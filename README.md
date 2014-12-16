@@ -84,15 +84,11 @@ the facility staff.
 
 An order template can have one of the following states:
 
-----------------------------------------------------------------------
 | State       | Semantics                                            |
-----------------------------------------------------------------------
+|-------------|------------------------------------------------------|
 | PREPARATION | Newly created, being edited.                         |
-----------------------------------------------------------------------
 | PUBLISHED   | Available to make orders from.                       |
-----------------------------------------------------------------------
 | ARCHIVED    | No longer available to make orders from.             |
-----------------------------------------------------------------------
 
 Order
 -----
@@ -112,43 +108,25 @@ conditionally displayed subfields.
 
 An order can have one of the following states:
 
-----------------------------------------------------------------------
 | State       | Semantics                                            |
-----------------------------------------------------------------------
+|-------------|------------------------------------------------------|
 | PREPARATION | Created, edited, but lacking some required value.    |
-----------------------------------------------------------------------
 | READY       | All require values are present, submittable.         |
-----------------------------------------------------------------------
 | SUBMITTED   | Submitted by user.                                   |
-----------------------------------------------------------------------
 | REVIEW      | Under review by the facility.                        |
-----------------------------------------------------------------------
 | ACCEPTED    | Checked by facility, found OK, and accepted.         |
-----------------------------------------------------------------------
 | REJECTED    | Rejected by facility.                                |
-----------------------------------------------------------------------
 | ABORTED     | Stopped by the user.                                 |
-----------------------------------------------------------------------
 | CANCELLED   | Stopped by the facility.                             |
-----------------------------------------------------------------------
 | PENDING     | Awaiting further input from user.                    |
-----------------------------------------------------------------------
 | QUEUED      | Facility has placed the order in its work queue.     |
-----------------------------------------------------------------------
 | PROCESSING  | Work is on-going.                                    |
----------------------------------------------------------------------
 | WAITING     | Work has paused for some reason.                     |
-----------------------------------------------------------------------
 | FINISHED    | Work has been finalized.                             |
-----------------------------------------------------------------------
 | DELIVERED   | The results have been delivered to the user.         |
-----------------------------------------------------------------------
 | INVOICED    | The user has been invoiced.                          |
-----------------------------------------------------------------------
 | CLOSED      | The order has been closed, everything has been done. |
-----------------------------------------------------------------------
 | ARCHIVED    | The order has been archived, no longer visible.      |
-----------------------------------------------------------------------
 
 Sample form
 -----------
