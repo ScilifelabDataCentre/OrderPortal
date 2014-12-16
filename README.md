@@ -56,15 +56,11 @@ Access privileges
 The facility staff must only be able to see data belonging to their
 facility.
 
-An external scientist should be able to view a page where all orders
-are shown, regardless of facility.
+An external scientist should be able to view a page where all his/hers
+orders are shown, regardless of facility.
 
-A user should be allowed to specify which other users are to be
-allowed access to their orders by default. Access should then also be
-editable on an order-by-order basis.
-
-A user should be able to set the level of email communication for an
-order, or generally.
+A user should be allowed to specify which other users should be
+allowed access to their orders.
 
 Order template
 --------------
@@ -104,7 +100,9 @@ required values have been entered.
 
 The form displayed for an order is defined by the data copied from the
 order template when it was required. The display allows hierarchical,
-conditionally displayed subfields.
+conditionally displayed subfields. The input fields should be
+specifiable for different types of values; integers, positive
+integers, floats in ranges, text, selections, etc.
 
 An order can have one of the following states:
 
@@ -128,31 +126,35 @@ An order can have one of the following states:
 | CLOSED      | All work and steps for the order have been done.     |
 | ARCHIVED    | The order has been archived, no longer visible.      |
 
-Sample form
------------
+Additional information
+----------------------
 
-A form to be filled in by the user to provide information about the
-samples for an order. A template is defined by the facility staff.  It
-should be possible to download and upload Excel or CSV files.
+Once an order has been submitted, additional information may be
+required from the user. For example, a sample information sheet may be
+requested by the facility. The facility should be able to specify a
+form for this, which should handle Excel and CSV files up- and
+download.
 
 Attached files
 --------------
 
 Files such as agreements, specifications, images, etc, can be attached
-to an order or to a sample.
+to an order or to a sample. Both users and facility staff should be
+allowed to do this.
 
 Links
 -----
 
-Links to other web pages can be set for orders and samples. Both
-facility staff and users should be able to set this, allowing users to
-navigate to other relevant information systems.
+Links to other web pages can be set for orders and samples, allowing
+users to navigate to other relevant information systems. Both facility
+staff and users should be able to set this.
 
 Log
 ---
 
 Each change of an order is logged, and the information "who, when,
-what" is stored.
+what" is stored. Neither facility staff nor users are allowed to edit
+the log trace explicitly.
 
 API
 ---
