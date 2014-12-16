@@ -22,8 +22,8 @@ hardcoded for scientific or genomics data per se. The form content
 must be easy to change, and previously submitted orders must not be
 affected by such changes, unless explicitly requested.
 
-We are striving to keep the design as general as possible, within the
-constraints of the context of the task.
+We are striving to keep the design as general as possible, given the
+requirements of the fundamental task.
 
 Only orders, no info pages
 --------------------------
@@ -86,7 +86,7 @@ An order template can have one of the following states:
 
 | State       | Semantics                                            |
 |-------------|------------------------------------------------------|
-| PREPARATION | Newly created, being edited.                         |
+| PREPARATION | Newly created, and/or being edited.                  |
 | PUBLISHED   | Available to make orders from.                       |
 | ARCHIVED    | No longer available to make orders from.             |
 
@@ -111,21 +111,21 @@ An order can have one of the following states:
 | State       | Semantics                                            |
 |-------------|------------------------------------------------------|
 | PREPARATION | Created, edited, but lacking some required value.    |
-| READY       | All require values are present, submittable.         |
+| READY       | All require values are present; submittable.         |
 | SUBMITTED   | Submitted by user.                                   |
 | REVIEW      | Under review by the facility.                        |
-| ACCEPTED    | Checked by facility, found OK, and accepted.         |
+| ACCEPTED    | Checked by facility, and found OK                    |
 | REJECTED    | Rejected by facility.                                |
 | ABORTED     | Stopped by the user.                                 |
 | CANCELLED   | Stopped by the facility.                             |
 | PENDING     | Awaiting further input from user.                    |
 | QUEUED      | Facility has placed the order in its work queue.     |
 | PROCESSING  | Work is on-going.                                    |
-| WAITING     | Work has paused for some reason.                     |
+| WAITING     | Work has paused, due to either user or facility.     |
 | FINISHED    | Work has been finalized.                             |
 | DELIVERED   | The results have been delivered to the user.         |
 | INVOICED    | The user has been invoiced.                          |
-| CLOSED      | The order has been closed, everything has been done. |
+| CLOSED      | All work and steps for the order have been done.     |
 | ARCHIVED    | The order has been archived, no longer visible.      |
 
 Sample form
@@ -147,3 +147,14 @@ Links
 Links to other web pages can be set for orders and samples. Both
 facility staff and users should be able to set this, allowing users to
 navigate to other relevant information systems.
+
+Log
+---
+
+Each change of an order is logged, and the information "who, when,
+what" is stored.
+
+API
+---
+
+The interface provides an API for interaction with other systems.
