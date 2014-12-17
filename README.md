@@ -144,12 +144,12 @@ transitions are allowed, to tailor the system to the relevant
 workflows.
 
 This would entail additional system complexity by introducing various
-update issues. The question is whether it is worth it.
+update issues. Is it worth it?
 
 Interface
 ---------
 
-There are two interfaces to the system.
+There are two interfaces to the system:
 
 ### The web interface
 
@@ -158,7 +158,7 @@ help and visual cues to allow filling in the form in a productive
 manner. Missing values and values outside of allowed ranges must be
 highlighted to help the user prepare a valid order.
 
-### The API
+### The Application Programming Interface (API)
 
 The API allows other systems to interact with the order portal. It is
 based on RESTful principles using JSON and linked data to allow other
@@ -193,6 +193,3 @@ Log
 Each change of an order is logged, and the information "who, when,
 what" is stored. Neither facility staff nor users are allowed to edit
 the log trace explicitly.
-
-API
----
