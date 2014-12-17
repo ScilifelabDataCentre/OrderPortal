@@ -43,18 +43,23 @@ except the user, belong to one and only one facility.
 User
 ----
 
-A user us an account for an external scientist to place one or more
-orders, and to follow the progress of an order.
+A user is an account in the system. All editing operations, and most
+viewing operations, require that the user is logged in.
 
-It is also an account for the facility staff, who may view and edit
-all orders for their facility. The access privileges are determined by
-the system administrator.
+There are basically two kinds of users:
+
+1. An external scientist, who uses the portal to place one or more
+   orders, and to follow the progress of an order.
+
+2. Facility staff, including facility administrator, who may view and edit 
+   all orders for their facility. The access privileges are determined by
+   the system administrator.
 
 Access privileges
 -----------------
 
-The facility staff must only be able to see data belonging to their
-facility.
+The facility staff is allowed to view and edit only data belonging to
+their facility.
 
 An external scientist should be able to view a page where all his/hers
 orders are shown, regardless of facility.
@@ -78,6 +83,9 @@ yet submitted?) are also to be updated by some change.
 An order template belongs to a facility, and can be modified only by
 the facility staff.
 
+An order template should be possible to clone, to facilitate creating
+new templates.
+
 An order template can have one of the following states:
 
 | State       | Semantics                                            |
@@ -85,6 +93,9 @@ An order template can have one of the following states:
 | PREPARATION | Newly created, and/or being edited.                  |
 | PUBLISHED   | Available to make orders from.                       |
 | ARCHIVED    | No longer available to make orders from.             |
+
+All state transitions are allowed. An order is not affected by the
+state changes of its original template.
 
 Order
 -----
@@ -115,7 +126,7 @@ An order can have one of the following states:
 | ACCEPTED    | Checked by facility, and found OK.                   |
 | REJECTED    | Rejected by facility.                                |
 | PENDING     | Awaiting further input from user.                    |
-| WORKING     | Work is on-going, in the lab or in bioinformatics.   |
+| WORKING     | Work is on-going, in the lab or in data analysis.    |
 | QUEUED      | Facility has placed the order in its work queue.     |
 | WAITING     | Work has paused, due to either user or facility.     |
 | ABORTED     | Stopped by the user.                                 |
@@ -125,6 +136,33 @@ An order can have one of the following states:
 | INVOICED    | The user has been invoiced.                          |
 | CLOSED      | All work and steps for the order have been done.     |
 | ARCHIVED    | The order has been archived, no longer visible.      |
+
+It remains to be determined whether just some state transitions are to
+be allowed, and if so, how this is to be defined. One possibility is
+to allow a facility to define which states are accessible, and which
+transitions are allowed, to tailor the system to the relevant
+workflows.
+
+This would entail additional system complexity by introducing various
+update issues. The question is whether it is worth it.
+
+Interface
+---------
+
+There are two interfaces to the system.
+
+### The web interface
+
+This is for human users. It should provide the user with sufficient
+help and visual cues to allow filling in the form in a productive
+manner. Missing values and values outside of allowed ranges must be
+highlighted to help the user prepare a valid order.
+
+### The API
+
+The API allows other systems to interact with the order portal. It is
+based on RESTful principles using JSON and linked data to allow other
+systems to access and/or modify various data entities in the portal.
 
 Additional information
 ----------------------
@@ -158,5 +196,3 @@ the log trace explicitly.
 
 API
 ---
-
-The interface provides an API for interaction with other systems.
