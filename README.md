@@ -112,14 +112,14 @@ An order can have one of the following states:
 | READY       | All require values are present; submittable.         |
 | SUBMITTED   | Submitted by user.                                   |
 | REVIEW      | Under review by the facility.                        |
-| ACCEPTED    | Checked by facility, and found OK                    |
+| ACCEPTED    | Checked by facility, and found OK.                   |
 | REJECTED    | Rejected by facility.                                |
+| PENDING     | Awaiting further input from user.                    |
+| WORKING     | Work is on-going, in the lab or in bioinformatics.   |
+| QUEUED      | Facility has placed the order in its work queue.     |
+| WAITING     | Work has paused, due to either user or facility.     |
 | ABORTED     | Stopped by the user.                                 |
 | CANCELLED   | Stopped by the facility.                             |
-| PENDING     | Awaiting further input from user.                    |
-| QUEUED      | Facility has placed the order in its work queue.     |
-| PROCESSING  | Work is on-going.                                    |
-| WAITING     | Work has paused, due to either user or facility.     |
 | FINISHED    | Work has been finalized.                             |
 | DELIVERED   | The results have been delivered to the user.         |
 | INVOICED    | The user has been invoiced.                          |
