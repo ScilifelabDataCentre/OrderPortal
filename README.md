@@ -94,8 +94,15 @@ An order template can have one of the following states:
 | PUBLISHED   | Available to make orders from.                       |
 | ARCHIVED    | No longer available to make orders from.             |
 
-All state transitions are allowed. An order is not affected by the
-state changes of its original template.
+All state transitions are allowed by default. An order is not affected
+by the state changes of its original template.
+
+**Implementation note**: The states and allowed transitions should be
+defined in a configuration file (e.g. YAML) for each facility. This
+allows a facility to define other states than the default ones. It
+also allows new states to be added to an existing setup. The question
+whether current states should be possible to remove is left for a
+future decision; the assumption is that this is not allowed.
 
 Order
 -----
@@ -137,14 +144,12 @@ An order can have one of the following states:
 | CLOSED      | All work and steps for the order have been done.     |
 | ARCHIVED    | The order has been archived, no longer visible.      |
 
-It remains to be determined whether just some state transitions are to
-be allowed, and if so, how this is to be defined. One possibility is
-to allow a facility to define which states are accessible, and which
-transitions are allowed, to tailor the system to the relevant
-workflows.
-
-This would entail additional system complexity by introducing various
-update issues. Is it worth it?
+**Implementation note**: The states and allowed transitions should be
+defined in a configuration file (e.g. YAML) for each facility. This
+allows a facility to define other states than the default ones. It
+also allows new states to be added to an existing setup. The question
+whether current states should be possible to remove is left for a
+future decision; the assumption is that this is not allowed.
 
 Interface
 ---------
