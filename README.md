@@ -7,7 +7,7 @@ The system has been created to satisfy the needs of a lab facility
 which produces DNA sequence data from biological samples. The samples
 are provided by external researchers. The facility processes the
 samples according to the order from the scientist, and this system
-keeps the user to date with the current status of the order and any
+keeps the user up to date with the current status of the order and any
 resulting data and metadata.
 
 OrderPortal has been written to extend to the needs of other similar
@@ -15,15 +15,15 @@ scientific facilities operating within the same organisation. It
 can be instantiated for any number of facilities, using a common
 database of user accounts.
 
-The design of the order form setup allows its application to other
+The design of the order form setup must allow its application to other
 domains; there is nothing that is hardcoded for scientific or genomics
-data _per se_. The form content is easy to change, and previously
-submitted orders are not affected by such changes, unless
+data _per se_. The form content must be easy to change, and previously
+submitted orders must not be affected by such changes, unless
 explicitly requested.
 
-We are striving to keep the design as general as possible, given the
-requirements of the fundamental task. The base template and CSS will
-be editable for customisation.
+We are striving to keep the design as flexible and general as possible.
+The base template and CSS will be editable, allowing the appearance of
+the OrderPortal to be customised.
 
 Only orders, no info pages
 --------------------------
@@ -78,9 +78,9 @@ There are basically three kinds of users:
 Authentication uses one single database, meaning that the same user account
 can be used to access to different facilities.
 
-All user accounts can be set as inactive, in case the person leaves or
+User accounts can be set as inactive, for example if the person leaves, or
 as a means of blocking invalid use. Deletion of a user account is
-never allowed (except in special circumstances, by System administrators).
+never allowed (except in special circumstances, only by system administrators).
 
 New registrations must be approved by facility staff.
 
