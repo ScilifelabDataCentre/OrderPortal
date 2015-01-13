@@ -1,28 +1,29 @@
 OrderPortal
 ===========
 
-A portal for orders (= requests, project applications) for a facility.
+A portal for orders (_aka._ requests, project applications) for a facility.
 
-The goal of this system is to satisfy the needs of a lab facility
+The system has been created to satisfy the needs of a lab facility
 which produces DNA sequence data from biological samples. The samples
 are provided by external researchers. The facility processes the
-samples according to the order from the scientist, and this system is
-capable of displaying the current status of the order and the
+samples according to the order from the scientist, and this system
+keeps the user to date with the current status of the order and any
 resulting data and metadata.
 
-In addition, the needs of other similar scientific facilities
-operating within the same organisation require a solution. This system
-can be instantiated for any number of facilities, using the same
+OrderPortal has been written to extend to the needs of other similar
+scientific facilities operating within the same organisation. It
+can be instantiated for any number of facilities, using a common
 database of user accounts.
 
-The design of the order form setup must allow its application to other
+The design of the order form setup allows its application to other
 domains; there is nothing that is hardcoded for scientific or genomics
-data per se. The form content must be easy to change, and previously
-submitted orders must not be affected by such changes, unless
+data _per se_. The form content is easy to change, and previously
+submitted orders are not affected by such changes, unless
 explicitly requested.
 
 We are striving to keep the design as general as possible, given the
-requirements of the fundamental task.
+requirements of the fundamental task. The base template and CSS will
+be editable for customisation.
 
 Only orders, no info pages
 --------------------------
@@ -54,6 +55,7 @@ One drawback with this design choice is that it makes it more
 difficult to allow the users to see all their orders in all
 facilities.
 
+
 Users
 -----
 
@@ -73,13 +75,15 @@ There are basically three kinds of users:
    of the system. This user account should only be used to perform system
    maintenance. It should not be used for any actual processing of orders.
 
-Each instance of the system can access one single database containing
-the user accounts, which allows the same user account to be used for
-access to different facilities.
+Authentication uses one single database, meaning that the same user account
+can be used to access to different facilities.
 
 All user accounts can be set as inactive, in case the person leaves or
 as a means of blocking invalid use. Deletion of a user account is
-never allowed.
+never allowed (except in special circumstances, by System administrators).
+
+New registrations must be approved by facility staff.
+
 
 Access privileges
 -----------------
@@ -90,8 +94,9 @@ their facility.
 An external scientist should by default be able to place orders with
 any facility, once the user has been allowed into the system.
 
-A user should be allowed to specify which other users should be
-allowed access to their orders in a facility.
+A user should be allowed to specify which other users will be
+allowed access to their orders within each facility. 
+
 
 Order template
 --------------
@@ -121,7 +126,8 @@ updated. The facility administrators are allowed to edit a submitted
 order.
 
 This design allows the facility staff to modify the order template
-without invalidating any existing submitted orders.
+without invalidating any existing submitted orders. Fields and options
+are never deleted, only removed from the current template when depreciated.
 
 The order template can be modified only by the facility staff.
 
@@ -160,7 +166,7 @@ An order can have one of the following states:
 | ARCHIVED    | The order has been archived, no longer visible.      |
 
 **Implementation note**: The states and allowed transitions should be
-defined in a configuration file (e.g. YAML) for each facility. This
+defined in a databse or configuration file (e.g. YAML) for each facility. This
 allows a facility to define other states than the default ones. It
 also allows new states to be added to an existing setup. The question
 whether current states should be possible to remove is left for a
@@ -169,14 +175,19 @@ future decision; the assumption is that this is not allowed.
 Interface
 ---------
 
-There are two interfaces to the system:
+There are three interfaces to the system:
 
-### The web interface
+### The facility web interface
 
 This is for human users. It should provide the user with sufficient
 help and visual cues to allow filling in the form in a productive
 manner. Missing values and values outside of allowed ranges must be
 highlighted to help the user prepare a valid order.
+
+### User administration web interface
+
+For system administrators only, this is a simple interface that allows
+deletion and other non-standard modifications to existing users.
 
 ### The Application Programming Interface (API)
 
