@@ -1,8 +1,7 @@
 OrderPortal
 ===========
 
-A portal for orders (= requests, project applications) for one or more
-facilities.
+A portal for orders (= requests, project applications) for a facility.
 
 The goal of this system is to satisfy the needs of a lab facility
 which produces DNA sequence data from biological samples. The samples
@@ -13,14 +12,14 @@ resulting data and metadata.
 
 In addition, the needs of other similar scientific facilities
 operating within the same organisation require a solution. This system
-allows independent facilities to handle their own orders, using a
-common database for user accounts.
+can be instantiated for any number of facilities, using the same
+database of user accounts.
 
-The design of the order form setup is such that this software system
-should be applicable to other areas; there is nothing that is
-hardcoded for scientific or genomics data per se. The form content
-must be easy to change, and previously submitted orders must not be
-affected by such changes, unless explicitly requested.
+The design of the order form setup must allow its application to other
+domains; there is nothing that is hardcoded for scientific or genomics
+data per se. The form content must be easy to change, and previously
+submitted orders must not be affected by such changes, unless
+explicitly requested.
 
 We are striving to keep the design as general as possible, given the
 requirements of the fundamental task.
@@ -29,31 +28,58 @@ Only orders, no info pages
 --------------------------
 
 The system is minimalistic in the sense that it handles only
-orders. There is no general wiki or blog function, which is usually
-required for a scientific facility to describe the available
-services. Such needs should be handled by other systems.
+orders. There is no general wiki or blog function for describing the
+context of the orders. Such needs should be handled by other systems.
 
 Facility
 --------
 
-The organisation providing the service specified by the order
-form. The system can handle more than one facility. All entities,
-except the user, belong to one and only one facility.
+The term facility is used for the organisation providing the service
+specified by the order form. One instance (database) of the system
+handles one facility. All entities in the database, except the user
+account, belong to one and only one facility.
 
-User
-----
+There are two reasons for this design choice:
+
+1. Security between facilities. The fact that a particular project is
+   present in one facility must not be visible to the administrators of
+   another facility. This is a strict requirement from some facilities,
+   and it is easier to implement if the databases for each facility is
+   strictly separate from one another.
+
+2. The styling of an order portal is much easier to implement if each
+   facility has its own portal instance.
+
+One drawback with this design choice is that it makes it more
+difficult to allow the users to see all their orders in all
+facilities.
+
+Users
+-----
 
 A user is an account in the system. All editing operations, and most
 viewing operations, require that the user is logged in.
 
-There are basically two kinds of users:
+There are basically three kinds of users:
 
 1. An external scientist, who uses the portal to place one or more
-   orders, and to follow the progress of an order.
+   orders, and to follow the progress of an order. In principle, this
+   type of user can place orders with any facility.
 
 2. Facility staff, including facility administrator, who may view and edit 
-   all orders for their facility. The access privileges are determined by
-   the system administrator.
+   all orders for their facility.
+
+3. System administrators, who are allowed to view and edit all aspects
+   of the system. This user account should only be used to perform system
+   maintenance. It should not be used for any actual processing of orders.
+
+Each instance of the system can access one single database containing
+the user accounts, which allows the same user account to be used for
+access to different facilities.
+
+All user accounts can be set as inactive, in case the person leaves or
+as a means of blocking invalid use. Deletion of a user account is
+never allowed.
 
 Access privileges
 -----------------
@@ -61,66 +87,55 @@ Access privileges
 The facility staff is allowed to view and edit only data belonging to
 their facility.
 
-An external scientist should be able to view a page where all his/hers
-orders are shown, regardless of facility.
+An external scientist should by default be able to place orders with
+any facility, once the user has been allowed into the system.
 
 A user should be allowed to specify which other users should be
-allowed access to their orders.
+allowed access to their orders in a facility.
 
 Order template
 --------------
 
-An order template is the class of a set of orders. When an order is
-create by the user, the current template is copied. It is used to
-produce the form displayed for the user to fill in the relevant
-values.
+The order template describes the currently valid set of fields and
+options that can be entered into an actual order prepared by a
+user. The order template contains fields that are editable by the
+facility staff, determining name, data type, order in the form,
+default value, required or not, and other properties.
+
+A field may be conditional, meaning that it is displayed only of some
+other field has been assigned a specific value. This is necessary for
+orders where the relevant fields depend on some high-level choice,
+such a type of technology to use for a project.
+
+The data in all dependent fields deselected by a choice in a
+high-level conditional field should be set as undetermined when the
+order is saved by the user. This simplifies interpretation of the
+order data by other external systems.
+
+Each time an order is edited by the user, the order is displayed
+according to the current order template.
+
+Once an order has been submitted, its fields and selected options are
+effectively frozen, and remain fixed even if the order template is
+updated. The facility administrators are allowed to edit a submitted
+order.
 
 This design allows the facility staff to modify the order template
-without invalidating any existing orders. These remain unchanged. A
-special mechanism must then be put in place if existing orders (not
-yet submitted?) are also to be updated by some change.
+without invalidating any existing submitted orders.
 
-An order template belongs to a facility, and can be modified only by
-the facility staff.
-
-An order template should be possible to clone, to facilitate creating
-new templates.
-
-An order template can have one of the following states:
-
-| State       | Semantics                                            |
-|-------------|------------------------------------------------------|
-| PREPARATION | Newly created, and/or being edited.                  |
-| PUBLISHED   | Available to make orders from.                       |
-| ARCHIVED    | No longer available to make orders from.             |
-
-All state transitions are allowed by default. An order is not affected
-by the state changes of its original template.
-
-**Implementation note**: The states and allowed transitions should be
-defined in a configuration file (e.g. YAML) for each facility. This
-allows a facility to define other states than the default ones. It
-also allows new states to be added to an existing setup. The question
-whether current states should be possible to remove is left for a
-future decision; the assumption is that this is not allowed.
+The order template can be modified only by the facility staff.
 
 Order
 -----
 
-An order is an instance of an order template. It belongs to a user and
-a facility. It is editable by the user until it has been submitted for
+An order is an instance of the order template. It belongs to a
+user. It is editable by the user until it has been submitted for
 approval by the facility staff.
 
-An order may contain fields which require a value. The design is such
-that the order can be edited and saved many times without setting such
-required values, but it is not possible to submit it until all
-required values have been entered.
-
-The form displayed for an order is defined by the data copied from the
-order template when it was required. The display allows hierarchical,
-conditionally displayed subfields. The input fields should be
-specifiable for different types of values; integers, positive
-integers, floats in ranges, text, selections, etc.
+An order may contain fields which require a value. An order lacking a
+required value can be saved, but it cannot be submitted. This allows
+the user to create and fill in orders only partially, and to return to
+the order at a later date to complete it.
 
 An order can have one of the following states:
 
@@ -191,6 +206,14 @@ Links
 Links to other web pages can be set for orders and samples, allowing
 users to navigate to other relevant information systems. Both facility
 staff and users should be able to set this.
+
+Status
+------
+
+The system should allow display of a status page, in which the current
+state of the project corresponding to the order is provided to the
+user. The content of this page is extracted from other systems such as
+the LIMS of the laboratory.
 
 Log
 ---
