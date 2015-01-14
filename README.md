@@ -78,9 +78,10 @@ There are basically three kinds of users:
 Authentication uses one single database, meaning that the same user account
 can be used to access to different facilities.
 
-User accounts can be set as inactive, for example if the person leaves, or
-as a means of blocking invalid use. Deletion of a user account is
-never allowed (except in special circumstances, only by system administrators).
+User accounts can be set as inactive, for example if the person
+leaves, or as a means of blocking invalid use. Deletion of a user
+account is never allowed (except in special circumstances, only by
+system administrators), to allow full traceability of old orders.
 
 New registrations must be approved by facility staff.
 
@@ -92,7 +93,7 @@ The facility staff is allowed to view and edit only data belonging to
 their facility.
 
 An external scientist should by default be able to place orders with
-any facility, once the user has been allowed into the system.
+any facility, once the user's account has been approved.
 
 A user should be allowed to specify which other users will be
 allowed access to their orders within each facility. 
@@ -166,11 +167,12 @@ An order can have one of the following states:
 | ARCHIVED    | The order has been archived, no longer visible.      |
 
 **Implementation note**: The states and allowed transitions should be
-defined in a databse or configuration file (e.g. YAML) for each facility. This
-allows a facility to define other states than the default ones. It
-also allows new states to be added to an existing setup. The question
-whether current states should be possible to remove is left for a
-future decision; the assumption is that this is not allowed.
+defined in a database or configuration file (e.g. YAML) for each
+facility. This allows a facility to define other states than the
+default ones. It also allows new states to be added to an existing
+setup. The question whether current states should be possible to
+remove is left for a future decision; the assumption is that this is
+not allowed.
 
 Interface
 ---------
