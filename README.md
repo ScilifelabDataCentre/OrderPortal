@@ -1,7 +1,8 @@
 OrderPortal
 ===========
 
-A portal for orders (_aka._ requests, project applications) for a facility.
+A portal for orders (_aka._ requests, project applications) to a
+facility from its users.
 
 The system has been created to satisfy the needs of a lab facility
 which produces DNA sequence data from biological samples. The samples

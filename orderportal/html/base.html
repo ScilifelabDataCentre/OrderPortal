@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <!-- <link rel="icon" href="{{ static_url('favicon.ico') }}" type="image/x-icon"> -->
+    <link rel="stylesheet" type="text/css" href="{{ static_url('default.css') }}">
+  </head>
+
+  <body>
+    <header>
+      <div class="left">
+	<a href="{{ reverse_url('home') }}">
+	  <img src="{{ static_url('home.png') }}"
+	</a>
+      </div>
+      <div class="right">
+	{% block search %}
+	<div class="search">
+	  <form action="{{ reverse_url('search') }}">
+	    <input type="text" name="term">
+	    {% module Submit('search') %}
+	  </form>
+	</div>
+	{% end %}
+	{% block login %}
+	<div class="login">
+	  {% if current_user %} Logged in as
+	  <a href="{{ reverse_url('user', current_user['username']) }}">
+	    {% module Icon('user') %} {{ current_user['username'] }}
+	  </a>
+	  {% else %}
+	  <table>
+	    <tr>
+	      <td>
+		<form action="{{ reverse_url('login') }}">
+		  <button type="submit" name="login">
+		    <img src="{{ static_url('login.png') }}"> Login
+		  </button>
+		</form>
+	      </td>
+	      {% if not settings.get('REGISTRATION_DISABLED') %}
+	      <td>
+		<form action="{{ reverse_url('user_register') }}">
+		  <button type="submit" name="register">
+		    <img src="{{ static_url('register.png') }}"> Register
+		  </button>
+		</form>
+	      </td>
+	      {% end %}
+	    </tr>
+	  </table>
+	  {% end %}
+	</div>
+	{% end %}
+      </div>
+      <h1>{{ title }}</h1>
+    </header>
+
+    <nav>
+      {% block navigation %}
+      <div><a href ="{{ reverse_url('home') }}">Home</a></div>
+      <!-- <div><a href ="{{ reverse_url('search') }}">Search</a></div> -->
+      {% if current_user %}
+      <!-- <div>Create</div> -->
+      <!-- <div class="menu1"> -->
+      <!-- 	<a href ="{{ reverse_url('order_create') }}">Order</a> -->
+      <!-- </div> -->
+      {% if is_admin %}
+        <div><a href ="{{ reverse_url('users') }}">Users</a></div>
+      {% end %}
+      {% end %}
+      {% block more_navigation %}
+      {% end %}
+      {% end %}
+    </nav>
+
+    <aside>
+      <div class="actions">
+	{% block actions %}
+	{% end %}
+      </div>
+      <br>
+      <div class="xrefs">
+	{% block xrefs %}
+	{% end %}
+      </div>
+    </aside>
+
+    {% block outer_content %}
+    <div class="content">
+    {% block error %}
+      {% try %}
+        {% if error %}
+          <p class="error">
+	    Error: {{ error }}
+	  </p>
+	{% end %}
+      {% except NameError %}
+      {% end %}
+    {% end %}
+    {% block content %}
+    {% end %}
+    </div>
+    {% end %}
+
+    {% block footer %}
+    <footer>
+      OrderPortal {{ version }}
+    </footer>
+    {% end %}
+
+    {% block javascript_libraries %}
+    <script type="text/javascript" src="{{ static_url('jquery-1.11.2.min.js') }}">
+    </script>
+    <script type="text/javascript" src="{{ static_url('jquery.localtime-0.9.1.min.js') }}">
+    </script>
+    {% end %}
+    {% block javascript_code %}
+    {% end %}
+  </body>
+</html>

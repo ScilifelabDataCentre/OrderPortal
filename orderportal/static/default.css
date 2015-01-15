@@ -1,0 +1,154 @@
+/* OrderPortal default CSS */
+
+* {font-family: Arial, Helvetica, sans-serif;
+   font-size: small; }
+
+h1 {font-size: x-large; }
+h2 {font-size: large; }
+h3 {font-size: medium; }
+
+header h1 { padding-left: 2em; }
+
+nav {width: 100px;
+     clear: both;
+     float: left; }
+
+aside {float: right; }
+
+footer {clear: both;
+	padding-top: 0.5em;
+	border-top-style: solid;
+	border-top-color: lightgray;
+	border-top-width: 2px;
+       }
+
+a {text-decoration: none;
+   font-weight: bold; }
+
+form { padding-top: 0.5em;}
+
+input {background: lightgrey; }
+
+textarea {width: 40em;
+	  height: 6em;
+	  background: lightgrey; 
+	 }
+
+textarea.small {height: 3em; }
+textarea.large {height: 16em; }
+
+.medium {font-size: medium; }
+.medium a {font-size: medium; }
+ol.medium li {font-size: medium;
+	      padding-top: 0.5em;
+	     }
+ul.medium li {font-size: medium;
+	      padding-top: 0.5em;
+	     }
+
+.nobr {white-space: nowrap; }
+.pre  {white-space: pre; }
+.bold {font-weight: bold; }
+.tech {font-family: Courier, monospace; }
+.border {border-style: solid;
+	 border-width: 1px; }
+.text {font-family: Courier, monospace; 
+       white-space: pre; 
+       padding: 0.2em;
+       border-style: inset;
+      }
+
+.number {font-family: Courier, monospace;
+	 text-align: right;
+	}
+.error {color: red; }
+.description {font-style: italic; }
+.message {font-weight: bold; }
+
+.top {vertical-align: top; }
+.bottom {vertical-align: bottom; }
+
+div.menu1 {margin-left: 1em; }
+div.content {float: left;
+	     width: 80%;
+	    }
+div.left {float: left; }
+div.right {float: right; }
+div.login {white-space: nowrap; }
+div.actions form { padding-top: 0.5em;}
+
+ol.airy li {margin-bottom: 1em; }
+
+img.icon {vertical-align: middle; }
+span.icon {vertical-align: middle; }
+
+h1 span.icon {font-size: x-large;
+	      vertical-align: bottom;
+	     }
+
+img.right {float: right;
+	   margin-right: 2em;
+	  }
+
+div.vertical_space {height: 1em; }
+
+aside button {width: 100%;
+              text-align: left;
+	     }
+
+button:disabled img {opacity:0.4;
+		     filter:alpha(opacity=40);
+		    }
+
+caption {text-align: left; }
+
+table.fields tr th {text-align: right;
+		    vertical-align: top;
+		    padding-right: 1em;
+		   }
+
+table.fields tr td {text-align: left;
+		    vertical-align: top;
+		   }
+
+table.fields tr td a {vertical-align: top; }
+
+table.fields tr td.spacer {padding-right: 3em; }
+
+table.listing tr th {text-align: left;
+		     padding-right: 0.5em;
+		     border-bottom-style: solid;
+		     border-bottom-color: lightgray;
+		     border-bottom-width: 2px;
+		    }
+
+table.listing tr td {padding-right: 1em; }
+
+table.log {display: block;
+	   width: 800px;
+	  }
+
+table.log tr th {text-align: left;
+		 font-style: italic;
+		 border-bottom-style: solid;
+		 border-bottom-color: lightgray;
+		 border-bottom-width: 2px;
+		 padding-right: 0.5em;
+		}
+
+table.log tr td {padding-right: 0.5em;
+		 border-bottom-style: solid;
+		 border-bottom-color: lightgray;
+		 border-bottom-width: 1px;
+		}
+
+table.logdata tr th {font-style: italic;
+		     font-weight: normal;
+		     border-bottom-width: 0;
+		    }
+
+table.logdata tr td {border-bottom-width: 0; }
+
+table.parameters tr th {text-align: right; }
+
+table.result tr th {text-align: right; }
