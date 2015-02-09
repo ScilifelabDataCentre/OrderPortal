@@ -2,33 +2,33 @@ OrderPortal
 ===========
 
 A portal for orders (_aka._ requests, project applications) to one
-single facility from its users.
-
-The system has been created to satisfy the needs of a lab facility
-which produces DNA sequence data from biological samples. The samples
-are provided by external researchers. The facility processes the
-samples according to the order from the scientist. This system keeps
-the user up to date with the current status of the order and any
-resulting data and metadata.
+single facility from its users. The order form contents is fully
+configurable via the web interface. The field definitions are generic,
+and allow order forms to be designed for a wide variety of facilities.
 
 The OrderPortal system can be used for several facilities within the
 same organisation by running several completely separate
 instances. The current design sets up user accounts for each instance
-separately, using email address as the user account identifier. A
-database design involving a single user account database for all
-facilities was decided against at this stage, for conceptual
-simplicity. This decision may be reviewed in the future.
+separately, using email address as the user account identifier. We
+decided against a database design involving a single user account
+database for all facilities, for conceptual simplicity. This decision
+may be revisited in the future.
 
 The design of the order form setup is fairly general; there is nothing
 that is hardcoded for scientific or genomics data _per se_. The form
-content is easy to change, and previously submitted orders are not
-affected by such changes. A mechanism to also update older orders by
-changes to the current form fields is being considered, but has not
-been designed or implemented yet.
+content is easy to change via the web interface. Previously submitted
+orders are not affected by such changes. A mechanism to also update
+older orders by changes to the current form fields is being
+considered, but has not been designed or implemented yet.
 
 We are striving to keep the design as flexible and general as
-possible.  The base template and CSS are to some extend editable,
+possible. The base template and CSS are to some extend editable,
 allowing the appearance of the OrderPortal to be customised.
+
+The OrderPortal system was originally created to satisfy the needs of
+a lab facility which produces sequence data from DNA and RNA samples
+provided by external researchers. The facility processes the samples
+according to the order from the scientist.
 
 Only orders, no info pages
 --------------------------
@@ -47,17 +47,17 @@ only one facility.
 
 There are two reasons for this design choice:
 
-1. Security between facilities. The fact that a particular project is
-   present in one facility must not be visible to the administrators of
-   another facility. This is a strict requirement from some facilities,
-   and it is easier to implement if the databases for each facility is
-   strictly separate from one another.
+1. Security between facilities. The existence of a particular project
+   in one facility must not be visible to the administrators of
+   another facility. This is a strict requirement from some
+   facilities, and it is easier to implement if the databases for each
+   facility is separate from one another.
 
 2. The styling of an order portal is much easier to implement if each
    facility has its own portal instance.
 
 One drawback with this design choice is that it does not allow the
-users to see all their orders in all facilities.
+users to see all their orders in all facilities within the system.
 
 
 Users
@@ -69,28 +69,28 @@ viewing operations, require that the user is logged in.
 There are basically three kinds of users:
 
 1. User: An external scientist, who uses the portal to place one or
-   more orders, and to follow the progress of an order.
+   more orders, and to follow the progress of their own orders.
 
-2. Staff: Facility staff, who may view and process orders.
+2. Staff: Facility staff, who may view all orders.
 
 3. Admin: System administrators, who are allowed to view and edit all
-   aspects of the system. This user account can modify the form
-   fields, and manage the user database.
+   aspects of the system. This includes processing orders, modifying
+   the order fields, and handling user accounts.
 
 User accounts can be set as inactive, for example if the person leaves
 her position, or as a means of blocking invalid use. Deletion of a
 user account is not allowed, to allow full traceability of old orders.
 
-New registrations must be approved by facility staff.
+New registrations of user accounts must be approved by the administrator.
 
 
 Access privileges
 -----------------
 
 An external scientist applies for a user account by providing the
-relevant information. The system administrator reviews the
-application, and approves or declines it. The user gets an email about
-the account having been approved, with instructions on how to log in.
+relevant information. The administrator reviews the application, and
+approves or declines it. The user gets an email about the account
+having been approved, with instructions on how to log in.
 
 The user can place orders as soon has she has logged in.
 
@@ -101,9 +101,9 @@ allowed access to their orders within each facility.
 Order: form and fields
 ----------------------
 
-The system administrator designs the set of fields which are to be
-filled in by the user for an order. This involves the following
-parameters for a field:
+The administrator designs the set of fields which are to be filled in
+by the user for an order. This involves the following parameters for a
+field:
 
 - Field identifier
 - Field data type
@@ -191,23 +191,23 @@ There are two main interfaces to the system, the web and the API. The
 web interface behaves differently depending on the type of the user
 account logged in.
 
-### The user web interface
+### User web interface
 
 This is for human users. It should provide the user with sufficient
 help and visual cues to allow filling in the form in a productive
 manner. Missing values and values outside of allowed ranges must be
 highlighted to help the user prepare a valid order.
 
-### The staff web interface
+### Staff web interface
 
 This is for normal facility staff usage. Display of orders according
-to state and other parameters. Ability to move orders along into
-different states, and to edit orders.
+to state and other parameters.
 
-### User administration web interface
+### System administration web interface
 
-For system administrators only, this is a simple interface that allows
-deletion and other non-standard modifications to existing users.
+For administrators only, this interface enables editing orders, users
+and fields. This includes the ability to move orders along into
+different states.
 
 ### The Application Programming Interface (API)
 
@@ -251,4 +251,4 @@ Log
 
 Each change of an order is logged, and the information "who, when,
 what" is stored. The log trace is written by the system automatically
-and is read-only for all users.
+and cannot be edited by any user.
