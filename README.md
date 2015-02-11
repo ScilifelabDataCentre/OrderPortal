@@ -1,8 +1,8 @@
 OrderPortal
 ===========
 
-A portal for orders (_aka._ requests, project applications) to one
-single facility from its users. The order form contents is fully
+A portal for orders (_a.k.a._ requests, project applications) to one
+single facility from its users. The order form fields are fully
 configurable via the web interface. The field definitions are generic,
 and allow order forms to be designed for a wide variety of facilities.
 
@@ -22,8 +22,9 @@ older orders by changes to the current form fields is being
 considered, but has not been designed or implemented yet.
 
 We are striving to keep the design as flexible and general as
-possible. The base template and CSS are to some extend editable,
-allowing the appearance of the OrderPortal to be customised.
+possible. The base template and CSS are to some extend modifiable (via
+command line operations), allowing the appearance of the OrderPortal
+to be customised.
 
 The OrderPortal system was originally created to satisfy the needs of
 a lab facility which produces sequence data from DNA and RNA samples
@@ -47,11 +48,11 @@ only one facility.
 
 There are two reasons for this design choice:
 
-1. Security between facilities. The existence of a particular project
-   in one facility must not be visible to the administrators of
-   another facility. This is a strict requirement from some
-   facilities, and it is easier to implement if the databases for each
-   facility is separate from one another.
+1. Security between facilities. The existence and contents of a
+   particular project in one facility must not be visible to the
+   administrators or staff of another facility. This is a strict
+   requirement for some facilities, and it is easier to implement if
+   the databases for each facility is separate from one another.
 
 2. The styling of an order portal is much easier to implement if each
    facility has its own portal instance.
@@ -63,39 +64,43 @@ users to see all their orders in all facilities within the system.
 Users
 -----
 
-A user is an account in the system. All editing operations, and most
-viewing operations, require that the user is logged in.
+A user is an account in the system. Almost all operation require that
+the user is logged in.
 
 There are basically three kinds of users:
 
 1. User: An external scientist, who uses the portal to place one or
-   more orders, and to follow the progress of their own orders.
+   more orders, and to follow the progress of their own orders. The
+   "customer" of the facility.
 
 2. Staff: Facility staff, who may view all orders.
 
 3. Admin: System administrators, who are allowed to view and edit all
-   aspects of the system. This includes processing orders, modifying
-   the order fields, and handling user accounts.
+   aspects of the system that can be modified via the web
+   interface. This includes processing orders, modifying the order
+   fields, and handling user accounts.
 
-User accounts can be set as inactive, for example if the person leaves
+User accounts can be set as disabled, for example if the person leaves
 her position, or as a means of blocking invalid use. Deletion of a
-user account is not allowed, to allow full traceability of old orders.
+user account is not allowed, to allow full traceability of old
+orders. An account can always be enabled again.
 
-New registrations of user accounts must be approved by the administrator.
+An external scientist applies for a user account by providing the
+relevant information. Such an account is created with a status of
+"pending".  The administrator reviews the pending user account and
+enables it if it appears legitimate. The user gets an email about the
+account having been enabled and with instructions on how to set the
+password for it.
 
 
 Access privileges
 -----------------
 
-An external scientist applies for a user account by providing the
-relevant information. The administrator reviews the application, and
-approves or declines it. The user gets an email about the account
-having been approved, with instructions on how to log in.
-
 The user can place orders as soon has she has logged in.
 
-A user should be allowed to specify which other users will be
-allowed access to their orders within each facility. 
+A user is allowed to specify which other users will be able to access
+to her orders. Access can also be granted to specific users for each
+individual order.
 
 
 Order: form and fields
@@ -111,6 +116,7 @@ field:
 - Field description
 - Value options, if relevant
 - Hierarchy and order, including conditional visibility
+- Visibility to the user
 
 When an order is created, its fields definitions are copied from the
 current set. Thus, an order is always self-contained. The set of
