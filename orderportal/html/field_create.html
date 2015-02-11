@@ -1,0 +1,81 @@
+{# Field create page. #}
+{% extends "base.html" %}
+
+{% block subheader %}
+<p class="medium">
+Define a new field and create it.
+</p>
+{% end %}
+
+{% block content %}
+<form action="{{ reverse_url('field_create') }}" method='POST'>
+  {% module xsrf_form_html() %}
+
+  <table class="fields">
+    <tr>
+      <th>Identifier</th>
+      <td>{% module Icon('required') %}</td>
+      <td>
+	<input type="text" name="identifier">
+      </td>
+      <td class="description">
+	Unique identifier for the field. Cannot be changed once defined.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Type</th>
+      <td>{% module Icon('required') %}</td>
+      <td>
+	<select name="type">
+	  {% for type in constants.TYPES %}
+	  <option value="{{ type['value'] }}">{{ type['label'] }}</option>
+	  {% end %}
+	</select>
+      </td>
+      <td class="description">
+	Data type of the field. Cannot be changed once defined.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Required</th>
+      <td></td>
+      <td>
+	<input type="checkbox" name="required" value="yes"> Yes
+      </td>
+      <td class="description">
+	Demand that the field must have a value specified in the order.
+	If no value, then the order is incomplete, and cannot be submitted.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+      <td></td>
+      <td>
+	<input type="text" name="label">
+      </td>
+      <td class="description">
+	Label to show for the field in the order form. May be edited later.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Description</th>
+      <td></td>
+      <td>
+	<textarea name="description"></textarea>
+      </td>
+      <td class="description">
+	Description to display in the order as information to the user.
+      </td>
+    </tr>
+
+  </table>
+
+  <p>
+
+  {% module Submit('create', title='Create new field') %}
+</form>
+{% end %}

@@ -3,8 +3,10 @@
 from __future__ import unicode_literals, print_function, absolute_import
 
 import os
+import sys
 import socket
 import logging
+import optparse
 import collections
 import urlparse
 import urllib
@@ -14,6 +16,7 @@ import tarfile
 from cStringIO import StringIO
 import time
 import datetime
+import hashlib
 import unicodedata
 import mimetypes
 
@@ -27,53 +30,45 @@ from orderportal import settings
 from . import constants
 
 
-# Corrections and additions to standard mimetypes data.
-EXTENSIONS = {
-    constants.BIN_MIME:         '.bin',
-    'application/docbook+xml':  '.xml',
-    'application/xml':          '.xml',  # Else '.wsdl'
-    constants.JPEG_MIME:        '.jpg',  # Else '.jpe'
-    constants.TEXT_MIME:        '.txt',  # Else '.ksh'
-    'text/x-rst':               '.rst',
-    constants.MARKDOWN_MIME:    '.md',
-    'application/x-gdbm':       '.gdb',
-    'application/x-fasta':      '.fasta',
-    'application/x-sqlite3':    '.db3',
-}
+def get_command_line_parser(usage='usage: %prog [options]', description=None):
+    "Get the base command line argument parser."
+    # optparse is used (rather than argparse) since
+    # this code must be possible to run under Python 2.6
+    parser = optparse.OptionParser(usage=usage, description=description)
+    parser.add_option('-s', '--settings',
+                      action='store', dest='settings', default=None,
+                      metavar="FILE", help="filename of settings YAML file")
+    parser.add_option('-v', '--verbose',
+                      action="store_true", dest="verbose", default=False,
+                      help='verbose output of actions taken')
+    parser.add_option('-f', '--force',
+                      action="store_true", dest="force", default=False,
+                      help='force action, rather than ask for confirmation')
+    return parser
 
-def guess_extension(ct):
-    "Guess the filename extension from content type, with corrections."
-    try:
-        return EXTENSIONS[ct]
-    except KeyError:
-        return mimetypes.guess_extension(ct)
-
-
-def load_settings(filepath=None):
+def load_settings(filepath=None, verbose=False):
     """Load and return the settings from the file path given by
-    1) the command line argument,
+    1) the argument to this procedure,
     2) the environment variable ORDERPORTAL_SETTINGS,
     3) the first existing file in a predefined list of filepaths.
-    Raise IOError if no readable settings file was found.
+    Raise ValueError if no settings file was given.
+    Raise IOError if settings file could not be read.
     Raise KeyError if a settings variable is missing.
     Raise ValueError if the settings variable value is invalid.
     """
     if not filepath:
         filepath = os.environ.get('ORDERPORTAL_SETTINGS')
     if not filepath:
-        homedir = os.path.expandvars('$HOME')
         basedir = constants.ROOT
         hostname = socket.gethostname().split('.')[0]
-        for filepath in [os.path.join(homedir, "{}.yaml".format(hostname)),
-                         os.path.join(homedir, 'default.yaml'),
-                         os.path.join(basedir, "{}.yaml".format(hostname)),
+        for filepath in [os.path.join(basedir, "{}.yaml".format(hostname)),
                          os.path.join(basedir, 'default.yaml')]:
-            if os.path.exists(filepath) and \
-               os.path.isfile(filepath) and \
-               os.access(filepath, os.R_OK):
+            if os.path.exists(filepath) and os.path.isfile(filepath):
                 break
         else:
-            raise IOError('no readable settings file found')
+            raise ValueError('no settings file specified')
+    if verbose:
+        print('settings from', filepath, file=sys.stderr)
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
     # Set logging state
@@ -94,9 +89,8 @@ def load_settings(filepath=None):
     except KeyError:
         pass
     logging.basicConfig(**kwargs)
-    logging.info("settings from %s", filepath)
     # Check settings
-    for key in ['BASE_URL', 'DB_SERVER', 'DB_DATABASE', 'COOKIE_SECRET']:
+    for key in ['BASE_URL', 'DB_SERVER', 'COOKIE_SECRET', 'DATABASE']:
         if key not in settings:
             raise KeyError("no settings['{}'] item".format(key))
         if not settings[key]:
@@ -122,14 +116,14 @@ def get_db(create=False):
     If 'create' is True, then create the database if it does not exist.
     """
     server = couchdb.Server(settings['DB_SERVER'])
+    name = settings['DATABASE']
     try:
-        return server[settings['DB_DATABASE']]
+        return server[name]
     except couchdb.http.ResourceNotFound:
         if create:
-            return server.create(settings['DB_DATABASE'])
+            return server.create(name)
         else:
-            raise KeyError("CouchDB database '%s' does not exist" %
-                           settings['DB_DATABASE'])
+            raise KeyError("CouchDB database '%s' does not exist" % name)
 
 def get_iuid():
     "Return a unique instance identifier."
@@ -180,7 +174,14 @@ def absolute_path(filename):
     "Return the absolute path given the current directory."
     return os.path.join(constants.ROOT, filename)
 
-def load_designs(db, root=os.path.join(constants.ROOT, 'designs')):
+def hashed_password(password):
+    "Return the password in hashed form."
+    sha256 = hashlib.sha256(settings['PASSWORD_SALT'])
+    sha256.update(password)
+    return sha256.hexdigest()
+
+def load_designs(db, verbose=False,
+                 root=os.path.join(constants.ROOT, 'designs')):
     "Load all CouchDB database design documents."
     for design in os.listdir(root):
         views = dict()
@@ -205,26 +206,25 @@ def load_designs(db, root=os.path.join(constants.ROOT, 'designs')):
         try:
             doc = db[id]
         except couchdb.http.ResourceNotFound:
-            logging.debug("loading %s", id)
+            if verbose: print('loading', id, file=sys.stderr)
             db.save(dict(_id=id, views=views))
         else:
             if doc['views'] != views:
                 doc['views'] = views
-                logging.debug("updating %s", id)
+                if verbose: print('updating', id, file=sys.stderr)
                 db.save(doc)
-            else:
-                logging.debug("no change %s", id)
+            elif verbose:
+                print('no change', id, file=sys.stderr)
 
 def wipeout_database(db):
     """Wipe out the contents of the database.
-    This is used rather than total delete of the database instance,
-    since that may require additional privileges, depending on
-    the setup.
+    This is used rather than total delete of the database instance, since
+    that may require additional privileges, depending on the setup.
     """
     for doc in db:
         del db[doc]
 
-def dump(db, filepath):
+def dump(db, filepath, verbose=False):
     "Dump contents of the database to a tar file, optionally gzip compressed."
     count_items = 0
     count_files = 0
@@ -254,10 +254,11 @@ def dump(db, filepath):
             outfile.addfile(info, StringIO(data))
             count_files += 1
     outfile.close()
-    logging.info("dumped %s items and %s files to %s",
-                 count_items, count_files, filepath)
+    if verbose:
+        print('dumped', count_items, 'items and',
+              count_files, 'files to', filepath, file=sys.stderr)
 
-def undump(db, filename):
+def undump(db, filename, verbose=False):
     """Reverse of dump; load all items from a tar file.
     Items are just added to the database, ignoring existing items.
     """
@@ -287,4 +288,6 @@ def undump(db, filename):
                 attachments[key] = dict(filename=attname,
                                         content_type=attinfo['content_type'])
     infile.close()
-    return count_items, count_files
+    if verbose:
+        print('undumped', count_items, 'items and',
+              count_files, 'files from', filepath, file=sys.stderr)

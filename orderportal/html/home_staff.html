@@ -1,0 +1,18 @@
+{# Home page: Staff dashboard. #}
+{% extends "base.html" %}
+
+{% block subheader %}
+<p class="medium">
+Staff dashboard.
+</p>
+{% end %}
+
+{% block actions %}
+<form action="{{ reverse_url('logout') }}" method="POST">
+  {% module xsrf_form_html() %}
+  {% module Submit('logout') %}
+</form>
+{% end %}
+
+{% block content %}
+{% end %}

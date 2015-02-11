@@ -32,29 +32,6 @@ class Icon(IconMixin, tornado.web.UIModule):
         return self.get_icon(name, title=title, label=label)
 
 
-class Access(IconMixin, tornado.web.UIModule):
-    "HTML for access display, optionally labelled."
-
-    def render(self, entity, label=False):
-        if label:
-            parts = []
-            for mode in constants.ACCESS_MODES:
-                category = entity['access'].get(mode, constants.PRIVATE)
-                value = self.get_icon(category, label=True)
-                parts.append("<th>{}</th><td>{}</td>".format(
-                        mode.capitalize(), value))
-            rows = ''.join(["<tr>{}</tr>".format(p) for p in parts])
-            return """<table class="fields">{}</table>""".format(rows)
-        else:
-            parts = []
-            for mode in constants.ACCESS_MODES:
-                category = entity['access'].get(mode, constants.PRIVATE)
-                title = "{}: {}".format(mode.capitalize(),category.capitalize())
-                value = self.get_icon(category, title=title, label=False)
-                parts.append(value)
-            return ' '.join(parts)
-
-
 class Submit(IconMixin, tornado.web.UIModule):
     "HTML for a submit button with an icon, optionally with a different title."
 
@@ -94,31 +71,3 @@ class Entity(tornado.web.UIModule):
             raise KeyError(str(msg) + ':', name)
         return """<a href="{url}">{icon} {title}</a>""".format(
             url=url, icon=icon, title=title)
-
-class ParameterValue(tornado.web.UIModule):
-    """HTML for displaying the value of a parameter.
-    Show links to data and meta pages of item, if local item.
-    """
-
-    LOCAL = """<a href="{meta}"><img src="{metaicon}"> {title}</a>;
-<a href="{url}"><img src="{icon}"> [data]</a>"""
-
-    REMOTE = """<a href="{url}"><img src="{icon}"> {url}</a>"""
-
-    def render(self, parameter):
-        value = parameter.get('value')
-        if value is None:
-            return '-'
-        elif parameter['type'] == constants.URI['value']:
-            display = parameter.get('display', {})
-            if 'meta' in display: # Local item
-                return self.LOCAL.format(
-                        icon=self.handler.static_url('local.png'), 
-                        metaicon=self.handler.static_url('item.png'),
-                       **display)
-            else:               # Remote item, or other data resource
-                return self.REMOTE.format(
-                    icon=self.handler.static_url('remote.png'),
-                    **display)
-        else:
-            return str(value)

@@ -1,0 +1,69 @@
+{# User page. #}
+{% extends "base.html" %}
+
+{% block actions %}
+{% if is_admin %}
+  {% if user['status'] in (constants.PENDING, constants.DISABLED) %}
+    <form action="{{ reverse_url('user_enable', user['email']) }}"
+	  method='POST'>
+      {% module xsrf_form_html() %}
+      {% module Submit('enable') %}
+    </form>
+  {% else %}
+    <form action="{{ reverse_url('user_disable', user['email']) }}"
+	  method='POST'>
+      {% module xsrf_form_html() %}
+      {% module Submit('disable') %}
+    </form>
+  {% end %}
+{% end %}
+{% end %}
+
+{% block content %}
+<table class="fields">
+  <tr>
+    <th>Email address</th>
+    <td>{{ user['email'] }}</td>
+  </tr>
+  <tr>
+    <th>Modified</th>
+    <td class="localtime">{{ user['modified'] }}</td>
+  </tr>
+  <tr>
+    <th>Created</th>
+    <td class="localtime">{{ user['created'] }}</td>
+  </tr>
+  <tr>
+    <th>First name</th>
+    <td>{{ user.get('first_name') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Last name</th>
+    <td>{{ user.get('last_name') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>University</th>
+    <td>{{ user.get('university') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Department</th>
+    <td>{{ user.get('department') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Address</th>
+    <td>{{ user.get('address') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Phone</th>
+    <td>{{ user.get('phone') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Role</th>
+    <td>{% module Icon(user['role'], label=True) %}</td>
+  </tr>
+  <tr>
+    <th>Status</th>
+    <td>{% module Icon(user['status'], label=True) %}</td>
+  </tr>
+</table>
+{% end %}

@@ -1,0 +1,93 @@
+{# Field page. #}
+{% extends "base.html" %}
+
+{% block subheader %}
+<p class="medium">
+The definition of a field in an order.
+</p>
+{% end %}
+
+{% block content %}
+
+<table class="fields">
+  <tr>
+    <th>Identifier</th>
+    <td>{% module Icon('required') %}</td>
+    <td>{{ field['identifier'] }}</td>
+    <td class="description">
+      Unique identifier for the field. Cannot be changed.
+    </td>
+  </tr>
+
+  <tr>
+    <th>Type</th>
+    <td>{% module Icon('required') %}</td>
+    <td>{{ field['type'] }}</td>
+    <td class="description">
+      Data type of the field. Cannot be changed.
+    </td>
+  </tr>
+
+  <tr>
+    <th>Required</th>
+    <td></td>
+    <td>{{ field['required'] and 'Yes' or 'No' }}</td>
+    <td class="description">
+      Demand that the field must have a value specified in the order.
+      If no value, then the order is incomplete, and cannot be submitted.
+    </td>
+  </tr>
+
+  <tr>
+    <th>Label</th>
+    <td></td>
+    <td>{{ field.get('label') or '[none]' }}</td>
+    <td class="description">
+      Label to show for the field in the order form. May be edited.
+    </td>
+  </tr>
+
+  <tr>
+    <th>Parent</th>
+    <td></td>
+    <td>
+      {% set parent = field.get('parent') %}
+      {% if parent is None %}
+      -
+      {% else %}
+      <a href="{{ reverse_url('field', parent) }}">{{ parent }}</a>
+      {% end %}
+    </td>
+    <td class="description">
+      The field which this field is grouped under.
+    </td>
+  </tr>
+
+  <tr>
+    <th>Position</th>
+    <td></td>
+    <td>{{ field['position'] }}</td>
+    <td class="description">
+      Position of field relative to other fields with the same parent.
+      May be edited.
+    </td>
+  </tr>
+
+  <tr>
+    <th>Description</th>
+    <td></td>
+    <td>{{ field.get('description') or '[none]' }}</td>
+    <td class="description">
+      Description to display in the order as information to the user.
+    </td>
+  </tr>
+
+</table>
+
+<p>
+
+<form action="{{ reverse_url('field_edit', field['identifier']) }}"
+      method='GET'>
+  {% module Submit('edit', title='Edit field') %}
+</form>
+{% end %}

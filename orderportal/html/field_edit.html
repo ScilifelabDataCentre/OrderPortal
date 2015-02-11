@@ -1,0 +1,117 @@
+{# Field edit page. #}
+{% extends "base.html" %}
+
+{% block subheader %}
+<p class="medium">
+Edit an existing field.
+</p>
+{% end %}
+
+{% block content %}
+<form action="{{ reverse_url('field_edit', field['identifier']) }}"
+      method='POST'>
+  {% module xsrf_form_html() %}
+
+  <table class="fields">
+    <tr>
+      <th>Identifier</th>
+      <td>{% module Icon('required') %}</td>
+      <td>{{ field['identifier'] }}</td>
+      <td class="description">
+	Unique identifier for the field. Cannot be changed.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Type</th>
+      <td>{% module Icon('required') %}</td>
+      <td>{{ field['type'] }}</td>
+      <td class="description">
+	Data type of the field. Cannot be changed.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Required</th>
+      <td></td>
+      <td>
+	{% if field.get('required') %}
+	<input type="checkbox" name="required" value="yes" checked> Yes
+	{% else %}
+	<input type="checkbox" name="required" value="yes"> Yes
+	{% end %}
+      </td>
+      <td class="description">
+	Demand that the field must have a value specified in the order.
+	If no value, then the order is incomplete, and cannot be submitted.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+      <td></td>
+      <td>
+	<input type="text" name="label" value="{{ field.get('label') or '' }}">
+      </td>
+      <td class="description">
+	Label to show for the field in the order form. May be edited later.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Parent</th>
+      <td></td>
+      <td>
+	<select name="parent">
+	  <option value="__top__">[top-level]</option>
+	  {% for f in fields %}
+	    {% if field.get('parent') == f['identifier'] %}
+	      <option value="{{ f['identifier'] }}" checked>
+	    {% else %}
+	      <option value="{{ f['identifier'] }}">
+	    {% end %}
+	    {% raw '&nbsp;' * f.level %}
+	    {{ f['label'] }}
+	    ({{ f['identifier'] }})
+	  </option>
+	  {% end %}
+	 </select>
+      </td>
+      <td class="description">
+	The field which this field is grouped under.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Position</th>
+      <td></td>
+      <td>
+	<input type="text" name="position" value="{{ field['position'] }}">
+      </td>
+      <td class="description">
+	Position of field relative to other fields with the same parent.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Description</th>
+      <td></td>
+      <td>
+	<textarea name="description">{{ field.get('description') or '' }}</textarea>
+      </td>
+      <td class="description">
+	Description to display in the order as information to the user.
+      </td>
+    </tr>
+
+  </table>
+
+  <p>
+
+  {% module Submit('save') %}
+</form>
+<form action="{{ reverse_url('field', field['identifier']) }}"
+      method='GET'>
+  {% module Submit('cancel') %}
+</form>
+{% end %}

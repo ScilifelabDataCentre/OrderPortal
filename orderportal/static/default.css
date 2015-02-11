@@ -7,7 +7,7 @@ h1 {font-size: x-large; }
 h2 {font-size: large; }
 h3 {font-size: medium; }
 
-header h1 { padding-left: 2em; }
+header h1 { margin-left: 140px; }
 
 nav {width: 100px;
      clear: both;
@@ -34,17 +34,19 @@ textarea {width: 40em;
 	  background: lightgrey; 
 	 }
 
+textarea.thin {width: 20em; }
 textarea.small {height: 3em; }
 textarea.large {height: 16em; }
 
-.medium {font-size: medium; }
-.medium a {font-size: medium; }
-ol.medium li {font-size: medium;
-	      padding-top: 0.5em;
-	     }
-ul.medium li {font-size: medium;
-	      padding-top: 0.5em;
-	     }
+.subheader {font-size: medium; }
+.subheader a {font-size: medium; }
+p.subheader {margin-left: 100px; }
+ol.subheader li {font-size: medium;
+		 padding-top: 0.5em;
+		}
+ul.subheader li {font-size: medium;
+		 padding-top: 0.5em;
+		}
 
 .nobr {white-space: nowrap; }
 .pre  {white-space: pre; }

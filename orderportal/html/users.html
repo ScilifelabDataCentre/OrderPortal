@@ -1,0 +1,21 @@
+{# Users list page. #}
+{% extends "base.html" %}
+
+{% block content %}
+<table class="listing">
+  <tr>
+    <th>User</th>
+    <th>Role</th>
+    <th>Status</th>
+  </tr>
+{% for user in users %}
+  <tr>
+    <td>
+      <a href="{{ reverse_url('user', user['email']) }}">{{ user['email'] }}</a>
+    </td>
+    <td>{% module Icon(user['role'], label=True) %}</td>
+    <td>{% module Icon(user['status'], label=True) %}</td>
+  </tr>
+{% end %}
+</table>
+{% end %}

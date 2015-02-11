@@ -1,0 +1,40 @@
+{# Reset password page. #}
+{% extends "base.html" %}
+
+{% block subheader %}
+<p class="subheader">
+  Your current password will be invalidated by this action.
+</p>
+<p class="subheader">
+  You will be logged out of the current session.
+</p>
+<p class="subheader">
+  The instructions on how to set a new password will be sent in
+  a message to your email address.
+</p>
+{% end %}
+
+{% block content %}
+<form action="{{ reverse_url('reset') }}" method="POST">
+  {% module xsrf_form_html() %}
+  <table class="fields">
+    <tr>
+      <th>Email address</th>
+      <td>{% module Icon('required') %}</td>
+      <td>
+	<input type="text" name="email" value="{{ email or '' }}">
+      </td>
+      <td class="description">
+	The email address for your account.
+      </td>
+    </tr>
+    <tr>
+      <th></th>
+      <td></td>
+      <td>
+	{% module Submit('reset') %}
+      </td>
+    </tr>
+  </table>
+</form>
+{% end %}

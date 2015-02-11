@@ -1,0 +1,43 @@
+{# Field list page. #}
+{% extends "base.html" %}
+
+{% block content %}
+<table class="listing">
+  <tr>
+    <th>Identifier</th>
+    <th>Label</th>
+    <th>Type</th>
+    <th>Required</th>
+    <th>Parent</th>
+    <th>Position</th>
+  </tr>
+{% for field in fields %}
+  <tr>
+    <td>
+      {% raw '&nbsp;' * field.level %}
+      <a href="{{ reverse_url('field', field['identifier']) }}">
+	{{ field['identifier'] }}
+      </a>
+    </td>
+    <td>{{ field['label'] }}</td>
+    <td>{{ field['type'] }}</td>
+    <td>{{ field['required'] }}</td>
+    <td>
+      {% set parent = field.get('parent') %}
+      {% if parent is None %}
+      -
+      {% else %}
+      <a href="{{ reverse_url('field', parent) }}">{{ parent }}</a>
+      {% end %}
+    </td>
+    <td>{{ field['position'] }}</td>
+  </tr>
+{% end %}
+</table>
+
+<p>
+
+<form action="{{ reverse_url('field_create') }}" method='GET'>
+  {% module Submit('create', title='Create new field') %}
+</form>
+{% end %}

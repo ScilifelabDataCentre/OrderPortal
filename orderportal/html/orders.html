@@ -1,0 +1,39 @@
+{# Order list page. #}
+{% extends "base.html" %}
+
+{% block subheader %}
+<p class="medium">
+List of current input fields.
+</p>
+{% end %}
+
+{% block content %}
+<table class="listing">
+  <tr>
+    <th>Identifier</th>
+    <th>Label</th>
+    <th>Type</th>
+    <th>Required</th>
+    <th>Parent</th>
+  </tr>
+{% for field in fields %}
+  <tr>
+    <td>
+      <a href="{{ reverse_url('field', field['identifier']) }}">
+	{{ field['identifier'] }}
+      </a>
+    </td>
+    <td>{{ field['label'] }}</td>
+    <td>{{ field['type'] }}</td>
+    <td>{{ field['required'] }}</td>
+    <td>{{ field.get('parent') or '' }}</td>
+  </tr>
+{% end %}
+</table>
+
+<p>
+
+<form action="{{ reverse_url('field_create') }}" method='GET'>
+  {% module Submit('create', title='Create new field') %}
+</form>
+{% end %}

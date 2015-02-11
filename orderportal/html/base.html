@@ -11,7 +11,7 @@
     <header>
       <div class="left">
 	<a href="{{ reverse_url('home') }}">
-	  <img src="{{ static_url('home.png') }}"
+	  {% module Icon('home', title=settings['FACILITY_NAME']) %}
 	</a>
       </div>
       <div class="right">
@@ -25,31 +25,11 @@
 	{% end %}
 	{% block login %}
 	<div class="login">
-	  {% if current_user %} Logged in as
-	  <a href="{{ reverse_url('user', current_user['username']) }}">
-	    {% module Icon('user') %} {{ current_user['username'] }}
+	  {% if current_user %}
+	  Logged in as
+	  <a href="{{ reverse_url('user', current_user['email']) }}">
+	    {% module Icon('user') %} {{ current_user['email'] }}
 	  </a>
-	  {% else %}
-	  <table>
-	    <tr>
-	      <td>
-		<form action="{{ reverse_url('login') }}">
-		  <button type="submit" name="login">
-		    <img src="{{ static_url('login.png') }}"> Login
-		  </button>
-		</form>
-	      </td>
-	      {% if not settings.get('REGISTRATION_DISABLED') %}
-	      <td>
-		<form action="{{ reverse_url('user_register') }}">
-		  <button type="submit" name="register">
-		    <img src="{{ static_url('register.png') }}"> Register
-		  </button>
-		</form>
-	      </td>
-	      {% end %}
-	    </tr>
-	  </table>
 	  {% end %}
 	</div>
 	{% end %}
@@ -60,16 +40,16 @@
     <nav>
       {% block navigation %}
       <div><a href ="{{ reverse_url('home') }}">Home</a></div>
-      <!-- <div><a href ="{{ reverse_url('search') }}">Search</a></div> -->
       {% if current_user %}
-      <!-- <div>Create</div> -->
-      <!-- <div class="menu1"> -->
-      <!-- 	<a href ="{{ reverse_url('order_create') }}">Order</a> -->
-      <!-- </div> -->
+      <div><a href ="{{ reverse_url('search') }}">Search</a></div>
+      <div><a href ="{{ reverse_url('orders') }}">Orders</a></div>
       {% if is_admin %}
-        <div><a href ="{{ reverse_url('users') }}">Users</a></div>
+      <div><a href ="{{ reverse_url('users') }}">Users</a></div>
+      <div><a href ="{{ reverse_url('fields') }}">Fields</a></div>
       {% end %}
       {% end %}
+      <div><a href ="{{ reverse_url('reset') }}">Reset</a></div>
+      <div><a href ="{{ reverse_url('password') }}">Password</a></div>
       {% block more_navigation %}
       {% end %}
       {% end %}
@@ -88,6 +68,8 @@
     </aside>
 
     {% block outer_content %}
+    {% block subheader %}
+    {% end %}
     <div class="content">
     {% block error %}
       {% try %}
@@ -106,7 +88,7 @@
 
     {% block footer %}
     <footer>
-      OrderPortal {{ version }}
+      <a href="https://github.com/pekrau/OrderPortal">OrderPortal</a> {{ version }}
     </footer>
     {% end %}
 
