@@ -23,6 +23,17 @@ Edit an existing field.
     </tr>
 
     <tr>
+      <th>Label</th>
+      <td></td>
+      <td>
+	<input type="text" name="label" value="{{ field.get('label') or '' }}">
+      </td>
+      <td class="description">
+	Label to show for the field in the order form. May be edited later.
+      </td>
+    </tr>
+
+    <tr>
       <th>Type</th>
       <td>{% module Icon('required') %}</td>
       <td>{{ field['type'] }}</td>
@@ -30,6 +41,21 @@ Edit an existing field.
 	Data type of the field. Cannot be changed.
       </td>
     </tr>
+
+    {% if field['type'] == 'select' %}
+    <tr>
+      <th>Options</th>
+      <td></td>
+      <td>
+	<textarea class="thin" name='options'>{{ '\n'.join(field.get('options') or []) }}</textarea>
+      </td>
+      <td class="description">
+	Option values for the select field. Provide one value per line.
+	If none are given, then no value can be selected for this field,
+	which is probably an error.
+      </td>
+    </tr>
+    {% end %}
 
     <tr>
       <th>Required</th>
@@ -42,19 +68,8 @@ Edit an existing field.
 	{% end %}
       </td>
       <td class="description">
-	Demand that the field must have a value specified in the order.
+	Require that the field must have a value specified in the order.
 	If no value, then the order is incomplete, and cannot be submitted.
-      </td>
-    </tr>
-
-    <tr>
-      <th>Label</th>
-      <td></td>
-      <td>
-	<input type="text" name="label" value="{{ field.get('label') or '' }}">
-      </td>
-      <td class="description">
-	Label to show for the field in the order form. May be edited later.
       </td>
     </tr>
 
@@ -65,8 +80,8 @@ Edit an existing field.
 	<select name="parent">
 	  <option value="__top__">[top-level]</option>
 	  {% for f in fields %}
-	    {% if field.get('parent') == f['identifier'] %}
-	      <option value="{{ f['identifier'] }}" checked>
+	    {% if f['identifier'] == field.get('parent') %}
+	      <option value="{{ f['identifier'] }}" selected>
 	    {% else %}
 	      <option value="{{ f['identifier'] }}">
 	    {% end %}

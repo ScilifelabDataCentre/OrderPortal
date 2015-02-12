@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 
 {% block actions %}
-{% if is_admin %}
+{% if is_admin and current_user['email'] != user['email'] %}
   {% if user['status'] in (constants.PENDING, constants.DISABLED) %}
     <form action="{{ reverse_url('user_enable', user['email']) }}"
 	  method='POST'>
@@ -16,6 +16,19 @@
       {% module Submit('disable') %}
     </form>
   {% end %}
+  {% if user['status'] == constants.PENDING %}
+    <form action="{{ reverse_url('user_delete', user['email']) }}"
+	  method='POST'>
+      {% module xsrf_form_html() %}
+      {% module Submit('delete', onclick="return confirm('Delete cannot be undone; really delete?');") %}
+    </form>
+  {% end %}
+{% end %}
+{% if current_user['email'] == user['email'] %}
+  <form action="{{ reverse_url('logout') }}" method="POST">
+    {% module xsrf_form_html() %}
+    {% module Submit('logout') %}
+  </form>
 {% end %}
 {% end %}
 
@@ -24,6 +37,14 @@
   <tr>
     <th>Email address</th>
     <td>{{ user['email'] }}</td>
+  </tr>
+  <tr>
+    <th>Role</th>
+    <td>{% module Icon(user['role'], label=True) %}</td>
+  </tr>
+  <tr>
+    <th>Status</th>
+    <td>{% module Icon(user['status'], label=True) %}</td>
   </tr>
   <tr>
     <th>Modified</th>
@@ -56,14 +77,6 @@
   <tr>
     <th>Phone</th>
     <td>{{ user.get('phone') or '-' }}</td>
-  </tr>
-  <tr>
-    <th>Role</th>
-    <td>{% module Icon(user['role'], label=True) %}</td>
-  </tr>
-  <tr>
-    <th>Status</th>
-    <td>{% module Icon(user['status'], label=True) %}</td>
   </tr>
 </table>
 {% end %}

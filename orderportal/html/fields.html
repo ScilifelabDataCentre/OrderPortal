@@ -19,7 +19,7 @@
 	{{ field['identifier'] }}
       </a>
     </td>
-    <td>{{ field['label'] }}</td>
+    <td>{{ field.get('label') or '-' }}</td>
     <td>{{ field['type'] }}</td>
     <td>{{ field['required'] }}</td>
     <td>

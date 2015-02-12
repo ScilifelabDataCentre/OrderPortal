@@ -5,7 +5,6 @@ from __future__ import unicode_literals, print_function, absolute_import
 import logging
 import json
 import urllib
-import collections
 import smtplib
 from email.mime.text import MIMEText
 
@@ -259,7 +258,7 @@ class RequestHandler(tornado.web.RequestHandler):
         - Change '_id' key to 'iuid'.
         - Remove '_rev' and 'orderportal_doctype' attributes.
         """
-        result = collections.OrderedDict()
+        result = dict()
         result['iuid'] = doc['_id']
         ignore = set(['_id', '_rev', '_attachments', 'orderportal_doctype'])
         for key in sorted(doc.keys()):
@@ -293,9 +292,8 @@ class RequestHandler(tornado.web.RequestHandler):
         view = self.db.view('log/entity',
                             startkey=[iuid],
                             endkey=[iuid, constants.HIGH_CHAR])
-        ids = [r.id for r in view]
-        for id in ids:
-            del self.db[id]
+        for row in view:
+            del self.db[row.id]
 
     def send_email(self, recipient, subject, text, sender=None):
         "Send an email to the given recipient from the given sender user."

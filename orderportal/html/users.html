@@ -7,6 +7,9 @@
     <th>User</th>
     <th>Role</th>
     <th>Status</th>
+    <th>Login</th>
+    <th>Modified</th>
+    <th>Created</th>
   </tr>
 {% for user in users %}
   <tr>
@@ -15,6 +18,13 @@
     </td>
     <td>{% module Icon(user['role'], label=True) %}</td>
     <td>{% module Icon(user['status'], label=True) %}</td>
+    {% if user.get('login') %}
+    <td class="localtime">{{ user['login'] }}</td>
+    {% else %}
+    <td>-</td>
+    {% end %}
+    <td class="localtime">{{ user['modified'] }}</td>
+    <td class="localtime">{{ user['created'] }}</td>
   </tr>
 {% end %}
 </table>

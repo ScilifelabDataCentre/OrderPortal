@@ -6,6 +6,7 @@ import re
 import os.path
 
 # Patterns
+ID_RX  = re.compile(r'^[a-z][_a-z0-9]*$', re.IGNORECASE)
 IUID_RX  = re.compile(r'^[0-9a-f]{32}$')
 EMAIL_RX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
 
@@ -26,7 +27,7 @@ LOG         = 'log'
 ENTITIES    = frozenset([USER, FIELD, ORDER, PUBLICATION])
 
 # Field types
-GROUP   = dict(value='none', label='Group')
+GROUP   = dict(value='group', label='Group')
 STRING  = dict(value='string', label='String')
 INTEGER = dict(value='int', label='Integer')
 FLOAT   = dict(value='float', label='Float')

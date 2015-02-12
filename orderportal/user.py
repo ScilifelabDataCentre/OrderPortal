@@ -80,10 +80,11 @@ class Login(RequestHandler):
 class Logout(RequestHandler):
     "Logout; unset the secure cookie, and invalidate login session."
 
+    @tornado.web.authenticated
     def post(self):
         self.check_xsrf_cookie()
         self.set_secure_cookie(constants.USER_COOKIE, '')
-        with UserSaver(doc=user, rqh=self) as saver:
+        with UserSaver(doc=self.current_user, rqh=self) as saver:
             saver['login'] = None
         self.redirect(self.reverse_url('home'))
 
@@ -184,6 +185,19 @@ class Register(RequestHandler):
             saver['status'] = constants.PENDING
             saver['password'] = None
         self.see_other(self.reverse_url('password'))
+
+
+class UserDelete(RequestHandler):
+    "Delete a user that is pending; to get rid of spam application."
+
+    @tornado.web.authenticated
+    def post(self, email):
+        self.check_xsrf_cookie()
+        user = self.get_user(email)
+        self.check_admin()
+        self.delete_logs(user['_id'])
+        self.db.delete(user)
+        self.see_other(self.reverse_url('home'))
 
 
 class UserEnable(RequestHandler):

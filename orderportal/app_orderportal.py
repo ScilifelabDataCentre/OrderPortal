@@ -19,23 +19,10 @@ from orderportal import utils
 from orderportal import uimodules
 from orderportal.requesthandler import RequestHandler
 
+from orderportal.home import *
 from orderportal.user import *
 from orderportal.field import *
 # from orderportal.order import *
-
-
-class Home(RequestHandler):
-    "Home page. Contents according to role of logged-in user."
-
-    def get(self):
-        if not self.current_user:
-            self.render('home_login.html')
-        elif self.current_user['role'] == constants.ADMIN:
-            self.render('home_admin.html')
-        elif self.current_user['role'] == constants.STAFF:
-            self.render('home_staff.html')
-        else:
-            self.render('home_user.html')
 
 
 class Dummy(RequestHandler):
@@ -61,6 +48,7 @@ def get_handlers():
             URL(r'/reset', Reset, name='reset'),
             URL(r'/password', Password, name='password'),
             URL(r'/register', Register, name='register'),
+            URL(r'/user/([^/]+)/delete', UserDelete, name='user_delete'),
             URL(r'/user/([^/]+)/enable', UserEnable, name='user_enable'),
             URL(r'/user/([^/]+)/disable', UserDisable, name='user_disable'),
             # URL(r'/user/([0-9a-f]{32})/log', UserLog, name='user_log'),

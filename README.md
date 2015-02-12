@@ -150,35 +150,34 @@ required value can be saved, but it cannot be submitted. This allows
 the user to create and fill in orders only partially, and to return to
 the order at a later date to complete it.
 
-An order can have one and only one of the following states:
+An order can have one and only one state. The following is the list
+of standard states:
 
 | State       | Semantics                                            |
 |-------------|------------------------------------------------------|
-| PREPARATION | Created, edited, but lacking some required value.    |
-| READY       | All require values are present; submittable.         |
+| PREPARATION | Created, and possibly edited.                        |
 | SUBMITTED   | Submitted by user.                                   |
 | REVIEW      | Under review by the facility.                        |
-| ACCEPTED    | Checked by facility, and found OK.                   |
+| ACCEPTED    | Checked and accepted by the facility.                |
 | REJECTED    | Rejected by facility.                                |
 | PENDING     | Awaiting further input from user.                    |
-| WORKING     | Work is on-going, in the lab or in data analysis.    |
 | QUEUED      | Facility has placed the order in its work queue.     |
-| WAITING     | Work has paused, due to either user or facility.     |
-| ABORTED     | Stopped by the user.                                 |
-| CANCELLED   | Stopped by the facility.                             |
+| WORKING     | Work is on-going, in the lab or in data analysis.    |
+| WAITING     | Work has paused, for whatever reason.                |
+| CANCELLED   | Project stopped by the user.                         |
+| ABORTED     | Project stopped by the facility.                     |
 | FINISHED    | Work has been finalized.                             |
 | DELIVERED   | The results have been delivered to the user.         |
 | INVOICED    | The user has been invoiced.                          |
 | CLOSED      | All work and steps for the order have been done.     |
-| ARCHIVED    | The order has been archived, no longer visible.      |
+| ARCHIVED    | The order has been archived; cannot be changed.      |
 
-**Implementation note**: The states and allowed transitions should be
-defined in a database or configuration file (e.g. YAML) for each
-facility. This allows a facility to define other states than the
-default ones. It also allows new states to be added to an existing
-setup. The question whether current states should be possible to
-remove is left for a future decision; the assumption is that this is
-not allowed.
+The states and allowed transitions are defined in a YAML configuration
+file for a facility. This allows a facility to define other states and
+transitions than the standard ones. It also allows new states and
+transitions to be added to an existing setup. Removing existing states
+may break the system, and should not be attempted; instead, the transitions
+should be modified to avoid the redundant state.
 
 Publications
 ------------

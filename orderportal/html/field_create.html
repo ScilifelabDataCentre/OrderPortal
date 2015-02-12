@@ -24,6 +24,18 @@ Define a new field and create it.
     </tr>
 
     <tr>
+      <th>Label</th>
+      <td></td>
+      <td>
+	<input type="text" name="label">
+      </td>
+      <td class="description">
+	Label to show for the field in the order form. The identifier
+	will be used if this is not provided.  May be edited later.
+      </td>
+    </tr>
+
+    <tr>
       <th>Type</th>
       <td>{% module Icon('required') %}</td>
       <td>
@@ -45,19 +57,8 @@ Define a new field and create it.
 	<input type="checkbox" name="required" value="yes"> Yes
       </td>
       <td class="description">
-	Demand that the field must have a value specified in the order.
+	Require that the field must have a value specified in the order.
 	If no value, then the order is incomplete, and cannot be submitted.
-      </td>
-    </tr>
-
-    <tr>
-      <th>Label</th>
-      <td></td>
-      <td>
-	<input type="text" name="label">
-      </td>
-      <td class="description">
-	Label to show for the field in the order form. May be edited later.
       </td>
     </tr>
 

@@ -1,12 +1,6 @@
 {# Field page. #}
 {% extends "base.html" %}
 
-{% block subheader %}
-<p class="medium">
-The definition of a field in an order.
-</p>
-{% end %}
-
 {% block content %}
 
 <table class="fields">
@@ -20,6 +14,15 @@ The definition of a field in an order.
   </tr>
 
   <tr>
+    <th>Label</th>
+    <td></td>
+    <td>{{ field.get('label') or '[none]' }}</td>
+    <td class="description">
+      Label to show for the field in the order form. May be edited.
+    </td>
+  </tr>
+
+  <tr>
     <th>Type</th>
     <td>{% module Icon('required') %}</td>
     <td>{{ field['type'] }}</td>
@@ -28,22 +31,27 @@ The definition of a field in an order.
     </td>
   </tr>
 
+    {% if field['type'] == 'select' %}
+    <tr>
+      <th>Options</th>
+      <td></td>
+      <td class="text">{{ '\n'.join(field.get('options') or []) }}</td>
+      <td class="description">
+	Option values for the select field. One value per line.
+	If none are given, then no value can be selected for this field,
+	which is probably an error.
+      </td>
+    </tr>
+
+    {% end %}
+
   <tr>
     <th>Required</th>
     <td></td>
     <td>{{ field['required'] and 'Yes' or 'No' }}</td>
     <td class="description">
-      Demand that the field must have a value specified in the order.
+      Require that the field must have a value specified in the order.
       If no value, then the order is incomplete, and cannot be submitted.
-    </td>
-  </tr>
-
-  <tr>
-    <th>Label</th>
-    <td></td>
-    <td>{{ field.get('label') or '[none]' }}</td>
-    <td class="description">
-      Label to show for the field in the order form. May be edited.
     </td>
   </tr>
 
@@ -59,7 +67,7 @@ The definition of a field in an order.
       {% end %}
     </td>
     <td class="description">
-      The field which this field is grouped under.
+      The field which this field is grouped under. May be edited.
     </td>
   </tr>
 
@@ -78,10 +86,37 @@ The definition of a field in an order.
     <td></td>
     <td>{{ field.get('description') or '[none]' }}</td>
     <td class="description">
-      Description to display in the order as information to the user.
+      Description to display in the order as information to the
+      user. May be edited.
     </td>
   </tr>
 
+</table>
+
+<p>
+
+<table class="log">
+  <tr>
+    <th>Log entry</th>
+    <th>User</th>
+    <th>Changed</th>
+  </tr>
+  {% for log in logs %}
+  <tr>
+    <td class="localtime">{{ log['modified'] }}</td>
+    <td>{{ log['user'] }}</td>
+    <td>
+      <table>
+	{% for key in sorted(log['changed']) %}
+	<tr>
+	  <th class="key">{{ key }}</th>
+	  <td>{{ log['changed'][key] }}</td>
+	</tr>
+	{% end %}
+      </table>
+    </td>
+  </tr>
+  {% end %}
 </table>
 
 <p>

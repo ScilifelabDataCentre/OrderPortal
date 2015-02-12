@@ -107,7 +107,7 @@ class Saver(object):
         except AttributeError:
             self.doc['owner'] = None
         else:
-            self.doc['owner'] = self.rqh.current_user['username']
+            self.doc['owner'] = self.rqh.current_user['email']
         self.doc['created'] = utils.timestamp()
 
     def finalize(self):
@@ -134,7 +134,7 @@ class Saver(object):
                 pass
         entry[constants.DOCTYPE] = constants.LOG
         try:
-            entry['username'] = self.current_user['username']
+            entry['user'] = self.current_user['email']
         except (TypeError, KeyError):
             pass
         self.db.save(entry)

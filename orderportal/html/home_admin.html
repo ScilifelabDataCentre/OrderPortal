@@ -1,12 +1,6 @@
 {# Home page: Admin dashboard. #}
 {% extends "base.html" %}
 
-{% block subheader %}
-<p class="medium">
-Admin dashboard.
-</p>
-{% end %}
-
 {% block actions %}
 <form action="{{ reverse_url('logout') }}" method="POST">
   {% module xsrf_form_html() %}
@@ -15,4 +9,29 @@ Admin dashboard.
 {% end %}
 
 {% block content %}
+<h2>Pending user accounts</h2>
+<table class="listing">
+  <tr>
+    <th>User</th>
+    <th>Role</th>
+    <th>Status</th>
+    <th>Created</th>
+  </tr>
+{% if pending %}
+{% for user in pending %}
+  <tr>
+    <td>
+      <a href="{{ reverse_url('user', user['email']) }}">{{ user['email'] }}</a>
+    </td>
+    <td>{% module Icon(user['role'], label=True) %}</td>
+    <td>{% module Icon(user['status'], label=True) %}</td>
+    <td class="localtime">{{ user['created'] }}</td>
+  </tr>
+{% end %}
+{% else %}
+  <tr>
+    <td><i>[none]</i></td>
+  </tr>
+{% end %}
+</table>
 {% end %}

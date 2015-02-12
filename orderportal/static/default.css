@@ -17,10 +17,12 @@ aside {float: right; }
 
 footer {clear: both;
 	padding-top: 0.5em;
-	border-top-style: solid;
-	border-top-color: lightgray;
-	border-top-width: 2px;
        }
+
+hr {border-style: solid;
+    border-color: lightgray;
+    border-width: 1px;
+   }
 
 a {text-decoration: none;
    font-weight: bold; }
@@ -126,31 +128,15 @@ table.listing tr th {text-align: left;
 
 table.listing tr td {padding-right: 1em; }
 
-table.log {display: block;
-	   width: 800px;
-	  }
+table.log th {text-align: left;
+	     border-bottom-style: solid;
+	     border-bottom-color: lightgray;
+	     border-bottom-width: 2px;
+	     }
 
-table.log tr th {text-align: left;
-		 font-style: italic;
-		 border-bottom-style: solid;
-		 border-bottom-color: lightgray;
-		 border-bottom-width: 2px;
-		 padding-right: 0.5em;
-		}
+table.log td {vertical-align: top; }
 
-table.log tr td {padding-right: 0.5em;
-		 border-bottom-style: solid;
-		 border-bottom-color: lightgray;
-		 border-bottom-width: 1px;
-		}
-
-table.logdata tr th {font-style: italic;
-		     font-weight: normal;
-		     border-bottom-width: 0;
-		    }
-
-table.logdata tr td {border-bottom-width: 0; }
-
-table.parameters tr th {text-align: right; }
-
-table.result tr th {text-align: right; }
+table.log th.key {font-style: italic;
+		  text-align: right;
+		  border-bottom-style: none;
+		 }

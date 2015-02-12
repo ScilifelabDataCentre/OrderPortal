@@ -31,7 +31,10 @@ class Field(RequestHandler):
 
     def get(self, identifier):
         field = self.get_field(identifier)
-        self.render('field.html', field=field)
+        self.render('field.html',
+                    title="Field '{}'".format(field['identifier']),
+                    field=field,
+                    logs=self.get_logs(field['_id']))
 
 
 class FieldCreate(RequestHandler):
@@ -90,6 +93,10 @@ class FieldEdit(RequestHandler):
         with FieldSaver(doc=field, rqh=self) as saver:
             saver.save_required()
             saver['label'] = self.get_argument('label', None)
+            if field['type'] == 'select':
+                items = self.get_argument('options', '').split('\n')
+                items = [i.strip() for i in items]
+                saver['options'] = [i for i in items if i]
             parent = self.get_argument('parent', None)
             if parent == '__top__':
                 saver['parent'] = None
