@@ -101,7 +101,7 @@ class RequestHandler(tornado.web.RequestHandler):
             return None
         # Check if login session is invalidated.
         if user.get('login') is None:
-            logging.debug("user %s no login session", email)
+            logging.debug("user %s has no login session", email)
             return None
         return user
 
@@ -183,12 +183,12 @@ class RequestHandler(tornado.web.RequestHandler):
         result = []
         for field in fields.values():
             if lookup.get(field.get('parent')) is parent:
-                field.level = level
+                field['__level__'] = level
                 result.append(field)
                 del fields[field['identifier']]
         result.sort(lambda i, j: cmp(i['position'], j['position']))
         for c in result:
-            c.children = self._ordered_fields(c, fields, lookup, level+1)
+            c['__children__'] = self._ordered_fields(c, fields, lookup, level+1)
         return result
 
     def get_all_fields_flattened(self, exclude=None):
@@ -202,7 +202,8 @@ class RequestHandler(tornado.web.RequestHandler):
             if exclude and exclude['identifier'] == f['identifier']: continue
             result.append(f)
             try:
-                result.extend(self._flatten_fields(f.children, exclude=exclude))
+                result.extend(self._flatten_fields(f['__children__'],
+                                                   exclude=exclude))
             except AttributeError:
                 pass
         return result

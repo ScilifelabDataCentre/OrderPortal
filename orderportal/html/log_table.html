@@ -1,0 +1,28 @@
+{# Log entries table page. #}
+<table class="log">
+  <tr>
+    <th>Log entry</th>
+    <th>User</th>
+    <th>Changed</th>
+  </tr>
+  {% for log in logs %}
+  <tr>
+    <td>
+      <a href="{{ reverse_url('log', log['iuid']) }}">
+	<span class="localtime">{{ log['modified'] }}</span>
+      </a>
+    </td>
+    <td>{{ log.get('user') or '-' }}</td>
+    <td>
+      <table>
+	{% for key in sorted(log['changed']) %}
+	<tr>
+	  <th class="key">{{ key }}</th>
+	  <td>{{ log['changed'][key] }}</td>
+	</tr>
+	{% end %}
+      </table>
+    </td>
+  </tr>
+  {% end %}
+</table>

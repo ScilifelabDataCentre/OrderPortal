@@ -21,11 +21,21 @@ class UserSaver(saver.Saver):
             raise ValueError('email address already in use')
         self['email'] = email
 
+    def erase_password(self):
+        self['password'] = None
+
     def set_password(self, new):
-        self['password'] = utils.hashed_password(new)
+        self.check_password(new)
+        # Bypass ordinary 'set'; avoid logging password, even if hashed.
+        self.doc['password'] = utils.hashed_password(new)
+
+    def check_password(self, password):
+        if len(password) < 6:
+            raise tornado.web.HTTPError(400, reason='invalid password')
 
     def set_activation(self):
-        self['password'] = None
+        "Set activation code; invalidate any previous password."
+        self.erase_password()
         self['activation'] = utils.get_iuid()
 
 
@@ -49,7 +59,8 @@ class User(RequestHandler):
         self.check_owner_or_staff(user)
         self.render('user.html',
                     title="User {0}".format(user['email']),
-                    user=user)
+                    user=user,
+                    logs=self.get_logs(user['_id']))
 
 
 class Login(RequestHandler):
@@ -106,7 +117,7 @@ The code required to set your password is "{}".
         self.check_xsrf_cookie()
         user = self.get_user(self.get_argument('email'))
         with UserSaver(doc=user, rqh=self) as saver:
-            saver['password'] = None
+            saver.erase_password()
             saver['code'] = utils.get_iuid()
             saver['login'] = None # Invalidate login session.
         url = self.absolute_reverse_url('password',
@@ -136,8 +147,6 @@ class Password(RequestHandler):
         if user.get('code') != self.get_argument('code'):
             raise tornado.web.HTTPError(400, reason='invalid email or code')
         password = self.get_argument('password')
-        if not self.valid_password(password):
-            raise tornado.web.HTTPError(400, reason='invalid password')
         if password != self.get_argument('confirm_password'):
             raise tornado.web.HTTPError(400, reason='passwords not the same')
         with UserSaver(doc=user, rqh=self) as saver:
@@ -147,10 +156,6 @@ class Password(RequestHandler):
         self.set_secure_cookie(constants.USER_COOKIE, user['email'])
         self.redirect(self.reverse_url('home'))
             
-
-    def valid_password(self, password):
-        return len(password) >= 6
-
 
 class Register(RequestHandler):
     "Register a new user account."
@@ -183,7 +188,7 @@ class Register(RequestHandler):
             saver['owner'] = email
             saver['role'] = constants.USER
             saver['status'] = constants.PENDING
-            saver['password'] = None
+            saver.erase_password()
         self.see_other(self.reverse_url('password'))
 
 
@@ -215,8 +220,8 @@ Please got to {} to set your password.
         self.check_admin()
         with UserSaver(user, rqh=self) as saver:
             saver['code'] = utils.get_iuid()
-            saver['password'] = None
             saver['status'] = constants.ENABLED
+            saver.erase_password()
         text = "Your account {} in the {} portal has been enabled."
         url = self.absolute_reverse_url('password',
                                         email=email,
@@ -236,6 +241,6 @@ class UserDisable(RequestHandler):
         user = self.get_user(email)
         self.check_admin()
         with UserSaver(user, rqh=self) as saver:
-            saver['password'] = None
             saver['status'] = constants.DISABLED
+            saver.erase_password()
         self.see_other(self.reverse_url('user', email))

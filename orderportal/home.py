@@ -35,3 +35,12 @@ class Home(RequestHandler):
 
     def dashboard_user(self):
         self.render('home_user.html')
+
+
+class Log(RequestHandler):
+    "Log entry; JSON output."
+
+    def get(self, iuid):
+        doc = self.get_entity(iuid, doctype=constants.LOG)
+        self.write(self.get_presentable(doc))
+        self.set_header('Content-Type', constants.JSON_MIME)

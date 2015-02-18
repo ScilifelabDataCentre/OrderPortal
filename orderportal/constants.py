@@ -10,13 +10,16 @@ ID_RX  = re.compile(r'^[a-z][_a-z0-9]*$', re.IGNORECASE)
 IUID_RX  = re.compile(r'^[0-9a-f]{32}$')
 EMAIL_RX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
 
+# Content types (MIME types)
+JSON_MIME      = 'application/json'
+
 # CouchDB
 # For view ranges: CouchDB uses the Unicode Collation Algorithm,
 # which is not the same as the ASCII collation sequence.
 # The endkey is inclusive, by default.
 HIGH_CHAR = 'ZZZZZZZZ'
 
-# Documents
+# Entity documents
 DOCTYPE     = 'orderportal_doctype'
 USER        = 'user'
 FIELD       = 'field'

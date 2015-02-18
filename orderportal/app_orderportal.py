@@ -58,6 +58,7 @@ def get_handlers():
                 FieldEdit, name='field_edit'),
             URL(r'/fields', Fields, name='fields'),
             # URL(r'/field/([0-9a-f]{32})', Field, name='field'),
+            URL(r'/log/([0-9a-f]{32})', Log, name='log'),
             ]
 
 def get_args():
