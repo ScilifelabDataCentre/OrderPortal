@@ -8,11 +8,13 @@ and allow order forms to be designed for a wide variety of facilities.
 
 The OrderPortal system can be used for several facilities within the
 same organisation by running several completely separate
-instances. The current design sets up user accounts for each instance
-separately, using email address as the user account identifier. We
-decided against a database design involving a single user account
-database for all facilities, for conceptual simplicity. This decision
-may be revisited in the future.
+instances.
+
+The current design of the system implies user accounts being defined
+for each OrderPortal instance separately. We decided against a design
+involving a single user account database for all facilities, for
+conceptual simplicity. This decision may be revisited in the future.
+The email address as used as the user account identifier.
 
 The design of the order form setup is fairly general; there is nothing
 that is hardcoded for scientific or genomics data _per se_. The form
@@ -84,6 +86,9 @@ User accounts can be set as disabled, for example if the person leaves
 her position, or as a means of blocking invalid use. Deletion of a
 user account is not allowed, to allow full traceability of old
 orders. An account can always be enabled again.
+
+It must be possible to reassign an order from one user to another, to
+facilitate personnel changes.
 
 An external scientist applies for a user account by providing the
 relevant information. Such an account is created with a status of
