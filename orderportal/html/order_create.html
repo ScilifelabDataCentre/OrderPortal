@@ -1,0 +1,37 @@
+{# Order create page. #}
+{% extends "base.html" %}
+
+{% block content %}
+<form action="{{ reverse_url('order_create') }}" method='POST'>
+  {% module xsrf_form_html() %}
+
+  <table class="fields">
+    <tr>
+      <th>Title</th>
+      <td>{% module Icon('required') %}</td>
+      <td>
+	<input type="text" name="title" size="40">
+      </td>
+      <td class="description">
+	Brief, descriptive title for the project.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Description</th>
+      <td></td>
+      <td>
+	<textarea name="description"></textarea>
+      </td>
+      <td class="description">
+	Optional, more complete, description of the project.
+      </td>
+    </tr>
+
+  </table>
+
+  <p>
+
+  {% module Submit('create', title='Create new order') %}
+</form>
+{% end %}

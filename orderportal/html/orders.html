@@ -2,38 +2,27 @@
 {% extends "base.html" %}
 
 {% block subheader %}
-<p class="medium">
-List of current input fields.
-</p>
+<form action="{{ reverse_url('order_create') }}" method='GET'>
+  {% module Submit('create', title='Create new order') %}
+</form>
+<p>
 {% end %}
 
 {% block content %}
 <table class="listing">
   <tr>
-    <th>Identifier</th>
-    <th>Label</th>
-    <th>Type</th>
-    <th>Required</th>
-    <th>Parent</th>
+    <th>Link</th>
+    <th>Owner</th>
   </tr>
-{% for field in fields %}
+{% for order in orders %}
   <tr>
     <td>
-      <a href="{{ reverse_url('field', field['identifier']) }}">
-	{{ field['identifier'] }}
+      <a href="{{ reverse_url('order', order['iuid']) }}">
+	{{ order['iuid'] }}
       </a>
     </td>
-    <td>{{ field['label'] }}</td>
-    <td>{{ field['type'] }}</td>
-    <td>{{ field['required'] }}</td>
-    <td>{{ field.get('parent') or '' }}</td>
+    <td>{{ order['owner'] }}</td>
   </tr>
 {% end %}
 </table>
-
-<p>
-
-<form action="{{ reverse_url('field_create') }}" method='GET'>
-  {% module Submit('create', title='Create new field') %}
-</form>
 {% end %}

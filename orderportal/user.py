@@ -26,17 +26,19 @@ class UserSaver(saver.Saver):
 
     def set_password(self, new):
         self.check_password(new)
+        self['code'] = None
         # Bypass ordinary 'set'; avoid logging password, even if hashed.
         self.doc['password'] = utils.hashed_password(new)
 
     def check_password(self, password):
-        if len(password) < 6:
+        if password is None: return
+        if len(password) < constants.MIN_PASSWORD_LENGTH:
             raise tornado.web.HTTPError(400, reason='invalid password')
 
-    def set_activation(self):
-        "Set activation code; invalidate any previous password."
+    def reset_password(self):
+        "Invalidate any previous password and set activation code."
         self.erase_password()
-        self['activation'] = utils.get_iuid()
+        self['code'] = utils.get_iuid()
 
 
 class Users(RequestHandler):
@@ -117,8 +119,7 @@ The code required to set your password is "{}".
         self.check_xsrf_cookie()
         user = self.get_user(self.get_argument('email'))
         with UserSaver(doc=user, rqh=self) as saver:
-            saver.erase_password()
-            saver['code'] = utils.get_iuid()
+            saver.reset_password()
             saver['login'] = None # Invalidate login session.
         url = self.absolute_reverse_url('password',
                                         email=user['email'],
@@ -151,7 +152,6 @@ class Password(RequestHandler):
             raise tornado.web.HTTPError(400, reason='passwords not the same')
         with UserSaver(doc=user, rqh=self) as saver:
             saver.set_password(password)
-            saver['code'] = None
             saver['login'] = utils.timestamp() # Set login session.
         self.set_secure_cookie(constants.USER_COOKIE, user['email'])
         self.redirect(self.reverse_url('home'))

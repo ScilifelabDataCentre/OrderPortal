@@ -60,6 +60,9 @@ STAFF      = 'staff'
 STD_ROLE   = USER
 USER_ROLES = frozenset([USER, STAFF, ADMIN])
 
+# Password
+MIN_PASSWORD_LENGTH = 6
+
 # Display
 DEFAULT_MAX_DISPLAY_LOG = 20
 

@@ -22,7 +22,7 @@ from orderportal.requesthandler import RequestHandler
 from orderportal.home import *
 from orderportal.user import *
 from orderportal.field import *
-# from orderportal.order import *
+from orderportal.order import *
 
 
 class Dummy(RequestHandler):
@@ -34,9 +34,9 @@ def get_handlers():
     URL = tornado.web.url
     return [URL(r'/', Home, name='home'),
             URL(r'/search', Dummy, name='search'),
-            URL(r'/orders', Dummy, name='orders'),
-            # URL(r'/order/([0-9a-f]{32})', Order, name='order'),
-            # URL(r'/order', Dummy, name='order_create'),
+            URL(r'/orders', Orders, name='orders'),
+            URL(r'/order/([0-9a-f]{32})', Order, name='order'),
+            URL(r'/order', OrderCreate, name='order_create'),
             # URL(r'/order/([0-9a-f]{32})/edit', OrderEdit, name='order_edit'),
             # URL(r'/order/([0-9a-f]{32})/copy', OrderCopy, name='order_copy'),
             # URL(r'/order/([0-9a-f]{32})/log', OrderLog, name='order_log'),

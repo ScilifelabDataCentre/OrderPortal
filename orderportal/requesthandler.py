@@ -4,6 +4,7 @@ from __future__ import unicode_literals, print_function, absolute_import
 
 import logging
 import json
+import collections
 import urllib
 import smtplib
 from email.mime.text import MIMEText
@@ -174,12 +175,12 @@ class RequestHandler(tornado.web.RequestHandler):
         view = self.db.view('field/identifier', include_docs=True)
         return [self.get_presentable(r.doc) for r in view]
 
-    def get_all_fields_ordered(self):
-        "Return the fields ordered in hierarchy, and within levels."
+    def get_all_fields_sorted(self):
+        "Return the fields sorted in hierarchy, and within levels."
         lookup = dict([(f['identifier'], f) for f in self.get_all_fields()])
-        return self._ordered_fields(None, lookup.copy(), lookup)
+        return self._sorted_fields(None, lookup.copy(), lookup)
 
-    def _ordered_fields(self, parent, fields, lookup, level=0):
+    def _sorted_fields(self, parent, fields, lookup, level=0):
         result = []
         for field in fields.values():
             if lookup.get(field.get('parent')) is parent:
@@ -188,12 +189,12 @@ class RequestHandler(tornado.web.RequestHandler):
                 del fields[field['identifier']]
         result.sort(lambda i, j: cmp(i['position'], j['position']))
         for c in result:
-            c['__children__'] = self._ordered_fields(c, fields, lookup, level+1)
+            c['__children__'] = self._sorted_fields(c, fields, lookup, level+1)
         return result
 
     def get_all_fields_flattened(self, exclude=None):
-        "Return the fields ordered in a flattened list."
-        fields = self.get_all_fields_ordered()
+        "Return the fields sorted in a flattened list."
+        fields = self.get_all_fields_sorted()
         return self._flatten_fields(fields, exclude=exclude)
 
     def _flatten_fields(self, fields, exclude=None):
@@ -254,12 +255,12 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_presentable(self, doc):
         """Make the entity document presentable:
-        - Convert to ordered dictionary.
+        - Convert to sorted dictionary.
         - Remove all entries with value None.
         - Change '_id' key to 'iuid'.
         - Remove '_rev' and 'orderportal_doctype' attributes.
         """
-        result = dict()
+        result = collections.OrderedDict()
         result['iuid'] = doc['_id']
         ignore = set(['_id', '_rev', '_attachments', 'orderportal_doctype'])
         for key in sorted(doc.keys()):

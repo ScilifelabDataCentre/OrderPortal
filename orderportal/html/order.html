@@ -1,0 +1,39 @@
+{# Order page. #}
+{% extends "base.html" %}
+
+{% block content %}
+
+<table class="fields">
+  <tr>
+    <th>Title</th>
+    <td>{% module Icon('required') %}</td>
+    <td>{{ order['title'] }}</td>
+    <td class="description">
+      Brief, descriptive title for the project.
+    </td>
+  </tr>
+
+  <tr>
+    <th>Description</th>
+    <td></td>
+    <td>{{ order.get('description') or '[none]' }}</td>
+    <td class="description">
+      Optional, more complete, description of the project.
+    </td>
+  </tr>
+
+</table>
+
+<p>
+
+{#
+<form action="{{ reverse_url('order_edit', order['iuid']) }}"
+      method='GET'>
+  {% module Submit('edit', title='Edit order') %}
+</form>
+#}
+<p>
+
+{% include 'log_table.html' %}
+
+{% end %}
