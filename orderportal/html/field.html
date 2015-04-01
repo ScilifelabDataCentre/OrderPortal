@@ -18,7 +18,7 @@
     <td></td>
     <td>{{ field.get('label') or '[none]' }}</td>
     <td class="description">
-      Label to show for the field in the order form. May be edited.
+      Label to show for the field in the order form.
     </td>
   </tr>
 
@@ -55,6 +55,24 @@
     </td>
   </tr>
 
+    <tr>
+      <th>Restricted read</th>
+      <td></td>
+      <td>{{ field.get('restrict_read') and 'Yes' or 'No' }}</td>
+      <td class="description">
+	The field is restricted to be visible only to staff, not the user.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Restricted write</th>
+      <td></td>
+      <td>{{ field.get('restrict_write') and 'Yes' or 'No' }}</td>
+      <td class="description">
+	The field is restricted to be editable only by staff, not the user.
+      </td>
+    </tr>
+
   <tr>
     <th>Parent</th>
     <td></td>
@@ -67,7 +85,7 @@
       {% end %}
     </td>
     <td class="description">
-      The field which this field is grouped under. May be edited.
+      The field which this field is grouped under.
     </td>
   </tr>
 
@@ -77,7 +95,6 @@
     <td>{{ field['position'] }}</td>
     <td class="description">
       Position of field relative to other fields with the same parent.
-      May be edited.
     </td>
   </tr>
 
@@ -86,8 +103,7 @@
     <td></td>
     <td>{{ field.get('description') or '[none]' }}</td>
     <td class="description">
-      Description to display in the order as information to the
-      user. May be edited.
+      Description to display in the order as information to the user.
     </td>
   </tr>
 

@@ -71,3 +71,18 @@ class Entity(tornado.web.UIModule):
             raise KeyError(str(msg) + ':', name)
         return """<a href="{url}">{icon} {title}</a>""".format(
             url=url, icon=icon, title=title)
+
+
+class Fields(tornado.web.UIModule):
+    "HTML for the rows of a table of hierarchical fields."
+
+    def render(self, fields):
+        rows = []
+        for field in fields:
+            th = field.get('label') or field['identifier']
+            if field['type'] == 'group':
+                td = self.render(field['__children__'])
+            else:
+                td = field['type']
+            rows.append("<tr><th>{}</th><td>{}</td></tr>".format(th, td))
+        return "<table class='listing'>{}</table>".format('\n'.join(rows))

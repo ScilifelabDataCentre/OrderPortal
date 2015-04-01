@@ -30,8 +30,8 @@ Define a new field and create it.
 	<input type="text" name="label">
       </td>
       <td class="description">
-	Label to show for the field in the order form. The identifier
-	will be used if this is not provided.  May be edited later.
+	Label to display for the field in the order form. The
+	identifier will be used if this is not provided.
       </td>
     </tr>
 
@@ -59,6 +59,28 @@ Define a new field and create it.
       <td class="description">
 	Require that the field must have a value specified in the order.
 	If no value, then the order is incomplete, and cannot be submitted.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Restricted read</th>
+      <td></td>
+      <td>
+	<input type="checkbox" name="restrict_read" value="yes"> Yes
+      </td>
+      <td class="description">
+	The field is restricted to be visible only to staff, not the user.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Restricted write</th>
+      <td></td>
+      <td>
+	<input type="checkbox" name="restrict_write" value="yes"> Yes
+      </td>
+      <td class="description">
+	The field is restricted to be editable only by staff, not the user.
       </td>
     </tr>
 

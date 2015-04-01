@@ -38,7 +38,7 @@ class Order(RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        # XXX Check read privilege
+        self.check_read_order(order)
         self.render('order.html',
                     title="Order '{}'".format(order['title']),
                     order=order,
@@ -50,14 +50,15 @@ class OrderCreate(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
-        self.render('order_create.html', title='Create a new order')
+        self.render('order_create.html',
+                    title='Create a new order')
 
     @tornado.web.authenticated
     def post(self):
         self.check_xsrf_cookie()
         with OrderSaver(rqh=self) as saver:
             saver['title'] = self.get_argument('title')
-            saver['description'] = self.get_argument('description', None)
+            saver['fields'] = self.get_all_fields_sorted()
             saver['owner'] = self.current_user['email']
             doc = saver.doc
         self.see_other(self.reverse_url('order', doc['_id']))

@@ -63,9 +63,13 @@ class FieldCreate(RequestHandler):
             raise tornado.web.HTTPError(400, reason='invalid type')
         with FieldSaver(rqh=self) as saver:
             saver['identifier'] = identifier
+            saver['label'] = self.get_argument('label', None)
             saver['type'] = type
             saver.save_required()
-            saver['label'] = self.get_argument('label', None)
+            saver['restrict_read'] = utils.to_bool(
+                self.get_argument('restrict_read', False))
+            saver['restrict_write'] = utils.to_bool(
+                self.get_argument('restrict_write', False))
             saver['parent'] = None
             try:
                 saver['position'] = int(self.get_argument('position', 0))
@@ -91,12 +95,16 @@ class FieldEdit(RequestHandler):
         self.check_xsrf_cookie()
         field = self.get_field(identifier)
         with FieldSaver(doc=field, rqh=self) as saver:
-            saver.save_required()
             saver['label'] = self.get_argument('label', None)
             if field['type'] == 'select':
                 items = self.get_argument('options', '').split('\n')
                 items = [i.strip() for i in items]
                 saver['options'] = [i for i in items if i]
+            saver.save_required()
+            saver['restrict_read'] = utils.to_bool(
+                self.get_argument('restrict_read', False))
+            saver['restrict_write'] = utils.to_bool(
+                self.get_argument('restrict_write', False))
             parent = self.get_argument('parent', None)
             if parent == '__top__':
                 saver['parent'] = None

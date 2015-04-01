@@ -1,17 +1,8 @@
-{# Order create page. #}
+{# Order edit page. #}
 {% extends "base.html" %}
 
-{% block subheader %}
-<p class="medium">
-<ol>
-<li> Give a title for the new order.
-<li> Create the order by clicking 'Create'.
-<li> You will be sent to the edit page for the new order.
-</p>
-{% end %}
-
 {% block content %}
-<form action="{{ reverse_url('order_create') }}" method='POST'>
+<form action="{{ reverse_url('order_edit') }}" method='POST'>
   {% module xsrf_form_html() %}
 
   <table class="fields">

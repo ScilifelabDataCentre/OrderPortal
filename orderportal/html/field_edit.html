@@ -74,6 +74,36 @@ Edit an existing field.
     </tr>
 
     <tr>
+      <th>Restricted read</th>
+      <td></td>
+      <td>
+	{% if field.get('restrict_read') %}
+	<input type="checkbox" name="restrict_read" value="yes" checked> Yes
+	{% else %}
+	<input type="checkbox" name="restrict_read" value="yes"> Yes
+	{% end %}
+      </td>
+      <td class="description">
+	The field is restricted to be visible only to staff, not the user.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Restricted write</th>
+      <td></td>
+      <td>
+	{% if field.get('restrict_write') %}
+	<input type="checkbox" name="restrict_write" value="yes" checked> Yes
+	{% else %}
+	<input type="checkbox" name="restrict_write" value="yes"> Yes
+	{% end %}
+      </td>
+      <td class="description">
+	The field is restricted to be editable only by staff, not the user.
+      </td>
+    </tr>
+
+    <tr>
       <th>Parent</th>
       <td></td>
       <td>
@@ -85,7 +115,7 @@ Edit an existing field.
 	    {% else %}
 	      <option value="{{ f['identifier'] }}">
 	    {% end %}
-	    {% raw '&nbsp;' * f.level %}
+	    {% raw '&nbsp;' * f['__level__'] %}
 	    {{ f['label'] }}
 	    ({{ f['identifier'] }})
 	  </option>

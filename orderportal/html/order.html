@@ -2,26 +2,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-<table class="fields">
-  <tr>
-    <th>Title</th>
-    <td>{% module Icon('required') %}</td>
-    <td>{{ order['title'] }}</td>
-    <td class="description">
-      Brief, descriptive title for the project.
-    </td>
-  </tr>
-
-  <tr>
-    <th>Description</th>
-    <td></td>
-    <td>{{ order.get('description') or '[none]' }}</td>
-    <td class="description">
-      Optional, more complete, description of the project.
-    </td>
-  </tr>
-
+<table class="listing">
+  {% module Fields(order['fields']) %}
 </table>
 
 <p>
