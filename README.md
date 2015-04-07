@@ -1,37 +1,77 @@
 OrderPortal
 ===========
 
-A portal for orders (_a.k.a._ requests, project applications) to one
-single facility from its users. The order form fields are fully
-configurable via the web interface. The field definitions are generic,
-and allow order forms to be designed for a wide variety of facilities.
+Background
+----------
 
-The OrderPortal system can be used for several facilities within the
-same organisation by running several completely separate
-instances.
+The OrderPortal system was created to satisfy the needs of the
+[National Genomics Infrastructure Sweden](http://www.scilifelab.se/platforms/ngi/),
+which is a service facility producing sequence data from DNA and
+RNA samples provided by external researchers. The facility processes
+the samples according to the order from the scientist.
 
-The current design of the system implies user accounts being defined
-for each OrderPortal instance separately. We decided against a design
-involving a single user account database for all facilities, for
-conceptual simplicity. This decision may be revisited in the future.
-The email address as used as the user account identifier.
+
+Requirements
+------------
+
+A portal where users (researchers) can place orders for a project to
+be executed by a research service facility was required. The portal
+should have the following features:
+
+* Allow the user to specify an order.
+* Allow the user to submit the order to the facility.
+* Let the facility staff keep track of review and agreements.
+* The facility staff can accept an order, thus transforming it
+  into a project.
+* Allow input from the user of required project data, such as sample sheets.
+* Allow attaching various documents to an order.
+* Display project status reports.
+* Allow keeping track of Key Performance Indicators (KPIs), facilitating
+  resource usage reports for the facility.
+
+Design outline
+--------------
+
+The system is a portal for orders (_a.k.a._ requests, project
+applications) to one single facility from its users. A user is a
+researcher external to the service facility, and is usually the
+Principal Investigator (PI) for one or more projects.
+
+The OrderPortal system is designed for only one facility, having a
+single order input form, which can be hierarchically organized. The
+system can be used for several facilities within the same organisation
+by running several completely separate instances of it.
+
+A user account is defined within each OrderPortal instance separately.
+We decided against a design based on a single central user account
+database for all facilities.  The email address of the user is used as
+the user account identifier.
 
 The design of the order form setup is fairly general; there is nothing
-that is hardcoded for scientific or genomics data _per se_. The form
-content is easy to change via the web interface. Previously submitted
-orders are not affected by such changes. A mechanism to also update
-older orders by changes to the current form fields is being
-considered, but has not been designed or implemented yet.
+that is hardcoded for specific domains of science. The content of the
+order form is defined by the facility administrators.
 
-We are striving to keep the design as flexible and general as
+The design of the system is kept as flexible and general as
 possible. The base template and CSS are to some extend modifiable (via
 command line operations), allowing the appearance of the OrderPortal
 to be customised.
 
-The OrderPortal system was originally created to satisfy the needs of
-a lab facility which produces sequence data from DNA and RNA samples
-provided by external researchers. The facility processes the samples
-according to the order from the scientist.
+The order form
+--------------
+
+The order form fields are fully configurable by the facility
+administrators via the web interface. The field definitions are
+generic, and allow order forms to be designed for a wide variety of
+facilities.
+
+The order form must allow hierarchical grouping of fields, with
+dynamic display according to rules. This allows for cases where a
+top-level selection of e.g. a specific technology determines which
+further input fields are required to be filled in.
+
+When the order form for a facility is changed, previously submitted
+orders are not affected. It will not be possible (at least in the
+initial version) to change the form for previously created orders.
 
 Only orders, no info pages
 --------------------------
@@ -48,7 +88,7 @@ specified by the order form. One instance (database) of the system
 handles one facility. All entities in the database belong to one and
 only one facility.
 
-There are two reasons for this design choice:
+There are three reasons for this design choice:
 
 1. Security between facilities. The existence and contents of a
    particular project in one facility must not be visible to the
@@ -59,15 +99,20 @@ There are two reasons for this design choice:
 2. The styling of an order portal is much easier to implement if each
    facility has its own portal instance.
 
-One drawback with this design choice is that it does not allow the
-users to see all their orders in all facilities within the system.
+3. The introduction, or elimination, of a facility in the overall
+   organisation becomes much easier if every instance of the system is
+   independent of the other.
+
+One drawback with this design choice is that it complicates the
+communication between and linking of different but related projects in
+different facilities.
 
 
 Users
 -----
 
 A user is an account in the system. Almost all operation require that
-the user is logged in.
+the user is logged in. The email address is the user account identifier.
 
 There are basically three kinds of users:
 
@@ -121,14 +166,18 @@ field:
 - Field description
 - Value options, if relevant
 - Hierarchy and order, including conditional visibility
-- Visibility to the user
+- Visibility to the user; some fields may be visible only to the staff
 
 When an order is created, its fields definitions are copied from the
-current set. Thus, an order is always self-contained. The set of
-fields defined for the site may change, but the structure of the order
-stays the same. This allows any change of the current set of fields,
-while maintaining the integrity of old orders. The disadvantage is
-that it makes it hard to update old orders with any new fields.
+current set. Thus, an order is always self-contained.  Once an order
+has been created, its fields and selected options are effectively
+frozen, and remain fixed even if the current fields are updated.
+
+The set of fields defined for the site may change, but the structure
+of the order stays the same. This allows any change of the current set
+of fields, while maintaining the integrity of old orders. The
+disadvantage is that it makes it hard to update old orders with any
+new fields.
 
 A field may be conditional, meaning that it is displayed only of some
 other field has been assigned a specific value. This is necessary for
@@ -140,8 +189,6 @@ high-level conditional field should be set as undetermined when the
 order is saved by the user. This simplifies interpretation of the
 order data by other external systems.
 
-Once an order has been created, its fields and selected options are
-effectively frozen, and remain fixed even if the current fields are updated.
 
 Order
 -----
