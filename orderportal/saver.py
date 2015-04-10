@@ -80,26 +80,6 @@ class Saver(object):
         except KeyError:
             return default
 
-    def update(self, key, data=None, required=False):
-        """Update the field with a value from HTML form upload or JSON-LD data.
-        Raise ValueError if the value is None and required is True.
-        """
-        if data is None:
-            try:
-                value = self.rqh.get_argument(key) or None
-            except tornado.web.MissingArgumentError:
-                return          # Do not change value if parameter not present
-        else:
-            try:
-                value = data[key]
-            except KeyError:
-                return          # Do not change value if parameter not present
-            if value is not None and not isinstance(value, (str, unicode)):
-                raise ValueError("invalid value type for '%s'", key)
-        if required and value is None:
-            raise ValueError("value required for '{}'".format(key))
-        self[key] = value
-
     def initialize(self):
         "Set the initial values for the new entity."
         try:

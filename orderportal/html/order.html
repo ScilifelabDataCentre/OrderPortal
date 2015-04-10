@@ -2,18 +2,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<table class="listing">
-  {% module Fields(order['fields']) %}
-</table>
-
+{% module OrderFieldsDisplay(order['fields']) %}
 <p>
 
-{#
-<form action="{{ reverse_url('order_edit', order['iuid']) }}"
+<form action="{{ reverse_url('order_edit', order['_id']) }}"
       method='GET'>
   {% module Submit('edit', title='Edit order') %}
 </form>
-#}
+
 <p>
 
 {% include 'log_table.html' %}

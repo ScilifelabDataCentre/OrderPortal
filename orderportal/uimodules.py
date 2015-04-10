@@ -73,16 +73,42 @@ class Entity(tornado.web.UIModule):
             url=url, icon=icon, title=title)
 
 
-class Fields(tornado.web.UIModule):
-    "HTML for the rows of a table of hierarchical fields."
+class OrderFieldsDisplay(tornado.web.UIModule):
+    "HTML for displaying order fields in a hierarchical fashion."
 
     def render(self, fields):
         rows = []
         for field in fields:
             th = field.get('label') or field['identifier']
+            desc = field.get('description' or '-')
             if field['type'] == 'group':
+                rows.append('<tr><th colspan="2"><h3>{}</h3></th><td>{}</td></tr>'.format(th, desc))
                 td = self.render(field['__children__'])
+                rows.append('<tr><td colspan="3">{}</td></tr>'.format(td))
             else:
-                td = field['type']
-            rows.append("<tr><th>{}</th><td>{}</td></tr>".format(th, td))
-        return "<table class='listing'>{}</table>".format('\n'.join(rows))
+                value = field.get('value') or '-'
+                rows.append("<tr><th>{}</th><td>{}</td><td>{}</td></tr>".format(th, value, desc))
+        return "<table class='order'>{}</table>".format('\n'.join(rows))
+
+class OrderFieldsEdit(tornado.web.UIModule):
+    "HTML for editing the values of order fields."
+
+    def render(self, fields):
+        rows = []
+        for field in fields:
+            th = field.get('label') or field['identifier']
+            desc = field.get('description' or '-')
+            if field['type'] == constants.GROUP['value']:
+                rows.append('<tr><th colspan="2"><h3>{}</h3></th><td>{}</td></tr>'.format(th, desc))
+                td = self.render(field['__children__'])
+                rows.append('<tr><td colspan="3">{}</td></tr>'.format(td))
+            else:
+                value = field.get('value') or ''
+                if field['type'] == constants.STRING['value']:
+                    td = """<input type="text" name="{}" value="{}">""".\
+                        format(field['identifier'], value)
+                else:
+                    td = '[undef]'
+                rows.append("<tr><th>{}</th><td>{}</td><td>{}</td></tr>".\
+                        format(th, td, desc))
+        return "<table class='order'>{}</table>".format('\n'.join(rows))

@@ -2,27 +2,17 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form action="{{ reverse_url('order_edit') }}" method='POST'>
+<form action="{{ reverse_url('order_edit', order['_id']) }}"
+      method='POST'>
   {% module xsrf_form_html() %}
-
-  <table class="fields">
-    <tr>
-      <th>Title</th>
-      <td>{% module Icon('required') %}</td>
-      <td>
-	<input type="text" name="title" size="60">
-      </td>
-      <td class="description">
-	Brief, descriptive title for the order. It is not required to
-	be unique, but you may want to make it so anyway. May be
-	edited.
-      </td>
-    </tr>
-
-  </table>
-
+  {% module OrderFieldsEdit(order['fields']) %}
   <p>
 
-  {% module Submit('create', title='Create new order') %}
+  {% module Submit('save', title='Save edited order') %}
+</form>
+
+<form action="{{ reverse_url('order', order['_id']) }}"
+      method='GET'>
+  {% module Submit('cancel') %}
 </form>
 {% end %}

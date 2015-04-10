@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals, print_function, absolute_import
 
+import logging
+
 import tornado.web
 
 import orderportal
@@ -14,6 +16,18 @@ from orderportal.requesthandler import RequestHandler
 
 class OrderSaver(saver.Saver):
     doctype = constants.ORDER
+
+    def update_fields(self):
+        "Update all fields from the HTML form input."
+        assert self.rqh is not None
+        for field in self.rqh._flatten_fields(self.doc['fields']):
+            identifier = field['identifier']
+            old = field.get('value')
+            value = self.rqh.get_argument(identifier, None)
+            if old != value:
+                changed = self.changed.setdefault('field_values', dict())
+                changed[identifier] = value
+                field['value'] = value
 
 
 class Orders(RequestHandler):
@@ -62,3 +76,24 @@ class OrderCreate(RequestHandler):
             saver['owner'] = self.current_user['email']
             doc = saver.doc
         self.see_other(self.reverse_url('order', doc['_id']))
+
+
+class OrderEdit(RequestHandler):
+    "Page for editing an order."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.check_edit_order(order)
+        self.render('order_edit.html',
+                    title="Edit order '{}'".format(order['title']),
+                    order=order)
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.check_edit_order(order)
+        with OrderSaver(doc=order, rqh=self) as saver:
+            saver.update_fields()
+        self.see_other(self.reverse_url('order', order['_id']))

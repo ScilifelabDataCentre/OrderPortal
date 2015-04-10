@@ -128,6 +128,14 @@ table.listing tr th {text-align: left;
 
 table.listing tr td {padding-right: 1em; }
 
+table.order {padding-left: 2em; }
+
+table.order tr th {text-align: left;
+		   padding-right: 0.5em;
+		  }
+
+table.order tr td {}
+
 table.log th {text-align: left;
 	     border-bottom-style: solid;
 	     border-bottom-color: lightgray;
