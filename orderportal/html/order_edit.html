@@ -5,7 +5,7 @@
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
       method='POST'>
   {% module xsrf_form_html() %}
-  {% module OrderFieldsEdit(order['fields']) %}
+  {% module FormFieldsEdit(order['fields']) %}
   <p>
 
   {% module Submit('save', title='Save edited order') %}

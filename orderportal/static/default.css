@@ -7,7 +7,10 @@ h1 {font-size: x-large; }
 h2 {font-size: large; }
 h3 {font-size: medium; }
 
-header h1 { margin-left: 140px; }
+div.title { margin-left: 100px; }
+div.title h1 {margin: 0;
+	      padding: 0.75em;
+	     }
 
 nav {width: 100px;
      clear: both;
@@ -65,7 +68,9 @@ ul.subheader li {font-size: medium;
 .number {font-family: Courier, monospace;
 	 text-align: right;
 	}
-.error {color: red; }
+.error {color: red;
+	margin-left: 1em;
+       }
 .description {font-style: italic; }
 .message {font-weight: bold; }
 
@@ -128,11 +133,11 @@ table.listing tr th {text-align: left;
 
 table.listing tr td {padding-right: 1em; }
 
-table.order {padding-left: 2em; }
+table.formfields {padding-left: 2em; }
 
-table.order tr th {text-align: left;
-		   padding-right: 0.5em;
-		  }
+table.formfields tr th {text-align: left;
+			padding-right: 0.5em;
+		       }
 
 table.order tr td {}
 
@@ -147,4 +152,3 @@ table.log td {vertical-align: top; }
 table.log th.key {font-style: italic;
 		  text-align: right;
 		  border-bottom-style: none;
-		 }

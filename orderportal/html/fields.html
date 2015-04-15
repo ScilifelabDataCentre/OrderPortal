@@ -2,6 +2,10 @@
 {% extends "base.html" %}
 
 {% block content %}
+<form action="{{ reverse_url('field_create') }}" method='GET'>
+  {% module Submit('create', title='Create new field') %}
+</form>
+<p>
 <table class="listing">
   <tr>
     <th>Identifier</th>
@@ -34,10 +38,4 @@
   </tr>
 {% end %}
 </table>
-
-<p>
-
-<form action="{{ reverse_url('field_create') }}" method='GET'>
-  {% module Submit('create', title='Create new field') %}
-</form>
 {% end %}

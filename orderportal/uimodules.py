@@ -73,8 +73,8 @@ class Entity(tornado.web.UIModule):
             url=url, icon=icon, title=title)
 
 
-class OrderFieldsDisplay(tornado.web.UIModule):
-    "HTML for displaying order fields in a hierarchical fashion."
+class FormFieldsDisplay(tornado.web.UIModule):
+    "HTML for displaying form fields in a hierarchical fashion."
 
     def render(self, fields):
         rows = []
@@ -88,10 +88,10 @@ class OrderFieldsDisplay(tornado.web.UIModule):
             else:
                 value = field.get('value') or '-'
                 rows.append("<tr><th>{}</th><td>{}</td><td>{}</td></tr>".format(th, value, desc))
-        return "<table class='order'>{}</table>".format('\n'.join(rows))
+        return "<table class='formfields'>{}</table>".format('\n'.join(rows))
 
-class OrderFieldsEdit(tornado.web.UIModule):
-    "HTML for editing the values of order fields."
+class formFieldsEdit(tornado.web.UIModule):
+    "HTML for editing the values of form fields."
 
     def render(self, fields):
         rows = []
@@ -111,4 +111,4 @@ class OrderFieldsEdit(tornado.web.UIModule):
                     td = '[undef]'
                 rows.append("<tr><th>{}</th><td>{}</td><td>{}</td></tr>".\
                         format(th, td, desc))
-        return "<table class='order'>{}</table>".format('\n'.join(rows))
+        return "<table class='formfields'>{}</table>".format('\n'.join(rows))

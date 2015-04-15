@@ -1,0 +1,26 @@
+{# Form page. #}
+{% extends "base.html" %}
+
+{% block content %}
+<table class="fields">
+  <tr>
+    <th>Status</th>
+    <td>{% module Icon(form['status'], label=True) %}</td>
+  </tr>
+  <tr>
+    <th>Fields</th>
+    <td>{% module FormFieldsDisplay(form['fields']) %}</td>
+  </tr>
+</table>
+<p>
+
+<form action="{{ reverse_url('form_edit', form['_id']) }}"
+      method='GET'>
+  {% module Submit('edit', title='Edit form') %}
+</form>
+
+<p>
+
+{% include 'log_table.html' %}
+
+{% end %}

@@ -1,0 +1,36 @@
+{# Forms list page. #}
+{% extends "base.html" %}
+
+{#
+{% block subheader %}
+<form action="{{ reverse_url('form_create') }}" method='GET'>
+  {% module Submit('create', title='Create new form') %}
+</form>
+<p>
+{% end %}
+#}
+
+{% block content %}
+<form action="{{ reverse_url('form_create') }}" method='GET'>
+  {% module Submit('create', title='Create new form') %}
+</form>
+<p>
+<table class="listing">
+  <tr>
+    <th>Form</th>
+    <th>Status</th>
+    <th>Owner</th>
+  </tr>
+{% for form in forms %}
+  <tr>
+    <td>
+      <a href="{{ reverse_url('form', form['iuid']) }}">
+	{{ form['title'] }}
+      </a>
+    </td>
+    <td>{{ form['status'] }}</td>
+    <td>{{ form['owner'] }}</td>
+  </tr>
+{% end %}
+</table>
+{% end %}

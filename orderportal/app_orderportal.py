@@ -21,6 +21,7 @@ from orderportal.requesthandler import RequestHandler
 
 from orderportal.home import *
 from orderportal.user import *
+from orderportal.form import *
 from orderportal.field import *
 from orderportal.order import *
 
@@ -57,7 +58,10 @@ def get_handlers():
             URL(r'/field/([a-zA-Z][a-zA-Z0-9_]*)/edit',
                 FieldEdit, name='field_edit'),
             URL(r'/fields', Fields, name='fields'),
-            # URL(r'/field/([0-9a-f]{32})', Field, name='field'),
+            URL(r'/forms', Forms, name='forms'),
+            URL(r'/form/([0-9a-f]{32})', Form, name='form'),
+            URL(r'/form', FormCreate, name='form_create'),
+            URL(r'/form/([0-9a-f]{32})/edit', FormEdit, name='form_edit'),
             URL(r'/log/([0-9a-f]{32})', Log, name='log'),
             ]
 

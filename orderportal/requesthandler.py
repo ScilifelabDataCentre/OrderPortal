@@ -33,7 +33,9 @@ class RequestHandler(tornado.web.RequestHandler):
         result['settings'] = settings
         result['constants'] = constants
         result['absolute_reverse_url'] = self.absolute_reverse_url
+        result['is_staff'] = self.is_staff()
         result['is_admin'] = self.is_admin()
+        result['error'] = self.get_argument('error', None)
         return result
 
     def set_header_allow(self, **kwargs):

@@ -1,4 +1,4 @@
-"OrderPortal: Field page."
+"OrderPortal: Field pages."
 
 from __future__ import unicode_literals, print_function, absolute_import
 

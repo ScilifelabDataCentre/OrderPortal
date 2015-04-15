@@ -1,0 +1,38 @@
+{# Form create page. #}
+{% extends "base.html" %}
+
+{% block subheader %}
+<div>
+<p class="medium">
+<ol>
+<li> Give a title for the new form.
+<li> Create the form by clicking 'Create'.
+<li> You will be sent to the edit page for the new form.
+</p>
+</div>
+{% end %}
+
+{% block content %}
+<form action="{{ reverse_url('form_create') }}" method='POST'>
+  {% module xsrf_form_html() %}
+
+  <table class="fields">
+    <tr>
+      <th>Title</th>
+      <td>{% module Icon('required') %}</td>
+      <td>
+	<input type="text" name="title" size="60">
+      </td>
+      <td class="description">
+	Brief, descriptive title for the form. It is not required to
+	be unique, but you may want to make it so anyway.
+      </td>
+    </tr>
+
+  </table>
+
+  <p>
+
+  {% module Submit('create', title='Create new form') %}
+</form>
+{% end %}

@@ -23,6 +23,7 @@ HIGH_CHAR = 'ZZZZZZZZ'
 DOCTYPE     = 'orderportal_doctype'
 USER        = 'user'
 FIELD       = 'field'
+FORM        = 'form'
 ORDER       = 'order'
 PUBLICATION = 'publication'
 USER        = 'user'
@@ -59,6 +60,8 @@ ADMIN      = 'admin'
 STAFF      = 'staff'
 STD_ROLE   = USER
 USER_ROLES = frozenset([USER, STAFF, ADMIN])
+# Form status
+FORM_STATUSES = frozenset([PENDING, ENABLED, DISABLED])
 
 # Password
 MIN_PASSWORD_LENGTH = 6
