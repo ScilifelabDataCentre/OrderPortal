@@ -25,6 +25,16 @@
       <td>{% module Icon(form['status'], label=True) %}</td>
     </tr>
     <tr>
+      <th>Description</th>
+      <td></td>
+      <td>
+	<textarea name="description">{{ form.get('description') or '' }}</textarea>
+      </td>
+      <td class="description">
+	Description of the form.
+      </td>
+    </tr>
+    <tr>
       <th>Fields</th>
       <td></td>
       <td>{% module FormFieldsDisplay(form['fields']) %}</td>

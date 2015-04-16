@@ -17,6 +17,35 @@ from orderportal.requesthandler import RequestHandler
 class FormSaver(saver.Saver):
     doctype = constants.FORM
 
+    def add_field(self):
+        identifier = self.rqh.get_argument('identifier')
+        if not constants.ID_RX.match(identifier):
+            raise tornado.web.HTTPError(400, reason='invalid identifier')
+        # XXX recursive needed
+        identifiers = set([f['identifier'] for f in self.doc['fields']])
+        if identifier in identifiers:
+            raise tornado.web.HTTPError(409, reason='identifier already exists')
+        data = dict(identifier=identifier,
+                    label=self.rqh.get_argument('label', None),
+                    type=self.rqh.get_argument('type'),
+                    required=utils.to_bool(self.rqh.get_argument('required')),
+                    restrict_read=utils.to_bool(
+                        self.rqh.get_argument('restrict_read', False)),
+                    restrict_write=utils.to_bool(
+                        self.rqh.get_argument('restrict_write', False)),
+                    description=self.rqh.get_argument('description', None))
+        self.doc['fields'].append(data)
+        self.changed['fields'] = data
+
+    def set_status(self):
+        new = self.rqh.get_argument('status')
+        if new not in constants.FORM_STATUSES:
+            raise tornado.web.HTTPError(400, reason='invalid status')
+        if new == self.doc['status']: return
+        if new not in constants.FORM_TRANSITIONS[self.doc['status']]:
+            raise tornado.web.HTTPError(400, reason='invalid status transition')
+        saver['status'] = new
+
 
 class Forms(RequestHandler):
     "Forms list page."
@@ -54,10 +83,11 @@ class FormCreate(RequestHandler):
 
     @tornado.web.authenticated
     def post(self):
-        self.check_admin()
         self.check_xsrf_cookie()
+        self.check_admin()
         with FormSaver(rqh=self) as saver:
             saver['title'] = self.get_argument('title')
+            saver['description'] = self.get_argument('description')
             saver['fields'] = []
             saver['status'] = constants.PENDING
             saver['owner'] = self.current_user['email']
@@ -70,17 +100,39 @@ class FormEdit(RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
-        self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_edit_form(form)
         self.render('form_edit.html',
                     title="Edit form '{}'".format(form['title']),
                     form=form)
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_admin()
         self.check_xsrf_cookie()
         form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_edit_form(form)
         with FormSaver(doc=form, rqh=self) as saver:
-            saver.update_fields()
+            saver['title'] = self.get_argument('title')
+            saver['description'] = self.get_argument('description')
+        self.see_other(self.reverse_url('form', form['_id']))
+
+
+class FormFieldCreate(RequestHandler):
+    "Page for creating a field in a form."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_edit_form(form)
+        self.render('form_field_create.html',
+                    title="Create field in form '{}'".format(form['title']),
+                    form=form)
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_edit_form(form)
+        with FormSaver(doc=form, rqh=self) as saver:
+            saver.add_field()
         self.see_other(self.reverse_url('form', form['_id']))

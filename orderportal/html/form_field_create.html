@@ -1,0 +1,106 @@
+{# Form field create page. #}
+{% extends "base.html" %}
+
+{% block content %}
+<form action="{{ reverse_url('form_field_create', form['_id']) }}"
+      method='POST'>
+  {% module xsrf_form_html() %}
+
+  <table class="fields">
+    <tr>
+      <th>Identifier</th>
+      <td>{% module Icon('required') %}</td>
+      <td>
+	<input type="text" name="identifier">
+      </td>
+      <td class="description">
+	Unique identifier for the field within the form. Cannot be
+	changed once defined.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Label</th>
+      <td></td>
+      <td>
+	<input type="text" name="label">
+      </td>
+      <td class="description">
+	Label to display for the field in the order. The identifier
+	will be used if this is not provided.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Type</th>
+      <td>{% module Icon('required') %}</td>
+      <td>
+	<select name="type">
+	  {% for type in constants.TYPES %}
+	  <option value="{{ type['value'] }}">{{ type['label'] }}</option>
+	  {% end %}
+	</select>
+      </td>
+      <td class="description">
+	Data type of the field. Cannot be changed once defined.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Required</th>
+      <td></td>
+      <td>
+	<input type="checkbox" name="required" value="yes"> Yes
+      </td>
+      <td class="description">
+	Require that the field must have a value specified in the order.
+	If no value, then the order is incomplete, and cannot be submitted.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Restricted read</th>
+      <td></td>
+      <td>
+	<input type="checkbox" name="restrict_read" value="yes"> Yes
+      </td>
+      <td class="description">
+	The field is restricted to be visible only to staff, not the
+	user.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Restricted write</th>
+      <td></td>
+      <td>
+	<input type="checkbox" name="restrict_write" value="yes"> Yes
+      </td>
+      <td class="description">
+	The field is restricted to be editable only by staff, not the
+	user. It will be visible to the user.
+      </td>
+    </tr>
+
+    <tr>
+      <th>Description</th>
+      <td></td>
+      <td>
+	<textarea name="description"></textarea>
+      </td>
+      <td class="description">
+	Description to display in the order as information to the
+	user.
+      </td>
+    </tr>
+
+  </table>
+
+  {% module Submit('create', title='Create field') %}
+</form>
+
+<form action="{{ reverse_url('form', form['_id']) }}"
+      method='GET'>
+  {% module Submit('cancel') %}
+</form>
+{% end %}

@@ -62,6 +62,9 @@ STD_ROLE   = USER
 USER_ROLES = frozenset([USER, STAFF, ADMIN])
 # Form status
 FORM_STATUSES = frozenset([PENDING, ENABLED, DISABLED])
+FORM_TRANSITONS = {PENDING: (ENABLED, DISABLED),
+                   ENABLED: (DISABLED,),
+                   DISABLED: ()}
 
 # Password
 MIN_PASSWORD_LENGTH = 6

@@ -18,14 +18,6 @@ class FieldSaver(saver.Saver):
     doctype = constants.FIELD
 
 
-class Fields(RequestHandler):
-    "Fields list page."
-
-    def get(self):
-        fields = self.get_all_fields_flattened()
-        self.render('fields.html', title='Fields', fields=fields)
-
-
 class Field(RequestHandler):
     "Field page."
 

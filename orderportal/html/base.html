@@ -44,12 +44,11 @@
       {% if current_user %}
       <div><a href ="{{ reverse_url('search') }}">Search</a></div>
       <div><a href ="{{ reverse_url('orders') }}">Orders</a></div>
-      {% if is_staff %}
-      <div><a href ="{{ reverse_url('users') }}">Users</a></div>
       {% if is_admin %}
       <div><a href ="{{ reverse_url('forms') }}">Forms</a></div>
-      <div><a href ="{{ reverse_url('fields') }}">Fields</a></div>
       {% end %}
+      {% if is_staff %}
+      <div><a href ="{{ reverse_url('users') }}">Users</a></div>
       {% end %}
       {% end %}
       <div><a href ="{{ reverse_url('reset') }}">Reset</a></div>
