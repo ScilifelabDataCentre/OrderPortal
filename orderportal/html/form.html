@@ -14,11 +14,34 @@
   <tr>
     <th>Fields</th>
     <td>
-      <form action="{{ reverse_url('form_field_create', form['_id']) }}"
+      <table class="formfields">
+	<tr>
+	  <th>Identifier</th>
+	  <th>Label</th>
+	  <th>Type</th>
+	  <th></th>
+	  <th>Restricted read</th>
+	  <th>Restricted write</th>
+	  <th>Description</th>
+	</tr>
+	{% for field in fields %}
+	<tr>
+	  <td>{{ '&nbsp;'*field['depth'] }}{{ field['identifier'] }}</td>
+	  <td>{{ field.get('label') or '-' }}</td>
+	  <td>{{ field['type'] }}</td>
+	  <td>
+	    {% if field['required'] %}{% module Icon('required') %}{% end %}
+	  </td>
+	  <td>{{ field['restrict_read'] }}</td>
+	  <td>{{ field['restrict_write'] }}</td>
+	  <td>{{ field.get('description') or '-' }}</td>
+	</tr>
+	{% end %}
+      </table>
+      <form action="{{ reverse_url('field_create', form['_id']) }}"
 	    method='GET'>
-	{% module Submit('create', title='Create form field') %}
+	{% module Submit('create', title='Create field') %}
       </form>
-      {% module FormFieldsDisplay(form['fields']) %}
     </td>
   </tr>
 </table>

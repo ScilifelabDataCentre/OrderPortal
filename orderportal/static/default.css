@@ -133,9 +133,11 @@ table.listing tr th {text-align: left;
 
 table.listing tr td {padding-right: 1em; }
 
-table.formfields {padding-left: 2em; }
-
 table.formfields tr th {text-align: left;
+			padding-right: 0.5em;
+		       }
+
+table.formfields tr td {text-align: left;
 			padding-right: 0.5em;
 		       }
 

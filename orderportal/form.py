@@ -11,6 +11,7 @@ from orderportal import constants
 from orderportal import settings
 from orderportal import utils
 from orderportal import saver
+from orderportal.fields import Fields
 from orderportal.requesthandler import RequestHandler
 
 
@@ -21,21 +22,10 @@ class FormSaver(saver.Saver):
         identifier = self.rqh.get_argument('identifier')
         if not constants.ID_RX.match(identifier):
             raise tornado.web.HTTPError(400, reason='invalid identifier')
-        # XXX recursive needed
-        identifiers = set([f['identifier'] for f in self.doc['fields']])
-        if identifier in identifiers:
+        fields = Fields(self.doc)
+        if identifier in fields:
             raise tornado.web.HTTPError(409, reason='identifier already exists')
-        data = dict(identifier=identifier,
-                    label=self.rqh.get_argument('label', None),
-                    type=self.rqh.get_argument('type'),
-                    required=utils.to_bool(self.rqh.get_argument('required')),
-                    restrict_read=utils.to_bool(
-                        self.rqh.get_argument('restrict_read', False)),
-                    restrict_write=utils.to_bool(
-                        self.rqh.get_argument('restrict_write', False)),
-                    description=self.rqh.get_argument('description', None))
-        self.doc['fields'].append(data)
-        self.changed['fields'] = data
+        self.changed['fields'] = fields.add(identifier, self.rqh)
 
     def set_status(self):
         new = self.rqh.get_argument('status')
@@ -69,6 +59,7 @@ class Form(RequestHandler):
         self.render('form.html',
                     title="Form '{}'".format(form['title']),
                     form=form,
+                    fields=Fields(form),
                     logs=self.get_logs(form['_id']))
 
 
@@ -124,9 +115,10 @@ class FormFieldCreate(RequestHandler):
     def get(self, iuid):
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.check_edit_form(form)
-        self.render('form_field_create.html',
+        self.render('field_create.html',
                     title="Create field in form '{}'".format(form['title']),
-                    form=form)
+                    form=form,
+                    fields=Fields(form))
 
     @tornado.web.authenticated
     def post(self, iuid):

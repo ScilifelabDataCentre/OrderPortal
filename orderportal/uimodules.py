@@ -9,6 +9,7 @@ from . import constants
 
 ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""
 
+
 class IconMixin(object):
 
     def get_icon(self, name, title=None, label=False):
@@ -73,42 +74,38 @@ class Entity(tornado.web.UIModule):
             url=url, icon=icon, title=title)
 
 
-class FormFieldsDisplay(tornado.web.UIModule):
-    "HTML for displaying form fields in a hierarchical fashion."
+# class FormFieldsDisplay(tornado.web.UIModule):
+#     "HTML for displaying the fields of a form."
 
-    def render(self, fields):
-        rows = []
-        for field in fields:
-            th = field.get('label') or field['identifier']
-            desc = field.get('description' or '-')
-            if field['type'] == 'group':
-                rows.append('<tr><th colspan="2"><h3>{}</h3></th><td>{}</td></tr>'.format(th, desc))
-                td = self.render(field['__children__'])
-                rows.append('<tr><td colspan="3">{}</td></tr>'.format(td))
-            else:
-                value = field.get('value') or '-'
-                rows.append("<tr><th>{}</th><td>{}</td><td>{}</td></tr>".format(th, value, desc))
-        return "<table class='formfields'>{}</table>".format('\n'.join(rows))
+#     def render(self, fields):
+#         rows = []
+#         for field in fields:
+#             rows.append("<tr><th>{}</th><td>{}</td><td>{}</td></tr>".format(
+#                     field.get('label') or field['identifier'],
+#                     field['type'],
+#                     field.get('description' or '-')))
+#         return "<table class='formfields'>{}</table>".format('\n'.join(rows))
 
-class formFieldsEdit(tornado.web.UIModule):
-    "HTML for editing the values of form fields."
 
-    def render(self, fields):
-        rows = []
-        for field in fields:
-            th = field.get('label') or field['identifier']
-            desc = field.get('description' or '-')
-            if field['type'] == constants.GROUP['value']:
-                rows.append('<tr><th colspan="2"><h3>{}</h3></th><td>{}</td></tr>'.format(th, desc))
-                td = self.render(field['__children__'])
-                rows.append('<tr><td colspan="3">{}</td></tr>'.format(td))
-            else:
-                value = field.get('value') or ''
-                if field['type'] == constants.STRING['value']:
-                    td = """<input type="text" name="{}" value="{}">""".\
-                        format(field['identifier'], value)
-                else:
-                    td = '[undef]'
-                rows.append("<tr><th>{}</th><td>{}</td><td>{}</td></tr>".\
-                        format(th, td, desc))
-        return "<table class='formfields'>{}</table>".format('\n'.join(rows))
+# class FormFieldsEdit(tornado.web.UIModule):
+#     "HTML for editing the values of form fields."
+
+#     def render(self, fields):
+#         rows = []
+#         for field in fields:
+#             th = field.get('label') or field['identifier']
+#             desc = field.get('description' or '-')
+#             if field['type'] == constants.GROUP['value']:
+#                 rows.append('<tr><th colspan="2"><h3>{}</h3></th><td>{}</td></tr>'.format(th, desc))
+#                 td = self.render(field['__children__'])
+#                 rows.append('<tr><td colspan="3">{}</td></tr>'.format(td))
+#             else:
+#                 value = field.get('value') or ''
+#                 if field['type'] == constants.STRING['value']:
+#                     td = """<input type="text" name="{}" value="{}">""".\
+#                         format(field['identifier'], value)
+#                 else:
+#                     td = '[undef]'
+#                 rows.append("<tr><th>{}</th><td>{}</td><td>{}</td></tr>".\
+#                         format(th, td, desc))
+#         return "<table class='formfields'>{}</table>".format('\n'.join(rows))
