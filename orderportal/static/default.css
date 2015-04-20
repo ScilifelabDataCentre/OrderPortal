@@ -45,7 +45,7 @@ textarea.large {height: 16em; }
 
 .subheader {font-size: medium; }
 .subheader a {font-size: medium; }
-p.subheader {margin-left: 100px; }
+p.subheader {margin-left: 50px; }
 ol.subheader li {font-size: medium;
 		 padding-top: 0.5em;
 		}

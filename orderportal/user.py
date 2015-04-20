@@ -15,12 +15,6 @@ from orderportal.requesthandler import RequestHandler
 class UserSaver(saver.Saver):
     doctype = constants.USER
 
-    def set_email(self, email):
-        view = self.db.view('user/email')
-        if len(list(view[email])) != 0:
-            raise ValueError('email address already in use')
-        self['email'] = email
-
     def erase_password(self):
         self['password'] = None
 
@@ -63,6 +57,32 @@ class User(RequestHandler):
                     title="User {0}".format(user['email']),
                     user=user,
                     logs=self.get_logs(user['_id']))
+
+
+class UserEdit(RequestHandler):
+    "Page for editing user information."
+
+    @tornado.web.authenticated
+    def get(self, email):
+        user = self.get_user(email)
+        self.check_owner_or_staff(user)
+        self.render('user_edit.html',
+                    title="Edit user '{}'".format(user['email']),
+                    user=user)
+
+    @tornado.web.authenticated
+    def post(self, email):
+        self.check_xsrf_cookie()
+        user = self.get_user(email)
+        self.check_owner_or_staff(user)
+        with UserSaver(doc=user, rqh=self) as saver:
+            saver['first_name'] = self.get_argument('first_name')
+            saver['last_name'] = self.get_argument('last_name')
+            saver['university'] = self.get_argument('university')
+            saver['department'] = self.get_argument('department', default=None)
+            saver['address'] = self.get_argument('address', default=None)
+            saver['phone'] = self.get_argument('phone', default=None)
+        self.see_other(self.reverse_url('user', email))
 
 
 class Login(RequestHandler):
@@ -164,8 +184,7 @@ class Register(RequestHandler):
         self.check_xsrf_cookie()
         with UserSaver(rqh=self) as saver:
             try:
-                key = 'email'
-                email = self.get_argument(key)
+                email = self.get_argument('email')
                 if not email: raise ValueError
                 if not constants.EMAIL_RX.match(email): raise ValueError
                 try:
@@ -175,16 +194,16 @@ class Register(RequestHandler):
                 else:
                     reason = 'email address already in use'
                     raise tornado.web.HTTPError(409, reason=reason)
-                saver[key] = email
-                for key in ['first_name', 'last_name', 'university']:
-                    value = self.get_argument(key)
-                    if not value: raise ValueError
-                    saver[key] = value
+                saver['email'] = email
+                saver['first_name'] = self.get_argument('first_name')
+                saver['last_name'] = self.get_argument('last_name')
+                saver['university'] = self.get_argument('university')
             except (tornado.web.MissingArgumentError, ValueError):
                 reason = "invalid {} value provided".format(key)
                 raise tornado.web.HTTPError(400, reason=reason)
-            for key in ['department', 'address', 'phone']:
-                saver[key] = self.get_argument(key, default=None)
+            saver['department'] = self.get_argument('department', default=None)
+            saver['address'] = self.get_argument('address', default=None)
+            saver['phone'] = self.get_argument('phone', default=None)
             saver['owner'] = email
             saver['role'] = constants.USER
             saver['status'] = constants.PENDING

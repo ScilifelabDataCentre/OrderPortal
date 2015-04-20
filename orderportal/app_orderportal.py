@@ -43,7 +43,7 @@ def get_handlers():
             # URL(r'/order/([0-9a-f]{32})/log', OrderLog, name='order_log'),
             URL(r'/users', Users, name='users'),
             URL(r'/user/([^/]+)', User, name='user'),
-            # URL(r'/user/([^/]+)/edit', UserEdit, name='user_edit'),
+            URL(r'/user/([^/]+)/edit', UserEdit, name='user_edit'),
             URL(r'/login', Login, name='login'),
             URL(r'/logout', Logout, name='logout'),
             URL(r'/reset', Reset, name='reset'),

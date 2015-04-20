@@ -2,8 +2,8 @@
 {% extends "base.html" %}
 
 {% block subheader %}
-<p class="medium">
-User dashboard.
+<p class="subheader">
+[User dashboard]
 </p>
 {% end %}
 
@@ -12,7 +12,4 @@ User dashboard.
   {% module xsrf_form_html() %}
   {% module Submit('logout') %}
 </form>
-{% end %}
-
-{% block content %}
 {% end %}

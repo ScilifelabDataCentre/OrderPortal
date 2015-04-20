@@ -8,7 +8,7 @@
   {% module FormFieldsEdit(order['fields']) %}
   <p>
 
-  {% module Submit('save', title='Save edited order') %}
+  {% module Submit('save') %}
 </form>
 
 <form action="{{ reverse_url('order', order['_id']) }}"

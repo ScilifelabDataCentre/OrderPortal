@@ -1,0 +1,81 @@
+{# User edit page. #}
+{% extends "base.html" %}
+
+{% block content %}
+<form action="{{ reverse_url('user_edit', user['email']) }}"
+      method='POST'>
+  {% module xsrf_form_html() %}
+  <table class="fields">
+    <tr>
+      <th>First name</th>
+      <td>{% module Icon('required') %}</td>
+      <td>
+	<input type="text" name="first_name"
+	       value="{{ user.get('first_name') or '' }}">
+      </td>
+      <td class="description">
+      </td>
+    </tr>
+    <tr>
+      <th>Last name</th>
+      <td>{% module Icon('required') %}</td>
+      <td>
+	<input type="text" name="last_name"
+	       value="{{ user.get('last_name') or '' }}">
+      </td>
+      <td class="description">
+      </td>
+    </tr>
+    <tr>
+      <th>University</th>
+      <td>{% module Icon('required') %}</td>
+      <td>
+	<input type="text" name="university"
+	       value="{{ user.get('university') or '' }}">
+      </td>
+      <td class="description">
+	Your main affiliation; university, institute, company, or similar.
+      </td>
+    </tr>
+    <tr>
+      <th>Department</th>
+      <td></td>
+      <td>
+	<input type="text" name="department"
+	       value="{{ user.get('department') or '' }}">
+      </td>
+      <td class="description">
+	Your department at the university; section, group, or similar.
+      </td>
+    </tr>
+    <tr>
+      <th>Address</th>
+      <td></td>
+      <td>
+	<textarea class="thin" name="address">{{ user.get('address') or '' }}</textarea>
+      </td>
+      <td class="description">
+	Postal address for delivery of contracts, return samples, etc.
+      </td>
+    </tr>
+    <tr>
+      <th>Phone</th>
+      <td></td>
+      <td>
+	<input type="text" name="phone"
+	       value="{{ user.get('phone') or '' }}">
+      </td>
+      <td class="description">
+	Phone number, including the country prefix (e.g. +46 for Sweden).
+      </td>
+    </tr>
+  </table>
+
+  {% module Submit('save') %}
+</form>
+
+<form action="{{ reverse_url('user', user['email']) }}"
+      method='GET'>
+  {% module Submit('cancel') %}
+</form>
+{% end %}
