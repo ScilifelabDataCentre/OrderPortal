@@ -141,7 +141,13 @@ table.formfields tr td {text-align: left;
 			padding-right: 0.5em;
 		       }
 
-table.order tr td {}
+table.order tr th {text-align: right; }
+table.order tr th.group {text-align: left;
+			 margin-left: 1em;
+			 padding-top: 1em;
+			}
+table.order tr th.depth0 {font-size: large; }
+table.order tr th.depth1 {font-size: medium; }
 
 table.log th {text-align: left;
 	     border-bottom-style: solid;

@@ -1,0 +1,84 @@
+# OrderPortal order status definitions and transitions
+
+statuses:
+  preparation: The order has been created and may have been edited.
+
+  submitted: The order has been submitted by the user for consideration by the facility.
+
+  review: The order is under review by the facility.
+
+  accepted: The order has been checked and accepted by the facility.
+
+  rejected: The order has been rejected by the facility.
+
+  pending: The facility is awaiting further input from the user. (= Zendesk 'On Hold')
+
+  queued: The facility has placed the order in its work queue.
+
+  working: The facility is working on the order, in the lab or in data analysis.
+
+  waiting: Work has paused, for some reason.
+
+  cancelled: The work on the order has been permanently stopped by the user.
+
+  aborted: The work on the order has been permanently stopped by the facility.
+
+  finished: The facility has finished working on the order.
+
+  delivered: The results of the order have been delivered to the user.
+
+  invoiced: The user has been invoiced for the order.
+
+  closed: All work and other actions for the order have been performed.
+
+  archived: The order and its data have been archived and cannot be changed.
+
+transitions:
+  - source: null
+    target: [preparation]
+    permission: user
+
+  - source: preparation
+    target: null
+    permission: user
+
+  - source: preparation
+    target: [submitted]
+    permission: user
+    require: valid
+
+  - source: submitted
+    target: [review, accepted, rejected, pending]
+    permission: staff
+
+  - source: review
+    target: [accepted, rejected, pending]
+    permission: staff
+
+  - source: accepted
+    target: [pending, queued, working, waiting]
+    permission: staff
+
+  - source: rejected
+    target: [preparation, null]
+    permission: user
+
+  - source: pending
+    target: [queued, working, waiting]
+    permission: staff
+
+  - source: queued
+    target: [working, waiting]
+    permission: staff
+
+  - source: working
+    target: [waiting, aborted, finished]
+    permission: staff
+
+  - source: waiting
+    target: [working, aborted, finished]
+    permission: staff
+
+  - source: finished
+    target: [delivered]
+    permission: staff

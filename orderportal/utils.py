@@ -89,6 +89,10 @@ def load_settings(filepath=None, verbose=False):
     except KeyError:
         pass
     logging.basicConfig(**kwargs)
+    # Read order state definitions and transitions
+    data = yaml.safe_load(open(settings['ORDER_STATUS_FILENAME']))
+    settings['ORDER_STATUSES'] = data['statuses']
+    settings['ORDER_TRANSITIONS'] = data['transitions']
     # Check settings
     for key in ['BASE_URL', 'DB_SERVER', 'COOKIE_SECRET', 'DATABASE']:
         if key not in settings:

@@ -22,10 +22,26 @@ class FormSaver(saver.Saver):
         identifier = self.rqh.get_argument('identifier')
         if not constants.ID_RX.match(identifier):
             raise tornado.web.HTTPError(400, reason='invalid identifier')
+        if self.rqh.get_argument('type') not in constants.TYPES_SET:
+            raise tornado.web.HTTPError(400, reason='invalid type')
         fields = Fields(self.doc)
         if identifier in fields:
             raise tornado.web.HTTPError(409, reason='identifier already exists')
         self.changed['fields'] = fields.add(identifier, self.rqh)
+
+    def update_field(self, identifier):
+        fields = Fields(self.doc)
+        if identifier not in fields:
+            raise tornado.web.HTTPError(404, reason='no such field')
+        self.changed['fields'] = fields.update(identifier, self.rqh)
+
+    def delete_field(self, identifier):
+        fields = Fields(self.doc)
+        if identifier not in fields:
+            raise tornado.web.HTTPError(404, reason='no such field')
+        fields.delete(identifier)
+        self.changed['fields'] = dict(identifier=identifier,
+                                      action='deleted')
 
     def set_status(self):
         new = self.rqh.get_argument('status')
@@ -127,4 +143,44 @@ class FormFieldCreate(RequestHandler):
         self.check_edit_form(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.add_field()
+        self.see_other(self.reverse_url('form', form['_id']))
+
+
+class FormFieldEdit(RequestHandler):
+    "Page for editing or deleting a field in a form."
+
+    @tornado.web.authenticated
+    def get(self, iuid, identifier):
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_edit_form(form)
+        fields = Fields(form)
+        try:
+            field = fields[identifier]
+        except KeyError:
+            raise tornado.web.HTTPError(404, reason='no such field')
+        self.render('field_edit.html',
+                    title="Edit field '{}' in form '{}'".format(identifier,
+                                                                form['title']),
+                    form=form,
+                    field=field)
+
+    @tornado.web.authenticated
+    def post(self, iuid, identifier):
+        if self.get_argument('_http_method', None) == 'delete':
+            self.delete(iuid, identifier)
+            return
+        self.check_xsrf_cookie()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_edit_form(form)
+        with FormSaver(doc=form, rqh=self) as saver:
+            saver.update_field(identifier)
+        self.see_other(self.reverse_url('form', form['_id']))
+
+    @tornado.web.authenticated
+    def delete(self, iuid, identifier):
+        self.check_xsrf_cookie()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_edit_form(form)
+        with FormSaver(doc=form, rqh=self) as saver:
+            saver.delete_field(identifier)
         self.see_other(self.reverse_url('form', form['_id']))

@@ -1,12 +1,6 @@
 {# Field create page. #}
 {% extends "base.html" %}
 
-{% block subheader %}
-<p class="medium">
-Define a new field and create it.
-</p>
-{% end %}
-
 {% block content %}
 <form action="{{ reverse_url('field_create', form['_id']) }}" method='POST'>
   {% module xsrf_form_html() %}
@@ -19,14 +13,14 @@ Define a new field and create it.
 	<select name="group">
 	  <option value="__none__">[top level]</option>
 	  {% for field in fields %}
-	  {% if field['type'] == constants.GROUP %}
-	  <option>{{ field['identifier'] }}</option>
-	  {% end %}
+	    {% if field['type'] == constants.GROUP['value'] %}
+	      <option>{{ field['identifier'] }}</option>
+	    {% end %}
 	  {% end %}
 	</select>
       </td>
       <td class="description">
-	Unique identifier for the field. Cannot be changed once defined.
+	Unique identifier of the field. Cannot be changed once defined.
       </td>
     </tr>
 

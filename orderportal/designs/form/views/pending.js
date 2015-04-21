@@ -1,6 +1,6 @@
 /* OrderPortal
-   Form documents with 'pending' status indexed by email address.
-   Value: null.
+   Form documents with 'pending' status indexed by modified time stamp.
+   Value: title.
 */
 function(doc) {
     if (doc.orderportal_doctype !== 'form') return;

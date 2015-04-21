@@ -26,7 +26,8 @@
 	</tr>
 	{% for field in fields %}
 	<tr>
-	  <td>{{ '&nbsp;'*field['depth'] }}{{ field['identifier'] }}</td>
+	  <td>{% raw '-&nbsp;'*field['depth'] %}
+	    <a href="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}">{{ field['identifier'] }}</a></td>
 	  <td>{{ field.get('label') or '-' }}</td>
 	  <td>{{ field['type'] }}</td>
 	  <td>

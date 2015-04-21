@@ -91,7 +91,6 @@ class RequestHandler(tornado.web.RequestHandler):
     def get_current_user(self):
         "Get the currently logged-in user, if any."
         email = self.get_secure_cookie(constants.USER_COOKIE)
-        logging.debug("secure cookie user: %s", email)
         if not email:
             return None
         try:

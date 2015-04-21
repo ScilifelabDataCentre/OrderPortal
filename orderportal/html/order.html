@@ -2,8 +2,42 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% module FormFieldsDisplay(order['fields']) %}
-<p>
+<table class="order">
+
+  <tr>
+    <th>Status</th>
+    <td>{% module Icon('required') %}</td>
+    <td>{% module Icon(order['status'], label=True) %}</td>
+    <td>{{ settings['ORDER_STATUSES'][order['status']] }}</td>
+  </tr>
+
+  <tr>
+    <th>Owner</th>
+    <td>{% module Icon('required') %}</td>
+    <td>
+      <a href="{{ reverse_url('user', order['owner']) }}">
+	{{ order['owner'] }}
+      </a>
+    </td>
+    <td></td>
+  </tr>
+
+  {% for field in fields %}
+  <tr>
+    {% if field['type'] == 'group' %}
+    <th class="group depth{{ field['depth'] }}" colspan="3">
+      {{ field.get('label') or field['identifier'] }}
+    </th>
+    {% else %}
+    <th>{{ field.get('label') or field['identifier'] }}</th>
+    <td>{% if field['required'] %}{% module Icon('required') %}{% end %}</td>
+    <td>{{ order['fields'][field['identifier']] or '-' }}</td>
+    <td>{{ field.get('description') or '-' }}</td>
+    {% end %}
+  </tr>
+  {% end %}
+
+</table>
 
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
       method='GET'>

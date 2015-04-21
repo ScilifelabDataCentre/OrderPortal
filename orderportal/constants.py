@@ -50,7 +50,7 @@ FALSE = frozenset(['false', 'no', 'f', 'n', '0'])
 USER_COOKIE    = 'orderportal_user'
 API_KEY_HEADER = 'X-Orderportal-Api-Key'
 TOKEN_HEADER   = 'X-Orderportal-Token'
-# User status
+# User states
 PENDING       = 'pending'
 ENABLED       = 'enabled'
 DISABLED      = 'disabled'
@@ -60,11 +60,15 @@ ADMIN      = 'admin'
 STAFF      = 'staff'
 STD_ROLE   = USER
 USER_ROLES = frozenset([USER, STAFF, ADMIN])
-# Form status
+# Form states
 FORM_STATUSES = frozenset([PENDING, ENABLED, DISABLED])
 FORM_TRANSITONS = {PENDING: (ENABLED, DISABLED),
                    ENABLED: (DISABLED,),
                    DISABLED: ()}
+
+# To be filled in from separate YAML file
+ORDER_STATES = {}
+ORDER_TRANSITIONS = {}
 
 # Password
 MIN_PASSWORD_LENGTH = 6

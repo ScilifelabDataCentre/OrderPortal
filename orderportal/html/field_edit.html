@@ -1,24 +1,19 @@
 {# Field edit page. #}
 {% extends "base.html" %}
 
-{% block subheader %}
-<p class="medium">
-Edit an existing field.
-</p>
-{% end %}
-
 {% block content %}
-<form action="{{ reverse_url('field_edit', field['identifier']) }}"
+<form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
       method='POST'>
   {% module xsrf_form_html() %}
 
   <table class="fields">
+
     <tr>
       <th>Identifier</th>
       <td>{% module Icon('required') %}</td>
       <td>{{ field['identifier'] }}</td>
       <td class="description">
-	Unique identifier for the field. Cannot be changed.
+	Unique identifier of the field. Cannot be changed.
       </td>
     </tr>
 
@@ -26,10 +21,12 @@ Edit an existing field.
       <th>Label</th>
       <td></td>
       <td>
-	<input type="text" name="label" value="{{ field.get('label') or '' }}">
+	<input type="text" name="label"
+	       value="{{ field.get('label') or '' }}">
       </td>
       <td class="description">
-	Label to show for the field in the order form. May be edited later.
+	Label to display for the field in the order form. The
+	identifier will be used if this is not provided.
       </td>
     </tr>
 
@@ -42,29 +39,14 @@ Edit an existing field.
       </td>
     </tr>
 
-    {% if field['type'] == 'select' %}
-    <tr>
-      <th>Options</th>
-      <td></td>
-      <td>
-	<textarea class="thin" name='options'>{{ '\n'.join(field.get('options') or []) }}</textarea>
-      </td>
-      <td class="description">
-	Option values for the select field. Provide one value per line.
-	If none are given, then no value can be selected for this field,
-	which is probably an error.
-      </td>
-    </tr>
-    {% end %}
-
     <tr>
       <th>Required</th>
       <td></td>
       <td>
-	{% if field.get('required') %}
-	<input type="checkbox" name="required" value="yes" checked> Yes
+	{% if field['required'] %}
+	  <input type="checkbox" name="required" value="yes" checked> Yes
 	{% else %}
-	<input type="checkbox" name="required" value="yes"> Yes
+	  <input type="checkbox" name="required" value="yes"> Yes
 	{% end %}
       </td>
       <td class="description">
@@ -77,10 +59,10 @@ Edit an existing field.
       <th>Restricted read</th>
       <td></td>
       <td>
-	{% if field.get('restrict_read') %}
-	<input type="checkbox" name="restrict_read" value="yes" checked> Yes
+	{% if field['restrict_read'] %}
+	  <input type="checkbox" name="restrict_read" value="yes" checked> Yes
 	{% else %}
-	<input type="checkbox" name="restrict_read" value="yes"> Yes
+	  <input type="checkbox" name="restrict_read" value="yes"> Yes
 	{% end %}
       </td>
       <td class="description">
@@ -92,10 +74,10 @@ Edit an existing field.
       <th>Restricted write</th>
       <td></td>
       <td>
-	{% if field.get('restrict_write') %}
-	<input type="checkbox" name="restrict_write" value="yes" checked> Yes
+	{% if field['restrict_write'] %}
+	  <input type="checkbox" name="restrict_write" value="yes" checked> Yes
 	{% else %}
-	<input type="checkbox" name="restrict_write" value="yes"> Yes
+	  <input type="checkbox" name="restrict_write" value="yes"> Yes
 	{% end %}
       </td>
       <td class="description">
@@ -104,45 +86,10 @@ Edit an existing field.
     </tr>
 
     <tr>
-      <th>Parent</th>
-      <td></td>
-      <td>
-	<select name="parent">
-	  <option value="__top__">[top-level]</option>
-	  {% for f in fields %}
-	    {% if f['identifier'] == field.get('parent') %}
-	      <option value="{{ f['identifier'] }}" selected>
-	    {% else %}
-	      <option value="{{ f['identifier'] }}">
-	    {% end %}
-	    {% raw '&nbsp;' * f['__level__'] %}
-	    {{ f['label'] }}
-	    ({{ f['identifier'] }})
-	  </option>
-	  {% end %}
-	 </select>
-      </td>
-      <td class="description">
-	The field which this field is grouped under.
-      </td>
-    </tr>
-
-    <tr>
-      <th>Position</th>
-      <td></td>
-      <td>
-	<input type="text" name="position" value="{{ field['position'] }}">
-      </td>
-      <td class="description">
-	Position of field relative to other fields with the same parent.
-      </td>
-    </tr>
-
-    <tr>
       <th>Description</th>
       <td></td>
       <td>
-	<textarea name="description">{{ field.get('description') or '' }}</textarea>
+	<textarea name="description"></textarea>
       </td>
       <td class="description">
 	Description to display in the order as information to the user.
@@ -155,7 +102,15 @@ Edit an existing field.
 
   {% module Submit('save') %}
 </form>
-<form action="{{ reverse_url('field', field['identifier']) }}"
+
+<form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
+      method='POST'>
+  {% module xsrf_form_html() %}
+  <input type="hidden" name="_http_method" value="delete">
+  {% module Submit('delete', onclick="return confirm('Delete cannot be undone; really delete?');") %}
+</form>
+<p>
+<form action="{{ reverse_url('form', form['_id']) }}"
       method='GET'>
   {% module Submit('cancel') %}
 </form>

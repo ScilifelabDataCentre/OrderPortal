@@ -20,6 +20,7 @@
     <th>Form</th>
     <th>Status</th>
     <th>Owner</th>
+    <th>Modified</th>
   </tr>
 {% for form in forms %}
   <tr>
@@ -28,8 +29,11 @@
 	{{ form['title'] }}
       </a>
     </td>
-    <td>{{ form['status'] }}</td>
-    <td>{{ form['owner'] }}</td>
+    <td>{% module Icon(form['status'], label=True) %}</td>
+    <td>
+      <a href="{{ reverse_url('user', form['owner']) }}">{{ form['owner'] }}</a>
+    </td>
+    <td class="localtime">{{ form['modified'] }}</td>
   </tr>
 {% end %}
 </table>

@@ -2,25 +2,47 @@
 {% extends "base.html" %}
 
 {% block subheader %}
-<form action="{{ reverse_url('order_create') }}" method='GET'>
-  {% module Submit('create', title='Create new order') %}
-</form>
+<table class="listing">
+  <tr>
+    <th>Form</th>
+    <th>Description</th>
+  </tr>
+  {% for form in forms %}
+  <tr>
+    <td>
+      {% if is_admin %}
+      <a href="{{ reverse_url('form', form['iuid']) }}">{{ form['title'] }}</a>
+      {% else %}
+      {{ form['title'] }}
+      {% end %}
+    </td>
+    <td>{{ form['description'] }}</td>
+    <td>
+      <form action="{{ reverse_url('order_create') }}" method='POST'>
+	{% module xsrf_form_html() %}
+	<input type="hidden" name="form" value="{{ form['iuid'] }}">
+	{% module Submit('create', title='Create new order') %}
+      </form>
+    </td>
+  </tr>
+  {% end %}
+</table>
 <p>
 {% end %}
 
 {% block content %}
 <table class="listing">
   <tr>
-    <th>Link</th>
+    <th>Order</th>
+    <th>Modified</th>
     <th>Owner</th>
   </tr>
 {% for order in orders %}
   <tr>
     <td>
-      <a href="{{ reverse_url('order', order['iuid']) }}">
-	{{ order['iuid'] }}
-      </a>
+      <a href="{{ reverse_url('order', order['iuid']) }}">{{ order['iuid'] }}</a>
     </td>
+    <td class="localtime">{{ order['modified'] }}</td>
     <td>{{ order['owner'] }}</td>
   </tr>
 {% end %}
