@@ -1,84 +1,120 @@
 # OrderPortal order status definitions and transitions
 
 statuses:
-  preparation: The order has been created and may have been edited.
+  preparation:
+    identifier: preparation
+    initial: true
+    description:  The order has been created and is being edited by the user.
+    edit: [user, staff]
 
-  submitted: The order has been submitted by the user for consideration by the facility.
+  submitted:
+    identifier: submitted
+    label: Submit
+    description: The order has been submitted by the user for consideration by the facility.
 
-  review: The order is under review by the facility.
+  review:
+    identifier: review
+    description: The order is under review by the facility.
+    edit: [staff]
 
-  accepted: The order has been checked and accepted by the facility.
+  accepted:
+    identifier: accepted
+    description: The order has been checked and accepted by the facility.
 
-  rejected: The order has been rejected by the facility.
+  rejected:
+    identifier: rejected
+    description: The order has been rejected by the facility.
 
-  pending: The facility is awaiting further input from the user. (= Zendesk 'On Hold')
+  pending:
+    identifier: pending
+    description: The facility is awaiting further input from the user. (= Zendesk 'On Hold')
 
-  queued: The facility has placed the order in its work queue.
+  queued:
+    identifier: queued
+    description: The facility has placed the order in its work queue.
 
-  working: The facility is working on the order, in the lab or in data analysis.
+  working:
+    identifier: working
+    description: The facility is working on the order, in the lab or in data analysis.
 
-  waiting: Work has paused, for some reason.
+  waiting:
+    identifier: waiting
+    description: Work has paused, for some reason.
 
-  cancelled: The work on the order has been permanently stopped by the user.
+  cancelled:
+    identifier: cancelled
+    description: The work on the order has been permanently stopped by the user.
 
-  aborted: The work on the order has been permanently stopped by the facility.
+  aborted:
+    identifier: aborted
+    description: The work on the order has been permanently stopped by the facility.
 
-  finished: The facility has finished working on the order.
+  finished:
+    identifier: finished
+    description: The facility has finished working on the order.
 
-  delivered: The results of the order have been delivered to the user.
+  delivered:
+    identifier: delivered
+    description: The results of the order have been delivered to the user.
 
-  invoiced: The user has been invoiced for the order.
+  invoiced:
+    identifier: invoiced
+    description: The user has been invoiced for the order.
 
-  closed: All work and other actions for the order have been performed.
+  closed:
+    identifier: closed
+    description: All work and other actions for the order have been performed.
 
-  archived: The order and its data have been archived and cannot be changed.
+  archived:
+    identifier: archived
+    description: The order and its data have been archived and cannot be changed.
 
 transitions:
   - source: null
-    target: [preparation]
+    targets: [preparation]
     permission: user
 
   - source: preparation
-    target: null
+    targets: []
     permission: user
 
   - source: preparation
-    target: [submitted]
+    targets: [submitted]
     permission: user
     require: valid
 
   - source: submitted
-    target: [review, accepted, rejected, pending]
+    targets: [review, accepted, rejected, pending]
     permission: staff
 
   - source: review
-    target: [accepted, rejected, pending]
+    targets: [accepted, rejected, pending]
     permission: staff
 
   - source: accepted
-    target: [pending, queued, working, waiting]
+    targets: [pending, queued, working, waiting]
     permission: staff
 
   - source: rejected
-    target: [preparation, null]
+    targets: [preparation]
     permission: user
 
   - source: pending
-    target: [queued, working, waiting]
+    targets: [queued, working, waiting]
     permission: staff
 
   - source: queued
-    target: [working, waiting]
+    targets: [working, waiting]
     permission: staff
 
   - source: working
-    target: [waiting, aborted, finished]
+    targets: [waiting, aborted, finished]
     permission: staff
 
   - source: waiting
-    target: [working, aborted, finished]
+    targets: [working, aborted, finished]
     permission: staff
 
   - source: finished
-    target: [delivered]
+    targets: [delivered]
     permission: staff

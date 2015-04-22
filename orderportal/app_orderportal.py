@@ -22,7 +22,6 @@ from orderportal.requesthandler import RequestHandler
 from orderportal.home import *
 from orderportal.user import *
 from orderportal.form import *
-# from orderportal.field import *
 from orderportal.order import *
 
 
@@ -39,6 +38,8 @@ def get_handlers():
             URL(r'/order/([0-9a-f]{32})', Order, name='order'),
             URL(r'/order', OrderCreate, name='order_create'),
             URL(r'/order/([0-9a-f]{32})/edit', OrderEdit, name='order_edit'),
+            URL(r'/order/([0-9a-f]{32})/transition/(\w+)',
+                Dummy, name='order_transition'),
             # URL(r'/order/([0-9a-f]{32})/copy', OrderCopy, name='order_copy'),
             # URL(r'/order/([0-9a-f]{32})/log', OrderLog, name='order_log'),
             URL(r'/users', Users, name='users'),

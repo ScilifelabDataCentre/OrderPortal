@@ -31,6 +31,41 @@ class OrderSaver(saver.Saver):
         #         field['value'] = value
 
 
+class OrderMixin(object):
+    "Mixin for various useful methods."
+
+    def get_order_status(self, order):
+        "Get the order status lookup."
+        try:
+            return settings['ORDER_STATUSES'][order['status']]
+        except KeyError:
+            for status in settings['ORDER_STATUSES']:
+                if status.get('initial'):
+                    return status
+            raise ValueError('no initial order status defined')
+
+    def get_targets(self, order):
+        "Get the allowed transition targets."
+        result = []
+        for transition in settings['ORDER_TRANSITIONS']:
+            if transition['source'] != order['status']: continue
+            permission = transition['permission']
+            if self.is_staff() and permission == constants.STAFF:
+                result.extend(transition['targets'])
+            elif self.is_owner(order) and permission == constants.USER:
+                result.extend(transition['targets'])
+        return [settings['ORDER_STATUSES'][t] for t in result]
+
+    def is_editable(self, order):
+        "Is the order editable by the current user?"
+        if self.is_admin(): return True
+        status = self.get_order_status(order)
+        edit = status.get('edit', [])
+        if self.is_staff() and constants.STAFF in edit: return True
+        if self.is_owner(order) and constants.USER in edit: return True
+        return False
+
+
 class Orders(RequestHandler):
     "Page for orders list and creating a new order from a form."
 
@@ -49,7 +84,7 @@ class Orders(RequestHandler):
         self.render('orders.html', title=title, orders=orders, forms=forms)
 
 
-class Order(RequestHandler):
+class Order(OrderMixin, RequestHandler):
     "Order page."
 
     @tornado.web.authenticated
@@ -62,7 +97,10 @@ class Order(RequestHandler):
         self.render('order.html',
                     title="Order '{}'".format(title),
                     order=order,
+                    status=self.get_order_status(order),
                     fields=fields,
+                    is_editable=self.is_editable(order),
+                    targets=self.get_targets(order),
                     logs=self.get_logs(order['_id']))
 
 
