@@ -1,16 +1,22 @@
 {# Order page. #}
 {% extends "base.html" %}
 
-{% block content %}
+{% block actions %}
 {% if is_editable %}
-  <form action="{{ reverse_url('order_edit', order['_id']) }}"
-        method='GET'>
-    {% module Submit('edit', title='Edit order') %}
-  </form>
+<form action="{{ reverse_url('order_edit', order['_id']) }}"
+      method='GET'>
+  {% module Submit('edit') %}
+</form>
+{% end %}
+{% for target in targets %}
+<form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
+      method='POST'>
+  {% module Submit(target['identifier'], title=target.get('label', target['identifier'].capitalize())) %}
+</form>
+{% end %}
 {% end %}
 
-<p>
-
+{% block content %}
 <table class="order">
 
   <tr>
@@ -19,21 +25,6 @@
     <td>{% module Icon(order['status'], label=True) %}</td>
     <td>{{ status['description'] }}</td>
   </tr>
-
-  {% if targets %}
-  <tr>
-    <th></th>
-    <td></td>
-    <td colspan="2">
-      {% for target in targets %}
-        <form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
-              method='POST'>
-	  {% module Submit(target['identifier'], title=target.get('label', target['identifier'].capitalize())) %}
-	</form>
-      {% end %}
-    </td>
-  </tr>
-  {% end %}
 
   <tr>
     <th>Owner</th>
@@ -62,9 +53,8 @@
   {% end %}
 
 </table>
+{% end %}
 
-<p>
-
+{% block log %}
 {% include 'log_table.html' %}
-
 {% end %}

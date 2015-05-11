@@ -15,10 +15,18 @@
     <td>{{ log.get('user') or '-' }}</td>
     <td>
       <table>
-	{% for key in sorted(log['changed']) %}
+	{% for name in sorted(log['changed']) %}
 	<tr>
-	  <th class="key">{{ key }}</th>
-	  <td>{{ log['changed'][key] }}</td>
+	  <th class="key">{{ name }}</th>
+	  <td>
+	    {% if name == 'fields' %}
+	      {% for key, value in sorted(log['changed'][name].items()) %}
+	        {{ key }} = {{ repr(value) }}<br>
+	      {% end %}
+	    {% else %}
+	      {{ log['changed'][name] }}
+	    {% end %}
+	  </td>
 	</tr>
 	{% end %}
       </table>

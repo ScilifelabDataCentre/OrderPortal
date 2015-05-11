@@ -1,37 +1,44 @@
 /* OrderPortal default CSS */
 
 * {font-family: Arial, Helvetica, sans-serif;
-   font-size: small; }
+   font-size: small;
+  }
 
-h1 {font-size: x-large; }
+/*
+* {border: 1px solid gray; }
+*/
+
+h1 {float: left;
+    font-size: x-large;
+    padding: 0.75em;
+    margin: 0 1em;
+   }
 h2 {font-size: large; }
 h3 {font-size: medium; }
 
-div.title { margin-left: 100px; }
-div.title h1 {margin: 0;
-	      padding: 0.75em;
-	     }
+header {width:100%; }
 
-nav {width: 100px;
-     clear: both;
-     float: left; }
+nav {float: left;
+     padding: 0.75em;
+    }
 
-aside {float: right; }
+aside {float: right;
+       padding: 0.5em;
+      }
+
+section {margin-bottom: 1em; }
 
 footer {clear: both;
 	padding-top: 0.5em;
+	border-style: solid;
+	border-color: lightgray;
+	border-width: 2px 0 0 0;
        }
-
-hr {border-style: solid;
-    border-color: lightgray;
-    border-width: 1px;
-   }
 
 a {text-decoration: none;
    font-weight: bold; }
 
 form { padding-top: 0.5em;}
-
 input {background: lightgrey; }
 
 textarea {width: 40em;
@@ -53,6 +60,7 @@ ul.subheader li {font-size: medium;
 		 padding-top: 0.5em;
 		}
 
+.clear {clear: both; }
 .nobr {white-space: nowrap; }
 .pre  {white-space: pre; }
 .bold {font-weight: bold; }
@@ -77,14 +85,11 @@ ul.subheader li {font-size: medium;
 .top {vertical-align: top; }
 .bottom {vertical-align: bottom; }
 
-div.menu1 {margin-left: 1em; }
-div.content {float: left;
-	     width: 80%;
-	    }
-div.left {float: left; }
-div.right {float: right; }
+.left {float: left; }
+.right {float: right; }
+.menu1 {margin-left: 1em; }
+
 div.login {white-space: nowrap; }
-div.actions form { padding-top: 0.5em;}
 
 ol.airy li {margin-bottom: 1em; }
 
@@ -120,6 +125,10 @@ table.fields tr td {text-align: left;
 		    vertical-align: top;
 		   }
 
+table.fields tr td.description {
+		    min-width: 100px;
+		    max-width: 400px;
+		    }
 table.fields tr td a {vertical-align: top; }
 
 table.fields tr td.spacer {padding-right: 3em; }
@@ -135,6 +144,9 @@ table.listing tr td {padding-right: 1em; }
 
 table.formfields tr th {text-align: left;
 			padding-right: 0.5em;
+			border-bottom-style: solid;
+			border-bottom-color: lightgray;
+			border-bottom-width: 2px;
 		       }
 
 table.formfields tr td {text-align: left;
@@ -142,12 +154,14 @@ table.formfields tr td {text-align: left;
 		       }
 
 table.order tr th {text-align: right; }
-table.order tr th.group {text-align: left;
-			 margin-left: 1em;
-			 padding-top: 1em;
-			}
-table.order tr th.depth0 {font-size: large; }
-table.order tr th.depth1 {font-size: medium; }
+table.order tr th.depth0 {padding-left: 1em;
+			  text-align: left;
+			  font-size: large; }
+table.order tr th.depth1 {padding-left: 1em;
+			  text-align: left;
+			  font-size: medium; }
+
+table.actions tr td {padding: 0 0 1em 2em;}
 
 table.log th {text-align: left;
 	     border-bottom-style: solid;
@@ -159,4 +173,5 @@ table.log td {vertical-align: top; }
 
 table.log th.key {font-style: italic;
 		  text-align: right;
+		  vertical-align: top;
 		  border-bottom-style: none;

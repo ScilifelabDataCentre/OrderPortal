@@ -3,105 +3,135 @@
   <head>
     <meta charset="utf-8">
     <title>{{ title }}</title>
-    <!-- <link rel="icon" href="{{ static_url('favicon.ico') }}" type="image/x-icon"> -->
-    <link rel="stylesheet" type="text/css" href="{{ static_url('default.css') }}">
+    <link rel="shortcut icon" type="image/x-icon"
+	  href="{{ static_url('favicon.ico') }}">
+    <link rel="stylesheet" type="text/css"
+	  href="{{ static_url('default.css') }}">
   </head>
 
   <body>
-    <header>
-      <div class="left">
-	<a href="{{ reverse_url('home') }}">
-	  {% module Icon('home', title=settings['FACILITY_NAME']) %}
-	</a>
-      </div>
+    <header class="left">
+      <a class="left" href="{{ reverse_url('home') }}">
+	{% module Icon('home', title=settings['FACILITY_NAME']) %}
+      </a>
+
+      <h1>{{ title }}</h1>
+
       <div class="right">
-	{% block search %}
-	<div class="search">
+	<div>
 	  <form action="{{ reverse_url('search') }}">
 	    <input type="text" name="term">
 	    {% module Submit('search') %}
 	  </form>
 	</div>
-	{% end %}
+
 	{% block login %}
-	<div class="login">
-	  {% if current_user %}Logged in as
+	<div>
+	  {% if current_user %} Logged in as
 	  <a href="{{ reverse_url('user', current_user['email']) }}">
 	    {% module Icon('user') %} {{ current_user['email'] }}
 	  </a>
 	  {% end %}
 	</div>
 	{% end %}
-      </div>
-      <div class="title">
-	<h1>{{ title }}</h1>
+
       </div>
     </header>
 
-    <nav>
-      {% block navigation %}
-      <div><a href ="{{ reverse_url('home') }}">Home</a></div>
-      {% if current_user %}
-      <div><a href ="{{ reverse_url('search') }}">Search</a></div>
-      <div><a href ="{{ reverse_url('orders') }}">Orders</a></div>
-      {% if is_admin %}
-      <div><a href ="{{ reverse_url('forms') }}">Forms</a></div>
-      {% end %}
-      {% if is_staff %}
-      <div><a href ="{{ reverse_url('users') }}">Users</a></div>
-      {% end %}
-      {% end %}
-      <div><a href ="{{ reverse_url('reset') }}">Reset</a></div>
-      <div><a href ="{{ reverse_url('password') }}">Password</a></div>
-      {% block more_navigation %}
-      {% end %}
-      {% end %}
-    </nav>
+    <div class="clear">
 
-    <aside>
-      <div class="actions">
-	{% block actions %}
+      <nav>
+	{% block navigation %}
+	<div>
+	  <a href ="{{ reverse_url('home') }}">Home</a>
+	</div>
+	{% if current_user %}
+	  <div>
+	    <a href ="{{ reverse_url('search') }}">Search</a>
+	  </div>
+	  <div>
+	    <a href ="{{ reverse_url('orders') }}">Orders</a>
+	  </div>
+	  {% if is_admin %}
+	    <div>
+	      <a href ="{{ reverse_url('forms') }}">Forms</a>
+	    </div>
+	    {% end %}
+	    {% if is_staff %}
+	    <div>
+	      <a href ="{{ reverse_url('users') }}">Users</a>
+	    </div>
+	  {% end %}
+	{% end %} {# if current_user #}
+	<div>
+	  <a href ="{{ reverse_url('reset') }}">Reset</a>
+	</div>
+	<div>
+	  <a href ="{{ reverse_url('password') }}">Password</a>
+	</div>
+	{% block more_navigation %}
 	{% end %}
-      </div>
-      <br>
-      <div class="xrefs">
-	{% block xrefs %}
-	{% end %}
-      </div>
-    </aside>
+	{% end %} {# block navigation #}
+      </nav>
 
-    {% block outer_content %}
-    <div class="content">
-    {% block subheader %}
-    {% end %}
-    {% block error %}
-      {% try %}
+      <aside>
+	<div class="actions">
+	  {% block actions %}
+	  {% end %}
+	</div>
+	<br>
+	<div class="xrefs">
+	  {% block xrefs %}
+	  {% end %}
+	</div>
+      </aside>
+
+      <section class="left">
+	<div>
+	  {% block subheader %}
+	  {% end %}
+	</div>
+
+	{% block error %}
+	{% try %}
         {% if error %}
-          <p class="error">
-	    Error: {{ error }}
-	  </p>
+        <p class="error">
+	  Error: {{ error }}
+	</p>
 	{% end %}
-      {% except NameError %}
-      {% end %}
-    {% end %}
-    {% block content %}
-    {% end %}
+	{% except NameError %}
+	{% end %}
+	{% end %}
+
+	<div>
+	  {% block content %}
+	  {% end %}
+	</div>
+      </section>
+
+      <section class="clear">
+	{% block log %}
+	{% end %}
+      </section>
+
     </div>
-    {% end %}
 
     {% block footer %}
     <footer>
-      <hr>
-      <a href="https://github.com/pekrau/OrderPortal">OrderPortal</a> {{ version }}
+      <a href="https://github.com/pekrau/OrderPortal">OrderPortal</a>
+      {{ version }}
     </footer>
     {% end %}
 
     {% block javascript_libraries %}
-    <script type="text/javascript" src="{{ static_url('jquery-1.11.2.min.js') }}">
+    <script type="text/javascript"
+	    src="{{ static_url('jquery-1.11.2.min.js') }}">
     </script>
-    <script type="text/javascript" src="{{ static_url('jquery.localtime-0.9.1.min.js') }}">
+    <script type="text/javascript"
+	    src="{{ static_url('jquery.localtime-0.9.1.min.js') }}">
     </script>
     {% end %}
+
     {% block javascript_code %}
     {% end %}
   </body>

@@ -18,17 +18,30 @@ from orderportal.requesthandler import RequestHandler
 class OrderSaver(saver.Saver):
     doctype = constants.ORDER
 
-    def update_fields(self):
+    def update_fields(self, fields):
         "Update all fields from the HTML form input."
         assert self.rqh is not None
-        # for field in self.doc['fields']:
-        #     identifier = field['identifier']
-        #     old = field.get('value')
-        #     value = self.rqh.get_argument(identifier, None)
-        #     if old != value:
-        #         changed = self.changed.setdefault('field_values', dict())
-        #         changed[identifier] = value
-        #         field['value'] = value
+        # Loop over fields defined in the form document and get values.
+        # Do not change values for a field if that argument is missing.
+        docfields = self.doc['fields']
+        for field in fields:
+            identifier = field['identifier']
+            try:
+                value = self.rqh.get_argument(identifier)
+            except tornado.web.MissingArgumentError:
+                pass
+            else:
+                if value != docfields.get(identifier):
+                    changed = self.changed.setdefault('field_values', dict())
+                    changed[identifier] = value
+                    docfields[identifier] = value
+        # Check validity of current values
+        self.doc['invalid'] = dict()
+        for field in fields:
+            value = docfields.get(identifier)
+            # XXX temporary, simplistic
+            if field['required'] and value is None:
+                self.doc['invalid'][identifier] = 'required'
 
 
 class OrderMixin(object):
@@ -132,15 +145,20 @@ class OrderEdit(RequestHandler):
     def get(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_edit_order(order)
+        form = self.get_entity(order['form'], doctype=constants.FORM)
+        fields = Fields(form)
         self.render('order_edit.html',
                     title="Edit order '{}'".format(order['title']),
-                    order=order)
+                    order=order,
+                    fields=fields)
 
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_xsrf_cookie()
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_edit_order(order)
+        form = self.get_entity(order['form'], doctype=constants.FORM)
+        fields = Fields(form)
         with OrderSaver(doc=order, rqh=self) as saver:
-            saver.update_fields()
+            saver.update_fields(fields)
         self.see_other(self.reverse_url('order', order['_id']))

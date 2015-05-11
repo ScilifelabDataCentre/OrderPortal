@@ -74,6 +74,14 @@ class Entity(tornado.web.UIModule):
             url=url, icon=icon, title=title)
 
 
+class OrderFieldsDisplay(tornado.web.UIModule):
+    "HTML displaying the fields of an order."
+
+    def render(self, order, fields):
+        rows = []
+        for field in fields:
+            pass # XXX
+
 # class FormFieldsDisplay(tornado.web.UIModule):
 #     "HTML for displaying the fields of a form."
 

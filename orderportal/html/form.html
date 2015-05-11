@@ -1,6 +1,17 @@
 {# Form page. #}
 {% extends "base.html" %}
 
+{% block actions %}
+<form action="{{ reverse_url('form_edit', form['_id']) }}"
+      method='GET'>
+  {% module Submit('edit', title='Edit form') %}
+</form>
+<form action="{{ reverse_url('field_create', form['_id']) }}"
+      method='GET'>
+  {% module Submit('create', title='Create field') %}
+</form>
+{% end %}
+
 {% block content %}
 <table class="fields">
   <tr>
@@ -39,22 +50,11 @@
 	</tr>
 	{% end %}
       </table>
-      <form action="{{ reverse_url('field_create', form['_id']) }}"
-	    method='GET'>
-	{% module Submit('create', title='Create field') %}
-      </form>
     </td>
   </tr>
 </table>
-<p>
+{% end %}
 
-<form action="{{ reverse_url('form_edit', form['_id']) }}"
-      method='GET'>
-  {% module Submit('edit', title='Edit form') %}
-</form>
-
-<p>
-
+{% block log %}
 {% include 'log_table.html' %}
-
 {% end %}
