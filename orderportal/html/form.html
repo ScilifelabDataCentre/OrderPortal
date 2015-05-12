@@ -1,15 +1,28 @@
 {# Form page. #}
 {% extends "base.html" %}
 
+{% if is_admin %}
 {% block actions %}
-<form action="{{ reverse_url('form_edit', form['_id']) }}"
-      method='GET'>
-  {% module Submit('edit', title='Edit form') %}
-</form>
 <form action="{{ reverse_url('field_create', form['_id']) }}"
-      method='GET'>
+      method="GET">
   {% module Submit('create', title='Create field') %}
 </form>
+<form action="{{ reverse_url('form_edit', form['_id']) }}"
+      method="GET">
+  {% module Submit('edit', title='Edit form') %}
+</form>
+<form action="{{ reverse_url('form_copy', form['_id']) }}"
+      method="POST">
+  {% module xsrf_form_html() %}
+  {% module Submit('copy', title='Copy form') %}
+</form>
+<form action="{{ reverse_url('form', form['_id']) }}"
+      method="POST">
+  {% module xsrf_form_html() %}
+  <input type="hidden" name="_http_method" value="delete">
+  {% module Submit('delete', title='Delete form') %}
+</form>
+{% end %}
 {% end %}
 
 {% block content %}

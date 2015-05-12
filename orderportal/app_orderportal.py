@@ -57,6 +57,7 @@ def get_handlers():
             URL(r'/form/([0-9a-f]{32})', Form, name='form'),
             URL(r'/form', FormCreate, name='form_create'),
             URL(r'/form/([0-9a-f]{32})/edit', FormEdit, name='form_edit'),
+            URL(r'/form/([0-9a-f]{32})/copy', FormCopy, name='form_copy'),
             URL(r'/form/([0-9a-f]{32})/field',
                 FormFieldCreate, name='field_create'),
             URL(r'/form/([0-9a-f]{32})/field/([a-zA-Z][_a-zA-Z0-9]*)',

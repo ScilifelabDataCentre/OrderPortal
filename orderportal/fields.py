@@ -11,7 +11,7 @@ from orderportal import utils
 
 
 class Fields(object):
-    "Handle fields in an form or an order."
+    "Handle fields in a form."
 
     def __init__(self, form):
         """Set reference to the form containing the fields,
@@ -68,6 +68,14 @@ class Fields(object):
                 break
         else:
             self.form['fields'].append(new)
+        self.setup()
+        return new
+
+    def copy(self, field):
+        "Copy the field from another form."
+        assert field['identifier'] not in self
+        new = field.copy()
+        self.form['fields'].append(new)
         self.setup()
         return new
 

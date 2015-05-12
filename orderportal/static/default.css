@@ -1,12 +1,12 @@
 /* OrderPortal default CSS */
 
-* {font-family: Arial, Helvetica, sans-serif;
-   font-size: small;
-  }
-
 /*
 * {border: 1px solid gray; }
 */
+
+* {font-family: Arial, Helvetica, sans-serif;
+   font-size: small;
+  }
 
 h1 {float: left;
     font-size: x-large;
@@ -19,14 +19,15 @@ h3 {font-size: medium; }
 header {width:100%; }
 
 nav {float: left;
-     padding: 0.75em;
+     padding: 1em 1em 0.5em 0.5em;
     }
 
 aside {float: right;
        padding: 0.5em;
       }
 
-section {margin-bottom: 1em; }
+section {margin-bottom: 1em;
+	}
 
 footer {clear: both;
 	padding-top: 0.5em;
@@ -162,6 +163,9 @@ table.order tr th.depth1 {padding-left: 1em;
 			  font-size: medium; }
 
 table.actions tr td {padding: 0 0 1em 2em;}
+
+div.log {padding-top: 1em;
+	 clear: both; }
 
 table.log th {text-align: left;
 	     border-bottom-style: solid;

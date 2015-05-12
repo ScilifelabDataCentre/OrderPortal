@@ -2,7 +2,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form action="{{ reverse_url('field_create', form['_id']) }}" method='POST'>
+<form action="{{ reverse_url('field_create', form['_id']) }}"
+      method="POST">
   {% module xsrf_form_html() %}
 
   <table class="fields">
@@ -115,7 +116,7 @@
 </form>
 
 <form action="{{ reverse_url('form', form['_id']) }}"
-      method='GET'>
+      method="GET">
   {% module Submit('cancel') %}
 </form>
 {% end %}

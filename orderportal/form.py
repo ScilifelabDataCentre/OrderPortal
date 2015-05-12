@@ -35,6 +35,15 @@ class FormSaver(saver.Saver):
             raise tornado.web.HTTPError(404, reason='no such field')
         self.changed['fields'] = fields.update(identifier, self.rqh)
 
+    def copy_fields(self, form):
+        "Copy all fields from the given form."
+        if not hasattr(self.doc, 'fields'):
+            self.doc['fields'] = []
+        fields = Fields(self.doc)
+        for field in form['fields']:
+            fields.copy(field)
+        self.changed['copied'] = "from {}".format(form['_id'])
+
     def delete_field(self, identifier):
         fields = Fields(self.doc)
         if identifier not in fields:
@@ -59,7 +68,7 @@ class Forms(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_staff()
-        view = self.db.view('form/modified', include_docs=True)
+        view = self.db.view('form/modified', descending=True, include_docs=True)
         title = 'Recent forms'
         forms = [self.get_presentable(r.doc) for r in view]
         self.render('forms.html', title=title, forms=forms)
@@ -70,13 +79,29 @@ class Form(RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
-        self.check_admin()
+        self.check_staff()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.render('form.html',
                     title="Form '{}'".format(form['title']),
                     form=form,
                     fields=Fields(form),
                     logs=self.get_logs(form['_id']))
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        if self.get_argument('_http_method', None) == 'delete':
+            self.delete(iuid)
+            return
+        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
+
+    @tornado.web.authenticated
+    def delete(self, iuid):
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_edit_form(form)
+        self.delete_logs(form['_id'])
+        self.db.delete(form)
+        self.see_other(self.reverse_url('forms'))
 
 
 class FormCreate(RequestHandler):
@@ -100,6 +125,11 @@ class FormCreate(RequestHandler):
             saver['owner'] = self.current_user['email']
             doc = saver.doc
         self.see_other(self.reverse_url('form_edit', doc['_id']))
+
+    @tornado.web.authenticated
+    def post(self):
+        self.check_xsrf_cookie()
+        self.check_admin()
 
 
 class FormEdit(RequestHandler):
@@ -166,10 +196,10 @@ class FormFieldEdit(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid, identifier):
+        self.check_xsrf_cookie()
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid, identifier)
             return
-        self.check_xsrf_cookie()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.check_edit_form(form)
         with FormSaver(doc=form, rqh=self) as saver:
@@ -178,9 +208,26 @@ class FormFieldEdit(RequestHandler):
 
     @tornado.web.authenticated
     def delete(self, iuid, identifier):
-        self.check_xsrf_cookie()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.check_edit_form(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.delete_field(identifier)
         self.see_other(self.reverse_url('form', form['_id']))
+
+
+class FormCopy(RequestHandler):
+    "Make a copy of a form."
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        self.check_admin()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        with FormSaver(rqh=self) as saver:
+            saver['title'] = "Copy of {}".format(form['title'])
+            saver['description'] = form.get('description')
+            saver.copy_fields(form)
+            saver['status'] = constants.PENDING
+            saver['owner'] = self.current_user['email']
+            doc = saver.doc
+        self.see_other(self.reverse_url('form_edit', doc['_id']))

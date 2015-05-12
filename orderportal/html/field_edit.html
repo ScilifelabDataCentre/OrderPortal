@@ -3,7 +3,7 @@
 
 {% block content %}
 <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
-      method='POST'>
+      method="POST">
   {% module xsrf_form_html() %}
 
   <table class="fields">
@@ -38,6 +38,19 @@
 	Data type of the field. Cannot be changed.
       </td>
     </tr>
+
+    {% if field['type'] == constants.SELECT['value'] %}
+    <tr>
+      <th>Select</th>
+      <td>{% module Icon('required') %}</td>
+      <td>
+	<textarea name="select">{{ field.get('select') or '' }}</textarea>
+      </td>
+      <td class="description">
+	Values to select among. One per line. The first value is the default.
+      </td>
+    </tr>
+    {% end %}
 
     <tr>
       <th>Required</th>
@@ -89,7 +102,7 @@
       <th>Description</th>
       <td></td>
       <td>
-	<textarea name="description"></textarea>
+	<textarea name="description">{{ field.get('description') or '' }}</textarea>
       </td>
       <td class="description">
 	Description to display in the order as information to the user.
@@ -104,14 +117,15 @@
 </form>
 
 <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
-      method='POST'>
+      method="POST">
   {% module xsrf_form_html() %}
   <input type="hidden" name="_http_method" value="delete">
-  {% module Submit('delete', onclick="return confirm('Delete cannot be undone; really delete?');") %}
+  {% module Submit('delete') %}
 </form>
+
 <p>
 <form action="{{ reverse_url('form', form['_id']) }}"
-      method='GET'>
+      method="GET">
   {% module Submit('cancel') %}
 </form>
 {% end %}

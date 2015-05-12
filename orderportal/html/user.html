@@ -25,7 +25,7 @@
     <form action="{{ reverse_url('user_delete', user['email']) }}"
 	  method='POST'>
       {% module xsrf_form_html() %}
-      {% module Submit('delete', onclick="return confirm('Delete cannot be undone; really delete?');") %}
+      {% module Submit('delete') %}
     </form>
   {% end %}
 {% end %}
@@ -84,9 +84,8 @@
     <td>{{ user.get('phone') or '-' }}</td>
   </tr>
 </table>
+{% end %}
 
-<p>
-
+{% block log %}
 {% include 'log_table.html' %}
-
 {% end %}
