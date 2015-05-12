@@ -71,6 +71,12 @@ def load_settings(filepath=None, verbose=False):
         print('settings from', filepath, file=sys.stderr)
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
+    # Expand environment variables and the constants.ROOT
+    for key, value in settings.items():
+        if isinstance(value, (str, unicode)):
+            value = os.path.expandvars(value)
+            value = value.replace('{ROOT}', constants.ROOT)
+            settings[key] = value
     # Set logging state
     if settings.get('LOGGING_DEBUG'):
         kwargs = dict(level=logging.DEBUG)

@@ -14,5 +14,5 @@ settings = dict(BASE_URL='http://localhost:8885/',
                 LOGGING_DEBUG=True,
                 LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',
                 FACILITY_NAME='[facility]',
-                ORDER_STATUS_FILENAME='order_status.yaml',
+                ORDER_STATUS_FILENAME='{ROOT}/order_status.yaml',
                 )
