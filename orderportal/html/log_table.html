@@ -15,16 +15,18 @@
     <td>{{ log.get('user') or '-' }}</td>
     <td>
       <table>
-	{% for name in sorted(log['changed']) %}
+	{% for key, value in sorted(log['changed'].items()) %}
 	<tr>
-	  <th class="key">{{ name }}</th>
+	  <th class="key">{{ key }}</th>
 	  <td>
-	    {% if name == 'fields' %}
-	      {% for key, value in sorted(log['changed'][name].items()) %}
-	        {{ key }} = {{ repr(value) }}<br>
+	    {% if key == 'fields' %}
+	      {% for k, v in sorted(value.items()) %}
+	        {{ k }} = {{ repr(v) }}<br>
 	      {% end %}
+	    {% elif key == 'copied from' %}
+	      <a href="{{ reverse_url('entity', value) }}">{{ value }}</a>
 	    {% else %}
-	      {{ log['changed'][name] }}
+	      {{ value }}
 	    {% end %}
 	  </td>
 	</tr>

@@ -44,3 +44,20 @@ class Log(RequestHandler):
         doc = self.get_entity(iuid, doctype=constants.LOG)
         self.write(self.get_presentable(doc))
         self.set_header('Content-Type', constants.JSON_MIME)
+
+
+class Entity(RequestHandler):
+    "Redirect to the entity given by the IUID, if any."
+
+    def get(self, iuid):
+        "Login and privileges are checked by the entity redirected to."
+        doc = self.get_entity(iuid)
+        if doc[constants.DOCTYPE] == constants.ORDER:
+            url = self.absolute_reverse_url('order', doc['_id'])
+        elif doc[constants.DOCTYPE] == constants.FORM:
+            url = self.absolute_reverse_url('form', doc['_id'])
+        elif doc[constants.DOCTYPE] == constants.USER:
+            url = self.absolute_reverse_url('user', doc['email'])
+        else:
+            raise tornado.web.HTTPError(404)
+        self.see_other(url)
