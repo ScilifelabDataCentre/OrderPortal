@@ -50,7 +50,6 @@ def get_handlers():
             URL(r'/reset', Reset, name='reset'),
             URL(r'/password', Password, name='password'),
             URL(r'/register', Register, name='register'),
-            URL(r'/user/([^/]+)/delete', UserDelete, name='user_delete'),
             URL(r'/user/([^/]+)/enable', UserEnable, name='user_enable'),
             URL(r'/user/([^/]+)/disable', UserDisable, name='user_disable'),
             URL(r'/forms', Forms, name='forms'),

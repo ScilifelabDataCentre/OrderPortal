@@ -22,9 +22,10 @@
     </form>
   {% end %}
   {% if user['status'] == constants.PENDING %}
-    <form action="{{ reverse_url('user_delete', user['email']) }}"
+    <form action="{{ reverse_url('user', user['email']) }}"
 	  method='POST'>
       {% module xsrf_form_html() %}
+      <input type="hidden" name="_http_method" value="delete">
       {% module Submit('delete') %}
     </form>
   {% end %}

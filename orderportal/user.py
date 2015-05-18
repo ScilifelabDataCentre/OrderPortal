@@ -58,6 +58,26 @@ class User(RequestHandler):
                     user=user,
                     logs=self.get_logs(user['_id']))
 
+    @tornado.web.authenticated
+    def post(self, email):
+        self.check_xsrf_cookie()
+        if self.get_argument('_http_method', None) == 'delete':
+            self.delete(email)
+            return
+        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
+
+    @tornado.web.authenticated
+    def delete(self, email):
+        "Delete a user that is pending; to get rid of spam application."
+        user = self.get_user(email)
+        self.check_admin()
+        if user['status'] != constants.PENDING:
+            raise tornado.web.HTTPError(
+                403, reason='only pending user can be deleted')
+        self.delete_logs(user['_id'])
+        self.db.delete(user)
+        self.see_other(self.reverse_url('home'))
+
 
 class UserEdit(RequestHandler):
     "Page for editing user information."
@@ -212,7 +232,6 @@ class Register(RequestHandler):
 
 
 class UserDelete(RequestHandler):
-    "Delete a user that is pending; to get rid of spam application."
 
     @tornado.web.authenticated
     def post(self, email):
