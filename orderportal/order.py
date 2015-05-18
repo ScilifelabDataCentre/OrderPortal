@@ -69,6 +69,15 @@ class OrderMixin(object):
                 result.extend(transition['targets'])
         return [settings['ORDER_STATUSES'][t] for t in result]
 
+    # def set_status(self):
+    #     new = self.rqh.get_argument('status')
+    #     if new not in constants.FORM_STATUSES:
+    #         raise tornado.web.HTTPError(400, reason='invalid status')
+    #     if new == self.doc['status']: return
+    #     if new not in constants.FORM_TRANSITIONS[self.doc['status']]:
+    #         raise tornado.web.HTTPError(400, reason='invalid status transition')
+    #     saver['status'] = new
+
     def is_editable(self, order):
         "Is the order editable by the current user?"
         if self.is_admin(): return True

@@ -7,20 +7,40 @@
       method="GET">
   {% module Submit('create', title='Create field') %}
 </form>
+{% if form['status'] == constants.PENDING %}
+  <form action="{{ reverse_url('form_enable', form['_id']) }}"
+	method="POST">
+    {% module xsrf_form_html() %}
+    {% module Submit('enable', confirm=True) %}
+  </form>
+{% elif form['status'] == constants.ENABLED %}
+  <form action="{{ reverse_url('form_disable', form['_id']) }}"
+	method="POST">
+    {% module xsrf_form_html() %}
+    {% module Submit('disable') %}
+  </form>
+{% elif form['status'] == constants.DISABLED %}
+  <form action="{{ reverse_url('form_enable', form['_id']) }}"
+	method="POST">
+    {% module xsrf_form_html() %}
+    {% module Submit('enable') %}
+  </form>
+{% end %}
+</form>
 <form action="{{ reverse_url('form_edit', form['_id']) }}"
       method="GET">
-  {% module Submit('edit', title='Edit form') %}
+  {% module Submit('edit') %}
 </form>
 <form action="{{ reverse_url('form_copy', form['_id']) }}"
       method="POST">
   {% module xsrf_form_html() %}
-  {% module Submit('copy', title='Copy form') %}
+  {% module Submit('copy') %}
 </form>
 <form action="{{ reverse_url('form', form['_id']) }}"
       method="POST">
   {% module xsrf_form_html() %}
   <input type="hidden" name="_http_method" value="delete">
-  {% module Submit('delete', title='Delete form') %}
+  {% module Submit('delete', confirm=True) %}
 </form>
 {% end %}
 {% end %}

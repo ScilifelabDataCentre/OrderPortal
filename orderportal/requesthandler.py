@@ -142,12 +142,6 @@ class RequestHandler(tornado.web.RequestHandler):
         if self.is_staff(): return
         raise tornado.web.HTTPError(403, reason='you do not own the entity')
 
-    def check_edit_form(self, form):
-        "Check if form can be edited by the current user."
-        self.check_admin()
-        if form['status'] != constants.PENDING:
-            raise tornado.web.HTTPError(409, reason='form is not pending')
-
     def check_read_order(self, order):
         "Check if current user may read the order."
         if self.is_owner(order): return

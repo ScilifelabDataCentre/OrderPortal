@@ -231,18 +231,6 @@ class Register(RequestHandler):
         self.see_other(self.reverse_url('password'))
 
 
-class UserDelete(RequestHandler):
-
-    @tornado.web.authenticated
-    def post(self, email):
-        self.check_xsrf_cookie()
-        user = self.get_user(email)
-        self.check_admin()
-        self.delete_logs(user['_id'])
-        self.db.delete(user)
-        self.see_other(self.reverse_url('home'))
-
-
 class UserEnable(RequestHandler):
     "Enable the user; from status pending or disabled."
 
@@ -260,7 +248,6 @@ Please got to {} to set your password.
             saver['code'] = utils.get_iuid()
             saver['status'] = constants.ENABLED
             saver.erase_password()
-        text = "Your account {} in the {} portal has been enabled."
         url = self.absolute_reverse_url('password',
                                         email=email,
                                         code=user['code'])

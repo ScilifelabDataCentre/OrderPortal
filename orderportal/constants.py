@@ -62,9 +62,6 @@ STD_ROLE   = USER
 USER_ROLES = frozenset([USER, STAFF, ADMIN])
 # Form states
 FORM_STATUSES = frozenset([PENDING, ENABLED, DISABLED])
-FORM_TRANSITONS = {PENDING: (ENABLED, DISABLED),
-                   ENABLED: (DISABLED,),
-                   DISABLED: ()}
 
 # To be filled in from separate YAML file
 ORDER_STATES = {}

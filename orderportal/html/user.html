@@ -26,7 +26,7 @@
 	  method='POST'>
       {% module xsrf_form_html() %}
       <input type="hidden" name="_http_method" value="delete">
-      {% module Submit('delete') %}
+      {% module Submit('delete', confirm=True) %}
     </form>
   {% end %}
 {% end %}

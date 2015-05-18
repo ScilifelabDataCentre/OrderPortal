@@ -52,14 +52,15 @@ class FormSaver(saver.Saver):
         self.changed['fields'] = dict(identifier=identifier,
                                       action='deleted')
 
-    def set_status(self):
-        new = self.rqh.get_argument('status')
-        if new not in constants.FORM_STATUSES:
-            raise tornado.web.HTTPError(400, reason='invalid status')
-        if new == self.doc['status']: return
-        if new not in constants.FORM_TRANSITIONS[self.doc['status']]:
-            raise tornado.web.HTTPError(400, reason='invalid status transition')
-        saver['status'] = new
+
+class FormMixin(object):
+    "Mixin providing form-related methods."
+
+    def check_edit_form(self, form):
+        "Check if form can be edited by the current user."
+        self.check_admin()
+        if form['status'] != constants.PENDING:
+            raise tornado.web.HTTPError(409, reason='form is not pending')
 
 
 class Forms(RequestHandler):
@@ -74,7 +75,7 @@ class Forms(RequestHandler):
         self.render('forms.html', title=title, forms=forms)
 
 
-class Form(RequestHandler):
+class Form(FormMixin, RequestHandler):
     "Form page."
 
     @tornado.web.authenticated
@@ -132,7 +133,7 @@ class FormCreate(RequestHandler):
         self.check_admin()
 
 
-class FormEdit(RequestHandler):
+class FormEdit(FormMixin, RequestHandler):
     "Page for editing an form."
 
     @tornado.web.authenticated
@@ -154,7 +155,7 @@ class FormEdit(RequestHandler):
         self.see_other(self.reverse_url('form', form['_id']))
 
 
-class FormFieldCreate(RequestHandler):
+class FormFieldCreate(FormMixin, RequestHandler):
     "Page for creating a field in a form."
 
     @tornado.web.authenticated
@@ -176,7 +177,7 @@ class FormFieldCreate(RequestHandler):
         self.see_other(self.reverse_url('form', form['_id']))
 
 
-class FormFieldEdit(RequestHandler):
+class FormFieldEdit(FormMixin, RequestHandler):
     "Page for editing or deleting a field in a form."
 
     @tornado.web.authenticated
@@ -231,3 +232,33 @@ class FormCopy(RequestHandler):
             saver['owner'] = self.current_user['email']
             doc = saver.doc
         self.see_other(self.reverse_url('form_edit', doc['_id']))
+
+
+class FormEnable(RequestHandler):
+    "Enable making orders from the form."
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        self.check_admin()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        url = self.absolute_reverse_url('form', iuid)
+        if form['status'] != constants.ENABLED:
+            with FormSaver(doc=form, rqh=self) as saver:
+                saver['status'] = constants.ENABLED
+        self.see_other(url)
+
+
+class FormDisable(RequestHandler):
+    "Disable making orders from the form."
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        self.check_admin()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        url = self.absolute_reverse_url('form', iuid)
+        if form['status'] != constants.DISABLED:
+            with FormSaver(doc=form, rqh=self) as saver:
+                saver['status'] = constants.DISABLED
+        self.see_other(url)
