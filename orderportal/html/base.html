@@ -6,7 +6,7 @@
     <link rel="shortcut icon" type="image/x-icon"
 	  href="{{ static_url('favicon.ico') }}">
     <link rel="stylesheet" type="text/css"
-	  href="{{ static_url('default.css') }}">
+	  href="{{ static_url('base.css') }}">
   </head>
 
   <body>
@@ -90,31 +90,34 @@
       </aside>
 
       <section>
-	<div>
-	  {% block subheader %}
+	<div class="left">
+	  <div>
+	    {% block subheader %}
+	    {% end %}
+	  </div>
+
+	  {% block error %}
+	  {% try %}
+          {% if error %}
+          <p class="error">
+	    Error: {{ error }}
+	  </p>
 	  {% end %}
+	  {% except NameError %}
+	  {% end %}
+	  {% end %}
+
+	  <div>
+	    {% block content %}
+	    {% end %}
+	  </div>
+
+	  <div class="log">
+	    {% block log %}
+	    {% end %}
+	  </div>
 	</div>
 
-	{% block error %}
-	{% try %}
-        {% if error %}
-        <p class="error">
-	  Error: {{ error }}
-	</p>
-	{% end %}
-	{% except NameError %}
-	{% end %}
-	{% end %}
-
-	<div>
-	  {% block content %}
-	  {% end %}
-	</div>
-
-	<div class="log">
-	  {% block log %}
-	  {% end %}
-	</div>
       </section>
 
     </div>

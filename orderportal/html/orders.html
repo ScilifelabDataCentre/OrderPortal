@@ -4,11 +4,19 @@
 {% block subheader %}
 <table class="listing">
   <tr>
+    <th></th>
     <th>Form</th>
     <th>Description</th>
   </tr>
   {% for form in forms %}
   <tr>
+    <td>
+      <form action="{{ reverse_url('order_create') }}" method='POST'>
+	{% module xsrf_form_html() %}
+	<input type="hidden" name="form" value="{{ form['iuid'] }}">
+	{% module Submit('create', title='New order') %}
+      </form>
+    </td>
     <td>
       {% if is_admin %}
       <a href="{{ reverse_url('form', form['iuid']) }}">{{ form['title'] }}</a>
@@ -17,13 +25,6 @@
       {% end %}
     </td>
     <td>{{ form['description'] }}</td>
-    <td>
-      <form action="{{ reverse_url('order_create') }}" method='POST'>
-	{% module xsrf_form_html() %}
-	<input type="hidden" name="form" value="{{ form['iuid'] }}">
-	{% module Submit('create', title='Create new order') %}
-      </form>
-    </td>
   </tr>
   {% end %}
 </table>
