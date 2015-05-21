@@ -142,18 +142,6 @@ class RequestHandler(tornado.web.RequestHandler):
         if self.is_staff(): return
         raise tornado.web.HTTPError(403, reason='you do not own the entity')
 
-    def check_read_order(self, order):
-        "Check if current user may read the order."
-        if self.is_owner(order): return
-        if self.is_staff(): return
-        raise tornado.web.HTTPError(403, reason='you may not read the order')
-
-    def check_edit_order(self, order):
-        "Check if current user may edit the order."
-        if self.is_owner(order): return
-        if self.is_staff(): return
-        raise tornado.web.HTTPError(403, reason='you may not edit the order')
-
     def get_entity(self, iuid, doctype=None):
         """Get the entity by the IUID. Check the doctype, if given.
         Raise HTTP 404 if no such entity.

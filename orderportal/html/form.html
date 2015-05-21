@@ -26,10 +26,9 @@
     {% module Submit('enable') %}
   </form>
 {% end %}
-</form>
 <form action="{{ reverse_url('form_edit', form['_id']) }}"
       method="GET">
-  {% module Submit('edit') %}
+  {% module Submit('edit', disabled=not is_editable) %}
 </form>
 <form action="{{ reverse_url('form_copy', form['_id']) }}"
       method="POST">

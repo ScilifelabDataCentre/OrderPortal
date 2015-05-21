@@ -36,7 +36,7 @@ class Icon(IconMixin, tornado.web.UIModule):
 class Submit(IconMixin, tornado.web.UIModule):
     "HTML for a submit button with an icon, optionally with a different title."
 
-    def render(self, name, title=None, slim=False, confirm=False):
+    def render(self, name, title=None, slim=False, confirm=False, disabled=False):
         params = dict(type='submit')
         Name = name.capitalize()
         if confirm:
@@ -45,6 +45,8 @@ class Submit(IconMixin, tornado.web.UIModule):
             params['onclick'] = text
         if slim:
             params['class'] = 'slim'
+        if disabled:
+            params['disabled'] = 'disabled'
         result = "<button {}>".format(' '.join(['{}="{}"'.format(k,v)
                                                 for k,v in params.items()]))
         result += """<img src="{url}" alt="{name}" title="{name}">""".format(

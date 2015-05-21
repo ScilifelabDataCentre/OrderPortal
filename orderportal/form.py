@@ -56,10 +56,14 @@ class FormSaver(saver.Saver):
 class FormMixin(object):
     "Mixin providing form-related methods."
 
-    def check_edit_form(self, form):
-        "Check if form can be edited by the current user."
+    def is_editable(self, form):
+        "Is the form editable? Checks status only."
+        return form['status'] == constants.PENDING
+
+    def check_editable(self, form):
+        "Check if the form can be edited by the current user."
         self.check_admin()
-        if form['status'] != constants.PENDING:
+        if not self.is_editable(form):
             raise tornado.web.HTTPError(409, reason='form is not pending')
 
 
@@ -85,6 +89,7 @@ class Form(FormMixin, RequestHandler):
         self.render('form.html',
                     title="Form '{}'".format(form['title']),
                     form=form,
+                    is_editable=self.is_editable(form),
                     fields=Fields(form),
                     logs=self.get_logs(form['_id']))
 
@@ -99,7 +104,7 @@ class Form(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def delete(self, iuid):
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_edit_form(form)
+        self.check_editable(form)
         self.delete_logs(form['_id'])
         self.db.delete(form)
         self.see_other(self.reverse_url('forms'))
@@ -139,7 +144,7 @@ class FormEdit(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_edit_form(form)
+        self.check_editable(form)
         self.render('form_edit.html',
                     title="Edit form '{}'".format(form['title']),
                     form=form)
@@ -148,7 +153,7 @@ class FormEdit(FormMixin, RequestHandler):
     def post(self, iuid):
         self.check_xsrf_cookie()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_edit_form(form)
+        self.check_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver['title'] = self.get_argument('title')
             saver['description'] = self.get_argument('description')
@@ -161,7 +166,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_edit_form(form)
+        self.check_editable(form)
         self.render('field_create.html',
                     title="Create field in form '{}'".format(form['title']),
                     form=form,
@@ -171,7 +176,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
     def post(self, iuid):
         self.check_xsrf_cookie()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_edit_form(form)
+        self.check_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.add_field()
         self.see_other(self.reverse_url('form', form['_id']))
@@ -183,7 +188,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid, identifier):
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_edit_form(form)
+        self.check_editable(form)
         fields = Fields(form)
         try:
             field = fields[identifier]
@@ -202,7 +207,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
             self.delete(iuid, identifier)
             return
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_edit_form(form)
+        self.check_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.update_field(identifier)
         self.see_other(self.reverse_url('form', form['_id']))
@@ -210,7 +215,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def delete(self, iuid, identifier):
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_edit_form(form)
+        self.check_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.delete_field(identifier)
         self.see_other(self.reverse_url('form', form['_id']))

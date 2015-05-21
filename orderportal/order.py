@@ -47,6 +47,25 @@ class OrderSaver(saver.Saver):
 class OrderMixin(object):
     "Mixin for various useful methods."
 
+    def is_editable(self, order):
+        "Is the order editable by the current user?"
+        status = self.get_order_status(order)
+        edit = status.get('edit', [])
+        if self.is_staff() and constants.STAFF in edit: return True
+        if self.is_owner(order) and constants.USER in edit: return True
+        return False
+
+    def check_readable(self, order):
+        "Check if current user may read the order."
+        if self.is_owner(order): return
+        if self.is_staff(): return
+        raise tornado.web.HTTPError(403, reason='you may not read the order')
+
+    def check_editable(self, order):
+        "Check if current user may edit the order."
+        if self.is_editable(order): return
+        raise tornado.web.HTTPError(403, reason='you may not edit the order')
+
     def get_order_status(self, order):
         "Get the order status lookup."
         try:
@@ -68,24 +87,6 @@ class OrderMixin(object):
             elif self.is_owner(order) and permission == constants.USER:
                 result.extend(transition['targets'])
         return [settings['ORDER_STATUSES'][t] for t in result]
-
-    # def set_status(self):
-    #     new = self.rqh.get_argument('status')
-    #     if new not in constants.FORM_STATUSES:
-    #         raise tornado.web.HTTPError(400, reason='invalid status')
-    #     if new == self.doc['status']: return
-    #     if new not in constants.FORM_TRANSITIONS[self.doc['status']]:
-    #         raise tornado.web.HTTPError(400, reason='invalid status transition')
-    #     saver['status'] = new
-
-    def is_editable(self, order):
-        "Is the order editable by the current user?"
-        if self.is_admin(): return True
-        status = self.get_order_status(order)
-        edit = status.get('edit', [])
-        if self.is_staff() and constants.STAFF in edit: return True
-        if self.is_owner(order) and constants.USER in edit: return True
-        return False
 
 
 class Orders(RequestHandler):
@@ -112,7 +113,7 @@ class Order(OrderMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_read_order(order)
+        self.check_readable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
         fields = Fields(form)
         title = order['fields'].get('title') or order['_id']
@@ -121,7 +122,7 @@ class Order(OrderMixin, RequestHandler):
                     order=order,
                     status=self.get_order_status(order),
                     fields=fields,
-                    is_editable=self.is_editable(order),
+                    is_editable=self.is_admin() or self.is_editable(order),
                     targets=self.get_targets(order),
                     logs=self.get_logs(order['_id']))
 
@@ -147,13 +148,13 @@ class OrderCreate(RequestHandler):
         self.see_other(self.reverse_url('order', doc['_id']))
 
 
-class OrderEdit(RequestHandler):
+class OrderEdit(OrderMixin, RequestHandler):
     "Page for editing an order."
 
     @tornado.web.authenticated
     def get(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_edit_order(order)
+        self.check_editable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
         fields = Fields(form)
         self.render('order_edit.html',
@@ -165,7 +166,7 @@ class OrderEdit(RequestHandler):
     def post(self, iuid):
         self.check_xsrf_cookie()
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_edit_order(order)
+        self.check_editable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
         fields = Fields(form)
         with OrderSaver(doc=order, rqh=self) as saver:
