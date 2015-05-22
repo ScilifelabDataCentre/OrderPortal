@@ -1,15 +1,31 @@
 {# Home page: User dashboard. #}
 {% extends "base.html" %}
 
-{% block subheader %}
-<p class="subheader">
-[User dashboard]
-</p>
-{% end %}
-
 {% block actions %}
 <form action="{{ reverse_url('logout') }}" method="POST">
   {% module xsrf_form_html() %}
   {% module Submit('logout') %}
 </form>
+{% end %}
+
+{% block content %}
+<table class="listing">
+  <tr>
+    <th>Order form</th>
+    <th>Description</th>
+  </tr>
+  {% for form in forms %}
+  <tr>
+    <td>{{ form['title'] }}</td>
+    <td>{{ form['description'] }}</td>
+    <td>
+      <form action="{{ reverse_url('order_create') }}" method='POST'>
+	{% module xsrf_form_html() %}
+	<input type="hidden" name="form" value="{{ form['iuid'] }}">
+	{% module Submit('create', title='New order') %}
+      </form>
+    </td>
+  </tr>
+  {% end %}
+</table>
 {% end %}

@@ -7,6 +7,14 @@
   {% module xsrf_form_html() %}
 
   <table class="order">
+    <tr>
+      <th>Order title</th>
+      <td></td>
+      <td>
+	<input type="text" name="__title__" value="{{ order['title'] or ''}}">
+      </td>
+      <td>A brief descriptive title for the order.</td>
+    </tr>
     {% for field in fields %}
       {% if field['type'] == 'group' %}
       <tr>

@@ -34,7 +34,9 @@ class Home(RequestHandler):
         self.render('home_staff.html')
 
     def dashboard_user(self):
-        self.render('home_user.html')
+        forms = [self.get_presentable(r.doc) for r in
+                 self.db.view('form/enabled', include_docs=True)]
+        self.render('home_user.html', forms=forms)
 
 
 class Log(RequestHandler):

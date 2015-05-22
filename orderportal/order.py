@@ -68,13 +68,7 @@ class OrderMixin(object):
 
     def get_order_status(self, order):
         "Get the order status lookup."
-        try:
-            return settings['ORDER_STATUSES'][order['status']]
-        except KeyError:
-            for status in settings['ORDER_STATUSES']:
-                if status.get('initial'):
-                    return status
-            raise ValueError('no initial order status defined')
+        return settings['ORDER_STATUSES'][order['status']]
 
     def get_targets(self, order):
         "Get the allowed transition targets."
@@ -103,7 +97,7 @@ class Orders(RequestHandler):
             title = 'Your orders'
         orders = [self.get_presentable(r.doc) for r in view]
         forms = [self.get_presentable(r.doc) for r in
-                 self.db.view('form/pending', include_docs=True)] # XXX enabled!
+                 self.db.view('form/enabled', include_docs=True)]
         self.render('orders.html', title=title, orders=orders, forms=forms)
 
 
@@ -116,7 +110,7 @@ class Order(OrderMixin, RequestHandler):
         self.check_readable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
         fields = Fields(form)
-        title = order['fields'].get('title') or order['_id']
+        title = order.get('title') or order['_id']
         self.render('order.html',
                     title="Order '{}'".format(title),
                     order=order,
@@ -137,13 +131,15 @@ class OrderCreate(RequestHandler):
         fields = Fields(form)
         with OrderSaver(rqh=self) as saver:
             saver['form'] = form['_id']
+            saver['title'] = form.get('title') or form['_id']
             saver['fields'] = dict([(f['identifier'], None) for f in fields])
             saver['owner'] = self.current_user['email']
             for transition in settings['ORDER_TRANSITIONS']:
                 if transition['source'] is None:
-                    saver['status'] = transition['target'][0]
+                    saver['status'] = transition['targets'][0]
                     break
-            saver['status'] = None
+            else:
+                raise ValueError('no initial order status defined')
             doc = saver.doc
         self.see_other(self.reverse_url('order', doc['_id']))
 
@@ -170,5 +166,6 @@ class OrderEdit(OrderMixin, RequestHandler):
         form = self.get_entity(order['form'], doctype=constants.FORM)
         fields = Fields(form)
         with OrderSaver(doc=order, rqh=self) as saver:
+            saver['title'] = self.get_argument('__title__', order['_id'])
             saver.update_fields(fields)
         self.see_other(self.reverse_url('order', order['_id']))

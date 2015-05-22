@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>{{ title }}</title>
+    <title>{% block head_title %}{{ title }}{% end %}</title>
     <link rel="shortcut icon" type="image/x-icon"
 	  href="{{ static_url('favicon.ico') }}">
     <link rel="stylesheet" type="text/css"
@@ -15,7 +15,7 @@
 	{% module Icon('home', title=settings['FACILITY_NAME']) %}
       </a>
 
-      <h1>{{ title }}</h1>
+      <h1>{% block body_title %}{{ title }}{% end %}</h1>
 
       <div class="right">
 	<div>
@@ -122,12 +122,11 @@
 
     </div>
 
-    {% block footer %}
     <footer>
-      <a href="https://github.com/pekrau/OrderPortal">OrderPortal</a>
-      {{ version }}
+      <a href="https://github.com/pekrau/OrderPortal">
+	OrderPortal {{ version }}
+      </a>
     </footer>
-    {% end %}
 
     {% block javascript_libraries %}
     <script type="text/javascript"
