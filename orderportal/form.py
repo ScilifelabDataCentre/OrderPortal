@@ -56,13 +56,13 @@ class FormSaver(saver.Saver):
 class FormMixin(object):
     "Mixin providing form-related methods."
 
-    def is_editable(self, form):
+    def are_fields_editable(self, form):
         "Are the form fields editable? Checks status only."
         return form['status'] == constants.PENDING
 
-    def check_editable(self, form):
+    def check_fields_editable(self, form):
         "Check if the form fields can be edited. Checks status only."
-        if not self.is_editable(form):
+        if not self.are_fields_editable(form):
             raise tornado.web.HTTPError(409, reason='form is not editable')
 
 
@@ -149,7 +149,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
     def get(self, iuid):
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.check_admin()
-        self.check_editable(form)
+        self.check_fields_editable(form)
         self.render('field_create.html',
                     title="Create field in form '{}'".format(form['title']),
                     form=form,
@@ -160,7 +160,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
         self.check_xsrf_cookie()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.check_admin()
-        self.check_editable(form)
+        self.check_fields_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.add_field()
         self.see_other(self.reverse_url('form', form['_id']))
@@ -173,7 +173,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
     def get(self, iuid, identifier):
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.check_admin()
-        self.check_editable(form)
+        self.check_fields_editable(form)
         fields = Fields(form)
         try:
             field = fields[identifier]
@@ -193,7 +193,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
             return
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.check_admin()
-        self.check_editable(form)
+        self.check_fields_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.update_field(identifier)
         self.see_other(self.reverse_url('form', form['_id']))
@@ -202,7 +202,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
     def delete(self, iuid, identifier):
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.check_admin()
-        self.check_editable(form)
+        self.check_fields_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.delete_field(identifier)
         self.see_other(self.reverse_url('form', form['_id']))
