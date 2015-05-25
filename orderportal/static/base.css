@@ -115,7 +115,7 @@ button:disabled img {opacity:0.4;
 		     filter:alpha(opacity=40);
 		    }
 
-caption {text-align: left; }
+tr.vertical_spacer {height: 1em; }
 
 table.fields tr th {text-align: right;
 		    vertical-align: top;

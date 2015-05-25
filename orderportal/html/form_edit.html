@@ -1,6 +1,13 @@
 {# Form edit page. #}
 {% extends "base.html" %}
 
+{% block actions %}
+<form action="{{ reverse_url('form', form['_id']) }}"
+      method='GET'>
+  {% module Submit('cancel') %}
+</form>
+{% end %}
+
 {% block content %}
 <form action="{{ reverse_url('form_edit', form['_id']) }}"
       method='POST'>
@@ -34,13 +41,13 @@
 	Description of the form.
       </td>
     </tr>
+    <tr class="vertical_spacer"></tr>
+    <tr>
+      <th></th>
+      <td></td>
+      <td>{% module Submit('save') %}</td>
+    </tr>
   </table>
 
-  {% module Submit('save') %}
-</form>
-
-<form action="{{ reverse_url('form', form['_id']) }}"
-      method='GET'>
-  {% module Submit('cancel') %}
 </form>
 {% end %}

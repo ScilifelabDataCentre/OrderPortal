@@ -12,6 +12,13 @@
 </div>
 {% end %}
 
+{% block actions %}
+<form action="{{ reverse_url('forms') }}"
+      method='GET'>
+  {% module Submit('cancel') %}
+</form>
+{% end %}
+
 {% block content %}
 <form action="{{ reverse_url('form_create') }}" method='POST'>
   {% module xsrf_form_html() %}
@@ -28,11 +35,13 @@
 	be unique, but you may want to make it so anyway.
       </td>
     </tr>
-
+    <tr class="vertical_spacer"></tr>
+    <tr>
+      <th></th>
+      <td></td>
+      <td>{% module Submit('create') %}</td>
+    </tr>
   </table>
 
-  <p>
-
-  {% module Submit('create', title='Create new form') %}
 </form>
 {% end %}
