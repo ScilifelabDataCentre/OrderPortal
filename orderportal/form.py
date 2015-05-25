@@ -57,14 +57,13 @@ class FormMixin(object):
     "Mixin providing form-related methods."
 
     def is_editable(self, form):
-        "Is the form editable? Checks status only."
+        "Are the form fields editable? Checks status only."
         return form['status'] == constants.PENDING
 
     def check_editable(self, form):
-        "Check if the form can be edited by the current user."
-        self.check_admin()
+        "Check if the form fields can be edited. Checks status only."
         if not self.is_editable(form):
-            raise tornado.web.HTTPError(409, reason='form is not pending')
+            raise tornado.web.HTTPError(409, reason='form is not editable')
 
 
 class Forms(RequestHandler):
@@ -89,25 +88,8 @@ class Form(FormMixin, RequestHandler):
         self.render('form.html',
                     title="Form '{}'".format(form['title']),
                     form=form,
-                    is_editable=self.is_editable(form),
                     fields=Fields(form),
                     logs=self.get_logs(form['_id']))
-
-    @tornado.web.authenticated
-    def post(self, iuid):
-        self.check_xsrf_cookie()
-        if self.get_argument('_http_method', None) == 'delete':
-            self.delete(iuid)
-            return
-        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
-
-    @tornado.web.authenticated
-    def delete(self, iuid):
-        form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_editable(form)
-        self.delete_logs(form['_id'])
-        self.db.delete(form)
-        self.see_other(self.reverse_url('forms'))
 
 
 class FormCreate(RequestHandler):
@@ -139,12 +121,12 @@ class FormCreate(RequestHandler):
 
 
 class FormEdit(FormMixin, RequestHandler):
-    "Page for editing an form."
+    "Page for editing an form; title and description."
 
     @tornado.web.authenticated
     def get(self, iuid):
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_editable(form)
+        self.check_admin()
         self.render('form_edit.html',
                     title="Edit form '{}'".format(form['title']),
                     form=form)
@@ -153,7 +135,7 @@ class FormEdit(FormMixin, RequestHandler):
     def post(self, iuid):
         self.check_xsrf_cookie()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_editable(form)
+        self.check_admin()
         with FormSaver(doc=form, rqh=self) as saver:
             saver['title'] = self.get_argument('title')
             saver['description'] = self.get_argument('description')
@@ -166,6 +148,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_admin()
         self.check_editable(form)
         self.render('field_create.html',
                     title="Create field in form '{}'".format(form['title']),
@@ -176,6 +159,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
     def post(self, iuid):
         self.check_xsrf_cookie()
         form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_admin()
         self.check_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.add_field()
@@ -188,6 +172,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid, identifier):
         form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_admin()
         self.check_editable(form)
         fields = Fields(form)
         try:
@@ -207,6 +192,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
             self.delete(iuid, identifier)
             return
         form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_admin()
         self.check_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.update_field(identifier)
@@ -215,6 +201,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def delete(self, iuid, identifier):
         form = self.get_entity(iuid, doctype=constants.FORM)
+        self.check_admin()
         self.check_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.delete_field(identifier)

@@ -28,18 +28,12 @@
 {% end %}
 <form action="{{ reverse_url('form_edit', form['_id']) }}"
       method="GET">
-  {% module Submit('edit', disabled=not is_editable) %}
+  {% module Submit('edit') %}
 </form>
 <form action="{{ reverse_url('form_copy', form['_id']) }}"
       method="POST">
   {% module xsrf_form_html() %}
   {% module Submit('copy') %}
-</form>
-<form action="{{ reverse_url('form', form['_id']) }}"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <input type="hidden" name="_http_method" value="delete">
-  {% module Submit('delete', confirm=True) %}
 </form>
 {% end %}
 {% end %}
