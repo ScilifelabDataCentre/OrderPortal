@@ -120,6 +120,22 @@ class Order(OrderMixin, RequestHandler):
                     targets=self.get_targets(order),
                     logs=self.get_logs(order['_id']))
 
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        if self.get_argument('_http_method', None) == 'delete':
+            self.delete(iuid)
+            return
+        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
+
+    @tornado.web.authenticated
+    def delete(self, iuid):
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.check_editable(order)
+        self.delete_logs(order['_id'])
+        self.db.delete(order)
+        self.see_other(self.reverse_url('orders'))
+
 
 class OrderCreate(RequestHandler):
     "Create a new order."

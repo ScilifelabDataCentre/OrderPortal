@@ -14,6 +14,13 @@
   {% module Submit(target['identifier'], title=target.get('label', target['identifier'].capitalize())) %}
 </form>
 {% end %}
+<div class="vertical_space"></div>
+<form action="{{ reverse_url('order', order['_id']) }}"
+      method='POST'>
+  {% module xsrf_form_html() %}
+  <input type="hidden" name="_http_method" value="delete">
+  {% module Submit('delete', confirm=True) %}
+</form>
 {% end %}
 
 {% block content %}

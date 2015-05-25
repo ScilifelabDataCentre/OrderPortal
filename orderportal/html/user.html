@@ -2,6 +2,12 @@
 {% extends "base.html" %}
 
 {% block actions %}
+{% if current_user['email'] == user['email'] %}
+  <form action="{{ reverse_url('logout') }}" method="POST">
+    {% module xsrf_form_html() %}
+    {% module Submit('logout') %}
+  </form>
+{% end %}
 <form action="{{ reverse_url('user_edit', user['email']) }}"
       method='GET'>
   {% module xsrf_form_html() %}
@@ -21,6 +27,7 @@
       {% module Submit('disable') %}
     </form>
   {% end %}
+  <div class="vertical_space"></div>
   {% if user['status'] == constants.PENDING %}
     <form action="{{ reverse_url('user', user['email']) }}"
 	  method='POST'>
@@ -29,12 +36,6 @@
       {% module Submit('delete', confirm=True) %}
     </form>
   {% end %}
-{% end %}
-{% if current_user['email'] == user['email'] %}
-  <form action="{{ reverse_url('logout') }}" method="POST">
-    {% module xsrf_form_html() %}
-    {% module Submit('logout') %}
-  </form>
 {% end %}
 {% end %}
 
