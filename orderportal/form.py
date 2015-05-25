@@ -49,8 +49,7 @@ class FormSaver(saver.Saver):
         if identifier not in fields:
             raise tornado.web.HTTPError(404, reason='no such field')
         fields.delete(identifier)
-        self.changed['fields'] = dict(identifier=identifier,
-                                      action='deleted')
+        self.changed['fields'] = dict(identifier=identifier, action='deleted')
 
 
 class FormMixin(object):

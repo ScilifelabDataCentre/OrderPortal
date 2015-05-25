@@ -91,8 +91,14 @@ class Fields(object):
                        rqh.get_argument('restrict_write', False)),
                    description=rqh.get_argument('description', None))
         field = self._lookup[identifier]
+        old = field.copy()
         field.update(new)
-        return field            # Yes, 'field', not 'new'.
+        diff = dict(identifier=field['identifier'])
+        for key, value in field.iteritems():
+            if key == 'fields': continue
+            if old.get(key) != value:
+                diff[key] = value
+        return diff
 
     def delete(self, identifier):
         "Delete the field and its children, if any."

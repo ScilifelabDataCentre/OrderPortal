@@ -1,6 +1,13 @@
 {# User edit page. #}
 {% extends "base.html" %}
 
+{% block actions %}
+<form action="{{ reverse_url('user', user['email']) }}"
+      method='GET'>
+  {% module Submit('cancel') %}
+</form>
+{% end %}
+
 {% block content %}
 <form action="{{ reverse_url('user_edit', user['email']) }}"
       method='POST'>
@@ -69,13 +76,13 @@
 	Phone number, including the country prefix (e.g. +46 for Sweden).
       </td>
     </tr>
+    <tr class="vertical_spacer"></tr>
+    <tr>
+      <th></th>
+      <td></td>
+      <td>{% module Submit('save') %}</td>
+    </tr>
   </table>
 
-  {% module Submit('save') %}
-</form>
-
-<form action="{{ reverse_url('user', user['email']) }}"
-      method='GET'>
-  {% module Submit('cancel') %}
 </form>
 {% end %}
