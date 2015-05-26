@@ -28,7 +28,7 @@ ORDER       = 'order'
 PUBLICATION = 'publication'
 USER        = 'user'
 LOG         = 'log'
-ENTITIES    = frozenset([USER, FIELD, ORDER, PUBLICATION])
+ENTITIES    = frozenset([USER, FIELD, FORM, ORDER, PUBLICATION, USER])
 
 # Field types
 STRING  = dict(value='string', label='String')

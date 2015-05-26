@@ -55,7 +55,11 @@
   </tr>
   <tr>
     <th>Modified</th>
-    <td class="localtime">{{ user['modified'] }}</td>
+    <td>
+      <a href="{{ reverse_url('user_logs', user['email']) }}" class="localtime">
+	{{ user['modified'] }}
+      </a>
+    </td>
   </tr>
   <tr>
     <th>Created</th>
@@ -86,8 +90,4 @@
     <td>{{ user.get('phone') or '-' }}</td>
   </tr>
 </table>
-{% end %}
-
-{% block log %}
-{% include 'log_table.html' %}
-{% end %}
+{% end %} {# block content #}

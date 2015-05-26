@@ -49,10 +49,21 @@
     <th>Description</th>
     <td>{{ form.get('description') or '' }}</td>
   </tr>
+
   <tr>
     <th>Status</th>
     <td>{% module Icon(form['status'], label=True) %}</td>
   </tr>
+
+  <tr>
+    <th>Modified</th>
+    <td>
+      <a href={{ reverse_url('form_logs', form['_id']) }} class="localtime">
+	{{ form['modified'] }}
+      </a>
+    </td>
+  </tr>
+
   <tr>
     <th>Fields</th>
     <td>
@@ -84,8 +95,4 @@
     </td>
   </tr>
 </table>
-{% end %}
-
-{% block log %}
-{% include 'log_table.html' %}
-{% end %}
+{% end %} {# block content #}

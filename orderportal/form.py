@@ -91,6 +91,19 @@ class Form(FormMixin, RequestHandler):
                     logs=self.get_logs(form['_id']))
 
 
+class FormLogs(RequestHandler):
+    "Form log entries page."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        self.check_staff()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        self.render('logs.html',
+                    title="Logs for form'{}'".format(form['title']),
+                    entity=form,
+                    logs=self.get_logs(form['_id']))
+
+
 class FormCreate(RequestHandler):
     "Page for creating an form."
 

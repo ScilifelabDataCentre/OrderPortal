@@ -1,4 +1,11 @@
-{# Log entries table page. #}
+{# Form logs page. #}
+{% extends "base.html" %}
+
+{% block content %}
+<p>
+  {% module Entity(entity) %}
+</p>
+
 <table class="log">
   <tr>
     <th>Log entry</th>
@@ -36,3 +43,4 @@
   </tr>
   {% end %}
 </table>
+{% end %} {# block content #}

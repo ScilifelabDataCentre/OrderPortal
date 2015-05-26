@@ -79,6 +79,19 @@ class User(RequestHandler):
         self.see_other(self.reverse_url('home'))
 
 
+class UserLogs(RequestHandler):
+    "User log entries page."
+
+    @tornado.web.authenticated
+    def get(self, email):
+        user = self.get_user(email)
+        self.check_owner_or_staff(user)
+        self.render('logs.html',
+                    title="Logs for user '{}'".format(user['email']),
+                    entity=user,
+                    logs=self.get_logs(user['_id']))
+
+
 class UserEdit(RequestHandler):
     "Page for editing user information."
 

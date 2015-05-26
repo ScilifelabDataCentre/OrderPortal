@@ -137,6 +137,19 @@ class Order(OrderMixin, RequestHandler):
         self.see_other(self.reverse_url('orders'))
 
 
+class OrderLogs(OrderMixin, RequestHandler):
+    "Order log entries page."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.check_readable(order)
+        self.render('logs.html',
+                    title="Logs for order'{}'".format(order['title']),
+                    entity=order,
+                    logs=self.get_logs(order['_id']))
+
+
 class OrderCreate(RequestHandler):
     "Create a new order."
 

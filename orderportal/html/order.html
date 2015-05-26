@@ -34,6 +34,16 @@
   </tr>
 
   <tr>
+    <th>Modified</th>
+    <td></td>
+    <td>
+      <a href={{ reverse_url('order_logs', order['_id']) }} class="localtime">
+	{{ order['modified'] }}
+      </a>
+    </td>
+  </tr>
+
+  <tr>
     <th>Owner</th>
     <td>{% module Icon('required') %}</td>
     <td>
@@ -60,8 +70,4 @@
   {% end %}
 
 </table>
-{% end %}
-
-{% block log %}
-{% include 'log_table.html' %}
-{% end %}
+{% end %} {# block content #}

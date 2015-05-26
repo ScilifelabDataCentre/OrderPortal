@@ -40,7 +40,7 @@ class Home(RequestHandler):
 
 
 class Log(RequestHandler):
-    "Log entry; JSON output."
+    "Singe log entry; JSON output."
 
     def get(self, iuid):
         doc = self.get_entity(iuid, doctype=constants.LOG)

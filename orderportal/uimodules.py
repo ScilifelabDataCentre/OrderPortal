@@ -67,13 +67,16 @@ class Entity(tornado.web.UIModule):
         Name = name.capitalize()
         iuid = entity.get('iuid') or entity['_id']
         url = self.handler.static_url(name + '.png')
-        title = entity.get('path') or entity.get('name') or \
+        title = entity.get('path') or entity.get('email') or \
             entity.get('title') or iuid
         icon = ICON_TEMPLATE.format(url=url, alt=Name, title=title)
-        try:
-            url = self.handler.reverse_url(name, iuid)
-        except KeyError, msg:
-            raise KeyError(str(msg) + ':', name)
+        if name == 'user':
+            url = self.handler.reverse_url(name, entity['email'])
+        else:
+            try:
+                url = self.handler.reverse_url(name, iuid)
+            except KeyError, msg:
+                raise KeyError(str(msg) + ':', name)
         return """<a href="{url}">{icon} {title}</a>""".format(
             url=url, icon=icon, title=title)
 
@@ -85,39 +88,3 @@ class OrderFieldsDisplay(tornado.web.UIModule):
         rows = []
         for field in fields:
             pass # XXX
-
-# class FormFieldsDisplay(tornado.web.UIModule):
-#     "HTML for displaying the fields of a form."
-
-#     def render(self, fields):
-#         rows = []
-#         for field in fields:
-#             rows.append("<tr><th>{}</th><td>{}</td><td>{}</td></tr>".format(
-#                     field.get('label') or field['identifier'],
-#                     field['type'],
-#                     field.get('description' or '-')))
-#         return "<table class='formfields'>{}</table>".format('\n'.join(rows))
-
-
-# class FormFieldsEdit(tornado.web.UIModule):
-#     "HTML for editing the values of form fields."
-
-#     def render(self, fields):
-#         rows = []
-#         for field in fields:
-#             th = field.get('label') or field['identifier']
-#             desc = field.get('description' or '-')
-#             if field['type'] == constants.GROUP['value']:
-#                 rows.append('<tr><th colspan="2"><h3>{}</h3></th><td>{}</td></tr>'.format(th, desc))
-#                 td = self.render(field['__children__'])
-#                 rows.append('<tr><td colspan="3">{}</td></tr>'.format(td))
-#             else:
-#                 value = field.get('value') or ''
-#                 if field['type'] == constants.STRING['value']:
-#                     td = """<input type="text" name="{}" value="{}">""".\
-#                         format(field['identifier'], value)
-#                 else:
-#                     td = '[undef]'
-#                 rows.append("<tr><th>{}</th><td>{}</td><td>{}</td></tr>".\
-#                         format(th, td, desc))
-#         return "<table class='formfields'>{}</table>".format('\n'.join(rows))

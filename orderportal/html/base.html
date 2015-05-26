@@ -40,19 +40,22 @@
 
     <div class="clear">
 
-      <nav>
-	{% block navigation %}
-	<div>
-	  <a href ="{{ reverse_url('home') }}">Home</a>
-	</div>
-	{% if current_user %}
-	  <div>
-	    <a href ="{{ reverse_url('search') }}">Search</a>
-	  </div>
-	  <div>
-	    <a href ="{{ reverse_url('orders') }}">Orders</a>
-	  </div>
-	  {% if is_admin %}
+      <table class="content">
+	<tr>
+	  <td class="top">
+	    <div class="menu">
+	    {% block navigation %}
+	    <div>
+	      <a href ="{{ reverse_url('home') }}">Home</a>
+	    </div>
+	    {% if current_user %}
+	    <div>
+	      <a href ="{{ reverse_url('search') }}">Search</a>
+	    </div>
+	    <div>
+	      <a href ="{{ reverse_url('orders') }}">Orders</a>
+	    </div>
+	    {% if is_admin %}
 	    <div>
 	      <a href ="{{ reverse_url('forms') }}">Forms</a>
 	    </div>
@@ -61,65 +64,67 @@
 	    <div>
 	      <a href ="{{ reverse_url('users') }}">Users</a>
 	    </div>
-	  {% end %}
-	{% end %} {# if current_user #}
-	<div class="bold">Password</div>
-	<div class="menu1">
-	  <div>
-	    <a href ="{{ reverse_url('reset') }}">Reset</a>
-	  </div>
-	  <div>
-	    <a href ="{{ reverse_url('password') }}">Set</a>
-	  </div>
-	</div>
-	{% block more_navigation %}
-	{% end %}
-	{% end %} {# block navigation #}
-      </nav>
-
-      <aside>
-	<div class="actions">
-	  {% block actions %}
-	  {% end %}
-	</div>
-	<br>
-	<div class="xrefs">
-	  {% block xrefs %}
-	  {% end %}
-	</div>
-      </aside>
-
-      <section>
-	<div class="left">
-
-	  <div>
-	    {% block subheader %}
 	    {% end %}
-	  </div>
-
-	  {% block error %}
-	  {% try %}
-          {% if error %}
-          <p class="error">
-	    Error: {{ error }}
-	  </p>
-	  {% end %}
-	  {% except NameError %}
-	  {% end %}
-	  {% end %}
-
-	  <div class="content">
-	    {% block content %}
+	    {% end %} {# if current_user #}
+	    <div class="bold">Password</div>
+	    <div class="menu1">
+	      <div>
+		<a href ="{{ reverse_url('reset') }}">Reset</a>
+	      </div>
+	      <div>
+		<a href ="{{ reverse_url('password') }}">Set</a>
+	      </div>
+	    </div>
+	    {% block more_navigation %}
 	    {% end %}
-	  </div>
+	    {% end %} {# block navigation #}
+	    </div>
+	  </td>
 
-	  <div class="log">
-	    {% block log %}
-	    {% end %}
-	  </div>
-	</div>
+	  <td class="top">
+	    <div class="left">
+	      <div>
+		{% block subheader %}
+		{% end %}
+	      </div>
 
-      </section>
+	      {% block error %}
+	      {% try %}
+              {% if error %}
+              <p class="error">
+		Error: {{ error }}
+	      </p>
+	      {% end %}
+	      {% except NameError %}
+	      {% end %}
+	      {% end %}
+
+	      <div class="content">
+		{% block content %}
+		{% end %}
+	      </div>
+
+	      <div class="log">
+		{% block log %}
+		{% end %}
+	      </div>
+	    </div>
+	  </td>
+
+	  <td class="aside">
+	    <div class="actions">
+	      {% block actions %}
+	      {% end %}
+	    </div>
+	    <br>
+	    <div class="xrefs">
+	      {% block xrefs %}
+	      {% end %}
+	    </div>
+	  </td>
+
+	</tr>
+      </table>
 
     </div>
 

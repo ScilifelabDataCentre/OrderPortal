@@ -112,12 +112,8 @@
 <p>
 
 <form action="{{ reverse_url('field_edit', field['identifier']) }}"
-      method='GET'>
+      method="GET">
   {% module Submit('edit', title='Edit field') %}
 </form>
 
-<p>
-
-{% include 'log_table.html' %}
-
-{% end %}
+{% end %} {# block content #}
