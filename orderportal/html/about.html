@@ -1,0 +1,18 @@
+{# Page describing the site. #}
+{% extends "base.html" %}
+
+{% block head_title %}About {{ settings['FACILITY_NAME'] }} Order Portal{% end %}
+{% block body_title %}
+About
+<img src="{{ static_url(settings['FACILITY_ICON_72']) }}"
+     title="{{ settings['FACILITY_NAME'] }}"
+     alt="{{ settings['FACILITY_NAME'] }}">
+{{ settings['FACILITY_NAME'] }} Order Portal
+{% end %}
+
+{% block content %}
+<p>
+  The source code for this site is available at
+  <a href="https://github.com/pekrau/OrderPortal">GitHub</a>
+</p>
+{% end %} {# block content #}

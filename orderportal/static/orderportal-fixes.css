@@ -9,9 +9,6 @@
 /* Remove border from panel. */
 .panel-noborder {border: 0; }
 
-/* Adjust text in fixed footer. */
-.container .text-muted {margin: 20px 0; }
-
 /* SciLifeLab green for navbar */
 /*
 .navbar-inverse {background-color: #a5cf4c; }

@@ -1,4 +1,4 @@
-{# Home page when not logged in; base for other variants. #}
+{# Home page when not logged in; base for other home variants. #}
 {% extends "base.html" %}
 
 {% block head_title %}{{ settings['FACILITY_NAME'] }} Order Portal{% end %}
@@ -73,8 +73,9 @@ This portal is used to describe and submit orders for the services provided by N
     </div>
 
   </div>
-{% end %} {# block content-left #}
+  {% end %} {# block content-left #}
 
+  {% block content-right %}
   <div class="col-sm-7">
 
     <div class="panel panel-primary">
@@ -110,24 +111,16 @@ This portal is used to describe and submit orders for the services provided by N
       </div>
     </div>
   </div>
+  {% end %} {# block content-right #}
+
 </div>
 
+{% block content-bottom %}
 <div class="panel panel-info">
-  <div class="panel-heading">About</div>
   <div class="panel-body">
     The National Genomics Infrastructure (NGI) is financed by...
   </div>
 </div>
-{% end %} {# block content #}
+{% end %} {# block content-bottom #}
 
-{% block footer %}
-<nav class="navbar navbar-default navbar-fixed-bottom">
-  <div class="container">
-    <p class="text-muted">
-      <a href="https://github.com/pekrau/OrderPortal">
-	OrderPortal {{ version }}
-      </a>
-    </p>
-  </div>
-</nav>
-{% end %} {# block footer #}
+{% end %} {# block content #}

@@ -28,15 +28,16 @@
             <li><a href ="{{ reverse_url('orders') }}">Orders</a></li>
 	    {% end %}
 	    {% if is_admin %}
-            <li><a href ="{{ reverse_url('forms') }}">Forms</a></li> 
+            <li><a href ="{{ reverse_url('forms') }}">Forms</a></li>
 	    {% end %}
 	    {% if is_staff %}
-            <li><a href ="{{ reverse_url('users') }}">Users</a></li> 
+            <li><a href ="{{ reverse_url('users') }}">Users</a></li>
 	    {% end %}
 	  </ul>
-	  {% if current_user %}
 	  <div>
 	    <ul class="nav navbar-nav navbar-right">
+	      <li><a href ="{{ reverse_url('about') }}">About</a></li>
+	      {% if current_user %}
 	      <li>
 		<p class="navbar-text">
 		  Logged in as
@@ -55,9 +56,9 @@
 		  </button>
 		</form>
 	      </li>
+	      {% end %} {# if current_user #}
 	    </ul>
 	  </div>
-	  {% end %}
 	</div>
       </div>
     </nav>

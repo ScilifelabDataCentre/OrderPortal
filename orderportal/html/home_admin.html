@@ -1,37 +1,49 @@
 {# Home page: Admin dashboard. #}
 {% extends "home.html" %}
 
-{% block actions %}
-<form action="{{ reverse_url('logout') }}" method="POST">
-  {% module xsrf_form_html() %}
-  {% module Submit('logout') %}
-</form>
-{% end %}
+{% block content-top %}
+{% end %} {# block content-top #}
 
-{% block content %}
-<h3>Pending user accounts</h3>
-<table class="table-condensed">
-  <tr>
-    <th>User</th>
-    <th>Role</th>
-    <th>Status</th>
-    <th>Created</th>
-  </tr>
-{% if pending %}
-{% for user in pending %}
-  <tr>
-    <td>
-      <a href="{{ reverse_url('user', user['email']) }}">{{ user['email'] }}</a>
-    </td>
-    <td>{% module Icon(user['role'], label=True) %}</td>
-    <td>{% module Icon(user['status'], label=True) %}</td>
-    <td class="localtime">{{ user['created'] }}</td>
-  </tr>
-{% end %}
-{% else %}
-  <tr>
-    <td><i>[none]</i></td>
-  </tr>
-{% end %}
-</table>
-{% end %} {# block content #}
+{% block content-left %}
+<div class="col-sm-5">
+  <div class="panel panel-danger">
+    <div class="panel-heading">
+      <span class="glyphicon glyphicon-user">
+	Pending user accounts
+      </span>
+    </div>
+
+    <div class="panel-body">
+      <table class="table table-condensed">
+	<tr>
+	  <th>User</th>
+	  <th>Role</th>
+	  <th>Status</th>
+	  <th>Created</th>
+	</tr>
+	{% if pending %}
+	{% for user in pending %}
+	<tr>
+	  <td>
+	    <a href="{{ reverse_url('user', user['email']) }}">
+	      {{ user['email'] }}
+	    </a>
+	  </td>
+	  <td>{% module Icon(user['role'], label=True) %}</td>
+	  <td>{% module Icon(user['status'], label=True) %}</td>
+	  <td class="localtime">{{ user['created'] }}</td>
+	</tr>
+	{% end %}
+	{% else %}
+	<tr>
+	  <td colspan="4"><i>[none]</i></td>
+	</tr>
+	{% end %}
+      </table>
+    </div>
+  </div>
+</div>
+{% end %} {# block content-left #}
+
+{% block content-bottom %}
+{% end %} {# block content-bottom #}

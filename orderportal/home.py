@@ -67,3 +67,10 @@ class Entity(RequestHandler):
         else:
             raise tornado.web.HTTPError(404)
         self.see_other(url)
+
+
+class About(RequestHandler):
+    "Page describing the site."
+
+    def get(self):
+        self.render('about.html')
