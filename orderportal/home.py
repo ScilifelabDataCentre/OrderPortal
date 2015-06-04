@@ -16,27 +16,31 @@ class Home(RequestHandler):
 
     def get(self):
         if not self.current_user:
-            self.render('home_login.html')
+            self.render('home.html')
         elif self.current_user['role'] == constants.ADMIN:
-            self.dashboard_admin()
+            self.home_admin()
         elif self.current_user['role'] == constants.STAFF:
-            self.dashboard_staff()
+            self.home_staff()
         else:
-            self.dashboard_user()
+            self.home_user()
 
-    def dashboard_admin(self):
+    def home_admin(self):
         view = self.db.view('user/pending', include_docs=True)
         pending = [self.get_presentable(r.doc) for r in view]
         pending.sort(utils.cmp_modified, reverse=True)
         self.render('home_admin.html', pending=pending)
 
-    def dashboard_staff(self):
+    def home_staff(self):
         self.render('home_staff.html')
 
-    def dashboard_user(self):
+    def home_user(self):
         forms = [self.get_presentable(r.doc) for r in
                  self.db.view('form/enabled', include_docs=True)]
-        self.render('home_user.html', forms=forms)
+        view = self.db.view('order/owner', descending=True,
+                            limit=10, include_docs=True,
+                            key=self.current_user['email'])
+        orders = [self.get_presentable(r.doc) for r in view]
+        self.render('home_user.html', forms=forms, orders=orders)
 
 
 class Log(RequestHandler):

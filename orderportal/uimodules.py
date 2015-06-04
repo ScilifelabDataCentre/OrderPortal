@@ -64,12 +64,16 @@ class Entity(tornado.web.UIModule):
         if not name:
             name = entity[constants.DOCTYPE]
         assert name in constants.ENTITIES
-        Name = name.capitalize()
         iuid = entity.get('iuid') or entity['_id']
-        url = self.handler.static_url(name + '.png')
-        title = entity.get('path') or entity.get('email') or \
-            entity.get('title') or iuid
-        icon = ICON_TEMPLATE.format(url=url, alt=Name, title=title)
+        if name == 'user':
+            url = self.handler.static_url(entity['role'] + '.png')
+            title = entity['email']
+            alt = entity['role']
+        else:
+            url = self.handler.static_url(name + '.png')
+            title = entity.get('path') or entity.get('title') or iuid
+            alt = name.capitalize()
+        icon = ICON_TEMPLATE.format(url=url, alt=alt, title=alt)
         if name == 'user':
             url = self.handler.reverse_url(name, entity['email'])
         else:

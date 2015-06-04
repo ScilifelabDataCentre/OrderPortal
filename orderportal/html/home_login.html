@@ -1,54 +1,16 @@
 {# Login variant of home page. #}
-{% extends "base.html" %}
+{% extends "home.html" %}
 
-{% block subheader %}
+{% block content %}
 <p class="subheader">
 This portal is used to create orders (a.k.a. requests, project
 applications) for the {{ settings['FACILITY_NAME'] }} facility.
 </p>
-{% end %}
 
-{% block content %}
-<h2>Login to your existing user account</h2>
-<form action="{{ reverse_url('login') }}" method="POST">
-  {% module xsrf_form_html() %}
-  <table class="fields">
-    <tr>
-      <th>Email address</th>
-      <td>{% module Icon('required') %}</td>
-      <td>
-	<input type="email" name="email">
-      </td>
-      <td class="description">
-	Your email address is your user name in this portal.
-      </td>
-    </tr>
-    <tr>
-      <th>Password</th>
-      <td>{% module Icon('required') %}</td>
-      <td>
-	<input type="password" name="password">
-      </td>
-      <td class="description">
-	Forgot your password?
-	<a href="{{ reverse_url('reset') }}">Go to this page to reset it.</a>
-      </td>
-    </tr>
-    <tr>
-      <th></th>
-      <td></td>
-      <td>
-	{% module Submit('login') %}
-      </td>
-    </tr>
-  </table>
-</form>
+<h2>Register a new user account
+<span class="glyphicon glyphicon-user"></span>
+</h2>
 
-<br>
-<br>
-<br>
-
-<h2>Register a new user account</h2>
 <ul>
   <li> Your registration of a new user account will be processed
     manually by the portal administrators.

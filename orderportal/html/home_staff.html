@@ -1,11 +1,5 @@
 {# Home page: Staff dashboard. #}
-{% extends "base.html" %}
-
-{% block subheader %}
-<p class="medium">
-Staff dashboard.
-</p>
-{% end %}
+{% extends "home.html" %}
 
 {% block actions %}
 <form action="{{ reverse_url('logout') }}" method="POST">
@@ -15,4 +9,4 @@ Staff dashboard.
 {% end %}
 
 {% block content %}
-{% end %}
+{% end %} {# block content #}

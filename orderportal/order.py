@@ -92,7 +92,8 @@ class Orders(RequestHandler):
             view = self.db.view('order/modified', include_docs=True)
             title = 'Recent orders'
         else:
-            view = self.db.view('order/owner', include_docs=True,
+            view = self.db.view('order/owner', descending=True,
+                                include_docs=True,
                                 key=self.current_user['email'])
             title = 'Your orders'
         orders = [self.get_presentable(r.doc) for r in view]

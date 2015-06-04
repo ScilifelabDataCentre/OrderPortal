@@ -28,7 +28,6 @@ class RequestHandler(tornado.web.RequestHandler):
     def get_template_namespace(self):
         "Set the variables accessible within the template."
         result = super(RequestHandler, self).get_template_namespace()
-        result['title'] = 'OrderPortal'
         result['version'] = orderportal.__version__
         result['settings'] = settings
         result['constants'] = constants

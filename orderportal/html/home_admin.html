@@ -1,5 +1,5 @@
 {# Home page: Admin dashboard. #}
-{% extends "base.html" %}
+{% extends "home.html" %}
 
 {% block actions %}
 <form action="{{ reverse_url('logout') }}" method="POST">
@@ -9,8 +9,8 @@
 {% end %}
 
 {% block content %}
-<h2>Pending user accounts</h2>
-<table class="listing">
+<h3>Pending user accounts</h3>
+<table class="table-condensed">
   <tr>
     <th>User</th>
     <th>Role</th>
@@ -34,4 +34,4 @@
   </tr>
 {% end %}
 </table>
-{% end %}
+{% end %} {# block content #}

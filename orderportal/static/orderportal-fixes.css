@@ -1,0 +1,20 @@
+/* OrderPortal CSS fixing minor issues with the standard bootstrap CSS. */
+
+/* The icon image padding must be adjusted for the navbar */
+.navbar-brand {padding: 9px; }
+
+/* Reduce empty space below navbar. */
+.navbar {margin-bottom: 0; }
+
+/* Remove border from panel. */
+.panel-noborder {border: 0; }
+
+/* Adjust text in fixed footer. */
+.container .text-muted {margin: 20px 0; }
+
+/* SciLifeLab green for navbar */
+/*
+.navbar-inverse {background-color: #a5cf4c; }
+.navbar-inverse .navbar-nav li a {color: white; }
+.navbar-inverse .navbar-text {color: white; }
+*/

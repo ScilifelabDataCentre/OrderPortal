@@ -1,31 +1,55 @@
 {# Home page: User dashboard. #}
-{% extends "base.html" %}
+{% extends "home.html" %}
 
-{% block actions %}
-<form action="{{ reverse_url('logout') }}" method="POST">
-  {% module xsrf_form_html() %}
-  {% module Submit('logout') %}
-</form>
-{% end %}
+{% block content-top %}
+{% end %} {# block content-top #}
 
-{% block content %}
-<table class="listing">
-  <tr>
-    <th>Form</th>
-    <th>Description</th>
-  </tr>
-  {% for form in forms %}
-  <tr>
-    <td>{{ form['title'] }}</td>
-    <td>{{ form['description'] }}</td>
-    <td>
-      <form action="{{ reverse_url('order_create') }}" method='POST'>
-	{% module xsrf_form_html() %}
-	<input type="hidden" name="form" value="{{ form['iuid'] }}">
-	{% module Submit('create', title='New order') %}
-      </form>
-    </td>
-  </tr>
-  {% end %}
-</table>
-{% end %}
+{% block content-left %}
+<div class="col-sm-5">
+  
+  <div class="panel-group">
+    {% for form in forms %}
+    <div class="panel panel-warning">
+      <div class="panel-heading">
+	<form action="{{ reverse_url('order_create') }}"
+	      class="form" method="POST">
+	  {% module xsrf_form_html() %}
+	  <input type="hidden" name="form" value="{{ form['iuid'] }}">
+	  <button type="submit"
+		  class="btn btn-sm btn-warning glyphicon glyphicon-plus">
+	    Create order
+	  </button>
+	  {{ form['title'] }}
+	</form>
+      </div>
+      <div class="panel-body">
+	  {{ form['description'] }}
+      </div>
+    </div>
+    {% end %}
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <a href="{{ reverse_url('orders') }}" class="btn btn-default">
+	{% module Icon('order') %}
+	Recently modified orders
+      </a>
+    </div>
+    <div class="panel-body">
+      <table class="table table-condensed">
+	{% for order in orders %}
+	<tr>
+	  <th>
+	    <a href="{{ reverse_url('order', order['iuid']) }}">{{ order['title'] }}</a>
+	  </th>
+	  <td>{% module Icon(order['status'], label=True) %}</td>
+	  <td class="localtime">{{ order['modified'] }}</td>
+	</tr>
+	{% end %}
+      </table>
+    </div>
+  </div>
+
+</div>
+{% end %} {# block content-left #}

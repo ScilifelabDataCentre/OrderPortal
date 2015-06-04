@@ -1,0 +1,133 @@
+{# Home page when not logged in; base for other variants. #}
+{% extends "base.html" %}
+
+{% block head_title %}{{ settings['FACILITY_NAME'] }} Order Portal{% end %}
+{% block body_title %}
+<img src="{{ static_url(settings['FACILITY_ICON_72']) }}"
+     title="{{ settings['FACILITY_NAME'] }}"
+     alt="{{ settings['FACILITY_NAME'] }}">
+{{ settings['FACILITY_NAME'] }} Order Portal
+{% end %}
+
+{% block content %}
+
+{% block content-top %}
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <div class="panel panel-default">
+      <div class="panel-body">
+This portal is used to describe and submit orders for the services provided by NGI. NGI primarily serves projects run by research groups in Sweden. Projects from other countries are admissible, but have lower priority than Swedish projects. Depending on the queue situation, NGI may decide to decline a non-Swedish project altogether.
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-11">
+  </div>
+</div>
+{% end %} {# block content-top #}
+
+<div class="row">
+
+  {% block content-left %}
+  <div class="col-sm-5">
+    <div class="panel panel-warning">
+      <div class="panel-heading">
+	<span class="glyphicon glyphicon-user">
+	  User account login
+	</span>
+      </div>
+      <div class="panel-body">
+
+	<form action="{{ reverse_url('login') }}" method="POST" role="form">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group">
+	    <label for="email">Email:</label>
+	    <input type="text" class="form-control" name="email"
+		   placeholder="Email address of existing account">
+	  </div>
+	  <div class="form-group">
+	    <label for="password">Password:</label>
+	    <input type="password" class="form-control" name="password">
+	  </div>
+	  <div class="form-group"> 
+	    <button type="submit"
+		    class="btn btn-warning glyphicon glyphicon-log-in">
+	      Login
+	    </button>
+	  </div>
+	</form>
+	  
+	<br>
+	<p>
+	  <a href="#"
+	     class="btn btn-default glyphicon glyphicon-user" role="button">
+	    Register new user account
+	  </a>
+	</p>
+	<p>
+	  <a href="#"
+	     class="btn btn-default glyphicon glyphicon-envelope" role="button">
+	    Reset password
+	  </a>
+	</p>
+      </div>
+    </div>
+
+  </div>
+{% end %} {# block content-left #}
+
+  <div class="col-sm-7">
+
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+	<span class="glyphicon glyphicon-info-sign">
+	  News
+	</span>
+      </div>
+      <div class="panel-body">
+	<ul class="list-group">
+	  <li class="list-group-item"> News 1... </li>
+	  <li class="list-group-item"> News 2... </li>
+	</ul>
+      </div>
+    </div>
+
+    <div class="panel panel-success">
+      <div class="panel-heading">
+	<a href="#" class="btn btn-success glyphicon glyphicon-calendar">
+	  Events
+	</a>
+      </div>
+      <div class="panel-body">
+	<div class="list-group">
+	  <a href="#" class="list-group-item">
+	    <strong>1 Sep 2015, Uppsala:</strong>
+	    Course...
+	    <span class="small">[added 2015-06-01]</span>
+	  </a>
+	  <a href="#" class="list-group-item">Seminar...</a>
+	  <a href="#" class="list-group-item">Meeting...</a>
+	</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-info">
+  <div class="panel-heading">About</div>
+  <div class="panel-body">
+    The National Genomics Infrastructure (NGI) is financed by...
+  </div>
+</div>
+{% end %} {# block content #}
+
+{% block footer %}
+<nav class="navbar navbar-default navbar-fixed-bottom">
+  <div class="container">
+    <p class="text-muted">
+      <a href="https://github.com/pekrau/OrderPortal">
+	OrderPortal {{ version }}
+      </a>
+    </p>
+  </div>
+</nav>
+{% end %} {# block footer #}

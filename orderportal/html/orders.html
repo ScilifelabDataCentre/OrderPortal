@@ -1,8 +1,14 @@
 {# Order list page. #}
 {% extends "base.html" %}
 
+{% block head_title %}Orders{% end %}
+{% block body_title %}
+{% module Icon('order', title='Orders') %}
+Orders
+{% end %}
+
 {% block content %}
-<table class="listing">
+<table class="table table-condensed">
   <tr>
     <th>Order</th>
     <th>Status</th>

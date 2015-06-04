@@ -139,7 +139,7 @@ class Login(RequestHandler):
             raise tornado.web.HTTPError(400, reason='disabled user account')
         self.set_secure_cookie(constants.USER_COOKIE, user['email'])
         with UserSaver(doc=user, rqh=self) as saver:
-            saver['login'] = utils.timestamp() # Set login session.
+            saver['login'] = utils.timestamp() # Set login timestamp.
         self.redirect(self.reverse_url('home'))
 
 
@@ -150,8 +150,6 @@ class Logout(RequestHandler):
     def post(self):
         self.check_xsrf_cookie()
         self.set_secure_cookie(constants.USER_COOKIE, '')
-        with UserSaver(doc=self.current_user, rqh=self) as saver:
-            saver['login'] = None
         self.redirect(self.reverse_url('home'))
 
 
