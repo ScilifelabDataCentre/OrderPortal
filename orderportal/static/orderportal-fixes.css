@@ -9,6 +9,22 @@
 /* Remove border from panel. */
 .panel-noborder {border: 0; }
 
+/* Table for field values. */
+.table-fields tr th {text-align: right;
+		     vertical-align: top;
+		    }
+
+.table-fields tr td {vertical-align: top; }
+
+/* Pre-formatted white-spaces in text. */
+.pre {white-space: pre; }
+
+/* Mark input field as required with a red star. */
+.form-required label:after { color: red;
+			     content: ' *';
+			     display: inline;
+			   }
+
 /* SciLifeLab green for navbar */
 /*
 .navbar-inverse {background-color: #a5cf4c; }
