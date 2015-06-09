@@ -12,22 +12,16 @@
     {% for form in forms %}
     <div class="panel panel-warning">
       <div class="panel-heading">
-	<div class="row">
-	  <div class="col-sm-8">
-	    {{ form['title'] }}
-	  </div>
-	  <div class="col-sm-4">
-	    <form action="{{ reverse_url('order_create') }}"
-		  role="form" class="text-right" method="POST">
-	      {% module xsrf_form_html() %}
-	      <input type="hidden" name="form" value="{{ form['iuid'] }}">
-	      <button type="submit"
-		      class="btn btn-xs btn-warning glyphicon glyphicon-plus">
-		Create order
-	      </button>
-	    </form>
-	  </div>
-	</div>
+	{{ form['title'] }}
+	<form action="{{ reverse_url('order_create') }}"
+	      role="form" class="pull-right" method="POST">
+	  {% module xsrf_form_html() %}
+	  <input type="hidden" name="form" value="{{ form['iuid'] }}">
+	  <button type="submit"
+		  class="btn btn-xs btn-warning glyphicon glyphicon-plus">
+	    Create order
+	  </button>
+	</form>
       </div>
       <div class="panel-body">
 	  {{ form['description'] }}
@@ -38,13 +32,15 @@
 
   <div class="panel panel-default">
     <div class="panel-heading">
-      <a href="{{ reverse_url('orders') }}" class="btn btn-default">
+      My recently modified orders
+      <a href="{{ reverse_url('orders_user', current_user['email']) }}"
+	 class="btn btn-xs btn-default pull-right">
 	{% module Icon('order') %}
-	Recently modified orders
+	My orders
       </a>
     </div>
     <div class="panel-body">
-      <table class="table table-condensed">
+      <table class="table-condensed">
 	{% for order in orders %}
 	<tr>
 	  <th>

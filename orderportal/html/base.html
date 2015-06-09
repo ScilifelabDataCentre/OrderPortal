@@ -24,8 +24,13 @@
 	</div>
 	<div>
 	  <ul class="nav navbar-nav">
+            <li><a href ="{{ reverse_url('home') }}">Home</a></li>
 	    {% if current_user %}
+	    {% if is_staff %}
             <li><a href ="{{ reverse_url('orders') }}">Orders</a></li>
+	    {% else %}
+            <li><a href ="{{ reverse_url('orders_user', current_user['email']) }}">My orders</a></li>
+	    {% end %}
 	    {% end %}
 	    {% if is_admin %}
             <li><a href ="{{ reverse_url('forms') }}">Forms</a></li>
@@ -90,15 +95,18 @@
 
       {% block content %}
       <div class="row">
-	<div class="col-sm-10">
+	<div class="col-sm-9 col-sm-offset-1">
+	  {% block main_content %}
+	  {% end %} {# block main_content #}
+	</div>
+	<div class="col-sm-2">
+	  {% block meta_content %}
+	  {% end %} {# block meta_content #}
 	</div>
       </div>
-      {% end %}
+      {% end %} {# block content #}
 
     </div>
-
-    {% block footer %}
-    {% end %} {# block footer #}
 
     {% block javascript_standard %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>

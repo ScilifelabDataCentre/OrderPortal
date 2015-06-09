@@ -84,7 +84,7 @@ class OrderMixin(object):
 
 
 class Orders(RequestHandler):
-    "Page for orders list and creating a new order from a form."
+    "Page for a list of all orders."
 
     @tornado.web.authenticated
     def get(self):
@@ -97,9 +97,22 @@ class Orders(RequestHandler):
                                 key=self.current_user['email'])
             title = 'Your orders'
         orders = [self.get_presentable(r.doc) for r in view]
-        forms = [self.get_presentable(r.doc) for r in
-                 self.db.view('form/enabled', include_docs=True)]
-        self.render('orders.html', title=title, orders=orders, forms=forms)
+        self.render('orders.html', title=title, orders=orders)
+
+
+class OrdersUser(RequestHandler):
+    "Page for a list of all orders for a user."
+
+    @tornado.web.authenticated
+    def get(self, email):
+        if not self.is_staff() and email != self.current_user['email']:
+            raise tornado.web.HTTPError(403,
+                                        reason='you may not view these orders')
+        user = self.get_user(email)
+        view = self.db.view('order/owner', descending=True,
+                            include_docs=True, key=email)
+        orders = [self.get_presentable(r.doc) for r in view]
+        self.render('orders_user.html', user=user, orders=orders)
 
 
 class Order(OrderMixin, RequestHandler):

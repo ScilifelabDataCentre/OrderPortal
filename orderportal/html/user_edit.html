@@ -2,91 +2,100 @@
 
 {% extends "base.html" %}
 
-{% block actions %}
-<form action="{{ reverse_url('user', user['email']) }}"
-      method="GET">
-  {% module Submit('cancel') %}
-</form>
+{% block head_title %}Edit {{ user['email'] }}{% end %}
+{% block body_title %}
+Edit
+{% module Icon('user') %}
+{{ user['email'] }}
 {% end %}
 
-{% block content %}
-<div class="row">
-  <div class="col-sm-9 col-sm-offset-1">
-    <form action="{{ reverse_url('user_edit', user['email']) }}"
-	  role="form" class="form-horizontal" method="POST">
-      {% module xsrf_form_html() %}
+{% block main_content %}
+<form action="{{ reverse_url('user_edit', user['email']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
 
-      <div class="form-group form-required">
-	<label class="control-label col-sm-2" for="first_name">First name</label>
-	<div class="col-sm-10">
-	  <input type="text" class="form-control" name="first_name"
-		 placeholder="Enter given name, optionally with initials"
-		 value="{{ user.get('first_name') or '' }}">
-	</div>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-6">
+	<label class="control-label" for="first_name">First name</label>
+	<input type="text" class="form-control" name="first_name"
+	       value="{{ user.get('first_name') or '' }}">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+	<p class="text-muted">
+	  Given name, optionally with initials.
+	</p>
       </div>
-
-      <div class="form-group form-required">
-	<label class="control-label col-sm-2" for="last_name">Last name</label>
-	<div class="col-sm-10"> 
-	  <input type="text" class="form-control" name="last_name"
-		 placeholder="Enter family name"
-		 value="{{ user.get('last_name') or '' }}">
-	</div>
-      </div>
-
-      <div class="form-group form-required">
-	<label class="control-label col-sm-2" for="university">University</label>
-	<div class="col-sm-10"> 
-	  <input type="text" class="form-control" name="university"
-		 placeholder="Enter main affiliation: university, company, or similar"
-		 value="{{ user.get('university') or '' }}">
-	</div>
-      </div>
-
-      <div class="form-group">
-	<label class="control-label col-sm-2" for="department">Department</label>
-	<div class="col-sm-10"> 
-	  <input type="text" class="form-control" name="department"
-		 placeholder="Enter department, section, or similar"
-		 value="{{ user.get('department') or '' }}">
-	</div>
-      </div>
-
-      <div class="form-group">
-	<label class="control-label col-sm-2" for="address">Address</label>
-	<div class="col-sm-10"> 
-	  <textarea class="form-control" name="address">
-	    {{ user.get('address') or '' }}
-	    </textarea>
-	</div>
-      </div>
-
-      <div class="form-group">
-	<label class="control-label col-sm-2" for="phone">Phone</label>
-	<div class="col-sm-10"> 
-	  <input type="text" class="form-control" name="phone"
-		 value="{{ user.get('phone') or '' }}">
-	</div>
-      </div>
-
-      <div class="form-group">
-	<label class="control-label col-sm-2"></label>
-	<div class="col-sm-10">
-	  <button type="submit" class="btn btn-default">
-	    {% module Icon('save', label=True) %}
-	  </button>
-	</div>
-      </div>
-    </form>
+    </div>
   </div>
 
-  <div class="col-sm-2">
-    <form action="{{ reverse_url('user', user['email']) }}"
-	  role="form" method="GET">
-      <button type="submit" class="btn btn-default">
-	{% module Icon('cancel', label=True) %}
+  <div class="form-group form-required">
+    <label class="control-label col-sm-2" for="last_name">Last name</label>
+    <div class="col-sm-10"> 
+      <input type="text" class="form-control" name="last_name"
+	     placeholder="Enter family name"
+	     value="{{ user.get('last_name') or '' }}">
+    </div>
+  </div>
+
+  <div class="form-group form-required">
+    <label class="control-label col-sm-2" for="university">University</label>
+    <div class="col-sm-10"> 
+      <input type="text" class="form-control" name="university"
+	     placeholder="Enter main affiliation: university, company, or similar"
+	     value="{{ user.get('university') or '' }}">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="department">Department</label>
+    <div class="col-sm-10"> 
+      <input type="text" class="form-control" name="department"
+	     placeholder="Enter department, section, or similar"
+	     value="{{ user.get('department') or '' }}">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="address">Address</label>
+    <div class="col-sm-10"> 
+      <textarea class="form-control" name="address">
+	{{ user.get('address') or '' }}
+      </textarea>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="phone">Phone</label>
+    <div class="col-sm-10"> 
+      <input type="text" class="form-control" name="phone"
+	     value="{{ user.get('phone') or '' }}">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-sm-2"></label>
+    <div class="col-sm-10">
+      <button type="submit"
+	      class="btn btn-default btn-primary glyphicon glyphicon-save">
+	Save
       </button>
-    </form>
+    </div>
   </div>
-</div>
-{% end %}
+
+  <div class="form-group">
+    <label class="control-label col-sm-2"></label>
+    <div class="col-sm-10">
+      <form action="{{ reverse_url('user', user['email']) }}"
+	    role="form" method="GET">
+	<button type="submit"
+		class="btn btn-default glyphicon glyphicon-remove">
+	  Cancel
+	</button>
+      </form>
+    </div>
+  </div>
+
+</form>
+{% end %} {# block main_content #}

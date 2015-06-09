@@ -41,6 +41,7 @@ def get_handlers():
             URL(r'/order/([0-9a-f]{32})/edit', OrderEdit, name='order_edit'),
             URL(r'/order/([0-9a-f]{32})/transition/(\w+)',
                 Dummy, name='order_transition'),
+            URL(r'/orders/([^/]+)', OrdersUser, name='orders_user'),
             # URL(r'/order/([0-9a-f]{32})/copy', OrderCopy, name='order_copy'),
             # URL(r'/order/([0-9a-f]{32})/log', OrderLog, name='order_log'),
             URL(r'/users', Users, name='users'),

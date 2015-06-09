@@ -1,10 +1,11 @@
-{# List of all orders. #}
+{# List of all orders for a user. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}Orders{% end %}
+{% block head_title %}Orders for {{ user['email'] }}{% end %}
 {% block body_title %}
-{% module Icon('order', title='Orders', label=True) %}
+{% module Icon('order') %} Orders for
+<a href="{{ reverse_url('user', user['email']) }}">{{ user['email'] }}</a>
 {% end %}
 
 {% block content %}
@@ -15,7 +16,6 @@
 	<th>Order</th>
 	<th>Status</th>
 	<th>Modified</th>
-	<th>Owner</th>
       </tr>
       {% for order in orders %}
       <tr>
@@ -24,7 +24,6 @@
 	</td>
 	<td>{% module Icon(order['status'], label=True) %}</td>
 	<td class="localtime">{{ order['modified'] }}</td>
-	<td><a href="{{ reverse_url('user', order['owner']) }}">{{ order['owner'] }}</a></td>
       </tr>
       {% end %}
     </table>
