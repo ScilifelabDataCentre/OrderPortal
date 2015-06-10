@@ -1,12 +1,12 @@
-{# Home page: Staff dashboard. #}
-{% extends "home.html" %}
+{# Home page for staff. #}
 
-{% block actions %}
-<form action="{{ reverse_url('logout') }}" method="POST">
-  {% module xsrf_form_html() %}
-  {% module Submit('logout') %}
-</form>
-{% end %}
+{% extends "base.html" %}
 
-{% block content %}
-{% end %} {# block content #}
+{% block content-top %}
+{% end %} {# block content-top #}
+
+{% block content-left %}
+{% end %} {# block content-left #}
+
+{% block content-bottom %}
+{% end %} {# block content-bottom #}

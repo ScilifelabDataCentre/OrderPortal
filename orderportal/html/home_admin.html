@@ -2,9 +2,6 @@
 
 {% extends "home.html" %}
 
-{% block content-top %}
-{% end %} {# block content-top #}
-
 {% block content-left %}
 <div class="col-sm-5">
   <div class="panel panel-danger">
@@ -19,7 +16,6 @@
 	<tr>
 	  <th>User</th>
 	  <th>Role</th>
-	  <th>Status</th>
 	  <th>Created</th>
 	</tr>
 	{% if pending %}
@@ -31,13 +27,12 @@
 	    </a>
 	  </td>
 	  <td>{% module Icon(user['role'], label=True) %}</td>
-	  <td>{% module Icon(user['status'], label=True) %}</td>
 	  <td class="localtime">{{ user['created'] }}</td>
 	</tr>
 	{% end %}
 	{% else %}
 	<tr>
-	  <td colspan="4"><i>[none]</i></td>
+	  <td colspan="4"><i>Currently none.</i></td>
 	</tr>
 	{% end %}
       </table>
@@ -45,6 +40,3 @@
   </div>
 </div>
 {% end %} {# block content-left #}
-
-{% block content-bottom %}
-{% end %} {# block content-bottom #}

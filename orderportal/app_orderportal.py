@@ -69,6 +69,8 @@ def get_handlers():
             URL(r'/form/([0-9a-f]{32})/field/([a-zA-Z][_a-zA-Z0-9]*)',
                 FormFieldEdit, name='field_edit'),
             URL(r'/log/([0-9a-f]{32})', Log, name='log'),
+            URL(r'/news/', Dummy, name='news'),
+            URL(r'/events/', Dummy, name='events'),
             URL(r'/([0-9a-f]{32})', Entity, name='entity'),
             URL(r'/about', About, name='about'),
             ]

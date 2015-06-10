@@ -11,36 +11,57 @@ from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 
 
-class Home(RequestHandler):
+class NewsMixin(object):
+    "Mixin for news items handling."
+
+    def get_news(self):
+        return []
+
+
+class EventsMixin(object):
+    "Mixin for events items handling."
+
+    def get_events(self):
+        return []
+
+
+class Home(NewsMixin, EventsMixin, RequestHandler):
     "Home page; dashboard. Contents according to role of logged-in user."
 
     def get(self):
         if not self.current_user:
-            self.render('home.html')
+            self.render('home.html',
+                        news=self.get_news(),
+                        events=self.get_events())
         elif self.current_user['role'] == constants.ADMIN:
-            self.home_admin()
+            self.home_admin(news=self.get_news(),
+                            events=self.get_events())
         elif self.current_user['role'] == constants.STAFF:
-            self.home_staff()
+            self.home_staff(news=self.get_news(),
+                            events=self.get_events())
         else:
-            self.home_user()
+            self.home_user(news=self.get_news(),
+                            events=self.get_events())
 
-    def home_admin(self):
+    def home_admin(self, news, events):
         view = self.db.view('user/pending', include_docs=True)
         pending = [self.get_presentable(r.doc) for r in view]
         pending.sort(utils.cmp_modified, reverse=True)
-        self.render('home_admin.html', pending=pending)
+        self.render('home_admin.html', pending=pending,
+                    news=news, events=events)
 
-    def home_staff(self):
-        self.render('home_staff.html')
+    def home_staff(self, news, events):
+        self.render('home_staff.html', news=news, events=events)
 
-    def home_user(self):
+    def home_user(self, news, events):
         forms = [self.get_presentable(r.doc) for r in
                  self.db.view('form/enabled', include_docs=True)]
         view = self.db.view('order/owner', descending=True,
                             limit=10, include_docs=True,
                             key=self.current_user['email'])
         orders = [self.get_presentable(r.doc) for r in view]
-        self.render('home_user.html', forms=forms, orders=orders)
+        self.render('home_user.html', forms=forms, orders=orders,
+                    news=news, events=events)
 
 
 class Log(RequestHandler):
