@@ -2,14 +2,14 @@
 
 from __future__ import unicode_literals, print_function, absolute_import
 
+import logging
 import os
 import sys
-import logging
 
+import couchdb
 import tornado
 import tornado.web
 import tornado.ioloop
-import couchdb
 import yaml
 
 import orderportal

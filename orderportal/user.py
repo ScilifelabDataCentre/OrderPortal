@@ -159,14 +159,13 @@ The code required to set your password is "{}".
 
     def get(self):
         email = self.current_user and self.current_user.get('email')
-        self.render('reset.html', email=email, title='Reset your password')
+        self.render('reset.html', email=email)
 
     def post(self):
         self.check_xsrf_cookie()
         user = self.get_user(self.get_argument('email'))
         with UserSaver(doc=user, rqh=self) as saver:
             saver.reset_password()
-            saver['login'] = None # Invalidate login session.
         url = self.absolute_reverse_url('password',
                                         email=user['email'],
                                         code=user['code'])
@@ -210,6 +209,9 @@ class Password(RequestHandler):
 class Register(RequestHandler):
     "Register a new user account."
 
+    def get(self):
+        self.render('register.html')
+
     def post(self):
         self.check_xsrf_cookie()
         with UserSaver(rqh=self) as saver:
@@ -227,9 +229,12 @@ class Register(RequestHandler):
                 saver['email'] = email
                 saver['first_name'] = self.get_argument('first_name')
                 saver['last_name'] = self.get_argument('last_name')
-                saver['university'] = self.get_argument('university')
+                university = self.get_argument('university_other', default=None)
+                if not university:
+                    university = self.get_argument('university', default=None)
+                saver['university'] = university or 'undefined'
             except (tornado.web.MissingArgumentError, ValueError):
-                reason = "invalid {} value provided".format(key)
+                reason = "invalid '{}' value provided".format(key)
                 raise tornado.web.HTTPError(400, reason=reason)
             saver['department'] = self.get_argument('department', default=None)
             saver['address'] = self.get_argument('address', default=None)

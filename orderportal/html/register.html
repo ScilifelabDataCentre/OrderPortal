@@ -1,26 +1,53 @@
-{# User edit page. #}
+{# Register new user page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}Edit {{ user['email'] }}{% end %}
-{% block body_title %}
-Edit
-{% module Icon('user') %}
-{{ user['email'] }}
-{% end %}
+{% block head_title %}Register new user{% end %}
+{% block body_title %}Register new user{% end %}
 
 {% block main_content %}
-<form action="{{ reverse_url('user_edit', user['email']) }}"
+
+<div class="panel panel-default">
+  <div class="panel-body">
+    <p>
+      You may register a new account in this portal. Your email
+      address is your account name in this portal. This may take one
+      or two working days.
+    </p>
+    <p>
+      The portal administrator will review your account. When and if
+      she enables it, you will receive an email message containing a
+      code required to set your password.
+    </p>
+  </div>
+</div>
+
+<form action="{{ reverse_url('register') }}"
       role="form" method="POST">
   {% module xsrf_form_html() %}
 
   <div class="form-group">
     <div class="row">
       <div class="col-xs-6">
+	<label class="control-label" for="email">Email</label>
+	<input type="email" class="form-control"
+	       name="email" id="email">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+    </div>
+    <p class="text-muted">
+      Your email address is your user account name in this portal.
+    </p>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-6">
 	<label class="control-label" for="first_name">First name</label>
 	<input type="text" class="form-control"
-	       name="first_name" id="first_name"
-	       value="{{ user.get('first_name') or '' }}">
+	       name="first_name" id="first_name">
 	<span style="color:red; margin-right: 1em;"
 	      class="glyphicon glyphicon-star form-control-feedback"
 	      aria-hidden="true"></span>
@@ -33,8 +60,7 @@ Edit
       <div class="col-xs-6">
 	<label class="control-label" for="last_name">Last name</label>
 	<input type="text" class="form-control"
-	       name="last_name" id="last_name"
-	       value="{{ user.get('last_name') or '' }}">
+	       name="last_name" id="last_name">
 	<span style="color:red; margin-right: 1em;"
 	      class="glyphicon glyphicon-star form-control-feedback"
 	      aria-hidden="true"></span>
@@ -47,21 +73,10 @@ Edit
       <div class="col-xs-6">
 	<label class="control-label" for="university">University</label>
 	<select class="form-control" name="university" id="university">
-	  {% set other = True %}
 	  {% for abbrev, name in sorted(settings['UNIVERSITY_LIST'].items()) %}
-	    {% if user.get('university') == abbrev %}
-	      {% set other = False %}
-	      {% set selected = 'selected' %}
-	    {% else %}
-	      {% set selected = '' %}
-	    {% end %}
-	    <option {{selected}} value="{{ abbrev }}">{{ abbrev }} ({{ name }})</option>
+	    <option value="{{ abbrev }}">{{ abbrev }} ({{ name }})</option>
 	  {% end %}
-	  {% if other %}
-	    <option selected value="undefined">[not available in list]</option>
-	  {% else %}
-	    <option value="undefined">[not available in list]</option>
-	  {% end %}
+	  <option value="undefined">[not available in list]</option>
 	</select>
 	<span style="color:red; margin-right: 2em;"
 	      class="glyphicon glyphicon-star form-control-feedback"
@@ -71,13 +86,12 @@ Edit
 	</p>
 	<input type="text" class="form-control"
 	       name="university_other" id="university_other"
-	       placeholder="Provide full name if not available in list above."
-	       value="{{ other and user.get('university') or '' }}">
-	<p class="text-muted">
-	  Main affiliation: Company, organization, or similar.
-	</p>
+	       placeholder="Provide full name if not available in list above.">
       </div>
     </div>
+    <p class="text-muted">
+      Main affiliation: Company, organization, or similar.
+    </p>
   </div>
 
   <div class="form-group">
@@ -85,8 +99,7 @@ Edit
       <div class="col-xs-6">
 	<label class="control-label" for="department">Department</label>
 	<input type="text" class="form-control"
-	       name="department" id="department"
-	       value="{{ user.get('department') or '' }}">
+	       name="department" id="department">
       </div>
     </div>
     <p class="text-muted">
@@ -99,8 +112,7 @@ Edit
       <div class="col-xs-8">
 	<label class="control-label" for="address">Address</label>
 	<textarea rows="4" class="form-control"
-		  id="address" name="address"
-		  >{{ user.get('address') or '' }}</textarea>
+		  id="address" name="address"></textarea>
       </div>
     </div>
     <p class="text-muted">
@@ -114,8 +126,7 @@ Edit
       <div class="col-xs-6">
 	<label class="control-label" for="phone">Phone</label>
 	<input type="text" class="form-control"
-	       name="phone" id="phone"
-	       value="{{ user.get('phone') or '' }}">
+	       name="phone" id="phone">
       </div>
     </div>
     <p class="text-muted">
@@ -127,14 +138,14 @@ Edit
     <label class="control-label"></label>
     <button type="submit"
 	    class="btn btn-primary glyphicon glyphicon-save">
-      Save
+      Register
     </button>
   </div>
 
 </form>
 
 <br>
-<form action="{{ reverse_url('user', user['email']) }}"
+<form action="{{ reverse_url('home') }}"
       role="form" method="GET">
   <div class="form-group">
     <label class="control-label"></label>

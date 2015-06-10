@@ -4,8 +4,8 @@ from __future__ import unicode_literals, print_function, absolute_import
 
 import logging
 
-import tornado.web
 import couchdb
+import tornado.web
 
 from orderportal import constants
 from orderportal import utils

@@ -1,40 +1,66 @@
 {# Reset password page. #}
+
 {% extends "base.html" %}
 
-{% block subheader %}
-<p class="subheader">
-  Your current password will be invalidated by this action.
-</p>
-<p class="subheader">
-  You will be logged out of the current session.
-</p>
-<p class="subheader">
-  The instructions on how to set a new password will be sent in
-  a message to your email address.
-</p>
-{% end %}
+{% block head_title %}Reset password{% end %}
+{% block body_title %}Reset password{% end %}
 
-{% block content %}
-<form action="{{ reverse_url('reset') }}" method="POST">
+{% block main_content %}
+
+<div class="panel panel-default">
+  <div class="panel-body">
+    <p>
+      Your current password will be removed by this action. You will
+      not be able to login without first setting a new password.
+    </p>
+    <p>
+      The instructions on how to set a new password will be sent in
+      a message to your email address.
+    </p>
+  </div>
+</div>
+
+<form action="{{ reverse_url('reset') }}"
+      role="form" method="POST">
   {% module xsrf_form_html() %}
-  <table class="fields">
-    <tr>
-      <th>Email address</th>
-      <td>{% module Icon('required') %}</td>
-      <td>
-	<input type="text" name="email" value="{{ email or '' }}">
-      </td>
-      <td class="description">
-	The email address for your account.
-      </td>
-    </tr>
-    <tr>
-      <th></th>
-      <td></td>
-      <td>
-	{% module Submit('reset') %}
-      </td>
-    </tr>
-  </table>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-6">
+	<label class="control-label" for="email">Email</label>
+	<input type="email" class="form-control"
+	       name="email" id="email"
+	       value="{{ email or ''}}">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+    </div>
+    <p class="text-muted">
+      Your email address is your user account name in this portal.
+    </p>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-primary glyphicon glyphicon-step-backward">
+      Reset
+    </button>
+  </div>
+
 </form>
-{% end %}
+
+<br>
+<form action="{{ reverse_url('home') }}"
+      role="form" method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+{% end %} {# block main_content #}

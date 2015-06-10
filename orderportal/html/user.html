@@ -64,7 +64,8 @@
       <form action="{{ reverse_url('user_edit', user['email']) }}"
 	    role="form" method="GET">
 	<div class="form-group">
-	  <button type="submit" class="btn btn-primary glyphicon glyphicon-edit">
+	  <button type="submit"
+		  class="btn btn-primary glyphicon glyphicon-edit">
 	    Edit
 	  </button>
 	</div>
@@ -74,16 +75,20 @@
   {% end %} {# if is_admin #}
 
   {% if is_admin and current_user['email'] != user['email'] %}
+
   {% if user['status'] in (constants.PENDING, constants.DISABLED) %}
   <tr>
     <th></th>
     <td>
       <form action="{{ reverse_url('user_enable', user['email']) }}"
-	    role="form" method='POST'>
+	    role="form" method="POST">
 	{% module xsrf_form_html() %}
-	<button class="btn btn-success glyphicon glyphicon-ok">
-	  Enable
-	</button>
+	<div class="form-group">
+	  <button type="submit"
+		  class="btn btn-success glyphicon glyphicon-ok">
+	    Enable
+	  </button>
+	</div>
       </form>
     </td>
   </tr>
@@ -92,31 +97,40 @@
     <th></th>
     <td>
       <form action="{{ reverse_url('user_disable', user['email']) }}"
-	    role="form" method='POST'>
+	    role="form" method="POST">
 	{% module xsrf_form_html() %}
-	<button class="btn btn-danger glyphicon glyphicon-remove">
-	  Disable
-	</button>
+	<div class="form-group">
+	  <button type="submit"
+		  class="btn btn-danger glyphicon glyphicon-remove">
+	    Disable
+	  </button>
+	</div>
       </form>
     </td>
   </tr>
   {% end %} {# if user['status'] #}
+
   {% if user['status'] == constants.PENDING %}
   <tr>
     <th></th>
     <td>
       <form action="{{ reverse_url('user', user['email']) }}"
-	    role="form" method='POST'>
+	    role="form" method="POST">
 	{% module xsrf_form_html() %}
-	<input type="hidden" name="_http_method" value="delete">
-	<button class="btn btn-default glyphicon glyphicon-minus">
-	  {% module Icon('delete', label=True) %}
-	</button>
+	<div class="form-group">
+	  <input type="hidden" name="_http_method" value="delete">
+	  <button type="submit"
+		  class="btn btn-danger glyphicon glyphicon-minus">
+	    Delete
+	  </button>
+	</div>
       </form>
     </td>
   </tr>
-  {% end %}
+  {% end %} {# if user['status'] #}
+
   {% end %} {# if is_admin #}
+
   <tr>
     <th>Modified</th>
     <td>

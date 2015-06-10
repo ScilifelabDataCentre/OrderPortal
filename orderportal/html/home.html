@@ -41,12 +41,12 @@ This portal is used to describe and submit orders for the services provided by N
 	<form action="{{ reverse_url('login') }}" method="POST" role="form">
 	  {% module xsrf_form_html() %}
 	  <div class="form-group">
-	    <label for="email">Email:</label>
+	    <label for="email">Email</label>
 	    <input type="text" class="form-control" name="email"
 		   placeholder="Email address of existing account">
 	  </div>
 	  <div class="form-group">
-	    <label for="password">Password:</label>
+	    <label for="password">Password</label>
 	    <input type="password" class="form-control" name="password">
 	  </div>
 	  <div class="form-group"> 
@@ -59,15 +59,15 @@ This portal is used to describe and submit orders for the services provided by N
 	  
 	<br>
 	<p>
-	  <a href="#"
+	  <a href="{{ reverse_url('register') }}"
 	     class="btn btn-default glyphicon glyphicon-user" role="button">
 	    Register new user account
 	  </a>
 	</p>
 	<p>
-	  <a href="#"
+	  <a href="{{ reverse_url('reset') }}"
 	     class="btn btn-default glyphicon glyphicon-envelope" role="button">
-	    Reset password
+	    Reset your password
 	  </a>
 	</p>
       </div>
