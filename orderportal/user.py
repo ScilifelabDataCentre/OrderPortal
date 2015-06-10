@@ -53,10 +53,7 @@ class User(RequestHandler):
     def get(self, email):
         user = self.get_user(email)
         self.check_owner_or_staff(user)
-        self.render('user.html',
-                    title="User {0}".format(user['email']),
-                    user=user,
-                    logs=self.get_logs(user['_id']))
+        self.render('user.html', user=user)
 
     @tornado.web.authenticated
     def post(self, email):
@@ -86,10 +83,7 @@ class UserLogs(RequestHandler):
     def get(self, email):
         user = self.get_user(email)
         self.check_owner_or_staff(user)
-        self.render('logs.html',
-                    title="Logs for user '{}'".format(user['email']),
-                    entity=user,
-                    logs=self.get_logs(user['_id']))
+        self.render('logs.html', entity=user, logs=self.get_logs(user['_id']))
 
 
 class UserEdit(RequestHandler):
@@ -99,9 +93,7 @@ class UserEdit(RequestHandler):
     def get(self, email):
         user = self.get_user(email)
         self.check_owner_or_staff(user)
-        self.render('user_edit.html',
-                    title="Edit user '{}'".format(user['email']),
-                    user=user)
+        self.render('user_edit.html', user=user)
 
     @tornado.web.authenticated
     def post(self, email):
@@ -111,7 +103,10 @@ class UserEdit(RequestHandler):
         with UserSaver(doc=user, rqh=self) as saver:
             saver['first_name'] = self.get_argument('first_name')
             saver['last_name'] = self.get_argument('last_name')
-            saver['university'] = self.get_argument('university')
+            university = self.get_argument('university_other', default=None)
+            if not university:
+                university = self.get_argument('university', default=None)
+            saver['university'] = university or 'undefined'
             saver['department'] = self.get_argument('department', default=None)
             saver['address'] = self.get_argument('address', default=None)
             saver['phone'] = self.get_argument('phone', default=None)
@@ -199,8 +194,12 @@ class Password(RequestHandler):
         if user.get('code') != self.get_argument('code'):
             raise tornado.web.HTTPError(400, reason='invalid email or code')
         password = self.get_argument('password')
+        if len(password) < constants.PASSWORD_LEN:
+            mgs = "password shorter than {} characters".format(constants.PASSWORD_LEN)
+            raise tornado.web.HTTPError(400, reason=msg)
         if password != self.get_argument('confirm_password'):
-            raise tornado.web.HTTPError(400, reason='passwords not the same')
+            msg = 'password not the same! mistyped'
+            raise tornado.web.HTTPError(400, reason=msg)
         with UserSaver(doc=user, rqh=self) as saver:
             saver.set_password(password)
             saver['login'] = utils.timestamp() # Set login session.

@@ -2,27 +2,27 @@
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import os
-import sys
-import socket
-import logging
-import optparse
 import collections
-import urlparse
-import urllib
-import uuid
-import json
-import tarfile
-from cStringIO import StringIO
-import time
+import cStringIO
 import datetime
 import hashlib
-import unicodedata
+import json
+import logging
 import mimetypes
+import optparse
+import os
+import socket
+import sys
+import tarfile
+import time
+import unicodedata
+import urllib
+import urlparse
+import uuid
 
-import tornado.web
 import couchdb
 import requests
+import tornado.web
 import yaml
 
 import orderportal
@@ -107,6 +107,12 @@ def load_settings(filepath=None, verbose=False):
             raise ValueError("settings['{}'] has invalid value".format(key))
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short")
+    # Read university list
+    try:
+        settings['UNIVERSITY_LIST'] = yaml.safe_load(
+            open(settings['UNIVERSITY_LIST_FILENAME']))
+    except KeyError:
+        settings['UNIVERSITY_LIST'] = dict()
     # Settings computable from others
     settings['DB_SERVER_VERSION'] = couchdb.Server(settings['DB_SERVER']).version()
     if 'PORT' not in settings:
@@ -250,7 +256,7 @@ def dump(db, filepath, verbose=False):
         info = tarfile.TarInfo(doc['_id'])
         data = json.dumps(doc)
         info.size = len(data)
-        outfile.addfile(info, StringIO(data))
+        outfile.addfile(info, cStringIO.StringIO(data))
         count_items += 1
         for attname in doc.get('_attachments', dict()):
             info = tarfile.TarInfo("{}_att/{}".format(doc['_id'], attname))
@@ -261,7 +267,7 @@ def dump(db, filepath, verbose=False):
                 data = attfile.read()
                 attfile.close()
             info.size = len(data)
-            outfile.addfile(info, StringIO(data))
+            outfile.addfile(info, cStringIO.StringIO(data))
             count_files += 1
     outfile.close()
     if verbose:

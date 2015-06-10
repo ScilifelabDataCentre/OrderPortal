@@ -18,84 +18,127 @@ Edit
     <div class="row">
       <div class="col-xs-6">
 	<label class="control-label" for="first_name">First name</label>
-	<input type="text" class="form-control" name="first_name"
+	<input type="text" class="form-control"
+	       name="first_name" id="first_name"
 	       value="{{ user.get('first_name') or '' }}">
 	<span style="color:red; margin-right: 1em;"
 	      class="glyphicon glyphicon-star form-control-feedback"
 	      aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-6">
+	<label class="control-label" for="last_name">Last name</label>
+	<input type="text" class="form-control"
+	       name="last_name" id="last_name"
+	       value="{{ user.get('last_name') or '' }}">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-6">
+	<label class="control-label" for="university">University</label>
+	<select class="form-control" name="university" id="university">
+	  <option value="undefined">[not available in list]</option>
+	  {% set other = True %}
+	  {% for abbrev, name in sorted(settings['UNIVERSITY_LIST'].items()) %}
+	    {% if user.get('university') == abbrev %}
+	      {% set other = False %}
+	      {% set selected = 'selected' %}
+	    {% else %}
+	      {% set selected = '' %}
+	    {% end %}
+	    <option {{selected}} value="{{ abbrev }}">{{ abbrev }} ({{ name }})</option>
+	  {% end %}
+	</select>
+	<span style="color:red; margin-right: 2em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
 	<p class="text-muted">
-	  Given name, optionally with initials.
+	  Main affiliation: University or college.
+	</p>
+	<input type="text" class="form-control"
+	       name="university_other" id="university_other"
+	       placeholder="Provide full name if not available in list above."
+	       value="{{ other and user.get('university') or '' }}">
+	<p class="text-muted">
+	  Main affiliation: Company, organization, or similar.
 	</p>
       </div>
     </div>
   </div>
 
-  <div class="form-group form-required">
-    <label class="control-label col-sm-2" for="last_name">Last name</label>
-    <div class="col-sm-10"> 
-      <input type="text" class="form-control" name="last_name"
-	     placeholder="Enter family name"
-	     value="{{ user.get('last_name') or '' }}">
-    </div>
-  </div>
-
-  <div class="form-group form-required">
-    <label class="control-label col-sm-2" for="university">University</label>
-    <div class="col-sm-10"> 
-      <input type="text" class="form-control" name="university"
-	     placeholder="Enter main affiliation: university, company, or similar"
-	     value="{{ user.get('university') or '' }}">
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-6">
+	<label class="control-label" for="department">Department</label>
+	<input type="text" class="form-control"
+	       name="department" id="department"
+	       value="{{ user.get('department') or '' }}">
+	<p class="text-muted">
+	  University department, company section, group, or similar.
+	</p>
+      </div>
     </div>
   </div>
 
   <div class="form-group">
-    <label class="control-label col-sm-2" for="department">Department</label>
-    <div class="col-sm-10"> 
-      <input type="text" class="form-control" name="department"
-	     placeholder="Enter department, section, or similar"
-	     value="{{ user.get('department') or '' }}">
+    <div class="row">
+      <div class="col-xs-8">
+	<label class="control-label" for="address">Address</label>
+	<textarea rows="4" class="form-control"
+		  id="address" name="address"
+		  >{{ user.get('address') or '' }}</textarea>
+	<p class="text-muted">
+	  Postal address; for delivery of paper documents, returned
+	  samples, etc.
+	</p>
     </div>
   </div>
 
   <div class="form-group">
-    <label class="control-label col-sm-2" for="address">Address</label>
-    <div class="col-sm-10"> 
-      <textarea class="form-control" name="address">
-	{{ user.get('address') or '' }}
-      </textarea>
+    <div class="row">
+      <div class="col-xs-6">
+	<label class="control-label" for="phone">Phone</label>
+	<input type="text" class="form-control"
+	       name="phone" id="phone"
+	       value="{{ user.get('phone') or '' }}">
+	<p class="text-muted">
+	  One or more telephone numbers.
+	</p>
+      </div>
     </div>
   </div>
 
   <div class="form-group">
-    <label class="control-label col-sm-2" for="phone">Phone</label>
-    <div class="col-sm-10"> 
-      <input type="text" class="form-control" name="phone"
-	     value="{{ user.get('phone') or '' }}">
-    </div>
-  </div>
-
-  <div class="form-group">
-    <label class="control-label col-sm-2"></label>
-    <div class="col-sm-10">
+    <label class="control-label"></label>
       <button type="submit"
-	      class="btn btn-default btn-primary glyphicon glyphicon-save">
+	      class="btn btn-primary glyphicon glyphicon-save">
 	Save
       </button>
     </div>
   </div>
 
-  <div class="form-group">
-    <label class="control-label col-sm-2"></label>
-    <div class="col-sm-10">
-      <form action="{{ reverse_url('user', user['email']) }}"
-	    role="form" method="GET">
-	<button type="submit"
-		class="btn btn-default glyphicon glyphicon-remove">
-	  Cancel
-	</button>
-      </form>
-    </div>
-  </div>
-
 </form>
+
+<br>
+<form action="{{ reverse_url('user', user['email']) }}"
+      role="form" method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
 {% end %} {# block main_content #}

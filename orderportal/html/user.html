@@ -33,19 +33,6 @@
     <td>{% module Icon(user['status'], label=True) %}</td>
   </tr>
   <tr>
-    <th>Modified</th>
-    <td>
-      <span class="localtime">{{ user['modified'] }}</span>
-      <a href="{{ reverse_url('user_logs', user['email']) }}">
-	{% module Icon('logs', label=True) %}
-      </a>
-    </td>
-  </tr>
-  <tr>
-    <th>Created</th>
-    <td class="localtime">{{ user['created'] }}</td>
-  </tr>
-  <tr>
     <th>First name</th>
     <td>{{ user.get('first_name') or '-' }}</td>
   </tr>
@@ -94,7 +81,7 @@
       <form action="{{ reverse_url('user_enable', user['email']) }}"
 	    role="form" method='POST'>
 	{% module xsrf_form_html() %}
-	<button class="btn btn-default glyphicon glyphicon-ok">
+	<button class="btn btn-success glyphicon glyphicon-ok">
 	  Enable
 	</button>
       </form>
@@ -107,7 +94,7 @@
       <form action="{{ reverse_url('user_disable', user['email']) }}"
 	    role="form" method='POST'>
 	{% module xsrf_form_html() %}
-	<button class="btn btn-default glyphicon glyphicon-remove">
+	<button class="btn btn-danger glyphicon glyphicon-remove">
 	  Disable
 	</button>
       </form>
@@ -130,5 +117,18 @@
   </tr>
   {% end %}
   {% end %} {# if is_admin #}
+  <tr>
+    <th>Modified</th>
+    <td>
+      <span class="localtime">{{ user['modified'] }}</span>
+      <a href="{{ reverse_url('user_logs', user['email']) }}">
+	{% module Icon('logs', label=True) %}
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <th>Created</th>
+    <td class="localtime">{{ user['created'] }}</td>
+  </tr>
 </table>
 {% end %} {# block content #}
