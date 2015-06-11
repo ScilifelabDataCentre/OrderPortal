@@ -2,6 +2,8 @@
 
 from __future__ import unicode_literals, print_function, absolute_import
 
+import couchdb
+import markdown
 import tornado.web
 
 from . import constants
@@ -92,3 +94,14 @@ class OrderFieldsDisplay(tornado.web.UIModule):
         rows = []
         for field in fields:
             pass # XXX
+
+
+class Text(tornado.web.UIModule):
+    "Fetch Markdown text from the database, process it, and output."
+
+    def render(self, name):
+        try:
+            doc = self.handler.get_entity_view('text/name', name)
+        except tornado.web.HTTPError:
+            return "<i>No text '{}' defined.</i>".format(name)
+        return markdown.markdown(doc['markdown'], output_format='html5')

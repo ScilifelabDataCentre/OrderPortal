@@ -7,6 +7,7 @@ import os.path
 
 # Patterns
 ID_RX        = re.compile(r'^[a-z][_a-z0-9]*$', re.IGNORECASE)
+NAME_RX      = re.compile(r'^[^/]+$')
 IUID_RX      = re.compile(r'^[0-9a-f]{32}$')
 EMAIL_RX     = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
 PASSWORD_LEN = 6
@@ -30,6 +31,7 @@ PUBLICATION = 'publication'
 NEW         = 'new'         # A single news item.
 EVENT       = 'event'
 USER        = 'user'
+TEXT        = 'text'
 LOG         = 'log'
 ENTITIES    = frozenset([USER, FIELD, FORM, ORDER, PUBLICATION, USER])
 

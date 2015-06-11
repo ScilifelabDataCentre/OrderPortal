@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals, print_function, absolute_import
 
+import logging
 import tornado.web
 
 import orderportal
@@ -9,6 +10,7 @@ from orderportal import constants
 from orderportal import settings
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
+from orderportal.saver import Saver
 
 
 class NewsMixin(object):
@@ -95,3 +97,48 @@ class About(RequestHandler):
 
     def get(self):
         self.render('about.html')
+
+
+class News(NewsMixin, RequestHandler):
+    "Edit page for news items."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.render('news.html', news=self.get_news())
+
+
+class Events(EventsMixin, RequestHandler):
+    "Edit page for events items."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render('events.html', events=self.get_events())
+
+
+class TextSaver(Saver):
+    doctype = constants.TEXT
+
+class Text(RequestHandler):
+    "Edit page for information text."
+
+    @tornado.web.authenticated
+    def get(self, name):
+        self.check_admin()
+        try:
+            text = self.get_entity_view('text/name', name)
+        except tornado.web.HTTPError:
+            text = dict(name=name)
+        origin = self.get_argument('origin', self.reverse_url('home'))
+        self.render('text.html', text=text, origin=origin)
+
+    @tornado.web.authenticated
+    def post(self, name):
+        self.check_admin()
+        try:
+            text = self.get_entity_view('text/name', name)
+        except tornado.web.HTTPError:
+            text = dict(name=name)
+        with TextSaver(doc=text, rqh=self) as saver:
+            saver['markdown'] = self.get_argument('markdown')
+        self.see_other(self.get_argument('origin', self.reverse_url('home')))

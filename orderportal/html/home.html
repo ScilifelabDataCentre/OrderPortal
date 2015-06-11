@@ -12,33 +12,32 @@
 
 {% block content %}
 
-{% block content-top %}
+{% block content-header %}
 <div class="row">
   <div class="col-sm-10 col-sm-offset-1">
     <div class="panel panel-default">
       <div class="panel-body">
 	{% if is_admin %}
-	<form action="#"
+	<form action="{{ reverse_url('text', 'header') }}"
 	      role="form" class="pull-right" method="GET">
+	  <input type="hidden" name="origin"
+		 value="{{ absolute_reverse_url('home') }}">
 	  <button type="submit"
 		  class="btn btn-sm btn-default glyphicon glyphicon-edit">
 	    Edit
 	  </button>
 	</form>
 	{% end %}
-	This portal is used to describe and submit orders for the
-	services provided by NGI. NGI primarily serves projects run by
-	research groups in Sweden. Projects from other countries are
-	admissible, but have lower priority than Swedish
-	projects. Depending on the queue situation, NGI may decide to
-	decline a non-Swedish project altogether.
+	<div>
+	  {% module Text('header') %}
+	</div>
       </div>
     </div>
   </div>
   <div class="col-sm-11">
   </div>
 </div>
-{% end %} {# block content-top #}
+{% end %} {# block content-header #}
 
 <div class="row">
 
@@ -123,7 +122,8 @@
 
     <div class="panel panel-success">
       <div class="panel-heading">
-	<a href="#" class="btn btn-success glyphicon glyphicon-calendar">
+	<a href="{{ reverse_url('events') }}"
+	   class="btn btn-success glyphicon glyphicon-calendar">
 	  Events
 	</a>
 	{% if is_admin %}
@@ -153,21 +153,25 @@
 
 </div>
 
-{% block content-bottom %}
+{% block content-footer %}
 <div class="panel panel-info">
   <div class="panel-body">
     {% if is_admin %}
-    <form action="#"
+    <form action="{{ reverse_url('text', 'footer') }}"
 	  role="form" class="pull-right" method="GET">
+	  <input type="hidden" name="origin"
+		 value="{{ absolute_reverse_url('home') }}">
       <button type="submit"
 	      class="btn btn-sm btn-default glyphicon glyphicon-edit">
 	Edit
       </button>
     </form>
     {% end %}
-    The National Genomics Infrastructure (NGI) is financed by...
+    <div>
+      {% module Text('footer') %}
+    </div>
   </div>
 </div>
-{% end %} {# block content-bottom #}
+{% end %} {# block content-footer #}
 
 {% end %} {# block content #}
