@@ -1,0 +1,22 @@
+{# Page view. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}{{ title }}{% end %}
+{% block body_title %}{{ title }}{% end %}
+
+{% block main_content %}
+
+{% if is_admin %}
+<form action="{{ reverse_url('page_edit', name) }}"
+      role="form" class="pull-right" method="GET">
+  <button type="submit"
+	  class="btn btn-sm btn-default glyphicon glyphicon-edit">
+    Edit
+  </button>
+</form>
+{% end %}
+
+{% raw content %}
+
+{% end %} {# block main_content #}

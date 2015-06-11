@@ -38,6 +38,9 @@
 	    {% if is_staff %}
             <li><a href ="{{ reverse_url('users') }}">Users</a></li>
 	    {% end %}
+	    {% if is_admin %}
+            <li><a href ="{{ reverse_url('pages') }}">Pages</a></li>
+	    {% end %}
 	  </ul>
 	  <div>
 	    <ul class="nav navbar-nav navbar-right">
@@ -52,8 +55,8 @@
 		</p>
 	      </li>
 	      <li>
-		<form role="form" class="navbar-text"
-		      action="{{ reverse_url('logout') }}" method="POST">
+		<form action="{{ reverse_url('logout') }}"
+		      role="form" class="navbar-text" method="POST">
 		  {% module xsrf_form_html() %}
 		  <button type="submit"
 			  class="btn btn-default btn-sm glyphicon glyphicon-log-out">

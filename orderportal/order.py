@@ -148,7 +148,7 @@ class Order(OrderMixin, RequestHandler):
         self.check_editable(order)
         self.delete_logs(order['_id'])
         self.db.delete(order)
-        self.see_other(self.reverse_url('orders'))
+        self.see_other('orders')
 
 
 class OrderLogs(OrderMixin, RequestHandler):
@@ -184,7 +184,7 @@ class OrderCreate(RequestHandler):
             else:
                 raise ValueError('no initial order status defined')
             doc = saver.doc
-        self.see_other(self.reverse_url('order', doc['_id']))
+        self.see_other('order', doc['_id'])
 
 
 class OrderEdit(OrderMixin, RequestHandler):
@@ -211,4 +211,4 @@ class OrderEdit(OrderMixin, RequestHandler):
         with OrderSaver(doc=order, rqh=self) as saver:
             saver['title'] = self.get_argument('__title__', order['_id'])
             saver.update_fields(fields)
-        self.see_other(self.reverse_url('order', order['_id']))
+        self.see_other('order', order['_id'])

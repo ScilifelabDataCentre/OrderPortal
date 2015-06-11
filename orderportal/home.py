@@ -82,14 +82,13 @@ class Entity(RequestHandler):
         "Login and privileges are checked by the entity redirected to."
         doc = self.get_entity(iuid)
         if doc[constants.DOCTYPE] == constants.ORDER:
-            url = self.absolute_reverse_url('order', doc['_id'])
+            self.see_other('order', doc['_id'])
         elif doc[constants.DOCTYPE] == constants.FORM:
-            url = self.absolute_reverse_url('form', doc['_id'])
+            self.see_other('form', doc['_id'])
         elif doc[constants.DOCTYPE] == constants.USER:
-            url = self.absolute_reverse_url('user', doc['email'])
+            self.see_other('user', doc['email'])
         else:
             raise tornado.web.HTTPError(404)
-        self.see_other(url)
 
 
 class About(RequestHandler):
@@ -141,4 +140,5 @@ class Text(RequestHandler):
             text = dict(name=name)
         with TextSaver(doc=text, rqh=self) as saver:
             saver['markdown'] = self.get_argument('markdown')
-        self.see_other(self.get_argument('origin', self.reverse_url('home')))
+        url = self.get_argument('origin', self.absolute_reverse_url('home'))
+        self.redirect(url, status=303)

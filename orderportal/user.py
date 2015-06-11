@@ -73,7 +73,7 @@ class User(RequestHandler):
                 403, reason='only pending user can be deleted')
         self.delete_logs(user['_id'])
         self.db.delete(user)
-        self.see_other(self.reverse_url('home'))
+        self.see_other('home')
 
 
 class UserLogs(RequestHandler):
@@ -110,7 +110,7 @@ class UserEdit(RequestHandler):
             saver['department'] = self.get_argument('department', default=None)
             saver['address'] = self.get_argument('address', default=None)
             saver['phone'] = self.get_argument('phone', default=None)
-        self.see_other(self.reverse_url('user', email))
+        self.see_other('user', email)
 
 
 class Login(RequestHandler):
@@ -175,7 +175,7 @@ The code required to set your password is "{}".
                                          settings['FACILITY_NAME'],
                                          url,
                                          user['code']))
-        self.see_other(self.reverse_url('password'))
+        self.see_other('password')
 
 
 class Password(RequestHandler):
@@ -243,7 +243,7 @@ class Register(RequestHandler):
             saver['role'] = constants.USER
             saver['status'] = constants.PENDING
             saver.erase_password()
-        self.see_other(self.reverse_url('password'))
+        self.see_other('password')
 
 
 class UserEnable(RequestHandler):
@@ -269,7 +269,7 @@ Please got to {} to set your password.
         self.send_email(user['email'],
                         self.SUBJECT.format(settings['FACILITY_NAME']),
                         self.TEXT.format(email, settings['FACILITY_NAME'], url))
-        self.see_other(self.reverse_url('user', email))
+        self.see_other('user', email)
 
 
 class UserDisable(RequestHandler):
@@ -283,4 +283,4 @@ class UserDisable(RequestHandler):
         with UserSaver(user, rqh=self) as saver:
             saver['status'] = constants.DISABLED
             saver.erase_password()
-        self.see_other(self.reverse_url('user', email))
+        self.see_other('user', email)

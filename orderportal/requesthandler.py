@@ -67,9 +67,11 @@ class RequestHandler(tornado.web.RequestHandler):
             self.set_header('Content-Disposition',
                             'attachment; filename="{}"'.format(filename))
 
-    def see_other(self, absurl):
-        "Redirect to the given absolute URL using HTTP status 303 See Other."
-        self.redirect(absurl, status=303)
+    def see_other(self, name, *args, **query):
+        """Redirect to the absolute URL given by name
+        using HTTP status 303 See Other."""
+        url = self.absolute_reverse_url(name, *args, **query)
+        self.redirect(url, status=303)
 
     def absolute_reverse_url(self, name, *args, **query):
         "Get the absolute URL given the handler name, arguments and query."

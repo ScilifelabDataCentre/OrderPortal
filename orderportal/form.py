@@ -124,7 +124,7 @@ class FormCreate(RequestHandler):
             saver['status'] = constants.PENDING
             saver['owner'] = self.current_user['email']
             doc = saver.doc
-        self.see_other(self.reverse_url('form_edit', doc['_id']))
+        self.see_other('form_edit', doc['_id'])
 
     @tornado.web.authenticated
     def post(self):
@@ -151,7 +151,7 @@ class FormEdit(FormMixin, RequestHandler):
         with FormSaver(doc=form, rqh=self) as saver:
             saver['title'] = self.get_argument('title')
             saver['description'] = self.get_argument('description')
-        self.see_other(self.reverse_url('form', form['_id']))
+        self.see_other('form', form['_id'])
 
 
 class FormFieldCreate(FormMixin, RequestHandler):
@@ -175,7 +175,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
         self.check_fields_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.add_field()
-        self.see_other(self.reverse_url('form', form['_id']))
+        self.see_other('form', form['_id'])
 
 
 class FormFieldEdit(FormMixin, RequestHandler):
@@ -208,7 +208,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
         self.check_fields_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.update_field(identifier)
-        self.see_other(self.reverse_url('form', form['_id']))
+        self.see_other('form', form['_id'])
 
     @tornado.web.authenticated
     def delete(self, iuid, identifier):
@@ -217,7 +217,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
         self.check_fields_editable(form)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.delete_field(identifier)
-        self.see_other(self.reverse_url('form', form['_id']))
+        self.see_other('form', form['_id'])
 
 
 class FormCopy(RequestHandler):
@@ -235,7 +235,7 @@ class FormCopy(RequestHandler):
             saver['status'] = constants.PENDING
             saver['owner'] = self.current_user['email']
             doc = saver.doc
-        self.see_other(self.reverse_url('form_edit', doc['_id']))
+        self.see_other('form_edit', doc['_id'])
 
 
 class FormEnable(RequestHandler):
@@ -246,11 +246,10 @@ class FormEnable(RequestHandler):
         self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        url = self.absolute_reverse_url('form', iuid)
         if form['status'] != constants.ENABLED:
             with FormSaver(doc=form, rqh=self) as saver:
                 saver['status'] = constants.ENABLED
-        self.see_other(url)
+        self.see_other('form', iuid)
 
 
 class FormDisable(RequestHandler):
@@ -261,8 +260,7 @@ class FormDisable(RequestHandler):
         self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        url = self.absolute_reverse_url('form', iuid)
         if form['status'] != constants.DISABLED:
             with FormSaver(doc=form, rqh=self) as saver:
                 saver['status'] = constants.DISABLED
-        self.see_other(url)
+        self.see_other('form', iuid)

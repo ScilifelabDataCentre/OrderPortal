@@ -154,21 +154,25 @@
 </div>
 
 {% block content-footer %}
-<div class="panel panel-info">
-  <div class="panel-body">
-    {% if is_admin %}
-    <form action="{{ reverse_url('text', 'footer') }}"
-	  role="form" class="pull-right" method="GET">
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
+    <div class="panel panel-info">
+      <div class="panel-body">
+	{% if is_admin %}
+	<form action="{{ reverse_url('text', 'footer') }}"
+	      role="form" class="pull-right" method="GET">
 	  <input type="hidden" name="origin"
 		 value="{{ absolute_reverse_url('home') }}">
-      <button type="submit"
-	      class="btn btn-sm btn-default glyphicon glyphicon-edit">
-	Edit
-      </button>
-    </form>
-    {% end %}
-    <div>
-      {% module Text('footer') %}
+	  <button type="submit"
+		  class="btn btn-sm btn-default glyphicon glyphicon-edit">
+	    Edit
+	  </button>
+	</form>
+	{% end %}
+	<div>
+	  {% module Text('footer') %}
+	</div>
+      </div>
     </div>
   </div>
 </div>

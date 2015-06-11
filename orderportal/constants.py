@@ -32,8 +32,9 @@ NEW         = 'new'         # A single news item.
 EVENT       = 'event'
 USER        = 'user'
 TEXT        = 'text'
+PAGE        = 'page'
 LOG         = 'log'
-ENTITIES    = frozenset([USER, FIELD, FORM, ORDER, PUBLICATION, USER])
+ENTITIES    = frozenset([USER, FIELD, FORM, ORDER, PAGE, PUBLICATION, USER])
 
 # Field types
 STRING  = dict(value='string', label='String')
