@@ -49,7 +49,7 @@ the user account identifier.
 
 The design of the order form setup is fairly general; there is nothing
 that is hardcoded for specific domains of science. The content of the
-order form is defined by the facility administrators.
+order form is defined by the facility admins.
 
 The design of the system is kept as flexible and general as
 possible. The base template and CSS are to some extend modifiable (via
@@ -59,10 +59,9 @@ to be customised.
 The order form
 --------------
 
-The order form fields are fully configurable by the facility
-administrators via the web interface. The field definitions are
-generic, and allow order forms to be designed for a wide variety of
-facilities.
+The order form fields are fully configurable by the facility admins
+via the web interface. The field definitions are generic, and allow
+order forms to be designed for a wide variety of facilities.
 
 The order form must allow hierarchical grouping of fields, with
 dynamic display according to rules. This allows for cases where a
@@ -92,9 +91,9 @@ There are three reasons for this design choice:
 
 1. Security between facilities. The existence and contents of a
    particular project in one facility must not be visible to the
-   administrators or staff of another facility. This is a strict
-   requirement for some facilities, and it is easier to implement if
-   the databases for each facility is separate from one another.
+   admins or staff of another facility. This is a strict requirement
+   for some facilities, and it is easier to implement if the databases
+   for each facility is separate from one another.
 
 2. The styling of an order portal is much easier to implement if each
    facility has its own portal instance.
@@ -120,12 +119,12 @@ There are basically three kinds of users:
    more orders, and to follow the progress of their own orders. The
    "customer" of the facility.
 
-2. Staff: Facility staff, who may view all orders.
+2. Staff: Facility staff, who may view all orders, but not change anything.
 
-3. Admin: System administrators, who are allowed to view and edit all
-   aspects of the system that can be modified via the web
-   interface. This includes processing orders, modifying the order
-   fields, and handling user accounts.
+3. Admin: Facility administrators, a.k.a. project coordinators, who
+   are allowed to view and edit all aspects of the system that can be
+   modified via the web interface. This includes processing orders,
+   modifying the order fields, and handling user accounts.
 
 User accounts can be set as disabled, for example if the person leaves
 her position, or as a means of blocking invalid use. Deletion of a
@@ -137,10 +136,10 @@ facilitate personnel changes.
 
 An external scientist applies for a user account by providing the
 relevant information. Such an account is created with a status of
-"pending".  The administrator reviews the pending user account and
-enables it if it appears legitimate. The user gets an email about the
-account having been enabled and with instructions on how to set the
-password for it.
+"pending".  The admin reviews the pending user account and enables it
+if it appears legitimate. The user gets an email about the account
+having been enabled and with instructions on how to set the password
+for it.
 
 
 Access privileges
@@ -156,9 +155,8 @@ individual order.
 Order: form and fields
 ----------------------
 
-The administrator designs the set of fields which are to be filled in
-by the user for an order. This involves the following parameters for a
-field:
+The admin designs the set of fields which are to be filled in by the
+user for an order. This involves the following parameters for a field:
 
 - Field identifier
 - Field data type
@@ -260,11 +258,11 @@ highlighted to help the user prepare a valid order.
 This is for normal facility staff usage. Display of orders according
 to state and other parameters.
 
-### System administration web interface
+### Admin web interface
 
-For administrators only, this interface enables editing orders, users
-and fields. This includes the ability to move orders along into
-different states.
+For admins only, this interface enables editing orders, users and
+fields. This includes the ability to move orders along into different
+states.
 
 ### The Application Programming Interface (API)
 
