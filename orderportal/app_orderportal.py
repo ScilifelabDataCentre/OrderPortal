@@ -23,7 +23,7 @@ from orderportal.home import *
 from orderportal.user import *
 from orderportal.form import *
 from orderportal.order import *
-from orderportal.page import *
+from orderportal.info import *
 
 
 class Dummy(RequestHandler):
@@ -37,10 +37,10 @@ def get_handlers():
             URL(r'/news', News, name='news'),
             URL(r'/events', Events, name='events'),
             URL(r'/text/([^/]+)', Text, name='text'),
-            URL(r'/page', PageCreate, name='page_create'),
-            URL(r'/pages', Pages, name='pages'),
-            URL(r'/page/([^/]+)', Page, name='page'),
-            URL(r'/page/([^/]+)/edit', PageEdit, name='page_edit'),
+            URL(r'/info', InfoCreate, name='info_create'),
+            URL(r'/infos', Infos, name='infos'),
+            URL(r'/info/([^/]+)', Info, name='info'),
+            URL(r'/info/([^/]+)/edit', InfoEdit, name='info_edit'),
             URL(r'/search', Dummy, name='search'),
             URL(r'/orders', Orders, name='orders'),
             URL(r'/order/([0-9a-f]{32})', Order, name='order'),

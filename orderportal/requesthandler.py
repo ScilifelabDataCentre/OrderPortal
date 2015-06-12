@@ -2,19 +2,19 @@
 
 from __future__ import unicode_literals, print_function, absolute_import
 
-import logging
-import json
 import collections
-import urllib
-import smtplib
 from email.mime.text import MIMEText
+import json
+import logging
+import smtplib
+import urllib
 
-import tornado.web
 import couchdb
+import tornado.web
 
 import orderportal
-from . import settings
 from . import constants
+from . import settings
 from . import utils
 
 
@@ -35,6 +35,8 @@ class RequestHandler(tornado.web.RequestHandler):
         result['is_staff'] = self.is_staff()
         result['is_admin'] = self.is_admin()
         result['error'] = self.get_argument('error', None)
+        result['infos'] = [r.value for r in self.db.view('info/menu')]
+        logging.debug("infos: %s", result['infos'])
         return result
 
     def set_header_allow(self, **kwargs):

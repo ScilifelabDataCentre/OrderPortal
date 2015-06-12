@@ -1,13 +1,13 @@
-{# Page create page. #}
+{# Information create page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}Create page{% end %}
-{% block body_title %}Create {% module Icon('page', label=True) %}{% end %}
+{% block head_title %}Create information page{% end %}
+{% block body_title %}Create {% module Icon('info') %} information page{% end %}
 
 {% block main_content %}
 
-<form action="{{ reverse_url('page_create') }}"
+<form action="{{ reverse_url('info_create') }}"
       role="form" method="POST">
   {% module xsrf_form_html() %}
 
@@ -23,12 +23,12 @@
       </div>
     </div>
     <p class="text-muted">
-      Name of the page, which determines its URL. Cannot be changed
-      once set. Must be unique.
+      Name of the information page, which determines its URL. Cannot
+      be changed once set. Must be unique.
     </p>
   </div>
 
-  <div class="form-group has-feedback">
+  <div class="form-group">
     <div class="row">
       <div class="col-sm-10">
 	<label for="title">Title</label>
@@ -37,7 +37,22 @@
       </div>
     </div>
     <p class="text-muted">
-      Title to display for the page.
+      Title to display for the information page.
+    </p>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-sm-2">
+	<label for="menu">Menu</label>
+	<input type="number" class="form-control"
+	       id="menu" name="menu">
+      </div>
+    </div>
+    <p class="text-muted">
+      Position in 'Information' dropdown menu. If blank, the
+      information page must be linked to explicitly from elsewhere, or
+      it will not be reachable.
     </p>
   </div>
 
@@ -46,7 +61,7 @@
     <textarea rows="24" class="form-control"
 	      id="markdown" name="markdown"></textarea>
     <p class="text-muted">
-      Content of the page specified in
+      Content of the information page specified in
       <a href="http://daringfireball.net/projects/markdown/">Markdown</a>
       format.
     </p>

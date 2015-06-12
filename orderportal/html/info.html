@@ -1,4 +1,4 @@
-{# Page view. #}
+{# Information page. #}
 
 {% extends "base.html" %}
 
@@ -8,7 +8,7 @@
 {% block main_content %}
 
 {% if is_admin %}
-<form action="{{ reverse_url('page_edit', name) }}"
+<form action="{{ reverse_url('info_edit', name) }}"
       role="form" class="pull-right" method="GET">
   <button type="submit"
 	  class="btn btn-sm btn-default glyphicon glyphicon-edit">

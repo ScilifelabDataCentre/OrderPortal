@@ -70,7 +70,7 @@ class Entity(tornado.web.UIModule):
             title = entity['email']
             alt = entity['role']
             url = self.handler.reverse_url(name, entity['email'])
-        elif name == constants.PAGE:
+        elif name == constants.INFO:
             icon_url = self.handler.static_url(name + '.png')
             title = entity.get('title') or entity['name']
             alt = name

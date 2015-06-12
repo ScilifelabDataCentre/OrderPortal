@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block head_title %}OrderPortal{% end %}</title>
     <link rel="shortcut icon" type="image/png"
-	  href="{{ static_url(settings['FACILITY_ICON_32']) }}">
+	  href="{{ static_url(settings['FACILITY_ICON_NAVBAR']) }}">
     <link rel="stylesheet"
 	  href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ static_url('orderportal-fixes.css') }}">
@@ -17,7 +17,7 @@
       <div class="container-fluid">
 	<div class="navbar-header">
 	  <a class="navbar-brand" href="{{ reverse_url('home') }}">
-	    <img src="{{ static_url(settings['FACILITY_ICON_32']) }}"
+	    <img src="{{ static_url(settings['FACILITY_ICON_NAVBAR']) }}"
 		 title="{{ settings['FACILITY_NAME'] }}"
 		 alt="{{ settings['FACILITY_NAME'] }}">
 	  </a>
@@ -38,9 +38,20 @@
 	    {% if is_staff %}
             <li><a href ="{{ reverse_url('users') }}">Users</a></li>
 	    {% end %}
-	    {% if is_admin %}
-            <li><a href ="{{ reverse_url('pages') }}">Pages</a></li>
-	    {% end %}
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+		Information
+		<span class="caret"></span>
+	      </a>
+              <ul class="dropdown-menu">
+		{% for n,t in infos %}
+		<li><a href="{{ reverse_url('info', n) }}">{{ t or n }}</a></li>
+		{% end %}
+		{% if is_admin %}
+		<li><a href ="{{ reverse_url('infos') }}">All infos</a></li>
+		{% end %}
+              </ul>
+            </li>
 	  </ul>
 	  <div>
 	    <ul class="nav navbar-nav navbar-right">

@@ -16,7 +16,7 @@
 	<label class="control-label" for="markdown">Markdown</label>
 	<textarea rows="24" class="form-control"
 		  id="markdown" name="markdown"
-		  >{{ text.get('markdown') or '' }}</textarea>
+		  >{% raw text.get('markdown') or '' %}</textarea>
       </div>
     </div>
     <p class="text-muted">

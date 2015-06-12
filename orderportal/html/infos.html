@@ -1,0 +1,46 @@
+{# Information pages list page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Infomation pages{% end %}
+{% block body_title %}{% module Icon('info') %} Information pages{% end %}
+
+{% block content %}
+<form action="{{ reverse_url('info_create') }}"
+      role="form" class="pull-right" method="GET">
+  <button type="submit"
+	  class="btn btn-sm btn-warning glyphicon glyphicon-plus">
+    Create
+  </button>
+</form>
+
+<div class="row">
+  <div class="col-sm-9 col-sm-offset-1">
+    <table class="table table-striped">
+      <tr>
+	<th>Name</th>
+	<th>Title</th>
+	<th>Menu</th>
+	<th>Modified</th>
+	<th>Created</th>
+      </tr>
+      {% for info in all_infos %}
+      <tr>
+	<td>
+	  <a href="{{ reverse_url('info', info['name']) }}">
+	    {% module Icon('info') %}
+	    {{ info['name'] }}
+	  </a>
+	</td>
+	<td>{{ info.get('title') or '-' }}</td>
+	<td>{{ info.get('menu') or '-' }}</td>
+	<td class="localtime">{{ info['modified'] }}</td>
+	<td class="localtime">{{ info['created'] }}</td>
+      </tr>
+      {% end %}
+    </table>
+  </div>
+  <div class="col-sm-2">
+  </div>
+</div>
+{% end %}
