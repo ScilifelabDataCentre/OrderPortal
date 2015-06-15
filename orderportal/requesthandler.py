@@ -171,6 +171,16 @@ class RequestHandler(tornado.web.RequestHandler):
         else:
             raise tornado.web.HTTPError(404, reason=reason)
 
+    def get_news(self):
+        "Get all news items in descending 'modified' order."
+        view = self.db.view('new/modified', include_docs=True, descending=True)
+        return [r.doc for r in view]
+
+    def get_events(self):
+        "Get all events items in descending 'start' order."
+        view = self.db.view('event/start', include_docs=True, descending=True)
+        return [r.doc for r in view]
+
     def get_field(self, identifier):
         return self.get_entity_view('field/identifier', identifier)
 

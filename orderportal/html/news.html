@@ -1,0 +1,77 @@
+{# News items edit page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}News items{% end %}
+{% block body_title %}News items{% end %}
+
+{% block content %}
+
+<table class="table">
+  <tr>
+    <th>Text</th>
+    <th>Modified</th>
+    <th>Created</th>
+  </tr>
+
+  <form action="{{ reverse_url('news') }}"
+	role="form" method="POST">
+    {% module xsrf_form_html() %}
+    <tr>
+      <td>
+	<div class="form-group">
+	  <textarea class="form-control" rows="5"
+		    name="markdown" id="markdown"></textarea>
+	</div>
+	<p class="text-muted">
+	  Text in
+	  <a href="http://daringfireball.net/projects/markdown/">Markdown</a>
+	  format.
+	</p>
+      </td>
+
+      <td>
+	<div class="form-group">
+	  <label class="control-label"></label>
+	  <button type="submit"
+		  class="btn btn-primary glyphicon glyphicon-save">
+	    Save
+	  </button>
+	</div>
+      </td>
+    </tr>
+  </form>
+
+  {% for new in news %}
+  <tr>
+    <td>
+      <div class="panel panel-default">
+	<div class="panel-heading"></div>
+	<div class="panel-body">
+	  {% module Markdown(new) %}
+	</div>
+      </div>
+    </td>
+    <td class="localtime">{{ new['modified'] }}</td>
+    <td class="localtime">{{ new['created'] }}</td>
+    <td>
+      <form action="{{ reverse_url('new', new['_id']) }}"
+	    role="form" method="POST">
+	{% module xsrf_form_html() %}
+	<input type="hidden" name="_http_method" value="delete">
+	<div class="form-group">
+	  <label class="control-label"></label>
+	  <button type="submit"
+		  class="btn btn-primary glyphicon glyphicon-remove"
+		  onclick="return confirm('Cannot be undone! Really delete?');">
+	    Delete
+	  </button>
+	</div>
+      </form>
+    </td>
+  </tr>
+{% end %}
+
+</table>
+
+{% end %} {# block content #}

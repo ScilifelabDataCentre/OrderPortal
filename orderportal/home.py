@@ -1,4 +1,4 @@
-"OrderPortal: Home page."
+"OrderPortal: Home page variants, and a few general resources."
 
 from __future__ import unicode_literals, print_function, absolute_import
 
@@ -13,21 +13,7 @@ from orderportal.requesthandler import RequestHandler
 from orderportal.saver import Saver
 
 
-class NewsMixin(object):
-    "Mixin for news items handling."
-
-    def get_news(self):
-        return []
-
-
-class EventsMixin(object):
-    "Mixin for events items handling."
-
-    def get_events(self):
-        return []
-
-
-class Home(NewsMixin, EventsMixin, RequestHandler):
+class Home(RequestHandler):
     "Home page; dashboard. Contents according to role of logged-in user."
 
     def get(self):
@@ -96,23 +82,6 @@ class About(RequestHandler):
 
     def get(self):
         self.render('about.html')
-
-
-class News(NewsMixin, RequestHandler):
-    "Edit page for news items."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.render('news.html', news=self.get_news())
-
-
-class Events(EventsMixin, RequestHandler):
-    "Edit page for events items."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        self.render('events.html', events=self.get_events())
 
 
 class TextSaver(Saver):

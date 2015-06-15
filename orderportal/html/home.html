@@ -109,11 +109,18 @@
       </div>
       <div class="panel-body">
 	{% if news %}
-	<ul class="list-group">
+	<table class="table table-condensed">
 	  {% for new in news %}
-	  <li class="list-group-item">{{ repr(new) }} </li>
+	  <tr>
+	    <td>
+	      {% module Markdown(new) %}
+	    </td>
+	    <td class="text-right small">
+	      [{{ new['modified'].split('T')[0] }}]
+	    </td>
+	  </tr>
 	  {% end %}
-	</ul>
+	</table>
 	{% else %}
 	<i>Currently none. Check again later.</i>
 	{% end %}

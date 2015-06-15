@@ -89,8 +89,15 @@ class Entity(tornado.web.UIModule):
             url=url, icon=icon, title=title)
 
 
+class Markdown(tornado.web.UIModule):
+    "Process the document containing markdown content and output."
+
+    def render(self, doc):
+        return markdown.markdown(doc['markdown'], output_format='html5')
+
+
 class Text(tornado.web.UIModule):
-    "Fetch Markdown text from the database, process it, and output."
+    "Fetch text object from the database, process it, and output."
 
     def render(self, name):
         try:

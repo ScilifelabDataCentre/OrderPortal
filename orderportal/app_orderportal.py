@@ -24,6 +24,8 @@ from orderportal.user import *
 from orderportal.form import *
 from orderportal.order import *
 from orderportal.info import *
+from orderportal.news import *
+from orderportal.event import *
 
 
 class Dummy(RequestHandler):
@@ -34,13 +36,6 @@ class Dummy(RequestHandler):
 def get_handlers():
     URL = tornado.web.url
     return [URL(r'/', Home, name='home'),
-            URL(r'/news', News, name='news'),
-            URL(r'/events', Events, name='events'),
-            URL(r'/text/([^/]+)', Text, name='text'),
-            URL(r'/info', InfoCreate, name='info_create'),
-            URL(r'/infos', Infos, name='infos'),
-            URL(r'/info/([^/]+)', Info, name='info'),
-            URL(r'/info/([^/]+)/edit', InfoEdit, name='info_edit'),
             URL(r'/search', Dummy, name='search'),
             URL(r'/orders', Orders, name='orders'),
             URL(r'/order/([0-9a-f]{32})', Order, name='order'),
@@ -76,9 +71,17 @@ def get_handlers():
                 FormFieldCreate, name='field_create'),
             URL(r'/form/([0-9a-f]{32})/field/([a-zA-Z][_a-zA-Z0-9]*)',
                 FormFieldEdit, name='field_edit'),
+            URL(r'/news', News, name='news'),
+            URL(r'/new/([0-9a-f]{32})', New, name='new'),
+            URL(r'/events', Events, name='events'),
+            URL(r'/infos', Infos, name='infos'),
+            URL(r'/info', InfoCreate, name='info_create'),
+            URL(r'/info/([^/]+)', Info, name='info'),
+            URL(r'/info/([^/]+)/edit', InfoEdit, name='info_edit'),
+            URL(r'/text/([^/]+)', Text, name='text'),
+            URL(r'/about', About, name='about'),
             URL(r'/log/([0-9a-f]{32})', Log, name='log'),
             URL(r'/([0-9a-f]{32})', Entity, name='entity'),
-            URL(r'/about', About, name='about'),
             ]
 
 def get_args():
