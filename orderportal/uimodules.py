@@ -92,8 +92,15 @@ class Entity(tornado.web.UIModule):
 class Markdown(tornado.web.UIModule):
     "Process the document containing markdown content and output."
 
-    def render(self, doc):
-        return markdown.markdown(doc['markdown'], output_format='html5')
+    def render(self, doc, default=None):
+        try:
+            text = doc['markdown']
+        except KeyError:
+            if default:
+                text = default
+            else:
+                return '<i>No markdown text defined.</i>'
+        return markdown.markdown(text, output_format='html5')
 
 
 class Text(tornado.web.UIModule):

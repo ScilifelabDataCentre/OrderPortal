@@ -25,7 +25,7 @@ from orderportal.form import *
 from orderportal.order import *
 from orderportal.info import *
 from orderportal.news import *
-from orderportal.event import *
+from orderportal.events import *
 
 
 class Dummy(RequestHandler):
@@ -74,6 +74,7 @@ def get_handlers():
             URL(r'/news', News, name='news'),
             URL(r'/new/([0-9a-f]{32})', New, name='new'),
             URL(r'/events', Events, name='events'),
+            URL(r'/event/([0-9a-f]{32})', Event, name='event'),
             URL(r'/infos', Infos, name='infos'),
             URL(r'/info', InfoCreate, name='info_create'),
             URL(r'/info/([^/]+)', Info, name='info'),

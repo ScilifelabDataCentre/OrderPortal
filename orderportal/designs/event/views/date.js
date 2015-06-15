@@ -1,8 +1,8 @@
 /* OrderPortal
-   Events documents indexed by start date.
+   Events documents indexed by date.
    Value: title.
 */
 function(doc) {
     if (doc.orderportal_doctype !== 'event') return;
-    emit(doc.start, doc.title);
+    emit(doc.date, doc.title);
 }
