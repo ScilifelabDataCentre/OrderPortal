@@ -1,4 +1,4 @@
-"OrderPortal: News pages."
+"OrderPortal: News page."
 
 from __future__ import unicode_literals, print_function, absolute_import
 
@@ -18,11 +18,9 @@ class NewSaver(Saver):
 
 
 class News(RequestHandler):
-    "Page for handling all news items; creation, deletion."
+    "Page for viewing and handling all news items; creation, deletion."
 
-    @tornado.web.authenticated
     def get(self):
-        self.check_admin()
         self.render('news.html', news=self.get_news())
 
     @tornado.web.authenticated

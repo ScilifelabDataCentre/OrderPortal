@@ -9,14 +9,18 @@
 
 <div class="panel panel-default">
   <div class="panel-body">
-    <p>
-      Your current password will be removed by this action. You will
-      not be able to login without first setting a new password.
-    </p>
-    <p>
-      The instructions on how to set a new password will be sent in
-      a message to your email address.
-    </p>
+    {% if is_admin %}
+    <form action="{{ reverse_url('text', 'reset') }}"
+	  role="form" class="pull-right" method="GET">
+      <input type="hidden" name="origin"
+	     value="{{ absolute_reverse_url('reset') }}">
+      <button type="submit"
+	      class="btn btn-sm btn-default glyphicon glyphicon-edit">
+	Edit
+      </button>
+    </form>
+    {% end %} {# if is_admin #}
+    {% module Text('reset', default='The current password will be invalidated. Instructions on how to set a new one will be sent to the email address.') %}
   </div>
 </div>
 

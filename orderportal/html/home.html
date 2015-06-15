@@ -28,9 +28,7 @@
 	  </button>
 	</form>
 	{% end %}
-	<div>
-	  {% module Text('header') %}
-	</div>
+	{% module Text('header') %}
       </div>
     </div>
   </div>
@@ -80,7 +78,7 @@
 	<p>
 	  <a href="{{ reverse_url('reset') }}"
 	     class="btn btn-default glyphicon glyphicon-envelope" role="button">
-	    Reset your password
+	    Reset account password
 	  </a>
 	</p>
       </div>
@@ -175,10 +173,8 @@
 	    Edit
 	  </button>
 	</form>
-	{% end %}
-	<div>
-	  {% module Text('footer') %}
-	</div>
+	{% end %} {# if is_admin #}
+	{% module Text('footer') %}
       </div>
     </div>
   </div>

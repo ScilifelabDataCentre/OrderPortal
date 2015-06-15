@@ -99,12 +99,16 @@ class Markdown(tornado.web.UIModule):
 class Text(tornado.web.UIModule):
     "Fetch text object from the database, process it, and output."
 
-    def render(self, name):
+    def render(self, name, default=None):
         try:
             doc = self.handler.get_entity_view('text/name', name)
-        except tornado.web.HTTPError:
-            return "<i>No text '{}' defined.</i>".format(name)
-        return markdown.markdown(doc['markdown'], output_format='html5')
+            text = doc['markdown']
+        except (tornado.web.HTTPError, KeyError):
+            if default:
+                text = default
+            else:
+                return "<i>No text '{}' defined.</i>".format(name)
+        return markdown.markdown(text, output_format='html5')
 
 
 class OrderFieldsDisplay(tornado.web.UIModule):

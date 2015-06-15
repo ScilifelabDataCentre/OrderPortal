@@ -79,7 +79,6 @@ def get_handlers():
             URL(r'/info/([^/]+)', Info, name='info'),
             URL(r'/info/([^/]+)/edit', InfoEdit, name='info_edit'),
             URL(r'/text/([^/]+)', Text, name='text'),
-            URL(r'/about', About, name='about'),
             URL(r'/log/([0-9a-f]{32})', Log, name='log'),
             URL(r'/([0-9a-f]{32})', Entity, name='entity'),
             ]

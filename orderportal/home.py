@@ -77,13 +77,6 @@ class Entity(RequestHandler):
             raise tornado.web.HTTPError(404)
 
 
-class About(RequestHandler):
-    "Page describing the site."
-
-    def get(self):
-        self.render('about.html')
-
-
 class TextSaver(Saver):
     doctype = constants.TEXT
 

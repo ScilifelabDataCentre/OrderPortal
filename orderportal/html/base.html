@@ -24,20 +24,40 @@
 	</div>
 	<div>
 	  <ul class="nav navbar-nav">
-            <li><a href ="{{ reverse_url('home') }}">Home</a></li>
+            <li><a href="{{ reverse_url('home') }}">Home</a></li>
+
 	    {% if current_user %}
 	    {% if is_staff %}
-            <li><a href ="{{ reverse_url('orders') }}">Orders</a></li>
+            <li><a href="{{ reverse_url('orders') }}">Orders</a></li>
 	    {% else %}
-            <li><a href ="{{ reverse_url('orders_user', current_user['email']) }}">My orders</a></li>
-	    {% end %}
-	    {% end %}
+            <li><a href="{{ reverse_url('orders_user', current_user['email']) }}">My orders</a></li>
+	    {% end %} {# if is_staff #}
+	    {% end %} {# if current_user #}
+
 	    {% if is_admin %}
-            <li><a href ="{{ reverse_url('forms') }}">Forms</a></li>
-	    {% end %}
+            <li><a href="{{ reverse_url('forms') }}">Forms</a></li>
+	    {% end %} {# if is_admin #}
+
 	    {% if is_staff %}
-            <li><a href ="{{ reverse_url('users') }}">Users</a></li>
-	    {% end %}
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+		Users
+		<span class="caret"></span>
+	      </a>
+              <ul class="dropdown-menu">
+		<li><a href="{{ reverse_url('users') }}">All users</a></li>
+		{% if is_admin %}
+		<li>
+		  <a href="{{ reverse_url('reset') }}">Reset password</a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('register') }}">Register new user</a>
+		</li>
+		{% end %} {# if is_staff #}
+	      </ul>
+	    </li>
+	    {% end %} {# if is_staff #}
+
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">
 		Information
@@ -48,14 +68,14 @@
 		<li><a href="{{ reverse_url('info', n) }}">{{ t or n }}</a></li>
 		{% end %}
 		{% if is_admin %}
-		<li><a href ="{{ reverse_url('infos') }}">All infos</a></li>
+		<li><a href="{{ reverse_url('infos') }}">All items</a></li>
 		{% end %}
               </ul>
             </li>
+            <li><a href="{{ reverse_url('news') }}">News</a></li>
 	  </ul>
 	  <div>
 	    <ul class="nav navbar-nav navbar-right">
-	      <li><a href ="{{ reverse_url('about') }}">About</a></li>
 	      {% if current_user %}
 	      <li>
 		<p class="navbar-text">

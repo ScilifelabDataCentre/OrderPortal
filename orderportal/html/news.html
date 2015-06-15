@@ -2,58 +2,57 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}News items{% end %}
-{% block body_title %}News items{% end %}
+{% block head_title %}News{% end %}
+{% block body_title %}News{% end %}
 
 {% block content %}
 
-<table class="table">
-  <tr>
-    <th>Text</th>
-    <th>Modified</th>
-    <th>Created</th>
-  </tr>
-
-  <form action="{{ reverse_url('news') }}"
-	role="form" method="POST">
-    {% module xsrf_form_html() %}
-    <tr>
-      <td>
-	<div class="form-group">
-	  <textarea class="form-control" rows="5"
-		    name="markdown" id="markdown"></textarea>
-	</div>
+{% if is_admin %}
+<div class="panel panel-default">
+  <div class="panel-heading">Add a news item</div>
+  <div class="panel-body">
+    <form action="{{ reverse_url('news') }}"
+	  role="form" method="POST">
+      {% module xsrf_form_html() %}
+      <div class="form-group">
+	<label for="markdown">Text for a new item</label>
+	<textarea class="form-control" rows="5"
+		  name="markdown" id="markdown"></textarea>
 	<p class="text-muted">
 	  Text in
 	  <a href="http://daringfireball.net/projects/markdown/">Markdown</a>
 	  format.
 	</p>
-      </td>
+      </div>
 
-      <td>
-	<div class="form-group">
-	  <label class="control-label"></label>
-	  <button type="submit"
-		  class="btn btn-primary glyphicon glyphicon-save">
-	    Save
-	  </button>
-	</div>
-      </td>
-    </tr>
-  </form>
+      <div class="form-group">
+	<label class="control-label"></label>
+	<button type="submit"
+		class="btn btn-primary glyphicon glyphicon-save">
+	  Save
+	</button>
+      </div>
+    </form>
+  </div>
+</div>
+<br>
+{% end %} {# if is_admin #}
+
+<table class="table table-striped">
+  <tr>
+    <th>Item</th>
+    <th>Modified</th>
+    <th>Created</th>
+  </tr>
 
   {% for new in news %}
   <tr>
     <td>
-      <div class="panel panel-default">
-	<div class="panel-heading"></div>
-	<div class="panel-body">
-	  {% module Markdown(new) %}
-	</div>
-      </div>
+      {% module Markdown(new) %}
     </td>
     <td class="localtime">{{ new['modified'] }}</td>
     <td class="localtime">{{ new['created'] }}</td>
+    {% if is_admin %}
     <td>
       <form action="{{ reverse_url('new', new['_id']) }}"
 	    role="form" method="POST">
@@ -69,9 +68,8 @@
 	</div>
       </form>
     </td>
+    {% end %} {# if is_admin #}
   </tr>
-{% end %}
-
+  {% end %}
 </table>
-
 {% end %} {# block content #}

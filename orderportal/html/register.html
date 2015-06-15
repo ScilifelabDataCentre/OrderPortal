@@ -9,16 +9,18 @@
 
 <div class="panel panel-default">
   <div class="panel-body">
-    <p>
-      You may register a new account in this portal. Your email
-      address is your account name in this portal. This may take one
-      or two working days.
-    </p>
-    <p>
-      The portal administrator will review your account. When and if
-      she enables it, you will receive an email message containing a
-      code required to set your password.
-    </p>
+    {% if is_admin %}
+    <form action="{{ reverse_url('text', 'register') }}"
+	  role="form" class="pull-right" method="GET">
+      <input type="hidden" name="origin"
+	     value="{{ absolute_reverse_url('register') }}">
+      <button type="submit"
+	      class="btn btn-sm btn-default glyphicon glyphicon-edit">
+	Edit
+      </button>
+    </form>
+    {% end %} {# if is_admin #}
+    {% module Text('register') %}
   </div>
 </div>
 
@@ -86,7 +88,7 @@
 	</p>
 	<input type="text" class="form-control"
 	       name="university_other" id="university_other"
-	       placeholder="Provide full name if not available in list above.">
+	       placeholder="Provide name of organization if not available in list above.">
       </div>
     </div>
     <p class="text-muted">
@@ -130,7 +132,7 @@
       </div>
     </div>
     <p class="text-muted">
-      One or more telephone numbers.
+      One or more telephone numbers separated by comma (,).
     </p>
   </div>
 
