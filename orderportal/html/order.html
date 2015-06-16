@@ -1,76 +1,110 @@
 {# Order page. #}
 
-{# XXX not fixed! #}
+{% block head_title %}Order '{{ order.get('title') or order['_id'] }}'{% end %}
+{% block body_title %}Order '{{ order.get('title') or order['_id'] }}'{% end %}
 
 {% extends "base.html" %}
 
-{% block actions %}
+{% block meta_content %}
+
 {% if is_editable %}
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
-      method='GET'>
-  {% module Submit('edit') %}
+      role="form" method='GET'>
+  <div class="form-group">
+    <button type="submit"
+	    class="btn btn-primary glyphicon glyphicon-edit">
+      Edit
+    </button>
+  </div>
 </form>
-{% end %}
+{% end %} {# if is_editable #}
+
 {% for target in targets %}
+<br>
 <form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
-      method='POST'>
-  {% module Submit(target['identifier'], title=target.get('label', target['identifier'].capitalize())) %}
+      role="form" method='POST'>
+    <button type="submit" class="btn btn-primary">
+      {% module Icon(target['identifier']) %}
+      {{ target.get('label', target['identifier'].capitalize()) }}
+    </button>
 </form>
 {% end %}
-<div class="vertical_space"></div>
+
+<br>
 <form action="{{ reverse_url('order', order['_id']) }}"
-      method='POST'>
+      role="form" method='POST'>
   {% module xsrf_form_html() %}
-  <input type="hidden" name="_http_method" value="delete">
-  {% module Submit('delete', confirm=True) %}
+  <div class="form-group">
+    <input type="hidden" name="_http_method" value="delete">
+    <button type="submit"
+	    class="btn btn-danger glyphicon glyphicon-minus"
+	    onclick="return confirm('Cannot be undone! Really delete?');">
+      Delete
+    </button>
+  </div>
 </form>
-{% end %}
 
-{% block content %}
-<table class="order">
+{% end %} {# block meta_content #}
 
-  <tr>
-    <th>Status</th>
-    <td>{% module Icon('required') %}</td>
-    <td>{% module Icon(order['status'], label=True) %}</td>
-    <td>{{ status['description'] }}</td>
-  </tr>
+{% block main_content %}
+<div class="panel panel-default">
+  <div class="panel-heading">Order metadata</div>
+  <div class="panel-body">
 
-  <tr>
-    <th>Modified</th>
-    <td></td>
-    <td>
-      <a href={{ reverse_url('order_logs', order['_id']) }} class="localtime">
-	{{ order['modified'] }}
-      </a>
-    </td>
-  </tr>
+    <table class="table">
+      <tr>
+	<th>Owner</th>
+	<td colspan="2">
+	  <a href="{{ reverse_url('user', order['owner']) }}">
+	    {{ order['owner'] }}
+	  </a>
+	</td>
+      </tr>
 
-  <tr>
-    <th>Owner</th>
-    <td>{% module Icon('required') %}</td>
-    <td>
-      <a href="{{ reverse_url('user', order['owner']) }}">
-	{{ order['owner'] }}
-      </a>
-    </td>
-    <td></td>
-  </tr>
+      <tr>
+	<th>Status</th>
+	<td>{% module Icon(order['status'], label=True) %}</td>
+	<td>{{ status['description'] }}</td>
+      </tr>
 
-  {% for field in fields %}
-  <tr>
-    {% if field['type'] == 'group' %}
-    <th class="group depth{{ field['depth'] }}" colspan="3">
-      {{ field.get('label') or field['identifier'] }}
-    </th>
-    {% else %}
-    <th>{{ field.get('label') or field['identifier'] }}</th>
-    <td>{% if field['required'] %}{% module Icon('required') %}{% end %}</td>
-    <td>{{ order['fields'][field['identifier']] or '-' }}</td>
-    <td>{{ field.get('description') or '-' }}</td>
-    {% end %}
-  </tr>
-  {% end %}
+      <tr>
+	<th>Modified</th>
+	<td colspan="2">
+	  <span class="localtime">{{ order['modified'] }}</span>
+	  <a href="{{ reverse_url('order_logs', order['_id']) }}">
+	    {% module Icon('logs', label=True) %}
+	  </a>
+	</td>
+      </tr>
+    </table>
 
-</table>
-{% end %} {# block content #}
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">Order fields</div>
+  <div class="panel-body">
+
+    <table class="table">
+      {% for field in fields %}
+      <tr>
+	{% if field['type'] == 'group' %}
+	<th class="group depth{{ field['depth'] }}" colspan="3">
+	  {{ field.get('label') or field['identifier'] }}
+	</th>
+	{% else %}
+	<th>{{ field.get('label') or field['identifier'] }}</th>
+	<td>
+	  {% if field['required'] %}{% module Icon('required') %}{% end %}
+	</td>
+	<td>{{ order['fields'][field['identifier']] or '-' }}</td>
+	<td>{{ field.get('description') or '-' }}</td>
+	{% end %}
+      </tr>
+      {% end %}
+    </table>
+
+  </div>
+</div>
+
+{% end %} {# block main_content #}

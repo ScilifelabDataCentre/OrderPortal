@@ -8,7 +8,7 @@
 	  href="{{ static_url(settings['FACILITY_ICON_NAVBAR']) }}">
     <link rel="stylesheet"
 	  href="{{ static_url('bootstrap-3.3.4/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ static_url('minor_modifications.css') }}">
+    <link rel="stylesheet" href="{{ static_url('mods.css') }}">
   </head>
 
   <body>
@@ -78,6 +78,7 @@
             <li><a href="{{ reverse_url('news') }}">News</a></li>
             <li><a href="{{ reverse_url('events') }}">Events</a></li>
 	  </ul>
+
 	  <div>
 	    <ul class="nav navbar-nav navbar-right">
 	      {% if current_user %}
@@ -91,7 +92,7 @@
 	      </li>
 	      <li>
 		<form action="{{ reverse_url('logout') }}"
-		      role="form" class="navbar-text" method="POST">
+		      role="form" class="navbar-form" method="POST">
 		  {% module xsrf_form_html() %}
 		  <button type="submit"
 			  class="btn btn-default btn-sm glyphicon glyphicon-log-out">

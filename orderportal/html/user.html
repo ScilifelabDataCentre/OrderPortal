@@ -57,7 +57,8 @@
   <div class="form-group">
     <input type="hidden" name="_http_method" value="delete">
     <button type="submit"
-	    class="btn btn-danger glyphicon glyphicon-minus">
+	    class="btn btn-danger glyphicon glyphicon-minus"
+	    onclick="return confirm('Cannot be undone! Really delete?');">
       Delete
     </button>
   </div>
