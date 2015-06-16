@@ -6,69 +6,76 @@
 {% block body_title %}News{% end %}
 
 {% block content %}
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1">
 
-<table class="table table-striped">
-  <tr>
-    <th>Item</th>
-    <th>Modified</th>
-  </tr>
+    <table class="table table-striped">
+      <tr>
+	<th>Item</th>
+	<th>Modified</th>
+      </tr>
 
-  {% for new in news %}
-  <tr>
-    <td>
-      {% module Markdown(new) %}
-    </td>
-    <td class="localtime">{{ new['modified'] }}</td>
+      {% for new in news %}
+      <tr>
+	<td>
+	  {% module Markdown(new) %}
+	</td>
+	<td class="localtime">{{ new['modified'] }}</td>
+	{% if is_admin %}
+	<td>
+	  <form action="{{ reverse_url('new', new['_id']) }}"
+		role="form" method="POST">
+	    {% module xsrf_form_html() %}
+	    <input type="hidden" name="_http_method" value="delete">
+	    <div class="form-group">
+	      <label class="control-label"></label>
+	      <button type="submit"
+		      class="btn btn-primary glyphicon glyphicon-remove"
+		      onclick="return confirm('Cannot be undone! Really delete?');">
+		Delete
+	      </button>
+	    </div>
+	  </form>
+	</td>
+	{% end %} {# if is_admin #}
+      </tr>
+      {% end %}
+    </table>
+
     {% if is_admin %}
-    <td>
-      <form action="{{ reverse_url('new', new['_id']) }}"
-	    role="form" method="POST">
-	{% module xsrf_form_html() %}
-	<input type="hidden" name="_http_method" value="delete">
-	<div class="form-group">
-	  <label class="control-label"></label>
-	  <button type="submit"
-		  class="btn btn-primary glyphicon glyphicon-remove"
-		  onclick="return confirm('Cannot be undone! Really delete?');">
-	    Delete
-	  </button>
-	</div>
-      </form>
-    </td>
+    <div class="panel panel-primary">
+      <div class="panel-heading">Add a news item</div>
+      <div class="panel-body">
+	<form action="{{ reverse_url('news') }}"
+	      role="form" method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group">
+	    <label for="markdown">Text for a new item</label>
+	    <textarea class="form-control" rows="5"
+		      name="markdown" id="markdown"></textarea>
+	    <p class="text-muted">
+	      Text in
+	      <a href="http://daringfireball.net/projects/markdown/">
+		Markdown
+	      </a>
+	      format.
+	    </p>
+	  </div>
+	  
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit"
+		    class="btn btn-primary glyphicon glyphicon-save">
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
     {% end %} {# if is_admin #}
-  </tr>
-  {% end %}
-</table>
 
-{% if is_admin %}
-<div class="panel panel-primary">
-  <div class="panel-heading">Add a news item</div>
-  <div class="panel-body">
-    <form action="{{ reverse_url('news') }}"
-	  role="form" method="POST">
-      {% module xsrf_form_html() %}
-      <div class="form-group">
-	<label for="markdown">Text for a new item</label>
-	<textarea class="form-control" rows="5"
-		  name="markdown" id="markdown"></textarea>
-	<p class="text-muted">
-	  Text in
-	  <a href="http://daringfireball.net/projects/markdown/">Markdown</a>
-	  format.
-	</p>
-      </div>
-
-      <div class="form-group">
-	<label class="control-label"></label>
-	<button type="submit"
-		class="btn btn-primary glyphicon glyphicon-save">
-	  Save
-	</button>
-      </div>
-    </form>
+  </div>
+  <div class="col-sm-1">
   </div>
 </div>
-<br>
-{% end %} {# if is_admin #}
-
 {% end %} {# block content #}

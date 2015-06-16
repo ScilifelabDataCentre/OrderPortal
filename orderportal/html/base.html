@@ -7,8 +7,8 @@
     <link rel="shortcut icon" type="image/png"
 	  href="{{ static_url(settings['FACILITY_ICON_NAVBAR']) }}">
     <link rel="stylesheet"
-	  href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ static_url('orderportal-fixes.css') }}">
+	  href="{{ static_url('bootstrap-3.3.4/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ static_url('minor_modifications.css') }}">
   </head>
 
   <body>
@@ -48,10 +48,13 @@
 		<li><a href="{{ reverse_url('users') }}">All users</a></li>
 		{% if is_admin %}
 		<li>
+		  <a href="{{ reverse_url('register') }}">Register new user</a>
+		</li>
+		<li>
 		  <a href="{{ reverse_url('reset') }}">Reset password</a>
 		</li>
 		<li>
-		  <a href="{{ reverse_url('register') }}">Register new user</a>
+		  <a href="{{ reverse_url('password') }}">Set password</a>
 		</li>
 		{% end %} {# if is_staff #}
 	      </ul>
@@ -130,10 +133,12 @@
 
       {% block content %}
       <div class="row">
+	{% block outer_main_content %}
 	<div class="col-sm-9 col-sm-offset-1">
 	  {% block main_content %}
 	  {% end %} {# block main_content #}
 	</div>
+	{% end %} {# block outer_main_content #}
 	<div class="col-sm-2">
 	  {% block meta_content %}
 	  {% end %} {# block meta_content #}
@@ -144,8 +149,9 @@
     </div>
 
     {% block javascript_standard %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="{{ static_url('jquery-1.11.3.min.js') }}"></script>
+    <script src="{{ static_url('bootstrap-3.3.4/js/bootstrap.min.js') }}">
+    </script>
     <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
     {% end %} {# block javascript_standard #}
 
