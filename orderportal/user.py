@@ -42,7 +42,7 @@ class Users(RequestHandler):
     def get(self):
         self.check_admin()
         view = self.db.view('user/email', include_docs=True)
-        users = [self.get_presentable(r.doc) for r in view]
+        users = [r.doc for r in view]
         self.render('users.html', title='Users', users=users)
 
 
@@ -101,6 +101,11 @@ class UserEdit(RequestHandler):
         user = self.get_user(email)
         self.check_owner_or_staff(user)
         with UserSaver(doc=user, rqh=self) as saver:
+            if self.is_admin():
+                role = self.get_argument('role')
+                if role not in constants.USER_ROLES:
+                    raise tornado.web.HTTPError(404, reason='invalid role')
+                saver['role'] = role
             saver['first_name'] = self.get_argument('first_name')
             saver['last_name'] = self.get_argument('last_name')
             university = self.get_argument('university_other', default=None)

@@ -70,10 +70,10 @@ class Forms(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
-        self.check_staff()
+        self.check_admin()
         view = self.db.view('form/modified', descending=True, include_docs=True)
         title = 'Recent forms'
-        forms = [self.get_presentable(r.doc) for r in view]
+        forms = [r.doc for r in view]
         self.render('forms.html', title=title, forms=forms)
 
 
@@ -85,7 +85,6 @@ class Form(FormMixin, RequestHandler):
         self.check_staff()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.render('form.html',
-                    title="Form '{}'".format(form['title']),
                     form=form,
                     fields=Fields(form),
                     logs=self.get_logs(form['_id']))

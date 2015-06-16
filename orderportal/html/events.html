@@ -12,7 +12,6 @@
     <th>Date</th>
     <th>Title, text</th>
     <th>Modified</th>
-    <th>Created</th>
   </tr>
 
   {% for event in events %}
@@ -25,7 +24,6 @@
       </div>
     </td>
     <td class="localtime">{{ event['modified'] }}</td>
-    <td class="localtime">{{ event['created'] }}</td>
     {% if is_admin %}
     <td>
       <form action="{{ reverse_url('event', event['_id']) }}"

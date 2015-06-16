@@ -1,53 +1,79 @@
 {# Form page. #}
 
-{# XXX not fixed! #}
-
 {% extends "base.html" %}
 
+{% block head_title %}Form '{{ form['title'] }}'{% end %}
+{% block body_title %}Form '{{ form['title'] }}'{% end %}
+
 {% if is_admin %}
-{% block actions %}
-{% if form['status'] == constants.PENDING %}
-<form action="{{ reverse_url('field_create', form['_id']) }}"
-      method="GET">
-  {% module Submit('create', title='Create field') %}
-</form>
-{% end %}
+{% block meta_content %}
+
 <form action="{{ reverse_url('form_edit', form['_id']) }}"
-      method="GET">
-  {% module Submit('edit') %}
+      role="form" method="GET">
+  <button type="submit"
+	  class="btn btn-primary glyphicon glyphicon-edit">
+    Edit
+  </button>
 </form>
-<form action="{{ reverse_url('form_copy', form['_id']) }}"
-      method="POST">
-  {% module xsrf_form_html() %}
-  {% module Submit('copy') %}
-</form>
+
 {% if form['status'] == constants.PENDING %}
-  <div class="vertical_space"></div>
-  <form action="{{ reverse_url('form_enable', form['_id']) }}"
-	method="POST">
-    {% module xsrf_form_html() %}
-    {% module Submit('enable', confirm=True) %}
-  </form>
-{% elif form['status'] == constants.ENABLED %}
-  <div class="vertical_space"></div>
-  <form action="{{ reverse_url('form_disable', form['_id']) }}"
-	method="POST">
-    {% module xsrf_form_html() %}
-    {% module Submit('disable') %}
-  </form>
-{% elif form['status'] == constants.DISABLED %}
-  <div class="vertical_space"></div>
-  <form action="{{ reverse_url('form_enable', form['_id']) }}"
-	method="POST">
-    {% module xsrf_form_html() %}
-    {% module Submit('enable') %}
-  </form>
-{% end %}
-{% end %}
+<br>
+<form action="{{ reverse_url('field_create', form['_id']) }}"
+      role="form" method="GET">
+  <button type="submit"
+	  class="btn btn-primary glyphicon glyphicon-plus">
+    Create field
+  </button>
+</form>
 {% end %}
 
-{% block content %}
-<table class="fields">
+{% if form['status'] == constants.PENDING %}
+<br>
+<form action="{{ reverse_url('form_enable', form['_id']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <button type="submit" class="btn btn-success glyphicon glyphicon-ok"
+	  onclick="return confirm('Cannot be undone! Really enable?');">
+    Enable
+  </button>
+</form>
+
+{% elif form['status'] == constants.ENABLED %}
+<br>
+<form action="{{ reverse_url('form_disable', form['_id']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <button type="submit" class="btn btn-danger glyphicon glyphicon-remove">
+    Disable
+  </button>
+</form>
+
+{% elif form['status'] == constants.DISABLED %}
+<br>
+<form action="{{ reverse_url('form_enable', form['_id']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <button type="submit" class="btn btn-success glyphicon glyphicon-ok">
+    Enable
+  </button>
+</form>
+{% end %}
+
+<br>
+<form action="{{ reverse_url('form_copy', form['_id']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <button type="submit"
+	  class="btn btn-primary glyphicon glyphicon-plus-sign">
+    Copy
+  </button>
+</form>
+
+{% end %} {# block meta_content #}
+{% end %} {# if is_admin #}
+
+{% block main_content %}
+<table class="table table-striped">
   <tr>
     <th>Description</th>
     <td>{{ form.get('description') or '' }}</td>
@@ -61,16 +87,22 @@
   <tr>
     <th>Modified</th>
     <td>
-      <a href={{ reverse_url('form_logs', form['_id']) }} class="localtime">
-	{{ form['modified'] }}
+      <span class="localtime">{{ form['modified'] }}</span>
+      <a href="{{ reverse_url('form_logs', form['_id']) }}">
+	{% module Icon('logs', label=True) %}
       </a>
     </td>
   </tr>
 
   <tr>
+    <th>Created</th>
+    <td class="localtime">{{ form['created'] }}</td>
+  </tr>
+
+  <tr>
     <th>Fields</th>
     <td>
-      <table class="formfields">
+      <table class="table table-condensed">
 	<tr>
 	  <th>Identifier</th>
 	  <th>Label</th>
@@ -82,7 +114,8 @@
 	</tr>
 	{% for field in fields %}
 	<tr>
-	  <td>{% raw '-&nbsp;'*field['depth'] %}
+	  <td class="text-nowrap">
+	    {% raw '-&nbsp;'*field['depth'] %}
 	    <a href="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}">{{ field['identifier'] }}</a></td>
 	  <td>{{ field.get('label') or '-' }}</td>
 	  <td>{{ field['type'] }}</td>
@@ -98,4 +131,5 @@
     </td>
   </tr>
 </table>
-{% end %} {# block content #}
+
+{% end %} {# block main_content #}

@@ -1,31 +1,22 @@
 {# Forms list page. #}
+
 {% extends "base.html" %}
 
-{#
-{% block subheader %}
-<form action="{{ reverse_url('form_create') }}" method='GET'>
-  {% module Submit('create', title='Create new form') %}
-</form>
-<p>
-{% end %}
-#}
+{% block head_title %}Forms{% end %}
+{% block body_title %}Forms{% end %}
 
-{% block content %}
-<form action="{{ reverse_url('form_create') }}" method='GET'>
-  {% module Submit('create', title='Create new form') %}
-</form>
-<p>
-<table class="listing">
+{% block main_content %}
+<table class="table table-striped">
   <tr>
     <th>Form</th>
     <th>Status</th>
     <th>Owner</th>
     <th>Modified</th>
   </tr>
-{% for form in forms %}
+  {% for form in forms %}
   <tr>
     <td>
-      <a href="{{ reverse_url('form', form['iuid']) }}">
+      <a href="{{ reverse_url('form', form['_id']) }}">
 	{{ form['title'] }}
       </a>
     </td>
@@ -35,6 +26,6 @@
     </td>
     <td class="localtime">{{ form['modified'] }}</td>
   </tr>
-{% end %}
+  {% end %}
 </table>
-{% end %}
+{% end %} {# block main_content #}

@@ -8,6 +8,66 @@
 {{ user['email'] }}
 {% end %}
 
+{% block meta_content %}
+
+{% if is_admin or current_user['email'] == user['email'] %}
+<form action="{{ reverse_url('user_edit', user['email']) }}"
+      role="form" method="GET">
+  <div class="form-group">
+    <button type="submit"
+	    class="btn btn-primary glyphicon glyphicon-edit">
+      Edit
+    </button>
+  </div>
+</form>
+{% end %} {# if is_admin #}
+
+{% if is_admin and current_user['email'] != user['email'] %}
+
+{% if user['status'] in (constants.PENDING, constants.DISABLED) %}
+<br>
+<form action="{{ reverse_url('user_enable', user['email']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <div class="form-group">
+    <button type="submit"
+	    class="btn btn-success glyphicon glyphicon-ok">
+      Enable
+    </button>
+  </div>
+</form>
+
+{% else %}
+<form action="{{ reverse_url('user_disable', user['email']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <div class="form-group">
+    <button type="submit"
+	    class="btn btn-danger glyphicon glyphicon-remove">
+      Disable
+    </button>
+  </div>
+</form>
+{% end %} {# if user['status'] #}
+
+{% if user['status'] == constants.PENDING %}
+<form action="{{ reverse_url('user', user['email']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <div class="form-group">
+    <input type="hidden" name="_http_method" value="delete">
+    <button type="submit"
+	    class="btn btn-danger glyphicon glyphicon-minus">
+      Delete
+    </button>
+  </div>
+</form>
+{% end %} {# if user['status'] #}
+
+{% end %} {# if is_admin #}
+
+{% end %} {# block meta_content #}
+
 {% block main_content %}
 <table class="table-condensed table-fields">
   {% if is_staff %}
@@ -56,81 +116,6 @@
     <th>Phone</th>
     <td>{{ user.get('phone') or '-' }}</td>
   </tr>
-
-  {% if is_admin or current_user['email'] == user['email'] %}
-  <tr>
-    <th></th>
-    <td>
-      <form action="{{ reverse_url('user_edit', user['email']) }}"
-	    role="form" method="GET">
-	<div class="form-group">
-	  <button type="submit"
-		  class="btn btn-primary glyphicon glyphicon-edit">
-	    Edit
-	  </button>
-	</div>
-      </form>
-    </td>
-  </tr>
-  {% end %} {# if is_admin #}
-
-  {% if is_admin and current_user['email'] != user['email'] %}
-
-  {% if user['status'] in (constants.PENDING, constants.DISABLED) %}
-  <tr>
-    <th></th>
-    <td>
-      <form action="{{ reverse_url('user_enable', user['email']) }}"
-	    role="form" method="POST">
-	{% module xsrf_form_html() %}
-	<div class="form-group">
-	  <button type="submit"
-		  class="btn btn-success glyphicon glyphicon-ok">
-	    Enable
-	  </button>
-	</div>
-      </form>
-    </td>
-  </tr>
-  {% else %}
-  <tr>
-    <th></th>
-    <td>
-      <form action="{{ reverse_url('user_disable', user['email']) }}"
-	    role="form" method="POST">
-	{% module xsrf_form_html() %}
-	<div class="form-group">
-	  <button type="submit"
-		  class="btn btn-danger glyphicon glyphicon-remove">
-	    Disable
-	  </button>
-	</div>
-      </form>
-    </td>
-  </tr>
-  {% end %} {# if user['status'] #}
-
-  {% if user['status'] == constants.PENDING %}
-  <tr>
-    <th></th>
-    <td>
-      <form action="{{ reverse_url('user', user['email']) }}"
-	    role="form" method="POST">
-	{% module xsrf_form_html() %}
-	<div class="form-group">
-	  <input type="hidden" name="_http_method" value="delete">
-	  <button type="submit"
-		  class="btn btn-danger glyphicon glyphicon-minus">
-	    Delete
-	  </button>
-	</div>
-      </form>
-    </td>
-  </tr>
-  {% end %} {# if user['status'] #}
-
-  {% end %} {# if is_admin #}
-
   <tr>
     <th>Modified</th>
     <td>
