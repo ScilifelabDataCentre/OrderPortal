@@ -1,135 +1,161 @@
 {# Field edit page. #}
+
 {% extends "base.html" %}
 
-{% block actions %}
-<form action="{{ reverse_url('form', form['_id']) }}"
-      method="GET">
-  {% module Submit('cancel') %}
-</form>
-<div class="vertical_space"></div>
-<form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <input type="hidden" name="_http_method" value="delete">
-  {% module Submit('delete', confirm=True) %}
-</form>
+{% block head_title %}
+Edit field '{{ field['identifier'] }}' 
+in '{{ form['title'] }}'
+{% end %}
+{% block body_title %}
+Edit field '{{ field['identifier'] }}' 
+in '{{ form['title'] }}'
 {% end %}
 
-{% block content %}
+{% block main_content %}
 <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
-      method="POST">
+      role="form" method="POST">
   {% module xsrf_form_html() %}
 
-  <table class="fields">
+  <div class="form-group">
+    <div class="row">
+      <div class="col-sm-10">
+	<label for="label">Label</label>
+	<input type="text" class="form-control"
+	       id="label" name="label"
+	       value="{{ field.get('label') or ''}}">
+      </div>
+    </div>
+    <p class="text-muted">
+      Label to display for the field in the order form. The identifier
+      will be used if no label is provided.
+    </p>
+  </div>
 
-    <tr>
-      <th>Identifier</th>
-      <td>{% module Icon('required') %}</td>
-      <td>{{ field['identifier'] }}</td>
-      <td class="description">
-	Unique identifier of the field. Cannot be changed.
-      </td>
-    </tr>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-sm-6">
+	<label for="type">Type</label>
+	<p class="form-control-static">{{ field['type']}}</p>
+      </div>
+    </div>
+    <p class="text-muted">
+      Data type of the field. Cannot be changed.
+    </p>
+  </div>
 
-    <tr>
-      <th>Label</th>
-      <td></td>
-      <td>
-	<input type="text" name="label"
-	       value="{{ field.get('label') or '' }}">
-      </td>
-      <td class="description">
-	Label to display for the field in the order form. The
-	identifier will be used if this is not provided.
-      </td>
-    </tr>
-
-    <tr>
-      <th>Type</th>
-      <td>{% module Icon('required') %}</td>
-      <td>{{ field['type'] }}</td>
-      <td class="description">
-	Data type of the field. Cannot be changed.
-      </td>
-    </tr>
-
-    {% if field['type'] == constants.SELECT['value'] %}
-    <tr>
-      <th>Select</th>
-      <td>{% module Icon('required') %}</td>
-      <td>
+  {% if field['type'] == constants.SELECT['value'] %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-3">
+	<label class="control-label" for="select">Select</label>
 	<textarea name="select">{{ field.get('select') or '' }}</textarea>
-      </td>
-      <td class="description">
+      </div>
+    </div>
+    <p class="text-muted">
 	Values to select among. One per line. The first value is the default.
-      </td>
-    </tr>
-    {% end %}
+    </p>
+  </div>
+  {% end %}
 
-    <tr>
-      <th>Required</th>
-      <td></td>
-      <td>
-	{% if field['required'] %}
-	  <input type="checkbox" name="required" value="yes" checked> Yes
-	{% else %}
-	  <input type="checkbox" name="required" value="yes"> Yes
-	{% end %}
-      </td>
-      <td class="description">
-	Require that the field must have a value specified in the order.
-	If no value, then the order is incomplete, and cannot be submitted.
-      </td>
-    </tr>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-10">
+	<label class="control-label" for="required">Required</label>
+	<div class="checkbox">
+	  {% set checked = field['required'] and 'checked' or ''%}
+	  <label>
+	    <input type="checkbox" value="yes
+		   id="required" name="required"" {{ checked }}>
+	    Require the field to have a defined value for the order to
+	    be submittable.
+	  </label>
+	</div>
+      </div>
+    </div>
+  </div>
 
-    <tr>
-      <th>Restricted read</th>
-      <td></td>
-      <td>
-	{% if field['restrict_read'] %}
-	  <input type="checkbox" name="restrict_read" value="yes" checked> Yes
-	{% else %}
-	  <input type="checkbox" name="restrict_read" value="yes"> Yes
-	{% end %}
-      </td>
-      <td class="description">
-	The field is restricted to be visible only to staff, not the user.
-      </td>
-    </tr>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-10">
+	<label class="control-label" for="restrict_read">Restricted read</label>
+	<div class="checkbox">
+	  {% set checked = field['restrict_read'] and 'checked' or ''%}
+	  <label>
+	    <input type="checkbox" value="yes"
+		   id="restrict_read" name="restrict_read" {{ checked }}>
+	    The field in the form is visible only to staff, not the
+	    user.
+	  </label>
+	</div>
+      </div>
+    </div>
+  </div>
 
-    <tr>
-      <th>Restricted write</th>
-      <td></td>
-      <td>
-	{% if field['restrict_write'] %}
-	  <input type="checkbox" name="restrict_write" value="yes" checked> Yes
-	{% else %}
-	  <input type="checkbox" name="restrict_write" value="yes"> Yes
-	{% end %}
-      </td>
-      <td class="description">
-	The field is restricted to be editable only by staff, not the user.
-      </td>
-    </tr>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-10">
+	<label class="control-label" for="restrict_write">Restricted write</label>
+	<div class="checkbox">
+	  {% set checked = field['restrict_write'] and 'checked' or ''%}
+	  <label>
+	    <input type="checkbox" value="yes"
+		   id="restrict_write" name="restrict_write" {{ checked }}>
+	    The field in the form is editable only by admin, not the
+	    user.
+	  </label>
+	</div>
+      </div>
+    </div>
+  </div>
 
-    <tr>
-      <th>Description</th>
-      <td></td>
-      <td>
-	<textarea name="description">{{ field.get('description') or '' }}</textarea>
-      </td>
-      <td class="description">
-	Description to display in the order as information to the user.
-      </td>
-    </tr>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-10">
+	<label class="control-label" for="description">Description</label>
+	<textarea rows="6" class="form-control"
+		  id="description" name="description"
+		  >{{ field.get('description') or '' }}</textarea>
+      </div>
+    </div>
+    <p class="text-muted">
+      Description to display in the order to help the user fill in the
+      field correctly.
+    </p>
+  </div>
 
-    <tr class="vertical_spacer"></tr>
-    <tr>
-      <th></th>
-      <td></td>
-      <td>{% module Submit('save') %}</td>
-    </tr>
-  </table>
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-primary glyphicon glyphicon-save">
+      Save
+    </button>
+  </div>
 
 </form>
-{% end %}
+
+<br>
+<form action="{{ reverse_url('form', form['_id']) }}"
+      role="form" method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+<br>
+<form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <div class="form-group">
+    <label class="control-label"></label>
+    <input type="hidden" name="_http_method" value="delete">
+    <button type="submit"
+	    class="btn btn-danger glyphicon glyphicon-minus">
+      Delete
+    </button>
+  </div>
+</form>
+{% end %} {# block main_content #}

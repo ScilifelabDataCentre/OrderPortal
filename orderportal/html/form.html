@@ -115,7 +115,7 @@
 	<th>Identifier</th>
 	<th>Label</th>
 	<th>Type</th>
-	<th></th>
+	<th>Required</th>
 	<th>Restricted read</th>
 	<th>Restricted write</th>
 	<th>Description</th>
@@ -123,15 +123,27 @@
       {% for field in fields %}
       <tr>
 	<td class="text-nowrap">
-	  {% raw '-&nbsp;'*field['depth'] %}
+	  {% for i in xrange(field['depth']) %}
+	  <span class="glyphicon glyphicon-play"></span>
+	  {% end %}
 	  <a href="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}">{{ field['identifier'] }}</a></td>
 	<td>{{ field.get('label') or '-' }}</td>
 	<td>{{ field['type'] }}</td>
 	<td>
-	  {% if field['required'] %}{% module Icon('required') %}{% end %}
+	  {% if field['required'] %}
+	  <span class="glyphicon glyphicon-star" style="color: red;">
+	  {% end %}
 	</td>
-	<td>{{ field['restrict_read'] }}</td>
-	<td>{{ field['restrict_write'] }}</td>
+	<td>
+	  {% if field['restrict_read'] %}
+	  <span class="glyphicon glyphicon-ok">
+	  {% end %}
+	</td>
+	<td>
+	  {% if field['restrict_write'] %}
+	  <span class="glyphicon glyphicon-ok">
+	  {% end %}
+	</td>
 	<td>{{ field.get('description') or '-' }}</td>
       </tr>
       {% end %}
