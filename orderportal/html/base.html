@@ -71,7 +71,8 @@
 		<li><a href="{{ reverse_url('info', n) }}">{{ t or n }}</a></li>
 		{% end %}
 		{% if is_admin %}
-		<li><a href="{{ reverse_url('infos') }}">All items</a></li>
+		<li><a href="{{ reverse_url('infos') }}">[all pages]</a></li>
+		<li><a href="{{ reverse_url('info_create') }}">[create page]</a></li>
 		{% end %}
               </ul>
             </li>

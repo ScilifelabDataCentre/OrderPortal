@@ -23,7 +23,7 @@
 <br>
 <form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
       role="form" method='POST'>
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-warning">
       {% module Icon(target['identifier']) %}
       {{ target.get('label', target['identifier'].capitalize()) }}
     </button>
@@ -48,7 +48,7 @@
 
 {% block main_content %}
 <div class="panel panel-default">
-  <div class="panel-heading">Order metadata</div>
+  <div class="panel-heading">Metadata</div>
   <div class="panel-body">
 
     <table class="table">
@@ -82,7 +82,7 @@
 </div>
 
 <div class="panel panel-default">
-  <div class="panel-heading">Order fields</div>
+  <div class="panel-heading">Specification</div>
   <div class="panel-body">
 
     <table class="table">

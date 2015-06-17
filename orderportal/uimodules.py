@@ -104,9 +104,23 @@ class Markdown(tornado.web.UIModule):
 
 
 class Text(tornado.web.UIModule):
-    "Fetch text object from the database, process it, and output."
+    """Fetch text object from the database, process it, and output,
+    with an edit button if allowed."""
 
-    def render(self, name, default=None):
+    def render(self, name, default=None, origin=None):
+        if self.handler.is_admin():
+            url = self.handler.reverse_url('text', name)
+            origin = origin or self.handler.absolute_reverse_url('home')
+            result = \
+"""<form action="{}"
+  role="form" class="pull-right" method="GET">
+  <input type="hidden" name="origin" value="{}">
+  <button type="submit" class="btn btn-sm btn-default glyphicon glyphicon-edit">
+   Edit
+  </button>
+</form>\n""".format(url, origin)
+        else:
+            result = ''
         try:
             doc = self.handler.get_entity_view('text/name', name)
             text = doc['markdown']
@@ -114,8 +128,10 @@ class Text(tornado.web.UIModule):
             if default:
                 text = default
             else:
-                return "<i>No text '{}' defined.</i>".format(name)
-        return markdown.markdown(text, output_format='html5')
+                result += "<i>No text '{}' defined.</i>".format(name)
+        else:
+            result += markdown.markdown(text, output_format='html5')
+        return result
 
 
 class OrderFieldsDisplay(tornado.web.UIModule):

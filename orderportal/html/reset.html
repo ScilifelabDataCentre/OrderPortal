@@ -9,18 +9,7 @@
 
 <div class="panel panel-default">
   <div class="panel-body">
-    {% if is_admin %}
-    <form action="{{ reverse_url('text', 'reset') }}"
-	  role="form" class="pull-right" method="GET">
-      <input type="hidden" name="origin"
-	     value="{{ absolute_reverse_url('reset') }}">
-      <button type="submit"
-	      class="btn btn-sm btn-default glyphicon glyphicon-edit">
-	Edit
-      </button>
-    </form>
-    {% end %} {# if is_admin #}
-    {% module Text('reset', default='The current password will be invalidated. Instructions on how to set a new one will be sent to the email address.') %}
+    {% module Text('reset', default='The current password will be invalidated. Instructions on how to set a new one will be sent to the email address.', origin=absolute_reverse_url('reset')) %}
   </div>
 </div>
 

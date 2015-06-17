@@ -178,7 +178,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_events(self):
         "Get all events items in descending 'date' order."
-        view = self.db.view('event/date', include_docs=True, descending=True)
+        view = self.db.view('event/date', include_docs=True)
         return [r.doc for r in view]
 
     def get_field(self, identifier):
