@@ -12,7 +12,7 @@ from orderportal import utils
 
 
 class Saver(object):
-    "Context handler saving the data for the entity."
+    "Context manager saving the data for the entity."
 
     doctype = None
 

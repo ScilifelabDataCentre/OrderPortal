@@ -1,16 +1,6 @@
 {# Form create page. #}
-{% extends "base.html" %}
 
-{% block subheader %}
-<div>
-<p class="medium">
-<ol>
-<li> Give a title for the new form.
-<li> Create the form by clicking 'Create'.
-<li> You will be sent to the edit page for the new form.
-</p>
-</div>
-{% end %}
+{% extends "base.html" %}
 
 {% block actions %}
 <form action="{{ reverse_url('forms') }}"

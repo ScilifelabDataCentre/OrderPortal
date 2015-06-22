@@ -1,17 +1,21 @@
 {# Field create page. #}
+
 {% extends "base.html" %}
 
-{% block content %}
+{% block head_title %}Create field in form '{{ form['title'] }}'{% end %}
+{% block body_title %}Create field in form '{{ form['title'] }}'{% end %}
+
+{% block main_content %}
+
 <form action="{{ reverse_url('field_create', form['_id']) }}"
-      method="POST">
+      role="form" method="POST">
   {% module xsrf_form_html() %}
 
-  <table class="fields">
-    <tr>
-      <th>Group</th>
-      <td></td>
-      <td>
-	<select name="group">
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-xs-4">
+	<label class="control-label" for="group">Group</label>
+	<select class="form-control" name="group" id="group">
 	  <option value="__none__">[top level]</option>
 	  {% for field in fields %}
 	    {% if field['type'] == constants.GROUP['value'] %}
@@ -19,104 +23,144 @@
 	    {% end %}
 	  {% end %}
 	</select>
-      </td>
-      <td class="description">
-	Unique identifier of the field. Cannot be changed once defined.
-      </td>
-    </tr>
+	<span style="color:red; margin-right: 2em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+    </div>
+    <p class="text-muted">
+      Parent group of the field.
+    </p>
+  </div>
 
-    <tr>
-      <th>Identifier</th>
-      <td>{% module Icon('required') %}</td>
-      <td>
-	<input type="text" name="identifier">
-      </td>
-      <td class="description">
-	Unique identifier for the field. Cannot be changed once defined.
-      </td>
-    </tr>
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-xs-4">
+	<label class="control-label" for="identifier">Identifier</label>
+	<input type="text" class="form-control"
+	       name="identifier" id="identifier">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+    </div>
+    <p class="text-muted">
+      Unique identifier of the field. Cannot be changed once defined.
+    </p>
+  </div>
 
-    <tr>
-      <th>Label</th>
-      <td></td>
-      <td>
-	<input type="text" name="label">
-      </td>
-      <td class="description">
-	Label to display for the field in the order form. The
-	identifier will be used if this is not provided.
-      </td>
-    </tr>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-6">
+	<label class="control-label" for="label">Label</label>
+	<input type="text" class="form-control" name="label" id="label">
+      </div>
+    </div>
+    <p class="text-muted">
+      Label to display for the field in the order form. The identifier
+      will be used if this is not provided.
+    </p>
+  </div>
 
-    <tr>
-      <th>Type</th>
-      <td>{% module Icon('required') %}</td>
-      <td>
-	<select name="type">
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-3">
+	<label class="control-label" for="type">Type</label>
+	<select class="form-control" name="type" id="type">
 	  {% for type in constants.TYPES %}
 	  <option value="{{ type['value'] }}">{{ type['label'] }}</option>
 	  {% end %}
 	</select>
-      </td>
-      <td class="description">
-	Data type of the field. Cannot be changed once defined.
-      </td>
-    </tr>
+      </div>
+    </div>
+    <p class="text-muted">
+      Data type of the field. Cannot be changed once defined.
+    </p>
+  </div>
 
-    <tr>
-      <th>Required</th>
-      <td></td>
-      <td>
-	<input type="checkbox" name="required" value="yes"> Yes
-      </td>
-      <td class="description">
-	Require that the field must have a value specified in the order.
-	If no value, then the order is incomplete, and cannot be submitted.
-      </td>
-    </tr>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-6">
+	<label class="control-label" for="required">Required</label>
+	<div class="checkbox">
+	  <label>
+	    <input type="checkbox" name="required" id="required" value="yes">Yes
+	  </label>
+	</div>
+      </div>
+    </div>
+    <p class="text-muted">
+      Require that the field must have a value specified in the order.
+      If no value, then the order is incomplete, and cannot be
+      submitted.
+    </p>
+  </div>
 
-    <tr>
-      <th>Restricted read</th>
-      <td></td>
-      <td>
-	<input type="checkbox" name="restrict_read" value="yes"> Yes
-      </td>
-      <td class="description">
-	The field is restricted to be visible only to staff, not the user.
-      </td>
-    </tr>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-6">
+	<label class="control-label" for="restrict_read">Restricted read</label>
+	<div class="checkbox">
+	  <label>
+	    <input type="checkbox" name="restrict_read" id="restrict_read" value="yes">Yes
+	  </label>
+	</div>
+      </div>
+    </div>
+    <p class="text-muted">
+      The field is restricted to be visible only to staff, not the user.
+    </p>
+  </div>
 
-    <tr>
-      <th>Restricted write</th>
-      <td></td>
-      <td>
-	<input type="checkbox" name="restrict_write" value="yes"> Yes
-      </td>
-      <td class="description">
-	The field is restricted to be editable only by staff, not the user.
-      </td>
-    </tr>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-6">
+	<label class="control-label" for="restrict_write">Restricted write</label>
+	<div class="checkbox">
+	  <label>
+	    <input type="checkbox" name="restrict_write" id="restrict_write" value="yes">Yes
+	  </label>
+	</div>
+      </div>
+    </div>
+    <p class="text-muted">
+      The field is restricted to be editable only by staff, not the user.
+    </p>
+  </div>
 
-    <tr>
-      <th>Description</th>
-      <td></td>
-      <td>
-	<textarea name="description"></textarea>
-      </td>
-      <td class="description">
-	Description to display in the order as information to the user.
-      </td>
-    </tr>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-8">
+	<label class="control-label" for="description">Description</label>
+	<textarea class="form-control" name="description" id="description"></textarea>
+      </div>
+    </div>
+    <p class="text-muted">
+      Description to display for the field in the order as information
+      to the user.
+    </p>
+  </div>
 
-  </table>
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-primary glyphicon glyphicon-save">
+      Save
+    </button>
+  </div>
 
-  <p>
-
-  {% module Submit('create', title='Create new field') %}
 </form>
 
+<br>
 <form action="{{ reverse_url('form', form['_id']) }}"
-      method="GET">
-  {% module Submit('cancel') %}
+      role="form" method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default btn-sm glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
 </form>
-{% end %}
+
+{% end %} {# block main_content #}
