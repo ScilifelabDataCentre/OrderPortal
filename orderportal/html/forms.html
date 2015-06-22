@@ -6,6 +6,18 @@
 {% block body_title %}Forms{% end %}
 
 {% block main_content %}
+<form action="{{ reverse_url('form_create') }}"
+      role="form" method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default btn-sm glyphicon glyphicon-plus">
+      Create form
+    </button>
+  </div>
+</form>
+<br>
+
 <table class="table table-striped">
   <tr>
     <th>Form</th>

@@ -109,8 +109,7 @@ class FormCreate(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render('form_create.html',
-                    title='Create a new form')
+        self.render('form_create.html')
 
     @tornado.web.authenticated
     def post(self):
@@ -118,17 +117,12 @@ class FormCreate(RequestHandler):
         self.check_admin()
         with FormSaver(rqh=self) as saver:
             saver['title'] = self.get_argument('title')
-            saver['description'] = self.get_argument('description')
+            saver['description'] = self.get_argument('description', None)
             saver['fields'] = []
             saver['status'] = constants.PENDING
             saver['owner'] = self.current_user['email']
             doc = saver.doc
-        self.see_other('form_edit', doc['_id'])
-
-    @tornado.web.authenticated
-    def post(self):
-        self.check_xsrf_cookie()
-        self.check_admin()
+        self.see_other('form', doc['_id'])
 
 
 class FormEdit(FormMixin, RequestHandler):

@@ -2,36 +2,64 @@
 
 {% extends "base.html" %}
 
-{% block actions %}
-<form action="{{ reverse_url('forms') }}"
-      method='GET'>
-  {% module Submit('cancel') %}
-</form>
-{% end %}
+{% block head_title %}Create a new form{% end %}
+{% block body_title %}Create a new form{% end %}
 
-{% block content %}
-<form action="{{ reverse_url('form_create') }}" method='POST'>
+{% block main_content %}
+<form action="{{ reverse_url('form_create') }}"
+      role="form" method="POST">
   {% module xsrf_form_html() %}
 
-  <table class="fields">
-    <tr>
-      <th>Title</th>
-      <td>{% module Icon('required') %}</td>
-      <td>
-	<input type="text" name="title" size="60">
-      </td>
-      <td class="description">
-	Brief, descriptive title for the form. It is not required to
-	be unique, but you may want to make it so anyway.
-      </td>
-    </tr>
-    <tr class="vertical_spacer"></tr>
-    <tr>
-      <th></th>
-      <td></td>
-      <td>{% module Submit('create') %}</td>
-    </tr>
-  </table>
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-xs-8">
+	<label class="control-label" for="title">Title</label>
+	<input type="text" class="form-control" name="title" id="title">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+    </div>
+    <p class="text-muted">
+      Brief, descriptive title for the form. It is not required to be
+      unique, but you may want to make it so anyway.
+    </p>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-8">
+	<label class="control-label" for="description">Description</label>
+	<textarea rows="6" class="form-control"
+		  name="description" id="description"></textarea>
+      </div>
+    </div>
+    <p class="text-muted">
+      Description to display for the field in the order as information
+      to the user.
+    </p>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-primary glyphicon glyphicon-save">
+      Save
+    </button>
+  </div>
 
 </form>
-{% end %}
+
+<br>
+<form action="{{ reverse_url('forms') }}"
+      role="form" method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default btn-sm glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+{% end %} {# block main_content #}
