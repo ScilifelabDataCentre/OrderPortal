@@ -117,6 +117,8 @@ class FormCreate(RequestHandler):
         self.check_admin()
         with FormSaver(rqh=self) as saver:
             saver['title'] = self.get_argument('title')
+            if not saver['title']:
+                raise tornado.web.HTTPError(400, reason='no title given')
             saver['description'] = self.get_argument('description', None)
             saver['fields'] = []
             saver['status'] = constants.PENDING

@@ -1,5 +1,9 @@
 {# Form edit page. #}
+
 {% extends "base.html" %}
+
+{% block head_title %}Edit form '{{ form['title'] }}'{% end %}
+{% block body_title %}Edit form '{{ form['title'] }}'{% end %}
 
 {% block main_content %}
 <form action="{{ reverse_url('form_edit', form['_id']) }}"
