@@ -11,8 +11,7 @@
       <div class="panel-heading">
 	{{ form['title'] }}
 	<form action="{{ reverse_url('order_create') }}"
-	      role="form" class="pull-right" method="POST">
-	  {% module xsrf_form_html() %}
+	      role="form" class="pull-right" method="GET">
 	  <input type="hidden" name="form" value="{{ form['iuid'] }}">
 	  <button type="submit"
 		  class="btn btn-xs btn-warning glyphicon glyphicon-plus">

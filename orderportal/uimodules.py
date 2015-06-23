@@ -35,30 +35,6 @@ class Icon(IconMixin, tornado.web.UIModule):
         return self.get_icon(name, title=title, label=label)
 
 
-class Submit(IconMixin, tornado.web.UIModule):
-    "HTML for a submit button with an icon, optionally with a different title."
-
-    def render(self, name, title=None, slim=False, confirm=False, disabled=False):
-        params = dict(type='submit')
-        Name = name.capitalize()
-        if confirm:
-            text = "return confirm('{} cannot be undone; really {}?');".format(
-                Name, name)
-            params['onclick'] = text
-        if slim:
-            params['class'] = 'slim'
-        if disabled:
-            params['disabled'] = 'disabled'
-        result = "<button {}>".format(' '.join(['{}="{}"'.format(k,v)
-                                                for k,v in params.items()]))
-        result += """<img src="{url}" alt="{name}" title="{name}">""".format(
-            url=self.handler.static_url(name + '.png'),
-            name=Name)
-        result += ' ' + (title or Name)
-        result += '</button>'
-        return result
-
-
 class Entity(tornado.web.UIModule):
     "HTML for a link to an entity with an icon."
 
@@ -132,12 +108,3 @@ class Text(tornado.web.UIModule):
         else:
             result += markdown.markdown(text, output_format='html5')
         return result
-
-
-class OrderFieldsDisplay(tornado.web.UIModule):
-    "HTML displaying the fields of an order."
-
-    def render(self, order, fields):
-        rows = []
-        for field in fields:
-            pass # XXX

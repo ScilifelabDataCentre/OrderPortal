@@ -17,6 +17,7 @@ from orderportal.requesthandler import RequestHandler
 
 class OrderSaver(saver.Saver):
     doctype = constants.ORDER
+    # XXX fix this!
 
     def update_fields(self, fields):
         "Update all fields from the HTML form input."
@@ -168,13 +169,18 @@ class OrderCreate(RequestHandler):
     "Create a new order."
 
     @tornado.web.authenticated
+    def get(self):
+        form = self.get_entity(self.get_argument('form'),doctype=constants.FORM)
+        self.render('order_create.html', form=form)
+
+    @tornado.web.authenticated
     def post(self):
         self.check_xsrf_cookie()
         form = self.get_entity(self.get_argument('form'),doctype=constants.FORM)
         fields = Fields(form)
         with OrderSaver(rqh=self) as saver:
             saver['form'] = form['_id']
-            saver['title'] = form.get('title') or form['_id']
+            saver['title'] = self.get_argument('title', None) or form['title']
             saver['fields'] = dict([(f['identifier'], None) for f in fields])
             saver['owner'] = self.current_user['email']
             for transition in settings['ORDER_TRANSITIONS']:
@@ -210,5 +216,6 @@ class OrderEdit(OrderMixin, RequestHandler):
         fields = Fields(form)
         with OrderSaver(doc=order, rqh=self) as saver:
             saver['title'] = self.get_argument('__title__', order['_id'])
-            saver.update_fields(fields)
+            # XXX fix this!
+            # saver.update_fields(fields)
         self.see_other('order', order['_id'])

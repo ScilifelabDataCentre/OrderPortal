@@ -1,37 +1,52 @@
 {# Order create page. #}
+
 {% extends "base.html" %}
 
-{% block subheader %}
-<p class="medium">
-<ol>
-<li> Give a title for the new order.
-<li> Create the order by clicking 'Create'.
-<li> You will be sent to the edit page for the new order.
-</p>
-{% end %}
+{% block head_title %}Create a new order based on '{{ form['title'] }}'{% end %}
+{% block body_title %}Create a new order based on '{{ form['title'] }}'{% end %}
 
-{% block content %}
-<form action="{{ reverse_url('order_create') }}" method='POST'>
+{% block main_content %}
+<form action="{{ reverse_url('order_create') }}"
+      role="form" method="POST">
   {% module xsrf_form_html() %}
 
-  <table class="fields">
-    <tr>
-      <th>Title</th>
-      <td>{% module Icon('required') %}</td>
-      <td>
-	<input type="text" name="title" size="60">
-      </td>
-      <td class="description">
+  <input type="hidden" name="form" value="{{ form['_id'] }}">
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-8">
+	<label class="control-label" for="title">Title</label>
+	<input type="text" class="form-control" name="title" id="title">
+      </div>
+    </div>
+    <p class="text-muted">
 	Brief, descriptive title for the order. It is not required to
-	be unique, but you may want to make it so anyway. May be
-	edited.
-      </td>
-    </tr>
+	be unique, but it is a good idea to make it so anyway. If none
+	given, then the form's title is used. May be edited later.
+    </p>
+  </div>
 
-  </table>
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-primary glyphicon glyphicon-plus">
+      Create
+    </button>
+  </div>
 
-  <p>
-
-  {% module Submit('create', title='Create new order') %}
 </form>
-{% end %}
+
+
+<br>
+<form action="{{ reverse_url('orders') }}"
+      role="form" method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default btn-sm glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+{% end %} {# block main_content #}

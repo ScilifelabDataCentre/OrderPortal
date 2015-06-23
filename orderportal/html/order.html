@@ -17,18 +17,6 @@
     </button>
   </div>
 </form>
-{% end %} {# if is_editable #}
-
-{% for target in targets %}
-<br>
-<form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
-      role="form" method='POST'>
-    <button type="submit" class="btn btn-warning">
-      {% module Icon(target['identifier']) %}
-      {{ target.get('label', target['identifier'].capitalize()) }}
-    </button>
-</form>
-{% end %}
 
 <br>
 <form action="{{ reverse_url('order', order['_id']) }}"
@@ -43,6 +31,18 @@
     </button>
   </div>
 </form>
+{% end %} {# if is_editable #}
+
+{% for target in targets %}
+<br>
+<form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
+      role="form" method='POST'>
+    <button type="submit" class="btn btn-warning">
+      {% module Icon(target['identifier']) %}
+      {{ target.get('label', target['identifier'].capitalize()) }}
+    </button>
+</form>
+{% end %}
 
 {% end %} {# block meta_content #}
 
