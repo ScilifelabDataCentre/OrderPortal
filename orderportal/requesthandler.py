@@ -180,48 +180,6 @@ class RequestHandler(tornado.web.RequestHandler):
         view = self.db.view('event/date', include_docs=True)
         return [r.doc for r in view]
 
-    def get_field(self, identifier):
-        return self.get_entity_view('field/identifier', identifier)
-
-    def get_all_fields(self):
-        "Return all fields in identifier lexical order."
-        view = self.db.view('field/identifier', include_docs=True)
-        return [self.get_presentable(r.doc) for r in view]
-
-    def get_all_fields_sorted(self):
-        "Return the fields sorted in hierarchy, and within levels."
-        lookup = dict([(f['identifier'], f) for f in self.get_all_fields()])
-        return self._sorted_fields(None, lookup.copy(), lookup)
-
-    def _sorted_fields(self, parent, fields, lookup, level=0):
-        result = []
-        for field in fields.values():
-            if lookup.get(field.get('parent')) is parent:
-                field['__level__'] = level
-                result.append(field)
-                del fields[field['identifier']]
-        result.sort(lambda i, j: cmp(i['position'], j['position']))
-        for c in result:
-            c['__children__'] = self._sorted_fields(c, fields, lookup, level+1)
-        return result
-
-    def get_all_fields_flattened(self, exclude=None):
-        "Return the fields sorted in a flattened list."
-        fields = self.get_all_fields_sorted()
-        return self._flatten_fields(fields, exclude=exclude)
-
-    def _flatten_fields(self, fields, exclude=None):
-        result = []
-        for f in fields:
-            if exclude and exclude['identifier'] == f['identifier']: continue
-            result.append(f)
-            try:
-                result.extend(self._flatten_fields(f['__children__'],
-                                                   exclude=exclude))
-            except AttributeError:
-                pass
-        return result
-
     def get_entity_url(self, url):
         "Get the entity given its URL, if it is a local entity, else None."
         if not url: return None

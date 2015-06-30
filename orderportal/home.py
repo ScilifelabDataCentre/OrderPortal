@@ -7,10 +7,10 @@ import tornado.web
 
 import orderportal
 from orderportal import constants
+from orderportal import saver
 from orderportal import settings
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
-from orderportal.saver import Saver
 
 
 class Home(RequestHandler):
@@ -77,7 +77,7 @@ class Entity(RequestHandler):
             raise tornado.web.HTTPError(404)
 
 
-class TextSaver(Saver):
+class TextSaver(saver.Saver):
     doctype = constants.TEXT
 
 class Text(RequestHandler):

@@ -9,13 +9,13 @@ import tornado.web
 
 import orderportal
 from orderportal import constants
+from orderportal import saver
 from orderportal import settings
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
-from orderportal.saver import Saver
 
 
-class InfoSaver(Saver):
+class InfoSaver(saver.Saver):
     doctype = constants.INFO
 
 class Info(RequestHandler):

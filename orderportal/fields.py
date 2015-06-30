@@ -14,28 +14,26 @@ class Fields(object):
     "Handle fields in a form."
 
     def __init__(self, form):
-        """Set reference to the form containing the fields,
-        and set up lookup."""
+        "Set reference to the form containing the fields, and set up lookup."
         self.form = form
         self.fields = form['fields']
         self.setup()
 
     def setup(self):
-        self._flattened = self._flatten(self.fields)
         self._lookup = dict([(f['identifier'], f)
-                             for f in self._flatten(self.fields)])
+                             for f in self.flatten(self.fields)])
 
-    def _flatten(self, fields, depth=0):
+    def flatten(self, fields, depth=0):
         result = []
         for field in fields:
             field['depth'] = depth
             result.append(field)
             if field['type'] == constants.GROUP['value']:
-                result.extend(self._flatten(field['fields'], depth+1))
+                result.extend(self.flatten(field['fields'], depth+1))
         return result
 
     def __iter__(self):
-        return iter(self._flattened)
+        return iter(self.flatten(self.fields))
 
     def __contains__(self, identifier):
         return identifier in self._lookup
