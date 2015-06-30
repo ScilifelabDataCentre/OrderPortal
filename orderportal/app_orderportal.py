@@ -7,6 +7,8 @@ import os
 import sys
 
 import couchdb
+import markdown
+import requests
 import tornado
 import tornado.web
 import tornado.ioloop
@@ -90,11 +92,13 @@ def get_args():
 def main():
     logging.info("tornado debug: %s, logging debug: %s",
                  settings['TORNADO_DEBUG'], settings['LOGGING_DEBUG'])
-    logging.debug("orderportal %s, tornado %s, couchdb module %s, pyyaml %s",
-                  orderportal.__version__,
-                  tornado.version,
-                  couchdb.__version__,
-                  yaml.__version__)
+    logging.debug("OrderPortal version %s", orderportal.__version__)
+    logging.debug("CouchDB version %s", utils.get_dbserver().version())
+    logging.debug("CouchDB-Python version %s", couchdb.__version__)
+    logging.debug("tornado version %s", tornado.version)
+    logging.debug("PyYAML version %s", yaml.__version__)
+    logging.debug("requests version %s", requests.__version__)
+    logging.debug("Markdown version %s", markdown.version)
     application = tornado.web.Application(
         handlers=get_handlers(),
         debug=settings.get('TORNADO_DEBUG', False),

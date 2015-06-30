@@ -127,11 +127,14 @@ def load_settings(filepath=None, verbose=False):
         else:
             raise ValueError('could not determine port from BASE_URL')
 
+def get_dbserver():
+    return couchdb.Server(settings['DB_SERVER'])
+
 def get_db(create=False):
     """Return the handle for the CouchDB database.
     If 'create' is True, then create the database if it does not exist.
     """
-    server = couchdb.Server(settings['DB_SERVER'])
+    server = get_dbserver()
     name = settings['DATABASE']
     try:
         return server[name]

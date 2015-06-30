@@ -1,4 +1,5 @@
 {# Order edit page. #}
+
 {% extends "base.html" %}
 
 {% block head_title %}
@@ -21,7 +22,8 @@ Edit order
       <div class="col-xs-8">
 	<label class="control-label" for="__title__">Title</label>
 	<input type="text" class="form-control"
-	       name="__title__" id="__title__">
+	       name="__title__" id="__title__"
+	       value="{{ order.get('title') or '' }}">
       </div>
     </div>
     <p class="text-muted">
