@@ -16,12 +16,11 @@ class Fields(object):
     def __init__(self, form):
         "Set reference to the form containing the fields, and set up lookup."
         self.form = form
-        self.fields = form['fields']
         self.setup()
 
     def setup(self):
         self._lookup = dict([(f['identifier'], f)
-                             for f in self.flatten(self.fields)])
+                             for f in self.flatten(self.form['fields'])])
 
     def flatten(self, fields, depth=0):
         result = []
@@ -33,7 +32,7 @@ class Fields(object):
         return result
 
     def __iter__(self):
-        return iter(self.flatten(self.fields))
+        return iter(self.flatten(self.form['fields']))
 
     def __contains__(self, identifier):
         return identifier in self._lookup
@@ -101,7 +100,7 @@ class Fields(object):
     def delete(self, identifier):
         "Delete the field and its children, if any."
         assert identifier in self, 'field identifier must be defined in form'
-        self._delete(self.fields, identifier)
+        self._delete(self.form['fields'], identifier)
         self.setup()
 
     def _delete(self, fields, identifier):

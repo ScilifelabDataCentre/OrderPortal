@@ -27,7 +27,7 @@ class News(RequestHandler):
     def post(self):
         self.check_admin()
         with NewSaver(rqh=self) as saver:
-            saver['markdown'] = self.get_argument('markdown')
+            saver['text'] = self.get_argument('text')
         self.see_other('news')
 
 

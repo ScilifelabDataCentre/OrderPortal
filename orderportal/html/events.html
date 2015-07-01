@@ -22,7 +22,7 @@
 	<td>
 	  <strong>{{ event['title'] }}</strong>
 	  <div>
-	    {% module Markdown(event) %}
+	    {% module Markdown(event.get('text')) %}
 	  </div>
 	</td>
 	<td class="localtime">{{ event['modified'] }}</td>
@@ -90,13 +90,13 @@
 	  <div class="form-group">
 	    <div class="row">
 	      <div class="col-xs-10">
-		<label class="control-label" for="markdown">Text content</label>
+		<label class="control-label" for="text">Text</label>
 		<textarea class="form-control" rows="5"
-			  name="markdown" id="markdown"></textarea>
+			  name="text" id="text"></textarea>
 	      </div>
 	    </div>
 	    <p class="text-muted">
-	      Text in
+	      The text is specified in
 	      <a href="http://daringfireball.net/projects/markdown/">
 		Markdown
 	      </a>

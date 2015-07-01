@@ -66,17 +66,11 @@ class Entity(tornado.web.UIModule):
 
 
 class Markdown(tornado.web.UIModule):
-    "Process the document containing markdown content and output."
+    "Process the text as Markdown."
 
-    def render(self, doc, default=None):
-        try:
-            text = doc['markdown']
-        except KeyError:
-            if default:
-                text = default
-            else:
-                return '<i>No markdown text defined.</i>'
-        return markdown.markdown(text, output_format='html5')
+    def render(self, text):
+        return markdown.markdown(text or '*No text defined.*',
+                                 output_format='html5')
 
 
 class Text(tornado.web.UIModule):
@@ -99,7 +93,7 @@ class Text(tornado.web.UIModule):
             result = ''
         try:
             doc = self.handler.get_entity_view('text/name', name)
-            text = doc['markdown']
+            text = doc['text']
         except (tornado.web.HTTPError, KeyError):
             if default:
                 text = default

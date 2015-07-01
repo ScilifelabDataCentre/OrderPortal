@@ -29,7 +29,7 @@ class Events(RequestHandler):
         with EventSaver(rqh=self) as saver:
             saver['date'] = self.get_argument('date')
             saver['title'] = self.get_argument('title')
-            saver['markdown'] = self.get_argument('markdown', None)
+            saver['text'] = self.get_argument('text', None)
         self.see_other('events')
 
 

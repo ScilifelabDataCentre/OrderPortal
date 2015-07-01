@@ -92,7 +92,7 @@
 	  {% for new in news %}
 	  <tr>
 	    <td>
-	      {% module Markdown(new) %}
+	      {% module Markdown(new.get('text')) %}
 	    </td>
 	    <td class="text-right small">
 	      [{{ new['modified'].split('T')[0] }}]

@@ -101,6 +101,6 @@ class Text(RequestHandler):
         except tornado.web.HTTPError:
             text = dict(name=name)
         with TextSaver(doc=text, rqh=self) as saver:
-            saver['markdown'] = self.get_argument('markdown')
+            saver['text'] = self.get_argument('text')
         url = self.get_argument('origin', self.absolute_reverse_url('home'))
         self.redirect(url, status=303)

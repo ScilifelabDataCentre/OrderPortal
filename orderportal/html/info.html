@@ -2,13 +2,13 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}{{ title }}{% end %}
-{% block body_title %}{{ title }}{% end %}
+{% block head_title %}{{ info.get('title') or 'No title' }}{% end %}
+{% block body_title %}{{ info.get('title') or 'No title' }}{% end %}
 
 {% block main_content %}
 
 {% if is_admin %}
-<form action="{{ reverse_url('info_edit', name) }}"
+<form action="{{ reverse_url('info_edit', info['name']) }}"
       role="form" class="pull-right" method="GET">
   <button type="submit"
 	  class="btn btn-sm btn-default glyphicon glyphicon-edit">
@@ -17,6 +17,6 @@
 </form>
 {% end %}
 
-{% raw content %}
+{% module Markdown(info.get('text')) %}
 
 {% end %} {# block main_content #}

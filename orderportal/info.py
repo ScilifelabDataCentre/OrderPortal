@@ -4,7 +4,6 @@ from __future__ import unicode_literals, print_function, absolute_import
 
 import logging
 
-import markdown
 import tornado.web
 
 import orderportal
@@ -23,11 +22,7 @@ class Info(RequestHandler):
 
     def get(self, name):
         info = self.get_entity_view('info/name', name)
-        content = markdown.markdown(info['markdown'], output_format='html5')
-        self.render('info.html',
-                    name=name,
-                    title=info.get('title') or 'No title',
-                    content=content)
+        self.render('info.html', info=info)
 
 
 class Infos(RequestHandler):
@@ -68,7 +63,7 @@ class InfoCreate(RequestHandler):
                 saver['menu'] = int(self.get_argument('menu', None))
             except (ValueError, TypeError):
                 saver['menu'] = None
-            saver['markdown'] = self.get_argument('markdown', '')
+            saver['text'] = self.get_argument('text', '')
         self.see_other('info', name)
 
 
@@ -91,5 +86,5 @@ class InfoEdit(RequestHandler):
                 saver['menu'] = int(self.get_argument('menu', None))
             except (ValueError, TypeError):
                 saver['menu'] = None
-            saver['markdown'] = self.get_argument('markdown', '')
+            saver['text'] = self.get_argument('text', '')
         self.see_other('info', name)

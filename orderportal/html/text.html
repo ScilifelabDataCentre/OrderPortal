@@ -13,14 +13,14 @@
   <div class="form-group">
     <div class="row">
       <div class="col-xs-8">
-	<label class="control-label" for="markdown">Text content</label>
+	<label class="control-label" for="text">Text</label>
 	<textarea rows="24" class="form-control"
-		  id="markdown" name="markdown"
-		  >{% raw text.get('markdown') or '' %}</textarea>
+		  id="text" name="text"
+		  >{{ text.get('markdown') or '' }}</textarea>
       </div>
     </div>
     <p class="text-muted">
-      Text in
+      The text is specified in
       <a href="http://daringfireball.net/projects/markdown/">Markdown</a>
       format.
     </p>
