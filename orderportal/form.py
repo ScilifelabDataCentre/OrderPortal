@@ -123,8 +123,7 @@ class FormCreate(RequestHandler):
             saver['fields'] = []
             saver['status'] = constants.PENDING
             saver['owner'] = self.current_user['email']
-            doc = saver.doc
-        self.see_other('form', doc['_id'])
+        self.see_other('form', saver.doc['_id'])
 
 
 class FormEdit(FormMixin, RequestHandler):
@@ -225,8 +224,7 @@ class FormCopy(RequestHandler):
             saver.copy_fields(form)
             saver['status'] = constants.PENDING
             saver['owner'] = self.current_user['email']
-            doc = saver.doc
-        self.see_other('form_edit', doc['_id'])
+        self.see_other('form_edit', saver.doc['_id'])
 
 
 class FormEnable(RequestHandler):

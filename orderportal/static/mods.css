@@ -9,12 +9,16 @@
 /* Remove border from panel. */
 .panel-noborder {border: 0; }
 
-/* Table for field values. */
+/* Table variants. */
 .table-fields tr th {text-align: right;
 		     vertical-align: top;
 		    }
-
 .table-fields tr td {vertical-align: top; }
+
+.table-noborder > tbody > tr > th {border-width: 0px; }
+.table-noborder > tbody > tr > td {border-width: 0px; }
+
+.table-hierarchy { margin-bottom: 0px; }
 
 /* Pre-formatted white-spaces in text. */
 .pre {white-space: pre; }

@@ -51,7 +51,7 @@
   <div class="panel-heading">Metadata</div>
   <div class="panel-body">
 
-    <table class="table-condensed table-fields">
+    <table class="table table-condensed table-fields table-noborder">
       <tr>
 	<th>Owner</th>
 	<td colspan="2">
@@ -69,8 +69,8 @@
 
       <tr>
 	<th>Modified</th>
-	<td colspan="2">
-	  <span class="localtime">{{ order['modified'] }}</span>
+	<td class="localtime">{{ order['modified'] }}</td>
+	<td>
 	  <a href="{{ reverse_url('order_logs', order['_id']) }}">
 	    {% module Icon('logs', label=True) %}
 	  </a>
@@ -85,26 +85,69 @@
   <div class="panel-heading">Specification</div>
   <div class="panel-body">
 
-    <table class="table">
+    {% set stack = [0] %}
+    <table class="table table-condensed table-noborder table-hierarchy">
       {% for field in fields %}
-      <tr>
-	{% if field['type'] == 'group' %}
-	<th class="group depth{{ field['depth'] }}" colspan="3">
-	  {{ field.get('label') or field['identifier'] }}
-	</th>
-	{% else %}
-	<th>{{ field.get('label') or field['identifier'] }}</th>
-	<td>
-	  {% if field['required'] %}{% module Icon('required') %}{% end %}
-	</td>
-	<td>{{ order['fields'][field['identifier']] or '-' }}</td>
-	<td>{{ field.get('description') or '-' }}</td>
+	  {% while field['depth'] < stack[-1] %}
+	    {% set stack.pop() %}
+		  </table>
+		</div>
+	      </div>
+	    </td>
+	  </tr>
+	   {% end %}
+        {% if field['type'] == 'group' %}
+	  {% set stack.append(field['depth'] + 1) %}
+          <tr>
+	    <td colspan="3">
+	      <div class="panel panel-default">
+		<div class="panel-heading">
+		  {{ field.get('label') or field['identifier'].capitalize() }}
+		</div>
+		<div class="panel-body">
+		  <table class="table table-condensed table-noborder table-hierarchy">
+        {% else %}
+	  <tr>
+	    <th>
+	      {{ field.get('label') or field['identifier'].capitalize() }}
+	    </th>
+	    <td>{{ order['fields'][field['identifier']] or '-' }}</td>
+	    <td>{{ field.get('description') or '-' }}</td>
+	  </tr>
 	{% end %}
-      </tr>
+      {% end %} {# for field in fields #}
+      {% while stack.pop() %}
+	      </table>
+	    </div>
+	  </div>
+	</td>
       {% end %}
     </table>
 
   </div>
 </div>
+
+{#
+<div class="panel panel-default">
+  <div class="panel-heading">Test level 1</div>
+  <div class="panel-body">
+    <table class="table table-condensed table-noborder">
+      <tr>
+	<th>Field</th>
+	<td>Value</td>
+      </tr>
+      <tr>
+	<td colspan="2">
+	  <div class="panel panel-default">
+	    <div class="panel-heading">Test level 2</div>
+	    <div class="panel-body">
+	    </div>
+	  </div>
+	</td>
+      </tr>
+    </table>
+  </div>
+</div>
+#}
 
 {% end %} {# block main_content #}

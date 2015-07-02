@@ -90,7 +90,9 @@ class Orders(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         if self.is_staff():
-            view = self.db.view('order/modified', include_docs=True)
+            view = self.db.view('order/modified',
+                                include_docs=True,
+                                descending=True)
             title = 'Recent orders'
         else:
             view = self.db.view('order/owner', descending=True,
@@ -124,13 +126,12 @@ class Order(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_readable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
-        fields = Fields(form)
         title = order.get('title') or order['_id']
         self.render('order.html',
                     title="Order '{}'".format(title),
                     order=order,
                     status=self.get_order_status(order),
-                    fields=fields,
+                    fields=Fields(form),
                     is_editable=self.is_admin() or self.is_editable(order),
                     targets=self.get_targets(order),
                     logs=self.get_logs(order['_id']))
@@ -189,8 +190,7 @@ class OrderCreate(RequestHandler):
                     break
             else:
                 raise ValueError('no initial order status defined')
-            doc = saver.doc
-        self.see_other('order', doc['_id'])
+        self.see_other('order', saver.doc['_id'])
 
 
 class OrderEdit(OrderMixin, RequestHandler):
