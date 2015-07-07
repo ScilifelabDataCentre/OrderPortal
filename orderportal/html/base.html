@@ -16,13 +16,19 @@
     <nav class="navbar navbar-inverse">
       <div class="container-fluid">
 	<div class="navbar-header">
+	  <button type="button" class="navbar-toggle"
+		  data-toggle="collapse" data-target="#myNavbar">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span> 
+	  </button>
 	  <a class="navbar-brand" href="{{ reverse_url('home') }}">
 	    <img src="{{ static_url(settings['FACILITY_ICON_NAVBAR']) }}"
 		 title="{{ settings['FACILITY_NAME'] }}"
 		 alt="{{ settings['FACILITY_NAME'] }}">
 	  </a>
 	</div>
-	<div>
+	<div class="collapse navbar-collapse" id="myNavbar">
 	  <ul class="nav navbar-nav">
             <li><a href="{{ reverse_url('home') }}">Home</a></li>
 
