@@ -6,18 +6,16 @@ import logging
 
 import tornado.web
 
-import orderportal
-from orderportal import constants
-from orderportal import saver
-from orderportal import settings
-from orderportal import utils
-from orderportal.fields import Fields
-from orderportal.requesthandler import RequestHandler
+from . import constants
+from . import saver
+from . import settings
+from . import utils
+from .fields import Fields
+from .requesthandler import RequestHandler
 
 
 class OrderSaver(saver.Saver):
     doctype = constants.ORDER
-    # XXX fix this!
 
     def update_fields(self, fields):
         "Update all fields from the HTML form input."
@@ -26,9 +24,11 @@ class OrderSaver(saver.Saver):
         # Do not change values for a field if that argument is missing.
         docfields = self.doc['fields']
         for field in fields:
+            if field['type'] == constants.GROUP: continue
+
             identifier = field['identifier']
             try:
-                value = self.rqh.get_argument(identifier)
+                value = self.rqh.get_argument(identifier) or None
             except tornado.web.MissingArgumentError:
                 pass
             else:
@@ -39,10 +39,27 @@ class OrderSaver(saver.Saver):
         # Check validity of current values
         self.doc['invalid'] = dict()
         for field in fields:
-            value = docfields.get(identifier)
-            # XXX temporary, simplistic
+            if field['depth'] == 0:
+                self.check_validity(field)
+
+    def check_validity(self, field):
+        "Check validity of field values; recursively, postorder."
+        logging.debug("check_validity %s", field['identifier'])
+        if field['type'] == constants.GROUP['value']:
+            result = True
+            for subfield in field['fields']:
+                result = result and self.check_validity(subfield)
+            if not result:
+                self.doc['invalid'][field['identifier']] = 'subfield is invalid'
+        else:
+            value = self.doc['fields'][field['identifier']]
+            logging.debug("%s value %s", field['identifier'], value)
             if field['required'] and value is None:
-                self.doc['invalid'][identifier] = 'required'
+                self.doc['invalid'][field['identifier']] = 'value is missing'
+                result = False
+            else:
+                result = True
+        return result
 
 
 class OrderMixin(object):
@@ -216,6 +233,8 @@ class OrderEdit(OrderMixin, RequestHandler):
         fields = Fields(form)
         with OrderSaver(doc=order, rqh=self) as saver:
             saver['title'] = self.get_argument('__title__', order['_id'])
-            # XXX fix this!
-            # saver.update_fields(fields)
-        self.see_other('order', order['_id'])
+            saver.update_fields(fields)
+        if self.get_argument('save', None) == 'continue':
+            self.see_other('order_edit', order['_id'])
+        else:
+            self.see_other('order', order['_id'])

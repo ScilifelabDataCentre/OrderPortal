@@ -85,10 +85,6 @@ def get_handlers():
             URL(r'/([0-9a-f]{32})', Entity, name='entity'),
             ]
 
-def get_args():
-    parser = utils.get_command_line_parser(description='Web app server.')
-    return parser.parse_args()
-
 def main():
     logging.info("tornado debug: %s, logging debug: %s",
                  settings['TORNADO_DEBUG'], settings['LOGGING_DEBUG'])
@@ -114,7 +110,8 @@ def main():
 
 
 if __name__ == "__main__":
-    (options, args) = get_args()
+    parser = utils.get_command_line_parser(description='Web app server.')
+    (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings,
                         verbose=options.verbose)
     main()

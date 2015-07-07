@@ -6,13 +6,12 @@ import logging
 
 import tornado.web
 
-import orderportal
-from orderportal import constants
-from orderportal import saver
-from orderportal import settings
-from orderportal import utils
-from orderportal.fields import Fields
-from orderportal.requesthandler import RequestHandler
+from . import constants
+from . import saver
+from . import settings
+from . import utils
+from .fields import Fields
+from .requesthandler import RequestHandler
 
 
 class FormSaver(saver.Saver):

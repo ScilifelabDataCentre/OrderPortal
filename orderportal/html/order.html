@@ -48,7 +48,6 @@
 
 {% block main_content %}
 <div class="panel panel-default">
-  <div class="panel-heading">Metadata</div>
   <div class="panel-body">
 
     <table class="table table-condensed table-fields table-noborder">
@@ -82,7 +81,7 @@
 </div>
 
 <div class="panel panel-default">
-  <div class="panel-heading">Specification</div>
+  <div class="panel-heading"><h4>Specification</h4></div>
   <div class="panel-body">
 
     {% set stack = [0] %}
@@ -102,7 +101,20 @@
 	    <td colspan="3">
 	      <div class="panel panel-default">
 		<div class="panel-heading">
-		  {{ field.get('label') or field['identifier'].capitalize() }}
+		  <h4>
+		    {{ field.get('label') or field['identifier'].capitalize() }}
+		    <small>
+		      {% if field['identifier'] in order['invalid'] %}
+		      <span class="text-danger glyphicon glyphicon-remove">
+			({{ order['invalid'][field['identifier']] }})
+		      </span>
+		      {% else %}
+		      <span class="text-success glyphicon glyphicon-ok">
+		      </span>
+		      {% end %}
+		      {{ field.get('description') or '' }}
+		    </small>
+		  </h4>
 		</div>
 		<div class="panel-body">
 		  <table class="table table-condensed table-noborder table-hierarchy">
@@ -110,6 +122,14 @@
 	  <tr>
 	    <th>
 	      {{ field.get('label') or field['identifier'].capitalize() }}
+	      {% if field['identifier'] in order['invalid'] %}
+	      <span class="text-danger glyphicon glyphicon-remove">
+		({{ order['invalid'][field['identifier']] }})
+	      </span>
+	      {% else %}
+	      <span class="text-success glyphicon glyphicon-ok">
+	      </span>
+	      {% end %}
 	    </th>
 	    <td>{{ order['fields'][field['identifier']] or '-' }}</td>
 	    <td>{{ field.get('description') or '-' }}</td>

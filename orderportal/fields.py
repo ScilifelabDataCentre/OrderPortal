@@ -4,10 +4,9 @@ from __future__ import unicode_literals, print_function, absolute_import
 
 import logging
 
-import orderportal
-from orderportal import constants
-from orderportal import settings
-from orderportal import utils
+from . import constants
+from . import settings
+from . import utils
 
 
 class Fields(object):

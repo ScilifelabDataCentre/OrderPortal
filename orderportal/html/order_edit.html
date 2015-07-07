@@ -32,40 +32,87 @@ Edit order
     </p>
   </div>
 
+  {% set stack = [0] %}
   {% for field in fields %}
-
+    {% while field['depth'] < stack[-1] %}
+      {% set stack.pop() %}
+		</div>
+              </div>
+	    </td>
+	  </tr>
+    {% end %}
     {% if field['type'] == 'group' %}
-    <div class="row">
-      <div class="col-xs-8">
-	<h3>{{ field.get('label') or field['identifier'].capitalize() }}</h3>
-      </div>
-    </div>
-
-    {% else %}
-    <div class="form-group">
-      <div class="row">
-	<div class="col-xs-8">
-	  <label class="control-label" for="{{ field['identifier'] }}">
+      {% set stack.append(field['depth'] + 1) %}
+      <div class="panel panel-default">
+	<div class="panel-heading">
+	  <h4>
 	    {{ field.get('label') or field['identifier'].capitalize() }}
-	  </label>
-	  <input type="text" class="form-control"
-		 name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
-		 value="{{ order['fields'][field['identifier']] or '' }}">
+	    <small>
+	      {% if field['identifier'] in order['invalid'] %}
+	      <span class="text-danger glyphicon glyphicon-remove">
+		({{ order['invalid'][field['identifier']] }})
+	      </span>
+	      {% else %}
+	      <span class="text-success glyphicon glyphicon-ok">
+	      </span>
+	      {% end %}
+	      {{ field.get('description') or '' }}
+	    </small>
+	  </h4>
+	</div>
+	<div class="panel-body">
+    {% else %}
+      <div class="form-group has-feedback">
+	<div class="row">
+	  <div class="col-xs-8">
+	    <label class="control-label" for="{{ field['identifier'] }}">
+	      {{ field.get('label') or field['identifier'].capitalize() }}
+	      {% if field['identifier'] in order['invalid'] %}
+	      <span class="text-danger glyphicon glyphicon-remove">
+		({{ order['invalid'][field['identifier']] }})
+	      </span>
+	      {% else %}
+	      <span class="text-success glyphicon glyphicon-ok">
+	      </span>
+	      {% end %}
+	    </label>
+	    <input type="text" class="form-control"
+		   name="{{ field['identifier'] }}"
+		   id="{{ field['identifier'] }}"
+		   value="{{ order['fields'][field['identifier']] or '' }}">
+	    {% if field['required'] %}
+	    <span style="color:red; margin-right: 1em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true">
+	    </span>
+	    {% end %}
+	  </div>
+	</div>
+	<p class="text-muted">
+	  {{ field.get('description') or '' }}
+	</p>
+      </div>
+    {% end %} {# if field['type'] == 'group' #}
+    {% end %} {# for field in fields #}
+
+    {% while stack.pop() %}
 	</div>
       </div>
-      <p class="text-muted">
-	{{ field.get('description') or '' }}
-      </p>
-    </div>
     {% end %}
 
-  {% end %} {# for field in fields #}
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit" name="save" value="continue"
+	    class="btn btn-primary glyphicon glyphicon-save">
+      Save and continue
+    </button>
+  </div>
 
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit"
-	    class="btn btn-primary glyphicon glyphicon-save">
-      Save
+	    class="btn btn-primary glyphicon glyphicon-ok">
+      Save and quit
     </button>
   </div>
 
