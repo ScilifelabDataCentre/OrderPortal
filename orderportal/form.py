@@ -17,37 +17,38 @@ from .requesthandler import RequestHandler
 class FormSaver(saver.Saver):
     doctype = constants.FORM
 
+    def initialize(self):
+        super(FormSaver, self).initialize()
+        self.doc['fields'] = []
+
+    def setup(self):
+        self.fields = Fields(self.doc)
+
     def add_field(self):
         identifier = self.rqh.get_argument('identifier')
         if not constants.ID_RX.match(identifier):
             raise tornado.web.HTTPError(400, reason='invalid identifier')
         if self.rqh.get_argument('type') not in constants.TYPES_SET:
             raise tornado.web.HTTPError(400, reason='invalid type')
-        fields = Fields(self.doc)
-        if identifier in fields:
+        if identifier in self.fields:
             raise tornado.web.HTTPError(409, reason='identifier already exists')
-        self.changed['fields'] = fields.add(identifier, self.rqh)
+        self.changed['fields'] = self.fields.add(identifier, self.rqh)
 
     def update_field(self, identifier):
-        fields = Fields(self.doc)
-        if identifier not in fields:
+        if identifier not in self.fields:
             raise tornado.web.HTTPError(404, reason='no such field')
-        self.changed['fields'] = fields.update(identifier, self.rqh)
+        self.changed['fields'] = self.fields.update(identifier, self.rqh)
 
     def copy_fields(self, form):
         "Copy all fields from the given form."
-        if not hasattr(self.doc, 'fields'):
-            self.doc['fields'] = []
-        fields = Fields(self.doc)
         for field in form['fields']:
-            fields.copy(field)
+            self.fields.copy(field)
         self.changed['copied'] = "from {}".format(form['_id'])
 
     def delete_field(self, identifier):
-        fields = Fields(self.doc)
-        if identifier not in fields:
+        if identifier not in self.fields:
             raise tornado.web.HTTPError(404, reason='no such field')
-        fields.delete(identifier)
+        self.fields.delete(identifier)
         self.changed['fields'] = dict(identifier=identifier, action='deleted')
 
 
@@ -119,7 +120,6 @@ class FormCreate(RequestHandler):
             if not saver['title']:
                 raise tornado.web.HTTPError(400, reason='no title given')
             saver['description'] = self.get_argument('description', None)
-            saver['fields'] = []
             saver['status'] = constants.PENDING
             saver['owner'] = self.current_user['email']
         self.see_other('form', saver.doc['_id'])

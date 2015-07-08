@@ -148,7 +148,7 @@ class Order(OrderMixin, RequestHandler):
                     title="Order '{}'".format(title),
                     order=order,
                     status=self.get_order_status(order),
-                    fields=Fields(form),
+                    fields=form['fields'],
                     is_editable=self.is_admin() or self.is_editable(order),
                     targets=self.get_targets(order),
                     logs=self.get_logs(order['_id']))

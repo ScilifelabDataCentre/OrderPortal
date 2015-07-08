@@ -1,4 +1,4 @@
-"OrderPortal: Context handler for saving an entity. "
+"OrderPortal: Context handler for saving an entity as a CouchDB document. "
 
 from __future__ import unicode_literals, print_function, absolute_import
 
@@ -12,7 +12,7 @@ from orderportal import utils
 
 
 class Saver(object):
-    "Context manager saving the data for the entity."
+    "Context manager saving the data for the document."
 
     doctype = None
 
@@ -36,6 +36,7 @@ class Saver(object):
             self.doc[constants.DOCTYPE] = self.doctype
             self.doc['_id'] = utils.get_iuid()
             self.initialize()
+        self.setup()
 
     def __enter__(self):
         return self
@@ -81,7 +82,7 @@ class Saver(object):
             return default
 
     def initialize(self):
-        "Set the initial values for the new entity."
+        "Set the initial values for the new document."
         try:
             if not self.rqh.current_user: raise AttributeError
         except AttributeError:
@@ -90,12 +91,16 @@ class Saver(object):
             self.doc['owner'] = self.rqh.current_user['email']
         self.doc['created'] = utils.timestamp()
 
+    def setup(self):
+        "Any additional setup. To be redefined."
+        pass
+
     def finalize(self):
-        "Perform any final modifications before saving the entity."
+        "Perform any final modifications before saving the document."
         self.doc['modified'] = utils.timestamp()
 
     def post_process(self):
-        "Perform any actions after having saved the entity."
+        "Perform any actions after having saved the document."
         pass
 
     def log(self):

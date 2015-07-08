@@ -41,6 +41,9 @@ Edit order
 	    </td>
 	  </tr>
     {% end %}
+    {% if field['restrict_read'] and not is_staff %}
+    {% continue %}
+    {% end %}
     {% if field['type'] == 'group' %}
       {% set stack.append(field['depth'] + 1) %}
       <div class="panel panel-default">
@@ -100,20 +103,25 @@ Edit order
       </div>
     {% end %}
 
-  <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit" name="save" value="continue"
-	    class="btn btn-primary glyphicon glyphicon-save">
-      Save and continue
-    </button>
-  </div>
-
-  <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit"
-	    class="btn btn-primary glyphicon glyphicon-ok">
-      Save and quit
-    </button>
+  <div class="row">
+    <div class="col-xs-6">
+      <div class="form-group">
+	<label class="control-label"></label>
+	<button type="submit" name="save" value="continue"
+		class="btn btn-primary glyphicon glyphicon-save">
+	  Save and continue
+	</button>
+      </div>
+    </div>
+    <div class="col-xs-6">
+      <div class="form-group">
+	<label class="control-label"></label>
+	<button type="submit"
+		class="btn btn-primary glyphicon glyphicon-ok">
+	  Save and quit
+	</button>
+      </div>
+    </div>
   </div>
 
 </form>

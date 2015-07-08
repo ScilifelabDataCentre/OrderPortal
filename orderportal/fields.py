@@ -22,15 +22,17 @@ class Fields(object):
                              for f in self.flatten(self.form['fields'])])
 
     def flatten(self, fields, depth=0):
+        "Pre-order traversal to produce a list of all fields."
         result = []
         for field in fields:
             field['depth'] = depth
             result.append(field)
             if field['type'] == constants.GROUP['value']:
-                result.extend(self.flatten(field['fields'], depth+1))
+                result.extend(self.flatten(field['fields'], depth=depth+1))
         return result
 
     def __iter__(self):
+        "Pre-order iteration over all fields."
         return iter(self.flatten(self.form['fields']))
 
     def __contains__(self, identifier):

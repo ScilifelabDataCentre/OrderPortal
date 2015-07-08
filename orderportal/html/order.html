@@ -83,91 +83,9 @@
 <div class="panel panel-default">
   <div class="panel-heading"><h4>Specification</h4></div>
   <div class="panel-body">
-
-    {% set stack = [0] %}
-    <table class="table table-condensed table-noborder table-hierarchy">
-      {% for field in fields %}
-	  {% while field['depth'] < stack[-1] %}
-	    {% set stack.pop() %}
-		  </table>
-		</div>
-	      </div>
-	    </td>
-	  </tr>
-	   {% end %}
-        {% if field['type'] == 'group' %}
-	  {% set stack.append(field['depth'] + 1) %}
-          <tr>
-	    <td colspan="3">
-	      <div class="panel panel-default">
-		<div class="panel-heading">
-		  <h4>
-		    {{ field.get('label') or field['identifier'].capitalize() }}
-		    <small>
-		      {% if field['identifier'] in order['invalid'] %}
-		      <span class="text-danger glyphicon glyphicon-remove">
-			({{ order['invalid'][field['identifier']] }})
-		      </span>
-		      {% else %}
-		      <span class="text-success glyphicon glyphicon-ok">
-		      </span>
-		      {% end %}
-		      {{ field.get('description') or '' }}
-		    </small>
-		  </h4>
-		</div>
-		<div class="panel-body">
-		  <table class="table table-condensed table-noborder table-hierarchy">
-        {% else %}
-	  <tr>
-	    <th>
-	      {{ field.get('label') or field['identifier'].capitalize() }}
-	      {% if field['identifier'] in order['invalid'] %}
-	      <span class="text-danger glyphicon glyphicon-remove">
-		({{ order['invalid'][field['identifier']] }})
-	      </span>
-	      {% else %}
-	      <span class="text-success glyphicon glyphicon-ok">
-	      </span>
-	      {% end %}
-	    </th>
-	    <td>{{ order['fields'][field['identifier']] or '-' }}</td>
-	    <td>{{ field.get('description') or '-' }}</td>
-	  </tr>
-	{% end %}
-      {% end %} {# for field in fields #}
-      {% while stack.pop() %}
-	      </table>
-	    </div>
-	  </div>
-	</td>
-      {% end %}
-    </table>
-
+    {# Recursion: 'include' cannot be used! #}
+    {% module Template('order_fields.html', fields=fields, order=order, is_staff=is_staff) %}
   </div>
 </div>
-
-{#
-<div class="panel panel-default">
-  <div class="panel-heading">Test level 1</div>
-  <div class="panel-body">
-    <table class="table table-condensed table-noborder">
-      <tr>
-	<th>Field</th>
-	<td>Value</td>
-      </tr>
-      <tr>
-	<td colspan="2">
-	  <div class="panel panel-default">
-	    <div class="panel-heading">Test level 2</div>
-	    <div class="panel-body">
-	    </div>
-	  </div>
-	</td>
-      </tr>
-    </table>
-  </div>
-</div>
-#}
 
 {% end %} {# block main_content #}
