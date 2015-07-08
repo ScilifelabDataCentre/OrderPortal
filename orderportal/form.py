@@ -28,7 +28,7 @@ class FormSaver(saver.Saver):
         identifier = self.rqh.get_argument('identifier')
         if not constants.ID_RX.match(identifier):
             raise tornado.web.HTTPError(400, reason='invalid identifier')
-        if self.rqh.get_argument('type') not in constants.TYPES_SET:
+        if self.rqh.get_argument('type') not in constants.TYPES:
             raise tornado.web.HTTPError(400, reason='invalid type')
         if identifier in self.fields:
             raise tornado.web.HTTPError(409, reason='identifier already exists')

@@ -18,7 +18,7 @@
 	<select class="form-control" name="group" id="group">
 	  <option value="__none__">[top level]</option>
 	  {% for field in fields %}
-	    {% if field['type'] == constants.GROUP['value'] %}
+	    {% if field['type'] == constants.GROUP %}
 	      <option>{{ field['identifier'] }}</option>
 	    {% end %}
 	  {% end %}
@@ -68,7 +68,7 @@
 	<label class="control-label" for="type">Type</label>
 	<select class="form-control" name="type" id="type">
 	  {% for type in constants.TYPES %}
-	  <option value="{{ type['value'] }}">{{ type['label'] }}</option>
+	  <option value="{{ type }}">{{ constants.TYPE_LABELS.get(type, type) }}</option>
 	  {% end %}
 	</select>
       </div>

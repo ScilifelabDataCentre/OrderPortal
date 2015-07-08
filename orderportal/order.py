@@ -45,7 +45,7 @@ class OrderSaver(saver.Saver):
     def check_validity(self, field):
         "Check validity of field values; recursively, postorder."
         logging.debug("check_validity %s", field['identifier'])
-        if field['type'] == constants.GROUP['value']:
+        if field['type'] == constants.GROUP:
             result = True
             for subfield in field['fields']:
                 result = result and self.check_validity(subfield)

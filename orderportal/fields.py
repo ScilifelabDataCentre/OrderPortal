@@ -27,7 +27,7 @@ class Fields(object):
         for field in fields:
             field['depth'] = depth
             result.append(field)
-            if field['type'] == constants.GROUP['value']:
+            if field['type'] == constants.GROUP:
                 result.extend(self.flatten(field['fields'], depth=depth+1))
         return result
 
@@ -45,7 +45,7 @@ class Fields(object):
         "Add a field from HTML form data in the RequestHandler instance."
         assert identifier not in self, 'field identifier must be unique in form'
         type = rqh.get_argument('type')
-        assert type in constants.TYPES_SET, 'invalid field type'
+        assert type in constants.TYPES, 'invalid field type'
         new = dict(identifier=identifier,
                    label=rqh.get_argument('label', None),
                    type=rqh.get_argument('type'),
@@ -56,7 +56,7 @@ class Fields(object):
                    restrict_write=utils.to_bool(
                        rqh.get_argument('restrict_write', False)),
                    description=rqh.get_argument('description', None))
-        if type == constants.GROUP['value']:
+        if type == constants.GROUP:
             new['fields'] = []
         group = rqh.get_argument('group', None)
         if group == '__none__': group = None

@@ -37,16 +37,15 @@ LOG         = 'log'
 ENTITIES    = frozenset([USER, FIELD, FORM, ORDER, INFO, PUBLICATION, USER])
 
 # Field types
-STRING  = dict(value='string', label='String')
-INTEGER = dict(value='int', label='Integer')
-FLOAT   = dict(value='float', label='Float')
-BOOLEAN = dict(value='boolean', label='Boolean')
-URL     = dict(value='url', label='URL')
-SELECT  = dict(value='select', label='Select')
-GROUP   = dict(value='group', label='Group')
-TYPES   = (STRING, INTEGER, FLOAT, BOOLEAN, URL, SELECT, GROUP)
-TYPES_SET   = frozenset([t['value'] for t in TYPES])
-TYPE_LABELS = dict([(t['value'], t['label']) for t in TYPES])
+STRING  = 'string'
+INT     = 'int'
+FLOAT   = 'float'
+BOOLEAN = 'boolean'
+URL     = 'url'
+SELECT  = 'select'
+GROUP   = 'group'
+TYPES   = [STRING, INT, FLOAT, BOOLEAN, URL, SELECT, GROUP]
+TYPE_LABELS = {INT: 'integer'}
 
 # Boolean string values
 TRUE  = frozenset(['true', 'yes', 't', 'y', '1'])
