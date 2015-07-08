@@ -1,66 +1,65 @@
 {# Order fields recursive display. #}
 
-    <table class="table table-condensed table-noborder table-hierarchy">
+<table class="table table-condensed table-noborder table-hierarchy">
 
-      {% for field in fields %}
-        {% if field['restrict_read'] and not is_staff %}
-        {% continue %}
-        {% end %}
+  {% for field in fields %}
+    {% if field['restrict_read'] and not is_staff %}
+    {% continue %}
+    {% end %}
 
-      <tr>
+  <tr>
+    {% if field['type'] == 'group' %}
+    <td colspan="3">
+      <div class="panel panel-default">
+	<div class="panel-heading">
+	  <h4>
+	    {{ field.get('label') or field['identifier'].capitalize() }}
+	    <small>
+	      {% if field['identifier'] in order['invalid'] %}
+	      <span class="text-danger glyphicon glyphicon-remove">
+		({{ order['invalid'][field['identifier']] }})
+	      </span>
+	      {% else %}
+	      <span class="text-success glyphicon glyphicon-ok">
+	      </span>
+	      {% end %}
+	      {% if field['restrict_read'] %}
+	      [Staff only]
+	      {% end %}
+	      {{ field.get('description') or '' }}
+	    </small>
+	  </h4>
+	</div>
+	<div class="panel-body">
+	  {# Recursion: 'include' cannot be used! #}
+	  {% module Template('order_fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
+	</div>
+      </div>
+    </td>
 
-	{% if field['type'] == 'group' %}
-	<td colspan="3">
-	  <div class="panel panel-default">
-	    <div class="panel-heading">
-	      <h4>
-		{{ field.get('label') or field['identifier'].capitalize() }}
-		<small>
-		  {% if field['identifier'] in order['invalid'] %}
-		  <span class="text-danger glyphicon glyphicon-remove">
-		    ({{ order['invalid'][field['identifier']] }})
-		  </span>
-		  {% else %}
-		  <span class="text-success glyphicon glyphicon-ok">
-		  </span>
-		  {% end %}
-		  {% if field['restrict_read'] %}
-		  [Staff only]
-		  {% end %}
-		  {{ field.get('description') or '' }}
-		</small>
-	      </h4>
-	    </div>
-	    <div class="panel-body">
-	      {# Recursion: 'include' cannot be used! #}
-	      {% module Template('order_fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
-	    </div>
-	  </div>
-	</td>
+    {% else %}
+    <th>
+      {{ field.get('label') or field['identifier'].capitalize() }}
+      {% if field['identifier'] in order['invalid'] %}
+      <span class="text-danger glyphicon glyphicon-remove">
+	({{ order['invalid'][field['identifier']] }})
+      </span>
+      {% else %}
+      <span class="text-success glyphicon glyphicon-ok">
+      </span>
+      {% end %}
+    </th>
+    <td>{{ order['fields'][field['identifier']] or '-' }}</td>
+    <td>
+      {% if field['restrict_read'] %}
+      [Staff only]
+      {% end %}
+      {{ field.get('description') or '-' }}
+    </td>
 
-	{% else %}
-	<th>
-	  {{ field.get('label') or field['identifier'].capitalize() }}
-	  {% if field['identifier'] in order['invalid'] %}
-	  <span class="text-danger glyphicon glyphicon-remove">
-	    ({{ order['invalid'][field['identifier']] }})
-	  </span>
-	  {% else %}
-	  <span class="text-success glyphicon glyphicon-ok">
-	  </span>
-	  {% end %}
-	</th>
-	<td>{{ order['fields'][field['identifier']] or '-' }}</td>
-	<td>
-	  {% if field['restrict_read'] %}
-	  [Staff only]
-	  {% end %}
-	  {{ field.get('description') or '-' }}
-	</td>
+    {% end %}
 
-	{% end %}
+  </tr>
+  {% end %} {# for field in fields #}
 
-      </tr>
-      {% end %} {# for field in fields #}
-
-    </table>
+</table>

@@ -1,0 +1,71 @@
+{# Order edit fields recursive display. #}
+
+{% for field in fields %}
+  {% if (field['restrict_write'] or field['restrict_read']) and not is_staff %}
+  {% continue %}
+  {% end %}
+
+{% if field['type'] == 'group' %}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4>
+      {{ field.get('label') or field['identifier'].capitalize() }}
+      <small>
+	{% if field['identifier'] in order['invalid'] %}
+	<span class="text-danger glyphicon glyphicon-remove">
+	  ({{ order['invalid'][field['identifier']] }})
+	</span>
+	{% else %}
+	<span class="text-success glyphicon glyphicon-ok">
+	</span>
+	{% end %}
+	{% if field['restrict_read'] %}
+	[Read: Staff only]
+	{% end %}
+	{% if field['restrict_write'] %}
+	[Write: Staff only]
+	{% end %}
+	{{ field.get('description') or '' }}
+      </small>
+    </h4>
+  </div>
+  <div class="panel-body">
+    {# Recursion: 'include' cannot be used! #}
+    {% module Template('order_edit_fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
+  </div>
+</div>
+
+{% else %}
+
+<div class="form-group has-feedback">
+  <div class="row">
+    <div class="col-xs-8">
+      <label class="control-label" for="{{ field['identifier'] }}">
+	{{ field.get('label') or field['identifier'].capitalize() }}
+	{% if field['identifier'] in order['invalid'] %}
+	<span class="text-danger glyphicon glyphicon-remove">
+	  ({{ order['invalid'][field['identifier']] }})
+	</span>
+	{% else %}
+	<span class="text-success glyphicon glyphicon-ok">
+	</span>
+	{% end %}
+      </label>
+      <input type="text" class="form-control"
+	     name="{{ field['identifier'] }}"
+	     id="{{ field['identifier'] }}"
+	     value="{{ order['fields'][field['identifier']] or '' }}">
+      {% if field['required'] %}
+      <span style="color:red; margin-right: 1em;"
+	    class="glyphicon glyphicon-star form-control-feedback"
+	    aria-hidden="true">
+      </span>
+      {% end %}
+    </div>
+  </div>
+  <p class="text-muted">
+    {{ field.get('description') or '' }}
+  </p>
+</div>
+{% end %} {# if field['type'] == 'group' #}
+{% end %} {# for field in fields #}

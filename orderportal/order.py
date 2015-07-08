@@ -55,7 +55,7 @@ class OrderSaver(saver.Saver):
             value = self.doc['fields'][field['identifier']]
             logging.debug("%s value %s", field['identifier'], value)
             if field['required'] and value is None:
-                self.doc['invalid'][field['identifier']] = 'value is missing'
+                self.doc['invalid'][field['identifier']] = 'missing value'
                 result = False
             else:
                 result = True
@@ -195,11 +195,11 @@ class OrderCreate(RequestHandler):
     def post(self):
         self.check_xsrf_cookie()
         form = self.get_entity(self.get_argument('form'),doctype=constants.FORM)
-        fields = Fields(form)
         with OrderSaver(rqh=self) as saver:
             saver['form'] = form['_id']
             saver['title'] = self.get_argument('title', None) or form['title']
-            saver['fields'] = dict([(f['identifier'], None) for f in fields])
+            saver['fields'] = dict([(f['identifier'], None)
+                                    for f in Fields(form)])
             saver['owner'] = self.current_user['email']
             for transition in settings['ORDER_TRANSITIONS']:
                 if transition['source'] is None:
@@ -218,11 +218,10 @@ class OrderEdit(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_editable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
-        fields = Fields(form)
         self.render('order_edit.html',
                     title="Edit order '{}'".format(order['title']),
                     order=order,
-                    fields=fields)
+                    fields=form['fields'])
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -230,10 +229,9 @@ class OrderEdit(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_editable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
-        fields = Fields(form)
         with OrderSaver(doc=order, rqh=self) as saver:
             saver['title'] = self.get_argument('__title__', order['_id'])
-            saver.update_fields(fields)
+            saver.update_fields(Fields(form))
         if self.get_argument('save', None) == 'continue':
             self.see_other('order_edit', order['_id'])
         else:

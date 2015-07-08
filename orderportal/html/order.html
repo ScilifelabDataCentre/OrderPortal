@@ -80,12 +80,7 @@
   </div>
 </div>
 
-<div class="panel panel-default">
-  <div class="panel-heading"><h4>Specification</h4></div>
-  <div class="panel-body">
-    {# Recursion: 'include' cannot be used! #}
-    {% module Template('order_fields.html', fields=fields, order=order, is_staff=is_staff) %}
-  </div>
-</div>
+{# Recursion: 'include' cannot be used! #}
+{% module Template('order_fields.html', fields=fields, order=order, is_staff=is_staff) %}
 
 {% end %} {# block main_content #}

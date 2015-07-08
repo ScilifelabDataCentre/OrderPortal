@@ -32,6 +32,10 @@ Edit order
     </p>
   </div>
 
+  {# Recursion: 'include' cannot be used! #}
+  {% module Template('order_edit_fields.html', fields=fields, order=order, is_staff=is_staff) %}
+
+{#
   {% set stack = [0] %}
   {% for field in fields %}
     {% while field['depth'] < stack[-1] %}
@@ -95,13 +99,14 @@ Edit order
 	  {{ field.get('description') or '' }}
 	</p>
       </div>
-    {% end %} {# if field['type'] == 'group' #}
-    {% end %} {# for field in fields #}
+    {% end %}
+    {% end %}
 
     {% while stack.pop() %}
 	</div>
       </div>
     {% end %}
+#}
 
   <div class="row">
     <div class="col-xs-6">
