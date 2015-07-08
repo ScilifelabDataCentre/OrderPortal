@@ -7,32 +7,6 @@
 
 {% block meta_content %}
 
-{% if is_editable %}
-<form action="{{ reverse_url('order_edit', order['_id']) }}"
-      role="form" method="GET">
-  <div class="form-group">
-    <button type="submit"
-	    class="btn btn-primary glyphicon glyphicon-edit">
-      Edit
-    </button>
-  </div>
-</form>
-
-<br>
-<form action="{{ reverse_url('order', order['_id']) }}"
-      role="form" method="POST">
-  {% module xsrf_form_html() %}
-  <div class="form-group">
-    <input type="hidden" name="_http_method" value="delete">
-    <button type="submit"
-	    class="btn btn-danger glyphicon glyphicon-minus"
-	    onclick="return confirm('Cannot be undone! Really delete?');">
-      Delete
-    </button>
-  </div>
-</form>
-{% end %} {# if is_editable #}
-
 {% for target in targets %}
 <br>
 <form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
@@ -44,6 +18,29 @@
   </button>
 </form>
 {% end %}
+
+{% if is_editable %}
+<br>
+<form action="{{ reverse_url('order_edit', order['_id']) }}"
+      role="form" method="GET">
+  <button type="submit"
+	  class="btn btn-primary glyphicon glyphicon-edit">
+    Edit
+  </button>
+</form>
+
+<br>
+<form action="{{ reverse_url('order', order['_id']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <input type="hidden" name="_http_method" value="delete">
+  <button type="submit"
+	  class="btn btn-danger glyphicon glyphicon-minus"
+	  onclick="return confirm('Cannot be undone! Really delete?');">
+    Delete
+  </button>
+</form>
+{% end %} {# if is_editable #}
 
 {% end %} {# block meta_content #}
 

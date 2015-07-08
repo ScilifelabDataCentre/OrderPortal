@@ -67,6 +67,7 @@ class OrderMixin(object):
 
     def is_editable(self, order):
         "Is the order editable by the current user?"
+        if self.is_admin(): return True
         status = self.get_order_status(order)
         edit = status.get('edit', [])
         if self.is_staff() and constants.STAFF in edit: return True
