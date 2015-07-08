@@ -93,10 +93,13 @@ class OrderMixin(object):
         result = []
         for transition in settings['ORDER_TRANSITIONS']:
             if transition['source'] != order['status']: continue
+            # Check validity
+            if transition.get('require') == 'valid' and \
+               order['invalid']: continue
             permission = transition['permission']
-            if self.is_staff() and permission == constants.STAFF:
-                result.extend(transition['targets'])
-            elif self.is_owner(order) and permission == constants.USER:
+            if (self.is_admin() and constants.ADMIN in permission) or \
+               (self.is_staff() and constants.STAFF in permission) or \
+               (self.is_owner(order) and constants.USER in permission):
                 result.extend(transition['targets'])
         return [settings['ORDER_STATUSES'][t] for t in result]
 
@@ -236,3 +239,20 @@ class OrderEdit(OrderMixin, RequestHandler):
             self.see_other('order_edit', order['_id'])
         else:
             self.see_other('order', order['_id'])
+
+
+class OrderTransition(OrderMixin, RequestHandler):
+    "Change the status of an order."
+
+    @tornado.web.authenticated
+    def post(self, iuid, targetid):
+        self.check_xsrf_cookie()
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.check_editable(order)
+        for target in self.get_targets(order):
+            if target['identifier'] == targetid: break
+        else:
+            raise tornado.web.HTTPError(403, reason='invalid target')
+        with OrderSaver(doc=order, rqh=self) as saver:
+            saver['status'] = targetid
+        self.see_other('order', order['_id'])

@@ -9,7 +9,7 @@
 
 {% if is_editable %}
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
-      role="form" method='GET'>
+      role="form" method="GET">
   <div class="form-group">
     <button type="submit"
 	    class="btn btn-primary glyphicon glyphicon-edit">
@@ -20,7 +20,7 @@
 
 <br>
 <form action="{{ reverse_url('order', order['_id']) }}"
-      role="form" method='POST'>
+      role="form" method="POST">
   {% module xsrf_form_html() %}
   <div class="form-group">
     <input type="hidden" name="_http_method" value="delete">
@@ -36,11 +36,12 @@
 {% for target in targets %}
 <br>
 <form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
-      role="form" method='POST'>
-    <button type="submit" class="btn btn-warning">
-      {% module Icon(target['identifier']) %}
-      {{ target.get('label', target['identifier'].capitalize()) }}
-    </button>
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <button type="submit" class="btn btn-warning">
+    {% module Icon(target['identifier']) %}
+    {{ target.get('label', target['identifier'].capitalize()) }}
+  </button>
 </form>
 {% end %}
 

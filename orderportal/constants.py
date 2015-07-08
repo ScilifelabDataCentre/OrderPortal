@@ -64,7 +64,7 @@ USER_STATUSES = [PENDING, ENABLED, DISABLED]
 ADMIN      = 'admin'
 STAFF      = 'staff'
 USER_ROLES = [USER, STAFF, ADMIN]
-# Form state
+# Form statuses; hard-wired!
 FORM_STATUSES = [PENDING, ENABLED, DISABLED]
 
 # To be filled in from separate YAML file
