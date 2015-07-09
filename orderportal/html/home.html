@@ -33,7 +33,7 @@
     <div class="panel panel-warning">
       <div class="panel-heading">
 	<span class="glyphicon glyphicon-user">
-	  User account login
+	  Account login
 	</span>
       </div>
       <div class="panel-body">
@@ -57,19 +57,23 @@
 	  </div>
 	</form>
 	  
-	<br>
-	<p>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-body">
+	<div>
 	  <a href="{{ reverse_url('register') }}"
-	     class="btn btn-default glyphicon glyphicon-user" role="button">
-	    Register new user account
+	     class="btn btn-primary glyphicon glyphicon-user" role="button">
+	    Register new account
 	  </a>
-	</p>
-	<p>
+	</div>
+	<br>
+	<div>
 	  <a href="{{ reverse_url('reset') }}"
-	     class="btn btn-default glyphicon glyphicon-envelope" role="button">
+	     class="btn btn-danger glyphicon glyphicon-envelope" role="button">
 	    Reset account password
 	  </a>
-	</p>
+	</div>
       </div>
     </div>
 

@@ -11,15 +11,19 @@
 {% block meta_content %}
 
 {% if is_admin or current_user['email'] == user['email'] %}
-<form action="{{ reverse_url('user_edit', user['email']) }}"
-      role="form" method="GET">
-  <div class="form-group">
-    <button type="submit"
-	    class="btn btn-primary glyphicon glyphicon-edit">
-      Edit
-    </button>
-  </div>
-</form>
+<div>
+  <a href="{{ reverse_url('user_edit', user['email']) }}"
+     class="btn btn-primary glyphicon glyphicon-edit" role="button">
+    Edit
+  </a>
+</div>
+<br>
+<div>
+  <a href="{{ reverse_url('reset') }}"
+     class="btn btn-danger glyphicon glyphicon-envelope" role="button">
+    Reset password
+  </a>
+</div>
 {% end %} {# if is_admin #}
 
 {% if is_admin and current_user['email'] != user['email'] %}
