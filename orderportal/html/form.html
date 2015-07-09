@@ -7,15 +7,6 @@
 
 {% block meta_content %}
 
-<form action="{{ reverse_url('form_copy', form['_id']) }}"
-      role="form" method="POST">
-  {% module xsrf_form_html() %}
-  <button type="submit"
-	  class="btn btn-primary glyphicon glyphicon-plus-sign">
-    Copy
-  </button>
-</form>
-
 {% if form['status'] == constants.PENDING %}
 <br>
 <form action="{{ reverse_url('form_enable', form['_id']) }}"
@@ -47,6 +38,15 @@
   </button>
 </form>
 {% end %}
+
+<form action="{{ reverse_url('form_copy', form['_id']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <button type="submit"
+	  class="btn btn-primary glyphicon glyphicon-plus-sign">
+    Copy
+  </button>
+</form>
 
 {% end %} {# block meta_content #}
 
@@ -93,7 +93,7 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     Specification fields
-    {% if form['status'] == constants.PENDING %}
+    {% if are_fields_editable %}
     <form action="{{ reverse_url('field_create', form['_id']) }}"
 	  role="form" class="pull-right" method="GET">
       <button type="submit"
@@ -114,6 +114,7 @@
 	<th>Required</th>
 	<th>Restricted read</th>
 	<th>Restricted write</th>
+	<th>Options</th>
 	<th>Description</th>
       </tr>
       {% for field in fields %}
@@ -122,7 +123,14 @@
 	  {% for i in xrange(field['depth']) %}
 	  <span class="glyphicon glyphicon-play"></span>
 	  {% end %}
-	  <a href="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}">{{ field['identifier'] }}</a></td>
+	  {% if are_fields_editable %}
+	  <a href="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}">
+	    {{ field['identifier'] }}
+	  </a>
+	  {% else %}
+	  {{ field['identifier'] }}
+	  {% end %}
+	</td>
 	<td>{{ field.get('label') or '-' }}</td>
 	<td>{{ field['type'] }}</td>
 	<td>
@@ -138,6 +146,11 @@
 	<td>
 	  {% if field['restrict_write'] %}
 	  <span class="glyphicon glyphicon-ok">
+	  {% end %}
+	</td>
+	<td>
+	  {% if field['type'] == constants.SELECT %}
+	  <pre>{{ '\n'.join(field['select']) }}</pre>
 	  {% end %}
 	</td>
 	<td>{{ field.get('description') or '-' }}</td>

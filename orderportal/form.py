@@ -87,6 +87,7 @@ class Form(FormMixin, RequestHandler):
         self.render('form.html',
                     form=form,
                     fields=Fields(form),
+                    are_fields_editable=self.are_fields_editable(form),
                     logs=self.get_logs(form['_id']))
 
 

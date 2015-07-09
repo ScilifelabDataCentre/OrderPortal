@@ -48,7 +48,7 @@ in '{{ form['title'] }}'
     <div class="row">
       <div class="col-xs-3">
 	<label class="control-label" for="select">Select</label>
-	<textarea name="select">{{ field.get('select') or '' }}</textarea>
+	<textarea name="select">{{ '\n'.join(field.get('select') or []) }}</textarea>
       </div>
     </div>
     <p class="text-muted">
@@ -64,8 +64,8 @@ in '{{ form['title'] }}'
 	<div class="checkbox">
 	  {% set checked = field['required'] and 'checked' or ''%}
 	  <label>
-	    <input type="checkbox" value="yes
-		   id="required" name="required"" {{ checked }}>
+	    <input type="checkbox" value="yes"
+		   id="required" name="required" {{ checked }}>
 	    Require the field to have a defined value for the order to
 	    be submittable.
 	  </label>

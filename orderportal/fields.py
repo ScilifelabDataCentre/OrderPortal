@@ -89,6 +89,11 @@ class Fields(object):
                        rqh.get_argument('restrict_write', False)),
                    description=rqh.get_argument('description', None))
         field = self._lookup[identifier]
+        if field['type'] == constants.SELECT:
+            values = rqh.get_argument('select', '').split('\n')
+            values = [v.strip() for v in values]
+            values = [v for v in values if v]
+            new['select'] = values
         old = field.copy()
         field.update(new)
         diff = dict(identifier=field['identifier'])

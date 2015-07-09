@@ -48,7 +48,7 @@ Edit order
     {% if field['restrict_read'] and not is_staff %}
     {% continue %}
     {% end %}
-    {% if field['type'] == 'group' %}
+    {% if field['type'] == constants.GROUP %}
       {% set stack.append(field['depth'] + 1) %}
       <div class="panel panel-default">
 	<div class="panel-heading">

@@ -5,7 +5,7 @@
   {% continue %}
   {% end %}
 
-{% if field['type'] == 'group' %}
+{% if field['type'] == constants.GROUP %}
 <div class="panel panel-default">
   <div class="panel-heading">
     <h4>
@@ -51,6 +51,27 @@
 	</span>
 	{% end %}
       </label>
+      {% if field['type'] == constants.SELECT %}
+      <select class="form-control"
+	      name="{{ field['identifier'] }}"
+	      id="{{ field['identifier'] }}">
+	{% set value = order['fields'][field['identifier']] %}
+	{% if not field['required'] %}
+	  {% if value is None %}
+	  <option selected value="">[no value]</option>
+	  {% else %}
+	  <option value="">[no value]</option>
+	  {% end %}
+	{% end %}
+	{% for v in field['select'] %}
+	  {% if v == value %}
+	  <option selected>{{ v }}</option>
+	  {% else %}
+	  <option>{{ v }}</option>
+	  {% end %}
+	{% end %}
+      </select>
+      {% else %}
       <input type="text" class="form-control"
 	     name="{{ field['identifier'] }}"
 	     id="{{ field['identifier'] }}"
@@ -61,11 +82,12 @@
 	    aria-hidden="true">
       </span>
       {% end %}
+      {% end %}
     </div>
   </div>
   <p class="text-muted">
     {{ field.get('description') or '' }}
   </p>
 </div>
-{% end %} {# if field['type'] == 'group' #}
+{% end %} {# if field['type'] == constants.GROUP #}
 {% end %} {# for field in fields #}

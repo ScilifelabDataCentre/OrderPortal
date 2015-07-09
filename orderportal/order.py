@@ -3,6 +3,7 @@
 from __future__ import unicode_literals, print_function, absolute_import
 
 import logging
+import urlparse
 
 import tornado.web
 
@@ -43,23 +44,43 @@ class OrderSaver(saver.Saver):
                 self.check_validity(field)
 
     def check_validity(self, field):
-        "Check validity of field values; recursively, postorder."
-        logging.debug("check_validity %s", field['identifier'])
+        "Check validity of converted field values; recursively, postorder."
+        message = None
         if field['type'] == constants.GROUP:
-            result = True
             for subfield in field['fields']:
-                result = result and self.check_validity(subfield)
-            if not result:
-                self.doc['invalid'][field['identifier']] = 'subfield is invalid'
+                if not self.check_validity(subfield):
+                    message = 'subfield is invalid'
+                    break
         else:
             value = self.doc['fields'][field['identifier']]
-            logging.debug("%s value %s", field['identifier'], value)
-            if field['required'] and value is None:
-                self.doc['invalid'][field['identifier']] = 'missing value'
-                result = False
-            else:
-                result = True
-        return result
+            if value is None:
+                if field['required']:
+                    message = 'missing value'
+            elif field['type'] == constants.INT:
+                try:
+                    self.doc['fields'][field['identifier']] = int(value)
+                except (TypeError, ValueError):
+                    message = 'not an integer value'
+            elif field['type'] == constants.FLOAT:
+                try:
+                    self.doc['fields'][field['identifier']] = float(value)
+                except (TypeError, ValueError):
+                    message = 'not a float value'
+            elif field['type'] == constants.BOOLEAN:
+                try:
+                    self.doc['fields'][field['identifier']] = utils.to_bool(value)
+                except (TypeError, ValueError):
+                    message = 'not a boolean value'
+            elif field['type'] == constants.URL:
+                parsed = urlparse.urlparse(value)
+                if not (parsed.scheme and parsed.netloc):
+                    message = 'incomplete URL'
+            elif field['type'] == constants.SELECT:
+                if value not in field['select']:
+                    message = 'invalid selection'
+        if message:
+            self.doc['invalid'][field['identifier']] = message
+        return message is None
 
 
 class OrderMixin(object):
@@ -95,8 +116,8 @@ class OrderMixin(object):
         for transition in settings['ORDER_TRANSITIONS']:
             if transition['source'] != order['status']: continue
             # Check validity
-            if transition.get('require') == 'valid' and \
-               order['invalid']: continue
+            if transition.get('require') == 'valid' and order['invalid']:
+                continue
             permission = transition['permission']
             if (self.is_admin() and constants.ADMIN in permission) or \
                (self.is_staff() and constants.STAFF in permission) or \
@@ -204,6 +225,7 @@ class OrderCreate(RequestHandler):
             saver['title'] = self.get_argument('title', None) or form['title']
             saver['fields'] = dict([(f['identifier'], None)
                                     for f in Fields(form)])
+            saver['invalid'] = dict()
             saver['owner'] = self.current_user['email']
             for transition in settings['ORDER_TRANSITIONS']:
                 if transition['source'] is None:
