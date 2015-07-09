@@ -18,6 +18,18 @@
   </button>
 </form>
 
+<br>
+<form action="{{ reverse_url('form', form['_id']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <input type="hidden" name="_http_method" value="delete">
+  <button type="submit"
+	  class="btn btn-danger glyphicon glyphicon-minus"
+	  onclick="return confirm('Cannot be undone! Really delete?');">
+    Delete
+  </button>
+</form>
+
 {% elif form['status'] == constants.ENABLED %}
 <br>
 <form action="{{ reverse_url('form_disable', form['_id']) }}"
@@ -39,6 +51,7 @@
 </form>
 {% end %}
 
+<br>
 <form action="{{ reverse_url('form_copy', form['_id']) }}"
       role="form" method="POST">
   {% module xsrf_form_html() %}

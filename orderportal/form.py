@@ -55,6 +55,10 @@ class FormSaver(saver.Saver):
 class FormMixin(object):
     "Mixin providing form-related methods."
 
+    def is_deletable(self, form):
+        "Can the form be deleted? Checks status only."
+        return form['status'] == constants.PENDING
+
     def are_fields_editable(self, form):
         "Are the form fields editable? Checks status only."
         return form['status'] == constants.PENDING
@@ -87,8 +91,28 @@ class Form(FormMixin, RequestHandler):
         self.render('form.html',
                     form=form,
                     fields=Fields(form),
+                    is_deletable=self.is_deletable(form),
                     are_fields_editable=self.are_fields_editable(form),
                     logs=self.get_logs(form['_id']))
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        self.check_admin()
+        if self.get_argument('_http_method', None) == 'delete':
+            self.delete(iuid)
+            return
+        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
+
+    @tornado.web.authenticated
+    def delete(self, iuid):
+        self.check_admin()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        if self.is_deletable(form):
+            raise tornado.web.HTTPError('form cannot be deleted')
+        self.delete_logs(form['_id'])
+        self.db.delete(form)
+        self.see_other('forms')
 
 
 class FormLogs(RequestHandler):
