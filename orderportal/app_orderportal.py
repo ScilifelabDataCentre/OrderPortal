@@ -80,6 +80,7 @@ def get_handlers():
             url(r'/info', InfoCreate, name='info_create'),
             url(r'/info/([^/]+)', Info, name='info'),
             url(r'/info/([^/]+)/edit', InfoEdit, name='info_edit'),
+            url(r'/info/([^/]+)/logs', InfoLogs, name='info_logs'),
             url(r'/text/([^/]+)', Text, name='text'),
             url(r'/log/([0-9a-f]{32})', Log, name='log'),
             url(r'/([0-9a-f]{32})', Entity, name='entity'),

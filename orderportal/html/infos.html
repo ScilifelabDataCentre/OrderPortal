@@ -34,7 +34,12 @@
 	</td>
 	<td>{{ info.get('title') or '-' }}</td>
 	<td>{{ info.get('menu') or '-' }}</td>
-	<td class="localtime">{{ info['modified'] }}</td>
+	<td>
+	  <span  class="localtime">{{ info['modified'] }}</span>
+	  <a href="{{ reverse_url('info_logs', info['name']) }}">
+	    {% module Icon('logs', label=True) %}
+	  </a>
+	</td>
 	<td class="localtime">{{ info['created'] }}</td>
       </tr>
       {% end %}

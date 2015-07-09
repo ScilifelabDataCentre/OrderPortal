@@ -1,4 +1,4 @@
-{# Form logs page. #}
+{# Logs page. #}
 
 {% extends "base.html" %}
 
@@ -36,7 +36,7 @@
 	  <td>
 	    {% if key == 'fields' %}
 	      {% for k, v in sorted(value.items()) %}
-	        {{ k }} = {{ repr(v) }}<br>
+	        {{ k }}: {{ repr(v) }}<br>
 	      {% end %}
 	    {% elif key == 'copied from' %}
 	      <a href="{{ reverse_url('entity', value) }}">{{ value }}</a>

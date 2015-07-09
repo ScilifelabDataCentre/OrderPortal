@@ -17,12 +17,26 @@ from orderportal.requesthandler import RequestHandler
 class InfoSaver(saver.Saver):
     doctype = constants.INFO
 
+
 class Info(RequestHandler):
     "Information page."
 
     def get(self, name):
         info = self.get_entity_view('info/name', name)
         self.render('info.html', info=info)
+
+
+class InfoLogs(RequestHandler):
+    "Info log entries page."
+
+    @tornado.web.authenticated
+    def get(self, name):
+        self.check_admin()
+        info = self.get_entity_view('info/name', name)
+        self.render('logs.html',
+                    title="Logs for info '{}'".format(name),
+                    entity=info,
+                    logs=self.get_logs(info['_id']))
 
 
 class Infos(RequestHandler):

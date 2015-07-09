@@ -33,7 +33,7 @@ class OrderSaver(saver.Saver):
                 pass
             else:
                 if value != docfields.get(identifier):
-                    changed = self.changed.setdefault('field_values', dict())
+                    changed = self.changed.setdefault('fields', dict())
                     changed[identifier] = value
                     docfields[identifier] = value
         # Check validity of current values
@@ -182,7 +182,7 @@ class OrderLogs(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_readable(order)
         self.render('logs.html',
-                    title="Logs for order'{}'".format(order['title']),
+                    title="Logs for order '{}'".format(order['title']),
                     entity=order,
                     logs=self.get_logs(order['_id']))
 
