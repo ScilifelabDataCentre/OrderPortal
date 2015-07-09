@@ -80,6 +80,7 @@ class Entity(RequestHandler):
 class TextSaver(saver.Saver):
     doctype = constants.TEXT
 
+
 class Text(RequestHandler):
     "Edit page for information text."
 
@@ -90,7 +91,7 @@ class Text(RequestHandler):
             text = self.get_entity_view('text/name', name)
         except tornado.web.HTTPError:
             text = dict(name=name)
-        origin = self.get_argument('origin', self.reverse_url('home'))
+        origin = self.get_argument('origin', self.absolute_reverse_url('home'))
         self.render('text.html', text=text, origin=origin)
 
     @tornado.web.authenticated
