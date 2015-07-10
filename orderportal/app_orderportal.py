@@ -25,8 +25,9 @@ from orderportal.home import *
 from orderportal.user import *
 from orderportal.form import *
 from orderportal.order import *
-from orderportal.info import *
 from orderportal.news import *
+from orderportal.info import *
+from orderportal.file import *
 from orderportal.events import *
 
 
@@ -81,6 +82,13 @@ def get_handlers():
             url(r'/info/([^/]+)', Info, name='info'),
             url(r'/info/([^/]+)/edit', InfoEdit, name='info_edit'),
             url(r'/info/([^/]+)/logs', InfoLogs, name='info_logs'),
+            url(r'/files', Files, name='files'),
+            url(r'/file', FileCreate, name='file_create'),
+            url(r'/file/([^/]+)', File, name='file'),
+            url(r'/file/([^/]+)/download', FileDownload, name='file_download'),
+            url(r'/file/([^/]+)/meta', FileMeta, name='file_meta'),
+            url(r'/file/([^/]+)/edit', FileEdit, name='file_edit'),
+            url(r'/file/([^/]+)/logs', FileLogs, name='file_logs'),
             url(r'/text/([^/]+)', Text, name='text'),
             url(r'/log/([0-9a-f]{32})', Log, name='log'),
             url(r'/([0-9a-f]{32})', Entity, name='entity'),

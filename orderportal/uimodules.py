@@ -47,10 +47,15 @@ class Entity(tornado.web.UIModule):
             alt = entity['role']
             url = self.handler.reverse_url(name, entity['email'])
         elif name == constants.INFO:
-            icon_url = self.handler.static_url(name + '.png')
+            icon_url = self.handler.static_url('info.png')
             title = entity.get('title') or entity['name']
             alt = name
-            url = self.handler.reverse_url(name, entity['name'])
+            url = self.handler.reverse_url('info', entity['name'])
+        elif name == constants.FILE:
+            icon_url = self.handler.static_url('file.png')
+            title = entity['name']
+            alt = title
+            url = self.handler.reverse_url('file_meta', entity['name'])
         else:
             icon_url = self.handler.static_url(name + '.png')
             iuid = entity.get('iuid') or entity['_id']
@@ -85,7 +90,7 @@ class Text(tornado.web.UIModule):
 """<form action="{}"
   role="form" class="pull-right" method="GET">
   <input type="hidden" name="origin" value="{}">
-  <button type="submit" class="btn btn-sm btn-default glyphicon glyphicon-edit">
+  <button type="submit" class="btn btn-sm btn-primary glyphicon glyphicon-edit">
    Edit
   </button>
 </form>\n""".format(url, origin)

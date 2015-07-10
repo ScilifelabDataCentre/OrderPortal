@@ -73,21 +73,46 @@
 		<span class="caret"></span>
 	      </a>
               <ul class="dropdown-menu">
-		{% for n,t in infos %}
+		{% for name, title in infos %}
 		<li>
-		  <a href="{{ reverse_url('info', n) }}">{{ t or n }}</a>
+		  <a href="{{ reverse_url('info', name) }}">
+		    {{ title or name }}
+		  </a>
 		</li>
 		{% end %}
 		{% if is_admin %}
 		<li>
-		  <a href="{{ reverse_url('infos') }}">[all pages]</a>
+		  <a href="{{ reverse_url('infos') }}">[all infos]</a>
 		</li>
 		<li>
-		  <a href="{{ reverse_url('info_create') }}">[create page]</a>
+		  <a href="{{ reverse_url('info_create') }}">[create info]</a>
 		</li>
 		{% end %}
               </ul>
             </li>
+
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+		File
+		<span class="caret"></span>
+	      </a>
+              <ul class="dropdown-menu">
+		{% for name in files %}
+		<li>
+		  <a href="{{ reverse_url('file_meta', name) }}">{{ name }}</a>
+		</li>
+		{% end %}
+		{% if is_admin %}
+		<li>
+		  <a href="{{ reverse_url('files') }}">[all files]</a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('file_create') }}">[create file]</a>
+		</li>
+		{% end %}
+              </ul>
+            </li>
+
             <li><a href="{{ reverse_url('news') }}">News</a></li>
             <li><a href="{{ reverse_url('events') }}">Events</a></li>
 	  </ul>

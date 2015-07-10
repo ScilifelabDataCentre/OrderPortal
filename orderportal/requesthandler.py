@@ -36,6 +36,7 @@ class RequestHandler(tornado.web.RequestHandler):
         result['is_admin'] = self.is_admin()
         result['error'] = self.get_argument('error', None)
         result['infos'] = [r.value for r in self.db.view('info/menu')]
+        result['files'] = [r.value for r in self.db.view('file/menu')]
         return result
 
     def set_header_allow(self, **kwargs):

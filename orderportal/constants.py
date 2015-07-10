@@ -22,19 +22,19 @@ JSON_MIME      = 'application/json'
 HIGH_CHAR = 'ZZZZZZZZ'
 
 # Entity documents
-DOCTYPE     = 'orderportal_doctype'
-USER        = 'user'
-FIELD       = 'field'
-FORM        = 'form'
-ORDER       = 'order'
-PUBLICATION = 'publication'
-NEW         = 'new'         # A single news item.
-EVENT       = 'event'
-USER        = 'user'
-TEXT        = 'text'
-INFO        = 'info'
-LOG         = 'log'
-ENTITIES    = frozenset([USER, FIELD, FORM, ORDER, INFO, PUBLICATION, USER])
+DOCTYPE  = 'orderportal_doctype'
+USER     = 'user'
+FIELD    = 'field'
+FORM     = 'form'
+ORDER    = 'order'
+NEW      = 'new'         # A single news item.
+EVENT    = 'event'
+USER     = 'user'
+TEXT     = 'text'
+INFO     = 'info'
+FILE     = 'file'
+LOG      = 'log'
+ENTITIES = frozenset([USER, FIELD, FORM, ORDER, INFO, FILE, USER])
 
 # Field types
 STRING  = 'string'
