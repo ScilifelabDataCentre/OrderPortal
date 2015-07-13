@@ -7,18 +7,6 @@
 
 {% block meta_content %}
 
-{% for target in targets %}
-<br>
-<form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
-      role="form" method="POST">
-  {% module xsrf_form_html() %}
-  <button type="submit" class="btn btn-warning">
-    {% module Icon(target['identifier']) %}
-    {{ target.get('label', target['identifier'].capitalize()) }}
-  </button>
-</form>
-{% end %}
-
 {% if is_editable %}
 <br>
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
@@ -28,7 +16,25 @@
     Edit
   </button>
 </form>
+{% end %} {# if is_editable #}
 
+{% for target in targets %}
+<br>
+<form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
+      role="form" method="POST">
+  {% module xsrf_form_html() %}
+  <button type="submit" class="btn btn-success"
+	  {% if not is_admin %}
+	  onclick="return confirm('Cannot be undone! Really change status?');"
+	  {% end %}
+	  >
+    {% module Icon(target['identifier']) %}
+    {{ target.get('label', target['identifier'].capitalize()) }}
+  </button>
+</form>
+{% end %}
+
+{% if is_editable %}
 <br>
 <form action="{{ reverse_url('order', order['_id']) }}"
       role="form" method="POST">

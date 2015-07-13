@@ -31,6 +31,14 @@ class Fields(object):
                 result.extend(self.flatten(field['fields'], depth=depth+1))
         return result
 
+    def get_siblings(self, field, fields):
+        "Find the list of fields which this field is part of."
+        if field in fields:
+            return fields
+        for other in fields:
+            if other['type'] == constants.GROUP:
+                return self.get_siblings(field, other['fields'])
+
     def __iter__(self):
         "Pre-order iteration over all fields."
         return iter(self.flatten(self.form['fields']))
@@ -101,6 +109,31 @@ class Fields(object):
             if key == 'fields': continue
             if old.get(key) != value:
                 diff[key] = value
+        move = rqh.get_argument('move', '').lower()
+        if move:
+            siblings = self.get_siblings(field, self.form['fields'])
+            if move == 'first':
+                siblings.remove(field)
+                siblings.insert(0, field)
+            elif move == 'previous':
+                pos = siblings.index(field)
+                if pos > 0:
+                    siblings.remove(field)
+                    pos -= 1
+                    siblings.insert(pos, field)
+            elif move == 'next':
+                pos = siblings.index(field)
+                if pos < len(siblings) - 1:
+                    siblings.remove(field)
+                    pos += 1
+                    siblings.insert(pos, field)
+            elif move == 'last':
+                siblings.remove(field)
+                siblings.extend(field)
+            else:
+                move = ''
+            if move:
+                diff['move'] = move
         return diff
 
     def delete(self, identifier):

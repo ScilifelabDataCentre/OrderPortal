@@ -111,6 +111,29 @@ in '{{ form['title'] }}'
   <div class="form-group">
     <div class="row">
       <div class="col-xs-10">
+	<label class="control-label" for="move">Change position</label>
+	<div>
+	  <label class="radio-inline">
+	    <input type="radio" name="move" value="" checked>No change</label>
+	  <label class="radio-inline">
+	    <input type="radio" name="move" value="first">First</label>
+	  <label class="radio-inline">
+	    <input type="radio" name="move" value="previous">Previous</label>
+	  <label class="radio-inline">
+	    <input type="radio" name="move" value="next">Next</label>
+	  <label class="radio-inline">
+	    <input type="radio" name="move" value="last">Last</label>
+	</div>
+      </div>
+    </div>
+    <p class="text-muted">
+      Move the field relative to its current position.
+    </p>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-xs-10">
 	<label class="control-label" for="description">Description</label>
 	<textarea rows="6" class="form-control"
 		  id="description" name="description"
