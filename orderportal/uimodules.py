@@ -1,6 +1,6 @@
 " OrderPortal: UI modules. "
 
-from __future__ import unicode_literals, print_function, absolute_import
+from __future__ import print_function, absolute_import
 
 import couchdb
 import markdown

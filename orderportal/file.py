@@ -1,6 +1,6 @@
 "OrderPortal: File pages; uploaded files."
 
-from __future__ import unicode_literals, print_function, absolute_import
+from __future__ import print_function, absolute_import
 
 import logging
 
@@ -31,6 +31,8 @@ class FileSaver(saver.Saver):
         "Save the file as an attachment to the document."
         # No new file uploaded, just skip out.
         if self.content is None: return
+        logging.debug("self.doc %s", self.doc)
+        logging.debug("len(self.content) %s", len(self.content))
         self.db.put_attachment(self.doc,
                                self.content,
                                filename=self['name'],
