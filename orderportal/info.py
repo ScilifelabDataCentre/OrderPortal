@@ -25,6 +25,23 @@ class Info(RequestHandler):
         info = self.get_entity_view('info/name', name)
         self.render('info.html', info=info)
 
+    @tornado.web.authenticated
+    def post(self, name):
+        self.check_xsrf_cookie()
+        self.check_admin()
+        if self.get_argument('_http_method', None) == 'delete':
+            self.delete(name)
+            return
+        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
+
+    @tornado.web.authenticated
+    def delete(self, name):
+        self.check_admin()
+        info = self.get_entity_view('info/name', name)
+        self.delete_logs(info['_id'])
+        self.db.delete(info)
+        self.see_other('infos')
+
 
 class InfoLogs(RequestHandler):
     "Info log entries page."
@@ -45,9 +62,11 @@ class Infos(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
+        view = self.db.view('info/menu', include_docs=True)
+        menu_infos = [r.doc for r in view]
         view = self.db.view('info/name', include_docs=True)
-        all_infos = [r.doc for r in view]
-        self.render('infos.html', all_infos=all_infos)
+        rest_infos = [r.doc for r in view if r.doc.get('menu') is None]
+        self.render('infos.html', all_infos=menu_infos + rest_infos)
 
 
 class InfoCreate(RequestHandler):

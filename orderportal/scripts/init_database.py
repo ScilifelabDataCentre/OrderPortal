@@ -3,7 +3,7 @@
 2) Load the design documents.
 """
 
-from __future__ import unicode_literals, print_function, absolute_import
+from __future__ import print_function, absolute_import
 
 import sys
 

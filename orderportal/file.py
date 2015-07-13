@@ -70,6 +70,23 @@ class FileMeta(RequestHandler):
         file = self.get_entity_view('file/name', name)
         self.render('file_meta.html', file=file)
 
+    @tornado.web.authenticated
+    def post(self, name):
+        self.check_xsrf_cookie()
+        self.check_admin()
+        if self.get_argument('_http_method', None) == 'delete':
+            self.delete(name)
+            return
+        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
+
+    @tornado.web.authenticated
+    def delete(self, name):
+        self.check_admin()
+        file = self.get_entity_view('file/name', name)
+        self.delete_logs(file['_id'])
+        self.db.delete(file)
+        self.see_other('files')
+
 
 class FileLogs(RequestHandler):
     "File log entries page."
@@ -90,9 +107,11 @@ class Files(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
+        view = self.db.view('file/menu', include_docs=True)
+        menu_files = [r.doc for r in view]
         view = self.db.view('file/name', include_docs=True)
-        all_files = [r.doc for r in view]
-        self.render('files.html', all_files=all_files)
+        rest_files = [r.doc for r in view if r.doc.get('menu') is None]
+        self.render('files.html', all_files=menu_files + rest_files)
 
 
 class FileCreate(RequestHandler):

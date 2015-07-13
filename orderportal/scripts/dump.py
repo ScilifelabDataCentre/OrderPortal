@@ -6,7 +6,7 @@ Create the dump file in the directory specified by BACKUP_DIR variable
 in the settings, otherwise in the current working directory.
 """
 
-from __future__ import unicode_literals, print_function, absolute_import
+from __future__ import print_function, absolute_import
 
 import os
 import time
