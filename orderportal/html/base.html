@@ -148,7 +148,7 @@
     <div class="container-fluid">
 
       <div class="row">
-	<div class="col-sm-11 col-sm-offset-1">
+	<div class="col-md-11 col-md-offset-1">
 	  <h1>{% block body_title %}OrderPortal{% end %}</h1>
 	</div>
       </div>
@@ -157,13 +157,13 @@
       {% try %}
       {% if error %}
       <div class="row">
-	<div class="col-sm-8 col-sm-offset-2">
+	<div class="col-md-8 col-md-offset-2">
 	  <div class="panel panel-danger">
 	    <div class="panel-heading">Error</div>
 	    <div class="panel-body">{{ error }}</div>
 	  </div>
 	</div>
-	<div class="col-sm-2"></div>
+	<div class="col-md-2"></div>
       </div>
       {% end %} {# if error #}
       {% except NameError %}
@@ -173,12 +173,12 @@
       {% block content %}
       <div class="row">
 	{% block outer_main_content %}
-	<div class="col-sm-9 col-sm-offset-1">
+	<div class="col-md-9 col-md-offset-1">
 	  {% block main_content %}
 	  {% end %} {# block main_content #}
 	</div>
 	{% end %} {# block outer_main_content #}
-	<div class="col-sm-2">
+	<div class="col-md-2">
 	  {% block meta_content %}
 	  {% end %} {# block meta_content #}
 	</div>

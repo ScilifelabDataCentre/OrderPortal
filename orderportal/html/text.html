@@ -12,18 +12,18 @@
 
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-8">
+      <div class="col-md-8">
 	<label class="control-label" for="text">Text</label>
 	<textarea rows="16" class="form-control"
 		  id="text" name="text"
 		  >{{ text.get('text') or '' }}</textarea>
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
       The text is specified in
       <a href="http://daringfireball.net/projects/markdown/">Markdown</a>
       format.
-    </p>
+    </span>
   </div>
 
   <input type="hidden" name="origin" value="{{ origin }}">

@@ -3,6 +3,7 @@
 {% extends "base.html" %}
 
 {% block head_title %}Create field in form '{{ form['title'] }}'{% end %}
+
 {% block body_title %}Create field in form '{{ form['title'] }}'{% end %}
 
 {% block main_content %}
@@ -13,7 +14,7 @@
 
   <div class="form-group has-feedback">
     <div class="row">
-      <div class="col-xs-4">
+      <div class="col-md-4">
 	<label class="control-label" for="group">Group</label>
 	<select class="form-control" name="group" id="group">
 	  <option value="__none__">[top level]</option>
@@ -28,14 +29,14 @@
 	      aria-hidden="true"></span>
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
       Parent group of the field.
-    </p>
+    </span>
   </div>
 
   <div class="form-group has-feedback">
     <div class="row">
-      <div class="col-xs-4">
+      <div class="col-md-4">
 	<label class="control-label" for="identifier">Identifier</label>
 	<input type="text" class="form-control"
 	       name="identifier" id="identifier">
@@ -44,27 +45,27 @@
 	      aria-hidden="true"></span>
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
       Unique identifier of the field. Cannot be changed once defined.
-    </p>
+    </span
   </div>
 
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-6">
+      <div class="col-md-6">
 	<label class="control-label" for="label">Label</label>
 	<input type="text" class="form-control" name="label" id="label">
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
       Label to display for the field in the order form. The identifier
       will be used if this is not provided.
-    </p>
+    </span>
   </div>
 
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-3">
+      <div class="col-md-3">
 	<label class="control-label" for="type">Type</label>
 	<select class="form-control" name="type" id="type">
 	  {% for type in constants.TYPES %}
@@ -73,14 +74,14 @@
 	</select>
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
       Data type of the field. Cannot be changed once defined.
-    </p>
+    </span>
   </div>
 
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-6">
+      <div class="col-md-6">
 	<label class="control-label" for="required">Required</label>
 	<div class="checkbox">
 	  <label>
@@ -89,16 +90,16 @@
 	</div>
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
       Require that the field must have a value specified in the order.
       If no value, then the order is incomplete, and cannot be
       submitted.
-    </p>
+    </span>
   </div>
 
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-6">
+      <div class="col-md-6">
 	<label class="control-label" for="restrict_read">Restricted read</label>
 	<div class="checkbox">
 	  <label>
@@ -107,14 +108,14 @@
 	</div>
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
       The field is restricted to be visible only to staff, not the user.
-    </p>
+    </span>
   </div>
 
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-6">
+      <div class="col-md-6">
 	<label class="control-label" for="restrict_write">Restricted write</label>
 	<div class="checkbox">
 	  <label>
@@ -123,22 +124,22 @@
 	</div>
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
       The field is restricted to be editable only by staff, not the user.
-    </p>
+    </span>
   </div>
 
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-8">
+      <div class="col-md-8">
 	<label class="control-label" for="description">Description</label>
 	<textarea class="form-control" name="description" id="description"></textarea>
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
       Description to display for the field in the order as information
       to the user.
-    </p>
+    </span>
   </div>
 
   <div class="form-group">

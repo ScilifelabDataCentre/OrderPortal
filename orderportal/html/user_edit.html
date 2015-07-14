@@ -17,7 +17,7 @@ Edit
   {% if is_admin %}
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-3">
+      <div class="col-md-3">
 	<label class="control-label" for="role">Role</label>
 	<select class="form-control" name="role" id="role">
 	  {% for role in constants.USER_ROLES %}
@@ -34,7 +34,7 @@ Edit
 
   <div class="form-group has-feedback">
     <div class="row">
-      <div class="col-xs-6">
+      <div class="col-md-6">
 	<label class="control-label" for="first_name">First name</label>
 	<input type="text" class="form-control"
 	       name="first_name" id="first_name"
@@ -48,7 +48,7 @@ Edit
 
   <div class="form-group has-feedback">
     <div class="row">
-      <div class="col-xs-6">
+      <div class="col-md-6">
 	<label class="control-label" for="last_name">Last name</label>
 	<input type="text" class="form-control"
 	       name="last_name" id="last_name"
@@ -61,9 +61,9 @@ Edit
   </div>
 
   <div class="form-group has-feedback">
+    <label class="control-label" for="university">University</label>
     <div class="row">
-      <div class="col-xs-6">
-	<label class="control-label" for="university">University</label>
+      <div class="col-md-6">
 	<select class="form-control" name="university" id="university">
 	  {% set other = True %}
 	  {% for abbrev, name in sorted(settings['UNIVERSITY_LIST'].items()) %}
@@ -84,61 +84,61 @@ Edit
 	<span style="color:red; margin-right: 2em;"
 	      class="glyphicon glyphicon-star form-control-feedback"
 	      aria-hidden="true"></span>
-	<p class="text-muted">
-	  Main affiliation: University or college.
-	</p>
+      </div>
+      <div class="col-md-6">
 	<input type="text" class="form-control"
 	       name="university_other" id="university_other"
-	       placeholder="Provide full name if not available in list above."
+	       placeholder="Provide full name if not available in the list."
 	       value="{{ other and user.get('university') or '' }}">
-	<p class="text-muted">
-	  Main affiliation: Company, organization, or similar.
-	</p>
       </div>
     </div>
+    <span class="help-block">
+      Main affiliation: University, college, company, organization, or
+      similar.
+    </span>
   </div>
 
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-6">
+      <div class="col-md-6">
 	<label class="control-label" for="department">Department</label>
 	<input type="text" class="form-control"
 	       name="department" id="department"
 	       value="{{ user.get('department') or '' }}">
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
       University department, company section, group, or similar.
-    </p>
+    </span>
   </div>
 
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-8">
+      <div class="col-md-8">
 	<label class="control-label" for="address">Address</label>
 	<textarea rows="4" class="form-control"
 		  id="address" name="address"
 		  >{{ user.get('address') or '' }}</textarea>
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
       Postal address; for delivery of paper documents, returned
       samples, etc.
-    </p>
+    </span>
   </div>
 
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-6">
+      <div class="col-md-6">
 	<label class="control-label" for="phone">Phone</label>
 	<input type="text" class="form-control"
 	       name="phone" id="phone"
 	       value="{{ user.get('phone') or '' }}">
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
       One or more telephone numbers.
-    </p>
+    </span>
   </div>
 
   <div class="form-group">

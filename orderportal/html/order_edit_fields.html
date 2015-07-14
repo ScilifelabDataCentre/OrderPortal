@@ -39,7 +39,7 @@
 
 <div class="form-group has-feedback">
   <div class="row">
-    <div class="col-xs-8">
+    <div class="col-md-8">
       <label class="control-label" for="{{ field['identifier'] }}">
 	{{ field.get('label') or field['identifier'].capitalize() }}
 	{% if field['identifier'] in order['invalid'] %}
@@ -85,9 +85,9 @@
       {% end %}
     </div>
   </div>
-  <p class="text-muted">
+  <span class="help-block">
     {{ field.get('description') or '' }}
-  </p>
+  </span>
 </div>
 {% end %} {# if field['type'] == constants.GROUP #}
 {% end %} {# for field in fields #}

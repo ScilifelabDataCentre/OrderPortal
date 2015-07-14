@@ -19,17 +19,17 @@ Edit order
 
   <div class="form-group">
     <div class="row">
-      <div class="col-xs-8">
+      <div class="col-md-8">
 	<label class="control-label" for="__title__">Title</label>
 	<input type="text" class="form-control"
 	       name="__title__" id="__title__"
 	       value="{{ order.get('title') or '' }}">
       </div>
     </div>
-    <p class="text-muted">
+    <span class="help-block">
 	Brief, descriptive title for the order. It is not required to
 	be unique, but it is a good idea to make it so anyway.
-    </p>
+    </span>
   </div>
 
   {# Recursion: 'include' cannot be used! #}
@@ -71,7 +71,7 @@ Edit order
     {% else %}
       <div class="form-group has-feedback">
 	<div class="row">
-	  <div class="col-xs-8">
+	  <div class="col-md-8">
 	    <label class="control-label" for="{{ field['identifier'] }}">
 	      {{ field.get('label') or field['identifier'].capitalize() }}
 	      {% if field['identifier'] in order['invalid'] %}
@@ -95,9 +95,9 @@ Edit order
 	    {% end %}
 	  </div>
 	</div>
-	<p class="text-muted">
+	<span class="help-block">
 	  {{ field.get('description') or '' }}
-	</p>
+	</span>
       </div>
     {% end %}
     {% end %}
@@ -109,7 +109,7 @@ Edit order
 #}
 
   <div class="row">
-    <div class="col-xs-6">
+    <div class="col-md-6">
       <div class="form-group">
 	<label class="control-label"></label>
 	<button type="submit" name="save" value="continue"
@@ -118,7 +118,7 @@ Edit order
 	</button>
       </div>
     </div>
-    <div class="col-xs-6">
+    <div class="col-md-6">
       <div class="form-group">
 	<label class="control-label"></label>
 	<button type="submit"
