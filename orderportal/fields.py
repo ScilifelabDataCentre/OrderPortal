@@ -129,7 +129,7 @@ class Fields(object):
                     siblings.insert(pos, field)
             elif move == 'last':
                 siblings.remove(field)
-                siblings.extend(field)
+                siblings.append(field)
             else:
                 move = ''
             if move:
