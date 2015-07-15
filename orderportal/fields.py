@@ -131,7 +131,7 @@ class Fields(object):
                 siblings.remove(field)
                 siblings.append(field)
             else:
-                move = ''
+                move = None
             if move:
                 diff['move'] = move
         return diff
