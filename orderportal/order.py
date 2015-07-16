@@ -175,8 +175,7 @@ class Order(OrderMixin, RequestHandler):
                     status=self.get_order_status(order),
                     fields=form['fields'],
                     is_editable=self.is_admin() or self.is_editable(order),
-                    targets=self.get_targets(order),
-                    logs=self.get_logs(order['_id']))
+                    targets=self.get_targets(order))
 
     @tornado.web.authenticated
     def post(self, iuid):

@@ -123,7 +123,3 @@ class Saver(object):
         except (TypeError, KeyError):
             pass
         self.db.save(entry)
-
-    def save_required(self):
-        self['required'] = utils.to_bool(self.rqh.get_argument('required',
-                                                               False))

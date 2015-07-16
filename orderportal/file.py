@@ -143,7 +143,7 @@ class FileCreate(RequestHandler):
 
 
 class FileEdit(RequestHandler):
-    "Edit the filermation page."
+    "Edit the file page."
 
     @tornado.web.authenticated
     def get(self, name):
