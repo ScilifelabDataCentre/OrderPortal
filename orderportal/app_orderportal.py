@@ -111,7 +111,7 @@ def main():
         ui_modules=uimodules,
         template_path=settings.get('TEMPLATE_PATH', 'html'),
         static_path=settings.get('STATIC_PATH', 'static'),
-        login_url=r'/home')
+        login_url=r'/login')
     application.listen(settings['PORT'], xheaders=True)
     logging.info("OrderPortal %s web server PID %s on port %s",
                  settings['DATABASE'], os.getpid(), settings['PORT'])

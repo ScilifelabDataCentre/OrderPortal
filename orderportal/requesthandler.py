@@ -39,36 +39,6 @@ class RequestHandler(tornado.web.RequestHandler):
         result['files'] = [r.value for r in self.db.view('file/menu')]
         return result
 
-    def set_header_allow(self, **kwargs):
-        "Set the header 'Allow' in the output, if defined."
-        try:
-            self.set_header('Allow', ', '.join(self.get_allowed(**kwargs)))
-        except NotImplementedError:
-            pass
-
-    def set_header_content_type(self, item):
-        "Set the header describing the content type of the item."
-        assert item
-        assert constants.DOCTYPE in item
-        assert item[constants.DOCTYPE] == constants.ITEM
-        # Rely on the content_type set for the item, rather than
-        # the content_type for the attachment in the CouchDB database.
-        self.set_header('Content-Type', item['content_type'])
-
-    def set_header_content_disposition(self, item):
-        "Set the header describing the filename of the item."
-        assert item
-        assert constants.DOCTYPE in item
-        assert item[constants.DOCTYPE] == constants.ITEM
-        try:
-            filename = self.get_entity_attachment_filename(item)
-        except KeyError:
-            logging.debug("set_header_content_type: KeyError")
-            pass
-        else:
-            self.set_header('Content-Disposition',
-                            'attachment; filename="{}"'.format(filename))
-
     def see_other(self, name, *args, **query):
         """Redirect to the absolute URL given by name
         using HTTP status 303 See Other."""

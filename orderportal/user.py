@@ -198,8 +198,9 @@ class Password(RequestHandler):
         if user.get('code') != self.get_argument('code'):
             raise tornado.web.HTTPError(400, reason='invalid email or code')
         password = self.get_argument('password')
-        if len(password) < constants.PASSWORD_LEN:
-            mgs = "password shorter than {} characters".format(constants.PASSWORD_LEN)
+        if len(password) < constants.MIN_PASSWORD_LENGTH:
+            mgs = "password shorter than {} characters".format(
+                constants.MIN_PASSWORD_LENGTH)
             raise tornado.web.HTTPError(400, reason=msg)
         if password != self.get_argument('confirm_password'):
             msg = 'password not the same! mistyped'

@@ -1,4 +1,4 @@
-" OrderPortal: Various utility functions and mixins. "
+"OrderPortal: Various utility functions."
 
 from __future__ import print_function, absolute_import
 
