@@ -85,7 +85,9 @@
   </div>
 </div>
 
+<table class="table table-condensed table-noborder table-hierarchy">
 {# Recursion: 'include' cannot be used! #}
 {% module Template('order_fields.html', fields=fields, order=order, is_staff=is_staff) %}
+</table>
 
 {% end %} {# block main_content #}

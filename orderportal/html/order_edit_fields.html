@@ -1,6 +1,8 @@
 {# Order edit fields recursive display. #}
 
 {% for field in fields %}
+
+  {# Check if field may not be seen or edited. #}
   {% if (field['restrict_write'] or field['restrict_read']) and not is_staff %}
   {% continue %}
   {% end %}

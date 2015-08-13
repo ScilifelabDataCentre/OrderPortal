@@ -126,17 +126,13 @@
 	<th>Label</th>
 	<th>Type</th>
 	<th>Required</th>
-	<th>Restricted read</th>
-	<th>Restricted write</th>
-	<th>Options</th>
+	<th>Restrictions</th>
 	<th>Description</th>
       </tr>
       {% for field in fields %}
       <tr>
 	<td class="text-nowrap">
-	  {% for i in xrange(field['depth']) %}
-	  <span class="glyphicon glyphicon-play"></span>
-	  {% end %}
+	  {% raw '&nbsp;&nbsp;-&nbsp;&nbsp;' * field['depth'] %}
 	  {% if are_fields_editable %}
 	  <a href="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}">
 	    {{ field['identifier'] }}
@@ -146,7 +142,12 @@
 	  {% end %}
 	</td>
 	<td>{{ field.get('label') or '-' }}</td>
-	<td>{{ field['type'] }}</td>
+	<td>
+	  {{ field['type'] }}
+	  {% if field['type'] == constants.SELECT %}
+	  <pre>{{ '\n'.join(field['select']) }}</pre>
+	  {% end %}
+	</td>
 	<td>
 	  {% if field['required'] %}
 	  <span class="glyphicon glyphicon-star" style="color: red;">
@@ -154,17 +155,10 @@
 	</td>
 	<td>
 	  {% if field['restrict_read'] %}
-	  <span class="glyphicon glyphicon-ok">
+	  <span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
 	  {% end %}
-	</td>
-	<td>
 	  {% if field['restrict_write'] %}
-	  <span class="glyphicon glyphicon-ok">
-	  {% end %}
-	</td>
-	<td>
-	  {% if field['type'] == constants.SELECT %}
-	  <pre>{{ '\n'.join(field['select']) }}</pre>
+	  <span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
 	  {% end %}
 	</td>
 	<td>{{ field.get('description') or '-' }}</td>
