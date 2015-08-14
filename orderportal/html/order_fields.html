@@ -23,7 +23,7 @@
   <td>
     {% if field['identifier'] in order['invalid'] %}
     <span class="text-danger glyphicon glyphicon-remove">
-      ({{ order['invalid'][field['identifier']] }})
+      {{ order['invalid'][field['identifier']] }}
     </span>
     {% else %}
     <span class="text-success glyphicon glyphicon-ok">
@@ -51,7 +51,7 @@
   <td>
     {% if field['identifier'] in order['invalid'] %}
     <span class="text-danger glyphicon glyphicon-remove">
-      ({{ order['invalid'][field['identifier']] }})
+      {{ order['invalid'][field['identifier']] }}
     </span>
     {% else %}
     <span class="text-success glyphicon glyphicon-ok">

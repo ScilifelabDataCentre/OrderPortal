@@ -13,14 +13,6 @@
     <h4>
       {{ field.get('label') or field['identifier'].capitalize() }}
       <small>
-	{% if field['identifier'] in order['invalid'] %}
-	<span class="text-danger glyphicon glyphicon-remove">
-	  ({{ order['invalid'][field['identifier']] }})
-	</span>
-	{% else %}
-	<span class="text-success glyphicon glyphicon-ok">
-	</span>
-	{% end %}
 	{% if field['restrict_read'] %}
 	[Read: Staff only]
 	{% end %}
@@ -28,6 +20,14 @@
 	[Write: Staff only]
 	{% end %}
 	{{ field.get('description') or '' }}
+	{% if field['identifier'] in order['invalid'] %}
+	<span class="text-danger glyphicon glyphicon-remove">
+	  {{ order['invalid'][field['identifier']] }}
+	</span>
+	{% else %}
+	<span class="text-success glyphicon glyphicon-ok">
+	</span>
+	{% end %}
       </small>
     </h4>
   </div>
@@ -46,7 +46,7 @@
 	{{ field.get('label') or field['identifier'].capitalize() }}
 	{% if field['identifier'] in order['invalid'] %}
 	<span class="text-danger glyphicon glyphicon-remove">
-	  ({{ order['invalid'][field['identifier']] }})
+	  {{ order['invalid'][field['identifier']] }}
 	</span>
 	{% else %}
 	<span class="text-success glyphicon glyphicon-ok">

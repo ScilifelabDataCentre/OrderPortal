@@ -36,7 +36,7 @@ in '{{ form['title'] }}'
     <div class="row">
       <div class="col-md-6">
 	<label for="type">Type</label>
-	<p class="form-control-static">{{ field['type']}}</p>
+	<p class="form-control-static"><i>{{ field['type']}}</i></p>
       </div>
     </div>
     <span class="help-block">
@@ -58,6 +58,7 @@ in '{{ form['title'] }}'
   </div>
   {% end %}
 
+  {% if field['type'] != constants.GROUP %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
@@ -74,6 +75,7 @@ in '{{ form['title'] }}'
       </div>
     </div>
   </div>
+  {% end %}
 
   <div class="form-group">
     <div class="row">
@@ -91,6 +93,7 @@ in '{{ form['title'] }}'
     </div>
   </div>
 
+  {% if field['type'] != constants.GROUP %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
@@ -106,6 +109,7 @@ in '{{ form['title'] }}'
       </div>
     </div>
   </div>
+  {% end %}
 
   <div class="form-group">
     <div class="row">
