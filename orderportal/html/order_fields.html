@@ -2,15 +2,21 @@
 
 {% for field in fields %}
 
-  {# Check if field may not be seen. #}
-  {% if field['restrict_read'] and not is_staff %}
-  {% continue %}
-  {% end %}
+{# Check if field may not be seen. #}
+{% if field['restrict_read'] and not is_staff %}
+{% continue %}
+{% end %}
+
+{# Is there a visibility condition? If so, check it. #}
+{% set fid = field.get('visible_if_select_field') %}
+{% if fid and order['fields'].get(fid)!=field.get('visible_if_select_value') %}
+{% continue %}
+{% end %}
 
 {% if field['type'] == constants.GROUP %}
 <tr>
   <th>
-    {% raw '&nbsp;&nbsp;-&nbsp;&nbsp;' * field['depth'] %}
+    {% include 'field_indent.html' %}
     {{ field.get('label') or field['identifier'].capitalize() }}
   </th>
   <td></td>
@@ -38,7 +44,7 @@
 {% else %}
 <tr>
   <th>
-    {% raw '&nbsp;&nbsp;-&nbsp;&nbsp;' * field['depth'] %}
+    {% include 'field_indent.html' %}
     {{ field.get('label') or field['identifier'].capitalize() }}
   </th>
   <td>{{ order['fields'][field['identifier']] or '-' }}</td>

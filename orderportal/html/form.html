@@ -125,6 +125,7 @@
 	<th>Identifier</th>
 	<th>Label</th>
 	<th>Type</th>
+	<th>Visible</th>
 	<th>Required</th>
 	<th>Restrictions</th>
 	<th>Description</th>
@@ -132,7 +133,7 @@
       {% for field in fields %}
       <tr>
 	<td class="text-nowrap">
-	  {% raw '&nbsp;&nbsp;-&nbsp;&nbsp;' * field['depth'] %}
+	  {% include 'field_indent.html' %}
 	  {% if are_fields_editable %}
 	  <a href="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}">
 	    {{ field['identifier'] }}
@@ -149,8 +150,16 @@
 	  {% end %}
 	</td>
 	<td>
+	  {% set identifier = field.get('visible_if_select_field') %}
+	  {% if identifier %}
+	  if {{ identifier }} == '{{ field.get("visible_if_select_value") }}'
+	  {% end %}
+	</td>
+	<td>
 	  {% if field['required'] %}
 	  <span class="glyphicon glyphicon-star" style="color: red;">
+	  {% elif field['type'] == constants.GROUP %}
+	  -
 	  {% end %}
 	</td>
 	<td>

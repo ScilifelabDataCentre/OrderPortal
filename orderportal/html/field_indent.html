@@ -1,0 +1,4 @@
+{# Indent the field by its depth by adding a prefix. #}
+{% if field['depth'] > 0 %}
+  {% raw '&nbsp;&nbsp;&nbsp;&nbsp;' * field['depth'] %}
+{% end %}

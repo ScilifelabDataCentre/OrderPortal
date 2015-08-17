@@ -44,8 +44,17 @@ class OrderSaver(saver.Saver):
                 self.check_validity(field)
 
     def check_validity(self, field):
-        "Check validity of converted field values; recursively, postorder."
+        """Check validity of converted field values.
+        Skip field if not visible.
+        Else check recursively, postorder.
+        """
         message = None
+        select_id = field.get('visible_if_select_field')
+        if select_id:
+            select_value = self.doc['fields'].get(select_id)
+            if select_value != field.get('visible_if_select_value'):
+                return True
+
         if field['type'] == constants.GROUP:
             for subfield in field['fields']:
                 if not self.check_validity(subfield):

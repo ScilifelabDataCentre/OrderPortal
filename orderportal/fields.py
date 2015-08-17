@@ -102,6 +102,11 @@ class Fields(object):
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new['select'] = values
+        identifier = rqh.get_argument('visible_if_select_field', None)
+        if identifier == '__none__': identifier = None
+        new['visible_if_select_field'] = identifier
+        value = rqh.get_argument('visible_if_select_value', None)
+        new['visible_if_select_value'] = value
         old = field.copy()
         field.update(new)
         diff = dict(identifier=field['identifier'])

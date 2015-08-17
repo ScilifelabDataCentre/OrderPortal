@@ -1,4 +1,4 @@
-{# Field edit page. #}
+{# Form field edit page. #}
 
 {% extends "base.html" %}
 
@@ -40,7 +40,42 @@ in '{{ form['title'] }}'
       </div>
     </div>
     <span class="help-block">
-      Data type of the field. Cannot be changed.
+      Data type for the field. Cannot be changed.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label for="visible_if_select_field">Visible if select: Field identifier</label>
+	<select class="form-control"
+		name="visible_if_select_field" id="visible_if_select_field">
+	  <option value="__none__">[none]</option>
+	  {% for other in fields %}
+	    {% if other is not field and other['depth'] <= field['depth'] %}
+	      <option>{{ other['identifier'] }}</option>
+	    {% end %}
+	  {% end %}
+	</select>
+      </div>
+    </div>
+    <span class="help-block">
+      Field is visible if a select field with the given identifier has
+      a specific value.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label for="visible_if_select_value">Visible if select: Field value</label>
+	<input type="text" class="form-control"
+	       name="visible_if_select_value" id="visible_if_select_value">
+	</input>
+      </div>
+    </div>
+    <span class="help-block">
+      Field is visible if the select field (defined above) has the given value.
     </span>
   </div>
 

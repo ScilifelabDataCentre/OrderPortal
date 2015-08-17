@@ -2,13 +2,23 @@
 
 {% for field in fields %}
 
-  {# Check if field may not be seen or edited. #}
-  {% if (field['restrict_write'] or field['restrict_read']) and not is_staff %}
-  {% continue %}
-  {% end %}
+{# Check if field may not be read or edited. #}
+{% if (field['restrict_read'] or field['restrict_write']) and not is_staff %}
+{% continue %}
+{% end %}
+
+{# Is there a visibility condition? #}
+{% set visible_if_select_field = field.get('visible_if_select_field') %}
 
 {% if field['type'] == constants.GROUP %}
+
+{% if visible_if_select_field %}
+<div class="panel panel-default visible-if-select"
+     data-select-id="{{ visible_if_select_field }}"
+     data-select-val="{{ field.get('visible_if_select_value') or '' }}">
+{% else %}
 <div class="panel panel-default">
+{% end %}
   <div class="panel-heading">
     <h4>
       {{ field.get('label') or field['identifier'].capitalize() }}
@@ -39,7 +49,13 @@
 
 {% else %}
 
+{% if visible_if_select_field %}
+<div class="form-group has-feedback visible-if-select"
+     data-select-id="{{ visible_if_select_field }}"
+     data-select-val="{{ field.get('visible_if_select_value') or '' }}">
+{% else %}
 <div class="form-group has-feedback">
+{% end %}
   <div class="row">
     <div class="col-md-8">
       <label class="control-label" for="{{ field['identifier'] }}">
@@ -55,8 +71,7 @@
       </label>
       {% if field['type'] == constants.SELECT %}
       <select class="form-control"
-	      name="{{ field['identifier'] }}"
-	      id="{{ field['identifier'] }}">
+	      name="{{ field['identifier'] }}" id="{{ field['identifier'] }}">
 	{% set value = order['fields'][field['identifier']] %}
 	{% if not field['required'] %}
 	  {% if value is None %}
