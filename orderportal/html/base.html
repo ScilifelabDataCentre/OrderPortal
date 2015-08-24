@@ -115,6 +115,9 @@
 
             <li><a href="{{ reverse_url('news') }}">News</a></li>
             <li><a href="{{ reverse_url('events') }}">Events</a></li>
+	    {% if is_staff %}
+            <li><a href="{{ reverse_url('debug') }}">Debug</a></li>
+	    {% end %}
 	  </ul>
 
 	  <div>

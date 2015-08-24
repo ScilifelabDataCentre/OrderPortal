@@ -1,0 +1,24 @@
+{# Debug page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Debug{% end %}
+
+{% block body_title %}Debug{% end %}
+
+{% block main_content %}
+
+<table class="table table-condensed">
+  {% for name, version in versions %}
+  <tr>
+    <th>{{ name }}</th>
+    <td>{{ version }}</td>
+  </tr>
+  {% end %}
+  <tr>
+    <th>Database</th>
+    <td>{{ database }}</td>
+  </tr>
+</table>
+
+{% end %} {# block main_content #}

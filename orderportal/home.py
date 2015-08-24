@@ -3,7 +3,12 @@
 from __future__ import print_function, absolute_import
 
 import logging
-import tornado.web
+
+import couchdb
+import markdown
+import requests
+import tornado
+import yaml
 
 import orderportal
 from orderportal import constants
@@ -105,3 +110,21 @@ class Text(RequestHandler):
             saver['text'] = self.get_argument('text')
         url = self.get_argument('origin', self.absolute_reverse_url('home'))
         self.redirect(url, status=303)
+
+
+class Debug(RequestHandler):
+    "Page displaying some debug information."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_staff()
+        versions = [('OrderPortal', orderportal.__version__),
+                    ('CouchD', utils.get_dbserver().version()),
+                    ('CouchDB-Python', couchdb.__version__),
+                    ('tornado', tornado.version),
+                    ('PyYAML', yaml.__version__),
+                    ('requests', requests.__version__),
+                    ('markdown', markdown.version)]
+        self.render('debug.html',
+                    versions=versions,
+                    database=settings['DATABASE'])

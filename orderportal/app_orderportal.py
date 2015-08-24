@@ -4,15 +4,9 @@ from __future__ import print_function, absolute_import
 
 import logging
 import os
-import sys
 
-import couchdb
-import markdown
-import requests
-import tornado
 import tornado.web
 import tornado.ioloop
-import yaml
 
 import orderportal
 from orderportal import constants
@@ -92,18 +86,12 @@ def get_handlers():
             url(r'/text/([^/]+)', Text, name='text'),
             url(r'/log/([0-9a-f]{32})', Log, name='log'),
             url(r'/([0-9a-f]{32})', Entity, name='entity'),
+            url(r'/debug', Debug, name='debug'),
             ]
 
 def main():
     logging.info("tornado debug: %s, logging debug: %s",
                  settings['TORNADO_DEBUG'], settings['LOGGING_DEBUG'])
-    logging.debug("OrderPortal version %s", orderportal.__version__)
-    logging.debug("CouchDB version %s", utils.get_dbserver().version())
-    logging.debug("CouchDB-Python version %s", couchdb.__version__)
-    logging.debug("tornado version %s", tornado.version)
-    logging.debug("PyYAML version %s", yaml.__version__)
-    logging.debug("requests version %s", requests.__version__)
-    logging.debug("Markdown version %s", markdown.version)
     application = tornado.web.Application(
         handlers=get_handlers(),
         debug=settings.get('TORNADO_DEBUG', False),
@@ -113,8 +101,8 @@ def main():
         static_path=settings.get('STATIC_PATH', 'static'),
         login_url=r'/login')
     application.listen(settings['PORT'], xheaders=True)
-    logging.info("OrderPortal %s web server PID %s on port %s",
-                 settings['DATABASE'], os.getpid(), settings['PORT'])
+    logging.info("OrderPortal web server PID %s on port %s",
+                 os.getpid(), settings['PORT'])
     tornado.ioloop.IOLoop.instance().start()
 
 
