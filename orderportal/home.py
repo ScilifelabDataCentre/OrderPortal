@@ -24,29 +24,29 @@ class Home(RequestHandler):
     def get(self):
         if not self.current_user:
             self.render('home.html',
-                        news=self.get_news(),
+                        news_items=self.get_news(),
                         events=self.get_events())
         elif self.current_user['role'] == constants.ADMIN:
-            self.home_admin(news=self.get_news(),
+            self.home_admin(news_items=self.get_news(),
                             events=self.get_events())
         elif self.current_user['role'] == constants.STAFF:
-            self.home_staff(news=self.get_news(),
+            self.home_staff(news_items=self.get_news(),
                             events=self.get_events())
         else:
-            self.home_user(news=self.get_news(),
-                            events=self.get_events())
+            self.home_user(news_items=self.get_news(),
+                           events=self.get_events())
 
-    def home_admin(self, news, events):
+    def home_admin(self, news_items, events):
         view = self.db.view('user/pending', include_docs=True)
         pending = [self.get_presentable(r.doc) for r in view]
         pending.sort(utils.cmp_modified, reverse=True)
         self.render('home_admin.html', pending=pending,
-                    news=news, events=events)
+                    news_items=news_items, events=events)
 
-    def home_staff(self, news, events):
-        self.render('home_staff.html', news=news, events=events)
+    def home_staff(self, news_items, events):
+        self.render('home_staff.html', news_items=news_items, events=events)
 
-    def home_user(self, news, events):
+    def home_user(self, news_items, events):
         forms = [self.get_presentable(r.doc) for r in
                  self.db.view('form/enabled', include_docs=True)]
         view = self.db.view('order/owner', descending=True,
@@ -54,7 +54,7 @@ class Home(RequestHandler):
                             key=self.current_user['email'])
         orders = [self.get_presentable(r.doc) for r in view]
         self.render('home_user.html', forms=forms, orders=orders,
-                    news=news, events=events)
+                    news_items=news_items, events=events)
 
 
 class Log(RequestHandler):
@@ -117,14 +117,13 @@ class Debug(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
-        self.check_staff()
-        versions = [('OrderPortal', orderportal.__version__),
-                    ('CouchD', utils.get_dbserver().version()),
-                    ('CouchDB-Python', couchdb.__version__),
-                    ('tornado', tornado.version),
-                    ('PyYAML', yaml.__version__),
-                    ('requests', requests.__version__),
-                    ('markdown', markdown.version)]
-        self.render('debug.html',
-                    versions=versions,
-                    database=settings['DATABASE'])
+        self.check_admin()
+        params = [('OrderPortal', orderportal.__version__),
+                  ('Database', settings['DATABASE']),
+                  ('CouchDB', utils.get_dbserver().version()),
+                  ('CouchDB-Python', couchdb.__version__),
+                  ('tornado', tornado.version),
+                  ('PyYAML', yaml.__version__),
+                  ('requests', requests.__version__),
+                  ('markdown', markdown.version)]
+        self.render('debug.html', params=params)

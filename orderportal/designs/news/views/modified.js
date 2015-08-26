@@ -3,6 +3,6 @@
    Value: null.
 */
 function(doc) {
-    if (doc.orderportal_doctype !== 'new') return; /* Not 'news' ! */
+    if (doc.orderportal_doctype !== 'news') return;
     emit(doc.modified, null);
 }

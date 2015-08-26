@@ -8,17 +8,17 @@
 
 {% block main_content %}
 
-<table class="table table-condensed">
-  {% for name, version in versions %}
-  <tr>
-    <th>{{ name }}</th>
-    <td>{{ version }}</td>
-  </tr>
-  {% end %}
-  <tr>
-    <th>Database</th>
-    <td>{{ database }}</td>
-  </tr>
-</table>
+<div class="row">
+  <div class="col-md-5">
+    <table class="table table-condensed">
+      {% for key, value in params %}
+      <tr>
+	<th>{{ key }}</th>
+	<td>{{ value }}</td>
+      </tr>
+      {% end %}
+    </table>
+  </div>
+</div>
 
 {% end %} {# block main_content #}
