@@ -26,29 +26,8 @@
     {% end %}
   </div>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      My recently modified orders
-      <a href="{{ reverse_url('orders_user', current_user['email']) }}"
-	 class="btn btn-xs btn-default pull-right">
-	{% module Icon('order') %}
-	All my orders
-      </a>
-    </div>
-    <div class="panel-body">
-      <table class="table-condensed">
-	{% for order in orders %}
-	<tr>
-	  <th>
-	    <a href="{{ reverse_url('order', order['iuid']) }}">{{ order['title'] }}</a>
-	  </th>
-	  <td>{% module Icon(order['status'], label=True) %}</td>
-	  <td class="localtime">{{ order['modified'] }}</td>
-	</tr>
-	{% end %}
-      </table>
-    </div>
-  </div>
+  {% set orders_url = reverse_url('orders_user', current_user['email']) %}
+  {% include 'orders_mod_panel.html' %}
 
 </div>
 {% end %} {# block content-left #}

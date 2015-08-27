@@ -40,7 +40,12 @@ class Home(RequestHandler):
         view = self.db.view('user/pending', include_docs=True)
         pending = [self.get_presentable(r.doc) for r in view]
         pending.sort(utils.cmp_modified, reverse=True)
-        self.render('home_admin.html', pending=pending,
+        view = self.db.view('order/modified',
+                            descending=True,
+                            limit=constants.MAX_STAFF_RECENT_ORDERS,
+                            include_docs=True)
+        orders = [self.get_presentable(r.doc) for r in view]
+        self.render('home_admin.html', pending=pending, orders=orders,
                     news_items=news_items, events=events)
 
     def home_staff(self, news_items, events):

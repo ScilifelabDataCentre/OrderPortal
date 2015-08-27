@@ -38,5 +38,8 @@
       </table>
     </div>
   </div>
+
+  {% set orders_url = reverse_url('orders') %}
+  {% include 'orders_mod_panel.html' %}
 </div>
 {% end %} {# block content-left #}

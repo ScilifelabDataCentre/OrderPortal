@@ -4,30 +4,8 @@
 
 {% block content-left %}
 <div class="col-md-5">
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      Recently modified orders
-      <a href="{{ reverse_url('orders') }}"
-	 class="btn btn-xs btn-default pull-right">
-	{% module Icon('order') %}
-	All orders
-      </a>
-    </div>
-    <div class="panel-body">
-      <table class="table-condensed">
-	{% for order in orders %}
-	<tr>
-	  <th>
-	    <a href="{{ reverse_url('order', order['iuid']) }}">{{ order['title'] }}</a>
-	  </th>
-	  <td>{% module Icon(order['status'], label=True) %}</td>
-	  <td class="localtime">{{ order['modified'] }}</td>
-	</tr>
-	{% end %}
-      </table>
-    </div>
-  </div>
-
+  {% set orders_url = reverse_url('orders') %}
+  {% include 'orders_mod_panel.html' %}
 </div>
 {% end %} {# block content-left #}
 
