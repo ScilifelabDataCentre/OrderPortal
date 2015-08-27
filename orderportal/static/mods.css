@@ -20,8 +20,9 @@
 
 .table-hierarchy { margin-bottom: 0px; }
 
-/* Pre-formatted white-spaces in text. */
+/* Pre-formatted text variants. */
 .pre {white-space: pre; }
+.nobr { white-space:nowrap; }
 
 /* Mark input field as required with a red star. */
 .form-required label:after { color: red;

@@ -22,7 +22,7 @@ from orderportal.order import *
 from orderportal.news import *
 from orderportal.info import *
 from orderportal.file import *
-from orderportal.events import *
+from orderportal.event import *
 
 
 class Dummy(RequestHandler):
@@ -69,7 +69,7 @@ def get_handlers():
                 FormFieldEdit, name='field_edit'),
             url(r'/news', NewsCreate, name='news_create'),
             url(r'/news/([0-9a-f]{32})', News, name='news'),
-            url(r'/events', Events, name='events'),
+            url(r'/event', EventCreate, name='event_create'),
             url(r'/event/([0-9a-f]{32})', Event, name='event'),
             url(r'/infos', Infos, name='infos'),
             url(r'/info', InfoCreate, name='info_create'),

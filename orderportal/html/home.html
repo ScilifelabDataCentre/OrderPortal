@@ -95,19 +95,13 @@
 		data-toggle="modal" data-target="#news_create">
 	  Create
 	</button>
-	{% end %}
+	{% end %}{# if is_admin #}
       </div>
       <div class="panel-body">
 	{% if news_items %}
 	<table class="table table-condensed">
 	  {% for news in news_items %}
 	  <tr>
-	    <td>
-	      {% module Markdown(news.get('text')) %}
-	    </td>
-	    <td class="text-right small">
-	      [{{ news['modified'].split('T')[0] }}]
-	    </td>
 	    {% if is_admin %}
 	    <td>
 	      <button type="button"
@@ -115,21 +109,25 @@
 		      data-toggle="modal" data-target="#{{ news['_id'] }}">
 		Edit
 	      </button>
+	      <p></p>
 	      <form action="{{ reverse_url('news', news['_id']) }}"
 		    role="form" method="POST">
 		{% module xsrf_form_html() %}
 		<input type="hidden" name="_http_method" value="delete">
-		<div class="form-group">
-		  <label class="control-label"></label>
-		  <button type="submit"
-			  class="btn btn-danger btn-xs glyphicon glyphicon-remove"
-			  onclick="return confirm('Cannot be undone! Really delete?');">
-		    Delete
-		  </button>
-		</div>
+		<button type="submit"
+			class="btn btn-danger btn-xs glyphicon glyphicon-remove"
+			onclick="return confirm('Cannot be undone! Really delete?');">
+		  Delete
+		</button>
 	      </form>
 	    </td>
-	    {% end %}
+	    {% end %}{# if is_admin #}
+	    <td>
+	      {% module Markdown(news.get('text')) %}
+	    </td>
+	    <td class="text-right small">
+	      [{{ news['modified'].split('T')[0] }}]
+	    </td>
 	  </tr>
 	  {% end %}
 	</table>
@@ -141,18 +139,47 @@
 
     <div class="panel panel-success">
       <div class="panel-heading">
-	<a href="{{ reverse_url('events') }}"
-	   class="btn btn-success glyphicon glyphicon-calendar">
+	<span class="glyphicon glyphicon-calendar">
 	  Events
-	</a>
+	</span>
+	{% if is_admin %}
+	<button type="button"
+		class="btn btn-success btn-xs glyphicon glyphicon-plus pull-right"
+		data-toggle="modal" data-target="#event_create">
+	  Create
+	</button>
+	{% end %}{# if is_admin #}
       </div>
       <div class="panel-body">
 	{% if events %}
 	<table class="table table-condensed">
 	  {% for event in events %}
 	  <tr>
-	    <th>{{ event['date'] }}</th>
-	    <td>{{ event['title'] }}</td>
+	    {% if is_admin %}
+	    <td>
+	      <button type="button"
+		      class="btn btn-primary btn-xs glyphicon glyphicon-edit"
+		      data-toggle="modal" data-target="#{{ event['_id'] }}">
+		Edit
+	      </button>
+	      <p></p>
+	      <form action="{{ reverse_url('event', event['_id']) }}"
+		    role="form" method="POST">
+		{% module xsrf_form_html() %}
+		<input type="hidden" name="_http_method" value="delete">
+		<button type="submit"
+			class="btn btn-danger btn-xs glyphicon glyphicon-remove"
+			onclick="return confirm('Cannot be undone! Really delete?');">
+		  Delete
+		</button>
+	      </form>
+	    </td>
+	    {% end %}{# if is_admin #}
+	    <th class="nobr">{{ event['date'] }}</th>
+	    <td>
+	      <strong>{{ event['title'] }}</strong>
+	      {% module Markdown(event.get('text')) %}
+	    </td>
 	  </tr>
 	  {% end %}
 	</table>
@@ -209,9 +236,87 @@
   </div>
 </div>
 {% end %}{# for news in news_items #}
-{% end %}{# if is_admin #}
 
-{% if is_admin %}
+<!-- Modals for editing event items. -->
+{% for event in events %}
+<div id="{{ event['_id'] }}" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close glyphicon glyphicon-remove"
+		data-dismiss="modal"></button>
+        <h4 class="modal-title">Edit event item</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('event', event['_id']) }}"
+	      role="form" method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-4">
+		<label class="control-label" for="date">Date</label>
+		<input type="date" class="form-control"
+		       name="date" id="date" value="{{ event['date']}}">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Date for the event; start date if multi-day event.
+	    </span>
+	  </div>
+
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="title">Title</label>
+		<input type="text" class="form-control" name="title" id="title"
+		       value="{{ event['title'] }}">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Title for the event.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-10">
+		<label class="control-label" for="text">Text</label>
+		<textarea class="form-control" rows="5" name="text" id="text"
+			  >{% raw event.get('text') or '' %}</textarea>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      The text is specified in
+	      <a href="http://daringfireball.net/projects/markdown/">
+		Markdown
+	      </a>
+	      format.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit"
+		    class="btn btn-primary glyphicon glyphicon-save">
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% end %}{# for event in events #}
+
 <!-- Modal for creating a news item. -->
 <div id="news_create" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">
@@ -239,6 +344,83 @@
 	    </span>
 	  </div>
 	  
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit"
+		    class="btn btn-primary glyphicon glyphicon-save">
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal for creating an event item. -->
+<div id="event_create" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close glyphicon glyphicon-remove"
+		data-dismiss="modal"></button>
+        <h4 class="modal-title">Create an event item</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('event_create') }}"
+	      role="form" method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-4">
+		<label class="control-label" for="date">Date</label>
+		<input type="date" class="form-control"
+		       name="date" id="date">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Date for the event; start date if multi-day event.
+	    </span>
+	  </div>
+
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="title">Title</label>
+		<input type="text" class="form-control" name="title" id="title">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Title for the event.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-10">
+		<label class="control-label" for="text">Text</label>
+		<textarea class="form-control" rows="5"
+			  name="text" id="text"></textarea>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      The text is specified in
+	      <a href="http://daringfireball.net/projects/markdown/">
+		Markdown
+	      </a>
+	      format.
+	    </span>
+	  </div>
+
 	  <div class="form-group">
 	    <label class="control-label"></label>
 	    <button type="submit"
