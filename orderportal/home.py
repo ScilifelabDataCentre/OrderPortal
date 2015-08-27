@@ -44,13 +44,21 @@ class Home(RequestHandler):
                     news_items=news_items, events=events)
 
     def home_staff(self, news_items, events):
-        self.render('home_staff.html', news_items=news_items, events=events)
+        view = self.db.view('order/modified',
+                            descending=True,
+                            limit=constants.MAX_STAFF_RECENT_ORDERS,
+                            include_docs=True)
+        orders = [self.get_presentable(r.doc) for r in view]
+        self.render('home_staff.html', orders=orders,
+                    news_items=news_items, events=events)
 
     def home_user(self, news_items, events):
         forms = [self.get_presentable(r.doc) for r in
                  self.db.view('form/enabled', include_docs=True)]
-        view = self.db.view('order/owner', descending=True,
-                            limit=10, include_docs=True,
+        view = self.db.view('order/owner',
+                            descending=True,
+                            limit=constants.MAX_USER_RECENT_ORDERS,
+                            include_docs=True,
                             key=self.current_user['email'])
         orders = [self.get_presentable(r.doc) for r in view]
         self.render('home_user.html', forms=forms, orders=orders,
