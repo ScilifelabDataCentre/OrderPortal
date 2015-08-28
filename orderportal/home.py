@@ -136,6 +136,5 @@ class Debug(RequestHandler):
                   ('CouchDB-Python', couchdb.__version__),
                   ('tornado', tornado.version),
                   ('PyYAML', yaml.__version__),
-                  ('requests', requests.__version__),
                   ('markdown', markdown.version)]
         self.render('debug.html', params=params)

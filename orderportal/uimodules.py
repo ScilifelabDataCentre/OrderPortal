@@ -74,8 +74,7 @@ class Markdown(tornado.web.UIModule):
     "Process the text as Markdown."
 
     def render(self, text):
-        return markdown.markdown(text or '*No text defined.*',
-                                 output_format='html5')
+        return markdown.markdown(text or '', output_format='html5')
 
 
 class Text(tornado.web.UIModule):
