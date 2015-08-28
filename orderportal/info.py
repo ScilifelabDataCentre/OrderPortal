@@ -23,7 +23,7 @@ class Info(RequestHandler):
 
     def get(self, name):
         info = self.get_entity_view('info/name', name)
-        self.render('info.html', info=info, versions=versions)
+        self.render('info.html', info=info)
 
     @tornado.web.authenticated
     def post(self, name):
