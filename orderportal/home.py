@@ -6,7 +6,6 @@ import logging
 
 import couchdb
 import markdown
-import requests
 import tornado
 import yaml
 

@@ -1,4 +1,4 @@
-tornado>=3.2
-couchdb>=1.0.1
+tornado>=4.2
+couchdb>=0.9
 pyyaml>=3.10
 markdown>=2.3.1

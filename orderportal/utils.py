@@ -21,7 +21,6 @@ import urlparse
 import uuid
 
 import couchdb
-import requests
 import tornado.web
 import yaml
 
