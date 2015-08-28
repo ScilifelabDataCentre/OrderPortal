@@ -134,13 +134,7 @@
       <tr>
 	<td class="text-nowrap">
 	  {% include 'field_indent.html' %}
-	  {% if are_fields_editable %}
-	  <a href="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}">
-	    {{ field['identifier'] }}
-	  </a>
-	  {% else %}
 	  {{ field['identifier'] }}
-	  {% end %}
 	</td>
 	<td>{{ field.get('label') or '-' }}</td>
 	<td>
@@ -171,9 +165,86 @@
 	  {% end %}
 	</td>
 	<td>{{ field.get('description') or '-' }}</td>
+	<td>
+	  {% if are_fields_editable %}
+	  <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
+		role="form" method="GET">
+	    <button type="submit"
+		    class="btn btn-xs btn-primary glyphicon glyphicon-plus">
+	      Edit
+	    </button>
+	  </form>
+	{% else %}
+	{# Allow edit of label and description even when not really editable. #}
+	  <button type="button"
+		  class="btn btn-primary btn-xs glyphicon glyphicon-edit"
+		  data-toggle="modal" data-target="#{{ field['identifier'] }}">
+	    Edit
+	  </button>
+	{% end %}{# if are_fields_editable #}
+	</td>
       </tr>
       {% end %}
     </table>
   </div>
 </div>
+
+{# Allow edit of label and description even when not really editable. #}
+{% if not are_fields_editable %}
+{% for field in fields %}
+<div id="{{ field['identifier'] }}" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+
+    {# Modal content #}
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close glyphicon glyphicon-remove"
+		data-dismiss="modal"></button>
+        <h4 class="modal-title">Edit field</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('field_edit_descr', form['_id'], field['identifier']) }}"
+	      role="form" method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group">
+	    <label class="control-label" for="{{ field['identifier'] }}/label">
+	      Label
+	    </label>
+	    <input class="form-control"
+		   name="{{ field['identifier'] }}/label"
+		   id="{{ field['identifier'] }}/label"
+		   value="{{ field.get('label') or '' }}"</input>
+	    <span class="help-block">
+	      Label to display for the field in the order form. The
+	      identifier will be used if this is not provided.
+	    </span>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label" for="{{ field['identifier'] }}/descr">
+	      Description
+	    </label>
+	    <textarea class="form-control"
+		      name="{{ field['identifier'] }}/descr"
+		      id="{{ field['identifier'] }}/descr"
+		      >{% raw field.get('description') or '' %}</textarea>
+	    <span class="help-block">
+	      Description to display in the order to help the user
+	      fill in the field correctly.
+	    </span>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit"
+		    class="btn btn-primary glyphicon glyphicon-save">
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% end %}{# for field in fields #}
+{% end %}{# if not are_fields_editable #}
 {% end %} {# block main_content #}

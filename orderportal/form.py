@@ -234,6 +234,23 @@ class FormFieldEdit(FormMixin, RequestHandler):
         self.see_other('form', form['_id'])
 
 
+class FormFieldEditDescr(FormMixin, RequestHandler):
+    "Edit the label and description of a form field."
+
+    @tornado.web.authenticated
+    def post(self, iuid, identifier):
+        self.check_xsrf_cookie()
+        self.check_admin()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        logging.debug("FormFieldEditDescr %s", identifier)
+        with FormSaver(doc=form, rqh=self) as saver:
+            saver.fields[identifier]['label'] = \
+                self.get_argument("{}/label".format(identifier), '')
+            saver.fields[identifier]['description'] = \
+                self.get_argument("{}/descr".format(identifier), '')
+        self.see_other('form', form['_id'])
+
+
 class FormCopy(RequestHandler):
     "Make a copy of a form."
 
