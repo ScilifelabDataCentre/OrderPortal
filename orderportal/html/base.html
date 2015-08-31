@@ -114,6 +114,22 @@
             </li>
 
 	    {% if is_admin %}
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+		Text
+		<span class="caret"></span>
+	      </a>
+              <ul class="dropdown-menu">
+		{% for name in texts %}
+		<li>
+		  <a href="{{ reverse_url('text', name) }}">{{ name }}</a>
+		</li>
+		{% end %}
+              </ul>
+            </li>
+	    {% end %}
+
+	    {% if is_admin %}
             <li><a href="{{ reverse_url('debug') }}">Debug</a></li>
 	    {% end %}
 	  </ul>

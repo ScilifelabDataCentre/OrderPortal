@@ -2,6 +2,9 @@
 
 {% extends "home.html" %}
 
+{% block content-header %}
+{% end %} {# block content-header #}
+
 {% block content-left %}
 <div class="col-md-5">
   <div class="panel panel-danger">
@@ -43,3 +46,6 @@
   {% include 'orders_mod_panel.html' %}
 </div>
 {% end %} {# block content-left #}
+
+{% block content-footer %}
+{% end %} {# block content-footer #}
