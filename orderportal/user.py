@@ -36,14 +36,46 @@ class UserSaver(saver.Saver):
 
 
 class Users(RequestHandler):
-    "Users list page."
-
+    """Users list page.
+    Allow filtering by university, role and status.
+    """
     @tornado.web.authenticated
     def get(self):
-        self.check_admin()
-        view = self.db.view('user/email', include_docs=True)
-        users = [r.doc for r in view]
-        self.render('users.html', title='Users', users=users)
+        self.check_staff()
+        university = self.get_argument('university', None) or ''
+        if university:
+            view = self.db.view('user/university',
+                                key=university,
+                                include_docs=True)
+            users = [r.doc for r in view]
+        else:
+            users = None
+        role = self.get_argument('role', None) or ''
+        if role:
+            if users is None:
+                view = self.db.view('user/role',
+                                    key=role,
+                                    include_docs=True)
+                users = [r.doc for r in view]
+            else:
+                users = [u for u in users if u['role'] == role]
+        status = self.get_argument('status', None) or ''
+        if status:
+            if users is None:
+                view = self.db.view('user/status',
+                                    key=status,
+                                    include_docs=True)
+                users = [r.doc for r in view]
+            else:
+                users = [u for u in users if u['status'] == status]
+        if users is None:
+            view = self.db.view('user/email', include_docs=True)
+            users = [r.doc for r in view]
+        users.sort(lambda i, j: cmp(i['email'], j['email']))
+        self.render('users.html', title='Users', users=users,
+                    filter=dict(university=university,
+                                role=role,
+                                status=status))
 
 
 class User(RequestHandler):
