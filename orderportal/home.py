@@ -36,7 +36,9 @@ class Home(RequestHandler):
                            events=self.get_events())
 
     def home_admin(self, news_items, events):
-        view = self.db.view('user/pending', include_docs=True)
+        view = self.db.view('user/status',
+                            key=constants.PENDING,
+                            include_docs=True)
         pending = [self.get_presentable(r.doc) for r in view]
         pending.sort(utils.cmp_modified, reverse=True)
         view = self.db.view('order/modified',

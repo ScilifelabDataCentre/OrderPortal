@@ -6,50 +6,89 @@
 {% block body_title %}Users{% end %}
 
 {% block content %}
-<div class="row">
-  <div class="col-md-9 col-md-offset-1">
-    <form action="{{ reverse_url('users', **filter) }}"
-	  role="form" class="form-inline"
-	  method="GET">
+<form action="{{ reverse_url('users', **params) }}"
+      role="form" class="form-inline"
+      method="GET">
+  <div class="row">
+    <div class="col-md-9 col-md-offset-1">
+      <span class="glyphicon glyphicon-sort"></span>
       <div class="form-group">
-	<label for="university">University</label>
+	<label for="university">Sort by</label>
+	<select name="sort" id="sort" class="form-control">
+	  {% set sort = params.get('sort') %}
+	  <option {{ sort == 'name' and 'selected' or ''}}
+		  value="name">Name</option>
+	  <option {{ sort == 'login' and 'selected' or ''}}
+		  value="login">Login</option>
+	  <option {{ sort == 'email' and 'selected' or ''}}
+		  value="email">Email</option>
+	</select>
+      </div>
+      <div class="form-group">
+	<label class="radio-inline">
+	  <input type="radio" name="descending" value="false"
+		 {{ params.get('descending') == 'false' and 'checked' or '' }}>
+	  Ascending
+	</label>
+	<label class="radio-inline">
+	  <input type="radio" name="descending" value="true"
+		 {{ params.get('descending') == 'true' and 'checked' or '' }}>
+	  Descending
+	</label>
+	<label class="radio-inline">
+	  <input type="radio" name="descending" value=""
+		 {{ params.get('descending') is None and 'checked' or '' }}>
+	  Default
+	</label>
+      </div>
+    </div>
+  </div>
+  <br>
+  <div class="row">
+    <div class="col-md-9 col-md-offset-1">
+      <label class="glyphicon glyphicon-filter"></label>
+      <div class="form-group">
+	<label for="university">Filter by</label>
 	<select name="university" id="university" class="form-control">
-	  <option value="">[any]</option>
+	  <option value="">[any university]</option>
 	  {% for abbrev, name in sorted(settings['UNIVERSITY_LIST'].items()) %}
-	  {% set sel = abbrev == filter['university'] and 'selected' or '' %}
+	  {% set sel = abbrev == params.get('university') and 'selected' or '' %}
 	  <option {{ sel }} value="{{ abbrev }}">{{ abbrev }} ({{ name }})</option>
 	  {% end %}
 	</select>
       </div>
       <div class="form-group">
-	<label for="role">Role</label>
 	<select name="role" id="role" class="form-control">
-	  <option value="">[any]</option>
+	  <option value="">[any role]</option>
 	  {% for role in constants.USER_ROLES %}
-	  {% set sel = role == filter['role'] and 'selected' or '' %}
+	  {% set sel = role == params.get('role') and 'selected' or '' %}
 	  <option {{ sel }} value="{{ role }}">{{ role.capitalize() }}</option>
 	  {% end %}
 	</select>
       </div>
       <div class="form-group">
-	<label for="status">Status</label>
 	<select name="status" id="status" class="form-control">
-	  <option value="">[any]</option>
+	  <option value="">[any status]</option>
 	  {% for status in constants.USER_STATUSES %}
-	  {% set sel = status == filter['status'] and 'selected' or '' %}
+	  {% set sel = status == params.get('status') and 'selected' or '' %}
 	  <option {{ sel }} value="{{ status }}">{{ status.capitalize() }}</option>
 	  {% end %}
 	</select>
       </div>
+    </div>
+  </div>
+  <br>
+  <div class="row">
+    <div class="col-md-9 col-md-offset-1">
       <div class="form-group">
 	<button type="submit"
-		class="btn btn-sm btn-primary glyphicon glyphicon-filter">
-	  Filter
+		class="btn btn-sm btn-primary glyphicon glyphicon-refresh">
+	  Refresh
 	</button>
       </div>
-    </form>
+    </div>
   </div>
-</div>
+</form>
 <br>
 <div class="row">
   <div class="col-md-9 col-md-offset-1">
@@ -60,7 +99,7 @@
 	<th>University</th>
 	<th>Role</th>
 	<th>Status</th>
-	<th>Latest login</th>
+	<th>Login</th>
 	<th>Orders</th>
       </tr>
       {% for user in users %}

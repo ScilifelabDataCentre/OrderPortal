@@ -2,6 +2,8 @@
 
 from __future__ import print_function, absolute_import
 
+import logging
+
 import tornado.web
 
 import orderportal
@@ -42,15 +44,18 @@ class Users(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_staff()
-        university = self.get_argument('university', None) or ''
+        params = dict()
+        # Filter list
+        university = self.get_argument('university', '')
         if university:
             view = self.db.view('user/university',
                                 key=university,
                                 include_docs=True)
             users = [r.doc for r in view]
+            params['university'] = university
         else:
             users = None
-        role = self.get_argument('role', None) or ''
+        role = self.get_argument('role', '')
         if role:
             if users is None:
                 view = self.db.view('user/role',
@@ -59,7 +64,8 @@ class Users(RequestHandler):
                 users = [r.doc for r in view]
             else:
                 users = [u for u in users if u['role'] == role]
-        status = self.get_argument('status', None) or ''
+            params['role'] = role
+        status = self.get_argument('status', '')
         if status:
             if users is None:
                 view = self.db.view('user/status',
@@ -68,14 +74,44 @@ class Users(RequestHandler):
                 users = [r.doc for r in view]
             else:
                 users = [u for u in users if u['status'] == status]
+            params['status'] = status
         if users is None:
             view = self.db.view('user/email', include_docs=True)
             users = [r.doc for r in view]
-        users.sort(lambda i, j: cmp(i['email'], j['email']))
-        self.render('users.html', title='Users', users=users,
-                    filter=dict(university=university,
-                                role=role,
-                                status=status))
+        # Order; different default depending on sort key
+        try:
+            value = self.get_argument('descending')
+            if value == '': raise ValueError
+            descending = utils.to_bool(value)
+        except (tornado.web.MissingArgumentError, TypeError, ValueError):
+            descending = None
+        else:
+            params['descending'] = str(descending).lower()
+        # Sort list
+        sort = self.get_argument('sort', '').lower()
+        if sort == 'login':
+            if descending is None: descending = True
+            users.sort(lambda i, j: cmp(i['login'], j['login']),
+                       reverse=descending)
+        elif sort == 'name':
+            if descending is None: descending = False
+            users.sort(lambda i, j: cmp((i['last_name'], i['first_name']),
+                                        (j['last_name'], j['first_name'])),
+                       reverse=descending)
+        elif sort == 'email':
+            if descending is None: descending = False
+            users.sort(lambda i, j: cmp(i['email'], j['email']),
+                       reverse=descending)
+        # Default: name
+        else:
+            if descending is None: descending = False
+            users.sort(lambda i, j: cmp((i['last_name'], i['first_name']),
+                                        (j['last_name'], j['first_name'])),
+                       reverse=descending)
+        if sort:
+            params['sort'] = sort
+        logging.debug('params %s', params)
+        self.render('users.html', title='Users', users=users, params=params)
 
 
 class User(RequestHandler):
