@@ -9,7 +9,7 @@
 
 <div class="panel panel-default">
   <div class="panel-body">
-    {% module Text('reset', default='The current password will be invalidated. Instructions on how to set a new one will be sent to the email address.', origin=absolute_reverse_url('reset')) %}
+    {% module Text('reset', origin=absolute_reverse_url('reset')) %}
   </div>
 </div>
 

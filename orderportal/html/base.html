@@ -36,7 +36,11 @@
 	    {% if is_staff %}
             <li><a href="{{ reverse_url('orders') }}">Orders</a></li>
 	    {% else %}
-            <li><a href="{{ reverse_url('orders_user', current_user['email']) }}">My orders</a></li>
+            <li>
+	      <a href="{{ reverse_url('orders_user', current_user['email']) }}">
+		Orders
+	      </a>
+	    </li>
 	    {% end %} {# if is_staff #}
 	    {% end %} {# if current_user #}
 
@@ -93,7 +97,7 @@
 
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-		File
+		Files
 		<span class="caret"></span>
 	      </a>
               <ul class="dropdown-menu">
