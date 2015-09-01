@@ -37,7 +37,10 @@ class OrderSaver(saver.Saver):
                     changed = self.changed.setdefault('fields', dict())
                     changed[identifier] = value
                     docfields[identifier] = value
-        # Check validity of current values
+        self.check_fields_validity(fields)
+
+    def check_fields_validity(self, fields):
+        "Check validity of current values."
         self.doc['invalid'] = dict()
         for field in fields:
             if field['depth'] == 0:
@@ -150,7 +153,6 @@ class Orders(RequestHandler):
             title = 'My orders'
             view = self.db.view('order/owner',
                                 include_docs=True,
-                                descending=True,
                                 key=self.current_user['email'])
             orders = [self.get_presentable(r.doc) for r in view]
             orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
@@ -167,9 +169,12 @@ class OrdersUser(RequestHandler):
             raise tornado.web.HTTPError(403,
                                         reason='you may not view these orders')
         user = self.get_user(email)
-        view = self.db.view('order/owner', descending=True,
-                            include_docs=True, key=email)
+        view = self.db.view('order/owner',
+                            include_docs=True,
+                            key=email)
         orders = [self.get_presentable(r.doc) for r in view]
+        orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
+                    reverse=True)
         self.render('orders_user.html', user=user, orders=orders)
 
 
@@ -232,11 +237,11 @@ class OrderCreate(RequestHandler):
     def post(self):
         self.check_xsrf_cookie()
         form = self.get_entity(self.get_argument('form'),doctype=constants.FORM)
+        fields = Fields(form)
         with OrderSaver(rqh=self) as saver:
             saver['form'] = form['_id']
             saver['title'] = self.get_argument('title', None) or form['title']
-            saver['fields'] = dict([(f['identifier'], None)
-                                    for f in Fields(form)])
+            saver['fields'] = dict([(f['identifier'], None) for f in fields])
             saver['invalid'] = dict()
             saver['owner'] = self.current_user['email']
             for transition in settings['ORDER_TRANSITIONS']:
@@ -245,6 +250,7 @@ class OrderCreate(RequestHandler):
                     break
             else:
                 raise ValueError('no initial order status defined')
+            saver.check_fields_validity(fields)
         self.see_other('order', saver.doc['_id'])
 
 
