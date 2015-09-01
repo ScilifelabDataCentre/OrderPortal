@@ -35,8 +35,6 @@
 	  <th class="key">{{ key }}</th>
 	  <td>
 	    {% if key == 'fields' %}
-	      <strong>{{ value.pop('identifier') }}</strong>
-	      <br>
 	      {% for k, v in sorted(value.items()) %}
 	        {{ k }}: {{ repr(v) }}<br>
 	      {% end %}

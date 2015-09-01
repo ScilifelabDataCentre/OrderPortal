@@ -141,16 +141,20 @@ class Orders(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         if self.is_staff():
+            title = 'Recent orders'
             view = self.db.view('order/modified',
                                 include_docs=True,
                                 descending=True)
-            title = 'Recent orders'
+            orders = [self.get_presentable(r.doc) for r in view]
         else:
-            view = self.db.view('order/owner', descending=True,
+            title = 'My orders'
+            view = self.db.view('order/owner',
                                 include_docs=True,
+                                descending=True,
                                 key=self.current_user['email'])
-            title = 'Your orders'
-        orders = [self.get_presentable(r.doc) for r in view]
+            orders = [self.get_presentable(r.doc) for r in view]
+            orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
+                        reverse=True)
         self.render('orders.html', title=title, orders=orders)
 
 

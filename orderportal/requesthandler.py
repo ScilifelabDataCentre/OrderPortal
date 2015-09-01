@@ -197,7 +197,7 @@ class RequestHandler(tornado.web.RequestHandler):
         return self.get_entity_view('user/email', email, reason='no such user')
 
     def get_presentable(self, doc):
-        """Make the entity document presentable:
+        """Make the entity document presentable as JSON:
         - Convert to sorted dictionary.
         - Remove all entries with value None.
         - Change '_id' key to 'iuid'.
