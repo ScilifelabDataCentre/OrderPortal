@@ -73,10 +73,10 @@
 		<span class="caret"></span>
 	      </a>
               <ul class="dropdown-menu">
-		{% for name, title in infos %}
+		{% for n, t in infos %}
 		<li>
-		  <a href="{{ reverse_url('info', name) }}">
-		    {{ title or name }}
+		  <a href="{{ reverse_url('info', n) }}">
+		    {{ t or n }}
 		  </a>
 		</li>
 		{% end %}

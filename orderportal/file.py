@@ -68,7 +68,8 @@ class FileMeta(RequestHandler):
 
     def get(self, name):
         file = self.get_entity_view('file/name', name)
-        self.render('file_meta.html', file=file)
+        title = file.get('title') or file['name']
+        self.render('file_meta.html', file=file, title=title)
 
     @tornado.web.authenticated
     def post(self, name):
@@ -139,6 +140,7 @@ class FileCreate(RequestHandler):
                 saver['menu'] = int(self.get_argument('menu', None))
             except (ValueError, TypeError):
                 saver['menu'] = None
+            saver['description'] = self.get_argument('description', None)
         self.see_other('file_meta', saver['name'])
 
 
@@ -171,4 +173,5 @@ class FileEdit(RequestHandler):
                 saver['filename'] = infile['filename']
                 saver['size'] = len(saver.content)
                 saver['content_type'] = infile['content_type']
+            saver['description'] = self.get_argument('description', None)
         self.see_other('file_meta', name)
