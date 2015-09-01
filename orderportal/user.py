@@ -40,6 +40,7 @@ class UserSaver(saver.Saver):
 class Users(RequestHandler):
     """Users list page.
     Allow filtering by university, role and status.
+    Allow sort by email, name and login.
     """
     @tornado.web.authenticated
     def get(self):
@@ -47,7 +48,13 @@ class Users(RequestHandler):
         params = dict()
         # Filter list
         university = self.get_argument('university', '')
-        if university:
+        if university == '[other]':
+            view = self.db.view('user/email', include_docs=True)
+            users = [r.doc for r in view]
+            users = [u for u in users
+                     if u['university'] not in settings['UNIVERSITY_LIST']]
+            params['university'] = university
+        elif university:
             view = self.db.view('user/university',
                                 key=university,
                                 include_docs=True)
@@ -121,7 +128,7 @@ class User(RequestHandler):
     def get(self, email):
         user = self.get_user(email)
         self.check_owner_or_staff(user)
-        self.render('user.html', user=user)
+        self.render('user.html', user=user, deletable=self.get_deletable(user))
 
     @tornado.web.authenticated
     def post(self, email):
@@ -136,12 +143,19 @@ class User(RequestHandler):
         "Delete a user that is pending; to get rid of spam application."
         user = self.get_user(email)
         self.check_admin()
-        if user['status'] != constants.PENDING:
-            raise tornado.web.HTTPError(
-                403, reason='only pending user can be deleted')
+        if not self.get_deletable(user):
+            raise tornado.web.HTTPError(403, reason='user cannot be deleted')
         self.delete_logs(user['_id'])
         self.db.delete(user)
         self.see_other('home')
+
+    def get_deletable(self, user):
+        "Can the user be deleted? Pending, or disabled and no orders."
+        if user['status'] == constants.PENDING: return True
+        if user['status'] == constants.ENABLED: return False
+        view = self.db.view('order/owner', key=user['email'])
+        if len(list(view)) == 0: return True
+        return False
 
 
 class UserLogs(RequestHandler):

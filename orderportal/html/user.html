@@ -54,7 +54,7 @@
 </form>
 {% end %} {# if user['status'] #}
 
-{% if user['status'] == constants.PENDING %}
+{% if deletable %}
 <form action="{{ reverse_url('user', user['email']) }}"
       role="form" method="POST">
   {% module xsrf_form_html() %}
@@ -116,6 +116,10 @@
   <tr>
     <th>Phone</th>
     <td>{{ user.get('phone') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Other data</th>
+    <td class="pre">{{ user.get('other') or '-' }}</td>
   </tr>
   <tr>
     <th>Modified</th>

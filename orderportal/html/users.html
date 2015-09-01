@@ -51,6 +51,7 @@
 	<label for="university">Filter by</label>
 	<select name="university" id="university" class="form-control">
 	  <option value="">[any university]</option>
+	  <option value="[other]">[other]</option>
 	  {% for abbrev, name in sorted(settings['UNIVERSITY_LIST'].items()) %}
 	  {% set sel = abbrev == params.get('university') and 'selected' or '' %}
 	  <option {{ sel }} value="{{ abbrev }}">{{ abbrev }} ({{ name }})</option>
