@@ -98,7 +98,7 @@ class Users(RequestHandler):
         sort = self.get_argument('sort', '').lower()
         if sort == 'login':
             if descending is None: descending = True
-            users.sort(lambda i, j: cmp(i['login'], j['login']),
+            users.sort(lambda i, j: cmp(i.get('login'), j.get('login')),
                        reverse=descending)
         elif sort == 'name':
             if descending is None: descending = False
@@ -117,8 +117,26 @@ class Users(RequestHandler):
                        reverse=descending)
         if sort:
             params['sort'] = sort
-        logging.debug('params %s', params)
-        self.render('users.html', title='Users', users=users, params=params)
+        # Page
+        count = len(users)
+        max_page = (count - 1) / constants.PAGE_SIZE
+        try:
+            page = int(self.get_argument('page', 0))
+            page = max(0, min(page, max_page))
+        except (ValueError, TypeError):
+            page = 0
+        start = page * constants.PAGE_SIZE
+        end = min(start + constants.PAGE_SIZE, count)
+        users = users[start : end]
+        params['page'] = page
+        #
+        self.render('users.html',
+                    users=users,
+                    params=params,
+                    start=start+1,
+                    end=end,
+                    max_page=max_page,
+                    count=count)
 
 
 class User(RequestHandler):

@@ -7,14 +7,16 @@
 
 {% block content %}
 <form action="{{ reverse_url('users', **params) }}"
+      id="refresh"
       role="form" class="form-inline"
       method="GET">
+  <input type="hidden" name="page" value="{{ params.get('page') or 0 }}">
   <div class="row">
-    <div class="col-md-9 col-md-offset-1">
+    <div class="col-md-8 col-md-offset-2">
       <span class="glyphicon glyphicon-sort"></span>
       <div class="form-group">
 	<label for="university">Sort by</label>
-	<select name="sort" id="sort" class="form-control">
+	<select name="sort" id="sort" class="form-control refresh">
 	  {% set sort = params.get('sort') %}
 	  <option {{ sort == 'name' and 'selected' or ''}}
 		  value="name">Name</option>
@@ -26,32 +28,36 @@
       </div>
       <div class="form-group">
 	<label class="radio-inline">
-	  <input type="radio" name="descending" value="false"
+	  <input type="radio" name="descending" value="false" class="refresh"
 		 {{ params.get('descending') == 'false' and 'checked' or '' }}>
 	  Ascending
 	</label>
 	<label class="radio-inline">
-	  <input type="radio" name="descending" value="true"
+	  <input type="radio" name="descending" value="true" class="refresh"
 		 {{ params.get('descending') == 'true' and 'checked' or '' }}>
 	  Descending
 	</label>
 	<label class="radio-inline">
-	  <input type="radio" name="descending" value=""
+	  <input type="radio" name="descending" value="" class="refresh"
 		 {{ params.get('descending') is None and 'checked' or '' }}>
 	  Default
 	</label>
       </div>
     </div>
+    <div class="col-md-2">
+    </div>
   </div>
+
   <br>
   <div class="row">
-    <div class="col-md-9 col-md-offset-1">
+    <div class="col-md-8 col-md-offset-2">
       <label class="glyphicon glyphicon-filter"></label>
       <div class="form-group">
 	<label for="university">Filter by</label>
-	<select name="university" id="university" class="form-control">
+	<select name="university" id="university" class="form-control refresh">
 	  <option value="">[any university]</option>
-	  <option value="[other]">[other]</option>
+	  {% set sel = params.get('university') == '[other]' and 'selected' or '' %}
+	  <option value="[other]" {{ sel }}>[other]</option>
 	  {% for abbrev, name in sorted(settings['UNIVERSITY_LIST'].items()) %}
 	  {% set sel = abbrev == params.get('university') and 'selected' or '' %}
 	  <option {{ sel }} value="{{ abbrev }}">{{ abbrev }} ({{ name }})</option>
@@ -59,7 +65,7 @@
 	</select>
       </div>
       <div class="form-group">
-	<select name="role" id="role" class="form-control">
+	<select name="role" id="role" class="form-control refresh">
 	  <option value="">[any role]</option>
 	  {% for role in constants.USER_ROLES %}
 	  {% set sel = role == params.get('role') and 'selected' or '' %}
@@ -68,7 +74,7 @@
 	</select>
       </div>
       <div class="form-group">
-	<select name="status" id="status" class="form-control">
+	<select name="status" id="status" class="form-control refresh">
 	  <option value="">[any status]</option>
 	  {% for status in constants.USER_STATUSES %}
 	  {% set sel = status == params.get('status') and 'selected' or '' %}
@@ -77,22 +83,56 @@
 	</select>
       </div>
     </div>
-  </div>
-  <br>
-  <div class="row">
-    <div class="col-md-9 col-md-offset-1">
-      <div class="form-group">
-	<button type="submit"
-		class="btn btn-sm btn-primary glyphicon glyphicon-refresh">
-	  Refresh
-	</button>
-      </div>
+    <div class="col-md-2">
     </div>
   </div>
 </form>
-<br>
+
+  <div class="row">
+    <div class="col-md-6 col-md-offset-2">
+      <ul class="pager">
+	<li>
+	  {% set current = params.get('page', 0) %}
+	  {% set params['page'] = 0 %}
+	  <a href="{{ reverse_url('users', **params) }}">
+	  <span class="glyphicon glyphicon-fast-backward"></span>
+	  First
+	</a>
+      </li>
+      <li>
+	{% set params['page'] = max(0, current-1) %}
+	<a href="{{ reverse_url('users', **params) }}">
+	  <span class="glyphicon glyphicon-step-backward"></span>
+	  Previous
+	</a>
+      </li>
+      <li>
+	<a href="{{ reverse_url('users', **params) }}">
+	  {{ start }} to {{ end }} (of {{ count }})
+	</a>
+      </li>
+      <li>
+	{% set params['page'] = min(max_page, current+1) %}
+	<a href="{{ reverse_url('users', **params) }}">
+	  Next
+	  <span class="glyphicon glyphicon-step-forward"></span>
+	</a>
+      </li>
+      <li>
+	{% set params['page'] = max_page %}
+	<a href="{{ reverse_url('users', **params) }}">
+	  Last
+	  <span class="glyphicon glyphicon-fast-forward"></span>
+	</a>
+      </li>
+    </ul>
+    </div>
+    <div class="col-md-4">
+    </div>
+  </div>
+
 <div class="row">
-  <div class="col-md-9 col-md-offset-1">
+  <div class="col-md-10 col-md-offset-1">
     <table class="table table-striped">
       <tr>
 	<th>User</th>
@@ -128,7 +168,11 @@
       {% end %}
     </table>
   </div>
-  <div class="col-md-2">
+  <div class="col-md-1">
   </div>
 </div>
+{% end %}
+
+{% block javascript_code %}
+<script src="{{ static_url('refresh_on_change.js') }}"></script>
 {% end %}
