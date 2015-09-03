@@ -1,11 +1,12 @@
-{# List of all orders for a user. #}
+{# List of all orders for an account. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}Orders for {{ user['email'] }}{% end %}
+{% block head_title %}Orders for {{ account['email'] }}{% end %}
 {% block body_title %}
-{% module Icon('order') %} Orders for
-<a href="{{ reverse_url('user', user['email']) }}">{{ user['email'] }}</a>
+{% module Icon('order') %}
+Orders for
+<a href="{{ reverse_url('account', account['email']) }}">{{ account['email'] }}</a>
 {% end %}
 
 {% block content %}

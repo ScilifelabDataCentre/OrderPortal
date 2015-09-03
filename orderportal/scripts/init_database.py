@@ -1,19 +1,23 @@
 """ OrderPortal: Initialize the order database, directly towards CouchDB.
 1) Wipeout the old database.
 2) Load the design documents.
+3) Load the initial texts from 'texts.yaml'.
 """
 
 from __future__ import print_function, absolute_import
 
 import sys
 
+import yaml
+
 from orderportal import utils
+from orderportal import home
 
 
 def get_args():
     parser = utils.get_command_line_parser(description=
         'Initialize the database, deleting all old data,'
-        ' optionally load from order dump file.')
+        ' optionally load from dump file.')
     parser.add_option("-L", "--load",
                       action='store', dest='FILE', default='dump.tar.gz',
                       metavar="FILE", help="filepath of dump file to load")
@@ -28,6 +32,7 @@ def init_database(verbose=False, dumpfilepath=None):
     if verbose:
         print('loaded designs', file=sys.stderr)
     if dumpfilepath:
+        dumpfilepath = utils.expand_filepath(dumpfilepath)
         try:
             utils.undump(db, dumpfilepath, verbose=verbose)
         except IOError:

@@ -63,23 +63,25 @@ class RequestHandler(tornado.web.RequestHandler):
         return url
 
     def get_current_user(self):
-        "Get the currently logged-in user, if any."
+        """Get the currently logged-in user account, if any.
+        This overrides a tornado function, otherwise it would have
+        been called get_current_account."""
         email = self.get_secure_cookie(constants.USER_COOKIE)
         if not email:
             return None
         try:
-            user = self.get_user(email)
+            account = self.get_account(email)
         except tornado.web.HTTPError:
             return None
-        # Check that user is enabled.
-        if user.get('status') != constants.ENABLED:
-            logging.debug("user %s not enabled", email)
+        # Check that account is enabled.
+        if account.get('status') != constants.ENABLED:
+            logging.debug("account %s not enabled", email)
             return None
         # Check if login session is invalidated.
-        if user.get('login') is None:
-            logging.debug("user %s has no login session", email)
+        if account.get('login') is None:
+            logging.debug("account %s has no login session", email)
             return None
-        return user
+        return account
 
     def is_owner(self, entity):
         "Does the current user own the given entity?"
@@ -190,11 +192,11 @@ class RequestHandler(tornado.web.RequestHandler):
             infile.close()
         return data
 
-    def get_user(self, email):
-        """Get the user identified by the email address.
-        Raise HTTP 404 if no such user.
+    def get_account(self, email):
+        """Get the account identified by the email address.
+        Raise HTTP 404 if no such account.
         """
-        return self.get_entity_view('user/email', email, reason='no such user')
+        return self.get_entity_view('account/email', email, reason='no such account')
 
     def get_presentable(self, doc):
         """Make the entity document presentable as JSON:
@@ -241,7 +243,7 @@ class RequestHandler(tornado.web.RequestHandler):
             del self.db[row.id]
 
     def send_email(self, recipient, subject, text, sender=None):
-        "Send an email to the given recipient from the given sender user."
+        "Send an email to the given recipient from the given sender account."
         if sender:
             from_address = sender['email']
         else:

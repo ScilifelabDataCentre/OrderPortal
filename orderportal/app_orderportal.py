@@ -16,7 +16,7 @@ from orderportal import uimodules
 from orderportal.requesthandler import RequestHandler
 
 from orderportal.home import *
-from orderportal.user import *
+from orderportal.account import *
 from orderportal.form import *
 from orderportal.order import *
 from orderportal.news import *
@@ -33,7 +33,6 @@ class Dummy(RequestHandler):
 def get_handlers():
     url = tornado.web.url
     return [url(r'/', Home, name='home'),
-            url(r'/search', Dummy, name='search'),
             url(r'/orders', Orders, name='orders'),
             url(r'/order/([0-9a-f]{32})', Order, name='order'),
             url(r'/order/([0-9a-f]{32})/logs', OrderLogs, name='order_logs'),
@@ -41,19 +40,24 @@ def get_handlers():
             url(r'/order/([0-9a-f]{32})/edit', OrderEdit, name='order_edit'),
             url(r'/order/([0-9a-f]{32})/transition/(\w+)',
                 OrderTransition, name='order_transition'),
-            url(r'/orders/([^/]+)', OrdersUser, name='orders_user'),
+            url(r'/orders/([^/]+)', OrdersAccount, name='orders_account'),
             # url(r'/order/([0-9a-f]{32})/copy', OrderCopy, name='order_copy'),
-            url(r'/users', Users, name='users'),
-            url(r'/user/([^/]+)', User, name='user'),
-            url(r'/user/([^/]+)/logs', UserLogs, name='user_logs'),
-            url(r'/user/([^/]+)/edit', UserEdit, name='user_edit'),
+            url(r'/accounts', Accounts, name='accounts'),
+            url(r'/account/([^/]+)', Account, name='account'),
+            url(r'/account/([^/]+)/logs', AccountLogs, name='account_logs'),
+            url(r'/account/([^/]+)/edit', AccountEdit, name='account_edit'),
+            url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
+                {'path': 'site'}, name='site'),
+            url(r'/search', Dummy, name='search'),
             url(r'/login', Login, name='login'),
             url(r'/logout', Logout, name='logout'),
             url(r'/reset', Reset, name='reset'),
             url(r'/password', Password, name='password'),
             url(r'/register', Register, name='register'),
-            url(r'/user/([^/]+)/enable', UserEnable, name='user_enable'),
-            url(r'/user/([^/]+)/disable', UserDisable, name='user_disable'),
+            url(r'/account/([^/]+)/enable',
+                AccountEnable, name='account_enable'),
+            url(r'/account/([^/]+)/disable',
+                AccountDisable, name='account_disable'),
             url(r'/forms', Forms, name='forms'),
             url(r'/form/([0-9a-f]{32})', Form, name='form'),
             url(r'/form/([0-9a-f]{32})/logs', FormLogs, name='form_logs'),
@@ -93,15 +97,16 @@ def get_handlers():
 
 def main():
     logging.info("tornado debug: %s, logging debug: %s",
-                 settings['TORNADO_DEBUG'], settings['LOGGING_DEBUG'])
+                 settings.get('TORNADO_DEBUG', False),
+                 settings.get('LOGGING_DEBUG', False))
     application = tornado.web.Application(
         handlers=get_handlers(),
         debug=settings.get('TORNADO_DEBUG', False),
         cookie_secret=settings['COOKIE_SECRET'],
         ui_modules=uimodules,
-        template_path=settings.get('TEMPLATE_PATH', 'html'),
-        static_path=settings.get('STATIC_PATH', 'static'),
-        login_url=r'/login')
+        template_path='html',
+        static_path='static',
+        login_url=r'/')
     application.listen(settings['PORT'], xheaders=True)
     logging.info("OrderPortal web server PID %s on port %s",
                  os.getpid(), settings['PORT'])

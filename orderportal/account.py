@@ -1,4 +1,4 @@
-"OrderPortal: User and login pages."
+"OrderPortal: Account and login pages."
 
 from __future__ import print_function, absolute_import
 
@@ -14,8 +14,17 @@ from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 
 
-class UserSaver(saver.Saver):
-    doctype = constants.USER
+class AccountSaver(saver.Saver):
+    doctype = constants.ACCOUNT
+
+    def set_email(self, email):
+        assert self.get('email') is None
+        if not email: raise ValueError('no email given')
+        if not constants.EMAIL_RX.match(email):
+            raise ValueError('invalid email value')
+        if len(list(self.db.view('account/email', key=email))) > 0:
+            raise ValueError('email already in use')
+        self['email'] = email
 
     def erase_password(self):
         self['password'] = None
@@ -37,8 +46,8 @@ class UserSaver(saver.Saver):
         self['code'] = utils.get_iuid()
 
 
-class Users(RequestHandler):
-    """Users list page.
+class Accounts(RequestHandler):
+    """Accounts list page.
     Allow filtering by university, role and status.
     Allow sort by email, name and login.
     """
@@ -49,42 +58,42 @@ class Users(RequestHandler):
         # Filter list
         university = self.get_argument('university', '')
         if university == '[other]':
-            view = self.db.view('user/email', include_docs=True)
-            users = [r.doc for r in view]
-            users = [u for u in users
+            view = self.db.view('account/email', include_docs=True)
+            accounts = [r.doc for r in view]
+            accounts = [u for u in accounts
                      if u['university'] not in settings['UNIVERSITY_LIST']]
             params['university'] = university
         elif university:
-            view = self.db.view('user/university',
+            view = self.db.view('account/university',
                                 key=university,
                                 include_docs=True)
-            users = [r.doc for r in view]
+            accounts = [r.doc for r in view]
             params['university'] = university
         else:
-            users = None
+            accounts = None
         role = self.get_argument('role', '')
         if role:
-            if users is None:
-                view = self.db.view('user/role',
+            if accounts is None:
+                view = self.db.view('account/role',
                                     key=role,
                                     include_docs=True)
-                users = [r.doc for r in view]
+                accounts = [r.doc for r in view]
             else:
-                users = [u for u in users if u['role'] == role]
+                accounts = [u for u in accounts if u['role'] == role]
             params['role'] = role
         status = self.get_argument('status', '')
         if status:
-            if users is None:
-                view = self.db.view('user/status',
+            if accounts is None:
+                view = self.db.view('account/status',
                                     key=status,
                                     include_docs=True)
-                users = [r.doc for r in view]
+                accounts = [r.doc for r in view]
             else:
-                users = [u for u in users if u['status'] == status]
+                accounts = [u for u in accounts if u['status'] == status]
             params['status'] = status
-        if users is None:
-            view = self.db.view('user/email', include_docs=True)
-            users = [r.doc for r in view]
+        if accounts is None:
+            view = self.db.view('account/email', include_docs=True)
+            accounts = [r.doc for r in view]
         # Order; different default depending on sort key
         try:
             value = self.get_argument('descending')
@@ -98,27 +107,27 @@ class Users(RequestHandler):
         sort = self.get_argument('sort', '').lower()
         if sort == 'login':
             if descending is None: descending = True
-            users.sort(lambda i, j: cmp(i.get('login'), j.get('login')),
+            accounts.sort(lambda i, j: cmp(i.get('login'), j.get('login')),
                        reverse=descending)
         elif sort == 'name':
             if descending is None: descending = False
-            users.sort(lambda i, j: cmp((i['last_name'], i['first_name']),
+            accounts.sort(lambda i, j: cmp((i['last_name'], i['first_name']),
                                         (j['last_name'], j['first_name'])),
                        reverse=descending)
         elif sort == 'email':
             if descending is None: descending = False
-            users.sort(lambda i, j: cmp(i['email'], j['email']),
+            accounts.sort(lambda i, j: cmp(i['email'], j['email']),
                        reverse=descending)
         # Default: name
         else:
             if descending is None: descending = False
-            users.sort(lambda i, j: cmp((i['last_name'], i['first_name']),
+            accounts.sort(lambda i, j: cmp((i['last_name'], i['first_name']),
                                         (j['last_name'], j['first_name'])),
                        reverse=descending)
         if sort:
             params['sort'] = sort
         # Page
-        count = len(users)
+        count = len(accounts)
         max_page = (count - 1) / constants.PAGE_SIZE
         try:
             page = int(self.get_argument('page', 0))
@@ -127,11 +136,11 @@ class Users(RequestHandler):
             page = 0
         start = page * constants.PAGE_SIZE
         end = min(start + constants.PAGE_SIZE, count)
-        users = users[start : end]
+        accounts = accounts[start : end]
         params['page'] = page
         #
-        self.render('users.html',
-                    users=users,
+        self.render('accounts.html',
+                    accounts=accounts,
                     params=params,
                     start=start+1,
                     end=end,
@@ -139,14 +148,14 @@ class Users(RequestHandler):
                     count=count)
 
 
-class User(RequestHandler):
-    "User page."
+class Account(RequestHandler):
+    "Account page."
 
     @tornado.web.authenticated
     def get(self, email):
-        user = self.get_user(email)
-        self.check_owner_or_staff(user)
-        self.render('user.html', user=user, deletable=self.get_deletable(user))
+        account = self.get_account(email)
+        self.check_owner_or_staff(account)
+        self.render('account.html', account=account, deletable=self.get_deletable(account))
 
     @tornado.web.authenticated
     def post(self, email):
@@ -158,52 +167,52 @@ class User(RequestHandler):
 
     @tornado.web.authenticated
     def delete(self, email):
-        "Delete a user that is pending; to get rid of spam application."
-        user = self.get_user(email)
+        "Delete a account that is pending; to get rid of spam application."
+        account = self.get_account(email)
         self.check_admin()
-        if not self.get_deletable(user):
-            raise tornado.web.HTTPError(403, reason='user cannot be deleted')
-        self.delete_logs(user['_id'])
-        self.db.delete(user)
+        if not self.get_deletable(account):
+            raise tornado.web.HTTPError(403, reason='account cannot be deleted')
+        self.delete_logs(account['_id'])
+        self.db.delete(account)
         self.see_other('home')
 
-    def get_deletable(self, user):
-        "Can the user be deleted? Pending, or disabled and no orders."
-        if user['status'] == constants.PENDING: return True
-        if user['status'] == constants.ENABLED: return False
-        view = self.db.view('order/owner', key=user['email'])
+    def get_deletable(self, account):
+        "Can the account be deleted? Pending, or disabled and no orders."
+        if account['status'] == constants.PENDING: return True
+        if account['status'] == constants.ENABLED: return False
+        view = self.db.view('order/owner', key=account['email'])
         if len(list(view)) == 0: return True
         return False
 
 
-class UserLogs(RequestHandler):
-    "User log entries page."
+class AccountLogs(RequestHandler):
+    "Account log entries page."
 
     @tornado.web.authenticated
     def get(self, email):
-        user = self.get_user(email)
-        self.check_owner_or_staff(user)
-        self.render('logs.html', entity=user, logs=self.get_logs(user['_id']))
+        account = self.get_account(email)
+        self.check_owner_or_staff(account)
+        self.render('logs.html', entity=account, logs=self.get_logs(account['_id']))
 
 
-class UserEdit(RequestHandler):
-    "Page for editing user information."
+class AccountEdit(RequestHandler):
+    "Page for editing account information."
 
     @tornado.web.authenticated
     def get(self, email):
-        user = self.get_user(email)
-        self.check_owner_or_staff(user)
-        self.render('user_edit.html', user=user)
+        account = self.get_account(email)
+        self.check_owner_or_staff(account)
+        self.render('account_edit.html', account=account)
 
     @tornado.web.authenticated
     def post(self, email):
         self.check_xsrf_cookie()
-        user = self.get_user(email)
-        self.check_owner_or_staff(user)
-        with UserSaver(doc=user, rqh=self) as saver:
+        account = self.get_account(email)
+        self.check_owner_or_staff(account)
+        with AccountSaver(doc=account, rqh=self) as saver:
             if self.is_admin():
                 role = self.get_argument('role')
-                if role not in constants.USER_ROLES:
+                if role not in constants.ACCOUNT_ROLES:
                     raise tornado.web.HTTPError(404, reason='invalid role')
                 saver['role'] = role
             saver['first_name'] = self.get_argument('first_name')
@@ -215,14 +224,14 @@ class UserEdit(RequestHandler):
             saver['department'] = self.get_argument('department', default=None)
             saver['address'] = self.get_argument('address', default=None)
             saver['phone'] = self.get_argument('phone', default=None)
-        self.see_other('user', email)
+        self.see_other('account', email)
 
 
 class Login(RequestHandler):
-    "Login to a user account. Set a secure cookie."
+    "Login to a account account. Set a secure cookie."
 
     def post(self):
-        "Login to a user account. Set a secure cookie."
+        "Login to a account account. Set a secure cookie."
         self.check_xsrf_cookie()
         try:
             email = self.get_argument('email')
@@ -230,15 +239,15 @@ class Login(RequestHandler):
         except tornado.web.MissingArgumentError:
             raise tornado.web.HTTPError(403, reason='missing email or password')
         try:
-            user = self.get_user(email)
+            account = self.get_account(email)
         except tornado.web.HTTPError:
-            raise tornado.web.HTTPError(404, reason='no such user')
-        if not utils.hashed_password(password) == user.get('password'):
+            raise tornado.web.HTTPError(404, reason='no such account')
+        if not utils.hashed_password(password) == account.get('password'):
             raise tornado.web.HTTPError(400, reason='invalid password')
-        if not user.get('status') == constants.ENABLED:
-            raise tornado.web.HTTPError(400, reason='disabled user account')
-        self.set_secure_cookie(constants.USER_COOKIE, user['email'])
-        with UserSaver(doc=user, rqh=self) as saver:
+        if not account.get('status') == constants.ENABLED:
+            raise tornado.web.HTTPError(400, reason='disabled account account')
+        self.set_secure_cookie(constants.USER_COOKIE, account['email'])
+        with AccountSaver(doc=account, rqh=self) as saver:
             saver['login'] = utils.timestamp() # Set login timestamp.
         self.redirect(self.reverse_url('home'))
 
@@ -254,7 +263,7 @@ class Logout(RequestHandler):
 
 
 class Reset(RequestHandler):
-    "Reset the password of a user account."
+    "Reset the password of a account account."
 
     SUBJECT = "The password for your {} portal account has been reset"
     TEXT = """The password for your account {} in the {} portal has been reset.
@@ -263,28 +272,28 @@ The code required to set your password is "{}".
 """
 
     def get(self):
-        email = self.current_user and self.current_user.get('email')
+        email = self.current_account and self.current_account.get('email')
         self.render('reset.html', email=email)
 
     def post(self):
         self.check_xsrf_cookie()
-        user = self.get_user(self.get_argument('email'))
-        with UserSaver(doc=user, rqh=self) as saver:
+        account = self.get_account(self.get_argument('email'))
+        with AccountSaver(doc=account, rqh=self) as saver:
             saver.reset_password()
         url = self.absolute_reverse_url('password',
-                                        email=user['email'],
-                                        code=user['code'])
-        self.send_email(user['email'],
+                                        email=account['email'],
+                                        code=account['code'])
+        self.send_email(account['email'],
                         self.SUBJECT.format(settings['FACILITY_NAME']),
-                        self.TEXT.format(user['email'],
+                        self.TEXT.format(account['email'],
                                          settings['FACILITY_NAME'],
                                          url,
-                                         user['code']))
+                                         account['code']))
         self.see_other('password')
 
 
 class Password(RequestHandler):
-    "Set the password of a user account; requires a code."
+    "Set the password of a account account; requires a code."
 
     def get(self):
         self.render('password.html',
@@ -294,8 +303,8 @@ class Password(RequestHandler):
 
     def post(self):
         self.check_xsrf_cookie()
-        user = self.get_user(self.get_argument('email'))
-        if user.get('code') != self.get_argument('code'):
+        account = self.get_account(self.get_argument('email'))
+        if account.get('code') != self.get_argument('code'):
             raise tornado.web.HTTPError(400, reason='invalid email or code')
         password = self.get_argument('password')
         if len(password) < constants.MIN_PASSWORD_LENGTH:
@@ -305,34 +314,28 @@ class Password(RequestHandler):
         if password != self.get_argument('confirm_password'):
             msg = 'password not the same! mistyped'
             raise tornado.web.HTTPError(400, reason=msg)
-        with UserSaver(doc=user, rqh=self) as saver:
+        with AccountSaver(doc=account, rqh=self) as saver:
             saver.set_password(password)
             saver['login'] = utils.timestamp() # Set login session.
-        self.set_secure_cookie(constants.USER_COOKIE, user['email'])
+        self.set_secure_cookie(constants.USER_COOKIE, account['email'])
         self.redirect(self.reverse_url('home'))
             
 
 class Register(RequestHandler):
-    "Register a new user account."
+    "Register a new account account."
 
     def get(self):
         self.render('register.html')
 
     def post(self):
         self.check_xsrf_cookie()
-        with UserSaver(rqh=self) as saver:
+        with AccountSaver(rqh=self) as saver:
             try:
-                email = self.get_argument('email')
-                if not email: raise ValueError
-                if not constants.EMAIL_RX.match(email): raise ValueError
-                try:
-                    self.get_user(email)
-                except tornado.web.HTTPError:
-                    pass
-                else:
-                    reason = 'email address already in use'
-                    raise tornado.web.HTTPError(409, reason=reason)
+                saver.set_email(self.get_argument('email', ''))
                 saver['email'] = email
+            except ValueError(msg):
+                raise tornado.web.HTTPError(400, reason=str(msg))
+            try:
                 saver['first_name'] = self.get_argument('first_name')
                 saver['last_name'] = self.get_argument('last_name')
                 university = self.get_argument('university_other', default=None)
@@ -352,8 +355,8 @@ class Register(RequestHandler):
         self.see_other('password')
 
 
-class UserEnable(RequestHandler):
-    "Enable the user; from status pending or disabled."
+class AccountEnable(RequestHandler):
+    "Enable the account; from status pending or disabled."
 
     SUBJECT = "Your {} portal account has been enabled"
     TEXT = """Your account {} in the {} portal has been enabled.
@@ -363,30 +366,30 @@ Please got to {} to set your password.
     @tornado.web.authenticated
     def post(self, email):
         self.check_xsrf_cookie()
-        user = self.get_user(email)
+        account = self.get_account(email)
         self.check_admin()
-        with UserSaver(user, rqh=self) as saver:
+        with AccountSaver(account, rqh=self) as saver:
             saver['code'] = utils.get_iuid()
             saver['status'] = constants.ENABLED
             saver.erase_password()
         url = self.absolute_reverse_url('password',
                                         email=email,
-                                        code=user['code'])
-        self.send_email(user['email'],
+                                        code=account['code'])
+        self.send_email(account['email'],
                         self.SUBJECT.format(settings['FACILITY_NAME']),
                         self.TEXT.format(email, settings['FACILITY_NAME'], url))
-        self.see_other('user', email)
+        self.see_other('account', email)
 
 
-class UserDisable(RequestHandler):
-    "Disable the user; from status pending or enabled."
+class AccountDisable(RequestHandler):
+    "Disable the account; from status pending or enabled."
 
     @tornado.web.authenticated
     def post(self, email):
         self.check_xsrf_cookie()
-        user = self.get_user(email)
+        account = self.get_account(email)
         self.check_admin()
-        with UserSaver(user, rqh=self) as saver:
+        with AccountSaver(account, rqh=self) as saver:
             saver['status'] = constants.DISABLED
             saver.erase_password()
-        self.see_other('user', email)
+        self.see_other('account', email)

@@ -73,9 +73,7 @@ def load_settings(filepath=None, verbose=False):
     # Expand environment variables and the constants.ROOT
     for key, value in settings.items():
         if isinstance(value, (str, unicode)):
-            value = os.path.expandvars(value)
-            value = value.replace('{ROOT}', constants.ROOT)
-            settings[key] = value
+            settings[key] = expand_filepath(value)
     # Set logging state
     if settings.get('LOGGING_DEBUG'):
         kwargs = dict(level=logging.DEBUG)
@@ -125,6 +123,11 @@ def load_settings(filepath=None, verbose=False):
             settings['PORT'] =  443
         else:
             raise ValueError('could not determine port from BASE_URL')
+
+def expand_filepath(filepath):
+    "Expand environment variables and the constants.ROOT in filepaths."
+    value = os.path.expandvars(value)
+    return value.replace('{ROOT}', constants.ROOT)
 
 def get_dbserver():
     return couchdb.Server(settings['DB_SERVER'])
@@ -294,9 +297,9 @@ def undump(db, filename, verbose=False):
             count_files += 1
         else:
             doc = json.loads(itemdata)
-            # If the user document already exists, do not load again.
-            if doc[constants.DOCTYPE] == constants.USER:
-                rows = db.view('user/username', key=doc['username'])
+            # If the account document already exists, do not load again.
+            if doc[constants.DOCTYPE] == constants.ACCOUNT:
+                rows = db.view('account/email', key=doc['email'])
                 if len(list(rows)) != 0: continue
             atts = doc.pop('_attachments', dict())
             db.save(doc)

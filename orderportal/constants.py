@@ -22,18 +22,17 @@ HIGH_CHAR = 'ZZZZZZZZ'
 
 # Entity documents
 DOCTYPE  = 'orderportal_doctype'
-USER     = 'user'
+ACCOUNT  = 'account'
 FIELD    = 'field'
 FORM     = 'form'
 ORDER    = 'order'
 NEWS     = 'news'
 EVENT    = 'event'
-USER     = 'user'
 TEXT     = 'text'
 INFO     = 'info'
 FILE     = 'file'
 LOG      = 'log'
-ENTITIES = frozenset([USER, FIELD, FORM, ORDER, INFO, FILE, USER])
+ENTITIES = frozenset([ACCOUNT, FIELD, FORM, ORDER, INFO, FILE])
 
 # Field types
 STRING  = 'string'
@@ -50,19 +49,21 @@ TYPE_LABELS = {INT: 'integer'}
 TRUE  = frozenset(['true', 'yes', 't', 'y', '1'])
 FALSE = frozenset(['false', 'no', 'f', 'n', '0'])
 
-# User
-USER_COOKIE    = 'orderportal_user'
-API_KEY_HEADER = 'X-Orderportal-Api-Key'
-TOKEN_HEADER   = 'X-Orderportal-Token'
-# User state
-PENDING       = 'pending'
-ENABLED       = 'enabled'
-DISABLED      = 'disabled'
-USER_STATUSES = [PENDING, ENABLED, DISABLED]
-# User role
-ADMIN      = 'admin'
-STAFF      = 'staff'
-USER_ROLES = [USER, STAFF, ADMIN]
+# User login account
+USER_COOKIE = 'orderportal_user'
+
+# Account state
+PENDING  = 'pending'
+ENABLED  = 'enabled'
+DISABLED = 'disabled'
+ACCOUNT_STATUSES = [PENDING, ENABLED, DISABLED]
+
+# Account role
+USER  = 'user'
+STAFF = 'staff'
+ADMIN = 'admin'
+ACCOUNT_ROLES = [USER, STAFF, ADMIN]
+
 # Form statuses; hard-wired!
 FORM_STATUSES = [PENDING, ENABLED, DISABLED]
 
@@ -75,7 +76,7 @@ MIN_PASSWORD_LENGTH = 6
 
 # Display
 PAGE_SIZE = 2
-MAX_USER_RECENT_ORDERS = 5
+MAX_ACCOUNT_RECENT_ORDERS = 5
 MAX_STAFF_RECENT_ORDERS = 20
 DEFAULT_MAX_DISPLAY_LOG = 20
 

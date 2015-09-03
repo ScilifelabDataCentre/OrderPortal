@@ -1,4 +1,4 @@
-{# Home page for admin. #}
+{# Home page for a logged in user having role 'admin'. #}
 
 {% extends "home.html" %}
 
@@ -10,27 +10,27 @@
   <div class="panel panel-danger">
     <div class="panel-heading">
       <span class="glyphicon glyphicon-user">
-	Pending user accounts
+	Pending accounts
       </span>
     </div>
 
     <div class="panel-body">
       <table class="table table-condensed">
 	<tr>
-	  <th>User</th>
+	  <th>Account</th>
 	  <th>Role</th>
 	  <th>Created</th>
 	</tr>
 	{% if pending %}
-	{% for user in pending %}
+	{% for account in pending %}
 	<tr>
 	  <td>
-	    <a href="{{ reverse_url('user', user['email']) }}">
-	      {{ user['email'] }}
+	    <a href="{{ reverse_url('account', account['email']) }}">
+	      {{ account['email'] }}
 	    </a>
 	  </td>
-	  <td>{% module Icon(user['role'], label=True) %}</td>
-	  <td class="localtime">{{ user['created'] }}</td>
+	  <td>{% module Icon(account['role'], label=True) %}</td>
+	  <td class="localtime">{{ account['created'] }}</td>
 	</tr>
 	{% end %}
 	{% else %}

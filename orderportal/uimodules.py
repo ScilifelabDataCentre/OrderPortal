@@ -2,6 +2,8 @@
 
 from __future__ import print_function, absolute_import
 
+import os.path
+
 import couchdb
 import markdown
 import tornado.web
@@ -39,32 +41,32 @@ class Entity(tornado.web.UIModule):
     "HTML for a link to an entity with an icon."
 
     def render(self, entity):
-        name = entity[constants.DOCTYPE]
-        assert name in constants.ENTITIES
-        if name == constants.USER:
+        doctype = entity[constants.DOCTYPE]
+        assert doctype in constants.ENTITIES
+        if doctype == constants.ACCOUNT:
             icon_url = self.handler.static_url(entity['role'] + '.png')
             title = entity['email']
             alt = entity['role']
-            url = self.handler.reverse_url(name, entity['email'])
-        elif name == constants.INFO:
+            url = self.handler.reverse_url(doctype, entity['email'])
+        elif doctype == constants.INFO:
             icon_url = self.handler.static_url('info.png')
             title = entity.get('title') or entity['name']
-            alt = name
+            alt = doctype
             url = self.handler.reverse_url('info', entity['name'])
-        elif name == constants.FILE:
+        elif doctype == constants.FILE:
             icon_url = self.handler.static_url('file.png')
             title = entity['name']
             alt = title
             url = self.handler.reverse_url('file_meta', entity['name'])
         else:
-            icon_url = self.handler.static_url(name + '.png')
+            icon_url = self.handler.static_url(doctype + '.png')
             iuid = entity.get('iuid') or entity['_id']
             title = entity.get('path') or entity.get('title') or iuid
-            alt = name.capitalize()
+            alt = doctype.capitalize()
             try:
-                url = self.handler.reverse_url(name, iuid)
+                url = self.handler.reverse_url(doctype, iuid)
             except KeyError, msg:
-                raise KeyError(str(msg) + ':', name)
+                raise KeyError(str(msg) + ':', doctype)
         icon = ICON_TEMPLATE.format(url=icon_url, alt=alt, title=alt)
         return """<a href="{url}">{icon} {title}</a>""".format(
             url=url, icon=icon, title=title)

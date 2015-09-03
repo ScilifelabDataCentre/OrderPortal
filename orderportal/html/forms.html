@@ -23,7 +23,7 @@
     </td>
     <td>{% module Icon(form['status'], label=True) %}</td>
     <td>
-      <a href="{{ reverse_url('user', form['owner']) }}">{{ form['owner'] }}</a>
+      <a href="{{ reverse_url('account', form['owner']) }}">{{ form['owner'] }}</a>
     </td>
     <td class="localtime">{{ form['modified'] }}</td>
   </tr>

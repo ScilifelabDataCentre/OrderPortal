@@ -119,7 +119,7 @@ class Saver(object):
                 pass
         entry[constants.DOCTYPE] = constants.LOG
         try:
-            entry['user'] = self.current_user['email']
+            entry['account'] = self.current_user['email']
         except (TypeError, KeyError):
             pass
         self.db.save(entry)

@@ -160,22 +160,22 @@ class Orders(RequestHandler):
         self.render('orders.html', title=title, orders=orders)
 
 
-class OrdersUser(RequestHandler):
-    "Page for a list of all orders for a user."
+class OrdersAccount(RequestHandler):
+    "Page for a list of all orders for an account."
 
     @tornado.web.authenticated
     def get(self, email):
         if not self.is_staff() and email != self.current_user['email']:
             raise tornado.web.HTTPError(403,
                                         reason='you may not view these orders')
-        user = self.get_user(email)
+        account = self.get_account(email)
         view = self.db.view('order/owner',
                             include_docs=True,
                             key=email)
         orders = [self.get_presentable(r.doc) for r in view]
         orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
                     reverse=True)
-        self.render('orders_user.html', user=user, orders=orders)
+        self.render('orders_account.html', account=account, orders=orders)
 
 
 class Order(OrderMixin, RequestHandler):

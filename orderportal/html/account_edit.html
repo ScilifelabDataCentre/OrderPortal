@@ -1,16 +1,16 @@
-{# User edit page. #}
+{# Account edit page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}Edit {{ user['email'] }}{% end %}
+{% block head_title %}Edit {{ account['email'] }}{% end %}
 {% block body_title %}
 Edit
-{% module Icon('user') %}
-{{ user['email'] }}
+{% module Icon('account') %}
+{{ account['email'] }}
 {% end %}
 
 {% block main_content %}
-<form action="{{ reverse_url('user_edit', user['email']) }}"
+<form action="{{ reverse_url('account_edit', account['email']) }}"
       role="form" method="POST">
   {% module xsrf_form_html() %}
 
@@ -20,8 +20,8 @@ Edit
       <div class="col-md-3">
 	<label class="control-label" for="role">Role</label>
 	<select class="form-control" name="role" id="role">
-	  {% for role in constants.USER_ROLES %}
-	  {% set selected = role == user['role'] and 'selected' or '' %}
+	  {% for role in constants.ACCOUNT_ROLES %}
+	  {% set selected = role == account['role'] and 'selected' or '' %}
 	  <option {{ selected }} value="{{ role }}">
 	    {{ role.capitalize() }}
 	  </option>
@@ -38,7 +38,7 @@ Edit
 	<label class="control-label" for="first_name">First name</label>
 	<input type="text" class="form-control"
 	       name="first_name" id="first_name"
-	       value="{{ user.get('first_name') or '' }}">
+	       value="{{ account.get('first_name') or '' }}">
 	<span style="color:red; margin-right: 1em;"
 	      class="glyphicon glyphicon-star form-control-feedback"
 	      aria-hidden="true"></span>
@@ -52,7 +52,7 @@ Edit
 	<label class="control-label" for="last_name">Last name</label>
 	<input type="text" class="form-control"
 	       name="last_name" id="last_name"
-	       value="{{ user.get('last_name') or '' }}">
+	       value="{{ account.get('last_name') or '' }}">
 	<span style="color:red; margin-right: 1em;"
 	      class="glyphicon glyphicon-star form-control-feedback"
 	      aria-hidden="true"></span>
@@ -67,7 +67,7 @@ Edit
 	<select class="form-control" name="university" id="university">
 	  {% set other = True %}
 	  {% for abbrev, name in sorted(settings['UNIVERSITY_LIST'].items()) %}
-	    {% if user.get('university') == abbrev %}
+	    {% if account.get('university') == abbrev %}
 	      {% set other = False %}
 	      {% set selected = 'selected' %}
 	    {% else %}
@@ -89,7 +89,7 @@ Edit
 	<input type="text" class="form-control"
 	       name="university_other" id="university_other"
 	       placeholder="Provide full name if not available in the list."
-	       value="{{ other and user.get('university') or '' }}">
+	       value="{{ other and account.get('university') or '' }}">
       </div>
     </div>
     <span class="help-block">
@@ -104,7 +104,7 @@ Edit
 	<label class="control-label" for="department">Department</label>
 	<input type="text" class="form-control"
 	       name="department" id="department"
-	       value="{{ user.get('department') or '' }}">
+	       value="{{ account.get('department') or '' }}">
       </div>
     </div>
     <span class="help-block">
@@ -118,7 +118,7 @@ Edit
 	<label class="control-label" for="address">Address</label>
 	<textarea rows="4" class="form-control"
 		  id="address" name="address"
-		  >{{ user.get('address') or '' }}</textarea>
+		  >{{ account.get('address') or '' }}</textarea>
       </div>
     </div>
     <span class="help-block">
@@ -133,7 +133,7 @@ Edit
 	<label class="control-label" for="phone">Phone</label>
 	<input type="text" class="form-control"
 	       name="phone" id="phone"
-	       value="{{ user.get('phone') or '' }}">
+	       value="{{ account.get('phone') or '' }}">
       </div>
     </div>
     <span class="help-block">
@@ -147,7 +147,7 @@ Edit
 	<label class="control-label" for="other">Other data</label>
 	<textarea rows="4" class="form-control"
 		  id="other" name="other"
-		  >{{ user.get('other') or '' }}</textarea>
+		  >{{ account.get('other') or '' }}</textarea>
       </div>
     </div>
     <span class="help-block">
@@ -166,7 +166,7 @@ Edit
 </form>
 
 <br>
-<form action="{{ reverse_url('user', user['email']) }}"
+<form action="{{ reverse_url('account', account['email']) }}"
       role="form" method="GET">
   <div class="form-group">
     <label class="control-label"></label>

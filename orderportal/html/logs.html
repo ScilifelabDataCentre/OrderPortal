@@ -17,7 +17,7 @@
 <table class="table table-striped">
   <tr>
     <th>Log entry</th>
-    <th>User</th>
+    <th>Account</th>
     <th>Changed</th>
   </tr>
   {% for log in logs %}
@@ -27,7 +27,7 @@
 	<span class="localtime">{{ log['modified'] }}</span>
       </a>
     </td>
-    <td>{{ log.get('user') or '-' }}</td>
+    <td>{{ log.get('account') or '-' }}</td>
     <td>
       <table class="table-condensed">
 	{% for key, value in sorted(log['changed'].items()) %}

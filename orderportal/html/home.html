@@ -2,13 +2,18 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}{{ settings['FACILITY_NAME'] }} Order Portal{% end %}
+{% block head_title %}{{ settings['SITE_NAME'] }} Order Portal{% end %}
 
 {% block body_title %}
-<img src="{{ static_url(settings['FACILITY_ICON_HOME']) }}"
-     title="{{ settings['FACILITY_NAME'] }}"
-     alt="{{ settings['FACILITY_NAME'] }}">
-{{ settings['FACILITY_NAME'] }} Order Portal
+{% try %}
+  {% set url = reverse_url('site', settings['SITE_HOME_ICON']) %}
+{% except KeyError %}
+  {% set url = static_url('orderportal_144.png') %}
+{% end %}
+<img src="{{ url }}"
+     title="{{ settings['SITE_NAME'] }}"
+     alt="{{ settings['SITE_NAME'] }}">
+{{ settings['SITE_NAME'] }} Order Portal
 {% end %}
 
 {% block content %}
@@ -65,7 +70,7 @@
 	<div>
 	  <a href="{{ reverse_url('register') }}"
 	     class="btn btn-success glyphicon glyphicon-user" role="button">
-	    Register new user
+	    Register new account
 	  </a>
 	</div>
 	<br>

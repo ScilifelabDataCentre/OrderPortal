@@ -18,7 +18,7 @@ from orderportal.requesthandler import RequestHandler
 
 
 class Home(RequestHandler):
-    "Home page; dashboard. Contents according to role of logged-in user."
+    "Home page; dashboard. Contents according to role of logged-in account."
 
     def get(self):
         if not self.current_user:
@@ -36,7 +36,8 @@ class Home(RequestHandler):
                            events=self.get_events())
 
     def home_admin(self, news_items, events):
-        view = self.db.view('user/status',
+        "Home page for a current user having role 'admin'."
+        view = self.db.view('account/status',
                             key=constants.PENDING,
                             include_docs=True)
         pending = [self.get_presentable(r.doc) for r in view]
@@ -50,6 +51,7 @@ class Home(RequestHandler):
                     news_items=news_items, events=events)
 
     def home_staff(self, news_items, events):
+        "Home page for a current user having role 'staff'."
         view = self.db.view('order/modified',
                             descending=True,
                             limit=constants.MAX_STAFF_RECENT_ORDERS,
@@ -59,11 +61,12 @@ class Home(RequestHandler):
                     news_items=news_items, events=events)
 
     def home_user(self, news_items, events):
+        "Home page for a current user having role 'user'."
         forms = [self.get_presentable(r.doc) for r in
                  self.db.view('form/enabled', include_docs=True)]
         view = self.db.view('order/owner',
                             descending=True,
-                            limit=constants.MAX_USER_RECENT_ORDERS,
+                            limit=constants.MAX_ACCOUNT_RECENT_ORDERS,
                             include_docs=True,
                             key=self.current_user['email'])
         orders = [self.get_presentable(r.doc) for r in view]
@@ -90,8 +93,8 @@ class Entity(RequestHandler):
             self.see_other('order', doc['_id'])
         elif doc[constants.DOCTYPE] == constants.FORM:
             self.see_other('form', doc['_id'])
-        elif doc[constants.DOCTYPE] == constants.USER:
-            self.see_other('user', doc['email'])
+        elif doc[constants.DOCTYPE] == constants.ACCOUNT:
+            self.see_other('account', doc['email'])
         else:
             raise tornado.web.HTTPError(404)
 

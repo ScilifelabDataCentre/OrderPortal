@@ -1,12 +1,12 @@
-{# Users list page. #}
+{# Accounts list page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}Users{% end %}
-{% block body_title %}Users{% end %}
+{% block head_title %}Accounts{% end %}
+{% block body_title %}Accounts{% end %}
 
 {% block content %}
-<form action="{{ reverse_url('users', **params) }}"
+<form action="{{ reverse_url('accounts', **params) }}"
       id="refresh"
       role="form" class="form-inline"
       method="GET">
@@ -67,7 +67,7 @@
       <div class="form-group">
 	<select name="role" id="role" class="form-control refresh">
 	  <option value="">[any role]</option>
-	  {% for role in constants.USER_ROLES %}
+	  {% for role in constants.ACCOUNT_ROLES %}
 	  {% set sel = role == params.get('role') and 'selected' or '' %}
 	  <option {{ sel }} value="{{ role }}">{{ role.capitalize() }}</option>
 	  {% end %}
@@ -76,7 +76,7 @@
       <div class="form-group">
 	<select name="status" id="status" class="form-control refresh">
 	  <option value="">[any status]</option>
-	  {% for status in constants.USER_STATUSES %}
+	  {% for status in constants.ACCOUNT_STATUSES %}
 	  {% set sel = status == params.get('status') and 'selected' or '' %}
 	  <option {{ sel }} value="{{ status }}">{{ status.capitalize() }}</option>
 	  {% end %}
@@ -94,33 +94,33 @@
 	<li>
 	  {% set current = params.get('page', 0) %}
 	  {% set params['page'] = 0 %}
-	  <a href="{{ reverse_url('users', **params) }}">
+	  <a href="{{ reverse_url('accounts', **params) }}">
 	  <span class="glyphicon glyphicon-fast-backward"></span>
 	  First
 	</a>
       </li>
       <li>
 	{% set params['page'] = max(0, current-1) %}
-	<a href="{{ reverse_url('users', **params) }}">
+	<a href="{{ reverse_url('accounts', **params) }}">
 	  <span class="glyphicon glyphicon-step-backward"></span>
 	  Previous
 	</a>
       </li>
       <li>
-	<a href="{{ reverse_url('users', **params) }}">
+	<a href="{{ reverse_url('accounts', **params) }}">
 	  {{ start }} to {{ end }} (of {{ count }})
 	</a>
       </li>
       <li>
 	{% set params['page'] = min(max_page, current+1) %}
-	<a href="{{ reverse_url('users', **params) }}">
+	<a href="{{ reverse_url('accounts', **params) }}">
 	  Next
 	  <span class="glyphicon glyphicon-step-forward"></span>
 	</a>
       </li>
       <li>
 	{% set params['page'] = max_page %}
-	<a href="{{ reverse_url('users', **params) }}">
+	<a href="{{ reverse_url('accounts', **params) }}">
 	  Last
 	  <span class="glyphicon glyphicon-fast-forward"></span>
 	</a>
@@ -135,7 +135,7 @@
   <div class="col-md-10 col-md-offset-1">
     <table class="table table-striped">
       <tr>
-	<th>User</th>
+	<th>Account</th>
 	<th>Name</th>
 	<th>University</th>
 	<th>Role</th>
@@ -143,24 +143,24 @@
 	<th>Login</th>
 	<th>Orders</th>
       </tr>
-      {% for user in users %}
+      {% for account in accounts %}
       <tr>
 	<td>
-	  <a href="{{ reverse_url('user', user['email']) }}">
-	    {{ user['email'] }}
+	  <a href="{{ reverse_url('account', account['email']) }}">
+	    {{ account['email'] }}
 	  </a>
 	</td>
-	<td>{{ user['last_name'] + ', ' + user['first_name'] }}</td>
-	<td>{{ user['university'] }}</td>
-	<td>{% module Icon(user['role'], label=True) %}</td>
-	<td>{% module Icon(user['status'], label=True) %}</td>
-	{% if user.get('login') %}
-	<td class="localtime">{{ user['login'] }}</td>
+	<td>{{ account['last_name'] + ', ' + account['first_name'] }}</td>
+	<td>{{ account['university'] }}</td>
+	<td>{% module Icon(account['role'], label=True) %}</td>
+	<td>{% module Icon(account['status'], label=True) %}</td>
+	{% if account.get('login') %}
+	<td class="localtime">{{ account['login'] }}</td>
 	{% else %}
 	<td>-</td>
 	{% end %}
 	<td>
-	  <a href="{{ reverse_url('orders_user', user['email']) }}">
+	  <a href="{{ reverse_url('orders_account', account['email']) }}">
 	    {% module Icon('order') %} Orders
 	  </a>
 	</td>

@@ -1,4 +1,4 @@
-{# Home page for user. #}
+{# Home page for a logged in user having role 'user'. #}
 
 {% extends "home.html" %}
 
@@ -26,7 +26,7 @@
     {% end %}
   </div>
 
-  {% set orders_url = reverse_url('orders_user', current_user['email']) %}
+  {% set orders_url = reverse_url('orders_account', current_user['email']) %}
   {% include 'orders_mod_panel.html' %}
 
 </div>

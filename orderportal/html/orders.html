@@ -22,7 +22,7 @@
     </td>
     <td>{% module Icon(order['status'], label=True) %}</td>
     <td class="localtime">{{ order['modified'] }}</td>
-    <td><a href="{{ reverse_url('user', order['owner']) }}">{{ order['owner'] }}</a></td>
+    <td><a href="{{ reverse_url('account', order['owner']) }}">{{ order['owner'] }}</a></td>
   </tr>
   {% end %}
 </table>
