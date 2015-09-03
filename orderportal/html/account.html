@@ -10,7 +10,7 @@
 
 {% block meta_content %}
 
-{% if is_admin or current_account['email'] == account['email'] %}
+{% if is_admin or current_user['email'] == account['email'] %}
 <div>
   <a href="{{ reverse_url('account_edit', account['email']) }}"
      class="btn btn-primary glyphicon glyphicon-edit" role="button">
@@ -26,7 +26,7 @@
 </div>
 {% end %} {# if is_admin #}
 
-{% if is_admin and current_account['email'] != account['email'] %}
+{% if is_admin and current_user['email'] != account['email'] %}
 
 <br>
 {% if account['status'] in (constants.PENDING, constants.DISABLED) %}

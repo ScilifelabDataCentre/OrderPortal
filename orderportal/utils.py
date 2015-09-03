@@ -108,7 +108,7 @@ def load_settings(filepath=None, verbose=False):
     try:
         settings['UNIVERSITY_LIST'] = yaml.safe_load(
             open(settings['UNIVERSITY_LIST_FILENAME']))
-    except KeyError:
+    except (IOError, KeyError):
         settings['UNIVERSITY_LIST'] = dict()
     # Settings computable from others
     settings['DB_SERVER_VERSION'] = couchdb.Server(settings['DB_SERVER']).version()
@@ -126,8 +126,8 @@ def load_settings(filepath=None, verbose=False):
 
 def expand_filepath(filepath):
     "Expand environment variables and the constants.ROOT in filepaths."
-    value = os.path.expandvars(value)
-    return value.replace('{ROOT}', constants.ROOT)
+    filepath = os.path.expandvars(filepath)
+    return filepath.replace('{ROOT}', constants.ROOT)
 
 def get_dbserver():
     return couchdb.Server(settings['DB_SERVER'])

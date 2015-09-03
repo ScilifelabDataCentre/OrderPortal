@@ -63,9 +63,10 @@ Edit
   <div class="form-group has-feedback">
     <label class="control-label" for="university">University</label>
     <div class="row">
+      {% if settings['UNIVERSITY_LIST'] %}
+      {% set other = True %}
       <div class="col-md-6">
 	<select class="form-control" name="university" id="university">
-	  {% set other = True %}
 	  {% for abbrev, name in sorted(settings['UNIVERSITY_LIST'].items()) %}
 	    {% if account.get('university') == abbrev %}
 	      {% set other = False %}
@@ -91,6 +92,16 @@ Edit
 	       placeholder="Provide full name if not available in the list."
 	       value="{{ other and account.get('university') or '' }}">
       </div>
+      {% else %}
+      <div class="col-md-6">
+	<input type="text" class="form-control"
+	       name="university" id="university"
+	       value="{{ account.get('university') or '' }}">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+      {% end %}
     </div>
     <span class="help-block">
       Main affiliation: University, college, company, organization, or
