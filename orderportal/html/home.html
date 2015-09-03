@@ -2,7 +2,7 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}{{ settings['SITE_NAME'] }} Order Portal{% end %}
+{% block head_title %}{{ settings['SITE_NAME'] }}{% end %}
 
 {% block body_title %}
 {% try %}
@@ -13,7 +13,7 @@
 <img src="{{ url }}"
      title="{{ settings['SITE_NAME'] }}"
      alt="{{ settings['SITE_NAME'] }}">
-{{ settings['SITE_NAME'] }} Order Portal
+{{ settings['SITE_NAME'] }}
 {% end %}
 
 {% block content %}
