@@ -77,19 +77,14 @@
 		<span class="caret"></span>
 	      </a>
               <ul class="dropdown-menu">
+		<li>
+		  <a href="{{ reverse_url('infos') }}">[All info pages]</a>
+		</li>
 		{% for n, t in infos %}
 		<li>
 		  <a href="{{ reverse_url('info', n) }}">
 		    {{ t or n }}
 		  </a>
-		</li>
-		{% end %}
-		{% if is_admin %}
-		<li>
-		  <a href="{{ reverse_url('infos') }}">[all infos]</a>
-		</li>
-		<li>
-		  <a href="{{ reverse_url('info_create') }}">[create info]</a>
 		</li>
 		{% end %}
               </ul>
@@ -101,17 +96,12 @@
 		<span class="caret"></span>
 	      </a>
               <ul class="dropdown-menu">
+		<li>
+		  <a href="{{ reverse_url('files') }}">[All files]</a>
+		</li>
 		{% for name in files %}
 		<li>
 		  <a href="{{ reverse_url('file_meta', name) }}">{{ name }}</a>
-		</li>
-		{% end %}
-		{% if is_admin %}
-		<li>
-		  <a href="{{ reverse_url('files') }}">[all files]</a>
-		</li>
-		<li>
-		  <a href="{{ reverse_url('file_create') }}">[create file]</a>
 		</li>
 		{% end %}
               </ul>
@@ -134,7 +124,7 @@
 	    {% end %}
 
 	    {% if is_admin %}
-            <li><a href="{{ reverse_url('debug') }}">Debug</a></li>
+            <li><a href="{{ reverse_url('tech') }}">Tech</a></li>
 	    {% end %}
 	  </ul>
 
@@ -155,7 +145,7 @@
 		  {% module xsrf_form_html() %}
 		  <button type="submit"
 			  title="Logout"
-			  class="btn btn-warning btn-sm glyphicon glyphicon-log-out">
+			  class="btn btn-default btn-sm glyphicon glyphicon-log-out">
 		  </button>
 		</form>
 	      </li>

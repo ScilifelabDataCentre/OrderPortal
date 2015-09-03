@@ -126,8 +126,8 @@ class Text(RequestHandler):
         self.redirect(url, status=303)
 
 
-class Debug(RequestHandler):
-    "Page displaying some debug information."
+class Tech(RequestHandler):
+    "Page displaying some technical information."
 
     @tornado.web.authenticated
     def get(self):
@@ -139,4 +139,4 @@ class Debug(RequestHandler):
                   ('tornado', tornado.version),
                   ('PyYAML', yaml.__version__),
                   ('markdown', markdown.version)]
-        self.render('debug.html', params=params)
+        self.render('tech.html', params=params)

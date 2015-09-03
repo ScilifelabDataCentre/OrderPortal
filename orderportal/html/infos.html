@@ -9,47 +9,46 @@
 Information pages
 {% end %}
 
-{% block content %}
+{% block main_content %}
+<table class="table table-striped">
+  <tr>
+    <th>Name</th>
+    <th>Title</th>
+    <th>Menu</th>
+    <th>Modified</th>
+    <th>Created</th>
+  </tr>
+  {% for info in all_infos %}
+  <tr>
+    <td>
+      <a href="{{ reverse_url('info', info['name']) }}">
+	{% module Icon('info') %}
+	{{ info['name'] }}
+      </a>
+    </td>
+    <td>{{ info.get('title') or '-' }}</td>
+    <td>{{ info.get('menu') or '-' }}</td>
+    <td>
+      <span  class="localtime">{{ info['modified'] }}</span>
+      <a href="{{ reverse_url('info_logs', info['name']) }}">
+	{% module Icon('logs', label=True) %}
+      </a>
+    </td>
+    <td class="localtime">{{ info['created'] }}</td>
+  </tr>
+  {% end %}
+</table>
+{% end %}{# block main_content #}
+
+{% if is_admin %}
+{% block meta_content %}
 <form action="{{ reverse_url('info_create') }}"
-      role="form" class="pull-right" method="GET">
+      role="form"
+      method="GET">
   <button type="submit"
-	  class="btn btn-sm btn-warning glyphicon glyphicon-plus">
+	  class="btn btn-sm btn-primary glyphicon glyphicon-plus">
     Create
   </button>
 </form>
-
-<div class="row">
-  <div class="col-md-9 col-md-offset-1">
-    <table class="table table-striped">
-      <tr>
-	<th>Name</th>
-	<th>Title</th>
-	<th>Menu</th>
-	<th>Modified</th>
-	<th>Created</th>
-      </tr>
-      {% for info in all_infos %}
-      <tr>
-	<td>
-	  <a href="{{ reverse_url('info', info['name']) }}">
-	    {% module Icon('info') %}
-	    {{ info['name'] }}
-	  </a>
-	</td>
-	<td>{{ info.get('title') or '-' }}</td>
-	<td>{{ info.get('menu') or '-' }}</td>
-	<td>
-	  <span  class="localtime">{{ info['modified'] }}</span>
-	  <a href="{{ reverse_url('info_logs', info['name']) }}">
-	    {% module Icon('logs', label=True) %}
-	  </a>
-	</td>
-	<td class="localtime">{{ info['created'] }}</td>
-      </tr>
-      {% end %}
-    </table>
-  </div>
-  <div class="col-md-2">
-  </div>
-</div>
+{% end %} {# block meta_content #}
 {% end %}

@@ -9,49 +9,48 @@
 Files
 {% end %}
 
-{% block content %}
+{% block main_content %}
+<table class="table table-striped">
+  <tr>
+    <th>Name</th>
+    <th>Menu</th>
+    <th>Content type</th>
+    <th>Size</th>
+    <th>Modified</th>
+    <th>Created</th>
+  </tr>
+  {% for file in all_files %}
+  <tr>
+    <td>
+      <a href="{{ reverse_url('file_meta', file['name']) }}">
+	{% module Icon('file') %}
+	{{ file['name'] }}
+      </a>
+    </td>
+    <td>{{ file.get('menu') or '-' }}</td>
+    <td>{{ file['content_type'] }}</td>
+    <td>{{ file['size'] }}</td>
+    <td>
+      <span class="localtime">{{ file['modified'] }}</span>
+      <a href="{{ reverse_url('file_logs', file['name']) }}">
+	{% module Icon('logs', label=True) %}
+      </a>
+    </td>
+    <td class="localtime">{{ file['created'] }}</td>
+  </tr>
+  {% end %}
+</table>
+{% end %}{# block main_content #}
+
+{% if is_admin %}
+{% block meta_content %}
 <form action="{{ reverse_url('file_create') }}"
-      role="form" class="pull-right" method="GET">
+      role="form"
+      method="GET">
   <button type="submit"
-	  class="btn btn-sm btn-warning glyphicon glyphicon-plus">
+	  class="btn btn-sm btn-primary glyphicon glyphicon-plus">
     Create
   </button>
 </form>
-
-<div class="row">
-  <div class="col-md-9 col-md-offset-1">
-    <table class="table table-striped">
-      <tr>
-	<th>Name</th>
-	<th>Menu</th>
-	<th>Content type</th>
-	<th>Size</th>
-	<th>Modified</th>
-	<th>Created</th>
-      </tr>
-      {% for file in all_files %}
-      <tr>
-	<td>
-	  <a href="{{ reverse_url('file_meta', file['name']) }}">
-	    {% module Icon('file') %}
-	    {{ file['name'] }}
-	  </a>
-	</td>
-	<td>{{ file.get('menu') or '-' }}</td>
-	<td>{{ file['content_type'] }}</td>
-	<td>{{ file['size'] }}</td>
-	<td>
-	  <span class="localtime">{{ file['modified'] }}</span>
-	  <a href="{{ reverse_url('file_logs', file['name']) }}">
-	    {% module Icon('logs', label=True) %}
-	  </a>
-	</td>
-	<td class="localtime">{{ file['created'] }}</td>
-      </tr>
-      {% end %}
-    </table>
-  </div>
-  <div class="col-md-2">
-  </div>
-</div>
+{% end %} {# block meta_content #}
 {% end %}

@@ -88,7 +88,7 @@ def get_handlers():
             url(r'/text/([^/]+)', Text, name='text'),
             url(r'/log/([0-9a-f]{32})', Log, name='log'),
             url(r'/([0-9a-f]{32})', Entity, name='entity'),
-            url(r'/debug', Debug, name='debug'),
+            url(r'/tech', Tech, name='tech'),
             ]
 
 def main():

@@ -7,27 +7,23 @@
 {% module Icon('order', title='Orders', label=True) %}
 {% end %}
 
-{% block content %}
-<div class="row">
-  <div class="col-md-9 col-md-offset-1">
-    <table class="table table-striped">
-      <tr>
-	<th>Order</th>
-	<th>Status</th>
-	<th>Modified</th>
-	<th>Owner</th>
-      </tr>
-      {% for order in orders %}
-      <tr>
-	<td>
-	  <a href="{{ reverse_url('order', order['iuid']) }}">{{ order.get('title', order['iuid']) }}</a>
-	</td>
-	<td>{% module Icon(order['status'], label=True) %}</td>
-	<td class="localtime">{{ order['modified'] }}</td>
-	<td><a href="{{ reverse_url('user', order['owner']) }}">{{ order['owner'] }}</a></td>
-      </tr>
-      {% end %}
-    </table>
-  </div>
-</div>
-{% end %}
+{% block main_content %}
+<table class="table table-striped">
+  <tr>
+    <th>Order</th>
+    <th>Status</th>
+    <th>Modified</th>
+    <th>Owner</th>
+  </tr>
+  {% for order in orders %}
+  <tr>
+    <td>
+      <a href="{{ reverse_url('order', order['iuid']) }}">{{ order.get('title', order['iuid']) }}</a>
+    </td>
+    <td>{% module Icon(order['status'], label=True) %}</td>
+    <td class="localtime">{{ order['modified'] }}</td>
+    <td><a href="{{ reverse_url('user', order['owner']) }}">{{ order['owner'] }}</a></td>
+  </tr>
+  {% end %}
+</table>
+{% end %}{# block main_content #}
