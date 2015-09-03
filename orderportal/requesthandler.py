@@ -34,7 +34,7 @@ class RequestHandler(tornado.web.RequestHandler):
         result['absolute_reverse_url'] = self.absolute_reverse_url
         result['is_staff'] = self.is_staff()
         result['is_admin'] = self.is_admin()
-        result['error'] = self.get_argument('error', None)
+        result['message'] = self.get_argument('message', None)
         result['infos'] = [r.value for r in self.db.view('info/menu')]
         result['files'] = [r.value for r in self.db.view('file/menu')]
         result['texts'] = [r.key for r in self.db.view('text/name')]

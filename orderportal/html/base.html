@@ -173,22 +173,22 @@
 	</div>
       </div>
 
-      {% block error %}
+      {% block message %}
       {% try %}
-      {% if error %}
+      {% if message %}
       <div class="row">
 	<div class="col-md-8 col-md-offset-2">
 	  <div class="panel panel-danger">
-	    <div class="panel-heading">Error</div>
-	    <div class="panel-body">{{ error }}</div>
+	    <div class="panel-heading">Message</div>
+	    <div class="panel-body">{{ message }}</div>
 	  </div>
 	</div>
 	<div class="col-md-2"></div>
       </div>
-      {% end %} {# if error #}
+      {% end %} {# if message #}
       {% except NameError %}
       {% end %} {# try #}
-      {% end %} {# block error #}
+      {% end %} {# block message #}
 
       {% block content %}
       <div class="row">

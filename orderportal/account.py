@@ -331,9 +331,9 @@ class Register(RequestHandler):
         self.check_xsrf_cookie()
         with AccountSaver(rqh=self) as saver:
             try:
-                saver.set_email(self.get_argument('email', ''))
-                saver['email'] = email
-            except ValueError(msg):
+                email = self.get_argument('email', '')
+                saver.set_email(email)
+            except ValueError, msg:
                 raise tornado.web.HTTPError(400, reason=str(msg))
             try:
                 saver['first_name'] = self.get_argument('first_name')
@@ -352,14 +352,16 @@ class Register(RequestHandler):
             saver['role'] = constants.USER
             saver['status'] = constants.PENDING
             saver.erase_password()
-        self.see_other('password')
+        self.see_other('home',
+                       message='An activation email will be sent to you'
+                       ' from the administrator when your account is enabled.')
 
 
 class AccountEnable(RequestHandler):
     "Enable the account; from status pending or disabled."
 
-    SUBJECT = "Your {} portal account has been enabled"
-    TEXT = """Your account {} in the {} portal has been enabled.
+    SUBJECT = "Your {} account has been enabled"
+    TEXT = """Your account {} in the {} has been enabled.
 Please got to {} to set your password.
 """
 
@@ -369,15 +371,14 @@ Please got to {} to set your password.
         account = self.get_account(email)
         self.check_admin()
         with AccountSaver(account, rqh=self) as saver:
-            saver['code'] = utils.get_iuid()
             saver['status'] = constants.ENABLED
-            saver.erase_password()
+            saver.reset_password()
         url = self.absolute_reverse_url('password',
                                         email=email,
                                         code=account['code'])
         self.send_email(account['email'],
-                        self.SUBJECT.format(settings['FACILITY_NAME']),
-                        self.TEXT.format(email, settings['FACILITY_NAME'], url))
+                        self.SUBJECT.format(settings['SITE_NAME']),
+                        self.TEXT.format(email, settings['SITE_NAME'], url))
         self.see_other('account', email)
 
 
