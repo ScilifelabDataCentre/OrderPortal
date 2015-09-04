@@ -2,18 +2,14 @@
 
 from __future__ import print_function, absolute_import
 
-import collections
-import cStringIO
 import datetime
 import hashlib
-import json
 import logging
 import mimetypes
 import optparse
 import os
 import socket
 import sys
-import tarfile
 import time
 import unicodedata
 import urllib
@@ -25,8 +21,8 @@ import tornado.web
 import yaml
 
 import orderportal
-from orderportal import settings
 from . import constants
+from . import settings
 
 
 def get_command_line_parser(usage='usage: %prog [options]', description=None):
@@ -201,115 +197,3 @@ def hashed_password(password):
     sha256 = hashlib.sha256(settings['PASSWORD_SALT'])
     sha256.update(password)
     return sha256.hexdigest()
-
-def load_designs(db, verbose=False,
-                 root=os.path.join(constants.ROOT, 'designs')):
-    "Load all CouchDB database design documents."
-    for design in os.listdir(root):
-        views = dict()
-        path = os.path.join(root, design)
-        if not os.path.isdir(path): continue
-        path = os.path.join(root, design, 'views')
-        for filename in os.listdir(path):
-            name, ext = os.path.splitext(filename)
-            if ext != '.js': continue
-            with open(os.path.join(path, filename)) as codefile:
-                code = codefile.read()
-            if name.startswith('map_'):
-                name = name[len('map_'):]
-                key = 'map'
-            elif name.startswith('reduce_'):
-                name = name[len('reduce_'):]
-                key = 'reduce'
-            else:
-                key = 'map'
-            views.setdefault(name, dict())[key] = code
-        id = "_design/%s" % design
-        try:
-            doc = db[id]
-        except couchdb.http.ResourceNotFound:
-            if verbose: print('loading', id, file=sys.stderr)
-            db.save(dict(_id=id, views=views))
-        else:
-            if doc['views'] != views:
-                doc['views'] = views
-                if verbose: print('updating', id, file=sys.stderr)
-                db.save(doc)
-            elif verbose:
-                print('no change', id, file=sys.stderr)
-
-def wipeout_database(db):
-    """Wipe out the contents of the database.
-    This is used rather than total delete of the database instance, since
-    that may require additional privileges, depending on the setup.
-    """
-    for doc in db:
-        del db[doc]
-
-def dump(db, filepath, verbose=False):
-    "Dump contents of the database to a tar file, optionally gzip compressed."
-    count_items = 0
-    count_files = 0
-    if filepath.endswith('.gz'):
-        mode = 'w:gz'
-    else:
-        mode = 'w'
-    outfile = tarfile.open(filepath, mode=mode)
-    for key in db:
-        if not constants.IUID_RX.match(key): continue
-        doc = db[key]
-        del doc['_rev']
-        info = tarfile.TarInfo(doc['_id'])
-        data = json.dumps(doc)
-        info.size = len(data)
-        outfile.addfile(info, cStringIO.StringIO(data))
-        count_items += 1
-        for attname in doc.get('_attachments', dict()):
-            info = tarfile.TarInfo("{}_att/{}".format(doc['_id'], attname))
-            attfile = db.get_attachment(doc, attname)
-            if attfile is None:
-                data = ''
-            else:
-                data = attfile.read()
-                attfile.close()
-            info.size = len(data)
-            outfile.addfile(info, cStringIO.StringIO(data))
-            count_files += 1
-    outfile.close()
-    if verbose:
-        print('dumped', count_items, 'items and',
-              count_files, 'files to', filepath, file=sys.stderr)
-
-def undump(db, filename, verbose=False):
-    """Reverse of dump; load all items from a tar file.
-    Items are just added to the database, ignoring existing items.
-    """
-    count_items = 0
-    count_files = 0
-    attachments = dict()
-    infile = tarfile.open(filename, mode='r')
-    for item in infile:
-        itemfile = infile.extractfile(item)
-        itemdata = itemfile.read()
-        itemfile.close()
-        if item.name in attachments:
-            # This relies on an attachment being after its item in the tarfile.
-            db.put_attachment(doc, itemdata, **attachments.pop(item.name))
-            count_files += 1
-        else:
-            doc = json.loads(itemdata)
-            # If the account document already exists, do not load again.
-            if doc[constants.DOCTYPE] == constants.ACCOUNT:
-                rows = db.view('account/email', key=doc['email'])
-                if len(list(rows)) != 0: continue
-            atts = doc.pop('_attachments', dict())
-            db.save(doc)
-            count_items += 1
-            for attname, attinfo in atts.items():
-                key = "{}_att/{}".format(doc['_id'], attname)
-                attachments[key] = dict(filename=attname,
-                                        content_type=attinfo['content_type'])
-    infile.close()
-    if verbose:
-        print('undumped', count_items, 'items and',
-              count_files, 'files from', filepath, file=sys.stderr)

@@ -12,7 +12,7 @@ import yaml
 
 from orderportal import utils
 from orderportal import home
-
+from orderporta.scripts.load_designs import load_designs
 
 def get_args():
     parser = utils.get_command_line_parser(description=
@@ -25,10 +25,10 @@ def get_args():
 
 def init_database(verbose=False, dumpfilepath=None):
     db = utils.get_db(create=True)
-    utils.wipeout_database(db)
+    wipeout_database(db)
     if verbose:
         print('wiped out order database', file=sys.stderr)
-    utils.load_designs(db)
+    load_designs(db)
     if verbose:
         print('loaded designs', file=sys.stderr)
     if dumpfilepath:
@@ -39,6 +39,14 @@ def init_database(verbose=False, dumpfilepath=None):
             print('Warning: could not load', dumpfilepath)
     elif verbose:
         print('no dump file loaded', file=sys.stderr)
+
+def wipeout_database(db):
+    """Wipe out the contents of the database.
+    This is used rather than total delete of the database instance, since
+    that may require additional privileges, depending on the setup.
+    """
+    for doc in db:
+        del db[doc]
 
 
 if __name__ == '__main__':

@@ -362,7 +362,7 @@ class AccountEnable(RequestHandler):
 
     SUBJECT = "Your {} account has been enabled"
     TEXT = """Your account {} in the {} has been enabled.
-Please got to {} to set your password.
+Please go to {} to set your password.
 """
 
     @tornado.web.authenticated
