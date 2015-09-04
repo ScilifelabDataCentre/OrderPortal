@@ -7,23 +7,103 @@
 {% module Icon('order', title='Orders', label=True) %}
 {% end %}
 
-{% block main_content %}
-<table class="table table-striped">
-  <tr>
-    <th>Order</th>
-    <th>Status</th>
-    <th>Modified</th>
-    <th>Owner</th>
-  </tr>
-  {% for order in orders %}
-  <tr>
-    <td>
-      <a href="{{ reverse_url('order', order['iuid']) }}">{{ order.get('title', order['iuid']) }}</a>
-    </td>
-    <td>{% module Icon(order['status'], label=True) %}</td>
-    <td class="localtime">{{ order['modified'] }}</td>
-    <td><a href="{{ reverse_url('account', order['owner']) }}">{{ order['owner'] }}</a></td>
-  </tr>
-  {% end %}
-</table>
-{% end %}{# block main_content #}
+{% block content %}
+<form action="{{ reverse_url('orders', **params) }}"
+      id="refresh"
+      role="form" class="form-inline"
+      method="GET">
+  <input type="hidden" name="page" value="{{ params.get('page') or 0 }}">
+  <div class="row">
+    <div class="col-md-7 col-md-offset-3">
+      <label class="glyphicon glyphicon-filter"></label>
+      <div class="form-group">
+	<label for="status">Filter by</label>
+	<select name="status" id="status" class="form-control refresh">
+	  <option value="">[any status]</option>
+	  {% for status in settings['ORDER_STATUSES'] %}
+	  {% set sid = status['identifier'] %}
+	  {% set sel = sid == params.get('status') and 'selected' or '' %}
+	  <option {{ sel }} value="{{ sid }}">{{ sid.capitalize() }}</option>
+	  {% end %}
+	</select>
+      </div>
+    </div>
+    <div class="col-md-2">
+    </div>
+  </div>
+</form>
+
+<div class="row">
+  <div class="col-md-6 col-md-offset-2">
+    <ul class="pager">
+      <li>
+	{% set current = params.get('page', 0) %}
+	{% set params['page'] = 0 %}
+	<a href="{{ reverse_url('orders', **params) }}">
+	  <span class="glyphicon glyphicon-fast-backward"></span>
+	  First
+	</a>
+      </li>
+      <li>
+	{% set params['page'] = max(0, current-1) %}
+	<a href="{{ reverse_url('orders', **params) }}">
+	  <span class="glyphicon glyphicon-step-backward"></span>
+	  Previous
+	</a>
+      </li>
+      <li>
+	<a href="{{ reverse_url('orders', **params) }}">
+	  {{ start }} to {{ end }} (of {{ count }})
+	</a>
+      </li>
+      <li>
+	{% set params['page'] = min(max_page, current+1) %}
+	<a href="{{ reverse_url('orders', **params) }}">
+	  Next
+	  <span class="glyphicon glyphicon-step-forward"></span>
+	</a>
+      </li>
+      <li>
+	{% set params['page'] = max_page %}
+	<a href="{{ reverse_url('orders', **params) }}">
+	  Last
+	  <span class="glyphicon glyphicon-fast-forward"></span>
+	</a>
+      </li>
+    </ul>
+  </div>
+  <div class="col-md-4">
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-10 col-md-offset-1">
+    <table class="table table-striped">
+      <tr>
+	<th>Order</th>
+	<th>Owner</th>
+	<th>Status</th>
+	<th>Modified</th>
+      </tr>
+      {% for order in orders %}
+      <tr>
+	<td>
+	  <a href="{{ reverse_url('order', order['iuid']) }}">{{ order.get('title', order['iuid']) }}</a>
+	</td>
+	<td>
+	  <a href="{{ reverse_url('account', order['owner']) }}">{{ order['owner'] }}</a>
+	</td>
+	<td>{% module Icon(order['status'], label=True) %}</td>
+	<td class="localtime">{{ order['modified'] }}</td>
+      </tr>
+      {% end %}
+    </table>
+  </div>
+  <div class="col-md-1">
+  </div>
+</div>
+{% end %}{# block content #}
+
+{% block javascript_code %}
+<script src="{{ static_url('refresh_on_change.js') }}"></script>
+{% end %}

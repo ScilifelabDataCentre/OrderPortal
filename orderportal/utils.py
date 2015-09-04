@@ -89,9 +89,17 @@ def load_settings(filepath=None, verbose=False):
         pass
     logging.basicConfig(**kwargs)
     # Read order state definitions and transitions
-    data = yaml.safe_load(open(settings['ORDER_STATUS_FILENAME']))
-    settings['ORDER_STATUSES'] = data['statuses']
-    settings['ORDER_TRANSITIONS'] = data['transitions']
+    settings['ORDER_STATUSES'] = \
+        yaml.safe_load(open(settings['ORDER_STATUSES_FILENAME']))
+    lookup = dict()
+    for status in settings['ORDER_STATUSES']:
+        if status['identifier'] in lookup:
+            raise ValueError("order status '%s' redefined" %
+                             status['identifier'])
+        lookup[status['identifier']] = status
+    settings['ORDER_STATUSES_LOOKUP'] = lookup
+    settings['ORDER_TRANSITIONS'] = \
+        yaml.safe_load(open(settings['ORDER_TRANSITIONS_FILENAME']))
     # Check settings
     for key in ['BASE_URL', 'DB_SERVER', 'COOKIE_SECRET', 'DATABASE']:
         if key not in settings:

@@ -88,13 +88,13 @@
   </div>
 </form>
 
-  <div class="row">
-    <div class="col-md-6 col-md-offset-2">
-      <ul class="pager">
-	<li>
-	  {% set current = params.get('page', 0) %}
-	  {% set params['page'] = 0 %}
-	  <a href="{{ reverse_url('accounts', **params) }}">
+<div class="row">
+  <div class="col-md-6 col-md-offset-2">
+    <ul class="pager">
+      <li>
+	{% set current = params.get('page', 0) %}
+	{% set params['page'] = 0 %}
+	<a href="{{ reverse_url('accounts', **params) }}">
 	  <span class="glyphicon glyphicon-fast-backward"></span>
 	  First
 	</a>
@@ -126,10 +126,10 @@
 	</a>
       </li>
     </ul>
-    </div>
-    <div class="col-md-4">
-    </div>
   </div>
+  <div class="col-md-4">
+  </div>
+</div>
 
 <div class="row">
   <div class="col-md-10 col-md-offset-1">

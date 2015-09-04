@@ -10,9 +10,11 @@ import sys
 
 import yaml
 
-from orderportal import utils
 from orderportal import home
-from orderporta.scripts.load_designs import load_designs
+from orderportal import utils
+from orderportal.scripts.dump import undump
+from orderportal.scripts.load_designs import load_designs
+
 
 def get_args():
     parser = utils.get_command_line_parser(description=
@@ -34,7 +36,7 @@ def init_database(verbose=False, dumpfilepath=None):
     if dumpfilepath:
         dumpfilepath = utils.expand_filepath(dumpfilepath)
         try:
-            utils.undump(db, dumpfilepath, verbose=verbose)
+            undump(db, dumpfilepath, verbose=verbose)
         except IOError:
             print('Warning: could not load', dumpfilepath)
     elif verbose:

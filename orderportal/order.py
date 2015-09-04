@@ -120,7 +120,7 @@ class OrderMixin(object):
 
     def get_order_status(self, order):
         "Get the order status lookup."
-        return settings['ORDER_STATUSES'][order['status']]
+        return settings['ORDER_STATUSES_LOOKUP'][order['status']]
 
     def get_targets(self, order):
         "Get the allowed transition targets."
@@ -135,7 +135,7 @@ class OrderMixin(object):
                (self.is_staff() and constants.STAFF in permission) or \
                (self.is_owner(order) and constants.USER in permission):
                 result.extend(transition['targets'])
-        return [settings['ORDER_STATUSES'][t] for t in result]
+        return [settings['ORDER_STATUSES_LOOKUP'][t] for t in result]
 
 
 class Orders(RequestHandler):
@@ -143,21 +143,39 @@ class Orders(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
-        if self.is_staff():
-            title = 'Recent orders'
-            view = self.db.view('order/modified',
-                                include_docs=True,
-                                descending=True)
-            orders = [self.get_presentable(r.doc) for r in view]
+        if not self.is_staff():
+            self.see_other('orders_account', self.current_user['email'])
+        params = dict()
+        # Filter list
+        status = self.get_argument('status', '')
+        if status:
+            params['status'] = status
+            view = self.db.view('order/status',
+                                startkey=[status],
+                                endkey=[status, constants.HIGH_CHAR],
+                                include_docs=True)
         else:
-            title = 'My orders'
-            view = self.db.view('order/owner',
-                                include_docs=True,
-                                key=self.current_user['email'])
-            orders = [self.get_presentable(r.doc) for r in view]
-            orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
-                        reverse=True)
-        self.render('orders.html', title=title, orders=orders)
+            view = self.db.view('order/modified', include_docs=True)
+        orders = [self.get_presentable(r.doc) for r in view]
+        # Page
+        count = len(orders)
+        max_page = (count - 1) / constants.PAGE_SIZE
+        try:
+            page = int(self.get_argument('page', 0))
+            page = max(0, min(page, max_page))
+        except (ValueError, TypeError):
+            page = 0
+        start = page * constants.PAGE_SIZE
+        end = min(start + constants.PAGE_SIZE, count)
+        orders = orders[start : end]
+        params['page'] = page
+        self.render('orders.html',
+                    orders=orders,
+                    params=params,
+                    start=start+1,
+                    end=end,
+                    max_page=max_page,
+                    count=count)
 
 
 class OrdersAccount(RequestHandler):
