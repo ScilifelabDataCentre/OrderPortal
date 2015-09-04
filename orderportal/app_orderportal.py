@@ -46,8 +46,8 @@ def get_handlers():
             url(r'/account/([^/]+)', Account, name='account'),
             url(r'/account/([^/]+)/logs', AccountLogs, name='account_logs'),
             url(r'/account/([^/]+)/edit', AccountEdit, name='account_edit'),
-            url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
-                {'path': 'site'}, name='site'),
+            # url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
+            #     {'path': 'site'}, name='site'),
             url(r'/search', Dummy, name='search'),
             url(r'/login', Login, name='login'),
             url(r'/logout', Logout, name='logout'),
@@ -99,8 +99,16 @@ def main():
     logging.info("tornado debug: %s, logging debug: %s",
                  settings.get('TORNADO_DEBUG', False),
                  settings.get('LOGGING_DEBUG', False))
+    handlers = get_handlers()
+    try:
+        handlers.append(tornado.web.url(r'/site/([^/]+)',
+                                        tornado.web.StaticFileHandler,
+                                        {'path': settings['SITE_DIR']},
+                                        name='site'))
+    except KeyError:
+        pass
     application = tornado.web.Application(
-        handlers=get_handlers(),
+        handlers=handlers,
         debug=settings.get('TORNADO_DEBUG', False),
         cookie_secret=settings['COOKIE_SECRET'],
         ui_modules=uimodules,

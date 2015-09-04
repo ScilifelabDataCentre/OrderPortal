@@ -41,8 +41,9 @@ FLOAT   = 'float'
 BOOLEAN = 'boolean'
 URL     = 'url'
 SELECT  = 'select'
+TEXT    = 'text'
 GROUP   = 'group'
-TYPES   = [STRING, INT, FLOAT, BOOLEAN, URL, SELECT, GROUP]
+TYPES   = [STRING, INT, FLOAT, BOOLEAN, URL, SELECT, TEXT, GROUP]
 TYPE_LABELS = {INT: 'integer'}
 
 # Boolean string values

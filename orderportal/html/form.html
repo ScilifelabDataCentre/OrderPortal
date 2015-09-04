@@ -140,7 +140,7 @@
 	<td>
 	  {{ field['type'] }}
 	  {% if field['type'] == constants.SELECT %}
-	  <pre>{{ '\n'.join(field['select']) }}</pre>
+	  <pre>{{ '\n'.join(field.get('select') or []) }}</pre>
 	  {% end %}
 	</td>
 	<td>

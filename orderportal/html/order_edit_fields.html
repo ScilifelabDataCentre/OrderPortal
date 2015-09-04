@@ -88,6 +88,11 @@
 	  {% end %}
 	{% end %}
       </select>
+      {% elif field['type'] == constants.TEXT %}
+      <textarea class="form-control"
+		name="{{ field['identifier'] }}"
+		id="{{ field['identifier'] }}"
+		>{{ order['fields'][field['identifier']] or '' }}</textarea>
       {% else %}
       <input type="text" class="form-control"
 	     name="{{ field['identifier'] }}"
@@ -104,6 +109,12 @@
   </div>
   <span class="help-block">
     {{ field.get('description') or '' }}
+    {% if field['type'] == constants.TEXT %}
+    <a href="http://daringfireball.net/projects/markdown/">
+      Markdown
+    </a>
+    format is used.
+    {% end %}
   </span>
 </div>
 {% end %} {# if field['type'] == constants.GROUP #}

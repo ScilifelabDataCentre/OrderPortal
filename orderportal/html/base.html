@@ -142,7 +142,6 @@
 	      {% if current_user %}
 	      <li>
 		<p class="navbar-text">
-		  Logged in as
 		  <a href="{{ reverse_url('account', current_user['email']) }}">
 		    {% module Entity(current_user) %}
 		  </a>

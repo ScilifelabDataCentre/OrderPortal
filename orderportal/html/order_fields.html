@@ -13,12 +13,11 @@
 {% continue %}
 {% end %}
 
+{% set label = field.get('label') or field['identifier'].capitalize().replace('_', ' ') %}
+
 {% if field['type'] == constants.GROUP %}
 <tr>
-  <th>
-    {% include 'field_indent.html' %}
-    {{ field.get('label') or field['identifier'].capitalize() }}
-  </th>
+  <th>{% include 'field_indent.html' %}{{ label }}</th>
   <td></td>
   <td>
     {% if field['restrict_read'] %}
@@ -43,11 +42,14 @@
 
 {% else %}
 <tr>
-  <th>
-    {% include 'field_indent.html' %}
-    {{ field.get('label') or field['identifier'].capitalize() }}
-  </th>
-  <td>{{ order['fields'][field['identifier']] or '-' }}</td>
+  <th>{% include 'field_indent.html' %}{{ label }}</th>
+  <td>
+    {% if field['type'] == constants.TEXT %}
+    {% module Markdown(order['fields'][field['identifier']] or '-') %}
+    {% else %}
+    {{ order['fields'][field['identifier']] or '-' }}
+    {% end %}
+  </td>
   <td>
     {% if field['restrict_read'] %}
     [Staff only]

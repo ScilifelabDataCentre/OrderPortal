@@ -106,8 +106,9 @@ def load_settings(filepath=None, verbose=False):
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short")
     # Read university list
     try:
-        settings['UNIVERSITY_LIST'] = yaml.safe_load(
-            open(settings['UNIVERSITY_LIST_FILENAME']))
+        filepath = os.path.join(settings['SITE_DIR'],
+                                settings['UNIVERSITY_LIST_FILENAME'])
+        settings['UNIVERSITY_LIST'] = yaml.safe_load(open(filepath))
     except (IOError, KeyError):
         settings['UNIVERSITY_LIST'] = dict()
     # Settings computable from others
