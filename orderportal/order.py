@@ -151,11 +151,14 @@ class Orders(RequestHandler):
         if status:
             params['status'] = status
             view = self.db.view('order/status',
-                                startkey=[status],
-                                endkey=[status, constants.HIGH_CHAR],
+                                startkey=[status, constants.HIGH_CHAR],
+                                endkey=[status],
+                                descending=True,
                                 include_docs=True)
         else:
-            view = self.db.view('order/modified', include_docs=True)
+            view = self.db.view('order/modified',
+                                descending=True,
+                                include_docs=True)
         orders = [self.get_presentable(r.doc) for r in view]
         # Page
         count = len(orders)

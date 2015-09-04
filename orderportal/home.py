@@ -42,7 +42,10 @@ class Home(RequestHandler):
                             include_docs=True)
         pending = [self.get_presentable(r.doc) for r in view]
         pending.sort(utils.cmp_modified, reverse=True)
-        view = self.db.view('order/modified',
+        # XXX This status is not hard-wired, so this may yield nothing.
+        view = self.db.view('order/status',
+                            startkey=['submitted', constants.HIGH_CHAR],
+                            endkey=['submitted'],
                             descending=True,
                             limit=constants.MAX_STAFF_RECENT_ORDERS,
                             include_docs=True)
@@ -52,7 +55,10 @@ class Home(RequestHandler):
 
     def home_staff(self, news_items, events):
         "Home page for a current user having role 'staff'."
-        view = self.db.view('order/modified',
+        # XXX This status is not hard-wired, so this may yield nothing.
+        view = self.db.view('order/status',
+                            startkey=['accepted', constants.HIGH_CHAR],
+                            endkey=['accepted'],
                             descending=True,
                             limit=constants.MAX_STAFF_RECENT_ORDERS,
                             include_docs=True)
