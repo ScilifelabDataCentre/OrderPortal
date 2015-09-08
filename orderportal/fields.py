@@ -35,9 +35,10 @@ class Fields(object):
         "Find the list of fields which this field is part of."
         if field in fields:
             return fields
-        for other in fields:
-            if other['type'] == constants.GROUP:
-                return self.get_siblings(field, other['fields'])
+        for f in fields:
+            if f['type'] == constants.GROUP:
+                result = self.get_siblings(field, f['fields'])
+                if result is not None: return result
 
     def __iter__(self):
         "Pre-order iteration over all fields."
@@ -152,7 +153,6 @@ class Fields(object):
         for i, field in enumerate(fields):
             if field['identifier'] == identifier:
                 fields.pop(i)
-                logging.debug("deleted %s", identifier)
                 return
             if field['type'] == constants.GROUP:
                 self._delete(field['fields'], identifier)
