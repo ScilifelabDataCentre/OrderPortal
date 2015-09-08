@@ -164,15 +164,16 @@ class Orders(RequestHandler):
                                 include_docs=True)
         orders = [self.get_presentable(r.doc) for r in view]
         # Page
+        page_size = self.current_user.get('page_size') or constants.DEFAULT_PAGE_SIZE
         count = len(orders)
-        max_page = (count - 1) / constants.PAGE_SIZE
+        max_page = (count - 1) / page_size
         try:
             page = int(self.get_argument('page', 0))
             page = max(0, min(page, max_page))
         except (ValueError, TypeError):
             page = 0
-        start = page * constants.PAGE_SIZE
-        end = min(start + constants.PAGE_SIZE, count)
+        start = page * page_size
+        end = min(start + page_size, count)
         orders = orders[start : end]
         params['page'] = page
         self.render('orders.html',

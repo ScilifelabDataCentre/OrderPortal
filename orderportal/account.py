@@ -127,15 +127,16 @@ class Accounts(RequestHandler):
         if sort:
             params['sort'] = sort
         # Page
+        page_size = self.current_user.get('page_size') or constants.DEFAULT_PAGE_SIZE
         count = len(accounts)
-        max_page = (count - 1) / constants.PAGE_SIZE
+        max_page = (count - 1) / page_size
         try:
             page = int(self.get_argument('page', 0))
             page = max(0, min(page, max_page))
         except (ValueError, TypeError):
             page = 0
-        start = page * constants.PAGE_SIZE
-        end = min(start + constants.PAGE_SIZE, count)
+        start = page * page_size
+        end = min(start + page_size, count)
         accounts = accounts[start : end]
         params['page'] = page
         #
@@ -224,6 +225,15 @@ class AccountEdit(RequestHandler):
             saver['department'] = self.get_argument('department', default=None)
             saver['address'] = self.get_argument('address', default=None)
             saver['phone'] = self.get_argument('phone', default=None)
+            try:
+                value = int(self.get_argument('page_size', 0))
+                if value <= 1:
+                    raise ValueError
+            except (ValueError, TypeError):
+                saver['page_size'] = None
+            else:
+                saver['page_size'] = value
+            saver['other_data'] = self.get_argument('other_data', default=None)
         self.see_other('account', email)
 
 

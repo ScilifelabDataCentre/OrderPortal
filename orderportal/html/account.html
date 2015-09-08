@@ -118,8 +118,12 @@
     <td>{{ account.get('phone') or '-' }}</td>
   </tr>
   <tr>
+    <th>Page size</th>
+    <td>{{ account.get('page_size') or '-' }}</td>
+  </tr>
+  <tr>
     <th>Other data</th>
-    <td class="pre">{{ account.get('other') or '-' }}</td>
+    <td class="pre">{{ account.get('other_data') or '-' }}</td>
   </tr>
   <tr>
     <th>Modified</th>
