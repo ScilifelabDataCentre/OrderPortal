@@ -69,10 +69,11 @@
 	</span>
 	{% end %}
       </label>
+      {% set value = order['fields'][field['identifier']] %}
       {% if field['type'] == constants.SELECT %}
       <select class="form-control"
-	      name="{{ field['identifier'] }}" id="{{ field['identifier'] }}">
-	{% set value = order['fields'][field['identifier']] %}
+	      name="{{ field['identifier'] }}"
+	      id="{{ field['identifier'] }}">
 	{% if not field['required'] %}
 	  {% if value is None %}
 	  <option selected value="">[no value]</option>
@@ -92,7 +93,19 @@
       <textarea class="form-control"
 		name="{{ field['identifier'] }}"
 		id="{{ field['identifier'] }}"
-		>{{ order['fields'][field['identifier']] or '' }}</textarea>
+		>{{ value or '' }}</textarea>
+      {% elif field['type'] == constants.BOOLEAN %}
+      {# Simplifies a lot when a Select element is used rather than Radio. #}
+      <select class="form-control"
+	      id="{{ field['identifier'] }}"
+	      name="{{ field['identifier'] }}">
+	<option value="__none__" id="option_none"
+		{{ value is None and 'selected' or '' }}>[undef]</option>
+	<option value="true" id="option_true"
+		{{ value == True and 'selected' or '' }}>True</option>
+	<option value="false" id="option_false"
+		{{ value == False and 'selected' or '' }}>False</option>
+      </select>
       {% else %}
       <input type="text" class="form-control"
 	     name="{{ field['identifier'] }}"

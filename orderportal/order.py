@@ -30,6 +30,7 @@ class OrderSaver(saver.Saver):
             identifier = field['identifier']
             try:
                 value = self.rqh.get_argument(identifier) or None
+                if value == '__none__': value = None
             except tornado.web.MissingArgumentError:
                 pass
             else:
@@ -51,6 +52,7 @@ class OrderSaver(saver.Saver):
         Skip field if not visible.
         Else check recursively, postorder.
         """
+        logging.debug("field %s %s", field['identifier'], field['type'])
         message = None
         select_id = field.get('visible_if_select_field')
         if select_id:
@@ -61,8 +63,7 @@ class OrderSaver(saver.Saver):
         if field['type'] == constants.GROUP:
             for subfield in field['fields']:
                 if not self.check_validity(subfield):
-                    message = 'subfield is invalid'
-                    break
+                    message = 'subfield(s) invalid'
         else:
             value = self.doc['fields'][field['identifier']]
             if value is None:
@@ -79,7 +80,9 @@ class OrderSaver(saver.Saver):
                 except (TypeError, ValueError):
                     message = 'not a float value'
             elif field['type'] == constants.BOOLEAN:
+                logging.debug("boolean %s", value)
                 try:
+                    if value is None: raise ValueError
                     self.doc['fields'][field['identifier']] = utils.to_bool(value)
                 except (TypeError, ValueError):
                     message = 'not a boolean value'

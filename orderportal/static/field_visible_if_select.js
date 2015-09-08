@@ -7,10 +7,12 @@ $(document).ready(function() {
 	var selectVal = $(this).val();
 	$('.visible-if-select').each(function () {
 	    if (selectId === $(this).data('select-id')) {
-		if (selectVal === $(this).data('select-val')) {
+		/* Cast explicitly to string, since 'true' is interpreted. */
+		var thisVal = String($(this).data('select-val'));
+		if (selectVal === thisVal) {
 		    $(this).show('slow');
 		} else {
-		    $(this).hide();
+		    $(this).hide('slow');
 		};
 	    };
 	});
