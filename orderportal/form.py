@@ -235,14 +235,14 @@ class FormFieldEdit(FormMixin, RequestHandler):
 
 
 class FormFieldEditDescr(FormMixin, RequestHandler):
-    "Edit the label and description of a form field."
+    """Edit the label and description of a form field.
+    This is allowed also for enabled forms."""
 
     @tornado.web.authenticated
     def post(self, iuid, identifier):
         self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        logging.debug("FormFieldEditDescr %s", identifier)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.fields[identifier]['label'] = \
                 self.get_argument("{}/label".format(identifier), '')
