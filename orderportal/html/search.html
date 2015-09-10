@@ -13,7 +13,7 @@
       method="GET">
   <input type="hidden" name="page" value="{{ params.get('page') or 0 }}">
   <div class="row">
-    <div class="col-md-7 col-md-offset-3">
+    <div class="col-md-4 col-md-offset-3">
       <div class="form-group">
 	<input type="text" name="term" id="term"
 	       class="form-control" value="{{ params.get('term') or '' }}">
@@ -25,57 +25,14 @@
 	</button>
       </div>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-5">
+      <i>Currently, only order titles are searched.</i>
     </div>
   </div>
 </form>
 
-{% if max_page > 0 %}
-<div class="row">
-  <div class="col-md-6 col-md-offset-2">
-    <ul class="pager">
-      <li>
-	{% set current = params.get('page', 0) %}
-	{% set params['page'] = 0 %}
-	<a href="{{ reverse_url('search', **params) }}">
-	  <span class="glyphicon glyphicon-fast-backward"></span>
-	  First
-	</a>
-      </li>
-      <li>
-	{% set params['page'] = max(0, current-1) %}
-	<a href="{{ reverse_url('search', **params) }}">
-	  <span class="glyphicon glyphicon-step-backward"></span>
-	  Previous
-	</a>
-      </li>
-      <li>
-	<a href="{{ reverse_url('search', **params) }}">
-	  {{ start }} to {{ end }} (of {{ count }})
-	</a>
-      </li>
-      <li>
-	{% set params['page'] = min(max_page, current+1) %}
-	<a href="{{ reverse_url('search', **params) }}">
-	  Next
-	  <span class="glyphicon glyphicon-step-forward"></span>
-	</a>
-      </li>
-      <li>
-	{% set params['page'] = max_page %}
-	<a href="{{ reverse_url('search', **params) }}">
-	  Last
-	  <span class="glyphicon glyphicon-fast-forward"></span>
-	</a>
-      </li>
-    </ul>
-  </div>
-  <div class="col-md-4">
-  </div>
-</div>
-{% else %}
-<br>
-{% end %} {# if max_page > 0 #}
+{% set url_name = 'search' %}
+{% include 'paging.html' %}
 
 <div class="row">
   <div class="col-md-10 col-md-offset-1">

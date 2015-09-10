@@ -1,0 +1,48 @@
+{# Paging row #}
+
+{% if max_page > 0 %}
+<div class="row">
+  <div class="col-md-6 col-md-offset-2">
+    <ul class="pager">
+      <li>
+	{% set current = params.get('page', 0) %}
+	{% set params['page'] = 0 %}
+	<a href="{{ reverse_url(url_name, **params) }}">
+	  <span class="glyphicon glyphicon-fast-backward"></span>
+	  First
+	</a>
+      </li>
+      <li>
+	{% set params['page'] = max(0, current-1) %}
+	<a href="{{ reverse_url(url_name, **params) }}">
+	  <span class="glyphicon glyphicon-step-backward"></span>
+	  Previous
+	</a>
+      </li>
+      <li>
+	<a href="{{ reverse_url(url_name, **params) }}">
+	  {{ start }} to {{ end }} (of {{ count }})
+	</a>
+      </li>
+      <li>
+	{% set params['page'] = min(max_page, current+1) %}
+	<a href="{{ reverse_url(url_name, **params) }}">
+	  Next
+	  <span class="glyphicon glyphicon-step-forward"></span>
+	</a>
+      </li>
+      <li>
+	{% set params['page'] = max_page %}
+	<a href="{{ reverse_url(url_name, **params) }}">
+	  Last
+	  <span class="glyphicon glyphicon-fast-forward"></span>
+	</a>
+      </li>
+    </ul>
+  </div>
+  <div class="col-md-4">
+  </div>
+</div>
+{% else %}
+<br>
+{% end %} {# if max_page > 0 #}
