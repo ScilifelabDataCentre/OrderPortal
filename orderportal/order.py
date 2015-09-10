@@ -322,3 +322,31 @@ class OrderTransition(OrderMixin, RequestHandler):
         with OrderSaver(doc=order, rqh=self) as saver:
             saver['status'] = targetid
         self.see_other('order', order['_id'])
+
+
+class OrderSearch(RequestHandler):
+    "Search the order indices. Staff only."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        orig = self.get_argument('term', '')
+        # Keep this in sync with 'order/search.js'
+        term = orig.replace(':', ' ')
+        term = term.replace(',', ' ')
+        term = term.replace("'", ' ')
+        term = term.strip()
+        view = self.db.view('order/keyword')
+        id_sets = []
+        for part in [part for part in term.split() if len(part) > 2]:
+            id_sets.append(set([r.id for r in
+                                view[part : part+constants.HIGH_CHAR]]))
+        if id_sets:
+            id_set = reduce(lambda i,j: i.intersection(j), id_sets)
+            orders = [self.get_entity(id, doctype=constants.ORDER)
+                      for id in id_set]
+            orders.sort(lambda i,j: cmp(i['modified'], j['modified']),
+                        reverse=True)
+        else:
+            orders = []
+        self.render('orders.html', orders=orders, term=orig)

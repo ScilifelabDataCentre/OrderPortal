@@ -39,10 +39,10 @@ class FormSaver(saver.Saver):
             raise tornado.web.HTTPError(404, reason='no such field')
         self.changed['fields'] = self.fields.update(identifier, self.rqh)
 
-    def copy_fields(self, form):
-        "Copy all fields from the given form."
+    def clone_fields(self, form):
+        "Clone all fields from the given form."
         for field in form['fields']:
-            self.fields.copy(field)
+            self.fields.clone(field)
         self.changed['copied'] = "from {}".format(form['_id'])
 
     def delete_field(self, identifier):
@@ -251,8 +251,8 @@ class FormFieldEditDescr(FormMixin, RequestHandler):
         self.see_other('form', form['_id'])
 
 
-class FormCopy(RequestHandler):
-    "Make a copy of a form."
+class FormClone(RequestHandler):
+    "Make a clone of a form."
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -260,9 +260,9 @@ class FormCopy(RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(rqh=self) as saver:
-            saver['title'] = "Copy of {}".format(form['title'])
+            saver['title'] = "Clone of {}".format(form['title'])
             saver['description'] = form.get('description')
-            saver.copy_fields(form)
+            saver.clone_fields(form)
             saver['status'] = constants.PENDING
             saver['owner'] = self.current_user['email']
         self.see_other('form_edit', saver.doc['_id'])

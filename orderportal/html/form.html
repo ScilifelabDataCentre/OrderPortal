@@ -53,12 +53,12 @@
 {% end %}
 
 <br>
-<form action="{{ reverse_url('form_copy', form['_id']) }}"
+<form action="{{ reverse_url('form_clone', form['_id']) }}"
       role="form" method="POST">
   {% module xsrf_form_html() %}
   <button type="submit"
 	  class="btn btn-primary glyphicon glyphicon-plus-sign">
-    Copy
+    Clone
   </button>
 </form>
 

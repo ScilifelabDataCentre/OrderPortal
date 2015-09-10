@@ -39,8 +39,6 @@
 	</div>
 	<div class="collapse navbar-collapse" id="myNavbar">
 	  <ul class="nav navbar-nav">
-            <li><a href="{{ reverse_url('home') }}">Home</a></li>
-
 	    {% if current_user %}
 	    {% if is_staff %}
             <li><a href="{{ reverse_url('orders') }}">Orders</a></li>
@@ -158,6 +156,21 @@
 		</form>
 	      </li>
 	      {% end %} {# if current_user #}
+	      {% block search_field %}
+	      <li>
+		<form action="{{ reverse_url('search') }}"
+		      role="form"
+		      class="navbar-form form-inline"
+		      method="GET">
+		  <div class="form-group has-feedback">
+		    <input type="search" id="term" name="term" autofocus
+			   class="form-control"
+			   placeholder="Search order titles">
+		    <span class="glyphicon glyphicon-search form-control-feedback"></span>
+		  </div>
+		</form>
+	      </li>
+	      {% end %} {# block search_field #}
 	    </ul>
 	  </div>
 	</div>

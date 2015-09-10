@@ -23,6 +23,7 @@ from orderportal.news import *
 from orderportal.info import *
 from orderportal.file import *
 from orderportal.event import *
+from orderportal.search import *
 
 
 class Dummy(RequestHandler):
@@ -41,12 +42,12 @@ def get_handlers():
                 OrderTransition, name='order_transition'),
             url(r'/orders', Orders, name='orders'),
             url(r'/orders/([^/]+)', OrdersAccount, name='orders_account'),
-            # url(r'/order/([0-9a-f]{32})/copy', OrderCopy, name='order_copy'),
+            # url(r'/order/([0-9a-f]{32})/clone', OrderClone, name='order_clone'),
             url(r'/accounts', Accounts, name='accounts'),
             url(r'/account/([^/]+)', Account, name='account'),
             url(r'/account/([^/]+)/logs', AccountLogs, name='account_logs'),
             url(r'/account/([^/]+)/edit', AccountEdit, name='account_edit'),
-            url(r'/search', Dummy, name='search'),
+            url(r'/search', Search, name='search'),
             url(r'/login', Login, name='login'),
             url(r'/logout', Logout, name='logout'),
             url(r'/reset', Reset, name='reset'),
@@ -61,7 +62,7 @@ def get_handlers():
             url(r'/form/([0-9a-f]{32})/logs', FormLogs, name='form_logs'),
             url(r'/form', FormCreate, name='form_create'),
             url(r'/form/([0-9a-f]{32})/edit', FormEdit, name='form_edit'),
-            url(r'/form/([0-9a-f]{32})/copy', FormCopy, name='form_copy'),
+            url(r'/form/([0-9a-f]{32})/clone', FormClone, name='form_clone'),
             url(r'/form/([0-9a-f]{32})/enable', FormEnable, name='form_enable'),
             url(r'/form/([0-9a-f]{32})/disable',
                 FormDisable, name='form_disable'),
@@ -94,9 +95,6 @@ def get_handlers():
             ]
 
 def main():
-    logging.info("tornado debug: %s, logging debug: %s",
-                 settings.get('TORNADO_DEBUG', False),
-                 settings.get('LOGGING_DEBUG', False))
     handlers = get_handlers()
     try:
         handlers.append(tornado.web.url(r'/site/([^/]+)',
@@ -114,8 +112,12 @@ def main():
         static_path='static',
         login_url=r'/')
     application.listen(settings['PORT'], xheaders=True)
-    logging.info("OrderPortal web server PID %s on port %s",
-                 os.getpid(), settings['PORT'])
+    logging.info("OrderPortal web server PID %s on port %s,"
+                 " tornado debug: %s, logging debug: %s",
+                 os.getpid(),
+                 settings['PORT'],
+                 settings.get('TORNADO_DEBUG', False),
+                 settings.get('LOGGING_DEBUG', False))
     tornado.ioloop.IOLoop.instance().start()
 
 
