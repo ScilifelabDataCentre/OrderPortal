@@ -224,6 +224,14 @@ class AccountEdit(RequestHandler):
             saver['university'] = university or 'undefined'
             saver['department'] = self.get_argument('department', default=None)
             saver['address'] = self.get_argument('address', default=None)
+            saver['invoice_address'] = \
+                self.get_argument('invoice_address', default=None)
+            if not saver['invoice_address']:
+                try:
+                    saver['invoice_address'] = \
+                        settings['UNIVERSITIES'][saver['university']]['invoice_address']
+                except KeyError:
+                    pass
             saver['phone'] = self.get_argument('phone', default=None)
             try:
                 value = int(self.get_argument('page_size', 0))
@@ -357,6 +365,14 @@ class Register(RequestHandler):
                 raise tornado.web.HTTPError(400, reason=reason)
             saver['department'] = self.get_argument('department', default=None)
             saver['address'] = self.get_argument('address', default=None)
+            saver['invoice_address'] = \
+                self.get_argument('invoice_address', default=None)
+            if not saver['invoice_address']:
+                try:
+                    saver['invoice_address'] = \
+                        settings['UNIVERSITIES'][saver['university']]['invoice_address']
+                except KeyError:
+                    pass
             saver['phone'] = self.get_argument('phone', default=None)
             saver['owner'] = email
             saver['role'] = constants.USER

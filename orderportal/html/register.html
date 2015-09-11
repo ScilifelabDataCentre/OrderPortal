@@ -68,7 +68,11 @@
 	<select class="form-control" name="university" id="university">
 	  {# OrderedDict ! #}
 	  {% for abbrev, data in settings['UNIVERSITIES'].items() %}
-	    <option value="{{ abbrev }}">{{ abbrev }} ({{ data.get('name', abbrev) }})</option>
+	    <option {{selected}} value="{{ abbrev }}">{{ abbrev }}
+	      {% if data.get('name') %}
+	      ({{ data.get('name') }})
+	      {% end %}
+	    </option>
 	  {% end %}
 	  <option value="undefined">[not available in list]</option>
 	</select>
@@ -114,13 +118,27 @@
     <div class="row">
       <div class="col-md-8">
 	<label class="control-label" for="address">Address</label>
-	<textarea rows="4" class="form-control"
+	<textarea rows="3" class="form-control"
 		  id="address" name="address"></textarea>
       </div>
     </div>
     <span class="help-block">
       Postal address; for delivery of paper documents, returned
       samples, etc.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+	<label class="control-label" for="invoice_address">Invoice address</label>
+	<textarea rows="3" class="form-control"
+		  id="invoice_address" name="invoice_address"></textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      Invoice address. If none given, the university standard invoice
+      address will be used if known.
     </span>
   </div>
 
@@ -133,7 +151,7 @@
       </div>
     </div>
     <span class="help-block">
-      One or more telephone numbers, separated by comma (,).
+      One or more telephone numbers, separated by comma ",".
     </span>
   </div>
 
