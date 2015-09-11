@@ -47,7 +47,7 @@
   {% module xsrf_form_html() %}
   <div class="form-group">
     <button type="submit"
-	    class="btn btn-danger glyphicon glyphicon-remove">
+	    class="btn btn-danger glyphicon glyphicon-ban-circle">
       Disable
     </button>
   </div>
@@ -61,7 +61,7 @@
   <div class="form-group">
     <input type="hidden" name="_http_method" value="delete">
     <button type="submit"
-	    class="btn btn-danger glyphicon glyphicon-minus"
+	    class="btn btn-danger glyphicon glyphicon-trash"
 	    onclick="return confirm('Cannot be undone! Really delete?');">
       Delete
     </button>

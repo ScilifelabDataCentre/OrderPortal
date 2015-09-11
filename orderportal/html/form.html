@@ -25,7 +25,7 @@
   {% module xsrf_form_html() %}
   <input type="hidden" name="_http_method" value="delete">
   <button type="submit"
-	  class="btn btn-danger glyphicon glyphicon-minus"
+	  class="btn btn-danger glyphicon glyphicon-trash"
 	  onclick="return confirm('Cannot be undone! Really delete?');">
     Delete
   </button>
@@ -36,7 +36,7 @@
 <form action="{{ reverse_url('form_disable', form['_id']) }}"
       role="form" method="POST">
   {% module xsrf_form_html() %}
-  <button type="submit" class="btn btn-danger glyphicon glyphicon-remove">
+  <button type="submit" class="btn btn-danger glyphicon glyphicon-ban-circle">
     Disable
   </button>
 </form>
