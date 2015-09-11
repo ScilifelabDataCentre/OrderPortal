@@ -30,7 +30,9 @@
       </div>
     </div>
     <span class="help-block">
-      Your email address is your account name in this portal.
+      Your email address is your account name in this portal.  Cannot
+      be changed once set.  Please use an institutional email address,
+      not your personal Google, Yahoo or similar address.
     </span>
   </div>
 
@@ -68,7 +70,7 @@
 	<select class="form-control" name="university" id="university">
 	  {# OrderedDict ! #}
 	  {% for abbrev, data in settings['UNIVERSITIES'].items() %}
-	    <option {{selected}} value="{{ abbrev }}">{{ abbrev }}
+	    <option value="{{ abbrev }}">{{ abbrev }}
 	      {% if data.get('name') %}
 	      ({{ data.get('name') }})
 	      {% end %}

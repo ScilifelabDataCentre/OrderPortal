@@ -26,7 +26,7 @@
       </div>
     </div>
     <div class="col-md-5">
-      <i>Currently, only order titles are searched.</i>
+      <i>Currently, only order titles and account last names are searched.</i>
     </div>
   </div>
 </form>
@@ -40,20 +40,38 @@
       <tr>
 	<th>Item</th>
 	<th>Owner</th>
+	<th>Status</th>
 	<th>Modified</th>
       </tr>
       {% for item in items %}
       <tr>
 	<td>
 	  {% if item['orderportal_doctype'] == constants.ORDER %}
-	  <img src="{{ static_url('order.png') }}" alt="Order" title="Order">
+	  {% module Icon('order') %}
 	  <a href="{{ reverse_url('order', item['_id']) }}">{{ item.get('title', item['title']) }}</a>
+	  {% elif item['orderportal_doctype'] == constants.ACCOUNT %}
+	  {% module Icon('account') %}
+	  <a href="{{ reverse_url('account', item['email']) }}">{{ item['email'] }}</a>
 	  {% end %}
 	</td>
 	<td>
+	  {% if item['orderportal_doctype'] != constants.ACCOUNT %}
 	  <a href="{{ reverse_url('account', item['owner']) }}">{{ item['owner'] }}</a>
+	  {% end %}
+	</td>
+	<td>
+	  {% if 'status' in item %}
+	  {% module Icon(item['status'], label=True) %}
+	  {% end %}
 	</td>
 	<td class="localtime">{{ item['modified'] }}</td>
+	<td>
+	  {% if 'lastname' in item %}
+	  <strong>Name:</strong>
+	  {{ item.get('last_name') or '' }}
+	  {{ item.get('first_name') or '' }}
+	  {% end %}
+	</td>
       </tr>
       {% end %}
     </table>

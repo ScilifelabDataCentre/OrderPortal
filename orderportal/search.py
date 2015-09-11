@@ -22,26 +22,38 @@ class Search(RequestHandler):
     def get(self):
         self.check_admin()
         orig = self.get_argument('term', '')
+        params = dict(term=orig)
+        items = []
         # Keep this in sync with 'order/search.js'
         term = orig.replace(':', ' ')
         term = term.replace(',', ' ')
         term = term.replace("'", ' ')
         term = term.strip()
+        parts = [part for part in term.split() if part]
+        # Search order titles
         view = self.db.view('order/keyword')
         id_sets = []
-        for part in [part for part in term.split() if len(part) > 2]:
+        for part in parts:
             id_sets.append(set([r.id for r in
                                 view[part : part+constants.HIGH_CHAR]]))
         if id_sets:
+            # All words must exist in title
             id_set = reduce(lambda i,j: i.intersection(j), id_sets)
-            orders = [self.get_entity(id, doctype=constants.ORDER)
-                      for id in id_set]
-            orders.sort(lambda i,j: cmp(i['modified'], j['modified']),
-                        reverse=True)
-        else:
-            orders = []
-        items = orders
-        params = dict(term=orig)
+            items.extend([self.get_entity(id, doctype=constants.ORDER)
+                          for id in id_set])
+        # Search account last names
+        view = self.db.view('account/last_name')
+        id_sets = []
+        for part in parts:
+            id_sets.append(set([r.id for r in
+                                view[part : part+constants.HIGH_CHAR]]))
+        # Only require one hit in last name
+        if id_sets:
+            id_set = reduce(lambda i,j: i.union(j), id_sets)
+            items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
+                          for id in id_set])
+        # All items contain 'modified'
+        items.sort(lambda i,j: cmp(i['modified'], j['modified']), reverse=True)
         # Page
         page_size = self.current_user.get('page_size') or constants.DEFAULT_PAGE_SIZE
         count = len(items)
