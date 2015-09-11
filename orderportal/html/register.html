@@ -63,11 +63,12 @@
   <div class="form-group has-feedback">
     <label class="control-label" for="university">University</label>
     <div class="row">
-      {% if settings['UNIVERSITY_LIST'] %}
+      {% if settings['UNIVERSITIES'] %}
       <div class="col-md-6">
 	<select class="form-control" name="university" id="university">
-	  {% for abbrev, name in sorted(settings['UNIVERSITY_LIST'].items()) %}
-	    <option value="{{ abbrev }}">{{ abbrev }} ({{ name }})</option>
+	  {# OrderedDict ! #}
+	  {% for abbrev, data in settings['UNIVERSITIES'].items() %}
+	    <option value="{{ abbrev }}">{{ abbrev }} ({{ data.get('name', abbrev) }})</option>
 	  {% end %}
 	  <option value="undefined">[not available in list]</option>
 	</select>

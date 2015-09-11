@@ -58,9 +58,10 @@
 	  <option value="">[any university]</option>
 	  {% set sel = params.get('university') == '[other]' and 'selected' or '' %}
 	  <option value="[other]" {{ sel }}>[other]</option>
-	  {% for abbrev, name in sorted(settings['UNIVERSITY_LIST'].items()) %}
+	  {# OrderedDict ! #}
+	  {% for abbrev, data in settings['UNIVERSITIES'].items() %}
 	  {% set sel = abbrev == params.get('university') and 'selected' or '' %}
-	  <option {{ sel }} value="{{ abbrev }}">{{ abbrev }} ({{ name }})</option>
+	  <option {{ sel }} value="{{ abbrev }}">{{ abbrev }} ({{ data.get('name', abbrev) }})</option>
 	  {% end %}
 	</select>
       </div>

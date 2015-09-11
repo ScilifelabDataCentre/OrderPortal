@@ -2,6 +2,7 @@
 
 from __future__ import print_function, absolute_import
 
+import collections
 import datetime
 import hashlib
 import logging
@@ -108,13 +109,17 @@ def load_settings(filepath=None, verbose=False):
             raise ValueError("settings['{}'] has invalid value".format(key))
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short")
-    # Read university list
+    # Read universities lookup
     try:
         filepath = os.path.join(settings['SITE_DIR'],
-                                settings['UNIVERSITY_LIST_FILENAME'])
-        settings['UNIVERSITY_LIST'] = yaml.safe_load(open(filepath))
+                                settings['UNIVERSITIES_FILENAME'])
+        unis = yaml.safe_load(open(filepath))
     except (IOError, KeyError):
-        settings['UNIVERSITY_LIST'] = dict()
+        unis = dict()
+    unis = unis.items()
+    unis.sort(lambda i,j: cmp((i[1].get('rank'), i[0]),
+                              (j[1].get('rank'), j[0])))
+    settings['UNIVERSITIES'] = collections.OrderedDict(unis)
     # Settings computable from others
     settings['DB_SERVER_VERSION'] = couchdb.Server(settings['DB_SERVER']).version()
     if 'PORT' not in settings:
