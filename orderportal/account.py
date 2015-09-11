@@ -48,9 +48,9 @@ class AccountSaver(saver.Saver):
 
 class Accounts(RequestHandler):
     """Accounts list page.
-    Allow filtering by university, role and status.
-    Allow sort by email, name and login.
-    """
+    Handles filtering by university, role and status.
+    Handles sort by email, name and login."""
+
     @tornado.web.authenticated
     def get(self):
         self.check_staff()
@@ -91,6 +91,7 @@ class Accounts(RequestHandler):
             else:
                 accounts = [u for u in accounts if u['status'] == status]
             params['status'] = status
+        # No filter; all accounts
         if accounts is None:
             view = self.db.view('account/email', include_docs=True)
             accounts = [r.doc for r in view]
@@ -139,6 +140,13 @@ class Accounts(RequestHandler):
         end = min(start + page_size, count)
         accounts = accounts[start : end]
         params['page'] = page
+        # Number of orders per account
+        view = self.db.view('order/owner_count', group=True)
+        for account in accounts:
+            try:
+                account['order_count'] = list(view[account['email']])[0].value
+            except IndexError:
+                account['order_count'] = 0
         #
         self.render('accounts.html',
                     accounts=accounts,
@@ -156,7 +164,14 @@ class Account(RequestHandler):
     def get(self, email):
         account = self.get_account(email)
         self.check_owner_or_staff(account)
-        self.render('account.html', account=account, deletable=self.get_deletable(account))
+        view = self.db.view('order/owner_count', group=True)
+        try:
+            account['order_count'] = list(view[email])[0].value
+        except IndexError:
+            account['order_count'] = 0
+        self.render('account.html',
+                    account=account,
+                    deletable=self.get_deletable(account))
 
     @tornado.web.authenticated
     def post(self, email):

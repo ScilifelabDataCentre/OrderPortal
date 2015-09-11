@@ -79,8 +79,9 @@
   <tr>
     <th>Orders</th>
     <td>
-      <a href="{{ reverse_url('orders_account', account['email']) }}">
-	{% module Icon('order') %} Orders
+      <a class="badge"
+	 href="{{ reverse_url('orders_account', account['email']) }}">
+	{{ account['order_count'] }}
       </a>
     </td>
   </tr>
