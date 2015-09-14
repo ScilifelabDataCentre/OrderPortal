@@ -1,15 +1,15 @@
-{# Technical page. #}
+{# Configuration display page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}Tech{% end %}
+{% block head_title %}Configuration{% end %}
 
-{% block body_title %}Tech{% end %}
+{% block body_title %}Configuration{% end %}
 
 {% block main_content %}
 
 <div class="row">
-  <div class="col-md-5">
+  <div class="col-md-10">
     <table class="table table-condensed">
       {% for key, value in params %}
       <tr>
@@ -18,6 +18,8 @@
       </tr>
       {% end %}
     </table>
+  </div>
+  <div class="col-md-2">
   </div>
 </div>
 

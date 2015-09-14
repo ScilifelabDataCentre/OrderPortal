@@ -111,8 +111,7 @@ def load_settings(filepath=None, verbose=False):
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short")
     # Read universities lookup
     try:
-        filepath = os.path.join(settings['SITE_DIR'],
-                                settings['UNIVERSITIES_FILENAME'])
+        filepath = expand_filepath(settings['UNIVERSITIES_FILENAME'])
         unis = yaml.safe_load(open(filepath))
     except (IOError, KeyError):
         unis = dict()
@@ -135,9 +134,17 @@ def load_settings(filepath=None, verbose=False):
             raise ValueError('could not determine port from BASE_URL')
 
 def expand_filepath(filepath):
-    "Expand environment variables and the constants.ROOT in filepaths."
+    "Expand environment variables, the ROOT and SITE_DIR in filepaths."
     filepath = os.path.expandvars(filepath)
-    return filepath.replace('{ROOT}', constants.ROOT)
+    while True:
+        old = filepath
+        try:
+            filepath = filepath.replace('{SITE_DIR}', settings['SITE_DIR'])
+        except KeyError:
+            pass
+        filepath = filepath.replace('{ROOT}', constants.ROOT)
+        if filepath == old: break
+    return filepath
 
 def get_dbserver():
     return couchdb.Server(settings['DB_SERVER'])

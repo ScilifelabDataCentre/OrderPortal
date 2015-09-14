@@ -16,5 +16,5 @@ settings = dict(BASE_URL='http://localhost:8885/',
                 ORDER_STATUSES_FILENAME='{ROOT}/data/order_statuses.yaml',
                 ORDER_TRANSITIONS_FILENAME='{ROOT}/data/order_transitions.yaml',
                 SITE_NAME='OrderPortal',
-                UNIVERSITY_LIST_FILENAME='{ROOT}/data/university_list.yaml',
+                UNIVERSITIES_FILENAME='{ROOT}/data/university_list.yaml',
                 )

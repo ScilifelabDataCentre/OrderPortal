@@ -135,8 +135,8 @@ class Text(RequestHandler):
         self.redirect(url, status=303)
 
 
-class Tech(RequestHandler):
-    "Page displaying technical info: versions of modules."
+class Config(RequestHandler):
+    "Page displaying configuration info."
 
     @tornado.web.authenticated
     def get(self):
@@ -148,4 +148,14 @@ class Tech(RequestHandler):
                   ('tornado', tornado.version),
                   ('PyYAML', yaml.__version__),
                   ('markdown', markdown.version)]
-        self.render('tech.html', params=params)
+        params.append(('Site name', settings['SITE_NAME']))
+        params.append(('Site directory', settings['SITE_DIR']))
+        params.append(('Registration enabled',settings['REGISTRATION_ENABLED']))
+        params.append(('Tornado debug', settings['TORNADO_DEBUG']))
+        params.append(('logging debug', settings['LOGGING_DEBUG']))
+        params.append(('order statuses', settings['ORDER_STATUSES_FILENAME']))
+        params.append(('order transitions',
+                       settings['ORDER_TRANSITIONS_FILENAME']))
+        params.append(('universities', settings['UNIVERSITIES_FILENAME']))
+
+        self.render('config.html', params=params)
