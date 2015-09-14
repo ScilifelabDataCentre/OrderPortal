@@ -60,7 +60,7 @@ class Entity(tornado.web.UIModule):
             url = self.handler.reverse_url('file_meta', entity['name'])
         else:
             icon_url = self.handler.static_url(doctype + '.png')
-            iuid = entity.get('iuid') or entity['_id']
+            iuid = entity['_id']
             title = entity.get('path') or entity.get('title') or iuid
             alt = doctype.capitalize()
             try:

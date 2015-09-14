@@ -40,7 +40,7 @@ class Home(RequestHandler):
         view = self.db.view('account/status',
                             key=constants.PENDING,
                             include_docs=True)
-        pending = [self.get_presentable(r.doc) for r in view]
+        pending = [r.doc for r in view]
         pending.sort(utils.cmp_modified, reverse=True)
         # XXX This status is not hard-wired, so this may yield nothing.
         view = self.db.view('order/status',
@@ -49,7 +49,7 @@ class Home(RequestHandler):
                             descending=True,
                             limit=constants.MAX_STAFF_RECENT_ORDERS,
                             include_docs=True)
-        orders = [self.get_presentable(r.doc) for r in view]
+        orders = [r.doc for r in view]
         self.render('home_admin.html', pending=pending, orders=orders,
                     news_items=news_items, events=events)
 
@@ -62,20 +62,19 @@ class Home(RequestHandler):
                             descending=True,
                             limit=constants.MAX_STAFF_RECENT_ORDERS,
                             include_docs=True)
-        orders = [self.get_presentable(r.doc) for r in view]
+        orders = [r.doc for r in view]
         self.render('home_staff.html', orders=orders,
                     news_items=news_items, events=events)
 
     def home_user(self, news_items, events):
         "Home page for a current user having role 'user'."
-        forms = [self.get_presentable(r.doc) for r in
-                 self.db.view('form/enabled', include_docs=True)]
+        forms = [r.doc for r in self.db.view('form/enabled', include_docs=True)]
         view = self.db.view('order/owner',
                             descending=True,
                             limit=constants.MAX_ACCOUNT_RECENT_ORDERS,
                             include_docs=True,
                             key=self.current_user['email'])
-        orders = [self.get_presentable(r.doc) for r in view]
+        orders = [r.doc for r in view]
         self.render('home_user.html', forms=forms, orders=orders,
                     news_items=news_items, events=events)
 
@@ -84,8 +83,11 @@ class Log(RequestHandler):
     "Singe log entry; JSON output."
 
     def get(self, iuid):
-        doc = self.get_entity(iuid, doctype=constants.LOG)
-        self.write(self.get_presentable(doc))
+        log = self.get_entity(iuid, doctype=constants.LOG)
+        log['iuid'] = log.pop('_id')
+        log.pop('_rev')
+        log.pop('orderportal_doctype')
+        self.write(log)
         self.set_header('Content-Type', constants.JSON_MIME)
 
 

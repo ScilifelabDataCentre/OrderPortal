@@ -154,22 +154,6 @@ class RequestHandler(tornado.web.RequestHandler):
         view = self.db.view('event/date', include_docs=True)
         return [r.doc for r in view]
 
-    def get_entity_url(self, url):
-        "Get the entity given its URL, if it is a local entity, else None."
-        if not url: return None
-        iuid = url.split('/')[-1]
-        if not constants.IUID_RX.match(iuid): return None
-        try:
-            entity = self.db[iuid]
-        except couchdb.http.ResourceNotFound:
-            return None
-        try:
-            if entity[constants.DOCTYPE] in constants.ENTITIES:
-                return entity
-        except KeyError:
-            pass
-        return None
-
     def get_entity_attachment_filename(self, entity):
         """Return the filename of the attachment for the given entity.
         Raise KeyError if no attachment.
@@ -198,26 +182,27 @@ class RequestHandler(tornado.web.RequestHandler):
         """
         return self.get_entity_view('account/email', email, reason='no such account')
 
-    def get_presentable(self, doc):
-        """Make the entity document presentable as JSON:
-        - Convert to sorted dictionary.
-        - Remove all entries with value None.
-        - Change '_id' key to 'iuid'.
-        - Remove '_rev' and 'orderportal_doctype' attributes.
-        """
-        result = collections.OrderedDict()
-        result['iuid'] = doc['_id']
-        ignore = set(['_id', '_rev', '_attachments', 'orderportal_doctype'])
-        for key in sorted(doc.keys()):
-            if key in ignore: continue
-            value = doc[key]
-            if value is None: continue
-            result[key] = value
-        try:
-            result['filename'] = doc['_attachments'].keys()[0]
-        except (KeyError, IndexError):
-            pass
-        return result
+    # def get_presentable(self, doc):
+    #     """Make the entity document presentable as JSON:
+    #     - Convert to sorted dictionary.
+    #     - Remove all entries with value None.
+    #     - Change '_id' key to 'iuid'.
+    #     - Remove '_rev' and 'orderportal_doctype' attributes.
+    #     """
+        # result = collections.OrderedDict()
+        # result['iuid'] = doc['_id']
+        # ignore = set(['_id', '_rev', '_attachments', 'orderportal_doctype'])
+        # for key in sorted(doc.keys()):
+        #     if key in ignore: continue
+        #     value = doc[key]
+        #     if value is None: continue
+        #     result[key] = value
+        # try:
+        #     result['filename'] = doc['_attachments'].keys()[0]
+        # except (KeyError, IndexError):
+        #     pass
+        # return result
+        # return doc
 
     def get_logs(self, iuid, limit=constants.DEFAULT_MAX_DISPLAY_LOG+1):
         "Return the event log documents for the given entity iuid."
@@ -228,10 +213,13 @@ class RequestHandler(tornado.web.RequestHandler):
         if limit > 0:
             kwargs['limit'] = limit
         view = self.db.view('log/entity', **kwargs)
-        logs = [self.get_presentable(r.doc) for r in view]
+        logs = [r.doc for r in view]
         # Ref to entity in DB is not needed in each log entry.
         for log in logs:
-            del log['entity']
+            log['iuid'] = log.pop('_id')
+            log.pop('_rev')
+            log.pop('orderportal_doctype')
+            log.pop('entity')
         return logs
 
     def delete_logs(self, iuid):

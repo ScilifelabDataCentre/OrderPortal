@@ -21,7 +21,7 @@
 	{% for order in orders %}
 	<tr>
 	  <th>
-	    <a href="{{ reverse_url('order', order['iuid']) }}">{{ order['title'] }}</a>
+	    <a href="{{ reverse_url('order', order['_id']) }}">{{ order['title'] }}</a>
 	  </th>
 	  <td>{% module Icon(order['status'], label=True) %}</td>
 	  <td class="localtime">{{ order['modified'] }}</td>

@@ -162,7 +162,7 @@ class Orders(RequestHandler):
             view = self.db.view('order/modified',
                                 descending=True,
                                 include_docs=True)
-        orders = [self.get_presentable(r.doc) for r in view]
+        orders = [r.doc for r in view]
         # Page
         page_size = self.current_user.get('page_size') or constants.DEFAULT_PAGE_SIZE
         count = len(orders)
@@ -197,7 +197,7 @@ class OrdersAccount(RequestHandler):
         view = self.db.view('order/owner',
                             include_docs=True,
                             key=email)
-        orders = [self.get_presentable(r.doc) for r in view]
+        orders = [r.doc for r in view]
         params = dict()
         # Filter list
         status = self.get_argument('status', '')

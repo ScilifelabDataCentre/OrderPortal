@@ -12,7 +12,7 @@
 	{{ form['title'] }}
 	<form action="{{ reverse_url('order_create') }}"
 	      role="form" class="pull-right" method="GET">
-	  <input type="hidden" name="form" value="{{ form['iuid'] }}">
+	  <input type="hidden" name="form" value="{{ form['_id'] }}">
 	  <button type="submit"
 		  class="btn btn-xs btn-default glyphicon glyphicon-plus">
 	    Create order
@@ -40,7 +40,7 @@
 	{% for order in orders %}
 	<tr>
 	  <th>
-	    <a href="{{ reverse_url('order', order['iuid']) }}">{{ order['title'] }}</a>
+	    <a href="{{ reverse_url('order', order['_id']) }}">{{ order['title'] }}</a>
 	  </th>
 	  <td>{% module Icon(order['status'], label=True) %}</td>
 	  <td class="localtime">{{ order['modified'] }}</td>

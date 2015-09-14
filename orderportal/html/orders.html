@@ -48,7 +48,7 @@
       {% for order in orders %}
       <tr>
 	<td>
-	  <a href="{{ reverse_url('order', order['iuid']) }}">{{ order.get('title', order['iuid']) }}</a>
+	  <a href="{{ reverse_url('order', order['_id']) }}">{{ order.get('title', order['_id']) }}</a>
 	</td>
 	<td>
 	  <a href="{{ reverse_url('account', order['owner']) }}">{{ order['owner'] }}</a>
