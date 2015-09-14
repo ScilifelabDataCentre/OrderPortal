@@ -136,7 +136,7 @@ class Text(RequestHandler):
 
 
 class Tech(RequestHandler):
-    "Page displaying some technical information."
+    "Page displaying technical info: versions of modules."
 
     @tornado.web.authenticated
     def get(self):

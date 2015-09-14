@@ -198,9 +198,18 @@ class OrdersAccount(RequestHandler):
                             include_docs=True,
                             key=email)
         orders = [self.get_presentable(r.doc) for r in view]
+        params = dict()
+        # Filter list
+        status = self.get_argument('status', '')
+        if status:
+            params['status'] = status
+            orders = [o for o in orders if o.get('status') == status]
         orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
                     reverse=True)
-        self.render('orders_account.html', account=account, orders=orders)
+        self.render('orders_account.html',
+                    account=account,
+                    orders=orders,
+                    params=params)
 
 
 class Order(OrderMixin, RequestHandler):
