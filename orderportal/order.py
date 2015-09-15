@@ -278,9 +278,9 @@ class OrderCreate(RequestHandler):
             saver['fields'] = dict([(f['identifier'], None) for f in fields])
             saver['invalid'] = dict()
             saver['owner'] = self.current_user['email']
-            for transition in settings['ORDER_TRANSITIONS']:
-                if transition['source'] is None:
-                    saver['status'] = transition['targets'][0]
+            for status in settings['ORDER_STATUSES']:
+                if status.get('initial'):
+                    saver['status'] = status['identifier']
                     break
             else:
                 raise ValueError('no initial order status defined')

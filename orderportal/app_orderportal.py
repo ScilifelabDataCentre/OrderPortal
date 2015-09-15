@@ -16,6 +16,7 @@ from orderportal import uimodules
 from orderportal.requesthandler import RequestHandler
 
 from orderportal.home import *
+from orderportal.admin import *
 from orderportal.account import *
 from orderportal.form import *
 from orderportal.order import *
@@ -91,7 +92,8 @@ def get_handlers():
             url(r'/text/([^/]+)', Text, name='text'),
             url(r'/log/([0-9a-f]{32})', Log, name='log'),
             url(r'/([0-9a-f]{32})', Entity, name='entity'),
-            url(r'/config', Config, name='config'),
+            url(r'/admin/statuses', Statuses, name='statuses'),
+            url(r'/admin/config', Config, name='config'),
             ]
 
 def main():

@@ -1,0 +1,75 @@
+{# Status display page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Statuses{% end %}
+
+{% block body_title %}Statuses{% end %}
+
+{% block main_content %}
+
+<div class="row">
+  <div class="col-md-10">
+    <table class="table table-condensed">
+      {% for status in settings['ORDER_STATUSES'] %}
+      <tr>
+	<th>{% module Icon(status['identifier'], label=True) %}</th>
+	<td>
+	  {{ status['description'] }}
+	  <table>
+	    {% if status.get('initial') %}
+	    <tr>
+	      <td>Initial status.</td>
+	    </tr>
+	    {% end %}
+	    <tr>
+	      <td>Order editable by {{ ', '.join(status.get('edit', [])) or 'none' }}.</td>
+	    </tr>
+	    <tr>
+	      <td>From
+		{% set first = True %}
+		{% for trans in settings['ORDER_TRANSITIONS'] %}
+		{% if status['identifier'] in trans['targets'] %}
+		{% if first %}
+		{% set first = False %}
+		{% else %}
+		,
+		{% end %}
+		<strong>{{ trans['source'] }}</strong>
+		(by {{', '.join(trans['permission']) }})
+		{% end %}
+		{% end %}
+	      </td>
+	    </tr>
+	    <tr>
+	      <td>To
+		{% set none = 'none' %}
+		{% set first = True %}
+		{% for trans in settings['ORDER_TRANSITIONS'] %}
+		{% if status['identifier'] == trans['source'] %}
+		{% for target in trans['targets'] %}
+		{% if first %}
+		{% set first = False %}
+		{% else %}
+		,
+		{% end %}
+		{% set none = '' %}
+		<strong>{{ target }}</strong>
+		(by {{', '.join(trans['permission']) }})
+		{% end %}
+		{% end %}
+		{% end %}
+		{{ none }}
+	      </td>
+	    </tr>
+	  </table>
+	</td>
+      </tr>
+      {% end %}
+    </table>
+  </div>
+  <div class="col-md-2">
+  </div>
+</div>
+
+{% end %} {# block main_content #}
