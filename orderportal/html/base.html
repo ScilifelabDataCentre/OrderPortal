@@ -84,9 +84,11 @@
 		<span class="caret"></span>
 	      </a>
               <ul class="dropdown-menu">
+		{% if is_admin %}
 		<li>
-		  <a href="{{ reverse_url('infos') }}">[All info pages]</a>
+		  <a href="{{ reverse_url('infos') }}">All info pages</a>
 		</li>
+		{% end %} {# if is_admin #}
 		{% for n, t in infos %}
 		<li>
 		  <a href="{{ reverse_url('info', n) }}">
@@ -104,11 +106,11 @@
 	      </a>
               <ul class="dropdown-menu">
 		<li>
-		  <a href="{{ reverse_url('files') }}">[All files]</a>
+		  <a href="{{ reverse_url('files') }}">All files</a>
 		</li>
 		{% for name in files %}
 		<li>
-		  <a href="{{ reverse_url('file_meta', name) }}">{{ name }}</a>
+		  <a href="{{ reverse_url('file_meta', name) }}">- {{ name }}</a>
 		</li>
 		{% end %}
               </ul>

@@ -42,8 +42,8 @@ Files
 </table>
 {% end %}{# block main_content #}
 
-{% if is_admin %}
 {% block meta_content %}
+{% if is_admin %}
 <form action="{{ reverse_url('file_create') }}"
       role="form"
       method="GET">
@@ -52,5 +52,5 @@ Files
     Create
   </button>
 </form>
+{% end %} {# if is_admin #}
 {% end %} {# block meta_content #}
-{% end %}

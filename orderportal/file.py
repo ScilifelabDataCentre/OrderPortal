@@ -105,9 +105,7 @@ class FileLogs(RequestHandler):
 class Files(RequestHandler):
     "List of file pages."
 
-    @tornado.web.authenticated
     def get(self):
-        self.check_admin()
         view = self.db.view('file/menu', include_docs=True)
         menu_files = [r.doc for r in view]
         view = self.db.view('file/name', include_docs=True)
