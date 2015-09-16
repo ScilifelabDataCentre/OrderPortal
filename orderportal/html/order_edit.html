@@ -14,7 +14,8 @@ Edit order
 
 {% block main_content %}
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
-      role="form" method="POST">
+      role="form"
+      method="POST">
   {% module xsrf_form_html() %}
 
   <div class="form-group">

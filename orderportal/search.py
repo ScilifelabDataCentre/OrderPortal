@@ -24,7 +24,7 @@ class Search(RequestHandler):
         orig = self.get_argument('term', '')
         params = dict(term=orig)
         items = []
-        # Keep this in sync with 'order/search.js'
+        # Keep this in sync with CouchDB view 'order/search.js'
         term = orig.replace(':', ' ')
         term = term.replace(',', ' ')
         term = term.replace("'", ' ')
@@ -76,4 +76,14 @@ class Search(RequestHandler):
                     count=count)
 
 
+class SearchFields(RequestHandler):
+    "Define which fields to index for search. Rewrites a design document."
 
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        try:
+            doc = self.db['_design/fields']
+        except couchdb.ResourceNotFound:
+            doc = dict()
+        self.render('search_fields.html', views=doc.get('views', dict()))

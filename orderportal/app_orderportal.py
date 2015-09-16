@@ -92,6 +92,7 @@ def get_handlers():
             url(r'/text/([^/]+)', Text, name='text'),
             url(r'/log/([0-9a-f]{32})', Log, name='log'),
             url(r'/([0-9a-f]{32})', Entity, name='entity'),
+            url(r'/admin/search_fields', SearchFields, name='search_fields'),
             url(r'/admin/statuses', Statuses, name='statuses'),
             url(r'/admin/config', Config, name='config'),
             ]
