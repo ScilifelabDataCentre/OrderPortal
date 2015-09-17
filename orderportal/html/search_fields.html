@@ -15,10 +15,6 @@
 	Order fields to be indexed and searched globally. It is not
 	possible to index fields in just a subset of orders.
       </p>
-      <p>
-	Check the fields whose indexes to delete, and/or add the
-	identifier of a new field to index.
-      </p>
     </div>
   </div>
 </div>
@@ -30,28 +26,42 @@
 	  method="POST">
       {% module xsrf_form_html() %}
 
+      {% if views %}
       <div class="form-group">
 	<table class="table table-condensed">
 	  <tr>
-	    <th>Identifiers of indexed fields</th>
+	    <th>Delete field indexes by checking identifier(s)</th>
 	  </tr>
 	  {% for key in sorted(views.keys()) %}
 	  <tr>
 	    <td>
 	      <div class="checkbox">
 		<label>
-		  <input type="checkbox" value="{{ key }}">{{ key }}</label>
+		  <input type="checkbox" value="{{ key }}"
+			 name="delete_field" id="delete_field">{{ key }}</label>
 	      </div>
 	    </td>
 	  </tr>
 	  {% end %}
 	</table>
       </div>
+      {% end %}
+
       <div class="form-group">
-	<label for="usr">Identifier of field to index</label>
-	<input type="text" class="form-control" id="field_identifier">
+	<label for="usr">Add field indexes by identifiers, separated by blanks</label>
+	<input type="text" class="form-control"
+	       name="add_fields" id="add_fields">
+      </div>
+
+      <div class="form-group">
+	<label class="control-label"></label>
+	<button type="submit"
+		class="btn btn-primary glyphicon glyphicon-save">
+	  Save
+	</button>
       </div>
     </form>
+
   </div>
   <div class="col-md-2">
   </div>

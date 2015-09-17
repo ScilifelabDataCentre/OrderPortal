@@ -98,6 +98,11 @@ def get_handlers():
             ]
 
 def main():
+    logging.info("OrderPortal version %s", orderportal.__version__)
+    if settings['TORNADO_DEBUG']:
+        logging.info('tornado debug')
+    if settings['LOGGING_DEBUG']:
+        logging.info('logging debug')
     handlers = get_handlers()
     try:
         handlers.append(tornado.web.url(r'/site/([^/]+)',
@@ -115,12 +120,7 @@ def main():
         static_path='static',
         login_url=r'/')
     application.listen(settings['PORT'], xheaders=True)
-    logging.info("OrderPortal web server PID %s on port %s,"
-                 " tornado debug: %s, logging debug: %s",
-                 os.getpid(),
-                 settings['PORT'],
-                 settings.get('TORNADO_DEBUG', False),
-                 settings.get('LOGGING_DEBUG', False))
+    logging.info("web server PID %s on port %s", os.getpid(), settings['PORT'])
     tornado.ioloop.IOLoop.instance().start()
 
 
