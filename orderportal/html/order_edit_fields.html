@@ -101,13 +101,40 @@
       <select class="form-control"
 	      id="{{ field['identifier'] }}"
 	      name="{{ field['identifier'] }}">
-	<option value="__none__" id="option_none"
+	<option value="__none__"
 		{{ value is None and 'selected' or '' }}>[undef]</option>
-	<option value="true" id="option_true"
+	<option value="true"
 		{{ value == True and 'selected' or '' }}>True</option>
-	<option value="false" id="option_false"
+	<option value="false"
 		{{ value == False and 'selected' or '' }}>False</option>
       </select>
+      {% elif field['type'] == constants.MILESTONE %}
+      <div class="row" id="{{ field['identifier'] }}">
+	<div class="col-md-4">
+	  <div class="radio">
+	    <label class="radio-inline">
+	      <input type="radio"
+		     name="{{ field['identifier'] }}"
+		     value="true"
+		     {{ order['fields'].get(field['identifier'], False) and 'checked' or '' }}>
+	      Reached
+	    </label>
+	    <label class="radio-inline">
+	      <input type="radio"
+		     name="{{ field['identifier'] }}"
+		     value="false"
+		     {{ not order['fields'].get(field['identifier'], False) and 'checked' or '' }}>
+	      Not reached
+	    </label>
+	  </div>
+	</div>
+	<div class="col-md-5">
+	  {# Multiple input fields with same name handled by server for this. #}
+	  <input type="date" class="form-control"
+		 name="{{ field['identifier'] }}"
+		 value="{{ order['fields'][field['identifier']] or '' }}">
+	</div>
+      </div>
       {% else %}
       <input type="text" class="form-control"
 	     name="{{ field['identifier'] }}"

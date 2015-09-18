@@ -9,6 +9,7 @@ import os.path
 ID_RX    = re.compile(r'^[a-z][_a-z0-9]*$', re.IGNORECASE)
 NAME_RX  = re.compile(r'^[^/]+$')
 IUID_RX  = re.compile(r'^[0-9a-f]{32}$')
+DATE_RX  = re.compile(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$') # Safe until 9999 CE...
 EMAIL_RX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
 
 # Content types (MIME types)
@@ -42,8 +43,11 @@ BOOLEAN = 'boolean'
 URL     = 'url'
 SELECT  = 'select'
 TEXT    = 'text'
+DATE    = 'date'
+MILESTONE = 'milestone'
 GROUP   = 'group'
-TYPES   = [STRING, INT, FLOAT, BOOLEAN, URL, SELECT, TEXT, GROUP]
+TYPES   = [STRING, INT, FLOAT, BOOLEAN, URL,
+           SELECT, TEXT, DATE, MILESTONE, GROUP]
 TYPE_LABELS = {INT: 'integer'}
 
 # Boolean string values
