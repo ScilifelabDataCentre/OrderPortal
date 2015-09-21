@@ -54,6 +54,17 @@ class Search(RequestHandler):
             id_set = reduce(lambda i,j: i.union(j), id_sets)
             items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
                           for id in id_set])
+        # Search account first names
+        view = self.db.view('account/first_name')
+        id_sets = []
+        for part in parts:
+            id_sets.append(set([r.id for r in
+                                view[part : part+constants.HIGH_CHAR]]))
+        # Only require one hit in first name
+        if id_sets:
+            id_set = reduce(lambda i,j: i.union(j), id_sets)
+            items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
+                          for id in id_set])
         # Search dynamically defined indexes for order fields
         try:
             fields = self.db['_design/fields']['views'].keys()
