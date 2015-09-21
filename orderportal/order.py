@@ -29,30 +29,8 @@ class OrderSaver(saver.Saver):
 
             identifier = field['identifier']
             try:
-                if field['type'] == constants.MILESTONE:
-                    values = self.rqh.get_arguments(identifier)
-                    if not values: raise tornado.web.MissingArgumentError
-                    # Is there an explicit boolean value?
-                    value = None
-                    for v in values:
-                        try:
-                            if utils.to_bool(v):
-                                value = utils.timestamp()
-                                value = value[:value.index('T')]
-                            else:
-                                value = False
-                            break
-                        except ValueError:
-                            pass
-                    # If 'true', then check if there is an explicit date value?
-                    if value:
-                        for v in values:
-                            if constants.DATE_RX.match(v):
-                                value = v
-                                break
-                else:
-                    value = self.rqh.get_argument(identifier) or None
-                    if value == '__none__': value = None
+                value = self.rqh.get_argument(identifier) or None
+                if value == '__none__': value = None
             except tornado.web.MissingArgumentError:
                 pass            # Missing arg means no change,
                                 # which is not the same as value None!

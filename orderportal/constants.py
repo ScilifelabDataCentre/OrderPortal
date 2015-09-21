@@ -44,11 +44,10 @@ URL     = 'url'
 SELECT  = 'select'
 TEXT    = 'text'
 DATE    = 'date'
-MILESTONE = 'milestone'
 GROUP   = 'group'
-TYPES   = [STRING, INT, FLOAT, BOOLEAN, URL,
-           SELECT, TEXT, DATE, MILESTONE, GROUP]
+TYPES   = [STRING, INT, FLOAT, BOOLEAN, URL, SELECT, TEXT, DATE, GROUP]
 TYPE_LABELS = {INT: 'integer'}
+TYPE_HTML = {STRING: 'text', INT: 'number'}
 
 # Boolean string values
 TRUE  = frozenset(['true', 'yes', 't', 'y', '1'])
