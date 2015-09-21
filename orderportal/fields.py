@@ -78,8 +78,8 @@ class Fields(object):
         self.setup()
         return new
 
-    def copy(self, field):
-        "Copy the field from another form."
+    def clone(self, field):
+        "Clone the field from another form."
         assert field['identifier'] not in self
         new = field.copy()
         self.form['fields'].append(new)
