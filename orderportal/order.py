@@ -75,7 +75,6 @@ class OrderSaver(saver.Saver):
         Skip field if not visible.
         Else check recursively, postorder.
         """
-        logging.debug("field %s %s", field['identifier'], field['type'])
         message = None
         select_id = field.get('visible_if_select_field')
         if select_id:
@@ -103,7 +102,6 @@ class OrderSaver(saver.Saver):
                 except (TypeError, ValueError):
                     message = 'not a float value'
             elif field['type'] == constants.BOOLEAN:
-                logging.debug("boolean %s", value)
                 try:
                     if value is None: raise ValueError
                     self.doc['fields'][field['identifier']] = utils.to_bool(value)
@@ -248,6 +246,7 @@ class Order(OrderMixin, RequestHandler):
                     title="Order '{}'".format(title),
                     order=order,
                     status=self.get_order_status(order),
+                    form=form,
                     fields=form['fields'],
                     is_editable=self.is_admin() or self.is_editable(order),
                     targets=self.get_targets(order))

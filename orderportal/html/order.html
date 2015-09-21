@@ -80,6 +80,18 @@
 	  </a>
 	</td>
       </tr>
+
+      {% if is_admin %}
+      <tr>
+	<th>Form</th>
+	<td>
+	  <a href="{{ reverse_url('form', form['_id']) }}">
+	    {{ form['title'] }}
+	  </a>
+	</td>
+      </tr>
+      {% end %}
+
     </table>
 
   </div>
