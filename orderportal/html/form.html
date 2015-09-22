@@ -186,7 +186,7 @@
       {% for field in fields %}
       <tr>
 	<td class="text-nowrap">
-	  {% include 'field_indent.html' %}
+	  {% module Indent(field['depth']) %}
 	  {{ field['identifier'] }}
 	</td>
 	<td>{{ field.get('label') or '-' }}</td>

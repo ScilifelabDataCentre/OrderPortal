@@ -89,3 +89,10 @@ class Text(tornado.web.UIModule):
         except (tornado.web.HTTPError, KeyError):
             text = default or ''
         return markdown.markdown(text, output_format='html5')
+
+
+class Indent(tornado.web.UIModule):
+    "Output indent blanks."
+
+    def render(self, number, multiple=4):
+        return '&nbsp;' * multiple * max(0, number)

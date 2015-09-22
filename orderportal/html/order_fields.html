@@ -17,7 +17,7 @@
 
 {% if field['type'] == constants.GROUP %}
 <tr>
-  <th>{% include 'field_indent.html' %}{{ label }}</th>
+  <th>{% module Indent(field['depth']) %}{{ label }}</th>
   <td></td>
   <td>
     {% if field['restrict_read'] %}
@@ -42,7 +42,7 @@
 
 {% else %}
 <tr>
-  <th>{% include 'field_indent.html' %}{{ label }}</th>
+  <th>{% module Indent(field['depth']) %}{{ label }}</th>
   <td>
     {% if field['type'] == constants.TEXT %}
     {% module Markdown(order['fields'][field['identifier']] or '-') %}
