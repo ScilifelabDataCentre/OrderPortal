@@ -55,10 +55,6 @@ class FormSaver(saver.Saver):
 class FormMixin(object):
     "Mixin providing form-related methods."
 
-    def is_deletable(self, form):
-        "Can the form be deleted? Checks status only."
-        return form['status'] == constants.PENDING
-
     def are_fields_editable(self, form):
         "Are the form fields editable? Checks status only."
         return form['status'] == constants.PENDING
@@ -108,11 +104,15 @@ class Form(FormMixin, RequestHandler):
     def delete(self, iuid):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        if self.is_deletable(form):
-            raise tornado.web.HTTPError('form cannot be deleted')
+        if not self.is_deletable(form):
+            raise tornado.web.HTTPError(400, reason='form cannot be deleted')
         self.delete_logs(form['_id'])
         self.db.delete(form)
         self.see_other('forms')
+
+    def is_deletable(self, form):
+        "Can the form be deleted?."
+        return form['status'] == constants.PENDING
 
 
 class FormLogs(RequestHandler):
@@ -268,29 +268,67 @@ class FormClone(RequestHandler):
         self.see_other('form_edit', saver.doc['_id'])
 
 
-class FormEnable(RequestHandler):
-    "Enable making orders from the form."
+class FormPending(RequestHandler):
+    """Change status from testing to pending.
+    To allow editing after testing.
+    All test orders for this form are deleted."""
 
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        if form['status'] != constants.ENABLED:
+        if form['status'] == constants.TESTING:
+            with FormSaver(doc=form, rqh=self) as saver:
+                saver['status'] = constants.PENDING
+        view = self.db.view('order/form')
+        for row in view[form['_id']]:
+            self.delete_logs(row.id)
+            del self.db[row.id]
+        # XXX Delete all orders!
+        self.see_other('form', iuid)
+
+
+class FormTesting(RequestHandler):
+    """Change status from pending to testing.
+    To allow testing making orders from the form."""
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        self.check_admin()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        if form['status'] == constants.PENDING:
+            with FormSaver(doc=form, rqh=self) as saver:
+                saver['status'] = constants.TESTING
+        self.see_other('form', iuid)
+
+
+class FormEnable(RequestHandler):
+    """Change status from pending to enabled.
+    Allows users to make orders from the form."""
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        self.check_admin()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        if form['status'] == constants.PENDING:
             with FormSaver(doc=form, rqh=self) as saver:
                 saver['status'] = constants.ENABLED
         self.see_other('form', iuid)
 
 
 class FormDisable(RequestHandler):
-    "Disable making orders from the form."
+    """Change status from enabled to disabled.
+    Disable making orders from the form."""
 
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        if form['status'] != constants.DISABLED:
+        if form['status'] == constants.ENABLED:
             with FormSaver(doc=form, rqh=self) as saver:
                 saver['status'] = constants.DISABLED
         self.see_other('form', iuid)

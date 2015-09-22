@@ -113,7 +113,7 @@
 
       {# All other field types. #}
       {% else %}
-      <input type="{{ constants.TYPE_HTML.get(field['type'], field['type']) }}"
+      <input type="{{ constants.TYPE_HTML.get(field['type'], 'text') }}"
 	     class="form-control"
 	     name="{{ field['identifier'] }}"
 	     id="{{ field['identifier'] }}"

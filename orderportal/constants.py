@@ -69,7 +69,8 @@ ADMIN = 'admin'
 ACCOUNT_ROLES = [USER, STAFF, ADMIN]
 
 # Form statuses; hard-wired!
-FORM_STATUSES = [PENDING, ENABLED, DISABLED]
+TESTING = 'testing'
+FORM_STATUSES = [PENDING, TESTING, ENABLED, DISABLED]
 
 # To be filled in from separate YAML file
 ORDER_STATES = {}
