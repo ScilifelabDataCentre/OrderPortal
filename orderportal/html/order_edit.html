@@ -28,8 +28,23 @@ Edit order
       </div>
     </div>
     <span class="help-block">
-	Brief, descriptive title for the order. It is not required to
-	be unique, but it is a good idea to make it so anyway.
+      Brief, descriptive title for the order. It is not required to
+      be unique, but it is a good idea to make it so anyway.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+	<label class="control-label" for="__owner__">Owner</label>
+	<input type="text" class="form-control"
+	       name="__owner__" id="__owner__"
+	       value="{{ order['owner'] }}">
+      </div>
+    </div>
+    <span class="help-block">
+      The order's owner specified by email address. May be changed to
+      another enabled account.
     </span>
   </div>
 
@@ -113,7 +128,7 @@ Edit order
     <div class="col-md-6">
       <div class="form-group">
 	<label class="control-label"></label>
-	<button type="submit" name="save" value="continue"
+	<button type="submit" name="__save__" value="continue"
 		class="btn btn-primary glyphicon glyphicon-save">
 	  Save and continue
 	</button>

@@ -307,13 +307,27 @@ class OrderEdit(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_editable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
-        with OrderSaver(doc=order, rqh=self) as saver:
-            saver['title'] = self.get_argument('__title__', order['_id'])
-            saver.update_fields(Fields(form))
-        if self.get_argument('save', None) == 'continue':
-            self.see_other('order_edit', order['_id'])
-        else:
-            self.see_other('order', order['_id'])
+        try:
+            with OrderSaver(doc=order, rqh=self) as saver:
+                saver['title'] = self.get_argument('__title__', order['_id'])
+                try:
+                    owner = self.get_argument('__owner__')
+                    account = self.get_account(owner)
+                    if account.get('status') != constants.ENABLED:
+                        raise ValueError('owner account is not enabled')
+                except tornado.web.MissingArgumentError:
+                    pass
+                except tornado.web.HTTPError:
+                    raise ValueError('no such owner account')
+                else:
+                    saver['owner'] = account['email']
+                saver.update_fields(Fields(form))
+            if self.get_argument('__save__', None) == 'continue':
+                self.see_other('order_edit', order['_id'])
+            else:
+                self.see_other('order', order['_id'])
+        except ValueError, msg:
+            self.see_other('order_edit', order['_id'], error=str(msg))
 
 
 class OrderTransition(OrderMixin, RequestHandler):

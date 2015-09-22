@@ -200,12 +200,29 @@
 	</div>
       </div>
 
+      {% block error %}
+      {% try %}
+      {% if error %}
+      <div class="row">
+	<div class="col-md-8 col-md-offset-2">
+	  <div class="panel panel-danger">
+	    <div class="panel-heading">Error</div>
+	    <div class="panel-body">{{ error }}</div>
+	  </div>
+	</div>
+	<div class="col-md-2"></div>
+      </div>
+      {% end %} {# if error #}
+      {% except NameError %}
+      {% end %} {# try #}
+      {% end %} {# block error #}
+
       {% block message %}
       {% try %}
       {% if message %}
       <div class="row">
 	<div class="col-md-8 col-md-offset-2">
-	  <div class="panel panel-danger">
+	  <div class="panel panel-warning">
 	    <div class="panel-heading">Message</div>
 	    <div class="panel-body">{{ message }}</div>
 	  </div>

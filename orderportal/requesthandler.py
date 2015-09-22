@@ -34,6 +34,7 @@ class RequestHandler(tornado.web.RequestHandler):
         result['absolute_reverse_url'] = self.absolute_reverse_url
         result['is_staff'] = self.is_staff()
         result['is_admin'] = self.is_admin()
+        result['error'] = self.get_argument('error', None)
         result['message'] = self.get_argument('message', None)
         result['infos'] = [r.value for r in self.db.view('info/menu')]
         result['files'] = [r.value for r in self.db.view('file/menu')]
@@ -181,28 +182,6 @@ class RequestHandler(tornado.web.RequestHandler):
         Raise HTTP 404 if no such account.
         """
         return self.get_entity_view('account/email', email, reason='no such account')
-
-    # def get_presentable(self, doc):
-    #     """Make the entity document presentable as JSON:
-    #     - Convert to sorted dictionary.
-    #     - Remove all entries with value None.
-    #     - Change '_id' key to 'iuid'.
-    #     - Remove '_rev' and 'orderportal_doctype' attributes.
-    #     """
-        # result = collections.OrderedDict()
-        # result['iuid'] = doc['_id']
-        # ignore = set(['_id', '_rev', '_attachments', 'orderportal_doctype'])
-        # for key in sorted(doc.keys()):
-        #     if key in ignore: continue
-        #     value = doc[key]
-        #     if value is None: continue
-        #     result[key] = value
-        # try:
-        #     result['filename'] = doc['_attachments'].keys()[0]
-        # except (KeyError, IndexError):
-        #     pass
-        # return result
-        # return doc
 
     def get_logs(self, iuid, limit=constants.DEFAULT_MAX_DISPLAY_LOG+1):
         "Return the event log documents for the given entity iuid."
