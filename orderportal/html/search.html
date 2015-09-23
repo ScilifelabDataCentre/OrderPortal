@@ -3,7 +3,7 @@
 {% extends "base.html" %}
 
 {% block head_title %}Search{% end %}
-{% block body_title %}Search{% end %}
+{% block body_title %}{% end %}
 
 {% block search_field %}{% end %}
 
@@ -13,9 +13,9 @@
       method="GET">
   <input type="hidden" name="page" value="{{ params.get('page') or 0 }}">
   <div class="row">
-    <div class="col-md-4 col-md-offset-3">
+    <div class="col-md-6 col-md-offset-2">
       <div class="form-group">
-	<input type="text" name="term" id="term"
+	<input type="text" name="term" id="term" size="40"
 	       class="form-control" value="{{ params.get('term') or '' }}">
       </div>
       <div class="form-group">
@@ -25,10 +25,10 @@
 	</button>
       </div>
     </div>
-    <div class="col-md-5">
+    <div class="col-md-4">
       <i>
-	Searched are order titles, account last and first names
-	and the order fields indexed by the administator.
+	Searches order titles, account last and first names,
+	and the order fields indexed by the administrator.
       </i>
     </div>
   </div>
