@@ -54,10 +54,10 @@ class OrderSaver(saver.Saver):
         Else check recursively, postorder.
         """
         message = None
-        select_id = field.get('visible_if_select_field')
+        select_id = field.get('visible_if_field')
         if select_id:
-            select_value = self.doc['fields'].get(select_id)
-            if select_value != field.get('visible_if_select_value'):
+            select_value = str(self.doc['fields'].get(select_id)).lower()
+            if select_value != str(field.get('visible_if_value')).lower():
                 return True
 
         if field['type'] == constants.GROUP:

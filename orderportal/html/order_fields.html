@@ -8,8 +8,8 @@
 {% end %}
 
 {# Is there a visibility condition? If so, check it. #}
-{% set fid = field.get('visible_if_select_field') %}
-{% if fid and order['fields'].get(fid)!=field.get('visible_if_select_value') %}
+{% set fid = field.get('visible_if_field') %}
+{% if fid and str(order['fields'].get(fid)).lower() != str(field.get('visible_if_value')).lower() %}
 {% continue %}
 {% end %}
 
@@ -44,10 +44,15 @@
 <tr>
   <th>{% module Indent(field['depth']) %}{{ label }}</th>
   <td>
+    {% set value = order['fields'][field['identifier']] %}
     {% if field['type'] == constants.TEXT %}
-    {% module Markdown(order['fields'][field['identifier']] or '-') %}
+      {% module Markdown(value or '-') %}
     {% else %}
-    {{ order['fields'][field['identifier']] or '-' }}
+      {% if value is None %}
+      -
+      {% else %}
+      {{ value }}
+      {% end %}
     {% end %}
   </td>
   <td>

@@ -197,9 +197,9 @@
 	  {% end %}
 	</td>
 	<td>
-	  {% set identifier = field.get('visible_if_select_field') %}
+	  {% set identifier = field.get('visible_if_field') %}
 	  {% if identifier %}
-	  if {{ identifier }} == '{{ field.get("visible_if_select_value") }}'
+	  if {{ identifier }} == '{{ field.get("visible_if_value") }}'
 	  {% end %}
 	</td>
 	<td>

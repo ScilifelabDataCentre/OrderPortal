@@ -10,14 +10,14 @@
 {% set label = field.get('label') or field['identifier'].capitalize().replace('_', ' ') %}
 
 {# Is there a visibility condition? #}
-{% set visible_if_select_field = field.get('visible_if_select_field') %}
+{% set visible_if_field = field.get('visible_if_field') %}
 
 {% if field['type'] == constants.GROUP %}
 
-{% if visible_if_select_field %}
-<div class="panel panel-default visible-if-select"
-     data-select-id="{{ visible_if_select_field }}"
-     data-select-val="{{ field.get('visible_if_select_value') or '' }}">
+{% if visible_if_field %}
+<div class="panel panel-default visible-if"
+     data-if-id="{{ visible_if_field }}"
+     data-if-val="{{ field.get('visible_if_value') or '' }}">
 {% else %}
 <div class="panel panel-default">
 {% end %}
@@ -51,10 +51,10 @@
 
 {% else %}
 
-{% if visible_if_select_field %}
-<div class="form-group has-feedback visible-if-select"
-     data-select-id="{{ visible_if_select_field }}"
-     data-select-val="{{ field.get('visible_if_select_value') or '' }}">
+{% if visible_if_field %}
+<div class="form-group has-feedback visible-if"
+     data-if-id="{{ visible_if_field }}"
+     data-if-val="{{ field.get('visible_if_value') or '' }}">
 {% else %}
 <div class="form-group has-feedback">
 {% end %}
@@ -74,7 +74,7 @@
       {% set value = order['fields'][field['identifier']] %}
 
       {% if field['type'] == constants.SELECT %}
-      <select class="form-control"
+      <select class="form-control visible-if-source"
 	      name="{{ field['identifier'] }}"
 	      id="{{ field['identifier'] }}">
 	{% if not field['required'] %}
@@ -92,6 +92,7 @@
 	  {% end %}
 	{% end %}
       </select>
+
       {% elif field['type'] == constants.TEXT %}
       <textarea class="form-control"
 		name="{{ field['identifier'] }}"
@@ -99,8 +100,8 @@
 		>{{ value or '' }}</textarea>
 
       {% elif field['type'] == constants.BOOLEAN %}
-      {# Simplifies a lot when a Select element is used rather than Radio. #}
-      <select class="form-control"
+      {# Simplifies a lot to use a Select element rather than Radio. #}
+      <select class="form-control visible-if-source"
 	      id="{{ field['identifier'] }}"
 	      name="{{ field['identifier'] }}">
 	<option value="__none__"
@@ -113,11 +114,14 @@
 
       {# All other field types. #}
       {% else %}
+      {% if value is None %}
+      {% set value = '' %}
+      {% end %}
       <input type="{{ constants.TYPE_HTML.get(field['type'], 'text') }}"
-	     class="form-control"
+	     class="form-control visible-if-source"
 	     name="{{ field['identifier'] }}"
 	     id="{{ field['identifier'] }}"
-	     value="{{ order['fields'][field['identifier']] or '' }}">
+	     value="{{ value }}">
       {% if field['required'] %}
       <span style="color:red; margin-right: 1em;"
 	    class="glyphicon glyphicon-star form-control-feedback"
