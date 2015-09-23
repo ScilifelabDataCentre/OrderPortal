@@ -18,6 +18,7 @@ from orderportal.requesthandler import RequestHandler
 from orderportal.home import *
 from orderportal.admin import *
 from orderportal.account import *
+from orderportal.group import *
 from orderportal.form import *
 from orderportal.order import *
 from orderportal.news import *
@@ -48,6 +49,10 @@ def get_handlers():
             url(r'/account/([^/]+)', Account, name='account'),
             url(r'/account/([^/]+)/logs', AccountLogs, name='account_logs'),
             url(r'/account/([^/]+)/edit', AccountEdit, name='account_edit'),
+            url(r'/group', GroupCreate, name='group_create'),
+            url(r'/group/([0-9a-f]{32})', Group, name='group'),
+            url(r'/group/([0-9a-f]{32})/edit', GroupEdit, name='group_edit'),
+            url(r'/group/([0-9a-f]{32})/logs', GroupLogs, name='group_logs'),
             url(r'/search', Search, name='search'),
             url(r'/login', Login, name='login'),
             url(r'/logout', Logout, name='logout'),

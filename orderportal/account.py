@@ -169,8 +169,12 @@ class Account(RequestHandler):
             account['order_count'] = list(view[email])[0].value
         except IndexError:
             account['order_count'] = 0
+        view = self.db.view('group/member', include_docs=True)
+        groups = sorted([r.doc for r in view[email]],
+                        cmp=lambda i,j: cmp(i['name'], j['name']))
         self.render('account.html',
                     account=account,
+                    groups=groups,
                     deletable=self.get_deletable(account))
 
     @tornado.web.authenticated

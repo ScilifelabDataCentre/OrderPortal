@@ -10,13 +10,25 @@
 
 {% block meta_content %}
 
+{% if current_user['email'] == account['email'] %}
+<br>
+<div>
+  <a href="{{ reverse_url('group_create') }}"
+     class="btn btn-success glyphicon glyphicon-plus" role="button">
+    Create group
+  </a>
+</div>
+{% end %}
+
 {% if is_admin or current_user['email'] == account['email'] %}
+<br>
 <div>
   <a href="{{ reverse_url('account_edit', account['email']) }}"
      class="btn btn-primary glyphicon glyphicon-edit" role="button">
     Edit
   </a>
 </div>
+
 <br>
 <div>
   <a href="{{ reverse_url('reset') }}"
@@ -94,6 +106,19 @@
     <th>Status</th>
     <td>{% module Icon(account['status'], label=True) %}</td>
   </tr>
+  <tr>
+    <th>Groups</th>
+    <td>
+      {% for group in groups %}
+      <a href="{{ reverse_url('group', group['_id']) }}">
+	{% module Entity(group) %}
+      </a>
+      {% if group['owner'] == account['email'] %}
+      (owner)
+      {% end %}
+      <br>
+      {% end %}
+    </td>
   <tr>
     <th>First name</th>
     <td>{{ account.get('first_name') or '-' }}</td>

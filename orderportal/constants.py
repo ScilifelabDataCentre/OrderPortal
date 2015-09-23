@@ -22,18 +22,19 @@ JSON_MIME      = 'application/json'
 HIGH_CHAR = 'ZZZZZZZZ'
 
 # Entity documents
-DOCTYPE  = 'orderportal_doctype'
-ACCOUNT  = 'account'
-FIELD    = 'field'
-FORM     = 'form'
-ORDER    = 'order'
-NEWS     = 'news'
-EVENT    = 'event'
-TEXT     = 'text'
-INFO     = 'info'
-FILE     = 'file'
-LOG      = 'log'
-ENTITIES = frozenset([ACCOUNT, FIELD, FORM, ORDER, INFO, FILE])
+DOCTYPE = 'orderportal_doctype'
+ACCOUNT = 'account'
+GROUP   = 'group'
+FIELD   = 'field'
+FORM    = 'form'
+ORDER   = 'order'
+NEWS    = 'news'
+EVENT   = 'event'
+TEXT    = 'text'
+INFO    = 'info'
+FILE    = 'file'
+LOG     = 'log'
+ENTITIES = frozenset([ACCOUNT, GROUP, FIELD, FORM, ORDER, INFO, FILE])
 
 # Field types
 STRING  = 'string'
@@ -44,7 +45,8 @@ URL     = 'url'
 SELECT  = 'select'
 TEXT    = 'text'
 DATE    = 'date'
-GROUP   = 'group'
+### This constant already defined above.
+### GROUP   = 'group'
 TYPES   = [STRING, INT, FLOAT, BOOLEAN, URL, SELECT, TEXT, DATE, GROUP]
 TYPE_LABELS = {INT: 'integer'}
 TYPE_HTML = {STRING: 'text', INT: 'number'}

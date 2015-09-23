@@ -61,7 +61,8 @@ class Entity(tornado.web.UIModule):
         else:
             icon_url = self.handler.static_url(doctype + '.png')
             iuid = entity['_id']
-            title = entity.get('path') or entity.get('title') or iuid
+            title = entity.get('path') or entity.get('title') or \
+                entity.get('name') or iuid
             alt = doctype.capitalize()
             try:
                 url = self.handler.reverse_url(doctype, iuid)

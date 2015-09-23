@@ -1,8 +1,11 @@
 {# Order page. #}
 
-{% block head_title %}Order '{{ order.get('title') or order['_id'] }}'{% end %}
+{% block head_title %}Order {{ order.get('title') or order['_id'] }}{% end %}
 
-{% block body_title %}Order '{{ order.get('title') or order['_id'] }}'{% end %}
+{% block body_title %}
+{% module Icon('order', label=True) %}
+{{ order.get('title') or order['_id'] }}
+{% end %}
 
 {% extends "base.html" %}
 
