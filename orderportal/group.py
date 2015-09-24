@@ -199,7 +199,7 @@ class GroupAccept(RequestHandler):
 
 
 class GroupDecline(RequestHandler):
-    "Decline group invitation. Only the user himself can do this."
+    "Decline group invitation or membership. Only the user himself can do this."
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -207,9 +207,10 @@ class GroupDecline(RequestHandler):
         group = self.get_entity(iuid, doctype=constants.GROUP)
         with GroupSaver(doc=group, rqh=self) as saver:
             invited = set(group['invited'])
-            try:
-                invited.remove(self.current_user['email'])
-            except KeyError:
-                raise tornado.web.HTTPError(403,reason='you are not invited')
+            invited.discard(self.current_user['email'])
             saver['invited'] = sorted(invited)
+            if self.current_user['email'] != group['owner']:
+                members = set(group['members'])
+                members.discard(self.current_user['email'])
+                saver['members'] = sorted(members)
         self.see_other('account', self.current_user['email'])

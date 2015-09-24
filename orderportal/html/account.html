@@ -110,13 +110,36 @@
   <tr>
     <th>Groups</th>
     <td>
-      {% for group in groups %}
-	{% module Entity(group) %}
-        {% if group['owner'] == account['email'] %}
-        (owner)
-      {% end %}
-      <br>
-      {% end %}
+      <table>
+	{% for group in groups %}
+	<tr>
+	  <td>
+	    {% module Entity(group) %}
+            {% if group['owner'] == account['email'] %}
+            (owner)
+	    {% end %}
+	  </td>
+	  {% if current_user['email'] == account['email'] and account['email'] != group['owner'] %}
+	  <td>
+            <form action="{{ reverse_url('group_decline', group['_id']) }}"
+		  role="form"
+		  class="form-inline"
+		  method="POST">
+	      {% module xsrf_form_html() %}
+	      <div class="form-group">
+		&nbsp;
+		<button type="submit"
+			class="btn btn-xs btn-danger glyphicon glyphicon-remove"
+			onclick="return confirm('Cannot be undone! Really decline?');">
+		  Decline
+		</button>
+	      </div>
+	    </form>
+	  </td>
+	  {% end %}
+	</tr>
+	{% end %}
+      </table>
     </td>
   </tr>
   <tr>
@@ -154,7 +177,8 @@
 	      <div class="form-group">
 		&nbsp;
 		<button type="submit"
-			class="btn btn-xs btn-danger glyphicon glyphicon-remove">
+			class="btn btn-xs btn-danger glyphicon glyphicon-remove"
+			onclick="return confirm('Cannot be undone! Really decline?');">
 		  Decline
 		</button>
 	      </div>
