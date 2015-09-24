@@ -43,7 +43,8 @@
 <br>
 {% if account['status'] in (constants.PENDING, constants.DISABLED) %}
 <form action="{{ reverse_url('account_enable', account['email']) }}"
-      role="form" method="POST">
+      role="form"
+      method="POST">
   {% module xsrf_form_html() %}
   <div class="form-group">
     <button type="submit"
@@ -55,7 +56,8 @@
 
 {% else %}
 <form action="{{ reverse_url('account_disable', account['email']) }}"
-      role="form" method="POST">
+      role="form"
+      method="POST">
   {% module xsrf_form_html() %}
   <div class="form-group">
     <button type="submit"
@@ -68,7 +70,8 @@
 
 {% if is_deletable %}
 <form action="{{ reverse_url('account', account['email']) }}"
-      role="form" method="POST">
+      role="form"
+      method="POST">
   {% module xsrf_form_html() %}
   <div class="form-group">
     <input type="hidden" name="_http_method" value="delete">
@@ -115,6 +118,54 @@
       <br>
       {% end %}
     </td>
+  </tr>
+  <tr>
+    <th>Group invitations</th>
+    <td>
+      <table>
+      {% for group in invitations %}
+        <tr>
+	  <td>
+	    {% module Entity(group) %}
+            ({% module Icon('account') %} {{ group['owner'] }})
+	  </td>
+	  {% if current_user['email'] == account['email'] %}
+	  <td>
+            <form action="{{ reverse_url('group_accept', group['_id']) }}"
+		  role="form"
+		  class="form-inline"
+		  method="POST">
+	      {% module xsrf_form_html() %}
+	      <div class="form-group">
+		&nbsp;
+		<button type="submit"
+			class="btn btn-xs btn-success glyphicon glyphicon-ok">
+		  Accept
+		</button>
+	      </div>
+	    </form>
+	  </td>
+	  <td>
+            <form action="{{ reverse_url('group_decline', group['_id']) }}"
+		  role="form"
+		  class="form-inline"
+		  method="POST">
+	      {% module xsrf_form_html() %}
+	      <div class="form-group">
+		&nbsp;
+		<button type="submit"
+			class="btn btn-xs btn-danger glyphicon glyphicon-remove">
+		  Decline
+		</button>
+	      </div>
+	    </form>
+	  </td>
+	  {% end %}
+	</tr>
+      {% end %}
+      </table>
+    </td>
+  </tr>
   <tr>
     <th>First name</th>
     <td>{{ account.get('first_name') or '-' }}</td>

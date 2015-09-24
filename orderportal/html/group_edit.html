@@ -54,12 +54,13 @@ Edit
       <div class="col-md-8">
 	<label class="control-label" for="members">Members</label>
 	<textarea class="form-control" name="members" id="members"
-		  >{{ '\n'.join(group['members']) }}</textarea>
+		  >{{ '\n'.join(group['members'] + group['invited']) }}</textarea>
       </div>
     </div>
     <span class="help-block">
       Email addresses of members, which must have accounts in the
-      system.  One per line.
+      system. One per line. New emails will be invited. Simply remove
+      the emails for those account you wish to exclude or disinvite.
     </span>
   </div>
 

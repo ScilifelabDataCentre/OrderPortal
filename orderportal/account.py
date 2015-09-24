@@ -196,9 +196,14 @@ class Account(AccountMixin, RequestHandler):
             account['order_count'] = list(view[email])[0].value
         except IndexError:
             account['order_count'] = 0
+        if self.is_staff() or self.current_user['email'] == account['email']:
+            invitations = self.get_invitations(account['email'])
+        else:
+            invitations = []
         self.render('account.html',
                     account=account,
                     groups=self.get_account_groups(email),
+                    invitations=invitations,
                     is_deletable=self.is_deletable(account))
 
     @tornado.web.authenticated

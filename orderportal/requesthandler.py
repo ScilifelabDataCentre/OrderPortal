@@ -191,6 +191,11 @@ class RequestHandler(tornado.web.RequestHandler):
             result.update(group['members'])
         return result
 
+    def get_invitations(self, email):
+        "Get the groups the account with the given email has been invited to."
+        view = self.db.view('group/invited', include_docs=True)
+        return [r.doc for r in view[email]]
+
     def is_colleague(self, email):
         """Is the user with the given email address
         in the same group as the current user?"""

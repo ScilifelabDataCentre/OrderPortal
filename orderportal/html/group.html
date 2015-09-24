@@ -21,6 +21,19 @@
     Edit
   </button>
 </form>
+
+<br>
+<form action="{{ reverse_url('group', group['_id']) }}"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+  <input type="hidden" name="_http_method" value="delete">
+  <button type="submit"
+	  class="btn btn-danger glyphicon glyphicon-trash"
+	  onclick="return confirm('Cannot be undone! Really delete?');">
+    Delete
+  </button>
+</form>
 {% end %} {# if is_editable #}
 
 {% if is_editable %}
@@ -60,13 +73,30 @@
       <tr>
 	<th>Members</th>
 	<td>
-	  {% for member in group['members'] %}
-	  <a href="{{ reverse_url('account', member) }}">
+	  {% for email in group['members'] %}
+	  <a href="{{ reverse_url('account', email) }}">
 	    {% module Icon('account') %}
-	    {{ member }}
+	    {{ email }}
 	  </a>
 	  <br>
 	  {% end %}
+	</td>
+      </tr>
+
+      <tr>
+	<th>Invited</th>
+	<td>
+	  {% for email in group['invited'] %}
+	    {% if is_staff %}
+	    <a href="{{ reverse_url('account', email) }}">
+	      {% module Icon('account') %}
+	      {{ email }}
+	    </a>
+	    {% else %}
+	    {{ email }}
+	    {% end %}
+	  {% end %}
+	  <br>
 	</td>
       </tr>
 

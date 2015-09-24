@@ -21,18 +21,28 @@ class Home(RequestHandler):
         if not self.current_user:
             self.render('home.html',
                         news_items=self.get_news(),
-                        events=self.get_events())
+                        events=self.get_events(),
+                        message=self.get_invited_message())
         elif self.current_user['role'] == constants.ADMIN:
             self.home_admin(news_items=self.get_news(),
-                            events=self.get_events())
+                            events=self.get_events(),
+                            message=self.get_invited_message())
         elif self.current_user['role'] == constants.STAFF:
             self.home_staff(news_items=self.get_news(),
-                            events=self.get_events())
+                            events=self.get_events(),
+                            message=self.get_invited_message())
         else:
             self.home_user(news_items=self.get_news(),
-                           events=self.get_events())
+                           events=self.get_events(),
+                           message=self.get_invited_message())
 
-    def home_admin(self, news_items, events):
+    def get_invited_message(self):
+        if self.get_invitations():
+            return 'You have group invitations. See the page for your account.'
+        else:
+            return None
+
+    def home_admin(self, **kwargs):
         "Home page for a current user having role 'admin'."
         view = self.db.view('account/status',
                             key=constants.PENDING,
@@ -47,10 +57,12 @@ class Home(RequestHandler):
                             limit=constants.MAX_STAFF_RECENT_ORDERS,
                             include_docs=True)
         orders = [r.doc for r in view]
-        self.render('home_admin.html', pending=pending, orders=orders,
-                    news_items=news_items, events=events)
+        self.render('home_admin.html',
+                    pending=pending,
+                    orders=orders,
+                    **kwargs)
 
-    def home_staff(self, news_items, events):
+    def home_staff(self, **kwargs):
         "Home page for a current user having role 'staff'."
         # XXX This status is not hard-wired, so this may yield nothing.
         view = self.db.view('order/status',
@@ -60,10 +72,11 @@ class Home(RequestHandler):
                             limit=constants.MAX_STAFF_RECENT_ORDERS,
                             include_docs=True)
         orders = [r.doc for r in view]
-        self.render('home_staff.html', orders=orders,
-                    news_items=news_items, events=events)
+        self.render('home_staff.html',
+                    orders=orders,
+                    **kwargs)
 
-    def home_user(self, news_items, events):
+    def home_user(self, **kwargs):
         "Home page for a current user having role 'user'."
         forms = [r.doc for r in self.db.view('form/enabled', include_docs=True)]
         view = self.db.view('order/owner',
@@ -72,8 +85,10 @@ class Home(RequestHandler):
                             include_docs=True,
                             key=self.current_user['email'])
         orders = [r.doc for r in view]
-        self.render('home_user.html', forms=forms, orders=orders,
-                    news_items=news_items, events=events)
+        self.render('home_user.html',
+                    forms=forms,
+                    orders=orders,
+                    **kwargs)
 
 
 class Log(RequestHandler):

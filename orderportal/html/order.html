@@ -14,7 +14,8 @@
 {% if is_editable %}
 <br>
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
-      role="form" method="GET">
+      role="form"
+      method="GET">
   <button type="submit"
 	  class="btn btn-primary glyphicon glyphicon-edit">
     Edit
@@ -25,7 +26,8 @@
 {% for target in targets %}
 <br>
 <form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
-      role="form" method="POST">
+      role="form"
+      method="POST">
   {% module xsrf_form_html() %}
   <button type="submit" class="btn btn-success"
 	  {% if not is_admin %}
@@ -41,7 +43,8 @@
 {% if is_editable %}
 <br>
 <form action="{{ reverse_url('order', order['_id']) }}"
-      role="form" method="POST">
+      role="form"
+      method="POST">
   {% module xsrf_form_html() %}
   <input type="hidden" name="_http_method" value="delete">
   <button type="submit"

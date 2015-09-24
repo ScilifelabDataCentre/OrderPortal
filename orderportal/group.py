@@ -69,8 +69,7 @@ class GroupMixin(object):
     def check_editable(self, group):
         "Check if current user may edit the group."
         if not self.is_editable(group):
-            raise tornado.web.HTTPError(403,
-                                        reason='you may not edit the group')
+            raise tornado.web.HTTPError(403,reason='you may not edit the group')
 
 
 class Group(GroupMixin, RequestHandler):
@@ -83,6 +82,22 @@ class Group(GroupMixin, RequestHandler):
         self.render('group.html',
                     group=group,
                     is_editable=self.is_editable(group))
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        if self.get_argument('_http_method', None) == 'delete':
+            self.delete(iuid)
+            return
+        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
+
+    @tornado.web.authenticated
+    def delete(self, iuid):
+        group = self.get_entity(iuid, doctype=constants.GROUP)
+        self.check_editable(group)
+        self.delete_logs(group['_id'])
+        self.db.delete(group)
+        self.see_other('account', self.current_user['email'])
 
 
 class GroupCreate(RequestHandler):
@@ -97,14 +112,16 @@ class GroupCreate(RequestHandler):
         with GroupSaver(rqh=self) as saver:
             saver['name'] = self.get_argument('name', '') or '[no name]'
             saver['owner'] = self.current_user['email']
-            members = set()
-            for member in self.get_argument('members', '').strip().split('\n'):
+            invited = set()
+            for email in self.get_argument('invited', '').strip().split('\n'):
                 try:
-                    members.add(self.get_account(member)['email'])
+                    self.get_account(email)
                 except tornado.web.HTTPError:
                     pass
-            members.add(self.current_user['email'])
-            saver['members'] = sorted(members)
+                else:
+                    invited.add(email)
+            saver['invited'] = sorted(invited)
+            saver['members'] = [self.current_user['email']]
         self.see_other('group', saver.doc['_id'])
 
 
@@ -118,23 +135,33 @@ class GroupEdit(GroupMixin, RequestHandler):
         self.render('group_edit.html', group=group)
 
     @tornado.web.authenticated
-    def post(self):
+    def post(self, iuid):
         group = self.get_entity(iuid, doctype=constants.GROUP)
         self.check_editable(group)
         with GroupSaver(doc=group, rqh=self) as saver:
+            old_members = set(group['members'])
+            old_invited = set(group['invited'])
             saver['name'] = self.get_argument('name', '') or '[no name]'
             owner = self.get_account(self.get_argument('owner'))
-            if owner['email'] not in group['members']:
-                raise ValueError('new owner not among members')
+            if owner['email'] not in old_members:
+                raise ValueError('new owner not among current members')
             saver['owner'] = owner['email']
             members = set()
-            for member in self.get_argument('members', '').strip().split('\n'):
+            invited = set()
+            for email in self.get_argument('members', '').strip().split():
                 try:
-                    members.add(self.get_account(member)['email'])
+                    self.get_account(email)
                 except tornado.web.HTTPError:
                     pass
+                if email in old_members:
+                    members.add(email)
+                else:
+                    invited.add(email)
+                if email in old_invited:
+                    invited.add(email)
             members.add(owner['email'])
             saver['members'] = sorted(members)
+            saver['invited'] = sorted(invited)
         self.see_other('group', saver.doc['_id'])
 
 
@@ -149,3 +176,40 @@ class GroupLogs(GroupMixin, RequestHandler):
                     title="Logs for group '{}'".format(group['name']),
                     entity=group,
                     logs=self.get_logs(group['_id']))
+
+
+class GroupAccept(RequestHandler):
+    "Accept group invitation. Only the user himself can do this."
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        group = self.get_entity(iuid, doctype=constants.GROUP)
+        with GroupSaver(doc=group, rqh=self) as saver:
+            invited = set(group['invited'])
+            try:
+                invited.remove(self.current_user['email'])
+            except KeyError:
+                raise tornado.web.HTTPError(403,reason='you are not invited')
+            members = set(group['members'])
+            members.add(self.current_user['email'])
+            saver['invited'] = sorted(invited)
+            saver['members'] = sorted(members)
+        self.see_other('account', self.current_user['email'])
+
+
+class GroupDecline(RequestHandler):
+    "Decline group invitation. Only the user himself can do this."
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        group = self.get_entity(iuid, doctype=constants.GROUP)
+        with GroupSaver(doc=group, rqh=self) as saver:
+            invited = set(group['invited'])
+            try:
+                invited.remove(self.current_user['email'])
+            except KeyError:
+                raise tornado.web.HTTPError(403,reason='you are not invited')
+            saver['invited'] = sorted(invited)
+        self.see_other('account', self.current_user['email'])
