@@ -75,10 +75,17 @@
 		<span class="caret"></span>
 	      </a>
               <ul class="dropdown-menu">
-		<li><a href="{{ reverse_url('accounts') }}">All accounts</a></li>
+		<li>
+		  <a href="{{ reverse_url('accounts') }}">All accounts</a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('groups') }}">All groups</a>
+		</li>
 		{% if is_admin %}
 		<li>
-		  <a href="{{ reverse_url('register') }}">Register new account</a>
+		  <a href="{{ reverse_url('register') }}">
+		    Register new account
+		  </a>
 		</li>
 		<li>
 		  <a href="{{ reverse_url('reset') }}">Reset password</a>

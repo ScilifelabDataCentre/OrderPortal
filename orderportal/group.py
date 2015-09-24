@@ -18,6 +18,39 @@ class GroupSaver(saver.Saver):
     doctype = constants.GROUP
 
 
+class Groups(RequestHandler):
+    "Page for a list of all groups."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_staff()
+        params = dict()
+        view = self.db.view('group/modified',
+                            descending=True,
+                            include_docs=True)
+        groups = [r.doc for r in view]
+        # Page
+        page_size = self.current_user.get('page_size') or constants.DEFAULT_PAGE_SIZE
+        count = len(groups)
+        max_page = (count - 1) / page_size
+        try:
+            page = int(self.get_argument('page', 0))
+            page = max(0, min(page, max_page))
+        except (ValueError, TypeError):
+            page = 0
+        start = page * page_size
+        end = min(start + page_size, count)
+        groups = groups[start : end]
+        params['page'] = page
+        self.render('groups.html',
+                    groups=groups,
+                    params=params,
+                    start=start+1,
+                    end=end,
+                    max_page=max_page,
+                    count=count)
+
+
 class GroupMixin(object):
 
     def check_readable(self, group):

@@ -10,7 +10,8 @@
 {% block content %}
 <form action="{{ reverse_url('orders', **params) }}"
       id="refresh"
-      role="form" class="form-inline"
+      role="form"
+      class="form-inline"
       method="GET">
   <input type="hidden" name="page" value="{{ params.get('page') or 0 }}">
   <div class="row">
@@ -48,10 +49,14 @@
       {% for order in orders %}
       <tr>
 	<td>
-	  <a href="{{ reverse_url('order', order['_id']) }}">{{ order.get('title', order['_id']) }}</a>
+	  <a href="{{ reverse_url('order', order['_id']) }}">
+	    {{ order.get('title', order['_id']) }}
+	  </a>
 	</td>
 	<td>
-	  <a href="{{ reverse_url('account', order['owner']) }}">{{ order['owner'] }}</a>
+	  <a href="{{ reverse_url('account', order['owner']) }}">
+	    {{ order['owner'] }}
+	  </a>
 	</td>
 	<td>{% module Icon(order['status'], label=True) %}</td>
 	<td class="localtime">{{ order['modified'] }}</td>

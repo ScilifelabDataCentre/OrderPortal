@@ -108,11 +108,9 @@
     <th>Groups</th>
     <td>
       {% for group in groups %}
-      <a href="{{ reverse_url('group', group['_id']) }}">
 	{% module Entity(group) %}
-      </a>
-      {% if group['owner'] == account['email'] %}
-      (owner)
+        {% if group['owner'] == account['email'] %}
+        (owner)
       {% end %}
       <br>
       {% end %}

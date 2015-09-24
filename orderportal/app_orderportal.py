@@ -54,6 +54,7 @@ def get_handlers():
             url(r'/group/([0-9a-f]{32})', Group, name='group'),
             url(r'/group/([0-9a-f]{32})/edit', GroupEdit, name='group_edit'),
             url(r'/group/([0-9a-f]{32})/logs', GroupLogs, name='group_logs'),
+            url(r'/groups', Groups, name='groups'),
             url(r'/search', Search, name='search'),
             url(r'/login', Login, name='login'),
             url(r'/logout', Logout, name='logout'),

@@ -1,0 +1,65 @@
+{# List of groups. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Groups{% end %}
+{% block body_title %}
+{% module Icon('group', title='Groups', label=True) %}
+{% end %}
+
+{% block content %}
+<form action="{{ reverse_url('groups', **params) }}"
+      id="refresh"
+      role="form"
+      class="form-inline"
+      method="GET">
+  <input type="hidden" name="page" value="{{ params.get('page') or 0 }}">
+</form>
+
+{% set url_name = 'groups' %}
+{% include 'paging.html' %}
+
+<div class="row">
+  <div class="col-md-10 col-md-offset-1">
+    <table class="table table-striped table-condensed">
+      <tr>
+	<th>Group</th>
+	<th>Owner</th>
+	<th>Members</th>
+	<th>Modified</th>
+      </tr>
+      {% for group in groups %}
+      <tr>
+	<td>
+	  <a href="{{ reverse_url('group', group['_id']) }}">
+	    {% module Entity(group) %}
+	  </a>
+	</td>
+	<td>
+	  <a href="{{ reverse_url('account', group['owner']) }}">
+	    {% module Icon('account') %}
+	    {{ group['owner'] }}
+	  </a>
+	</td>
+	<td>
+	  {% for member in group['members'] %}
+	  <a href="{{ reverse_url('account', member) }}">
+	    {% module Icon('account') %}
+	    {{ member }}
+	  </a>
+	  <br>
+	  {% end %}
+	</td>
+	<td class="localtime">{{ group['modified'] }}</td>
+      </tr>
+      {% end %}
+    </table>
+  </div>
+  <div class="col-md-1">
+  </div>
+</div>
+{% end %}{# block content #}
+
+{% block javascript_code %}
+<script src="{{ static_url('refresh_on_change.js') }}"></script>
+{% end %}
