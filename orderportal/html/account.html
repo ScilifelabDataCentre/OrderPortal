@@ -66,7 +66,7 @@
 </form>
 {% end %} {# if account['status'] #}
 
-{% if deletable %}
+{% if is_deletable %}
 <form action="{{ reverse_url('account', account['email']) }}"
       role="form" method="POST">
   {% module xsrf_form_html() %}
@@ -87,7 +87,6 @@
 
 {% block main_content %}
 <table class="table-condensed table-fields">
-  {% if is_staff %}
   <tr>
     <th>Orders</th>
     <td>
@@ -97,7 +96,6 @@
       </a>
     </td>
   </tr>
-  {% end %}
   <tr>
     <th>Role</th>
     <td>{% module Icon(account['role'], label=True) %}</td>

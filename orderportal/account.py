@@ -157,25 +157,49 @@ class Accounts(RequestHandler):
                     count=count)
 
 
-class Account(RequestHandler):
+class AccountMixin(object):
+    "Mixin for various useful methods."
+
+    def is_readable(self, account):
+        "Is the account readable by the current user?"
+        if self.is_owner(account): return True
+        if self.is_staff(): return True
+        if self.is_colleague(self.current_user, account['email']): return True
+        return False
+
+    def check_readable(self, account):
+        "Check that the account is readable by the current user."
+        if self.is_readable(account): return
+        raise tornado.web.HTTPError(403, reason='you may not read the account')
+
+    def is_editable(self, account):
+        "Is the account editable by the current user?"
+        if self.is_owner(account): return True
+        if self.is_staff(): return True
+        return False
+
+    def check_editable(self, account):
+        "Check that the account is editable by the current user."
+        if self.is_readable(account): return
+        raise tornado.web.HTTPError(403, reason='you may not edit the account')
+
+
+class Account(AccountMixin, RequestHandler):
     "Account page."
 
     @tornado.web.authenticated
     def get(self, email):
         account = self.get_account(email)
-        self.check_owner_or_staff(account)
+        self.check_readable(account)
         view = self.db.view('order/owner_count', group=True)
         try:
             account['order_count'] = list(view[email])[0].value
         except IndexError:
             account['order_count'] = 0
-        view = self.db.view('group/member', include_docs=True)
-        groups = sorted([r.doc for r in view[email]],
-                        cmp=lambda i,j: cmp(i['name'], j['name']))
         self.render('account.html',
                     account=account,
-                    groups=groups,
-                    deletable=self.get_deletable(account))
+                    groups=self.get_account_groups(email),
+                    is_deletable=self.is_deletable(account))
 
     @tornado.web.authenticated
     def post(self, email):
@@ -190,13 +214,13 @@ class Account(RequestHandler):
         "Delete a account that is pending; to get rid of spam application."
         account = self.get_account(email)
         self.check_admin()
-        if not self.get_deletable(account):
+        if not self.is_deletable(account):
             raise tornado.web.HTTPError(403, reason='account cannot be deleted')
         self.delete_logs(account['_id'])
         self.db.delete(account)
         self.see_other('home')
 
-    def get_deletable(self, account):
+    def is_deletable(self, account):
         "Can the account be deleted? Pending, or disabled and no orders."
         if account['status'] == constants.PENDING: return True
         if account['status'] == constants.ENABLED: return False
@@ -205,31 +229,34 @@ class Account(RequestHandler):
         return False
 
 
-class AccountLogs(RequestHandler):
+class AccountLogs(AccountMixin, RequestHandler):
     "Account log entries page."
 
     @tornado.web.authenticated
     def get(self, email):
         account = self.get_account(email)
-        self.check_owner_or_staff(account)
-        self.render('logs.html', entity=account, logs=self.get_logs(account['_id']))
+        self.check_readable(account)
+        self.render('logs.html',
+                    entity=account,
+                    logs=self.get_logs(account['_id']))
 
 
-class AccountEdit(RequestHandler):
+class AccountEdit(AccountMixin, RequestHandler):
     "Page for editing account information."
 
     @tornado.web.authenticated
     def get(self, email):
         account = self.get_account(email)
-        self.check_owner_or_staff(account)
+        self.check_editable(account)
         self.render('account_edit.html', account=account)
 
     @tornado.web.authenticated
     def post(self, email):
         self.check_xsrf_cookie()
         account = self.get_account(email)
-        self.check_owner_or_staff(account)
+        self.check_editable(account)
         with AccountSaver(doc=account, rqh=self) as saver:
+            # Only admin may change role of an account.
             if self.is_admin():
                 role = self.get_argument('role')
                 if role not in constants.ACCOUNT_ROLES:
@@ -403,7 +430,9 @@ class Register(RequestHandler):
 
 
 class AccountEnable(RequestHandler):
-    "Enable the account; from status pending or disabled."
+    """Enable the account; from status pending or disabled.
+    Sends a message to the email address about this operation,
+    and a link for setting the password."""
 
     SUBJECT = "Your {} account has been enabled"
     TEXT = """Your account {} in the {} has been enabled.
@@ -421,9 +450,9 @@ Please go to {} to set your password.
         url = self.absolute_reverse_url('password',
                                         email=email,
                                         code=account['code'])
-        self.send_email(account['email'],
-                        self.SUBJECT.format(settings['SITE_NAME']),
-                        self.TEXT.format(email, settings['SITE_NAME'], url))
+        # self.send_email(account['email'],
+        #                 self.SUBJECT.format(settings['SITE_NAME']),
+        #                 self.TEXT.format(email, settings['SITE_NAME'], url))
         self.see_other('account', email)
 
 

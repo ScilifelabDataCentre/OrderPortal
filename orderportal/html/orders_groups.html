@@ -1,16 +1,16 @@
-{# List of all orders for an account. #}
+{# List of all orders for all colleagues of an account. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}Orders {{ account['email'] }}{% end %}
+{% block head_title %}Orders in groups of {{ account['email'] }}{% end %}
 {% block body_title %}
-{% module Icon('order') %}
-Orders
+{% module Icon('order', title='Orders') %}
+{% module Icon('group') %}
 {% module Entity(account) %}
 {% end %}
 
 {% block content %}
-<form action="{{ reverse_url('orders_account', account['email']) }}"
+<form action="{{ reverse_url('orders_groups', account['email']) }}"
       id="refresh"
       role="form"
       class="form-inline"
@@ -42,6 +42,7 @@ Orders
       <tr>
 	<th>Order</th>
 	<th>Status</th>
+	<th>Owner</th>
 	<th>Modified</th>
       </tr>
       {% for order in orders %}
@@ -50,6 +51,7 @@ Orders
 	  <a href="{{ reverse_url('order', order['_id']) }}">{{ order.get('title', order['_id']) }}</a>
 	</td>
 	<td>{% module Icon(order['status'], label=True) %}</td>
+	<td>{{ order['owner'] }}</td>
 	<td class="localtime">{{ order['modified'] }}</td>
       </tr>
       {% end %}

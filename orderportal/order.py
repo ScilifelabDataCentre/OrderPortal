@@ -100,6 +100,18 @@ class OrderSaver(saver.Saver):
 class OrderMixin(object):
     "Mixin for various useful methods."
 
+    def is_readable(self, order):
+        "Is the order readable by the current user?"
+        if self.is_owner(order): return True
+        if self.is_staff(): return True
+        if self.is_colleague(self.current_user, order['owner']): return True
+        return False
+
+    def check_readable(self, order):
+        "Check if current user may read the order."
+        if self.is_readable(order): return
+        raise tornado.web.HTTPError(403, reason='you may not read the order')
+
     def is_editable(self, order):
         "Is the order editable by the current user?"
         if self.is_admin(): return True
@@ -108,12 +120,6 @@ class OrderMixin(object):
         if self.is_staff() and constants.STAFF in edit: return True
         if self.is_owner(order) and constants.USER in edit: return True
         return False
-
-    def check_readable(self, order):
-        "Check if current user may read the order."
-        if self.is_owner(order): return
-        if self.is_staff(): return
-        raise tornado.web.HTTPError(403, reason='you may not read the order')
 
     def check_editable(self, order):
         "Check if current user may edit the order."
@@ -206,6 +212,33 @@ class OrdersAccount(RequestHandler):
         orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
                     reverse=True)
         self.render('orders_account.html',
+                    account=account,
+                    orders=orders,
+                    params=params)
+
+
+class OrdersGroups(RequestHandler):
+    "Page for a list of all orders for the groups of an account."
+
+    @tornado.web.authenticated
+    def get(self, email):
+        account = self.get_account(email)
+        if not (self.is_staff() or email == self.current_user['email']):
+            raise tornado.web.HTTPError(403,
+                                        reason='you may not view these orders')
+        orders = []
+        view = self.db.view('order/owner', include_docs=True)
+        for colleague in self.get_account_colleagues(email):
+            orders.extend([r.doc for r in view[colleague]])
+        params = dict()
+        # Filter list
+        status = self.get_argument('status', '')
+        if status:
+            params['status'] = status
+            orders = [o for o in orders if o.get('status') == status]
+        orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
+                    reverse=True)
+        self.render('orders_groups.html',
                     account=account,
                     orders=orders,
                     params=params)

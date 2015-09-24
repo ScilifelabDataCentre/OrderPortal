@@ -113,12 +113,6 @@ class RequestHandler(tornado.web.RequestHandler):
             raise tornado.web.HTTPError(403,
                                         reason="you do not have role 'staff'")
 
-    def check_owner_or_staff(self, entity):
-        "Check if current user is owner of the entity, or is staff or admin."
-        if self.is_owner(entity): return
-        if self.is_staff(): return
-        raise tornado.web.HTTPError(403, reason='you do not own the entity')
-
     def get_entity(self, iuid, doctype=None):
         """Get the entity by the IUID. Check the doctype, if given.
         Raise HTTP 404 if no such entity.
@@ -182,6 +176,23 @@ class RequestHandler(tornado.web.RequestHandler):
         Raise HTTP 404 if no such account.
         """
         return self.get_entity_view('account/email', email, reason='no such account')
+
+    def get_account_groups(self, email):
+        "Get sorted list of all groups which the account is a member of."
+        view = self.db.view('group/member', include_docs=True)
+        return sorted([r.doc for r in view[email]],
+                      cmp=lambda i,j: cmp(i['name'], j['name']))
+
+    def get_account_colleagues(self, email):
+        """Return the set of all emails for colleagues of the account;
+        members of groups which the account is a member of."""
+        result = set()
+        for group in self.get_account_groups(email):
+            result.update(group['members'])
+        return result
+
+    def is_colleague(self, user, other_email):
+        return user['email'] in self.get_account_colleagues(other_email)
 
     def get_logs(self, iuid, limit=constants.DEFAULT_MAX_DISPLAY_LOG+1):
         "Return the event log documents for the given entity iuid."

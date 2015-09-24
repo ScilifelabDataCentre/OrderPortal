@@ -44,6 +44,7 @@ def get_handlers():
                 OrderTransition, name='order_transition'),
             url(r'/orders', Orders, name='orders'),
             url(r'/orders/([^/]+)', OrdersAccount, name='orders_account'),
+            url(r'/orders/([^/]+)/groups', OrdersGroups, name='orders_groups'),
             # url(r'/order/([0-9a-f]{32})/clone', OrderClone, name='order_clone'),
             url(r'/accounts', Accounts, name='accounts'),
             url(r'/account/([^/]+)', Account, name='account'),
