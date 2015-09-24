@@ -22,7 +22,7 @@ class IconMixin(object):
         title = title or alt
         value = ICON_TEMPLATE.format(url=url, alt=alt, title=title)
         if label:
-            value += """ <span class="icon">{}</span>""".format(title)
+            value += ' ' + title
         return value
 
 

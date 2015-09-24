@@ -20,7 +20,7 @@ Edit
     <div class="row">
       <div class="col-md-8">
 	<label class="control-label" for="owner">Owner</label>
-	<select name="owner" id="owner">
+	<select name="owner" id="owner" class="form-control">
 	  {% for member in group['members'] %}
 	  <option {{ member == group['owner'] and 'selected' or ''}}>
 	    {{ member }}

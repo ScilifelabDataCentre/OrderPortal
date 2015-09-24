@@ -60,19 +60,12 @@
       <tr>
 	<th>Members</th>
 	<td>
-	  {% if is_staff %}
-	    {% for member in group['members'] %}
-	      <a href="{{ reverse_url('account', member) }}">
-		{% module Icon('account') %}
-		{{ member }}
-	      </a>
-	    <br>
-	    {% end %}
-	  {% else %}
-	    {% for member in group['members'] %}
-	      {{ member }}
-	    <br>
-	    {% end %}
+	  {% for member in group['members'] %}
+	  <a href="{{ reverse_url('account', member) }}">
+	    {% module Icon('account') %}
+	    {{ member }}
+	  </a>
+	  <br>
 	  {% end %}
 	</td>
       </tr>
