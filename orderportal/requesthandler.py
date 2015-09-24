@@ -191,8 +191,11 @@ class RequestHandler(tornado.web.RequestHandler):
             result.update(group['members'])
         return result
 
-    def is_colleague(self, user, other_email):
-        return user['email'] in self.get_account_colleagues(other_email)
+    def is_colleague(self, email):
+        """Is the user with the given email address
+        in the same group as the current user?"""
+        if not self.current_user: return False
+        return self.current_user['email'] in self.get_account_colleagues(email)
 
     def get_logs(self, iuid, limit=constants.DEFAULT_MAX_DISPLAY_LOG+1):
         "Return the event log documents for the given entity iuid."

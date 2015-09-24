@@ -164,7 +164,7 @@ class AccountMixin(object):
         "Is the account readable by the current user?"
         if self.is_owner(account): return True
         if self.is_staff(): return True
-        if self.is_colleague(self.current_user, account['email']): return True
+        if self.is_colleague(account['email']): return True
         return False
 
     def check_readable(self, account):

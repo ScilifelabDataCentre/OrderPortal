@@ -104,7 +104,7 @@ class OrderMixin(object):
         "Is the order readable by the current user?"
         if self.is_owner(order): return True
         if self.is_staff(): return True
-        if self.is_colleague(self.current_user, order['owner']): return True
+        if self.is_colleague(order['owner']): return True
         return False
 
     def check_readable(self, order):
@@ -193,12 +193,22 @@ class Orders(RequestHandler):
 class OrdersAccount(RequestHandler):
     "Page for a list of all orders for an account."
 
+    def is_readable(self, account):
+        "Is the account readable by the current user?"
+        if account['email'] == self.current_user['email']: return True
+        if self.is_staff(): return True
+        if self.is_colleague(account['email']): return True
+        return False
+
+    def check_readable(self, account):
+        "Check that the account is readable by the current user."
+        if self.is_readable(account): return
+        raise tornado.web.HTTPError(403, reason='you may not view these orders')
+
     @tornado.web.authenticated
     def get(self, email):
-        if not self.is_staff() and email != self.current_user['email']:
-            raise tornado.web.HTTPError(403,
-                                        reason='you may not view these orders')
         account = self.get_account(email)
+        self.check_readable(account)
         view = self.db.view('order/owner',
                             include_docs=True,
                             key=email)
