@@ -20,14 +20,10 @@
 
 {% block content-header %}
 <div class="row">
-  <div class="col-md-10 col-md-offset-1">
-    <div class="panel panel-default">
-      <div class="panel-body">
-	{% module Text('header') %}
-      </div>
-    </div>
+  <div class="well well-sm col-md-10 col-md-offset-1">
+    {% module Text('header') %}
   </div>
-  <div class="col-md-11">
+  <div class="col-md-1">
   </div>
 </div>
 {% end %} {# block content-header #}
@@ -454,12 +450,10 @@
 
 {% block content-footer %}
 <div class="row">
-  <div class="col-md-10 col-md-offset-1">
-    <div class="panel panel-info">
-      <div class="panel-body">
-	{% module Text('footer') %}
-      </div>
-    </div>
+  <div class="well well-sm col-md-10 col-md-offset-1">
+    {% module Text('footer') %}
+  </div>
+  <div class="col-md-1">
   </div>
 </div>
 {% end %} {# block content-footer #}

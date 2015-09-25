@@ -11,15 +11,11 @@ Edit
 {% end %}
 
 {% block main_content %}
-<div class="row">
-  <div class="col-md-8 col-md-offset-1">
-    <div class="well">
-      A member of a group may read <strong>any</strong> order of
-      another member of that group. This feature is therefore suitable
-      for true working groups, but <strong>not</strong> for the
-      occasional collaboration.
-    </div>
-  </div>
+<div class="well">
+  A member of a group may read <strong>any</strong> order of another
+  member of that group. This feature is therefore suitable for true
+  working groups, but <strong>not</strong> for the occasional
+  collaboration.
 </div>
 
 <form action="{{ reverse_url('group_edit', group['_id']) }}"

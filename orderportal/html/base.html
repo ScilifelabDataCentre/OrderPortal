@@ -224,11 +224,8 @@
       {% try %}
       {% if error %}
       <div class="row">
-	<div class="col-md-8 col-md-offset-2">
-	  <div class="panel panel-danger">
-	    <div class="panel-heading">Error</div>
-	    <div class="panel-body">{{ error }}</div>
-	  </div>
+	<div class="col-md-8 col-md-offset-2 alert alert-danger">
+	  <strong>Error:</strong> {{ error }}
 	</div>
 	<div class="col-md-2"></div>
       </div>

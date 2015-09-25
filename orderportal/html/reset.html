@@ -7,10 +7,8 @@
 
 {% block main_content %}
 
-<div class="panel panel-default">
-  <div class="panel-body">
-    {% module Text('reset') %}
-  </div>
+<div class="well">
+  {% module Text('reset') %}
 </div>
 
 <form action="{{ reverse_url('reset') }}"

@@ -8,10 +8,8 @@
 
 {% block main_content %}
 
-<div class="panel panel-default">
-  <div class="panel-body">
-    {% module Text('register') %}
-  </div>
+<div class="well">
+  {% module Text('register') %}
 </div>
 
 <form action="{{ reverse_url('register') }}"
