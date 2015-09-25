@@ -37,7 +37,7 @@ class Home(RequestHandler):
                            message=self.get_invited_message())
 
     def get_invited_message(self):
-        if self.get_invitations():
+        if self.get_invitations(self.current_user['email']):
             return 'You have group invitations. See the page for your account.'
         else:
             return None

@@ -334,14 +334,15 @@ class Logout(RequestHandler):
 class Reset(RequestHandler):
     "Reset the password of a account account."
 
-    SUBJECT = "The password for your {} portal account has been reset"
-    TEXT = """The password for your account {} in the {} portal has been reset.
-Please got to {} to set your password.
-The code required to set your password is "{}".
+    SUBJECT = "The password for your {site} portal account has been reset"
+    TEXT = """The password for your account {account}
+in the {site} portal has been reset.
+Please go to {url} to set your password.
+The code required to set your password is {code}.
 """
 
     def get(self):
-        email = self.current_account and self.current_account.get('email')
+        email = self.current_user and self.current_user['email']
         self.render('reset.html', email=email)
 
     def post(self):
@@ -349,15 +350,15 @@ The code required to set your password is "{}".
         account = self.get_account(self.get_argument('email'))
         with AccountSaver(doc=account, rqh=self) as saver:
             saver.reset_password()
-        url = self.absolute_reverse_url('password',
-                                        email=account['email'],
-                                        code=account['code'])
+        params = dict(site=settings['SITE_NAME'],
+                      account=account['email'],
+                      url=self.absolute_reverse_url('password',
+                                                    email=account['email'],
+                                                    code=account['code']),
+                      code=account['code'])
         self.send_email(account['email'],
-                        self.SUBJECT.format(settings['FACILITY_NAME']),
-                        self.TEXT.format(account['email'],
-                                         settings['FACILITY_NAME'],
-                                         url,
-                                         account['code']))
+                        self.SUBJECT.format(**params),
+                        self.TEXT.format(**params))
         self.see_other('password')
 
 
