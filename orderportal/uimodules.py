@@ -88,12 +88,12 @@ class Text(tornado.web.UIModule):
             doc = self.handler.get_entity_view('text/name', name)
             text = doc['text']
         except (tornado.web.HTTPError, KeyError):
-            text = default or ''
+            text = default or "<i>No text for '{name}'.</i>".format(name)
         return markdown.markdown(text, output_format='html5')
 
 
 class Indent(tornado.web.UIModule):
-    "Output indent blanks."
+    "Output indentation blanks."
 
     def render(self, number, multiple=4):
         return '&nbsp;' * multiple * max(0, number)
