@@ -44,7 +44,9 @@
       </div>
       <div class="panel-body">
 
-	<form action="{{ reverse_url('login') }}" method="POST" role="form">
+	<form action="{{ reverse_url('login') }}"
+	      role="form"
+	      method="POST">
 	  {% module xsrf_form_html() %}
 	  <div class="form-group">
 	    <label for="email">Email</label>
@@ -123,7 +125,8 @@
 	      </button>
 	      <p></p>
 	      <form action="{{ reverse_url('news', news['_id']) }}"
-		    role="form" method="POST">
+		    role="form"
+		    method="POST">
 		{% module xsrf_form_html() %}
 		<input type="hidden" name="_http_method" value="delete">
 		<button type="submit"
@@ -176,7 +179,8 @@
 	      </button>
 	      <p></p>
 	      <form action="{{ reverse_url('event', event['_id']) }}"
-		    role="form" method="POST">
+		    role="form"
+		    method="POST">
 		{% module xsrf_form_html() %}
 		<input type="hidden" name="_http_method" value="delete">
 		<button type="submit"
@@ -220,7 +224,8 @@
       </div>
       <div class="modal-body">
 	<form action="{{ reverse_url('news', news['_id']) }}"
-	      role="form" method="POST">
+	      role="form"
+	      method="POST">
 	  {% module xsrf_form_html() %}
 	  <div class="form-group">
 	    <textarea class="form-control" rows="5" name="text" id="text"
@@ -262,7 +267,8 @@
       </div>
       <div class="modal-body">
 	<form action="{{ reverse_url('event', event['_id']) }}"
-	      role="form" method="POST">
+	      role="form"
+	      method="POST">
 	  {% module xsrf_form_html() %}
 	  <div class="form-group has-feedback">
 	    <div class="row">
@@ -340,7 +346,8 @@
       </div>
       <div class="modal-body">
 	<form action="{{ reverse_url('news_create') }}"
-	      role="form" method="POST">
+	      role="form"
+	      method="POST">
 	  {% module xsrf_form_html() %}
 	  <div class="form-group">
 	    <textarea class="form-control" rows="5"
@@ -380,7 +387,8 @@
       </div>
       <div class="modal-body">
 	<form action="{{ reverse_url('event_create') }}"
-	      role="form" method="POST">
+	      role="form"
+	      method="POST">
 	  {% module xsrf_form_html() %}
 	  <div class="form-group has-feedback">
 	    <div class="row">

@@ -14,7 +14,8 @@ in '{{ form['title'] }}'
 
 {% block main_content %}
 <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
-      role="form" method="POST">
+      role="form"
+      method="POST">
   {% module xsrf_form_html() %}
 
   <div class="form-group">
@@ -196,7 +197,8 @@ in '{{ form['title'] }}'
 
 <br>
 <form action="{{ reverse_url('form', form['_id']) }}"
-      role="form" method="GET">
+      role="form"
+      method="GET">
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit"
@@ -208,7 +210,8 @@ in '{{ form['title'] }}'
 
 <br>
 <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
-      role="form" method="POST">
+      role="form"
+      method="POST">
   {% module xsrf_form_html() %}
   <div class="form-group">
     <label class="control-label"></label>
