@@ -338,10 +338,12 @@ class OrderEdit(OrderMixin, RequestHandler):
     def get(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_editable(order)
+        colleagues = sorted(self.get_account_colleagues(self.current_user['email']))
         form = self.get_entity(order['form'], doctype=constants.FORM)
         self.render('order_edit.html',
                     title="Edit order '{}'".format(order['title']),
                     order=order,
+                    colleagues=colleagues,
                     fields=form['fields'])
 
     @tornado.web.authenticated

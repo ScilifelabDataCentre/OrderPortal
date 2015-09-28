@@ -37,14 +37,27 @@ Edit order
     <div class="row">
       <div class="col-md-8">
 	<label class="control-label" for="__owner__">Owner</label>
+	{% if is_admin %}
 	<input type="text" class="form-control"
 	       name="__owner__" id="__owner__"
 	       value="{{ order['owner'] }}">
+	{% else %}
+	<select name="__owner__" id="__owner__">
+	  {% for colleague in colleagues %}
+	  <option "{{ colleague == current_user['email'] and 'selected' or ''}}">{{ colleague }}</option>
+	  {% end %}
+	</select>
+	{% end %}
       </div>
     </div>
     <span class="help-block">
+      {% if is_admin %}
       The order's owner specified by email address. May be changed to
       another enabled account.
+      {% else %}
+      The order's owner may be changed to an enabled account in your groups.
+      <strong>You will then no longer be able to edit the order.</strong>
+      {% end %}
     </span>
   </div>
 

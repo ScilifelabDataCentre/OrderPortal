@@ -89,7 +89,8 @@
       method="POST">
   {% module xsrf_form_html() %}
   <button type="submit"
-	  class="btn btn-danger glyphicon glyphicon-ban-circle">
+	  class="btn btn-danger glyphicon glyphicon-ban-circle"
+	  onclick="return confirm('Orders will not be creatable from this form! Really disable?');">
     Disable
   </button>
 </form>
