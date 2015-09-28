@@ -35,19 +35,6 @@
   </button>
 </form>
 
-<br>
-<form action="{{ reverse_url('form', form['_id']) }}"
-      role="form"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <input type="hidden" name="_http_method" value="delete">
-  <button type="submit"
-	  class="btn btn-danger glyphicon glyphicon-trash"
-	  onclick="return confirm('Cannot be undone! Really delete?');">
-    Delete
-  </button>
-</form>
-
 {% elif form['status'] == constants.TESTING %}
 <br>
 <form action="{{ reverse_url('order_create') }}"
@@ -90,20 +77,23 @@
   {% module xsrf_form_html() %}
   <button type="submit"
 	  class="btn btn-danger glyphicon glyphicon-ban-circle"
-	  onclick="return confirm('Orders will not be creatable from this form! Really disable?');">
+	  onclick="return confirm('Orders will not be creatable from this form. Cannot be undone! Really disable?');">
     Disable
   </button>
 </form>
+{% end %}
 
-{% elif form['status'] == constants.DISABLED %}
+{% if is_deletable %}
 <br>
-<form action="{{ reverse_url('form_pending', form['_id']) }}"
+<form action="{{ reverse_url('form', form['_id']) }}"
       role="form"
       method="POST">
   {% module xsrf_form_html() %}
+  <input type="hidden" name="_http_method" value="delete">
   <button type="submit"
-	  class="btn btn-success glyphicon glyphicon-question-sign">
-    Pending
+	  class="btn btn-danger glyphicon glyphicon-trash"
+	  onclick="return confirm('Cannot be undone! Really delete?');">
+    Delete
   </button>
 </form>
 {% end %}

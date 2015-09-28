@@ -112,7 +112,10 @@ class Form(FormMixin, RequestHandler):
 
     def is_deletable(self, form):
         "Can the form be deleted?."
-        return form['status'] == constants.PENDING
+        if form['status'] == constants.PENDING: return True
+        view = self.db.view('order/form')
+        if not list(view[form['_id']]): return True
+        return False
 
 
 class FormLogs(RequestHandler):
@@ -276,14 +279,14 @@ class FormPending(RequestHandler):
         self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        if form['status'] == constants.TESTING:
-            with FormSaver(doc=form, rqh=self) as saver:
-                saver['status'] = constants.PENDING
+        if form['status'] != constants.TESTING:
+            raise ValueError('form does not have status testing')
+        with FormSaver(doc=form, rqh=self) as saver:
+            saver['status'] = constants.PENDING
         view = self.db.view('order/form')
         for row in view[form['_id']]:
             self.delete_logs(row.id)
             del self.db[row.id]
-        # XXX Delete all orders!
         self.see_other('form', iuid)
 
 
@@ -296,9 +299,10 @@ class FormTesting(RequestHandler):
         self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        if form['status'] == constants.PENDING:
-            with FormSaver(doc=form, rqh=self) as saver:
-                saver['status'] = constants.TESTING
+        if form['status'] != constants.PENDING:
+            raise ValueError('form does not have status pending')
+        with FormSaver(doc=form, rqh=self) as saver:
+            saver['status'] = constants.TESTING
         self.see_other('form', iuid)
 
 
