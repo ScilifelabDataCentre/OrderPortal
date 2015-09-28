@@ -55,6 +55,25 @@
 </form>
 {% end %} {# if is_editable #}
 
+{% if is_clonable %}
+<br>
+<form action="{{ reverse_url('order_clone', order['_id']) }}"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+  <button type="submit"
+	  class="btn btn-primary glyphicon glyphicon-plus-sign">
+    Clone
+  </button>
+</form>
+{% else %}
+<br>
+<div class="well">
+  This order cannot be cloned, since its underlying form has been
+  disabled by the administrator.
+</div>
+{% end %} {# if is_clonable #}
+
 {% end %} {# block meta_content #}
 
 {% block main_content %}

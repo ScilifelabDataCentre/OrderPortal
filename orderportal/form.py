@@ -146,7 +146,6 @@ class FormCreate(RequestHandler):
                 raise tornado.web.HTTPError(400, reason='no title given')
             saver['description'] = self.get_argument('description', None)
             saver['status'] = constants.PENDING
-            saver['owner'] = self.current_user['email']
         self.see_other('form', saver.doc['_id'])
 
 
@@ -264,7 +263,6 @@ class FormClone(RequestHandler):
             saver['description'] = form.get('description')
             saver.clone_fields(form)
             saver['status'] = constants.PENDING
-            saver['owner'] = self.current_user['email']
         self.see_other('form_edit', saver.doc['_id'])
 
 

@@ -145,6 +145,11 @@ class OrderMixin(object):
                 result.extend(transition['targets'])
         return [settings['ORDER_STATUSES_LOOKUP'][t] for t in result]
 
+    def is_clonable(self, order):
+        "Can the given order be cloned? Its form must be enabled."
+        form = self.get_entity(order['form'], doctype=constants.FORM)
+        return form['status'] == constants.ENABLED
+
 
 class Orders(RequestHandler):
     "Page for a list of all orders."
@@ -270,6 +275,7 @@ class Order(OrderMixin, RequestHandler):
                     form=form,
                     fields=form['fields'],
                     is_editable=self.is_admin() or self.is_editable(order),
+                    is_clonable=self.is_clonable(order),
                     targets=self.get_targets(order))
 
     @tornado.web.authenticated
@@ -319,8 +325,6 @@ class OrderCreate(RequestHandler):
             saver['form'] = form['_id']
             saver['title'] = self.get_argument('title', None) or form['title']
             saver['fields'] = dict([(f['identifier'], None) for f in fields])
-            saver['invalid'] = dict()
-            saver['owner'] = self.current_user['email']
             for status in settings['ORDER_STATUSES']:
                 if status.get('initial'):
                     saver['status'] = status['identifier']
@@ -373,6 +377,31 @@ class OrderEdit(OrderMixin, RequestHandler):
                 self.see_other('order', order['_id'])
         except ValueError, msg:
             self.see_other('order_edit', order['_id'], error=str(msg))
+
+
+class OrderClone(OrderMixin, RequestHandler):
+    "Create a new order from an existing one."
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.check_readable(order)
+        form = self.get_entity(order['form'], doctype=constants.FORM)
+        if form['status'] != constants.ENABLED:
+            raise ValueError('This order is outdated; the form of it has been disabled.')
+        with OrderSaver(rqh=self) as saver:
+            saver['form'] = form['_id']
+            saver['title'] = "Clone of {}".format(order['title'])
+            saver['fields'] = order['fields'].copy()
+            for status in settings['ORDER_STATUSES']:
+                if status.get('initial'):
+                    saver['status'] = status['identifier']
+                    break
+            else:
+                raise ValueError('no initial order status defined')
+            saver.check_fields_validity(Fields(form))
+        self.see_other('order', saver.doc['_id'])
 
 
 class OrderTransition(OrderMixin, RequestHandler):
