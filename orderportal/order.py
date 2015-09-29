@@ -421,29 +421,24 @@ class OrderTransition(OrderMixin, RequestHandler):
         self.see_other('order', order['_id'])
 
 
-class OrderSearch(RequestHandler):
-    "Search the order indices. Staff only."
+class OrderFile(RequestHandler):
+    "File attached to an order."
 
     @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        orig = self.get_argument('term', '')
-        # Keep this in sync with 'order/search.js'
-        term = orig.replace(':', ' ')
-        term = term.replace(',', ' ')
-        term = term.replace("'", ' ')
-        term = term.strip()
-        view = self.db.view('order/keyword')
-        id_sets = []
-        for part in [part for part in term.split() if len(part) > 2]:
-            id_sets.append(set([r.id for r in
-                                view[part : part+constants.HIGH_CHAR]]))
-        if id_sets:
-            id_set = reduce(lambda i,j: i.intersection(j), id_sets)
-            orders = [self.get_entity(id, doctype=constants.ORDER)
-                      for id in id_set]
-            orders.sort(lambda i,j: cmp(i['modified'], j['modified']),
-                        reverse=True)
-        else:
-            orders = []
-        self.render('orders.html', orders=orders, term=orig)
+    def get(self, iuid, filename):
+        pass
+
+    @tornado.web.authenticated
+    def post(self, iuid, filename=None):
+        self.check_xsrf_cookie()
+        if self.get_argument('_http_method', None) == 'delete':
+            self.delete(iuid, filename)
+            return
+
+    @tornado.web.authenticated
+    def delete(self, iuid, filename):
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.check_editable(order)
+        self.db.delete_attachment(order, filename)
+        utils.log(self.db, self, order, changed=dict('file_deleted', filename))
+        self.see_other('order', order['_id'])

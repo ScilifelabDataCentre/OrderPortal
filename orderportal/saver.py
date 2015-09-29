@@ -21,11 +21,9 @@ class Saver(object):
         if rqh is not None:
             self.rqh = rqh
             self.db = rqh.db
-            self.current_user = rqh.current_user
         elif db is not None:
             self.rqh = None
             self.db = db
-            self.current_user = dict()
         else:
             raise AttributeError('neither db nor rqh given')
         self.doc = doc or dict()
@@ -84,11 +82,9 @@ class Saver(object):
     def initialize(self):
         "Set the initial values for the new document."
         try:
-            if not self.rqh.current_user: raise AttributeError
-        except AttributeError:
-            self.doc['owner'] = None
-        else:
             self.doc['owner'] = self.rqh.current_user['email']
+        except (AttributeError, KeyError):
+            self.doc['owner'] = None
         self.doc['created'] = utils.timestamp()
 
     def setup(self):
@@ -105,21 +101,4 @@ class Saver(object):
 
     def log(self):
         "Create a log entry for the change."
-        entry = dict(_id=utils.get_iuid(),
-                     entity=self.doc['_id'],
-                     changed=self.changed,
-                     modified=self.doc['modified'])
-        if self.rqh:
-            # xheaders argument to HTTPServer takes care of X-Real-Ip
-            # and X-Forwarded-For
-            entry['remote_ip'] = self.rqh.request.remote_ip
-            try:
-                entry['user_agent'] = self.rqh.request.headers['User-Agent']
-            except KeyError:
-                pass
-        entry[constants.DOCTYPE] = constants.LOG
-        try:
-            entry['account'] = self.current_user['email']
-        except (TypeError, KeyError):
-            pass
-        self.db.save(entry)
+        utils.log(self.db, self.rqh, self.doc, changed=self.changed)

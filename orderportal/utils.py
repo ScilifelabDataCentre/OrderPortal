@@ -217,3 +217,24 @@ def hashed_password(password):
     sha256 = hashlib.sha256(settings['PASSWORD_SALT'])
     sha256.update(password)
     return sha256.hexdigest()
+
+def log(db, rqh, entity, changed=dict()):
+    "Add a log entry for the change of the given entity."
+    entry = dict(_id=get_iuid(),
+                 entity=entity['_id'],
+                 changed=changed,
+                 modified=timestamp())
+    entry[constants.DOCTYPE] = constants.LOG
+    if rqh:
+        # xheaders argument to HTTPServer takes care of X-Real-Ip
+        # and X-Forwarded-For
+        entry['remote_ip'] = rqh.request.remote_ip
+        try:
+            entry['user_agent'] = rqh.request.headers['User-Agent']
+        except KeyError:
+            pass
+    try:
+        entry['account'] = rqh.current_user['email']
+    except (AttributeError, TypeError, KeyError):
+        pass
+    db.save(entry)
