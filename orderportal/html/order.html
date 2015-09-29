@@ -117,6 +117,45 @@
       </tr>
       {% end %}
 
+      <tr>
+	<th>Files</th>
+	<td colspan="2">
+	  <table class="table table-condensed table-striped">
+	    {% for file in files %}
+	    <tr>
+	      <td>
+		<a href="{{ reverse_url('order_file', order['_id'], file['filename']) }}">
+		  {{ file['filename'] }}
+		</a>
+	      </td>
+	      <td>{{ file['content_type'] }}</td>
+	      <td>{{ file['size'] }}</td>
+	      <td>
+		<form action="{{ reverse_url('order_file', order['_id'], file['filename']) }}"
+		      role="form"
+		      method="POST">
+		  {% module xsrf_form_html() %}
+		  <input type="hidden" name="_http_method" value="delete">
+		  <button type="submit"
+			  class="btn btn-danger btn-xs glyphicon glyphicon-trash"
+			  onclick="return confirm('Cannot be undone! Really delete?');">
+		    Delete
+		  </button>
+		</form>
+	      </td>
+	    </tr>
+	    {% end %}
+	  </table>
+	  {% if is_attachable %}
+	  <button type="button"
+		  class="btn btn-primary btn-xs glyphicon glyphicon-paperclip"
+		  data-toggle="modal" data-target="#attach">
+	    Attach
+	  </button>
+	  {% end %}{# if is_attachable #}
+	</td>
+      </tr>
+
     </table>
 
   </div>
@@ -126,5 +165,46 @@
 {# Recursion: 'include' cannot be used! #}
 {% module Template('order_fields.html', fields=fields, order=order, is_staff=is_staff) %}
 </table>
+
+{% if is_attachable %}
+{# Modal for attaching a file. #}
+<div id="attach" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+
+    {# Modal content #}
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close glyphicon glyphicon-remove"
+		data-dismiss="modal"></button>
+        <h4 class="modal-title">Attach a file</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('order_attach', order['_id']) }}"
+	      role="form"
+	      enctype="multipart/form-data"
+	      method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group">
+	    <label for="file">File</label>
+	    <input type="file" name="file" class="form-control">
+	    <span class="help-block">
+	      The file to upload and attach to the order.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit"
+		    class="btn btn-primary glyphicon glyphicon-save">
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% end %}{# if is_attachable #}
 
 {% end %} {# block main_content #}

@@ -96,6 +96,26 @@ class OrderSaver(saver.Saver):
             self.doc['invalid'][field['identifier']] = message
         return message is None
 
+    def post_process(self):
+        "Save or delete the file as an attachment to the document."
+        # Try deleting file.
+        try:
+            filename = self.delete_filename
+        except AttributeError:
+            pass
+        else:
+            self.db.delete_attachment(self.doc, filename)
+            self.changed['file_deleted'] = filename
+            return
+        # No new file uploaded, just skip out.
+        try:
+            if self.content is None: return
+        except AttributeError:
+            return
+        self.db.put_attachment(self.doc,
+                               self.content,
+                               filename=self['filename'],
+                               content_type=self['content_type'])
 
 class OrderMixin(object):
     "Mixin for various useful methods."
@@ -125,6 +145,21 @@ class OrderMixin(object):
         "Check if current user may edit the order."
         if self.is_editable(order): return
         raise tornado.web.HTTPError(403, reason='you may not edit the order')
+
+    def is_attachable(self, order):
+        "Check if the current user may attach a file to the order."
+        if self.is_admin(): return True
+        status = self.get_order_status(order)
+        edit = status.get('attach', [])
+        if self.is_staff() and constants.STAFF in edit: return True
+        if self.is_owner(order) and constants.USER in edit: return True
+        return False
+
+    def check_attachable(self, order):
+        "Check if current user may attach a file to the order."
+        if self.is_attachable(order): return
+        raise tornado.web.HTTPError(
+            403, reason='you may not attach a file to the order')
 
     def get_order_status(self, order):
         "Get the order status lookup."
@@ -268,14 +303,25 @@ class Order(OrderMixin, RequestHandler):
         self.check_readable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
         title = order.get('title') or order['_id']
+        files = []
+        if self.is_attachable(order):
+            for filename in order.get('_attachments', []):
+                stub = order['_attachments'][filename]
+                files.append(dict(filename=filename,
+                                  size=stub['length'],
+                                  content_type=stub['content_type']))
+                files.sort(lambda i,j: cmp(i['filename'].lower(),
+                                           j['filename'].lower()))
         self.render('order.html',
                     title="Order '{}'".format(title),
                     order=order,
                     status=self.get_order_status(order),
                     form=form,
                     fields=form['fields'],
+                    files=files,
                     is_editable=self.is_admin() or self.is_editable(order),
                     is_clonable=self.is_clonable(order),
+                    is_attachable=self.is_attachable(order),
                     targets=self.get_targets(order))
 
     @tornado.web.authenticated
@@ -421,24 +467,57 @@ class OrderTransition(OrderMixin, RequestHandler):
         self.see_other('order', order['_id'])
 
 
-class OrderFile(RequestHandler):
+class OrderFile(OrderMixin, RequestHandler):
     "File attached to an order."
 
     @tornado.web.authenticated
     def get(self, iuid, filename):
-        pass
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.check_readable(order)
+        infile = self.db.get_attachment(order, filename)
+        if infile is None:
+            self.write('')
+        else:
+            self.write(infile.read())
+            infile.close()
+        self.set_header('Content-Type',
+                        order['_attachments'][filename]['content_type'])
+        self.set_header('Content-Disposition',
+                        'attachment; filename="{}"'.format(filename))
 
     @tornado.web.authenticated
-    def post(self, iuid, filename=None):
+    def post(self, iuid, filename):
         self.check_xsrf_cookie()
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid, filename)
             return
+        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
 
     @tornado.web.authenticated
     def delete(self, iuid, filename):
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_editable(order)
-        self.db.delete_attachment(order, filename)
-        utils.log(self.db, self, order, changed=dict('file_deleted', filename))
+        self.check_attachable(order)
+        with OrderSaver(doc=order, rqh=self) as saver:
+            saver.delete_filename = filename
+        self.see_other('order', order['_id'])
+
+
+class OrderAttach(OrderMixin, RequestHandler):
+    "Attach a file to an order."
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_xsrf_cookie()
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.check_attachable(order)
+        try:
+            infile = self.request.files['file'][0]
+        except (KeyError, IndexError):
+            pass
+        else:
+            with OrderSaver(doc=order, rqh=self) as saver:
+                saver.content = infile['body']
+                saver['filename'] = infile['filename']
+                saver['size'] = len(saver.content)
+                saver['content_type'] = infile['content_type'] or 'application/octet-stream'
         self.see_other('order', order['_id'])
