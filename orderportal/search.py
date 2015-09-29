@@ -20,6 +20,9 @@ from .requesthandler import RequestHandler
 class Search(RequestHandler):
     "Search. Currently only orders and staff."
 
+    # Keep this in sync with JS script 'designs/order/views/keyword.js'
+    LINT = set(['an', 'to', 'in', 'on', 'of', 'and', 'the', 'was', 'not'])
+
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
@@ -27,11 +30,9 @@ class Search(RequestHandler):
         params = dict(term=orig)
         items = []
         # Keep this in sync with JS script 'designs/order/views/keyword.js'
-        term = orig.replace(':', ' ')
-        term = term.replace(',', ' ')
-        term = term.replace("'", ' ')
-        term = term.strip()
-        parts = [part for part in term.split() if part]
+        term = ''.join([c in ":,;'" and ' ' or c for c in orig]).strip()
+        parts = [part for part in term.split()
+                 if part and len(part) >= 2 and part.lower() not in self.LINT]
         # Search order titles
         view = self.db.view('order/keyword')
         id_sets = []
