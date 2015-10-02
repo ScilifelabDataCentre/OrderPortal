@@ -121,7 +121,7 @@
 	<th>Files</th>
 	<td colspan="2">
 	  <table class="table table-condensed table-striped">
-	    {% for file in files %}
+	    {% for file in attached_files %}
 	    <tr>
 	      <td>
 		<a href="{{ reverse_url('order_file', order['_id'], file['filename']) }}">

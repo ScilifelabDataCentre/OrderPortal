@@ -318,7 +318,7 @@ class Order(OrderMixin, RequestHandler):
                     status=self.get_order_status(order),
                     form=form,
                     fields=form['fields'],
-                    files=files,
+                    attached_files=files,
                     is_editable=self.is_admin() or self.is_editable(order),
                     is_clonable=self.is_clonable(order),
                     is_attachable=self.is_attachable(order),
