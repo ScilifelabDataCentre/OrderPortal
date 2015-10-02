@@ -113,6 +113,7 @@ class Form(FormMixin, RequestHandler):
     def is_deletable(self, form):
         "Can the form be deleted?."
         if form['status'] == constants.PENDING: return True
+        if form['status'] == constants.ENABLED: return False
         view = self.db.view('order/form')
         if not list(view[form['_id']]): return True
         return False
