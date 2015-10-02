@@ -21,14 +21,20 @@ class Fields(object):
         self._lookup = dict([(f['identifier'], f)
                              for f in self.flatten(self.form['fields'])])
 
-    def flatten(self, fields, depth=0):
+    def flatten(self, fields, depth=0, parent=None):
         "Pre-order traversal to produce a list of all fields."
         result = []
         for field in fields:
+            if parent is None:
+                field['_parent'] = None
+            else:
+                field['_parent'] = parent['identifier']
             field['depth'] = depth
             result.append(field)
             if field['type'] == constants.GROUP:
-                result.extend(self.flatten(field['fields'], depth=depth+1))
+                result.extend(self.flatten(field['fields'],
+                                           depth=depth+1,
+                                           parent=field))
         return result
 
     def get_siblings(self, field, fields):
