@@ -25,7 +25,7 @@ Accounts
 	  <option {{ sort == 'name' and 'selected' or ''}}
 		  value="name">Name</option>
 	  <option {{ sort == 'login' and 'selected' or ''}}
-		  value="login">Login</option>
+		  value="login">Latest login</option>
 	  <option {{ sort == 'email' and 'selected' or ''}}
 		  value="email">Email</option>
 	</select>
@@ -105,7 +105,7 @@ Accounts
 	<th>University</th>
 	<th>Role</th>
 	<th>Status</th>
-	<th>Login</th>
+	<th>Latest login</th>
 	<th>Orders</th>
       </tr>
       {% for account in accounts %}

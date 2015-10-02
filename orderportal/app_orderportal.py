@@ -51,6 +51,7 @@ def get_handlers():
             url(r'/orders/([^/]+)', OrdersAccount, name='orders_account'),
             url(r'/orders/([^/]+)/groups', OrdersGroups, name='orders_groups'),
             url(r'/accounts', Accounts, name='accounts'),
+            url(r'/account', AccountCurrent, name='account_current'),
             url(r'/account/([^/]+)', Account, name='account'),
             url(r'/account/([^/]+)/logs', AccountLogs, name='account_logs'),
             url(r'/account/([^/]+)/edit', AccountEdit, name='account_edit'),
@@ -137,7 +138,7 @@ def main():
         ui_modules=uimodules,
         template_path='html',
         static_path='static',
-        login_url=r'/')
+        login_url=r'/login')
     application.listen(settings['PORT'], xheaders=True)
     logging.info("web server PID %s on port %s", os.getpid(), settings['PORT'])
     tornado.ioloop.IOLoop.instance().start()

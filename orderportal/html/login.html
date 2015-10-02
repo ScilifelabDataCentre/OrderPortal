@@ -1,0 +1,51 @@
+{# Login page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Login{% end %}
+
+{% block body_title %}Login{% end %}
+
+{% block content %}
+
+{% if next %}
+<div class="row">
+  <div class="well well-sm col-md-5 col-md-offset-1">
+    You need to login to access the requested page.
+  </div>
+  <div class="col-md-6">
+  </div>
+</div>
+{% end %} {# if next #}
+
+<div class="row">
+  <div class="col-md-5 col-md-offset-1">
+    <form action="{{ reverse_url('login') }}"
+	  role="form"
+	  method="POST">
+      {% module xsrf_form_html() %}
+      <div class="form-group">
+	<label for="email">Email</label>
+	<input type="text" class="form-control" name="email"
+	       placeholder="Email address of your account">
+      </div>
+      <div class="form-group">
+	<label for="password">Password</label>
+	<input type="password" class="form-control" name="password">
+      </div>
+      {% if next %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% end %} {# if next #}
+      <div class="form-group"> 
+	<button type="submit"
+		class="btn btn-primary glyphicon glyphicon-log-in">
+	  Login
+	</button>
+      </div>
+    </form>
+  </div>
+  <div class="col-md-6">
+  </div>
+</div>
+
+{% end %}

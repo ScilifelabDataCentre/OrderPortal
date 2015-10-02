@@ -196,6 +196,15 @@ class Account(AccountMixin, RequestHandler):
             account['order_count'] = list(view[email])[0].value
         except IndexError:
             account['order_count'] = 0
+        view = self.db.view('log/account',
+                            startkey=[email, constants.HIGH_CHAR],
+                            lastkey=[email],
+                            descending=True,
+                            limit=1)
+        try:
+            latest_activity = list(view)[0].key[1]
+        except IndexError:
+            latest_activity = None
         if self.is_staff() or self.current_user['email'] == account['email']:
             invitations = self.get_invitations(account['email'])
         else:
@@ -203,6 +212,7 @@ class Account(AccountMixin, RequestHandler):
         self.render('account.html',
                     account=account,
                     groups=self.get_account_groups(email),
+                    latest_activity=latest_activity,
                     invitations=invitations,
                     is_deletable=self.is_deletable(account))
 
@@ -232,6 +242,14 @@ class Account(AccountMixin, RequestHandler):
         view = self.db.view('order/owner', key=account['email'])
         if len(list(view)) == 0: return True
         return False
+
+
+class AccountCurrent(RequestHandler):
+    "Redirect to the account page for the current user."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.see_other('account', self.current_user['email'])
 
 
 class AccountLogs(AccountMixin, RequestHandler):
@@ -299,6 +317,9 @@ class AccountEdit(AccountMixin, RequestHandler):
 class Login(RequestHandler):
     "Login to a account account. Set a secure cookie."
 
+    def get(self):
+        self.render('login.html', next=self.get_argument('next', None))
+
     def post(self):
         "Login to a account account. Set a secure cookie."
         self.check_xsrf_cookie()
@@ -318,7 +339,13 @@ class Login(RequestHandler):
         self.set_secure_cookie(constants.USER_COOKIE, account['email'])
         with AccountSaver(doc=account, rqh=self) as saver:
             saver['login'] = utils.timestamp() # Set login timestamp.
-        self.redirect(self.reverse_url('home'))
+        next = self.get_argument('next', None)
+        if next is None:
+            self.see_other('home')
+        else:
+            # Not quite right: should be an absolute URL to redirect.
+            # But seems to work anyway.
+            self.redirect(next)
 
 
 class Logout(RequestHandler):

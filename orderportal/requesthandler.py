@@ -65,9 +65,12 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_current_user(self):
         """Get the currently logged-in user account, if any.
-        This overrides a tornado function, otherwise it would have
-        been called get_current_account."""
-        email = self.get_secure_cookie(constants.USER_COOKIE)
+        This overrides a tornado function, otherwise it should have
+        been called get_current_account, since terminology 'account'
+        is used in this code rather than 'user'."""
+        email = self.get_secure_cookie(
+            constants.USER_COOKIE,
+            max_age_days=settings['LOGIN_MAX_AGE_DAYS'])
         if not email:
             return None
         try:

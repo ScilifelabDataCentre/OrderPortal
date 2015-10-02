@@ -238,11 +238,9 @@
       {% try %}
       {% if message %}
       <div class="row">
-	<div class="col-md-8 col-md-offset-2">
-	  <div class="panel panel-danger">
-	    <div class="panel-heading">Message</div>
-	    <div class="panel-body">{{ message }}</div>
-	  </div>
+	<div class="col-md-8 col-md-offset-2 alert alert-warning">
+	  {# Allow links in message #}
+	  <strong>Message:</strong> {% raw message %}
 	</div>
 	<div class="col-md-2"></div>
       </div>

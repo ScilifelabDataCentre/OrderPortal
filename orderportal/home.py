@@ -18,29 +18,20 @@ class Home(RequestHandler):
     "Home page; dashboard. Contents according to role of logged-in account."
 
     def get(self):
+        kwargs = dict(news_items=self.get_news(),
+                      events=self.get_events())
+        if self.current_user and self.get_invitations(self.current_user['email']):
+            url = self.reverse_url('account', self.current_user['email'])
+            kwargs['message'] = """You have group invitations.
+See your <a href="{}">account</a>.""".format(url)
         if not self.current_user:
-            self.render('home.html',
-                        news_items=self.get_news(),
-                        events=self.get_events(),
-                        message=self.get_invited_message())
+            self.render('home.html', **kwargs)
         elif self.current_user['role'] == constants.ADMIN:
-            self.home_admin(news_items=self.get_news(),
-                            events=self.get_events(),
-                            message=self.get_invited_message())
+            self.home_admin(**kwargs)
         elif self.current_user['role'] == constants.STAFF:
-            self.home_staff(news_items=self.get_news(),
-                            events=self.get_events(),
-                            message=self.get_invited_message())
+            self.home_staff(**kwargs)
         else:
-            self.home_user(news_items=self.get_news(),
-                           events=self.get_events(),
-                           message=self.get_invited_message())
-
-    def get_invited_message(self):
-        if self.get_invitations(self.current_user['email']):
-            return 'You have group invitations. See the page for your account.'
-        else:
-            return None
+            self.home_user(**kwargs)
 
     def home_admin(self, **kwargs):
         "Home page for a current user having role 'admin'."

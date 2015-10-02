@@ -15,6 +15,7 @@ settings = dict(BASE_URL='http://localhost:8885/',
                 LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',
                 ORDER_STATUSES_FILENAME='{ROOT}/data/order_statuses.yaml',
                 ORDER_TRANSITIONS_FILENAME='{ROOT}/data/order_transitions.yaml',
+                LOGIN_MAX_AGE_DAYS=1,
                 SITE_NAME='OrderPortal',
                 UNIVERSITIES_FILENAME='{ROOT}/data/university_list.yaml',
                 )
