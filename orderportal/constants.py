@@ -59,7 +59,7 @@ FALSE = frozenset(['false', 'no', 'f', 'n', '0'])
 # User login account
 USER_COOKIE = 'orderportal_user'
 
-# Account state
+# Account status; hard-wired!
 PENDING  = 'pending'
 ENABLED  = 'enabled'
 DISABLED = 'disabled'
@@ -71,7 +71,7 @@ STAFF = 'staff'
 ADMIN = 'admin'
 ACCOUNT_ROLES = [USER, STAFF, ADMIN]
 
-# Form statuses; hard-wired!
+# Form status; hard-wired!
 TESTING = 'testing'
 FORM_STATUSES = [PENDING, TESTING, ENABLED, DISABLED]
 

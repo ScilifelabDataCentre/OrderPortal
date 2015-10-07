@@ -233,7 +233,7 @@ class Account(AccountMixin, RequestHandler):
             raise tornado.web.HTTPError(403, reason='account cannot be deleted')
         self.delete_logs(account['_id'])
         self.db.delete(account)
-        self.see_other('home')
+        self.see_other('accounts')
 
     def is_deletable(self, account):
         "Can the account be deleted? Pending, or disabled and no orders."

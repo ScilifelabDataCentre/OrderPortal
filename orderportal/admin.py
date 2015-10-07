@@ -71,9 +71,10 @@ class Config(RequestHandler):
                   ('markdown', markdown.version)]
         params.append(('Site name', settings['SITE_NAME']))
         params.append(('Site directory', settings['SITE_DIR']))
-        params.append(('Registration enabled',settings['REGISTRATION_ENABLED']))
         params.append(('Tornado debug', settings['TORNADO_DEBUG']))
         params.append(('logging debug', settings['LOGGING_DEBUG']))
+        params.append(('account messages',
+                       settings['ACCOUNT_MESSAGES_FILENAME']))
         params.append(('order statuses', settings['ORDER_STATUSES_FILENAME']))
         params.append(('order transitions',
                        settings['ORDER_TRANSITIONS_FILENAME']))

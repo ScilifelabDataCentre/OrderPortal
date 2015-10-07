@@ -22,7 +22,9 @@
 <br>
 <div>
   <a href="{{ reverse_url('reset') }}"
-     class="btn btn-warning glyphicon glyphicon-step-backward" role="button">
+     role="button"
+     class="btn btn-warning glyphicon glyphicon-step-backward"
+     onclick="return confirm('Really reset password?');">
     Reset password
   </a>
 </div>
@@ -61,7 +63,8 @@
   {% module xsrf_form_html() %}
   <div class="form-group">
     <button type="submit"
-	    class="btn btn-danger glyphicon glyphicon-ban-circle">
+	    class="btn btn-danger glyphicon glyphicon-ban-circle"
+	    onclick="return confirm('Really disable?');">
       Disable
     </button>
   </div>

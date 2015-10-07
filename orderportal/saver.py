@@ -83,7 +83,7 @@ class Saver(object):
         "Set the initial values for the new document."
         try:
             self.doc['owner'] = self.rqh.current_user['email']
-        except (AttributeError, KeyError):
+        except (TypeError, AttributeError, KeyError):
             self.doc['owner'] = None
         self.doc['created'] = utils.timestamp()
 
