@@ -222,6 +222,7 @@ def log(db, rqh, entity, changed=dict()):
     "Add a log entry for the change of the given entity."
     entry = dict(_id=get_iuid(),
                  entity=entity['_id'],
+                 entity_type=entity[constants.DOCTYPE],
                  changed=changed,
                  modified=timestamp())
     entry[constants.DOCTYPE] = constants.LOG

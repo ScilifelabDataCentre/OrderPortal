@@ -194,6 +194,7 @@ class Orders(RequestHandler):
         if not self.is_staff():
             self.see_other('orders_account', self.current_user['email'])
         params = dict()
+        # XXX Does not scale! Use limit and offset for doc retrieval!
         # Filter list
         status = self.get_argument('status', '')
         if status:
@@ -249,10 +250,9 @@ class OrdersAccount(RequestHandler):
     def get(self, email):
         account = self.get_account(email)
         self.check_readable(account)
-        view = self.db.view('order/owner',
-                            include_docs=True,
-                            key=email)
-        orders = [r.doc for r in view]
+        # XXX This does not scale! Should also be indexed by modified.
+        view = self.db.view('order/owner', include_docs=True)
+        orders = [r.doc for r in view[email]]
         params = dict()
         # Filter list
         status = self.get_argument('status', '')

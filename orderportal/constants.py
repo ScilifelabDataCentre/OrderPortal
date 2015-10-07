@@ -34,7 +34,8 @@ TEXT    = 'text'
 INFO    = 'info'
 FILE    = 'file'
 LOG     = 'log'
-ENTITIES = frozenset([ACCOUNT, GROUP, FIELD, FORM, ORDER, INFO, FILE])
+MESSAGE = 'message'
+ENTITIES = frozenset([ACCOUNT, GROUP, FIELD, FORM, ORDER, INFO, FILE, MESSAGE])
 
 # Field types
 STRING  = 'string'

@@ -230,26 +230,3 @@ class RequestHandler(tornado.web.RequestHandler):
                             endkey=[iuid, constants.HIGH_CHAR])
         for row in view:
             del self.db[row.id]
-
-    def send_email(self, recipient, subject, text, sender=None):
-        "Send an email to the given recipient from the given sender account."
-        if sender:
-            from_address = sender['email']
-        else:
-            from_address = settings['EMAIL']['USER']
-        mail = MIMEText(text)
-        mail['Subject'] = subject
-        mail['From'] = from_address
-        mail['To'] = recipient
-        server = smtplib.SMTP(host=settings['EMAIL']['HOST'],
-                              port=settings['EMAIL']['PORT'])
-        if settings['EMAIL'].get('TLS'):
-            server.starttls()
-        try:
-            server.login(settings['EMAIL']['USER'],
-                         settings['EMAIL']['PASSWORD'])
-        except KeyError:
-            pass
-        logging.debug("sendmail to %s from %s", recipient, from_address)
-        server.sendmail(from_address, [recipient], mail.as_string())
-        server.quit()
