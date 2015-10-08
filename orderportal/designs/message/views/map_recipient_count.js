@@ -3,7 +3,7 @@
    Value: 1.
 */
 function(doc) {
-    if (doc.orderportal_doctype !== 'order') return;
+    if (doc.orderportal_doctype !== 'message') return;
     for (var i=0; i<doc.recipients.length; i++) {
 	emit(doc.recipients[i], 1);
     };

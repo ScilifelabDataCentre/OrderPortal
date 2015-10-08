@@ -34,6 +34,7 @@ class AccountSaver(saver.Saver):
         self['code'] = None
         # Bypass ordinary 'set'; avoid logging password, even if hashed.
         self.doc['password'] = utils.hashed_password(new)
+        self.changed['password'] = '******'
 
     def check_password(self, password):
         if password is None: return
