@@ -11,6 +11,7 @@ from orderportal import constants
 from orderportal import saver
 from orderportal import settings
 from orderportal import utils
+from orderportal.group import GroupSaver
 from orderportal.requesthandler import RequestHandler
 
 
@@ -232,7 +233,36 @@ class Account(AccountMixin, RequestHandler):
         self.check_admin()
         if not self.is_deletable(account):
             raise tornado.web.HTTPError(403, reason='account cannot be deleted')
+        # Delete the groups this account owns.
+        view = self.db.view('group/owner',
+                            include_docs=True,
+                            key=email)
+        for row in view:
+            group = row.doc
+            self.delete_logs(group['_id'])
+            self.db.delete(group)
+        # Remove this account from groups it is a member of.
+        view = self.db.view('group/owner',
+                            include_docs=True,
+                            key=email)
+        for row in view:
+            group = row.doc
+            with GroupSaver(doc=row, rqh=self) as saver:
+                members = set(group['members'])
+                members.discard(email)
+                saver['members'] = sorted(members)
+        # Delete the messages of the account.
+        view = self.db.view('message/recipient',
+                            include_docs=True,
+                            startkey=[email],
+                            endkey=[email, constants.HIGH_CHAR])
+        for row in view:
+            message = row.doc
+            self.delete_logs(message['_id'])
+            self.db.delete(message)
+        # Delete the logs of the account.
         self.delete_logs(account['_id'])
+        # Delete the account itself.
         self.db.delete(account)
         self.see_other('accounts')
 
@@ -240,7 +270,7 @@ class Account(AccountMixin, RequestHandler):
         "Can the account be deleted? Pending, or disabled and no orders."
         if account['status'] == constants.PENDING: return True
         if account['status'] == constants.ENABLED: return False
-        view = self.db.view('order/owner', key=account['email'])
+        view = self.db.view('order/owner', key=account['email'], limit=1)
         if len(list(view)) == 0: return True
         return False
 
