@@ -242,6 +242,14 @@
     </td>
   </tr>
   <tr>
+    <th>Messages</th>
+    <td>
+      <a href="{{ reverse_url('account_messages', account['email']) }}">
+	{% module Icon('message', label=True, title='List') %}
+      </a>
+    </td>
+  </tr>
+  <tr>
     <th>Modified</th>
     <td>
       <span class="localtime">{{ account['modified'] }}</span>

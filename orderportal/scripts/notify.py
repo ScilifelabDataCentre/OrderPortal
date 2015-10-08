@@ -1,4 +1,6 @@
-"OrderPortal: Notify users about recent events. To be run as a cron job."
+"""OrderPortal: Notify users about recent events from log records.
+To be run as a cron job.
+"""
 
 from __future__ import print_function, absolute_import
 
@@ -9,13 +11,21 @@ import urllib
 import yaml
 
 from orderportal import constants
+from orderportal import saver
 from orderportal import settings
 from orderportal import utils
-from orderportal.message import MessageSaver
+
+
+class MessageSaver(saver.Saver):
+    doctype = constants.MESSAGE
+
+    def log(self):
+        "No log entry for message; its creation is a log in itself."
+        pass
 
 
 class Notifier(object):
-    "Process events and send messages for a subset of them."
+    "Process log records and send messages for interesting events."
 
     def __init__(self, db, verbose=False, dry_run=False):
         self.db = db
@@ -57,8 +67,8 @@ class Notifier(object):
             path += '?' + urllib.urlencode(query)
         return settings['BASE_URL'].rstrip('/') + path
 
-    def process_events(self):
-        "Go through log entries for unprocessed events to send messages about."
+    def process_logs(self):
+        "Go through unprocessed log entries for items to send messages about."
         view = self.db.view('message/modified', descending=True, limit=1)
         messages = list(view)
         try:
@@ -74,12 +84,12 @@ class Notifier(object):
                             endkey=endkey)
         for row in view:
             if row.value == constants.ACCOUNT:
-                self.process_account_event(row.doc)
+                self.process_account_log(row.doc)
             elif row.value == constants.ORDER:
-                self.process_order_event(row.doc)
+                self.process_order_log(row.doc)
 
-    def process_account_event(self, logdoc):
-        "Send message when some specific event has occurred for an account."
+    def process_account_log(self, logdoc):
+        "Send message for an interesting account log record."
         message = None
         if logdoc['changed'].get('status') == constants.PENDING:
             self.process_account_pending(logdoc)
@@ -95,9 +105,7 @@ class Notifier(object):
         params = dict(site=settings['SITE_NAME'],
                       account=entity['email'],
                       url=self.absolute_url('account', entity['email']))
-        self.send_email(subject=message['subject'].format(**params),
-                        text=message['text'].format(**params),
-                        recipients=self.get_recipients(entity, message))
+        self.send_email(entity, message, params)
 
     def process_account_enabled(self, logdoc):
         """Account was enabled. Send URL and code for setting password."""
@@ -110,17 +118,18 @@ class Notifier(object):
                                             email=entity['email'],
                                             code=entity['code']),
                       code=entity['code'])
-        self.send_email(subject=message['subject'].format(**params),
-                        text=message['text'].format(**params),
-                        recipients=self.get_recipients(entity, message))
+        self.send_email(entity, message, params)
 
-    def process_order_event(self, logdoc):
-        "Send message when some specific event has happened to an order."
+    def process_order_log(self, logdoc):
+        "Send message for an interesting order log record."
         print('order', logdoc['changed'])
 
-    def send_email(self, recipients, subject, text):
+    def send_email(self, entity, message, params):
         "Actually send the message as email; not if the dry_run flag is set."
+        subject = message['subject'].format(**params)
+        text = message['text'].format(**params)
         sender = settings['MESSAGE_SENDER_EMAIL']
+        recipients = self.get_recipients(entity, message)
         mail = email.mime.text.MIMEText(text)
         mail['Subject'] = subject
         mail['From'] = sender
@@ -130,6 +139,8 @@ class Notifier(object):
                 print(mail.as_string())
             else:
                 self.server.sendmail(sender, [recipient], mail.as_string())
+                if self.verbose:
+                    print("sent email '{}' to {}".format(subject, recipient))
         if not self.dry_run:
             with MessageSaver(db=self.db) as saver:
                 saver['sender'] = sender
@@ -137,25 +148,29 @@ class Notifier(object):
                 saver['subject'] = subject
                 saver['text'] = text
                 saver['type'] = 'email'
-
+        
     def get_recipients(self, entity, message):
         "Get list of recipient emails according to message roles and entity."
         result = set()
-        for role in message['recipients']:
-            if role == 'owner':
-                result.add(entity['owner'])
-            elif role == 'admin':
-                result.update(self.get_admins())
+        admins = self.get_admins()
+        if entity[constants.DOCTYPE] == constants.ACCOUNT:
+            # Hard-coded global rules in this case
+            for role in message['recipients']:
+                if role == 'owner':
+                    result.add(entity['owner'])
+                elif role == 'admin':
+                    result.update(admins)
         return list(result)
 
     def get_admins(self):
-        "Get the list of admin emails."
+        "Get the list of enabled admin emails."
+        
         return ['per.kraulis@scilifelab.se']
 
 
 def get_args():
     parser = utils.get_command_line_parser(description=
-        'Send messages for recent events.')
+        'Send messages for recent log record events.')
     parser.add_option('-d', '--dry-run',
                       action='store_true', dest='dry_run', default=False,
                       help='do not send messages; for debug')
@@ -169,4 +184,4 @@ if __name__ == '__main__':
     notifier = Notifier(utils.get_db(),
                         verbose=options.verbose,
                         dry_run=options.dry_run)
-    notifier.process_events()
+    notifier.process_logs()

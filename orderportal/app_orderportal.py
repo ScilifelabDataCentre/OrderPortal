@@ -54,6 +54,8 @@ def get_handlers():
             url(r'/account', AccountCurrent, name='account_current'),
             url(r'/account/([^/]+)', Account, name='account'),
             url(r'/account/([^/]+)/logs', AccountLogs, name='account_logs'),
+            url(r'/account/([^/]+)/messages',
+                AccountMessages, name='account_messages'),
             url(r'/account/([^/]+)/edit', AccountEdit, name='account_edit'),
             url(r'/group', GroupCreate, name='group_create'),
             url(r'/group/([0-9a-f]{32})', Group, name='group'),

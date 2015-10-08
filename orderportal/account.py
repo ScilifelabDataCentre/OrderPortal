@@ -265,6 +265,25 @@ class AccountLogs(AccountMixin, RequestHandler):
                     logs=self.get_logs(account['_id']))
 
 
+class AccountMessages(AccountMixin, RequestHandler):
+    "Account messages list page."
+
+    @tornado.web.authenticated
+    def get(self, email):
+        "Show list of messages sent to the account given by email address."
+        account = self.get_account(email)
+        self.check_readable(account)
+        view = self.db.view('message/recipient',
+                            include_docs=True,
+                            descending=True,
+                            startkey=[account['email'], constants.HIGH_CHAR],
+                            endkey=[account['email']])
+        messages = [r.doc for r in view]
+        self.render('account_messages.html',
+                    account=account,
+                    messages=messages)
+
+
 class AccountEdit(AccountMixin, RequestHandler):
     "Page for editing account information."
 
