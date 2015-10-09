@@ -18,17 +18,7 @@
     Edit
   </a>
 </div>
-
-<br>
-<div>
-  <a href="{{ reverse_url('reset') }}"
-     role="button"
-     class="btn btn-warning glyphicon glyphicon-step-backward"
-     onclick="return confirm('Really reset password?');">
-    Reset password
-  </a>
-</div>
-{% end %} {# if is_admin #}
+{% end %}
 
 {% if current_user['email'] == account['email'] %}
 <br>
@@ -40,53 +30,63 @@
 </div>
 {% end %}{# if current_user['email'] == account['email'] #}
 
-{% if is_admin and current_user['email'] != account['email'] %}
-
+{% if is_admin or current_user['email'] == account['email'] %}
 <br>
-{% if account['status'] in (constants.PENDING, constants.DISABLED) %}
-<form action="{{ reverse_url('account_enable', account['email']) }}"
-      role="form"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <div class="form-group">
-    <button type="submit"
-	    class="btn btn-success glyphicon glyphicon-ok">
-      Enable
-    </button>
-  </div>
-</form>
+<div>
+  <a href="{{ reverse_url('reset') }}"
+     role="button"
+     class="btn btn-warning glyphicon glyphicon-step-backward"
+     onclick="return confirm('Really reset password?');">
+    Reset password
+  </a>
+</div>
+{% end %}
 
-{% else %}
-<form action="{{ reverse_url('account_disable', account['email']) }}"
-      role="form"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <div class="form-group">
-    <button type="submit"
-	    class="btn btn-danger glyphicon glyphicon-ban-circle"
-	    onclick="return confirm('Really disable?');">
-      Disable
-    </button>
-  </div>
-</form>
-{% end %} {# if account['status'] #}
+{% if is_admin and current_user['email'] != account['email'] %}
+  <br>
+  {% if account['status'] in (constants.PENDING, constants.DISABLED) %}
+  <form action="{{ reverse_url('account_enable', account['email']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <button type="submit"
+	      class="btn btn-success glyphicon glyphicon-ok">
+	Enable
+      </button>
+    </div>
+  </form>
 
-{% if is_deletable %}
-<form action="{{ reverse_url('account', account['email']) }}"
-      role="form"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <div class="form-group">
-    <input type="hidden" name="_http_method" value="delete">
-    <button type="submit"
-	    class="btn btn-danger glyphicon glyphicon-trash"
-	    onclick="return confirm('Cannot be undone! Really delete?');">
-      Delete
-    </button>
-  </div>
-</form>
-{% end %} {# if account['status'] #}
+  {% else %}
+  <form action="{{ reverse_url('account_disable', account['email']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <button type="submit"
+	      class="btn btn-danger glyphicon glyphicon-ban-circle"
+	      onclick="return confirm('Really disable?');">
+	Disable
+      </button>
+    </div>
+  </form>
+  {% end %}
 
+  {% if is_deletable %}
+  <form action="{{ reverse_url('account', account['email']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <input type="hidden" name="_http_method" value="delete">
+      <button type="submit"
+	      class="btn btn-danger glyphicon glyphicon-trash"
+	      onclick="return confirm('Cannot be undone! Really delete?');">
+	Delete
+      </button>
+    </div>
+  </form>
+  {% end %}
 {% end %} {# if is_admin #}
 
 {% end %} {# block meta_content #}

@@ -1,4 +1,4 @@
-"""OrderPortal: Notify users about recent events from log records.
+"""OrderPortal: Send messages to users about recent events from log records.
 To be run as a cron job.
 """
 
@@ -24,7 +24,7 @@ class MessageSaver(saver.Saver):
         pass
 
 
-class Notifier(object):
+class Messager(object):
     "Process log records and send messages for interesting events."
 
     def __init__(self, db, verbose=False, dry_run=False):
@@ -101,35 +101,35 @@ class Notifier(object):
         "Account was created, is pending. Tell the admins to enable it."
         message = self.account_messages.get('account_pending')
         if not message: return
-        entity = self.db[logdoc['entity']]
+        account = self.db[logdoc['entity']]
         params = dict(site=settings['SITE_NAME'],
-                      account=entity['email'],
-                      url=self.absolute_url('account', entity['email']))
-        self.send_email(entity, message, params)
+                      account=account['email'],
+                      url=self.absolute_url('account', account['email']))
+        self.send_email(self.get_admins(), message, params)
 
     def process_account_enabled(self, logdoc):
         """Account was enabled. Send URL and code for setting password."""
         message = self.account_messages.get('account_enabled')
         if not message: return
-        entity = self.db[logdoc['entity']]
+        account = self.db[logdoc['entity']]
         params = dict(site=settings['SITE_NAME'],
-                      account=entity['email'],
-                      url=self.absolute_url('password',
-                                            email=entity['email'],
-                                            code=entity['code']),
-                      code=entity['code'])
-        self.send_email(entity, message, params)
+                      account=account['email'],
+                      url=self.absolute_url('password'),
+                      url_code=self.absolute_url('password',
+                                                 email=account['email'],
+                                                 code=account['code']),
+                      code=account['code'])
+        self.send_email([account['owner']], message, params)
 
     def process_order_log(self, logdoc):
         "Send message for an interesting order log record."
         print('order', logdoc['changed'])
 
-    def send_email(self, entity, message, params):
+    def send_email(self, recipients, message, params):
         "Actually send the message as email; not if the dry_run flag is set."
         subject = message['subject'].format(**params)
         text = message['text'].format(**params)
         sender = settings['MESSAGE_SENDER_EMAIL']
-        recipients = self.get_recipients(entity, message)
         mail = email.mime.text.MIMEText(text)
         mail['Subject'] = subject
         mail['From'] = sender
@@ -149,19 +149,6 @@ class Notifier(object):
                 saver['text'] = text
                 saver['type'] = 'email'
         
-    def get_recipients(self, entity, message):
-        "Get list of recipient emails according to message roles and entity."
-        result = set()
-        admins = self.get_admins()
-        if entity[constants.DOCTYPE] == constants.ACCOUNT:
-            # Hard-coded global rules in this case
-            for role in message['recipients']:
-                if role == 'owner':
-                    result.add(entity['owner'])
-                elif role == 'admin':
-                    result.update(admins)
-        return list(result)
-
     def get_admins(self):
         "Get the list of enabled admin emails."
         
@@ -181,7 +168,7 @@ if __name__ == '__main__':
     (options, args) = get_args()
     utils.load_settings(filepath=options.settings,
                         verbose=options.verbose)
-    notifier = Notifier(utils.get_db(),
+    messager = Messager(utils.get_db(),
                         verbose=options.verbose,
                         dry_run=options.dry_run)
-    notifier.process_logs()
+    messager.process_logs()
