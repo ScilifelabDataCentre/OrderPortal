@@ -30,16 +30,22 @@ Messages to {{ account['email'] }}
 	<tr>
 	  <td>
 	    <button type="button"
-		    class="btn btn-default btn-xs glyphicon glyphicon-envelope"
+		    class="btn btn-default btn-xs glyphicon glyphicon-chevron-down"
 		    data-toggle="collapse" data-target="#{{ message['_id'] }}">
-	      Text
 	    </button>
 	    {{ message['subject'] }}
 	  </td>
 	</tr>
 	<tr id="{{ message['_id'] }}" class="collapse">
-	  <td class="pre">
-	    {{ message['text'] }}
+	  <td>
+	    <div class="panel panel-default">
+	      <div class="panel-heading">
+		Recipients: {{ ', '.join(message['recipients']) }}
+	      </div>
+	      <div class="panel-body pre">
+		{{ message['text'] }}
+	      </div>
+	    </div>
 	  </td>
 	</tr>
       </table>

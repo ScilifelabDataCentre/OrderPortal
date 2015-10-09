@@ -32,172 +32,188 @@ Edit
   </div>
   {% end %}
 
-  <div class="form-group has-feedback">
-    <div class="row">
-      <div class="col-md-6">
-	<label class="control-label" for="first_name">First name</label>
-	<input type="text" class="form-control"
-	       name="first_name" id="first_name"
-	       value="{{ account.get('first_name') or '' }}">
-	<span style="color:red; margin-right: 1em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
-      </div>
-    </div>
-  </div>
+  <div class="panel panel-success">
+    <div class="panel-heading">User information</div>
+    <div class="panel-body">
 
-  <div class="form-group has-feedback">
-    <div class="row">
-      <div class="col-md-6">
-	<label class="control-label" for="last_name">Last name</label>
-	<input type="text" class="form-control"
-	       name="last_name" id="last_name"
-	       value="{{ account.get('last_name') or '' }}">
-	<span style="color:red; margin-right: 1em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
+      <div class="form-group has-feedback">
+	<div class="row">
+	  <div class="col-md-6">
+	    <label class="control-label" for="first_name">First name</label>
+	    <input type="text" class="form-control"
+		   name="first_name" id="first_name"
+		   value="{{ account.get('first_name') or '' }}">
+	    <span style="color:red; margin-right: 1em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true"></span>
+	  </div>
+	</div>
       </div>
-    </div>
-  </div>
 
-  <div class="form-group has-feedback">
-    <label class="control-label" for="university">University</label>
-    <div class="row">
-      {% if settings['UNIVERSITIES'] %}
-      {% set other = True %}
-      <div class="col-md-6">
-	<select class="form-control" name="university" id="university">
-	  {# OrderedDict ! #}
-	  {% for abbrev, data in settings['UNIVERSITIES'].items() %}
-	    {% if account.get('university') == abbrev %}
+      <div class="form-group has-feedback">
+	<div class="row">
+	  <div class="col-md-6">
+	    <label class="control-label" for="last_name">Last name</label>
+	    <input type="text" class="form-control"
+		   name="last_name" id="last_name"
+		   value="{{ account.get('last_name') or '' }}">
+	    <span style="color:red; margin-right: 1em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true"></span>
+	  </div>
+	</div>
+      </div>
+
+      <div class="form-group has-feedback">
+	<label class="control-label" for="university">University</label>
+	<div class="row">
+	  {% if settings['UNIVERSITIES'] %}
+	  {% set other = True %}
+	  <div class="col-md-6">
+	    <select class="form-control" name="university" id="university">
+	      {# OrderedDict ! #}
+	      {% for abbrev, data in settings['UNIVERSITIES'].items() %}
+	      {% if account.get('university') == abbrev %}
 	      {% set other = False %}
 	      {% set selected = 'selected' %}
-	    {% else %}
+	      {% else %}
 	      {% set selected = '' %}
-	    {% end %}
-	    <option {{selected}} value="{{ abbrev }}">{{ abbrev }}
-	      {% if data.get('name') %}
-	      ({{ data.get('name') }})
 	      {% end %}
-	    </option>
-	  {% end %}
-	  {% if other %}
-	    <option selected value="undefined">[not available in list]</option>
+	      <option {{selected}} value="{{ abbrev }}">{{ abbrev }}
+		{% if data.get('name') %}
+		({{ data.get('name') }})
+		{% end %}
+	      </option>
+	      {% end %}
+	      {% if other %}
+	      <option selected value="undefined">[not available in list]</option>
+	      {% else %}
+	      <option value="undefined">[not available in list]</option>
+	      {% end %}
+	    </select>
+	    <span style="color:red; margin-right: 2em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true"></span>
+	  </div>
+	  <div class="col-md-6">
+	    <input type="text" class="form-control"
+		   name="university_other" id="university_other"
+		   placeholder="Provide full name if not available in the list."
+		   value="{{ other and account.get('university') or '' }}">
+	  </div>
 	  {% else %}
-	    <option value="undefined">[not available in list]</option>
+	  <div class="col-md-6">
+	    <input type="text" class="form-control"
+		   name="university" id="university"
+		   value="{{ account.get('university') or '' }}">
+	    <span style="color:red; margin-right: 1em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true"></span>
+	  </div>
 	  {% end %}
-	</select>
-	<span style="color:red; margin-right: 2em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
+	</div>
+	<span class="help-block">
+	  Main affiliation: University, college, company, organization, or
+	  similar.
+	</span>
       </div>
-      <div class="col-md-6">
-	<input type="text" class="form-control"
-	       name="university_other" id="university_other"
-	       placeholder="Provide full name if not available in the list."
-	       value="{{ other and account.get('university') or '' }}">
+
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-6">
+	    <label class="control-label" for="department">Department</label>
+	    <input type="text" class="form-control"
+		   name="department" id="department"
+		   value="{{ account.get('department') or '' }}">
+	  </div>
+	</div>
+	<span class="help-block">
+	  University department, company section, group, or similar.
+	</span>
       </div>
-      {% else %}
-      <div class="col-md-6">
-	<input type="text" class="form-control"
-	       name="university" id="university"
-	       value="{{ account.get('university') or '' }}">
-	<span style="color:red; margin-right: 1em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
+
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="address">Address</label>
+	    <textarea rows="3" class="form-control"
+		      id="address" name="address"
+		      >{{ account.get('address') or '' }}</textarea>
+	  </div>
+	</div>
+	<span class="help-block">
+	  Postal address; for delivery of paper documents, returned
+	  samples, etc.
+	</span>
       </div>
-      {% end %}
+
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="invoice_address">
+	      Invoice address
+	    </label>
+	    <textarea rows="3" class="form-control"
+		      id="invoice_address" name="invoice_address"
+		      >{{ account.get('invoice_address') or '' }}</textarea>
+	  </div>
+	</div>
+	<span class="help-block">
+	  Invoice address. If none given, the university standard invoice
+	  address will be used (if available).
+	</span>
+      </div>
+      
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-6">
+	    <label class="control-label" for="phone">Phone</label>
+	    <input type="text" class="form-control"
+		   name="phone" id="phone"
+		   value="{{ account.get('phone') or '' }}">
+	  </div>
+	</div>
+	<span class="help-block">
+	  One or more telephone numbers, separated by comma ",".
+	</span>
+      </div>
+
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="other_data">Other data</label>
+	    <textarea rows="3" class="form-control"
+		      id="other_data" name="other_data"
+		      >{{ account.get('other_data') or '' }}</textarea>
+	  </div>
+	</div>
+	<span class="help-block">
+	  Miscellaneous user data from other sources.
+	</span>
+      </div>
+
     </div>
-    <span class="help-block">
-      Main affiliation: University, college, company, organization, or
-      similar.
-    </span>
   </div>
 
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-6">
-	<label class="control-label" for="department">Department</label>
-	<input type="text" class="form-control"
-	       name="department" id="department"
-	       value="{{ account.get('department') or '' }}">
-      </div>
-    </div>
-    <span class="help-block">
-      University department, company section, group, or similar.
-    </span>
-  </div>
+  <div class="panel panel-warning">
+    <div class="panel-heading">Site configuration</div>
+    <div class="panel-body">
 
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-8">
-	<label class="control-label" for="address">Address</label>
-	<textarea rows="3" class="form-control"
-		  id="address" name="address"
-		  >{{ account.get('address') or '' }}</textarea>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-6">
+	    <label class="control-label" for="phone">Page size</label>
+	    <input type="int" class="form-control"
+		   name="page_size" id="page_size"
+		   value="{{ account.get('page_size') or '' }}">
+	  </div>
+	</div>
+	<span class="help-block">
+	  Max number of items (e.g. orders) shown on each list page.
+	</span>
       </div>
-    </div>
-    <span class="help-block">
-      Postal address; for delivery of paper documents, returned
-      samples, etc.
-    </span>
-  </div>
 
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-8">
-	<label class="control-label" for="invoice_address">Invoice address</label>
-	<textarea rows="3" class="form-control"
-		  id="invoice_address" name="invoice_address"
-		  >{{ account.get('invoice_address') or '' }}</textarea>
-      </div>
     </div>
-    <span class="help-block">
-      Invoice address. If none given, the university standard invoice
-      address will be used if known.
-    </span>
-  </div>
-
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-6">
-	<label class="control-label" for="phone">Phone</label>
-	<input type="text" class="form-control"
-	       name="phone" id="phone"
-	       value="{{ account.get('phone') or '' }}">
-      </div>
-    </div>
-    <span class="help-block">
-      One or more telephone numbers, separated by comma ",".
-    </span>
-  </div>
-
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-6">
-	<label class="control-label" for="phone">Page size</label>
-	<input type="int" class="form-control"
-	       name="page_size" id="page_size"
-	       value="{{ account.get('page_size') or '' }}">
-      </div>
-    </div>
-    <span class="help-block">
-      Number of items (orders) on a page in this site.
-    </span>
-  </div>
-
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-8">
-	<label class="control-label" for="other_data">Other data</label>
-	<textarea rows="4" class="form-control"
-		  id="other_data" name="other_data"
-		  >{{ account.get('other_data') or '' }}</textarea>
-      </div>
-    </div>
-    <span class="help-block">
-      Miscellaneous data from other sources.
-    </span>
   </div>
 
   <div class="form-group">
