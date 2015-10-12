@@ -1,0 +1,23 @@
+# Message definitions for account status events.
+
+pending:
+  subject: "An account {account} in the {site} is pending approval."
+  text: |
+    An account {account} in the {site} is pending approval.
+
+    Go to {url} to view and enable it.
+
+enabled:
+  subject: "Your account in the {site} has been enabled."
+  text: |
+    Your account {account} in the {site} has been enabled.
+
+    However, you will first have to set your password for the account.
+
+    Go to {url_code} to set the password.
+
+    In case that link does not work, go to {url} and
+    fill in your email address and the one-time code {code}.
+
+    Yours sincerely,
+    The {site} administrators.

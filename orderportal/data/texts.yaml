@@ -1,0 +1,30 @@
+# Initial texts for the web site.
+header: >
+  This is a portal for placing orders. You need to have an account and
+  be logged in to create, edit, submit and view orders.
+
+footer: >
+  This text should be a description of the organisation running the portal.
+
+register:
+  Use this page to register a new account. Your email address is the account
+  name in this portal.
+
+  The administrator of the portal will view your account details and if
+  everything seems fine, the account will be enabled.
+
+  You will receive an email with a link to a page for setting the password
+  when the account is enabled.
+
+reset: >
+  Use this page to reset your password. You will not be able to login once
+  this has been done.
+
+  An email with a link to a page for setting a new password will be sent
+  to you. This contains a one-time code. If you loose this code, simply use
+  this page again, and a new code will be sent.
+
+password: >
+  Set the password for your account. You need the one-time code which was
+  contained in the URL sent to you by email. If the code has been used or
+  lost, go to [the reset page](/reset) to obtain a new code.
