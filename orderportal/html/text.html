@@ -7,7 +7,8 @@
 
 {% block main_content %}
 <form action="{{ reverse_url('text', text['name']) }}"
-      role="form" method="POST">
+      role="form"
+      method="POST">
   {% module xsrf_form_html() %}
 
   <div class="form-group">
@@ -39,7 +40,8 @@
 
 <br>
 <form action="{{ origin }}"
-      role="form" method="GET">
+      role="form"
+      method="GET">
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit"

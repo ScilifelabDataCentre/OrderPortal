@@ -9,7 +9,8 @@
 
 {% block content %}
 <form action="{{ reverse_url('search', **params) }}"
-      role="form" class="form-inline"
+      role="form"
+      class="form-inline"
       method="GET">
   <input type="hidden" name="page" value="{{ params.get('page') or 0 }}">
   <div class="row">

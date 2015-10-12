@@ -182,7 +182,9 @@
 	      </li>
 	      <li>
 		<form action="{{ reverse_url('logout') }}"
-		      role="form" class="navbar-form" method="POST">
+		      role="form"
+		      class="navbar-form"
+		      method="POST">
 		  {% module xsrf_form_html() %}
 		  <button type="submit"
 			  title="Logout"

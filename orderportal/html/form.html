@@ -155,7 +155,9 @@
     Specification fields
     {% if are_fields_editable %}
     <form action="{{ reverse_url('field_create', form['_id']) }}"
-	  role="form" class="pull-right" method="GET">
+	  role="form"
+	  class="pull-right"
+	  method="GET">
       <button type="submit"
 	      class="btn btn-xs btn-primary glyphicon glyphicon-plus">
 	Create field
@@ -214,7 +216,8 @@
 	<td>
 	  {% if are_fields_editable %}
 	  <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
-		role="form" method="GET">
+		role="form"
+		method="GET">
 	    <button type="submit"
 		    class="btn btn-xs btn-primary glyphicon glyphicon-plus">
 	      Edit
@@ -250,7 +253,8 @@
       </div>
       <div class="modal-body">
 	<form action="{{ reverse_url('field_edit_descr', form['_id'], field['identifier']) }}"
-	      role="form" method="POST">
+	      role="form"
+	      method="POST">
 	  {% module xsrf_form_html() %}
 	  <div class="form-group">
 	    <label class="control-label" for="{{ field['identifier'] }}/label">

@@ -11,7 +11,8 @@ Edit
 
 {% block main_content %}
 <form action="{{ reverse_url('account_edit', account['email']) }}"
-      role="form" method="POST">
+      role="form"
+      method="POST">
   {% module xsrf_form_html() %}
 
   {% if is_admin %}
@@ -228,7 +229,8 @@ Edit
 
 <br>
 <form action="{{ reverse_url('account', account['email']) }}"
-      role="form" method="GET">
+      role="form"
+      method="GET">
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit"

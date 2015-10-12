@@ -13,7 +13,8 @@ information page
 {% block main_content %}
 
 <form action="{{ reverse_url('info_create') }}"
-      role="form" method="POST">
+      role="form"
+      method="POST">
   {% module xsrf_form_html() %}
 
   <div class="form-group has-feedback">
@@ -83,7 +84,8 @@ information page
 
 <br>
 <form action="{{ reverse_url('home') }}"
-      role="form" method="GET">
+      role="form"
+      method="GET">
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit"
