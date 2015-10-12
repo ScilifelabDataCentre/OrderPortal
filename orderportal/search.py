@@ -30,9 +30,9 @@ class Search(RequestHandler):
         params = dict(term=orig)
         items = []
         # Keep this in sync with JS script 'designs/order/views/keyword.js'
-        term = ''.join([c in ":,;'" and ' ' or c for c in orig]).strip()
+        term = ''.join([c in ":,;'" and ' ' or c for c in orig]).strip().lower()
         parts = [part for part in term.split()
-                 if part and len(part) >= 2 and part.lower() not in self.LINT]
+                 if part and len(part) >= 2 and part not in self.LINT]
         # Search order titles
         view = self.db.view('order/keyword')
         id_sets = []
@@ -111,7 +111,7 @@ class SearchFields(RequestHandler):
     MAP_TEMPLATE = """function(doc) {{
   if (doc.orderportal_doctype !== 'order') return;
   if (!doc.fields.{fieldid}) return;
-  var cleaned = doc.fields.{fieldid}.replace(/[:,']/g, " ");
+  var cleaned = doc.fields.{fieldid}.replace(/[:,']/g, " ").toLowerCase();
   var words = cleaned.split(/\s+/);
   words.forEach(function(word) {{
     if (word.length > 2 && !lint[word]) emit(word, null);

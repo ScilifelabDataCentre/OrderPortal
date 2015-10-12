@@ -2,9 +2,6 @@
 
 from __future__ import print_function, absolute_import
 
-import os.path
-
-import couchdb
 import markdown
 import tornado.web
 

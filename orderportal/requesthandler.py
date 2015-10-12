@@ -2,11 +2,7 @@
 
 from __future__ import print_function, absolute_import
 
-import collections
-from email.mime.text import MIMEText
-import json
 import logging
-import smtplib
 import urllib
 
 import couchdb
