@@ -23,7 +23,7 @@
     {% if field['restrict_read'] %}
     [Staff only]
     {% end %}
-    {{ field.get('description') or '' }}
+    {% module Markdown(field.get('description')) %}
   </td>
   <td>
     {% if field['identifier'] in order['invalid'] %}
@@ -59,7 +59,7 @@
     {% if field['restrict_read'] %}
     [Staff only]
     {% end %}
-    {{ field.get('description') or '-' }}
+    {% module Markdown(field.get('description')) %}
   </td>
   <td>
     {% if field['identifier'] in order['invalid'] %}

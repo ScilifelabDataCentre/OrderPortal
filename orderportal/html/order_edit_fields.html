@@ -24,6 +24,14 @@
   <div class="panel-heading">
     <h4>
       {{ label }}
+      {% if field['identifier'] in order['invalid'] %}
+      <span class="text-danger glyphicon glyphicon-remove">
+	{{ order['invalid'][field['identifier']] }}
+      </span>
+      {% else %}
+      <span class="text-success glyphicon glyphicon-ok">
+      </span>
+      {% end %}
       <small>
 	{% if field['restrict_read'] %}
 	[Read: Staff only]
@@ -31,15 +39,7 @@
 	{% if field['restrict_write'] %}
 	[Write: Staff only]
 	{% end %}
-	{{ field.get('description') or '' }}
-	{% if field['identifier'] in order['invalid'] %}
-	<span class="text-danger glyphicon glyphicon-remove">
-	  {{ order['invalid'][field['identifier']] }}
-	</span>
-	{% else %}
-	<span class="text-success glyphicon glyphicon-ok">
-	</span>
-	{% end %}
+	{% module Markdown(field.get('description')) %}
       </small>
     </h4>
   </div>
@@ -132,7 +132,7 @@
     </div>
   </div>
   <span class="help-block">
-    {{ field.get('description') or '' }}
+    {% module Markdown(field.get('description')) %}
     {% if field['type'] == constants.TEXT %}
     <a href="http://daringfireball.net/projects/markdown/">
       Markdown
