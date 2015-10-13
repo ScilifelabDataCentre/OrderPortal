@@ -48,15 +48,26 @@ class Messager(object):
         try:
             return self._server
         except AttributeError:
-            self._server = smtplib.SMTP(host=settings['EMAIL']['HOST'],
-                                        port=settings['EMAIL']['PORT'])
+            host = settings['EMAIL']['HOST']
+            if self.verbose:
+                print('host', host)
+            try:
+                port = settings['EMAIL']['PORT']
+                if self.verbose:
+                    print('port', port)
+            except KeyError:
+                self._server = smtplib.SMTP(host)
+            else:
+                self._server = smtplib.SMTP(host, port=port)
             if settings['EMAIL'].get('TLS'):
                 self._server.starttls()
             try:
-                self._server.login(settings['EMAIL']['USER'],
-                                   settings['EMAIL']['PASSWORD'])
+                user = settings['EMAIL']['USER']
+                password = settings['EMAIL']['PASSWORD']
             except KeyError:
                 pass
+            else:
+                self._server.login(user, password)
             return self._server
 
     def __del__(self):
