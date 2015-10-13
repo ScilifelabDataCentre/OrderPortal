@@ -46,7 +46,7 @@ def dump(db, filepath, verbose=False):
         outfile.addfile(info, cStringIO.StringIO(data))
         count_items += 1
         for attname in doc.get('_attachments', dict()):
-            info = tarfile.TarInfo("{}_att/{}".format(doc['_id'], attname))
+            info = tarfile.TarInfo("{0}_att/{1}".format(doc['_id'], attname))
             attfile = db.get_attachment(doc, attname)
             if attfile is None:
                 data = ''
@@ -87,7 +87,7 @@ def undump(db, filename, verbose=False):
             db.save(doc)
             count_items += 1
             for attname, attinfo in atts.items():
-                key = "{}_att/{}".format(doc['_id'], attname)
+                key = "{0}_att/{1}".format(doc['_id'], attname)
                 attachments[key] = dict(filename=attname,
                                         content_type=attinfo['content_type'])
     infile.close()
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     if options.dumpfile:
         filepath = options.dumpfile
     else:
-        filepath = "dump_{}.tar.gz".format(time.strftime("%Y-%m-%d"))
+        filepath = "dump_{0}.tar.gz".format(time.strftime("%Y-%m-%d"))
     try:
         filepath = os.path.join(settings['BACKUP_DIR'], filepath)
     except KeyError:

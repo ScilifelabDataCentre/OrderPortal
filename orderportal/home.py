@@ -23,7 +23,7 @@ class Home(RequestHandler):
         if self.current_user and self.get_invitations(self.current_user['email']):
             url = self.reverse_url('account', self.current_user['email'])
             kwargs['message'] = """You have group invitations.
-See your <a href="{}">account</a>.""".format(url)
+See your <a href="{0}">account</a>.""".format(url)
         if not self.current_user:
             self.render('home.html', **kwargs)
         elif self.current_user['role'] == constants.ADMIN:

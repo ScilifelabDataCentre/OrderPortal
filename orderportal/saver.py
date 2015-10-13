@@ -52,13 +52,13 @@ class Saver(object):
     def __setitem__(self, key, value):
         "Update the key/value pair."
         try:
-            checker = getattr(self, "check_{}".format(key))
+            checker = getattr(self, "check_{0}".format(key))
         except AttributeError:
             pass
         else:
             checker(value)
         try:
-            converter = getattr(self, "convert_{}".format(key))
+            converter = getattr(self, "convert_{0}".format(key))
         except AttributeError:
             pass
         else:

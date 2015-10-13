@@ -439,7 +439,7 @@ class Password(RequestHandler):
             raise tornado.web.HTTPError(400, reason='invalid email or code')
         password = self.get_argument('password')
         if len(password) < constants.MIN_PASSWORD_LENGTH:
-            mgs = "password shorter than {} characters".format(
+            mgs = "password shorter than {0} characters".format(
                 constants.MIN_PASSWORD_LENGTH)
             raise tornado.web.HTTPError(400, reason=msg)
         if password != self.get_argument('confirm_password'):
@@ -474,7 +474,7 @@ class Register(RequestHandler):
                     university = self.get_argument('university', default=None)
                 saver['university'] = university or 'undefined'
             except (tornado.web.MissingArgumentError, ValueError):
-                reason = "invalid '{}' value provided".format(key)
+                reason = "invalid '{0}' value provided".format(key)
                 raise tornado.web.HTTPError(400, reason=reason)
             saver['department'] = self.get_argument('department', default=None)
             saver['address'] = self.get_argument('address', default=None)

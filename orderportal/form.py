@@ -43,7 +43,7 @@ class FormSaver(saver.Saver):
         "Clone all fields from the given form."
         for field in form['fields']:
             self.fields.clone(field)
-        self.changed['copied'] = "from {}".format(form['_id'])
+        self.changed['copied'] = "from {0}".format(form['_id'])
 
     def delete_field(self, identifier):
         if identifier not in self.fields:
@@ -127,7 +127,7 @@ class FormLogs(RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.render('logs.html',
-                    title="Logs for form'{}'".format(form['title']),
+                    title="Logs for form'{0}'".format(form['title']),
                     entity=form,
                     logs=self.get_logs(form['_id']))
 
@@ -161,7 +161,7 @@ class FormEdit(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.render('form_edit.html',
-                    title="Edit form '{}'".format(form['title']),
+                    title="Edit form '{0}'".format(form['title']),
                     form=form)
 
     @tornado.web.authenticated
@@ -184,7 +184,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.check_fields_editable(form)
         self.render('field_create.html',
-                    title="Create field in form '{}'".format(form['title']),
+                    title="Create field in form '{0}'".format(form['title']),
                     form=form,
                     fields=Fields(form))
 
@@ -248,9 +248,9 @@ class FormFieldEditDescr(FormMixin, RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(doc=form, rqh=self) as saver:
             saver.fields[identifier]['label'] = \
-                self.get_argument("{}/label".format(identifier), '')
+                self.get_argument("{0}/label".format(identifier), '')
             saver.fields[identifier]['description'] = \
-                self.get_argument("{}/descr".format(identifier), '')
+                self.get_argument("{0}/descr".format(identifier), '')
         self.see_other('form', form['_id'])
 
 
@@ -263,7 +263,7 @@ class FormClone(RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(rqh=self) as saver:
-            saver['title'] = "Clone of {}".format(form['title'])
+            saver['title'] = "Clone of {0}".format(form['title'])
             saver['description'] = form.get('description')
             saver.clone_fields(form)
             saver['status'] = constants.PENDING

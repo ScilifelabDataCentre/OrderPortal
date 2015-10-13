@@ -57,7 +57,7 @@ def load_settings(filepath=None, verbose=False):
     if not filepath:
         basedir = constants.ROOT
         hostname = socket.gethostname().split('.')[0]
-        for filepath in [os.path.join(basedir, "{}.yaml".format(hostname)),
+        for filepath in [os.path.join(basedir, "{0}.yaml".format(hostname)),
                          os.path.join(basedir, 'default.yaml')]:
             if os.path.exists(filepath) and os.path.isfile(filepath):
                 break
@@ -104,9 +104,9 @@ def load_settings(filepath=None, verbose=False):
     # Check settings
     for key in ['BASE_URL', 'DB_SERVER', 'COOKIE_SECRET', 'DATABASE']:
         if key not in settings:
-            raise KeyError("no settings['{}'] item".format(key))
+            raise KeyError("no settings['{0}'] item".format(key))
         if not settings[key]:
-            raise ValueError("settings['{}'] has invalid value".format(key))
+            raise ValueError("settings['{0}'] has invalid value".format(key))
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short")
     # Read universities lookup
@@ -189,7 +189,7 @@ def to_bool(value):
     lowvalue = value.lower()
     if lowvalue in constants.TRUE: return True
     if lowvalue in constants.FALSE: return False
-    raise ValueError("invalid boolean: '{}'".format(value))
+    raise ValueError("invalid boolean: '{0}'".format(value))
 
 def convert(type, value):
     "Convert the string representation to the given type."

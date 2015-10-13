@@ -187,8 +187,8 @@ class Messager(object):
                 saver['text'] = text
                 saver['type'] = 'email'
             if self.verbose:
-                print("sent email '{}' to {}".format(subject,
-                                                     ', '.join(recipients)))
+                print("sent email '{0}' to {1}".format(subject,
+                                                       ', '.join(recipients)))
 
     def get_account(self, email):
         "Get the account document for the email."

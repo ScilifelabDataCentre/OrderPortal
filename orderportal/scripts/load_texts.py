@@ -7,7 +7,7 @@ import sys
 import yaml
 
 from orderportal import utils
-from orderportal import home
+from orderportal import admin
 
 
 def load_texts(db, textfilepath, verbose=False):
@@ -20,11 +20,11 @@ def load_texts(db, textfilepath, verbose=False):
                 doc = docs[0]
             except IndexError:
                 doc = None
-            with home.TextSaver(doc=doc, db=db) as saver:
+            with admin.TextSaver(doc=doc, db=db) as saver:
                 saver['name'] = key
                 saver['text'] = text
             if verbose:
-                print("Text '{}' loaded".format(key))
+                print("Text '{0}' loaded".format(key))
 
 def get_args():
     parser = utils.get_command_line_parser(description=

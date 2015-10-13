@@ -173,7 +173,7 @@ class GroupLogs(GroupMixin, RequestHandler):
         group = self.get_entity(iuid, doctype=constants.GROUP)
         self.check_readable(group)
         self.render('logs.html',
-                    title="Logs for group '{}'".format(group['name']),
+                    title="Logs for group '{0}'".format(group['name']),
                     entity=group,
                     logs=self.get_logs(group['_id']))
 

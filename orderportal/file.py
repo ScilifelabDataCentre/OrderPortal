@@ -58,7 +58,7 @@ class FileDownload(File):
     def get(self, name):
         super(FileDownload, self).get(name)
         self.set_header('Content-Disposition',
-                        'attachment; filename="{}"'.format(name))
+                        'attachment; filename="{0}"'.format(name))
 
 
 class FileMeta(RequestHandler):
@@ -95,7 +95,7 @@ class FileLogs(RequestHandler):
         self.check_admin()
         file = self.get_entity_view('file/name', name)
         self.render('logs.html',
-                    title="Logs for file '{}'".format(name),
+                    title="Logs for file '{0}'".format(name),
                     entity=file,
                     logs=self.get_logs(file['_id']))
 

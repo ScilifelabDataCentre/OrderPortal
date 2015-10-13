@@ -313,7 +313,7 @@ class Order(OrderMixin, RequestHandler):
                 files.sort(lambda i,j: cmp(i['filename'].lower(),
                                            j['filename'].lower()))
         self.render('order.html',
-                    title="Order '{}'".format(title),
+                    title="Order '{0}'".format(title),
                     order=order,
                     status=self.get_order_status(order),
                     form=form,
@@ -349,7 +349,7 @@ class OrderLogs(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_readable(order)
         self.render('logs.html',
-                    title="Logs for order '{}'".format(order['title']),
+                    title="Logs for order '{0}'".format(order['title']),
                     entity=order,
                     logs=self.get_logs(order['_id']))
 
@@ -391,7 +391,7 @@ class OrderEdit(OrderMixin, RequestHandler):
         colleagues = sorted(self.get_account_colleagues(self.current_user['email']))
         form = self.get_entity(order['form'], doctype=constants.FORM)
         self.render('order_edit.html',
-                    title="Edit order '{}'".format(order['title']),
+                    title="Edit order '{0}'".format(order['title']),
                     order=order,
                     colleagues=colleagues,
                     fields=form['fields'])
@@ -438,7 +438,7 @@ class OrderClone(OrderMixin, RequestHandler):
             raise ValueError('This order is outdated; the form of it has been disabled.')
         with OrderSaver(rqh=self) as saver:
             saver['form'] = form['_id']
-            saver['title'] = "Clone of {}".format(order['title'])
+            saver['title'] = "Clone of {0}".format(order['title'])
             saver['fields'] = order['fields'].copy()
             for status in settings['ORDER_STATUSES']:
                 if status.get('initial'):
@@ -483,7 +483,7 @@ class OrderFile(OrderMixin, RequestHandler):
         self.set_header('Content-Type',
                         order['_attachments'][filename]['content_type'])
         self.set_header('Content-Disposition',
-                        'attachment; filename="{}"'.format(filename))
+                        'attachment; filename="{0}"'.format(filename))
 
     @tornado.web.authenticated
     def post(self, iuid, filename):

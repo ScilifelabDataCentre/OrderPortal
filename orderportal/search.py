@@ -72,7 +72,7 @@ class Search(RequestHandler):
         except (couchdb.ResourceNotFound, KeyError):
             fields = []
         for field in fields:
-            view = self.db.view("fields/{}".format(field))
+            view = self.db.view("fields/{0}".format(field))
             id_sets = []
             for part in parts:
                 id_sets.append(set([r.id for r in
