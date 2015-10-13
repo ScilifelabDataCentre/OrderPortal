@@ -4,7 +4,7 @@ to a facility from its users.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '0.5'
+__version__ = '0.6'
 
 # Default settings, to be changed in a settings YAML file.
 settings = dict(SITE_NAME='OrderPortal',
