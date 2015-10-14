@@ -154,8 +154,8 @@
       {% for group in invitations %}
         <tr>
 	  <td>
-	    {% module Entity(group) %}
-            ({% module Icon('account') %} {{ group['owner'] }})
+	    {{ group['name'] }}
+            (owner {% module Icon('account') %} {{ group['owner'] }})
 	  </td>
 	  {% if current_user['email'] == account['email'] %}
 	  <td>
@@ -167,7 +167,8 @@
 	      <div class="form-group">
 		&nbsp;
 		<button type="submit"
-			class="btn btn-xs btn-success glyphicon glyphicon-ok">
+			class="btn btn-xs btn-success glyphicon glyphicon-ok"
+			onclick="return confirm('All members of this group will be able to see all your orders. Really accept?');">
 		  Accept
 		</button>
 	      </div>
@@ -182,8 +183,7 @@
 	      <div class="form-group">
 		&nbsp;
 		<button type="submit"
-			class="btn btn-xs btn-danger glyphicon glyphicon-remove"
-			onclick="return confirm('Cannot be undone! Really decline?');">
+			class="btn btn-xs btn-danger glyphicon glyphicon-remove">
 		  Decline
 		</button>
 	      </div>
