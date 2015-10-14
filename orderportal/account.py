@@ -25,7 +25,7 @@ class AccountSaver(saver.Saver):
             raise ValueError('invalid email value')
         if len(list(self.db.view('account/email', key=email))) > 0:
             raise ValueError('email already in use')
-        self['email'] = email
+        self['email'] = email.lower()
 
     def erase_password(self):
         self['password'] = None
