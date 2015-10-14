@@ -183,7 +183,7 @@ class OrderMixin(object):
     def is_clonable(self, order):
         "Can the given order be cloned? Its form must be enabled."
         form = self.get_entity(order['form'], doctype=constants.FORM)
-        return form['status'] == constants.ENABLED
+        return form['status'] in (constants.ENABLED, constants.TESTING)
 
 
 class Orders(RequestHandler):
@@ -433,9 +433,9 @@ class OrderClone(OrderMixin, RequestHandler):
         self.check_xsrf_cookie()
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_readable(order)
+        if not self.is_clonable(order):
+            raise ValueError('This order is outdated; its form has been disabled.')
         form = self.get_entity(order['form'], doctype=constants.FORM)
-        if form['status'] != constants.ENABLED:
-            raise ValueError('This order is outdated; the form of it has been disabled.')
         with OrderSaver(rqh=self) as saver:
             saver['form'] = form['_id']
             saver['title'] = "Clone of {0}".format(order['title'])

@@ -32,6 +32,8 @@ class Messager(object):
         self.db = db
         self.verbose = verbose
         self.dry_run = dry_run
+        if self.verbose:
+            print('Messenger', utils.timestamp())
         try:
             with open(settings['ACCOUNT_MESSAGES_FILENAME']) as infile:
                 self.account_messages = yaml.safe_load(infile)
