@@ -472,6 +472,8 @@ class Register(RequestHandler):
                 university = self.get_argument('university_other', default=None)
                 if not university:
                     university = self.get_argument('university', default=None)
+                    if university == '__none__':
+                        university = None
                 saver['university'] = university or 'undefined'
             except (tornado.web.MissingArgumentError, ValueError):
                 reason = "invalid '{0}' value provided".format(key)

@@ -68,6 +68,7 @@
       <div class="col-md-6">
 	<select class="form-control" name="university" id="university">
 	  {# OrderedDict ! #}
+	  <option value="__none__">[select from the list below]</option>
 	  {% for abbrev, data in settings['UNIVERSITIES'].items() %}
 	    <option value="{{ abbrev }}">{{ abbrev }}
 	      {% if data.get('name') %}
@@ -75,7 +76,6 @@
 	      {% end %}
 	    </option>
 	  {% end %}
-	  <option value="undefined">[not available in list]</option>
 	</select>
 	<span style="color:red; margin-right: 2em;"
 	      class="glyphicon glyphicon-star form-control-feedback"
@@ -84,7 +84,7 @@
       <div class="col-md-6">
 	<input type="text" class="form-control"
 	       name="university_other" id="university_other"
-	       placeholder="Provide full name if not available in the list.">
+	       placeholder="Provide full name of your organization if not available in the list.">
       </div>
       {% else %}
       <div class="col-md-6">
