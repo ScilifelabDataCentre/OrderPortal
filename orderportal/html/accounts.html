@@ -26,6 +26,8 @@ Accounts
 		  value="name">Name</option>
 	  <option {{ sort == 'login' and 'selected' or ''}}
 		  value="login">Latest login</option>
+	  <option {{ sort == 'modified' and 'selected' or ''}}
+		  value="login">Modified</option>
 	  <option {{ sort == 'email' and 'selected' or ''}}
 		  value="email">Email</option>
 	</select>
@@ -97,7 +99,7 @@ Accounts
 {% include 'paging.html' %}
 
 <div class="row">
-  <div class="col-md-10 col-md-offset-1">
+  <div class="col-md-11 col-md-offset-1">
     <table class="table table-striped table-condensed">
       <tr>
 	<th>Account</th>
@@ -106,6 +108,7 @@ Accounts
 	<th>Role</th>
 	<th>Status</th>
 	<th>Latest login</th>
+	<th>Modified</th>
 	<th>Orders</th>
       </tr>
       {% for account in accounts %}
@@ -124,6 +127,7 @@ Accounts
 	{% else %}
 	<td>-</td>
 	{% end %}
+	<td class="localtime">{{ account['modified'] }}</td>
 	<td>
 	  <a class="badge"
 	     href="{{ reverse_url('orders_account', account['email']) }}">
@@ -133,8 +137,6 @@ Accounts
       </tr>
       {% end %}
     </table>
-  </div>
-  <div class="col-md-1">
   </div>
 </div>
 {% end %}

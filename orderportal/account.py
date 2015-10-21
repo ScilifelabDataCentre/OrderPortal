@@ -112,6 +112,10 @@ class Accounts(RequestHandler):
             if descending is None: descending = True
             accounts.sort(lambda i, j: cmp(i.get('login'), j.get('login')),
                        reverse=descending)
+        elif sort == 'modified':
+            if descending is None: descending = True
+            accounts.sort(lambda i, j: cmp(i['modified'], j['modified']),
+                       reverse=descending)
         elif sort == 'name':
             if descending is None: descending = False
             accounts.sort(lambda i, j: cmp((i['last_name'], i['first_name']),
@@ -204,9 +208,9 @@ class Account(AccountMixin, RequestHandler):
                             descending=True,
                             limit=1)
         try:
-            latest_activity = list(view)[0].key[1]
+            latest_edit = list(view)[0].key[1]
         except IndexError:
-            latest_activity = None
+            latest_edit = None
         if self.is_staff() or self.current_user['email'] == account['email']:
             invitations = self.get_invitations(account['email'])
         else:
@@ -214,7 +218,7 @@ class Account(AccountMixin, RequestHandler):
         self.render('account.html',
                     account=account,
                     groups=self.get_account_groups(email),
-                    latest_activity=latest_activity,
+                    latest_edit=latest_edit,
                     invitations=invitations,
                     is_deletable=self.is_deletable(account))
 
