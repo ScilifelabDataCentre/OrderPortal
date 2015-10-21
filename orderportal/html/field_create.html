@@ -77,7 +77,7 @@
       </div>
     </div>
     <span class="help-block">
-      Data type for the field. Cannot be changed.
+      Data type for the field. Cannot be changed. {% module Help('help_datatypes') %}
     </span>
   </div>
 
@@ -140,8 +140,10 @@
       </div>
     </div>
     <span class="help-block">
-      Description to display for the field in the order as information
-      to the user.
+      Description to display in the order to help the user fill in the
+      field correctly, using
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+      format.
     </span>
   </div>
 

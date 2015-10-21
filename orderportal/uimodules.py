@@ -11,19 +11,7 @@ from . import constants
 ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""
 
 
-class IconMixin(object):
-
-    def get_icon(self, name, title=None, label=False):
-        url = self.handler.static_url(name + '.png')
-        alt = name.capitalize()
-        title = title or alt
-        value = ICON_TEMPLATE.format(url=url, alt=alt, title=title)
-        if label:
-            value += ' ' + title
-        return value
-
-
-class Icon(IconMixin, tornado.web.UIModule):
+class Icon(tornado.web.UIModule):
     "HTML for an icon, optionally labelled with a title."
 
     def render(self, name, title=None, label=False):
@@ -31,7 +19,13 @@ class Icon(IconMixin, tornado.web.UIModule):
             name = 'unknown'
         elif not isinstance(name, basestring):
             name = name[constants.DOCTYPE]
-        return self.get_icon(name, title=title, label=label)
+        url = self.handler.static_url(name + '.png')
+        alt = name.capitalize()
+        title = title or alt
+        value = ICON_TEMPLATE.format(url=url, alt=alt, title=title)
+        if label:
+            value += ' ' + title
+        return value
 
 
 class Entity(tornado.web.UIModule):
@@ -87,6 +81,24 @@ class Text(tornado.web.UIModule):
         except (tornado.web.HTTPError, KeyError):
             text = default or "<i>No text for '{0}'.</i>".format(name)
         return markdown.markdown(text, output_format='html5')
+
+
+class Help(tornado.web.UIModule):
+    """Fetch text object from the database, process it,
+    and show in a collapsible div.
+    """
+
+    def render(self, name, default=None):
+        try:
+            doc = self.handler.get_entity_view('text/name', name)
+            text = doc['text']
+        except (tornado.web.HTTPError, KeyError):
+            text = default or "<i>No text for '{0}'.</i>".format(name)
+        html = markdown.markdown(text, output_format='html5')
+        return """<a class="glyphicon glyphicon-question-sign"
+title="Help" data-toggle="collapse" href="#{id}"></a>
+<div id="{id}" class="collapse">{html}</div>
+""".format(id=name, html=html)
 
 
 class Indent(tornado.web.UIModule):

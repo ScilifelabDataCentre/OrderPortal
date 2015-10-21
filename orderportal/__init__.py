@@ -19,4 +19,5 @@ settings = dict(SITE_NAME='OrderPortal',
                 UNIVERSITIES_FILENAME='{ROOT}/data/university_list.yaml',
                 ACCOUNT_MESSAGES_FILENAME='{ROOT}/data/account_messages.yaml',
                 ORDER_MESSAGES_FILENAME='{ROOT}/data/order_messages.yaml',
+                MARKDOWN_URL='http://daringfireball.net/projects/markdown/',
                 )

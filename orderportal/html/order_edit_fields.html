@@ -112,7 +112,7 @@
 		{{ value == False and 'selected' or '' }}>False</option>
       </select>
 
-      {# All other field types. #}
+      {# All other field types: string, integer, float, url, date. #}
       {% else %}
       {% if value is None %}
       {% set value = '' %}
@@ -134,9 +134,7 @@
   <span class="help-block">
     {% module Markdown(field.get('description')) %}
     {% if field['type'] == constants.TEXT %}
-    <a href="http://daringfireball.net/projects/markdown/">
-      Markdown
-    </a>
+    <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
     format is used.
     {% end %}
   </span>
