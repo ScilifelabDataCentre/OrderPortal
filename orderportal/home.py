@@ -46,6 +46,7 @@ See your <a href="{0}">account</a>.""".format(url)
                             endkey=['submitted'],
                             descending=True,
                             limit=constants.MAX_STAFF_RECENT_ORDERS,
+                            reduce=False,
                             include_docs=True)
         orders = [r.doc for r in view]
         self.render('home_admin.html',
@@ -61,6 +62,7 @@ See your <a href="{0}">account</a>.""".format(url)
                             endkey=['accepted'],
                             descending=True,
                             limit=constants.MAX_STAFF_RECENT_ORDERS,
+                            reduce=False,
                             include_docs=True)
         orders = [r.doc for r in view]
         self.render('home_staff.html',

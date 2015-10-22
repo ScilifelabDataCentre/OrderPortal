@@ -35,7 +35,7 @@
   </div>
 </form>
 
-{% set url_name = 'search' %}
+{% set url_func = functools.partial(reverse_url, 'search', **params) %}
 {% include 'paging.html' %}
 
 <div class="row">

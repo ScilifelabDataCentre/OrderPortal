@@ -194,41 +194,37 @@ class Orders(RequestHandler):
         if not self.is_staff():
             self.see_other('orders_account', self.current_user['email'])
         params = dict()
-        # XXX Does not scale! Use limit and offset for doc retrieval!
-        # Filter list
+        # Filter for status
         status = self.get_argument('status', '')
         if status:
-            params['status'] = status
             view = self.db.view('order/status',
+                                startkey=[status],
+                                endkey=[status, constants.HIGH_CHAR])
+            params['status'] = status
+        # No filter
+        else:
+            view = self.db.view('order/owner_count', level=None)
+        page = self.get_page(view=view)
+        if status:
+            view = self.db.view('order/status',
+                                descending=True,
                                 startkey=[status, constants.HIGH_CHAR],
                                 endkey=[status],
-                                descending=True,
+                                skip=page['start'],
+                                limit=page['size'],
+                                reduce=False,
                                 include_docs=True)
         else:
             view = self.db.view('order/modified',
                                 descending=True,
+                                skip=page['start'],
+                                limit=page['size'],
                                 include_docs=True)
         orders = [r.doc for r in view]
-        # Page
-        page_size = self.current_user.get('page_size') or constants.DEFAULT_PAGE_SIZE
-        count = len(orders)
-        max_page = (count - 1) / page_size
-        try:
-            page = int(self.get_argument('page', 0))
-            page = max(0, min(page, max_page))
-        except (ValueError, TypeError):
-            page = 0
-        start = page * page_size
-        end = min(start + page_size, count)
-        orders = orders[start : end]
-        params['page'] = page
         self.render('orders.html',
                     orders=orders,
                     params=params,
-                    start=start+1,
-                    end=end,
-                    max_page=max_page,
-                    count=count)
+                    page=page)
 
 
 class OrdersAccount(RequestHandler):

@@ -34,7 +34,7 @@
   </div>
 </form>
 
-{% set url_name = 'orders' %}
+{% set url_func = functools.partial(reverse_url, 'orders') %}
 {% include 'paging.html' %}
 
 <div class="row">

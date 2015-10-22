@@ -24,31 +24,18 @@ class Groups(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_staff()
-        params = dict()
+        page = self.get_page(view=self.db.view('group/modified'))
         view = self.db.view('group/modified',
                             descending=True,
+                            skip=page['start'],
+                            limit=page['size'],
+                            reduce=False,
                             include_docs=True)
         groups = [r.doc for r in view]
-        # Page
-        page_size = self.current_user.get('page_size') or constants.DEFAULT_PAGE_SIZE
-        count = len(groups)
-        max_page = (count - 1) / page_size
-        try:
-            page = int(self.get_argument('page', 0))
-            page = max(0, min(page, max_page))
-        except (ValueError, TypeError):
-            page = 0
-        start = page * page_size
-        end = min(start + page_size, count)
-        groups = groups[start : end]
-        params['page'] = page
         self.render('groups.html',
                     groups=groups,
-                    params=params,
-                    start=start+1,
-                    end=end,
-                    max_page=max_page,
-                    count=count)
+                    params=dict(),
+                    page=page)
 
 
 class GroupMixin(object):

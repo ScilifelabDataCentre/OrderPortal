@@ -83,26 +83,13 @@ class Search(RequestHandler):
                               for id in id_set])
         # All items contain 'modified'
         items.sort(lambda i,j: cmp(i['modified'], j['modified']), reverse=True)
-        # Page
-        page_size = self.current_user.get('page_size') or constants.DEFAULT_PAGE_SIZE
-        count = len(items)
-        max_page = (count - 1) / page_size
-        try:
-            page = int(self.get_argument('page', 0))
-            page = max(0, min(page, max_page))
-        except (ValueError, TypeError):
-            page = 0
-        start = page * page_size
-        end = min(start + page_size, count)
-        items = items[start : end]
-        params['page'] = page
+        # Paging
+        page = self.get_page(count=len(items))
+        items = items[page['start'] : page['end']]
         self.render('search.html',
                     items=items,
                     params=params,
-                    start=start+1,
-                    end=end,
-                    max_page=max_page,
-                    count=count)
+                    page=page)
 
 
 class SearchFields(RequestHandler):

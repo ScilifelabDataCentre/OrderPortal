@@ -15,6 +15,9 @@ Messages to {{ account['email'] }}
   </div>
 </div>
 
+{% set url_func = functools.partial(reverse_url, 'account_messages', account['email']) %}
+{% include 'paging.html' %}
+
 <table class="table table-striped">
   <tr>
     <th>Date</th>

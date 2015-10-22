@@ -1,8 +1,8 @@
 /* OrderPortal
    Group documents indexed by modified.
-   Value: name.
+   Value: 1.
 */
 function(doc) {
     if (doc.orderportal_doctype !== 'group') return;
-    emit(doc.modified, doc.name);
+    emit(doc.modified, 1);
 }

@@ -133,19 +133,9 @@ class Accounts(RequestHandler):
                        reverse=descending)
         if sort:
             params['sort'] = sort
-        # Page
-        page_size = self.current_user.get('page_size') or constants.DEFAULT_PAGE_SIZE
-        count = len(accounts)
-        max_page = (count - 1) / page_size
-        try:
-            page = int(self.get_argument('page', 0))
-            page = max(0, min(page, max_page))
-        except (ValueError, TypeError):
-            page = 0
-        start = page * page_size
-        end = min(start + page_size, count)
-        accounts = accounts[start : end]
-        params['page'] = page
+        # Paging
+        page = self.get_page(count=len(accounts))
+        accounts = accounts[page['start'] : page['end']]
         # Number of orders per account
         view = self.db.view('order/owner_count', group=True)
         for account in accounts:
@@ -157,10 +147,7 @@ class Accounts(RequestHandler):
         self.render('accounts.html',
                     accounts=accounts,
                     params=params,
-                    start=start+1,
-                    end=end,
-                    max_page=max_page,
-                    count=count)
+                    page=page)
 
 
 class AccountMixin(object):
@@ -257,6 +244,7 @@ class Account(AccountMixin, RequestHandler):
                 saver['members'] = sorted(members)
         # Delete the messages of the account.
         view = self.db.view('message/recipient',
+                            reduce=False,
                             include_docs=True,
                             startkey=[email],
                             endkey=[email, constants.HIGH_CHAR])
@@ -308,14 +296,22 @@ class AccountMessages(AccountMixin, RequestHandler):
         account = self.get_account(email)
         self.check_readable(account)
         view = self.db.view('message/recipient',
-                            include_docs=True,
+                            startkey=[account['email']],
+                            endkey=[account['email'], constants.HIGH_CHAR])
+        page = self.get_page(view=view)
+        view = self.db.view('message/recipient',
                             descending=True,
                             startkey=[account['email'], constants.HIGH_CHAR],
-                            endkey=[account['email']])
+                            endkey=[account['email']],
+                            skip=page['start'],
+                            limit=page['size'],
+                            reduce=False,
+                            include_docs=True)
         messages = [r.doc for r in view]
         self.render('account_messages.html',
                     account=account,
-                    messages=messages)
+                    messages=messages,
+                    page=page)
 
 
 class AccountEdit(AccountMixin, RequestHandler):

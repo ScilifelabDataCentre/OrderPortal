@@ -95,7 +95,7 @@ Accounts
   </div>
 </form>
 
-{% set url_name = 'accounts' %}
+{% set url_func = functools.partial(reverse_url, 'accounts', **params) %}
 {% include 'paging.html' %}
 
 <div class="row">

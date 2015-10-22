@@ -16,7 +16,7 @@
   <input type="hidden" name="page" value="{{ params.get('page') or 0 }}">
 </form>
 
-{% set url_name = 'groups' %}
+{% set url_func = functools.partial(reverse_url, 'groups') %}
 {% include 'paging.html' %}
 
 <div class="row">
