@@ -36,6 +36,9 @@ Orders
 </form>
 <br>
 
+{% set url_func = functools.partial(reverse_url, 'orders_account', account['email']) %}
+{% include 'paging.html' %}
+
 <div class="row">
   <div class="col-md-9 col-md-offset-1">
     <table class="table table-striped">

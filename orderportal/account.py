@@ -262,7 +262,9 @@ class Account(AccountMixin, RequestHandler):
         "Can the account be deleted? Pending, or disabled and no orders."
         if account['status'] == constants.PENDING: return True
         if account['status'] == constants.ENABLED: return False
-        view = self.db.view('order/owner', key=account['email'], limit=1)
+        view = self.db.view('order/owner',
+                            key=account['email'],
+                            limit=1)
         if len(list(view)) == 0: return True
         return False
 

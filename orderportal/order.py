@@ -257,10 +257,13 @@ class OrdersAccount(RequestHandler):
             orders = [o for o in orders if o.get('status') == status]
         orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
                     reverse=True)
+        page = self.get_page(count=len(orders))
+        orders = orders[page['start'] : page['end']]
         self.render('orders_account.html',
                     account=account,
                     orders=orders,
-                    params=params)
+                    params=params,
+                    page=page)
 
 
 class OrdersGroups(RequestHandler):
@@ -272,6 +275,7 @@ class OrdersGroups(RequestHandler):
         if not (self.is_staff() or email == self.current_user['email']):
             raise tornado.web.HTTPError(403,
                                         reason='you may not view these orders')
+        # XXX This does not scale!
         orders = []
         view = self.db.view('order/owner', include_docs=True)
         for colleague in self.get_account_colleagues(email):
@@ -284,10 +288,13 @@ class OrdersGroups(RequestHandler):
             orders = [o for o in orders if o.get('status') == status]
         orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
                     reverse=True)
+        page = self.get_page(count=len(orders))
+        orders = orders[page['start'] : page['end']]
         self.render('orders_groups.html',
                     account=account,
                     orders=orders,
-                    params=params)
+                    params=params,
+                    page=page)
 
 
 class Order(OrderMixin, RequestHandler):
