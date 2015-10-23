@@ -297,8 +297,8 @@ class OrdersGroups(RequestHandler):
         if not (self.is_staff() or email == self.current_user['email']):
             raise tornado.web.HTTPError(403,
                                         reason='you may not view these orders')
-        # XXX This does not scale!
         orders = []
+        # XXX This does not scale!
         for colleague in self.get_account_colleagues(email):
             view = self.db.view('order/owner',
                                 reduce=False,

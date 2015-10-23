@@ -17,21 +17,31 @@
       class="form-inline"
       method="GET">
   <div class="row">
-    <div class="col-md-7 col-md-offset-3">
-      <label class="glyphicon glyphicon-filter"></label>
-      <div class="form-group">
-	<label for="status">Filter by</label>
-	<select name="status" id="status" class="form-control refresh">
-	  <option value="">[any status]</option>
-	  {% for status in settings['ORDER_STATUSES'] %}
-	  {% set sid = status['identifier'] %}
-	  {% set sel = sid == params.get('status') and 'selected' or '' %}
-	  <option {{ sel }} value="{{ sid }}">{{ sid.capitalize() }}</option>
-	  {% end %}
-	</select>
-      </div>
-    </div>
-    <div class="col-md-2">
+    <div class="col-md-8 col-md-offset-3">
+      <table width="100%">
+	<tr>
+	  <td>
+	    <label class="glyphicon glyphicon-filter"></label>
+	    <div class="form-group">
+	      <label for="status">Filter by</label>
+	      <select name="status" id="status" class="form-control refresh">
+		<option value="">[any status]</option>
+		{% for status in settings['ORDER_STATUSES'] %}
+		{% set sid = status['identifier'] %}
+		{% set sel = sid == params.get('status') and 'selected' or '' %}
+		<option {{ sel }} value="{{ sid }}">{{ sid.capitalize() }}</option>
+		{% end %}
+	      </select>
+	    </div>
+	  </td>
+	  <td>
+	    <a href="{{ reverse_url('orders_account', account['email']) }}">
+	      {% module Icon('account') %}
+	      Only account's orders
+	    </a>
+	  </td>
+	</tr>
+      </table>
     </div>
   </div>
 </form>

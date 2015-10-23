@@ -16,21 +16,35 @@ Orders
       class="form-inline"
       method="GET">
   <div class="row">
-    <div class="col-md-7 col-md-offset-3">
-      <label class="glyphicon glyphicon-filter"></label>
-      <div class="form-group">
-	<label for="status">Filter by</label>
-	<select name="status" id="status" class="form-control refresh">
-	  <option value="">[any status]</option>
-	  {% for status in settings['ORDER_STATUSES'] %}
-	  {% set sid = status['identifier'] %}
-	  {% set sel = sid == params.get('status') and 'selected' or '' %}
-	  <option {{ sel }} value="{{ sid }}">{{ sid.capitalize() }}</option>
-	  {% end %}
-	</select>
-      </div>
+    <div class="col-md-8 col-md-offset-3">
+      <table width="100%">
+	<tr>
+	  <td>
+	    <label class="glyphicon glyphicon-filter"></label>
+	    <div class="form-group">
+	      <label for="status">Filter by</label>
+	      <select name="status" id="status" class="form-control refresh">
+		<option value="">[any status]</option>
+		{% for status in settings['ORDER_STATUSES'] %}
+		{% set sid = status['identifier'] %}
+		{% set sel = sid == params.get('status') and 'selected' or '' %}
+		<option {{ sel }} value="{{ sid }}">{{ sid.capitalize() }}</option>
+		{% end %}
+	      </select>
+	    </div>
+	  </td>
+	  <td>
+	    {% if is_staff or account['email'] == current_user['email'] %}
+	    <a href="{{ reverse_url('orders_groups', account['email']) }}">
+	      {% module Icon('group') %}
+	      All orders in groups
+	    </a>
+	    {% end %}
+	  </td>
+	</tr>
+      </table>
     </div>
-    <div class="col-md-2">
+    <div class="col-md-1">
     </div>
   </div>
 </form>
