@@ -11,11 +11,6 @@ from orderportal import constants
 from orderportal import utils
 
 
-def get_args():
-    parser = utils.get_command_line_parser(description=
-        'Reload all CouchDB design documents.')
-    return parser.parse_args()
-
 def load_designs(db, verbose=False, root=None):
     "Load all CouchDB database design documents."
     if root is None:
@@ -52,6 +47,11 @@ def load_designs(db, verbose=False, root=None):
                 db.save(doc)
             elif verbose:
                 print('no change', id, file=sys.stderr)
+
+def get_args():
+    parser = utils.get_command_line_parser(description=
+        'Reload all CouchDB design documents.')
+    return parser.parse_args()
 
 
 if __name__ == '__main__':

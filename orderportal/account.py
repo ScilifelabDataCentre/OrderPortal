@@ -19,13 +19,14 @@ class AccountSaver(saver.Saver):
     doctype = constants.ACCOUNT
 
     def set_email(self, email):
-        assert self.get('email') is None
+        assert self.get('email') is None # Email must not have been set.
         if not email: raise ValueError('no email given')
         if not constants.EMAIL_RX.match(email):
             raise ValueError('invalid email value')
+        email = email.lower()
         if len(list(self.db.view('account/email', key=email))) > 0:
             raise ValueError('email already in use')
-        self['email'] = email.lower()
+        self['email'] = email
 
     def erase_password(self):
         self['password'] = None
@@ -63,7 +64,7 @@ class Accounts(RequestHandler):
             view = self.db.view('account/email', include_docs=True)
             accounts = [r.doc for r in view]
             accounts = [u for u in accounts
-                     if u['university'] not in settings['UNIVERSITY_LIST']]
+                        if u['university'] not in settings['UNIVERSITY_LIST']]
             params['university'] = university
         elif university:
             view = self.db.view('account/university',
@@ -182,6 +183,7 @@ class Account(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
+        email = email.lower()
         account = self.get_account(email)
         self.check_readable(account)
         view = self.db.view('order/owner_count', group=True)
@@ -220,6 +222,7 @@ class Account(AccountMixin, RequestHandler):
     @tornado.web.authenticated
     def delete(self, email):
         "Delete a account that is pending; to get rid of spam application."
+        email = email.lower()
         account = self.get_account(email)
         self.check_admin()
         if not self.is_deletable(account):
@@ -282,6 +285,7 @@ class AccountLogs(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
+        email = email.lower()
         account = self.get_account(email)
         self.check_readable(account)
         self.render('logs.html',
@@ -295,6 +299,7 @@ class AccountMessages(AccountMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, email):
         "Show list of messages sent to the account given by email address."
+        email = email.lower()
         account = self.get_account(email)
         self.check_readable(account)
         view = self.db.view('message/recipient',
@@ -321,6 +326,7 @@ class AccountEdit(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
+        email = email.lower()
         account = self.get_account(email)
         self.check_editable(account)
         self.render('account_edit.html', account=account)
@@ -328,6 +334,7 @@ class AccountEdit(AccountMixin, RequestHandler):
     @tornado.web.authenticated
     def post(self, email):
         self.check_xsrf_cookie()
+        email = email.lower()
         account = self.get_account(email)
         self.check_editable(account)
         with AccountSaver(doc=account, rqh=self) as saver:

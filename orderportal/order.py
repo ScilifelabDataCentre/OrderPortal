@@ -244,6 +244,7 @@ class OrdersAccount(RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
+        email = email.lower()
         account = self.get_account(email)
         self.check_readable(account)
         # XXX This does not scale! Should also be indexed by modified.
@@ -271,6 +272,7 @@ class OrdersGroups(RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
+        email = email.lower()
         account = self.get_account(email)
         if not (self.is_staff() or email == self.current_user['email']):
             raise tornado.web.HTTPError(403,

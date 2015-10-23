@@ -101,6 +101,7 @@ class GroupCreate(RequestHandler):
             saver['owner'] = self.current_user['email']
             invited = set()
             for email in self.get_argument('invited', '').strip().split('\n'):
+                email = email.lower()
                 try:
                     self.get_account(email)
                 except tornado.web.HTTPError:
@@ -136,6 +137,7 @@ class GroupEdit(GroupMixin, RequestHandler):
             members = set()
             invited = set()
             for email in self.get_argument('members', '').strip().split():
+                email = email.lower()
                 try:
                     self.get_account(email)
                 except tornado.web.HTTPError:
