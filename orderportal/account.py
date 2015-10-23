@@ -137,14 +137,9 @@ class Accounts(RequestHandler):
         # Paging
         page = self.get_page(count=len(accounts))
         accounts = accounts[page['start'] : page['end']]
-        # Number of orders per account
-        view = self.db.view('order/owner_count', group=True)
+        # Get number of orders per account
         for account in accounts:
-            try:
-                account['order_count'] = list(view[account['email']])[0].value
-            except IndexError:
-                account['order_count'] = 0
-        #
+            account['order_count'] = self.get_account_order_count(account['email'])
         self.render('accounts.html',
                     accounts=accounts,
                     params=params,
@@ -186,11 +181,7 @@ class Account(AccountMixin, RequestHandler):
         email = email.lower()
         account = self.get_account(email)
         self.check_readable(account)
-        view = self.db.view('order/owner_count', group=True)
-        try:
-            account['order_count'] = list(view[email])[0].value
-        except IndexError:
-            account['order_count'] = 0
+        account['order_count'] = self.get_account_order_count(email)
         view = self.db.view('log/account',
                             startkey=[email, constants.HIGH_CHAR],
                             lastkey=[email],
@@ -265,10 +256,7 @@ class Account(AccountMixin, RequestHandler):
         "Can the account be deleted? Pending, or disabled and no orders."
         if account['status'] == constants.PENDING: return True
         if account['status'] == constants.ENABLED: return False
-        view = self.db.view('order/owner',
-                            key=account['email'],
-                            limit=1)
-        if len(list(view)) == 0: return True
+        if self.get_account_order_count(account['email']) == 0: return True
         return False
 
 

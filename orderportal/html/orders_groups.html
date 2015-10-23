@@ -37,36 +37,36 @@
 </form>
 <br>
 
-{% set url_func = functools.partial(reverse_url, 'orders_groups', account['email']) %}
+{% set url_func = functools.partial(reverse_url, 'orders_groups', account['email'], **params) %}
 {% include 'paging.html' %}
 
 <div class="row">
-  <div class="col-md-9 col-md-offset-1">
+  <div class="col-md-10 col-md-offset-1">
     <table class="table table-striped">
       <tr>
-	<th>Order</th>
-	<th>Status</th>
-	<th>Owner</th>
-	<th>Modified</th>
+	<th width="45%">Order</th>
+	<th width="20%">Owner</th>
+	<th width="15%">Status</th>
+	<th width="20%">Modified</th>
       </tr>
       {% for order in orders %}
       <tr>
 	<td>
 	  <a href="{{ reverse_url('order', order['_id']) }}">{{ order.get('title', order['_id']) }}</a>
 	</td>
-	<td>{% module Icon(order['status'], label=True) %}</td>
 	<td>
 	  <a href="{{ reverse_url('account', order['owner']) }}">
 	    {% module Icon('account') %}
 	    {{ order['owner'] }}
 	  </a>
 	</td>
+	<td>{% module Icon(order['status'], label=True) %}</td>
 	<td class="localtime">{{ order['modified'] }}</td>
       </tr>
       {% end %}
     </table>
   </div>
-  <div class="col-md-2">
+  <div class="col-md-1">
   </div>
 </div>
 {% end %}

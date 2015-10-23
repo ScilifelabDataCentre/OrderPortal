@@ -40,7 +40,7 @@ See your <a href="{0}">account</a>.""".format(url)
                             include_docs=True)
         pending = [r.doc for r in view]
         pending.sort(utils.cmp_modified, reverse=True)
-        # XXX This status is not hard-wired, so this may yield nothing.
+        # XXX This status should not be hard-wired!
         view = self.db.view('order/status',
                             startkey=['submitted', constants.HIGH_CHAR],
                             endkey=['submitted'],
@@ -56,7 +56,7 @@ See your <a href="{0}">account</a>.""".format(url)
 
     def home_staff(self, **kwargs):
         "Home page for a current user having role 'staff'."
-        # XXX This status is not hard-wired, so this may yield nothing.
+        # XXX This status should not be hard-wired!
         view = self.db.view('order/status',
                             startkey=['accepted', constants.HIGH_CHAR],
                             endkey=['accepted'],
@@ -73,10 +73,13 @@ See your <a href="{0}">account</a>.""".format(url)
         "Home page for a current user having role 'user'."
         forms = [r.doc for r in self.db.view('form/enabled', include_docs=True)]
         view = self.db.view('order/owner',
-                            descending=True,
-                            limit=constants.MAX_ACCOUNT_RECENT_ORDERS,
+                            reduce=False,
                             include_docs=True,
-                            key=self.current_user['email'])
+                            descending=True,
+                            startkey=[self.current_user['email'],
+                                      constants.HIGH_CHAR],
+                            endkey=[self.current_user['email']],
+                            limit=constants.MAX_ACCOUNT_RECENT_ORDERS)
         orders = [r.doc for r in view]
         self.render('home_user.html',
                     forms=forms,

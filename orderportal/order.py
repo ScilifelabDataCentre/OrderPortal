@@ -203,23 +203,25 @@ class Orders(RequestHandler):
             params['status'] = status
         # No filter
         else:
-            view = self.db.view('order/owner_count', level=None)
+            view = self.db.view('order/owner')
         page = self.get_page(view=view)
+        # Filter for status
         if status:
             view = self.db.view('order/status',
+                                reduce=False,
+                                include_docs=True,
                                 descending=True,
                                 startkey=[status, constants.HIGH_CHAR],
                                 endkey=[status],
                                 skip=page['start'],
-                                limit=page['size'],
-                                reduce=False,
-                                include_docs=True)
+                                limit=page['size'])
+        # No filter
         else:
             view = self.db.view('order/modified',
+                                include_docs=True,
                                 descending=True,
                                 skip=page['start'],
-                                limit=page['size'],
-                                include_docs=True)
+                                limit=page['size'])
         orders = [r.doc for r in view]
         self.render('orders.html',
                     orders=orders,
@@ -247,19 +249,37 @@ class OrdersAccount(RequestHandler):
         email = email.lower()
         account = self.get_account(email)
         self.check_readable(account)
-        # XXX This does not scale! Should also be indexed by modified.
-        view = self.db.view('order/owner', include_docs=True)
-        orders = [r.doc for r in view[email]]
         params = dict()
-        # Filter list
-        status = self.get_argument('status', '')
+        status = self.get_argument('status', None)
+        # Filter by status 
         if status:
             params['status'] = status
-            orders = [o for o in orders if o.get('status') == status]
-        orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
-                    reverse=True)
-        page = self.get_page(count=len(orders))
-        orders = orders[page['start'] : page['end']]
+            view = self.db.view('order/owner_status',
+                                startkey=[email, status],
+                                endkey=[email, status, constants.HIGH_CHAR])
+            page = self.get_page(view=view)
+            view = self.db.view('order/owner_status',
+                                reduce=False,
+                                include_docs=True,
+                                descending=True,
+                                startkey=[email, status, constants.HIGH_CHAR],
+                                endkey=[email, status],
+                                skip=page['start'],
+                                limit=page['size'])
+        else:
+            view = self.db.view('order/owner',
+                                startkey=[email],
+                                endkey=[email, constants.HIGH_CHAR])
+            page = self.get_page(view=view)
+            view = self.db.view('order/owner',
+                                reduce=False,
+                                include_docs=True,
+                                descending=True,
+                                startkey=[email, constants.HIGH_CHAR],
+                                endkey=[email],
+                                skip=page['start'],
+                                limit=page['size'])
+        orders = [r.doc for r in view]
         self.render('orders_account.html',
                     account=account,
                     orders=orders,
@@ -279,9 +299,13 @@ class OrdersGroups(RequestHandler):
                                         reason='you may not view these orders')
         # XXX This does not scale!
         orders = []
-        view = self.db.view('order/owner', include_docs=True)
         for colleague in self.get_account_colleagues(email):
-            orders.extend([r.doc for r in view[colleague]])
+            view = self.db.view('order/owner',
+                                reduce=False,
+                                include_docs=True,
+                                startkey=[colleague],
+                                endkey=[colleague, constants.HIGH_CHAR])
+            orders.extend([r.doc for r in view])
         params = dict()
         # Filter list
         status = self.get_argument('status', '')

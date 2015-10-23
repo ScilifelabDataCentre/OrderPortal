@@ -200,6 +200,16 @@ class RequestHandler(tornado.web.RequestHandler):
         """
         return self.get_entity_view('account/email', email, reason='no such account')
 
+    def get_account_order_count(self, email):
+        "Get the number of orders for the account."
+        view = self.db.view('order/owner',
+                            startkey=[email],
+                            endkey=[email, constants.HIGH_CHAR])
+        try:
+            return list(view)[0].value
+        except IndexError:
+            return 0
+
     def get_account_groups(self, email):
         "Get sorted list of all groups which the account is a member of."
         view = self.db.view('group/member', include_docs=True)
