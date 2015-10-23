@@ -64,7 +64,7 @@ class Accounts(RequestHandler):
             view = self.db.view('account/email', include_docs=True)
             accounts = [r.doc for r in view]
             accounts = [u for u in accounts
-                        if u['university'] not in settings['UNIVERSITY_LIST']]
+                        if u['university'] not in settings['UNIVERSITIES']]
             params['university'] = university
         elif university:
             view = self.db.view('account/university',
