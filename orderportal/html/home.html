@@ -19,6 +19,7 @@
 {% block content %}
 
 {% block content-header %}
+{% if not current_user %}
 <div class="row">
   <div class="well well-sm col-md-10 col-md-offset-1">
     {% module Text('header') %}
@@ -26,6 +27,7 @@
   <div class="col-md-1">
   </div>
 </div>
+{% end %} {# if not current_user #}
 {% end %} {# block content-header #}
 
 <div class="row">
