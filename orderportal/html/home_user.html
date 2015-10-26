@@ -7,7 +7,7 @@
   
   <div class="panel-group">
     {% for form in forms %}
-    <div class="panel panel-primary">
+    <div class="panel panel-warning">
       <div class="panel-heading">
 	{{ form['title'] }}
 	<form action="{{ reverse_url('order_create') }}"
@@ -16,7 +16,7 @@
 	      method="GET">
 	  <input type="hidden" name="form" value="{{ form['_id'] }}">
 	  <button type="submit"
-		  class="btn btn-xs btn-default glyphicon glyphicon-plus">
+		  class="btn btn-xs btn-primary glyphicon glyphicon-plus">
 	    Create order
 	  </button>
 	</form>
@@ -32,7 +32,7 @@
     <div class="panel-heading">
       My recently modified orders
       <a href="{{ reverse_url('orders_account', current_user['email']) }}"
-	 class="btn btn-xs btn-default pull-right">
+	 class="btn btn-xs btn-primary pull-right">
 	{% module Icon('order') %}
 	All my orders
       </a>
