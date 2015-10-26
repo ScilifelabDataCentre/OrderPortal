@@ -12,8 +12,12 @@
   <div class="col-md-10">
     <div class="well">
       <p>
-	Order fields to be indexed and searched globally. All orders
-	containing the given indexed field will be searched.
+	Only the titles of orders are searched by default.
+      </p>
+      <p>
+	If other order fields are to be searched, the identifiers for
+	those fields must be specified here. All order fields
+	containing the identifier will be indexed to allow search.
       </p>
     </div>
   </div>
@@ -56,7 +60,7 @@
       <div class="form-group">
 	<label class="control-label"></label>
 	<button type="submit"
-		class="btn btn-primary glyphicon glyphicon-save">
+		class="btn btn-success glyphicon glyphicon-floppy-disk">
 	  Save
 	</button>
       </div>
