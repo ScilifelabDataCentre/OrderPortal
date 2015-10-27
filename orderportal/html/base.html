@@ -48,7 +48,7 @@
             <li><a href="{{ reverse_url('orders') }}">Orders</a></li>
 	    {% else %}
 	    <li>
-	      <a href="{{ reverse_url('orders_account', current_user['email']) }}">
+	      <a href="{{ reverse_url('account_orders', current_user['email']) }}">
 		My orders
 	      </a>
 	    </li>

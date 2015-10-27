@@ -104,12 +104,12 @@ Accounts
       <tr>
 	<th width="20%">Account</th>
 	<th width="20%">Name</th>
+	<th width="5%">Orders</th>
 	<th width="10%">University</th>
 	<th width="5%">Role</th>
 	<th width="10%">Status</th>
 	<th width="15%">Latest login</th>
 	<th width="15%">Modified</th>
-	<th width="5%">Orders</th>
       </tr>
       {% for account in accounts %}
       <tr>
@@ -119,6 +119,12 @@ Accounts
 	  </a>
 	</td>
 	<td>{{ account['last_name'] + ', ' + account['first_name'] }}</td>
+	<td>
+	  <a class="badge"
+	     href="{{ reverse_url('account_orders', account['email']) }}">
+	    {{ account['order_count'] }}
+	  </a>
+	</td>
 	<td>{{ account['university'] }}</td>
 	<td>{% module Icon(account['role'], label=True) %}</td>
 	<td>{% module Icon(account['status'], label=True) %}</td>
@@ -128,12 +134,6 @@ Accounts
 	<td>-</td>
 	{% end %}
 	<td class="localtime">{{ account['modified'] }}</td>
-	<td>
-	  <a class="badge"
-	     href="{{ reverse_url('orders_account', account['email']) }}">
-	    {{ account['order_count'] }}
-	  </a>
-	</td>
       </tr>
       {% end %}
     </table>

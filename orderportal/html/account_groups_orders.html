@@ -11,7 +11,7 @@
 {% end %}
 
 {% block content %}
-<form action="{{ reverse_url('orders_groups', account['email']) }}"
+<form action="{{ reverse_url('account_groups_orders', account['email']) }}"
       id="refresh"
       role="form"
       class="form-inline"
@@ -35,7 +35,7 @@
 	    </div>
 	  </td>
 	  <td>
-	    <a href="{{ reverse_url('orders_account', account['email']) }}">
+	    <a href="{{ reverse_url('account_orders', account['email']) }}">
 	      {% module Icon('account') %}
 	      Just account's orders
 	    </a>
@@ -47,7 +47,7 @@
 </form>
 <br>
 
-{% set url_func = functools.partial(reverse_url, 'orders_groups', account['email'], **params) %}
+{% set url_func = functools.partial(reverse_url, 'account_groups_orders', account['email'], **params) %}
 {% include 'paging.html' %}
 
 <div class="row">

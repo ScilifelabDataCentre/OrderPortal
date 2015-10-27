@@ -192,7 +192,7 @@ class Orders(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         if not self.is_staff():
-            self.see_other('orders_account', self.current_user['email'])
+            self.see_other('account_orders', self.current_user['email'])
         params = dict()
         # Filter for status
         status = self.get_argument('status', '')
@@ -225,102 +225,6 @@ class Orders(RequestHandler):
         orders = [r.doc for r in view]
         account_names = self.get_account_names([o['owner'] for o in orders])
         self.render('orders.html',
-                    orders=orders,
-                    account_names=account_names,
-                    params=params,
-                    page=page)
-
-
-class OrdersAccount(RequestHandler):
-    "Page for a list of all orders for an account."
-
-    def is_readable(self, account):
-        "Is the account readable by the current user?"
-        if account['email'] == self.current_user['email']: return True
-        if self.is_staff(): return True
-        if self.is_colleague(account['email']): return True
-        return False
-
-    def check_readable(self, account):
-        "Check that the account is readable by the current user."
-        if self.is_readable(account): return
-        raise tornado.web.HTTPError(403, reason='you may not view these orders')
-
-    @tornado.web.authenticated
-    def get(self, email):
-        email = email.lower()
-        account = self.get_account(email)
-        self.check_readable(account)
-        params = dict()
-        status = self.get_argument('status', None)
-        # Filter by status 
-        if status:
-            params['status'] = status
-            view = self.db.view('order/owner_status',
-                                startkey=[email, status],
-                                endkey=[email, status, constants.CEILING])
-            page = self.get_page(view=view)
-            view = self.db.view('order/owner_status',
-                                reduce=False,
-                                include_docs=True,
-                                descending=True,
-                                startkey=[email, status, constants.CEILING],
-                                endkey=[email, status],
-                                skip=page['start'],
-                                limit=page['size'])
-        else:
-            view = self.db.view('order/owner',
-                                startkey=[email],
-                                endkey=[email, constants.CEILING])
-            page = self.get_page(view=view)
-            view = self.db.view('order/owner',
-                                reduce=False,
-                                include_docs=True,
-                                descending=True,
-                                startkey=[email, constants.CEILING],
-                                endkey=[email],
-                                skip=page['start'],
-                                limit=page['size'])
-        orders = [r.doc for r in view]
-        self.render('orders_account.html',
-                    account=account,
-                    orders=orders,
-                    params=params,
-                    page=page)
-
-
-class OrdersGroups(RequestHandler):
-    "Page for a list of all orders for the groups of an account."
-
-    @tornado.web.authenticated
-    def get(self, email):
-        email = email.lower()
-        account = self.get_account(email)
-        if not (self.is_staff() or email == self.current_user['email']):
-            raise tornado.web.HTTPError(403,
-                                        reason='you may not view these orders')
-        orders = []
-        # XXX This does not scale!
-        for colleague in self.get_account_colleagues(email):
-            view = self.db.view('order/owner',
-                                reduce=False,
-                                include_docs=True,
-                                startkey=[colleague],
-                                endkey=[colleague, constants.CEILING])
-            orders.extend([r.doc for r in view])
-        params = dict()
-        # Filter list
-        status = self.get_argument('status', '')
-        if status:
-            params['status'] = status
-            orders = [o for o in orders if o.get('status') == status]
-        orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
-                    reverse=True)
-        page = self.get_page(count=len(orders))
-        orders = orders[page['start'] : page['end']]
-        account_names = self.get_account_names([o['owner'] for o in orders])
-        self.render('orders_groups.html',
-                    account=account,
                     orders=orders,
                     account_names=account_names,
                     params=params,
