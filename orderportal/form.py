@@ -68,7 +68,7 @@ class FormMixin(object):
         "Return number of orders for the form."
         view = self.db.view('order/form',
                             startkey=[form['_id']],
-                            endkey=[form['_id'], constants.HIGH_CHAR])
+                            endkey=[form['_id'], constants.CEILING])
         try:
             return list(view)[0].value
         except (TypeError, IndexError):
@@ -303,7 +303,7 @@ class FormPending(RequestHandler):
         view = self.db.view('order/form',
                             reduce=False,
                             startkey=[form['_id']],
-                            endkey=[form['_id'], constants.HIGH_CHAR])
+                            endkey=[form['_id'], constants.CEILING])
         for row in view:
             self.delete_logs(row.id)
             del self.db[row.id]

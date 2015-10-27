@@ -199,7 +199,7 @@ class Orders(RequestHandler):
         if status:
             view = self.db.view('order/status',
                                 startkey=[status],
-                                endkey=[status, constants.HIGH_CHAR])
+                                endkey=[status, constants.CEILING])
             params['status'] = status
         # No filter
         else:
@@ -211,7 +211,7 @@ class Orders(RequestHandler):
                                 reduce=False,
                                 include_docs=True,
                                 descending=True,
-                                startkey=[status, constants.HIGH_CHAR],
+                                startkey=[status, constants.CEILING],
                                 endkey=[status],
                                 skip=page['start'],
                                 limit=page['size'])
@@ -258,26 +258,26 @@ class OrdersAccount(RequestHandler):
             params['status'] = status
             view = self.db.view('order/owner_status',
                                 startkey=[email, status],
-                                endkey=[email, status, constants.HIGH_CHAR])
+                                endkey=[email, status, constants.CEILING])
             page = self.get_page(view=view)
             view = self.db.view('order/owner_status',
                                 reduce=False,
                                 include_docs=True,
                                 descending=True,
-                                startkey=[email, status, constants.HIGH_CHAR],
+                                startkey=[email, status, constants.CEILING],
                                 endkey=[email, status],
                                 skip=page['start'],
                                 limit=page['size'])
         else:
             view = self.db.view('order/owner',
                                 startkey=[email],
-                                endkey=[email, constants.HIGH_CHAR])
+                                endkey=[email, constants.CEILING])
             page = self.get_page(view=view)
             view = self.db.view('order/owner',
                                 reduce=False,
                                 include_docs=True,
                                 descending=True,
-                                startkey=[email, constants.HIGH_CHAR],
+                                startkey=[email, constants.CEILING],
                                 endkey=[email],
                                 skip=page['start'],
                                 limit=page['size'])
@@ -306,7 +306,7 @@ class OrdersGroups(RequestHandler):
                                 reduce=False,
                                 include_docs=True,
                                 startkey=[colleague],
-                                endkey=[colleague, constants.HIGH_CHAR])
+                                endkey=[colleague, constants.CEILING])
             orders.extend([r.doc for r in view])
         params = dict()
         # Filter list

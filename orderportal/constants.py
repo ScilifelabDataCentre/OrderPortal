@@ -19,7 +19,7 @@ JSON_MIME      = 'application/json'
 # For view ranges: CouchDB uses the Unicode Collation Algorithm,
 # which is not the same as the ASCII collation sequence.
 # The endkey is inclusive, by default.
-HIGH_CHAR = 'ZZZZZZZZ'
+CEILING = 'ZZZZZZZZ'
 
 # Entity documents
 DOCTYPE = 'orderportal_doctype'

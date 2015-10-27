@@ -38,7 +38,7 @@ class Search(RequestHandler):
         id_sets = []
         for part in parts:
             id_sets.append(set([r.id for r in
-                                view[part : part+constants.HIGH_CHAR]]))
+                                view[part : part+constants.CEILING]]))
         if id_sets:
             # All words must exist in title
             id_set = reduce(lambda i,j: i.intersection(j), id_sets)
@@ -49,7 +49,7 @@ class Search(RequestHandler):
         id_sets = []
         for part in parts:
             id_sets.append(set([r.id for r in
-                                view[part : part+constants.HIGH_CHAR]]))
+                                view[part : part+constants.CEILING]]))
         # Only require one hit in last name
         if id_sets:
             id_set = reduce(lambda i,j: i.union(j), id_sets)
@@ -60,7 +60,7 @@ class Search(RequestHandler):
         id_sets = []
         for part in parts:
             id_sets.append(set([r.id for r in
-                                view[part : part+constants.HIGH_CHAR]]))
+                                view[part : part+constants.CEILING]]))
         # Only require one hit in first name
         if id_sets:
             id_set = reduce(lambda i,j: i.union(j), id_sets)
@@ -76,7 +76,7 @@ class Search(RequestHandler):
             id_sets = []
             for part in parts:
                 id_sets.append(set([r.id for r in
-                                    view[part : part+constants.HIGH_CHAR]]))
+                                    view[part : part+constants.CEILING]]))
             if id_sets:
                 id_set = reduce(lambda i,j: i.intersection(j), id_sets)
                 items.extend([self.get_entity(id, doctype=constants.ORDER)

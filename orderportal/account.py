@@ -183,7 +183,7 @@ class Account(AccountMixin, RequestHandler):
         self.check_readable(account)
         account['order_count'] = self.get_account_order_count(email)
         view = self.db.view('log/account',
-                            startkey=[email, constants.HIGH_CHAR],
+                            startkey=[email, constants.CEILING],
                             lastkey=[email],
                             descending=True,
                             limit=1)
@@ -241,7 +241,7 @@ class Account(AccountMixin, RequestHandler):
                             reduce=False,
                             include_docs=True,
                             startkey=[email],
-                            endkey=[email, constants.HIGH_CHAR])
+                            endkey=[email, constants.CEILING])
         for row in view:
             message = row.doc
             self.delete_logs(message['_id'])
@@ -292,11 +292,11 @@ class AccountMessages(AccountMixin, RequestHandler):
         self.check_readable(account)
         view = self.db.view('message/recipient',
                             startkey=[account['email']],
-                            endkey=[account['email'], constants.HIGH_CHAR])
+                            endkey=[account['email'], constants.CEILING])
         page = self.get_page(view=view)
         view = self.db.view('message/recipient',
                             descending=True,
-                            startkey=[account['email'], constants.HIGH_CHAR],
+                            startkey=[account['email'], constants.CEILING],
                             endkey=[account['email']],
                             skip=page['start'],
                             limit=page['size'],

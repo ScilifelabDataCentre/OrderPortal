@@ -42,7 +42,7 @@ See your <a href="{0}">account</a>.""".format(url)
         pending.sort(utils.cmp_modified, reverse=True)
         # XXX This status should not be hard-wired!
         view = self.db.view('order/status',
-                            startkey=['submitted', constants.HIGH_CHAR],
+                            startkey=['submitted', constants.CEILING],
                             endkey=['submitted'],
                             descending=True,
                             limit=constants.MAX_STAFF_RECENT_ORDERS,
@@ -58,7 +58,7 @@ See your <a href="{0}">account</a>.""".format(url)
         "Home page for a current user having role 'staff'."
         # XXX This status should not be hard-wired!
         view = self.db.view('order/status',
-                            startkey=['accepted', constants.HIGH_CHAR],
+                            startkey=['accepted', constants.CEILING],
                             endkey=['accepted'],
                             descending=True,
                             limit=constants.MAX_STAFF_RECENT_ORDERS,
@@ -77,7 +77,7 @@ See your <a href="{0}">account</a>.""".format(url)
                             include_docs=True,
                             descending=True,
                             startkey=[self.current_user['email'],
-                                      constants.HIGH_CHAR],
+                                      constants.CEILING],
                             endkey=[self.current_user['email']],
                             limit=constants.MAX_ACCOUNT_RECENT_ORDERS)
         orders = [r.doc for r in view]

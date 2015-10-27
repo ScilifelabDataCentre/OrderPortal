@@ -206,7 +206,7 @@ class RequestHandler(tornado.web.RequestHandler):
         "Get the number of orders for the account."
         view = self.db.view('order/owner',
                             startkey=[email],
-                            endkey=[email, constants.HIGH_CHAR])
+                            endkey=[email, constants.CEILING])
         try:
             return list(view)[0].value
         except IndexError:
@@ -253,7 +253,7 @@ class RequestHandler(tornado.web.RequestHandler):
     def get_logs(self, iuid, limit=constants.DEFAULT_MAX_DISPLAY_LOG+1):
         "Return the event log documents for the given entity iuid."
         kwargs = dict(include_docs=True,
-                      startkey=[iuid, constants.HIGH_CHAR],
+                      startkey=[iuid, constants.CEILING],
                       endkey=[iuid],
                       descending=True)
         if limit > 0:
@@ -272,6 +272,6 @@ class RequestHandler(tornado.web.RequestHandler):
         "Delete the event log documents for the given entity iuid."
         view = self.db.view('log/entity',
                             startkey=[iuid],
-                            endkey=[iuid, constants.HIGH_CHAR])
+                            endkey=[iuid, constants.CEILING])
         for row in view:
             del self.db[row.id]
