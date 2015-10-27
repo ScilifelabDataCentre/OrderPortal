@@ -30,6 +30,7 @@ Forms
       <a class="badge"
 	 href="{{ reverse_url('form_orders', form['_id']) }}">
 	{{ order_counts[form['_id']] }}
+      </a>
     </td>
     <td>
       <a href="{{ reverse_url('account', form['owner']) }}">

@@ -127,6 +127,16 @@
       </tr>
 
       <tr>
+	<th>Orders</th>
+	<td>
+	  <a class="badge"
+	     href="{{ reverse_url('form_orders', form['_id']) }}">
+	    {{ order_count }}
+	  </a>
+	</td>
+      </tr>
+
+      <tr>
 	<th>Status</th>
 	<td>{% module Icon(form['status'], label=True) %}</td>
       </tr>

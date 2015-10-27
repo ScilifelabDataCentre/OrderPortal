@@ -103,6 +103,7 @@ class Form(FormMixin, RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.render('form.html',
                     form=form,
+                    order_count=self.get_order_count(form),
                     fields=Fields(form),
                     is_deletable=self.is_deletable(form),
                     are_fields_editable=self.are_fields_editable(form),
