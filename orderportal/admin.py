@@ -81,3 +81,12 @@ class Config(RequestHandler):
         params.append(('universities', settings['UNIVERSITIES_FILENAME']))
 
         self.render('config.html', params=params)
+
+
+class AdminTutorial(RequestHandler):
+    "Page displaying a basic tutorial for administrators."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render('admin_tutorial.html')

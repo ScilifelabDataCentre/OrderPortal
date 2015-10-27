@@ -2,9 +2,9 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}{{ info.get('title') or 'No title' }}{% end %}
+{% block head_title %}{{ info.get('title') or info['name'] }}{% end %}
 
-{% block body_title %}{{ info.get('title') or 'No title' }}{% end %}
+{% block body_title %}{{ info.get('title') or info['name'] }}{% end %}
 
 {% block main_content %}
 
