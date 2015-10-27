@@ -162,7 +162,7 @@ class OrderMixin(object):
             403, reason='you may not attach a file to the order')
 
     def get_order_status(self, order):
-        "Get the order status lookup."
+        "Get the order status lookup item."
         return settings['ORDER_STATUSES_LOOKUP'][order['status']]
 
     def get_targets(self, order):
@@ -223,8 +223,10 @@ class Orders(RequestHandler):
                                 skip=page['start'],
                                 limit=page['size'])
         orders = [r.doc for r in view]
+        account_names = self.get_account_names([o['owner'] for o in orders])
         self.render('orders.html',
                     orders=orders,
+                    account_names=account_names,
                     params=params,
                     page=page)
 
@@ -316,9 +318,11 @@ class OrdersGroups(RequestHandler):
                     reverse=True)
         page = self.get_page(count=len(orders))
         orders = orders[page['start'] : page['end']]
+        account_names = self.get_account_names([o['owner'] for o in orders])
         self.render('orders_groups.html',
                     account=account,
                     orders=orders,
+                    account_names=account_names,
                     params=params,
                     page=page)
 
@@ -344,6 +348,7 @@ class Order(OrderMixin, RequestHandler):
         self.render('order.html',
                     title="Order '{0}'".format(title),
                     order=order,
+                    account_names=self.get_account_names([order['owner']]),
                     status=self.get_order_status(order),
                     form=form,
                     fields=form['fields'],

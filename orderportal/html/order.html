@@ -85,7 +85,7 @@
 	<th>Owner</th>
 	<td colspan="2">
 	  <a href="{{ reverse_url('account', order['owner']) }}">
-	    {{ order['owner'] }}
+	    {{ account_names.get(order['owner'], order['owner']) }}
 	  </a>
 	</td>
       </tr>

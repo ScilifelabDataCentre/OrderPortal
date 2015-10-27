@@ -198,7 +198,9 @@ class RequestHandler(tornado.web.RequestHandler):
         """Get the account identified by the email address.
         Raise HTTP 404 if no such account.
         """
-        return self.get_entity_view('account/email', email, reason='no such account')
+        return self.get_entity_view('account/email',
+                                    email,
+                                    reason='no such account')
 
     def get_account_order_count(self, email):
         "Get the number of orders for the account."
@@ -234,6 +236,19 @@ class RequestHandler(tornado.web.RequestHandler):
         in the same group as the current user?"""
         if not self.current_user: return False
         return self.current_user['email'] in self.get_account_colleagues(email)
+
+    def get_account_names(self, emails):
+        "Get the names (first + last) of the persons for the emails."
+        result = {}
+        view = self.db.view('account/email')
+        for email in emails:
+            try:
+                names = list(view[email])[0].value
+            except IndexError:
+                pass
+            else:
+                result[email] = ' '.join([n for n in names if n])
+        return result
 
     def get_logs(self, iuid, limit=constants.DEFAULT_MAX_DISPLAY_LOG+1):
         "Return the event log documents for the given entity iuid."

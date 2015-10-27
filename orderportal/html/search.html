@@ -60,7 +60,10 @@
 	</td>
 	<td>
 	  {% if item['orderportal_doctype'] != constants.ACCOUNT %}
-	  <a href="{{ reverse_url('account', item['owner']) }}">{{ item['owner'] }}</a>
+	  <a href="{{ reverse_url('account', item['owner']) }}">
+	    {% module Icon('account') %}
+	    {{ account_names.get(item['owner'], item['owner']) }}
+	  </a>
 	  {% end %}
 	</td>
 	<td>

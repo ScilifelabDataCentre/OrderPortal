@@ -74,7 +74,11 @@ class Forms(RequestHandler):
         view = self.db.view('form/modified', descending=True, include_docs=True)
         title = 'Recent forms'
         forms = [r.doc for r in view]
-        self.render('forms.html', title=title, forms=forms)
+        account_names = self.get_account_names([f['owner'] for f in forms])
+        self.render('forms.html',
+                    title=title,
+                    forms=forms,
+                    account_names=account_names)
 
 
 class Form(FormMixin, RequestHandler):

@@ -86,8 +86,10 @@ class Search(RequestHandler):
         # Paging
         page = self.get_page(count=len(items))
         items = items[page['start'] : page['end']]
+        account_names = self.get_account_names([i['owner'] for i in items])
         self.render('search.html',
                     items=items,
+                    account_names=account_names,
                     params=params,
                     page=page)
 

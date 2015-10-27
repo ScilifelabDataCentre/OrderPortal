@@ -55,7 +55,8 @@
 	</td>
 	<td>
 	  <a href="{{ reverse_url('account', order['owner']) }}">
-	    {{ order['owner'] }}
+	    {% module Icon('account') %}
+	    {{ account_names.get(order['owner'], order['owner']) }}
 	  </a>
 	</td>
 	<td>{% module Icon(order['status'], label=True) %}</td>
