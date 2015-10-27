@@ -354,3 +354,32 @@ class FormDisable(RequestHandler):
             with FormSaver(doc=form, rqh=self) as saver:
                 saver['status'] = constants.DISABLED
         self.see_other('form', iuid)
+
+
+class FormOrders(RequestHandler):
+    "Page for a list of all orders for a given form."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        self.check_staff()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        view = self.db.view('order/form',
+                            startkey=[iuid],
+                            endkey=[iuid, constants.CEILING])
+        page = self.get_page(view=view)
+        view = self.db.view('order/form',
+                            reduce=False,
+                            include_docs=True,
+                            descending=True,
+                            startkey=[iuid, constants.CEILING],
+                            endkey=[iuid],
+                            skip=page['start'],
+                            limit=page['size'])
+        orders = [r.doc for r in view]
+        account_names = self.get_account_names([o['owner'] for o in orders])
+        self.render('form_orders.html',
+                    form=form,
+                    orders=orders,
+                    account_names=account_names,
+                    params=dict(),
+                    page=page)

@@ -95,6 +95,8 @@ def get_handlers():
                 FormFieldEdit, name='field_edit'),
             url(r'/form/([0-9a-f]{32})/field/([a-zA-Z][_a-zA-Z0-9]*)/descr',
                 FormFieldEditDescr, name='field_edit_descr'),
+            url(r'/form/([0-9a-f]{32})/orders',
+                FormOrders, name='form_orders'),
             url(r'/news', NewsCreate, name='news_create'),
             url(r'/news/([0-9a-f]{32})', News, name='news'),
             url(r'/event', EventCreate, name='event_create'),
