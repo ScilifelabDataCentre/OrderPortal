@@ -469,26 +469,27 @@ class Login(RequestHandler):
         try:
             email = self.get_argument('email')
             password = self.get_argument('password')
-        except tornado.web.MissingArgumentError:
-            raise tornado.web.HTTPError(403, reason='missing email or password')
-        try:
             account = self.get_account(email)
-        except tornado.web.HTTPError:
-            raise tornado.web.HTTPError(404, reason='no such account')
-        if not utils.hashed_password(password) == account.get('password'):
-            raise tornado.web.HTTPError(400, reason='invalid password')
-        if not account.get('status') == constants.ENABLED:
-            raise tornado.web.HTTPError(400, reason='disabled account account')
-        self.set_secure_cookie(constants.USER_COOKIE, account['email'])
-        with AccountSaver(doc=account, rqh=self) as saver:
-            saver['login'] = utils.timestamp() # Set login timestamp.
-        next = self.get_argument('next', None)
-        if next is None:
-            self.see_other('home')
+            if not utils.hashed_password(password) == account.get('password'):
+                raise ValueError('invalid password')
+            if not account.get('status') == constants.ENABLED:
+                raise ValueError('disabled account account')
+        except (tornado.web.MissingArgumentError,
+                tornado.web.HTTPError,
+                ValueError), msg:
+            self.see_other('home',
+                           error='Invalid email (=username) or password.')
         else:
-            # Not quite right: should be an absolute URL to redirect.
-            # But seems to work anyway.
-            self.redirect(next)
+            self.set_secure_cookie(constants.USER_COOKIE, account['email'])
+            with AccountSaver(doc=account, rqh=self) as saver:
+                saver['login'] = utils.timestamp() # Set login timestamp.
+            next = self.get_argument('next', None)
+            if next is None:
+                self.see_other('home')
+            else:
+                # Not quite right: should be an absolute URL to redirect.
+                # But seems to work anyway.
+                self.redirect(next)
 
 
 class Logout(RequestHandler):
