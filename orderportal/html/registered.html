@@ -1,0 +1,18 @@
+{# Message after successful registration. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Registered{% end %}
+
+{% block body_title %}
+{% module Icon('accepted') %}
+Registered
+{% end %}
+
+{% block main_content %}
+<div class="row">
+  <div class="well">
+    {% module Text('registered') %}
+  </div>
+</div>
+{% end %}

@@ -586,9 +586,14 @@ class Register(RequestHandler):
             saver['role'] = constants.USER
             saver['status'] = constants.PENDING
             saver.erase_password()
-        self.see_other('home',
-                       message='An activation email will be sent to you'
-                       ' from the administrator when your account is enabled.')
+        self.see_other('registered')
+
+
+class Registered(RequestHandler):
+    "Successful registration. Display message."
+
+    def get(self):
+        self.render('registered.html')
 
 
 class AccountEnable(RequestHandler):

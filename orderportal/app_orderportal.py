@@ -74,6 +74,7 @@ def get_handlers():
             url(r'/reset', Reset, name='reset'),
             url(r'/password', Password, name='password'),
             url(r'/register', Register, name='register'),
+            url(r'/registered', Registered, name='registered'),
             url(r'/account/([^/]+)/enable',
                 AccountEnable, name='account_enable'),
             url(r'/account/([^/]+)/disable',

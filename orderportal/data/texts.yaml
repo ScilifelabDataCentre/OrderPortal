@@ -16,6 +16,10 @@ register: |
   You will receive an email with a link to a page for setting the password
   when the account is enabled.
 
+registered: |
+  An activation email will be sent to you from the administrator when your
+  account has been enabled. This may take up to two working days.
+
 reset: |
   Use this page to reset your password. You will not be able to login once
   this has been done.
