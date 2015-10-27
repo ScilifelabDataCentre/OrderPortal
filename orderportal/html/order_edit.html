@@ -42,9 +42,10 @@ Edit order
 	       name="__owner__" id="__owner__"
 	       value="{{ order['owner'] }}">
 	{% else %}
-	<select name="__owner__" id="__owner__">
+	<select class="form-control" name="__owner__" id="__owner__">
 	  {% for colleague in colleagues %}
-	  <option "{{ colleague == current_user['email'] and 'selected' or ''}}">{{ colleague }}</option>
+	    {% set sel = colleague == current_user['email'] and 'selected' or '' %}
+	    <option {{ sel }}>{{ colleague }}</option>
 	  {% end %}
 	</select>
 	{% end %}

@@ -316,7 +316,7 @@ class OrderCreate(RequestHandler):
             else:
                 raise ValueError('no initial order status defined')
             saver.check_fields_validity(fields)
-        self.see_other('order', saver.doc['_id'])
+        self.see_other('order_edit', saver.doc['_id'])
 
 
 class OrderEdit(OrderMixin, RequestHandler):
