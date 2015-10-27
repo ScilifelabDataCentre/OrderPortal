@@ -66,6 +66,9 @@
     <span class="text-danger glyphicon glyphicon-remove">
       {{ order['invalid'][field['identifier']] }}
     </span>
+    {% elif value in (None, '') %}
+    <span class="text-danger glyphicon glyphicon-question-sign">
+    </span>
     {% else %}
     <span class="text-success glyphicon glyphicon-ok">
     </span>

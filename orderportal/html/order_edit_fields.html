@@ -58,6 +58,7 @@
 {% else %}
 <div class="form-group has-feedback">
 {% end %}
+{% set value = order['fields'][field['identifier']] %}
   <div class="row">
     <div class="col-md-8">
       <label class="control-label" for="{{ field['identifier'] }}">
@@ -66,12 +67,14 @@
 	<span class="text-danger glyphicon glyphicon-remove">
 	  {{ order['invalid'][field['identifier']] }}
 	</span>
+	{% elif value in (None, '') %}
+	<span class="text-danger glyphicon glyphicon-question-sign">
+	</span>
 	{% else %}
 	<span class="text-success glyphicon glyphicon-ok">
 	</span>
 	{% end %}
       </label>
-      {% set value = order['fields'][field['identifier']] %}
 
       {% if field['type'] == constants.SELECT %}
       <select class="form-control visible-if-source"
