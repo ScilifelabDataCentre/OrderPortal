@@ -53,7 +53,7 @@ class FormSaver(saver.Saver):
 
 
 class FormMixin(object):
-    "Mixin providing form-related methods."
+    "Mixin providing various methods."
 
     def are_fields_editable(self, form):
         "Are the form fields editable? Checks status only."
@@ -64,8 +64,18 @@ class FormMixin(object):
         if not self.are_fields_editable(form):
             raise tornado.web.HTTPError(409, reason='form is not editable')
 
+    def get_order_count(self, form):
+        "Return number of orders for the form."
+        view = self.db.view('order/form',
+                            startkey=[form['_id']],
+                            endkey=[form['_id'], constants.HIGH_CHAR])
+        try:
+            return list(view)[0].value
+        except (TypeError, IndexError):
+            return 0
 
-class Forms(RequestHandler):
+
+class Forms(FormMixin, RequestHandler):
     "Forms list page."
 
     @tornado.web.authenticated
@@ -74,11 +84,14 @@ class Forms(RequestHandler):
         view = self.db.view('form/modified', descending=True, include_docs=True)
         title = 'Recent forms'
         forms = [r.doc for r in view]
-        account_names = self.get_account_names([f['owner'] for f in forms])
+        names = self.get_account_names([f['owner'] for f in forms])
+        counts = dict([(f['_id'], self.get_order_count(f))
+                       for f in forms])
         self.render('forms.html',
                     title=title,
                     forms=forms,
-                    account_names=account_names)
+                    account_names=names,
+                    order_counts=counts)
 
 
 class Form(FormMixin, RequestHandler):
@@ -118,8 +131,7 @@ class Form(FormMixin, RequestHandler):
         "Can the form be deleted?."
         if form['status'] == constants.PENDING: return True
         if form['status'] == constants.ENABLED: return False
-        view = self.db.view('order/form')
-        if not list(view[form['_id']]): return True
+        if self.get_order_count(form) == 0: return
         return False
 
 
@@ -288,8 +300,11 @@ class FormPending(RequestHandler):
             raise ValueError('form does not have status testing')
         with FormSaver(doc=form, rqh=self) as saver:
             saver['status'] = constants.PENDING
-        view = self.db.view('order/form')
-        for row in view[form['_id']]:
+        view = self.db.view('order/form',
+                            reduce=False,
+                            startkey=[form['_id']],
+                            endkey=[form['_id'], constants.HIGH_CHAR])
+        for row in view:
             self.delete_logs(row.id)
             del self.db[row.id]
         self.see_other('form', iuid)

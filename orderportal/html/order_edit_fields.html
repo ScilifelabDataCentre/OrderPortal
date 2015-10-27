@@ -77,12 +77,10 @@
       <select class="form-control visible-if-source"
 	      name="{{ field['identifier'] }}"
 	      id="{{ field['identifier'] }}">
-	{% if not field['required'] %}
-	  {% if value is None %}
-	  <option selected value="">[no value]</option>
-	  {% else %}
-	  <option value="">[no value]</option>
-	  {% end %}
+	{% if value is None %}
+	<option selected value="">[no value]</option>
+	{% else %}
+	<option value="">[no value]</option>
 	{% end %}
 	{% for v in field['select'] %}
 	  {% if v == value %}
@@ -105,7 +103,7 @@
 	      id="{{ field['identifier'] }}"
 	      name="{{ field['identifier'] }}">
 	<option value="__none__"
-		{{ value is None and 'selected' or '' }}>[undef]</option>
+		{{ value is None and 'selected' or '' }}>[no value]</option>
 	<option value="true"
 		{{ value == True and 'selected' or '' }}>True</option>
 	<option value="false"

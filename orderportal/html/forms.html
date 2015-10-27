@@ -14,6 +14,7 @@ Forms
   <tr>
     <th>Form</th>
     <th>Status</th>
+    <th>Orders</th>
     <th>Owner</th>
     <th>Modified</th>
   </tr>
@@ -25,6 +26,7 @@ Forms
       </a>
     </td>
     <td>{% module Icon(form['status'], label=True) %}</td>
+    <td>{{ order_counts[form['_id']] }}</td>
     <td>
       <a href="{{ reverse_url('account', form['owner']) }}">
 	{% module Icon('account') %}
