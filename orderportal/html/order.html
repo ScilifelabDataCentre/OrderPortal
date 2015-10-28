@@ -91,14 +91,16 @@
 
       <tr>
 	<th>Status</th>
-	<td>{% module Icon(order['status'], label=True) %}</td>
-	<td>{{ status['description'] }}</td>
+	<td>
+	  {% module Icon(order['status'], label=True) %}
+	  ({{ status['description'] }})
+	</td>
       </tr>
 
       <tr>
 	<th>Modified</th>
-	<td class="localtime">{{ order['modified'] }}</td>
 	<td>
+	  <span class="localtime">{{ order['modified'] }}</span>
 	  <a href="{{ reverse_url('order_logs', order['_id']) }}">
 	    {% module Icon('logs', label=True) %}
 	  </a>
