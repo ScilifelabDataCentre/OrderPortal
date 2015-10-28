@@ -95,7 +95,7 @@ class Help(tornado.web.UIModule):
         except (tornado.web.HTTPError, KeyError):
             text = default or "<i>No text for '{0}'.</i>".format(name)
         html = markdown.markdown(text, output_format='html5')
-        return """<a class="glyphicon glyphicon-question-sign"
+        return """<a class="glyphicon glyphicon-info-sign"
 title="Help" data-toggle="collapse" href="#{id}"></a>
 <div id="{id}" class="collapse">{html}</div>
 """.format(id=name, html=html)

@@ -29,13 +29,12 @@
       role="form"
       method="POST">
   {% module xsrf_form_html() %}
-  <button type="submit" class="btn btn-success"
+  <button type="submit" class="btn btn-default"
 	  {% if not is_admin %}
 	  onclick="return confirm('Cannot be undone! Really change status?');"
 	  {% end %}
 	  >
-    {% module Icon(target['identifier']) %}
-    {{ target.get('label', target['identifier'].capitalize()) }}
+    Set to {% module Icon(target['identifier'], label=True) %}
   </button>
 </form>
 {% end %}

@@ -17,9 +17,9 @@
       role="form"
       method="POST">
   {% module xsrf_form_html() %}
-  <button type="submit"
-	  class="btn btn-success glyphicon glyphicon-pencil">
-    Testing
+  <button type="submit" class="btn btn-default">
+    Set to
+    {% module Icon('testing', label=True) %}
   </button>
 </form>
 
@@ -28,10 +28,10 @@
       role="form"
       method="POST">
   {% module xsrf_form_html() %}
-  <button type="submit"
-	  class="btn btn-success glyphicon glyphicon-ok"
+  <button type="submit" class="btn btn-default"
 	  onclick="return confirm('Cannot be undone! Really enable?');">
-    Enable
+    Set to
+    {% module Icon('enabled', label=True) %}
   </button>
 </form>
 
@@ -42,7 +42,7 @@
       method="GET">
   <input type="hidden" name="form" value="{{ form['_id'] }}">
   <button type="submit"
-	  class="btn btn-default glyphicon glyphicon-plus">
+	  class="btn btn-success glyphicon glyphicon-plus">
     Create order
   </button>
 </form>
@@ -52,9 +52,9 @@
       role="form"
       method="POST">
   {% module xsrf_form_html() %}
-  <button type="submit"
-	  class="btn btn-success glyphicon glyphicon-question-sign">
-    Pending
+  <button type="submit" class="btn btn-default">
+    Set to
+    {% module Icon('pending', label=True) %}
   </button>
 </form>
 
@@ -65,7 +65,7 @@
       method="GET">
   <input type="hidden" name="form" value="{{ form['_id'] }}">
   <button type="submit"
-	  class="btn btn-default glyphicon glyphicon-plus">
+	  class="btn btn-success glyphicon glyphicon-plus">
     Create order
   </button>
 </form>
@@ -76,8 +76,9 @@
       method="POST">
   {% module xsrf_form_html() %}
   <button type="submit"
-	  class="btn btn-danger glyphicon glyphicon-ban-circle"
+	  class="btn btn-default"
 	  onclick="return confirm('Orders will not be creatable from this form. Cannot be undone! Really disable?');">
+    {% module Icon('disabled') %}
     Disable
   </button>
 </form>

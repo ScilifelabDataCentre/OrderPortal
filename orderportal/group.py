@@ -100,7 +100,8 @@ class GroupCreate(RequestHandler):
             saver['name'] = self.get_argument('name', '') or '[no name]'
             saver['owner'] = self.current_user['email']
             invited = set()
-            for email in self.get_argument('invited', '').strip().split('\n'):
+            value = self.get_argument('invited', '').replace(',', ' ').strip()
+            for email in value.split():
                 email = email.lower()
                 try:
                     self.get_account(email)
@@ -136,7 +137,8 @@ class GroupEdit(GroupMixin, RequestHandler):
             saver['owner'] = owner['email']
             members = set()
             invited = set()
-            for email in self.get_argument('members', '').strip().split():
+            value = self.get_argument('members', '').replace(',', ' ').strip()
+            for email in value.split():
                 email = email.lower()
                 try:
                     self.get_account(email)
