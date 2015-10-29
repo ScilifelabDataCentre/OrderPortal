@@ -93,3 +93,6 @@ admin_tutorial: |
 
   Currently, the site is in test mode. All forms and orders will be erased
   before going into production mode, so go wild.
+
+contact: |
+  Info on how to contact the facility...

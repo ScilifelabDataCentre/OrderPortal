@@ -87,6 +87,13 @@ See your <a href="{0}">account</a>.""".format(url)
                     **kwargs)
 
 
+class Contact(RequestHandler):
+    "Display contact information."
+
+    def get(self):
+        self.render('contact.html')
+
+
 class Log(RequestHandler):
     "Singe log entry; JSON output."
 

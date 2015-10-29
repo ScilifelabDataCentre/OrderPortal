@@ -104,6 +104,7 @@ def get_handlers():
             url(r'/news/([0-9a-f]{32})', News, name='news'),
             url(r'/event', EventCreate, name='event_create'),
             url(r'/event/([0-9a-f]{32})', Event, name='event'),
+            url(r'/contact', Contact, name='contact'),
             url(r'/infos', Infos, name='infos'),
             url(r'/info', InfoCreate, name='info_create'),
             url(r'/info/([^/]+)', Info, name='info'),
