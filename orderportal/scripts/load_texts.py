@@ -40,6 +40,10 @@ if __name__ == '__main__':
     (options, args) = get_args()
     utils.load_settings(filepath=options.settings,
                         verbose=options.verbose)
+    if not options.force:
+        response = raw_input('about to overwrite all current texts; really sure? [n] > ')
+        if not utils.to_bool(response):
+            sys.exit('aborted')
     load_texts(utils.get_db(),
                textfilepath=options.FILE,
                verbose=options.verbose)

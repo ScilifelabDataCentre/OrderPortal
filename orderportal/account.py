@@ -188,9 +188,9 @@ class Account(AccountMixin, RequestHandler):
                             descending=True,
                             limit=1)
         try:
-            latest_edit = list(view)[0].key[1]
+            latest_activity = list(view)[0].key[1]
         except IndexError:
-            latest_edit = None
+            latest_activity = None
         if self.is_staff() or self.current_user['email'] == account['email']:
             invitations = self.get_invitations(account['email'])
         else:
@@ -198,7 +198,7 @@ class Account(AccountMixin, RequestHandler):
         self.render('account.html',
                     account=account,
                     groups=self.get_account_groups(email),
-                    latest_edit=latest_edit,
+                    latest_activity=latest_activity,
                     invitations=invitations,
                     is_deletable=self.is_deletable(account))
 

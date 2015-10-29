@@ -232,15 +232,15 @@
     <td class="pre">{{ account.get('other_data') or '-' }}</td>
   </tr>
   <tr>
-    <th>Latest edit</th>
+    <th>Latest activity</th>
     <td>
-      <span class="localtime">{{ latest_edit }}</span>
+      <span class="localtime">{{ latest_activity }}</span>
     </td>
   </tr>
   <tr>
     <th>Latest login</th>
     <td>
-      <span class="localtime">{{ account.get('login') }}</span>
+      <span class="localtime">{{ account.get('login') or '-' }}</span>
     </td>
   </tr>
   <tr>
