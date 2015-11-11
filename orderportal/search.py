@@ -115,7 +115,7 @@ var lint = {{'and': 1, 'the': 1, 'was': 1, 'not': 1}};"""
             doc = self.db['_design/fields']
         except couchdb.ResourceNotFound:
             doc = dict()
-        self.render('search_fields.html', views=doc.get('views'))
+        self.render('search_fields.html', views=doc.get('views', {}))
 
     @tornado.web.authenticated
     def post(self):
@@ -130,10 +130,9 @@ var lint = {{'and': 1, 'the': 1, 'was': 1, 'not': 1}};"""
                 views.pop(delete_field)
             except KeyError:
                 logging.debug("no such field %s", delete_field)
-        for add_field in self.get_argument('add_fields', '').split():
-            if not constants.ID_RX.match(add_field): continue
-            if add_field not in views:
-                views[add_field] = dict(map=self.MAP_TEMPLATE.format(fieldid=add_field))
+        add_field = self.get_argument('add_field', '')
+        if constants.ID_RX.match(add_field) and add_field not in views:
+            views[add_field] = dict(map=self.MAP_TEMPLATE.format(fieldid=add_field))
         if not views:
             if '_rev' in doc:
                 self.db.delete(doc)
