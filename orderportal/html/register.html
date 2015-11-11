@@ -68,7 +68,7 @@
       <div class="col-md-6">
 	<select class="form-control" name="university" id="university">
 	  {# OrderedDict ! #}
-	  <option value="__none__">[select from the list below]</option>
+	  <option value="">[select from the list below]</option>
 	  {% for abbrev, data in settings['UNIVERSITIES'].items() %}
 	    <option value="{{ abbrev }}">{{ abbrev }}
 	      {% if data.get('name') %}

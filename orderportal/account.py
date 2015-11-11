@@ -431,9 +431,9 @@ class AccountEdit(AccountMixin, RequestHandler):
             saver['first_name'] = self.get_argument('first_name')
             saver['last_name'] = self.get_argument('last_name')
             university = self.get_argument('university_other', default=None)
-            if not university:
+            if not university or 'unknown' in university:
                 university = self.get_argument('university', default=None)
-            saver['university'] = university or 'undefined'
+            saver['university'] = university or None
             saver['department'] = self.get_argument('department', default=None)
             saver['address'] = self.get_argument('address', default=None)
             saver['invoice_address'] = \
@@ -566,9 +566,7 @@ class Register(RequestHandler):
                 university = self.get_argument('university_other', default=None)
                 if not university:
                     university = self.get_argument('university', default=None)
-                    if university == '__none__':
-                        university = None
-                saver['university'] = university or 'undefined'
+                saver['university'] = university or None
             except (tornado.web.MissingArgumentError, ValueError):
                 reason = "invalid '{0}' value provided".format(key)
                 raise tornado.web.HTTPError(400, reason=reason)
