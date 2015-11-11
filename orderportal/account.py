@@ -2,7 +2,9 @@
 
 from __future__ import print_function, absolute_import
 
+import csv
 import logging
+from cStringIO import StringIO
 
 import tornado.web
 
@@ -58,47 +60,14 @@ class Accounts(RequestHandler):
     def get(self):
         self.check_staff()
         params = dict()
-        # Filter list
-        university = self.get_argument('university', '')
-        if university == '[other]':
-            view = self.db.view('account/email', include_docs=True)
-            accounts = [r.doc for r in view]
-            accounts = [u for u in accounts
-                        if u['university'] not in settings['UNIVERSITIES']]
-            params['university'] = university
-        elif university:
-            view = self.db.view('account/university',
-                                key=university,
-                                include_docs=True)
-            accounts = [r.doc for r in view]
-            params['university'] = university
-        else:
-            accounts = None
-        role = self.get_argument('role', '')
-        if role:
-            if accounts is None:
-                view = self.db.view('account/role',
-                                    key=role,
-                                    include_docs=True)
-                accounts = [r.doc for r in view]
-            else:
-                accounts = [u for u in accounts if u['role'] == role]
-            params['role'] = role
-        status = self.get_argument('status', '')
-        if status:
-            if accounts is None:
-                view = self.db.view('account/status',
-                                    key=status,
-                                    include_docs=True)
-                accounts = [r.doc for r in view]
-            else:
-                accounts = [u for u in accounts if u['status'] == status]
-            params['status'] = status
+        accounts = self.filter_by_university(params)
+        accounts = self.filter_by_role(params, accounts=accounts)
+        accounts = self.filter_by_status(params, accounts=accounts)
         # No filter; all accounts
         if accounts is None:
             view = self.db.view('account/email', include_docs=True)
             accounts = [r.doc for r in view]
-        # Order; different default depending on sort key
+        # Direction; different default depending on sort key, set below
         try:
             value = self.get_argument('descending')
             if value == '': raise ValueError
@@ -109,34 +78,32 @@ class Accounts(RequestHandler):
             params['descending'] = str(descending).lower()
         # Sort list
         sort = self.get_argument('sort', '').lower()
+        if sort:
+            params['sort'] = sort
         if sort == 'login':
             if descending is None: descending = True
-            accounts.sort(lambda i, j: cmp(i.get('login'), j.get('login')),
-                       reverse=descending)
+            func = lambda i, j: cmp(i.get('login'), j.get('login'))
         elif sort == 'modified':
             if descending is None: descending = True
-            accounts.sort(lambda i, j: cmp(i['modified'], j['modified']),
-                       reverse=descending)
+            func = lambda i, j: cmp(i['modified'], j['modified'])
         elif sort == 'name':
             if descending is None: descending = False
-            accounts.sort(lambda i, j: cmp((i['last_name'], i['first_name']),
-                                        (j['last_name'], j['first_name'])),
-                       reverse=descending)
+            func = lambda i, j: cmp((i['last_name'], i['first_name']),
+                                    (j['last_name'], j['first_name']))
         elif sort == 'email':
             if descending is None: descending = False
-            accounts.sort(lambda i, j: cmp(i['email'], j['email']),
-                       reverse=descending)
+            func = lambda i, j: cmp(i['email'], j['email'])
         # Default: name
         else:
             if descending is None: descending = False
-            accounts.sort(lambda i, j: cmp((i['last_name'], i['first_name']),
-                                        (j['last_name'], j['first_name'])),
-                       reverse=descending)
-        if sort:
-            params['sort'] = sort
-        # Paging
-        page = self.get_page(count=len(accounts))
-        accounts = accounts[page['start'] : page['end']]
+            func = lambda i, j: cmp((i['last_name'], i['first_name']),
+                                    (j['last_name'], j['first_name']))
+        accounts.sort(func, reverse=descending)
+        page, accounts = self.do_paging(accounts)
+        self.output(accounts, params, page)
+
+    def output(self, accounts, params, page):
+        "HTML template output."
         # Get number of orders per account
         for account in accounts:
             account['order_count'] = self.get_account_order_count(account['email'])
@@ -144,6 +111,105 @@ class Accounts(RequestHandler):
                     accounts=accounts,
                     params=params,
                     page=page)
+
+    def filter_by_university(self, params, accounts=None):
+        """Return accounts list if any university filter, or None if none.
+        The 'params' dictionary is updated by the filter parameter.
+        """
+        university = self.get_argument('university', None)
+        if university == '[other]':
+            if accounts is None:
+                view = self.db.view('account/email', include_docs=True)
+                accounts = [r.doc for r in view]
+            accounts = [a for a in accounts
+                        if a['university'] not in settings['UNIVERSITIES']]
+            params['university'] = university
+        elif university:
+            if accounts is None:
+                view = self.db.view('account/university',
+                                    key=university,
+                                    include_docs=True)
+                accounts = [r.doc for r in view]
+            else:
+                account = [a for a in accounts
+                           if a['university'] == university]
+            params['university'] = university
+        return accounts
+
+    def filter_by_role(self, params, accounts=None):
+        """Return accounts list if any role filter, or None if none.
+        The 'params' dictionary is updated by the filter parameter.
+        """
+        role = self.get_argument('role', None)
+        if role:
+            if accounts is None:
+                view = self.db.view('account/role',
+                                    key=role,
+                                    include_docs=True)
+                accounts = [r.doc for r in view]
+            else:
+                accounts = [a for a in accounts if a['role'] == role]
+            params['role'] = role
+        return accounts
+
+    def filter_by_status(self, params, accounts=None):
+        """Return accounts list if any status filter, or None if none.
+        The 'params' dictionary is updated by the filter parameter.
+        """
+        status = self.get_argument('status', '')
+        if status:
+            if accounts is None:
+                view = self.db.view('account/status',
+                                    key=status,
+                                    include_docs=True)
+                accounts = [r.doc for r in view]
+            else:
+                accounts = [a for a in accounts if a['status'] == status]
+            params['status'] = status
+        return accounts
+
+    def do_paging(self, accounts):
+        "Get paging parameters and cut the list of account accordingly."
+        page = self.get_page(count=len(accounts))
+        accounts = accounts[page['start'] : page['end']]
+        return page, accounts
+
+
+class AccountsCsv(Accounts):
+    "Return a CSV file containing all data for all or filtered set of accounts."
+
+    def output(self, accounts, params, page):
+        "CSV file output."
+        csvfile = StringIO()
+        writer = csv.writer(csvfile)
+        writer.writerow(('Email', 'Last name', 'First name', 'Role', 'Status',
+                         'University', 'Department', 'Address',
+                         'Invoice address', 'Phone', 'Other data',
+                         'Latest login', 'Modified', 'Created'))
+        for account in accounts:
+            writer.writerow((utils.to_utf8(account['email']),
+                             utils.to_utf8(account.get('last_name') or ''),
+                             utils.to_utf8(account.get('first_name') or ''),
+                             account['role'],
+                             account['status'],
+                             utils.to_utf8(account.get('university') or ''),
+                             utils.to_utf8(account.get('department') or ''),
+                             utils.to_utf8(account.get('address') or ''),
+                             utils.to_utf8(account.get('invoice_address') or ''),
+                             utils.to_utf8(account.get('phone') or ''),
+                             utils.to_utf8(account.get('other_data') or ''),
+                             utils.to_utf8(account.get('login') or ''),
+                             utils.to_utf8(account.get('modified') or ''),
+                             utils.to_utf8(account.get('created') or ''),
+                             ))
+        self.write(csvfile.getvalue())
+        self.set_header('Content-Type', constants.CSV_MIME)
+        self.set_header('Content-Disposition',
+                        'attachment; filename="accounts.csv"')
+
+    def do_paging(self, accounts):
+        "No paging for CSV."
+        return dict(), accounts
 
 
 class AccountMixin(object):

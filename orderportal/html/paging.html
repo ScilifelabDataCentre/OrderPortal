@@ -3,43 +3,33 @@
 #}
 
 {% if page.get('max_page', 0) > 0 %}
-<div class="row">
-  <div class="col-md-6 col-md-offset-2">
-    <ul class="pager">
-      <li>
-	<a href="{{ url_func(page=0) }}">
-	  <span class="glyphicon glyphicon-fast-backward"></span>
-	  First
-	</a>
-      </li>
-      <li>
-	<a href="{{ url_func(page=max(0, page['current']-1)) }}">
-	  <span class="glyphicon glyphicon-step-backward"></span>
-	  Previous
-	</a>
-      </li>
-      <li>
-	<a href="{{ url_func(page=page['current']) }}">
-	  {{ page['start']+1 }} to {{ page['end'] }} (of {{ page['count'] }})
-	</a>
-      </li>
-      <li>
-	<a href="{{ url_func(page=min(page['max_page'], page['current']+1)) }}">
-	  Next
-	  <span class="glyphicon glyphicon-step-forward"></span>
-	</a>
-      </li>
-      <li>
-	<a href="{{ url_func(page=page['max_page']) }}">
-	  Last
-	  <span class="glyphicon glyphicon-fast-forward"></span>
-	</a>
-      </li>
-    </ul>
-  </div>
-  <div class="col-md-4">
-  </div>
-</div>
+<ul class="pager">
+  <li>
+    <a href="{{ url_func(page=0) }}">
+      <span class="glyphicon glyphicon-fast-backward"></span>First</a>
+  </li>
+  <li>
+    <a href="{{ url_func(page=max(0, page['current']-1)) }}">
+      <span class="glyphicon glyphicon-step-backward"></span>Previous</a>
+  </li>
+  <li>
+    <a href="{{ url_func(page=page['current']) }}">
+      {{ page['start']+1 }} to {{ page['end'] }} (of {{ page['count'] }})
+    </a>
+  </li>
+  <li>
+    <a href="{{ url_func(page=min(page['max_page'], page['current']+1)) }}">
+      Next
+      <span class="glyphicon glyphicon-step-forward"></span>
+    </a>
+  </li>
+  <li>
+    <a href="{{ url_func(page=page['max_page']) }}">
+      Last
+      <span class="glyphicon glyphicon-fast-forward"></span>
+    </a>
+  </li>
+</ul>
 {% else %}
 <br>
 {% end %} {# if max_page > 0 #}

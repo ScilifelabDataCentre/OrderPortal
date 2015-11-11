@@ -49,6 +49,7 @@ def get_handlers():
                 OrderFile, name='order_file'),
             url(r'/orders', Orders, name='orders'),
             url(r'/accounts', Accounts, name='accounts'),
+            url(r'/accounts.csv', AccountsCsv, name='accounts_csv'),
             url(r'/account', AccountCurrent, name='account_current'),
             url(r'/account/([^/]+)', Account, name='account'),
             url(r'/account/([^/]+)/orders',

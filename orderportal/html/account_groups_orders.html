@@ -17,7 +17,7 @@
       class="form-inline"
       method="GET">
   <div class="row">
-    <div class="col-md-8 col-md-offset-3">
+    <div class="col-md-10 col-md-offset-1">
       <table width="100%">
 	<tr>
 	  <td>
@@ -43,12 +43,20 @@
 	</tr>
       </table>
     </div>
+    <div class="col-md-1">
+    </div>
   </div>
 </form>
 <br>
 
-{% set url_func = functools.partial(reverse_url, 'account_groups_orders', account['email'], **params) %}
-{% include 'paging.html' %}
+<div class="row">
+  <div class="col-md-10 col-md-offset-1">
+    {% set url_func = functools.partial(reverse_url, 'account_groups_orders', account['email'], **params) %}
+    {% include 'paging.html' %}
+  </div>
+  <div class="col-md-1">
+  </div>
+</div>
 
 <div class="row">
   <div class="col-md-10 col-md-offset-1">
