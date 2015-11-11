@@ -90,5 +90,11 @@
 {% end %}
 
 {% block javascript_code %}
-<script src="{{ static_url('refresh_on_change.js') }}"></script>
+<script>
+$(document).ready(function() {
+    $('.refresh').change(function () {
+	$('#refresh').submit();
+    });
+});
+</script>
 {% end %}
