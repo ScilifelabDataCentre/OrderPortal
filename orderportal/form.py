@@ -200,10 +200,26 @@ class FormFieldCreate(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.check_fields_editable(form)
+        # Get existing field identifiers
+        identifiers = set()
+        for row in self.db.view('form/enabled', include_docs=True):
+            identifiers.update(self._get_identifiers(row.doc['fields']))
+        identifiers.difference_update(self._get_identifiers(form['fields']))
         self.render('field_create.html',
                     title="Create field in form '{0}'".format(form['title']),
                     form=form,
-                    fields=Fields(form))
+                    fields=Fields(form),
+                    identifiers=identifiers)
+
+    def _get_identifiers(self, fields):
+        result = set()
+        for field in fields:
+            result.add(field['identifier'])
+            try:
+                result.update(self._get_identifiers(field['fields']))
+            except KeyError:
+                pass
+        return result
 
     @tornado.web.authenticated
     def post(self, iuid):
