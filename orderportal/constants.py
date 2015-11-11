@@ -57,6 +57,12 @@ TYPE_HTML = {STRING: 'text', INT: 'number'}
 TRUE  = frozenset(['true', 'yes', 't', 'y', '1'])
 FALSE = frozenset(['false', 'no', 'f', 'n', '0'])
 
+# Default global modes
+DEFAULT_GLOBAL_MODES = dict(allow_registration=True,
+                            allow_login=True,
+                            allow_order_creation=True,
+                            allow_order_editing=True)
+
 # User login account
 USER_COOKIE = 'orderportal_user'
 

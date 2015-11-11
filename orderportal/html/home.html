@@ -68,10 +68,14 @@
     <div class="panel panel-default">
       <div class="panel-body">
 	<div>
+	  {% if global_modes['allow_registration'] %}
 	  <a href="{{ reverse_url('register') }}"
 	     class="btn btn-success glyphicon glyphicon-user" role="button">
 	    Register account
 	  </a>
+	  {% else %}
+	  <span class="text-danger">Registration is currently disabled. Check again later.</span>
+	  {% end %}
 	</div>
 	<br>
 	<div>

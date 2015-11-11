@@ -616,9 +616,13 @@ class Register(RequestHandler):
     "Register a new account account."
 
     def get(self):
+        if not self.global_modes['allow_registration']:
+            self.see_other('home', error='Registration is currently disabled.')
         self.render('register.html')
 
     def post(self):
+        if not self.global_modes['allow_registration']:
+            self.see_other('home', error='Registration is currently disabled.')
         self.check_xsrf_cookie()
         with AccountSaver(rqh=self) as saver:
             try:

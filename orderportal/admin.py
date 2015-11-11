@@ -83,6 +83,30 @@ class Config(RequestHandler):
         self.render('config.html', params=params)
 
 
+class GlobalModes(RequestHandler):
+    "Page for display and change of global modes."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render('global_modes.html')
+
+    @tornado.web.authenticated
+    def post(self):
+        self.check_admin()
+        try:
+            mode = self.get_argument('mode')
+            if mode not in self.global_modes: raise ValueError
+            self.global_modes[mode] = utils.to_bool(self.get_argument('value'))
+        except (tornado.web.MissingArgumentError, ValueError, TypeError):
+            pass
+        else:
+            if '_id' not in self.global_modes:
+                self.global_modes['_id'] = 'global_modes'
+            self.db.save(self.global_modes)
+        self.see_other('global_modes')
+
+
 class AdminTutorial(RequestHandler):
     "Page displaying a basic tutorial for administrators."
 

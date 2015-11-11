@@ -19,8 +19,12 @@ class RequestHandler(tornado.web.RequestHandler):
     "Base request handler."
 
     def prepare(self):
-        "Get the database connection."
+        "Get the database connection and global modes."
         self.db = utils.get_db()
+        try:
+            self.global_modes = self.db['global_modes']
+        except couchdb.ResourceNotFound:
+            self.global_modes = constants.DEFAULT_GLOBAL_MODES.copy()
 
     def get_template_namespace(self):
         "Set the variables accessible within the template."
@@ -28,6 +32,7 @@ class RequestHandler(tornado.web.RequestHandler):
         result['version'] = orderportal.__version__
         result['settings'] = settings
         result['constants'] = constants
+        result['global_modes'] = self.global_modes
         result['absolute_reverse_url'] = self.absolute_reverse_url
         result['functools'] = functools
         result['is_staff'] = self.is_staff()

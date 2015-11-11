@@ -28,7 +28,9 @@ def get_command_line_parser():
     return parser
 
 def dump(db, filepath, verbose=False):
-    "Dump contents of the database to a tar file, optionally gzip compressed."
+    """Dump contents of the database to a tar file, optionally gzip compressed.
+    Only entities with IUID key as name are dumped; all others are ignored.
+    """
     count_items = 0
     count_files = 0
     if filepath.endswith('.gz'):
