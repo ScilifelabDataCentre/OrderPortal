@@ -1,0 +1,53 @@
+{# About page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}About{% end %}
+
+{% block body_title %}About{% end %}
+
+{% block main_content %}
+
+<div class="row">
+  <div class="col-md-6">
+    <p>
+      The Python software for this web site is available at the
+      GitHub repo
+      <a href="https://github.com/pekrau/OrderPortal">pekrau/OrderPortal</a>.
+    </p>
+    <p>
+      The back-end database is
+      <a href="http://couchdb.apache.org/">Apache CouchDB</a>
+      version {{ versions['CouchDB'] }}.
+    </p>
+    <p>
+      The following Python packages, available from
+      <a href="https://pypi.python.org/pypi">PyPi</a>, are used:
+    </p>
+    <p>
+      <table class="table">
+	{% for key, value in versions['python'] %}
+	<tr>
+	  <th width="60%">{{ key }}</th>
+	  <td width="40%">{{ value }}</td>
+	</tr>
+	{% end %}
+      </table>
+    </p>
+    <p>
+      The HTML display uses the following packages:
+    </p>
+    <p>
+      <table class="table">
+	{% for key, value in versions['html'] %}
+	<tr>
+	  <th width="60%">{{ key }}</th>
+	  <td width="40%">{{ value }}</td>
+	</tr>
+	{% end %}
+      </table>
+    </p>
+  </div>
+</div>
+
+{% end %} {# block main_content #}

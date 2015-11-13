@@ -4,7 +4,11 @@ from __future__ import print_function, absolute_import
 
 import logging
 
+import couchdb
+import markdown
+import tornado
 import tornado.web
+import yaml
 
 import orderportal
 from orderportal import constants
@@ -92,6 +96,22 @@ class Contact(RequestHandler):
 
     def get(self):
         self.render('contact.html')
+
+
+class About(RequestHandler):
+    "Display information about the web site technology."
+
+    def get(self):
+        versions = dict(CouchDB=utils.get_dbserver().version(),
+                        python=[('OrderPortal', orderportal.__version__),
+                                ('CouchDB-Python', couchdb.__version__),
+                                ('tornado', tornado.version),
+                                ('PyYAML', yaml.__version__),
+                                ('markdown', markdown.version)],
+                        html=[('bootstrap', '3.3.4'),
+                              ('jQuery', '1.11.13'),
+                              ('jQuery localtime', '0.9.1')])
+        self.render('about.html', versions=versions)
 
 
 class Log(RequestHandler):

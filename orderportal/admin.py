@@ -4,10 +4,7 @@ from __future__ import print_function, absolute_import
 
 import logging
 
-import couchdb
-import markdown
-import tornado
-import yaml
+import tornado.web
 
 import orderportal
 from orderportal import constants
@@ -62,24 +59,15 @@ class Config(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        params = [('OrderPortal', orderportal.__version__),
-                  ('Database', settings['DATABASE']),
-                  ('CouchDB', utils.get_dbserver().version()),
-                  ('CouchDB-Python', couchdb.__version__),
-                  ('tornado', tornado.version),
-                  ('PyYAML', yaml.__version__),
-                  ('markdown', markdown.version)]
-        params.append(('Site name', settings['SITE_NAME']))
-        params.append(('Site directory', settings['SITE_DIR']))
-        params.append(('Tornado debug', settings['TORNADO_DEBUG']))
-        params.append(('logging debug', settings['LOGGING_DEBUG']))
-        params.append(('account messages',
-                       settings['ACCOUNT_MESSAGES_FILENAME']))
-        params.append(('order statuses', settings['ORDER_STATUSES_FILENAME']))
-        params.append(('order transitions',
-                       settings['ORDER_TRANSITIONS_FILENAME']))
-        params.append(('universities', settings['UNIVERSITIES_FILENAME']))
-
+        params = [('Database', settings['DATABASE']),
+                  ('Site name', settings['SITE_NAME']),
+                  ('Site directory', settings['SITE_DIR']),
+                  ('Tornado debug', settings['TORNADO_DEBUG']),
+                  ('logging debug', settings['LOGGING_DEBUG']),
+                  ('account messages', settings['ACCOUNT_MESSAGES_FILENAME']),
+                  ('order statuses', settings['ORDER_STATUSES_FILENAME']),
+                  ('order transitions', settings['ORDER_TRANSITIONS_FILENAME']),
+                  ('universities', settings['UNIVERSITIES_FILENAME'])]
         self.render('config.html', params=params)
 
 

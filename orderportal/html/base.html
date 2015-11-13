@@ -130,26 +130,13 @@
               </ul>
             </li>
 
-	    {% if is_admin %}
-            <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-		Text
-		<span class="caret"></span>
-	      </a>
-              <ul class="dropdown-menu">
-		{% for name in texts %}
-		<li>
-		  <a href="{{ reverse_url('text', name) }}">{{ name }}</a>
-		</li>
-		{% end %}
-              </ul>
-            </li>
-	    {% end %}
+	    <li>
+	      <a href="{{ reverse_url('about') }}">About</a>
+	    </li>
 
 	    {% if is_admin %}
             <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-		Admin
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">Admin
 		<span class="caret"></span>
 	      </a>
               <ul class="dropdown-menu">
@@ -162,11 +149,23 @@
 		<li><a href="{{ reverse_url('statuses') }}">Statuses</a></li>
 		<li><a href="{{ reverse_url('config') }}">Configuration</a></li>
 		<li>
+		  <a class="submenu" href="#">Text
+		    <span class="caret"></span>
+		  </a>
+		  <ul class="dropdown-menu">
+		    {% for name in texts %}
+		    <li>
+		      <a href="{{ reverse_url('text', name) }}">{{ name }}</a>
+		    </li>
+		    {% end %}
+		  </ul>
+		</li>
+		<li>
 		  <a href="{{ reverse_url('admin_tutorial') }}">Tutorial</a>
 		</li>
 	      </ul>
 	    </li>
-	    {% end %}
+	    {% end %} {# if is_admin #}
 
 	  </ul>
 
@@ -269,10 +268,18 @@
     </div>
 
     {% block javascript_standard %}
+    <script src="{{ static_url('bootstrap-3.3.4/js/bootstrap.min.js') }}"></script>
     <script src="{{ static_url('jquery-1.11.3.min.js') }}"></script>
-    <script src="{{ static_url('bootstrap-3.3.4/js/bootstrap.min.js') }}">
-    </script>
     <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
+    <script>
+      $(document).ready(function(){
+        $('.dropdown a.submenu').on("click", function(e){
+          $(this).next('ul').toggle();
+          e.stopPropagation();
+          e.preventDefault();
+        });
+      });
+    </script>
     {% end %} {# block javascript_standard #}
 
     {% block javascript_code %}
