@@ -148,7 +148,7 @@
 		</li>
 		<li><a href="{{ reverse_url('statuses') }}">Statuses</a></li>
 		<li><a href="{{ reverse_url('config') }}">Configuration</a></li>
-		<li>
+		<li class="dropdown-submenu">
 		  <a class="submenu" href="#">Text
 		    <span class="caret"></span>
 		  </a>
@@ -225,7 +225,7 @@
       {% try %}
       {% if error %}
       <div class="row">
-	<div class="col-md-10 col-md-offset-1 alert alert-danger">
+	<div class="col-md-10 col-md-offset-1 lead alert alert-danger">
 	  <strong>Error:</strong> {{ error }}
 	</div>
 	<div class="col-md-1"></div>
@@ -268,12 +268,12 @@
     </div>
 
     {% block javascript_standard %}
-    <script src="{{ static_url('bootstrap-3.3.4/js/bootstrap.min.js') }}"></script>
     <script src="{{ static_url('jquery-1.11.3.min.js') }}"></script>
     <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
+    <script src="{{ static_url('bootstrap-3.3.4/js/bootstrap.min.js') }}"></script>
     <script>
       $(document).ready(function(){
-        $('.dropdown a.submenu').on("click", function(e){
+        $('.dropdown-submenu a.submenu').on("click", function(e){
           $(this).next('ul').toggle();
           e.stopPropagation();
           e.preventDefault();
