@@ -549,6 +549,7 @@ class Login(RequestHandler):
             if not self.global_modes['allow_login'] \
                and account['role'] != constants.ADMIN:
                 self.see_other('home', error='Login is currently disabled.')
+                return
             self.set_secure_cookie(constants.USER_COOKIE, account['email'],
                                    expires_days=settings['LOGIN_MAX_AGE_DAYS'])
             with AccountSaver(doc=account, rqh=self) as saver:
@@ -623,11 +624,13 @@ class Register(RequestHandler):
     def get(self):
         if not self.global_modes['allow_registration']:
             self.see_other('home', error='Registration is currently disabled.')
+            return
         self.render('register.html')
 
     def post(self):
         if not self.global_modes['allow_registration']:
             self.see_other('home', error='Registration is currently disabled.')
+            return
         self.check_xsrf_cookie()
         with AccountSaver(rqh=self) as saver:
             try:

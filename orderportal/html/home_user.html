@@ -5,6 +5,7 @@
 {% block content-left %}
 <div class="col-md-5">
   
+  {% if global_modes['allow_order_creation'] %}
   <div class="panel-group">
     {% for form in forms %}
     <div class="panel panel-warning">
@@ -27,6 +28,12 @@
     </div>
     {% end %}
   </div>
+  {% else %}
+  <div class="well text-danger">
+    Order creation is currently disabled.
+    Try again later.
+  </div>
+  {% end %} {# if global_modes['allow_order_creation'] #}
 
   <div class="panel panel-default">
     <div class="panel-heading">

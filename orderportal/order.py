@@ -134,6 +134,7 @@ class OrderMixin(object):
 
     def is_editable(self, order):
         "Is the order editable by the current user?"
+        if not self.global_modes['allow_order_editing']: return False
         if self.is_admin(): return True
         status = self.get_order_status(order)
         edit = status.get('edit', [])
@@ -182,6 +183,7 @@ class OrderMixin(object):
 
     def is_clonable(self, order):
         "Can the given order be cloned? Its form must be enabled."
+        if not self.global_modes['allow_order_creation']: return False
         form = self.get_entity(order['form'], doctype=constants.FORM)
         return form['status'] in (constants.ENABLED, constants.TESTING)
 
@@ -193,6 +195,7 @@ class Orders(RequestHandler):
     def get(self):
         if not self.is_staff():
             self.see_other('account_orders', self.current_user['email'])
+            return
         params = dict()
         # Filter for status
         status = self.get_argument('status', '')
@@ -297,6 +300,10 @@ class OrderCreate(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
+        if not self.global_modes['allow_order_creation'] \
+           and self.current_user['role'] != constants.ADMIN:
+            self.see_other('home',error='Order creation is currently disabled.')
+            return
         form = self.get_entity(self.get_argument('form'),doctype=constants.FORM)
         self.render('order_create.html', form=form)
 
@@ -324,6 +331,10 @@ class OrderEdit(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
+        if not self.global_modes['allow_order_editing'] \
+           and self.current_user['role'] != constants.ADMIN:
+            self.see_other('home', error='Order editing is currently disabled.')
+            return
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_editable(order)
         colleagues = sorted(self.get_account_colleagues(self.current_user['email']))

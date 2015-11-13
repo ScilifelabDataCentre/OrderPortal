@@ -52,6 +52,11 @@
     Delete
   </button>
 </form>
+{% elif not global_modes['allow_order_editing'] %}
+<br>
+<div class="well text-danger">
+  Order editing is currently disabled.
+</div>
 {% end %} {# if is_editable #}
 
 {% if is_clonable %}
@@ -65,11 +70,15 @@
     Clone
   </button>
 </form>
+{% elif not global_modes['allow_order_creation'] %}
+<br>
+<div class="well text-danger">
+  Order creation is currently disabled.
+</div>
 {% else %}
 <br>
 <div class="well">
-  This order cannot be cloned, since its underlying form has been
-  disabled by the administrator.
+  This order cannot be cloned.
 </div>
 {% end %} {# if is_clonable #}
 
