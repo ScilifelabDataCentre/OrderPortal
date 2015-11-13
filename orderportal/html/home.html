@@ -41,7 +41,12 @@
 	</span>
       </div>
       <div class="panel-body">
-
+	{% if not global_modes['allow_login'] %}
+	  <div class="well text-danger">
+	    Login is currently disabled (except for administrators).
+	    Try again later.
+	  </div>
+	{% end %}
 	<form action="{{ reverse_url('login') }}"
 	      role="form"
 	      method="POST">
@@ -62,7 +67,6 @@
 	    </button>
 	  </div>
 	</form>
-	  
       </div>
     </div>
     <div class="panel panel-default">
@@ -74,8 +78,10 @@
 	    Register account
 	  </a>
 	  {% else %}
-	  <span class="text-danger">Registration is currently disabled. Check again later.</span>
-	  {% end %}
+	  <div class="well text-danger">
+	    Registration is currently disabled. Try again later.
+	  </div>
+	  {% end %} {# if global_modes['allow_registration'] #}
 	</div>
 	<br>
 	<div>

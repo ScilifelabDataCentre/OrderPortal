@@ -82,11 +82,11 @@ class RequestHandler(tornado.web.RequestHandler):
             return None
         # Check that account is enabled.
         if account.get('status') != constants.ENABLED:
-            logging.debug("account %s not enabled", email)
+            logging.warning("account %s not enabled", email)
             return None
         # Check if login session is invalidated.
         if account.get('login') is None:
-            logging.debug("account %s has no login session", email)
+            logging.warning("account %s has no login session", email)
             return None
         return account
 

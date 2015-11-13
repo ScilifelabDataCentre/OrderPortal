@@ -20,6 +20,12 @@
 
 <div class="row">
   <div class="col-md-5 col-md-offset-1">
+    {% if not global_modes['allow_login'] %}
+    <div class="well text-danger">
+      Login is currently disabled (except for administrators).
+      Try again later.
+    </div>
+    {% end %}
     <form action="{{ reverse_url('login') }}"
 	  role="form"
 	  method="POST">

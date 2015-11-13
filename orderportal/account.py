@@ -546,7 +546,11 @@ class Login(RequestHandler):
             self.see_other('home',
                            error='Invalid email (=username) or password.')
         else:
-            self.set_secure_cookie(constants.USER_COOKIE, account['email'])
+            if not self.global_modes['allow_login'] \
+               and account['role'] != constants.ADMIN:
+                self.see_other('home', error='Login is currently disabled.')
+            self.set_secure_cookie(constants.USER_COOKIE, account['email'],
+                                   expires_days=settings['LOGIN_MAX_AGE_DAYS'])
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver['login'] = utils.timestamp() # Set login timestamp.
             next = self.get_argument('next', None)
@@ -608,7 +612,8 @@ class Password(RequestHandler):
         with AccountSaver(doc=account, rqh=self) as saver:
             saver.set_password(password)
             saver['login'] = utils.timestamp() # Set login session.
-        self.set_secure_cookie(constants.USER_COOKIE, account['email'])
+        self.set_secure_cookie(constants.USER_COOKIE, account['email'],
+                               expires_days=settings['LOGIN_MAX_AGE_DAYS'])
         self.redirect(self.reverse_url('home'))
             
 
