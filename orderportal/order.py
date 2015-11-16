@@ -19,7 +19,8 @@ class OrderSaver(saver.Saver):
     doctype = constants.ORDER
 
     def set_status(self, new):
-        
+        self['status'] = new
+        self.doc['milestones'][new] = utils.today()
 
     def update_fields(self, fields):
         "Update all fields from the HTML form input."
@@ -320,10 +321,7 @@ class OrderCreate(RequestHandler):
             saver['title'] = self.get_argument('title', None) or form['title']
             saver['fields'] = dict([(f['identifier'], None) for f in fields])
             saver['milestones'] = {}
-            for status in settings['ORDER_STATUSES']:
-                if status.get('initial'):
-                    saver['status'] = status['identifier']
-                    break
+            saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
             saver.check_fields_validity(fields)
         self.see_other('order_edit', saver.doc['_id'])
 
@@ -391,10 +389,8 @@ class OrderClone(OrderMixin, RequestHandler):
             saver['form'] = form['_id']
             saver['title'] = "Clone of {0}".format(order['title'])
             saver['fields'] = order['fields'].copy()
-            for status in settings['ORDER_STATUSES']:
-                if status.get('initial'):
-                    saver['status'] = status['identifier']
-                    break
+            saver['milestones'] = {}
+            saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
             saver.check_fields_validity(Fields(form))
         self.see_other('order', saver.doc['_id'])
 
@@ -412,7 +408,7 @@ class OrderTransition(OrderMixin, RequestHandler):
         else:
             raise tornado.web.HTTPError(403, reason='invalid target')
         with OrderSaver(doc=order, rqh=self) as saver:
-            saver['status'] = targetid
+            saver.set_status(targetid)
         self.see_other('order', order['_id'])
 
 
