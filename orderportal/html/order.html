@@ -107,6 +107,20 @@
       </tr>
 
       <tr>
+	<th>Milestones</th>
+	<td>
+	  <table>
+	  {% for st, date in sorted(order['milestones'].items(), lambda i,j: cmp(j[1], i[1])) %}
+	  <tr>
+	    <td>{% module Icon(st, label=True) %}</td>
+	    <td>&nbsp;{{ date }}</td>
+	  <tr>
+	  {% end %}
+	  </table>
+	</td>
+      </tr>
+
+      <tr>
 	<th>Modified</th>
 	<td>
 	  <span class="localtime">{{ order['modified'] }}</span>

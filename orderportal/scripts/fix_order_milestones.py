@@ -15,6 +15,10 @@ class OrderMilestonesFixer(fixer.BaseFixer):
 
     def __call__(self, doc):
         milestones = doc.get('milestones') or {}
+        try:
+            del milestones['status']
+        except KeyError:
+            pass
         view = self.db.view('log/entity',
                             startkey=[doc['_id']],
                             endkey=[doc['_id'], constants.CEILING],
@@ -29,8 +33,8 @@ class OrderMilestonesFixer(fixer.BaseFixer):
             else:
                 if self.verbose:
                     print('-', status, timestamp)
-                milestones['status'] = timestamp[:timestamp.index('T')]
-        doc['milestones'] = milestones
+                milestones[status] = timestamp[:timestamp.index('T')]
+            doc['milestones'] = milestones
         return doc
 
 
