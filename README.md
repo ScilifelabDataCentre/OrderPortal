@@ -11,8 +11,8 @@ RNA samples provided by external researchers. The facility processes
 the samples according to the order from the scientist.
 
 
-Requirements
-------------
+Features
+--------
 
 A portal where users (researchers) can place orders for a project to
 be executed by a research service facility was required. The portal

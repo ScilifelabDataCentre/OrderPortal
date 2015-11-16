@@ -8,7 +8,7 @@
   {% if global_modes['allow_order_creation'] %}
   <div class="panel-group">
     {% for form in forms %}
-    <div class="panel panel-warning">
+    <div class="panel panel-default">
       <div class="panel-heading">
 	{{ form['title'] }}
 	<form action="{{ reverse_url('order_create') }}"
@@ -35,7 +35,7 @@
   </div>
   {% end %} {# if global_modes['allow_order_creation'] #}
 
-  <div class="panel panel-default">
+  <div class="panel panel-warning">
     <div class="panel-heading">
       My recently modified orders
       <a href="{{ reverse_url('account_orders', current_user['email']) }}"

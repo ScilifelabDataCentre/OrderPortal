@@ -10,43 +10,46 @@
 
 <div class="row">
   <div class="col-md-6">
-    <p>
-      The Python software for this web site is available at the
-      GitHub repo
-      <a href="https://github.com/pekrau/OrderPortal">pekrau/OrderPortal</a>.
-    </p>
-    <p>
-      The back-end database is
-      <a href="http://couchdb.apache.org/">Apache CouchDB</a>
-      version {{ versions['CouchDB'] }}.
-    </p>
-    <p>
-      The following Python packages, available from
-      <a href="https://pypi.python.org/pypi">PyPi</a>, are used:
-    </p>
-    <p>
-      <table class="table">
-	{% for key, value in versions['python'] %}
-	<tr>
-	  <th width="60%">{{ key }}</th>
-	  <td width="40%">{{ value }}</td>
-	</tr>
-	{% end %}
-      </table>
-    </p>
-    <p>
-      The HTML display uses the following packages:
-    </p>
-    <p>
-      <table class="table">
-	{% for key, value in versions['html'] %}
-	<tr>
-	  <th width="60%">{{ key }}</th>
-	  <td width="40%">{{ value }}</td>
-	</tr>
-	{% end %}
-      </table>
-    </p>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+	The OrderPortal system is written in Python 2.7:
+      </div>
+      <div class="panel-body">
+	Python code is available at the GitHub repo
+	<a href="https://github.com/pekrau/OrderPortal">pekrau/OrderPortal</a>.
+      </div>
+    </div>
+      <div class="panel panel-default">
+	<div class="panel-heading">
+	  The system uses a number of Python packages available from
+	  <a href="https://pypi.python.org/pypi">PyPi</a>:
+	</div>
+	<div class="panel-body">
+	  <table class="table table-noborder">
+	    {% for key, value in versions['python'] %}
+	    <tr>
+	      <th width="60%">{{ key }}</th>
+	      <td width="40%">{{ value }}</td>
+	    </tr>
+	    {% end %}
+	  </table>
+	</div>
+      </div>
+      <div class="panel panel-default">
+	<div class="panel-heading">
+	  The system uses the following non-Python software:
+	</div>
+	<div class="panel-body">
+	  <table class="table table-noborder">
+	    {% for key, value in versions['other'] %}
+	    <tr>
+	      <th width="60%">{% raw key %}</th>
+	      <td width="40%">{{ value }}</td>
+	    </tr>
+	    {% end %}
+	  </table>
+	</div>
+      </div>
   </div>
 </div>
 

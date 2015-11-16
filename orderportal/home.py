@@ -102,15 +102,16 @@ class About(RequestHandler):
     "Display information about the web site technology."
 
     def get(self):
-        versions = dict(CouchDB=utils.get_dbserver().version(),
-                        python=[('OrderPortal', orderportal.__version__),
+        versions = dict(python=[('OrderPortal', orderportal.__version__),
                                 ('CouchDB-Python', couchdb.__version__),
                                 ('tornado', tornado.version),
                                 ('PyYAML', yaml.__version__),
                                 ('markdown', markdown.version)],
-                        html=[('bootstrap', '3.3.4'),
-                              ('jQuery', '1.11.13'),
-                              ('jQuery localtime', '0.9.1')])
+                        other=[('<a href="http://couchdb.apache.org/">Apache CouchDB</a>',
+                                utils.get_dbserver().version()),
+                               ('<a href="http://getbootstrap.com/">bootstrap</a>', '3.3.4'),
+                              ('<a href="https://jquery.com/">jQuery</a>', '1.11.13'),
+                              ('<a href="https://github.com/GregDThomas/jquery-localtime">jQuery localtime</a>', '0.9.1')])
         self.render('about.html', versions=versions)
 
 
