@@ -93,11 +93,15 @@ def load_settings(filepath=None, verbose=False):
     settings['ORDER_STATUSES'] = \
         yaml.safe_load(open(settings['ORDER_STATUSES_FILENAME']))
     lookup = dict()
+    initial = None
     for status in settings['ORDER_STATUSES']:
         if status['identifier'] in lookup:
-            raise ValueError("order status '%s' redefined" %
+            raise ValueError("order status '%s' multiple definitions" %
                              status['identifier'])
         lookup[status['identifier']] = status
+        initial = initial or status.get('initial')
+    if not initial:
+        raise ValueError('no initial order status defined')
     settings['ORDER_STATUSES_LOOKUP'] = lookup
     settings['ORDER_TRANSITIONS'] = \
         yaml.safe_load(open(settings['ORDER_TRANSITIONS_FILENAME']))
@@ -176,6 +180,16 @@ def timestamp(days=None):
         instant += datetime.timedelta(days=days)
     instant = instant.isoformat()
     return instant[:-9] + "%06.3f" % float(instant[-9:]) + "Z"
+
+def today(days=None):
+    """Current date (UTC) in ISO format.
+    Add the specified offset in days, if given.
+    """
+    instant = datetime.datetime.utcnow()
+    if days:
+        instant += datetime.timedelta(days=days)
+    result = instant.isoformat()
+    return result[:result.index('T')]
 
 def to_ascii(value):
     "Convert any non-ASCII character to its closest ASCII equivalent."

@@ -18,6 +18,9 @@ from .requesthandler import RequestHandler
 class OrderSaver(saver.Saver):
     doctype = constants.ORDER
 
+    def set_status(self, new):
+        
+
     def update_fields(self, fields):
         "Update all fields from the HTML form input."
         assert self.rqh is not None
@@ -316,12 +319,11 @@ class OrderCreate(RequestHandler):
             saver['form'] = form['_id']
             saver['title'] = self.get_argument('title', None) or form['title']
             saver['fields'] = dict([(f['identifier'], None) for f in fields])
+            saver['milestones'] = {}
             for status in settings['ORDER_STATUSES']:
                 if status.get('initial'):
                     saver['status'] = status['identifier']
                     break
-            else:
-                raise ValueError('no initial order status defined')
             saver.check_fields_validity(fields)
         self.see_other('order_edit', saver.doc['_id'])
 
@@ -393,8 +395,6 @@ class OrderClone(OrderMixin, RequestHandler):
                 if status.get('initial'):
                     saver['status'] = status['identifier']
                     break
-            else:
-                raise ValueError('no initial order status defined')
             saver.check_fields_validity(Fields(form))
         self.see_other('order', saver.doc['_id'])
 
