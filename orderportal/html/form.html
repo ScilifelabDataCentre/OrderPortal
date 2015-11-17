@@ -117,7 +117,8 @@
 </p>
 {% end %} {# block meta_content #}
 
-{% block main_content %}
+{% block outer_main_content %}
+<div class="col-md-10">
 <div class="panel panel-default">
   <div class="panel-body">
     <form action="{{ reverse_url('form_edit', form['_id']) }}"
@@ -316,4 +317,5 @@
 </div>
 {% end %}{# for field in fields #}
 {% end %}{# if not are_fields_editable #}
-{% end %} {# block main_content #}
+</div>
+{% end %} {# block outer_main_content #}
