@@ -11,7 +11,6 @@
 
 {% block meta_content %}
 {% if form['status'] == constants.PENDING %}
-<br>
 <form action="{{ reverse_url('form_testing', form['_id']) }}"
       role="form"
       method="POST">
@@ -117,8 +116,7 @@
 </p>
 {% end %} {# block meta_content #}
 
-{% block outer_main_content %}
-<div class="col-md-10">
+{% block main_content %}
 <div class="panel panel-default">
   <div class="panel-body">
     <form action="{{ reverse_url('form_edit', form['_id']) }}"
@@ -167,7 +165,9 @@
     </table>
   </div>
 </div>
+{% end %} {# block main_content #}
 
+{% block sub_main_content %}
 <div class="panel panel-default">
   <div class="panel-heading">
     Specification fields
@@ -317,5 +317,4 @@
 </div>
 {% end %}{# for field in fields #}
 {% end %}{# if not are_fields_editable #}
-</div>
-{% end %} {# block outer_main_content #}
+{% end %} {# block sub_main_content #}
