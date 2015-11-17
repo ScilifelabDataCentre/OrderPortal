@@ -74,7 +74,7 @@ class Fields(object):
         if type == constants.GROUP:
             new['fields'] = []
         group = rqh.get_argument('group', None)
-        if group == '__none__': group = None
+        if group == '': group = None
         for field in self:
             if field['identifier'] == group:
                 field['fields'].append(new)
@@ -110,9 +110,11 @@ class Fields(object):
             values = [v for v in values if v]
             new['select'] = values
         identifier = rqh.get_argument('visible_if_field', None)
-        if identifier == '__none__': identifier = None
+        if identifier == '': identifier = None
         new['visible_if_field'] = identifier
         value = rqh.get_argument('visible_if_value', None)
+        if value:
+            value = '|'.join([s.strip() for s in value.split('|') if s.strip()])
         new['visible_if_value'] = value
         old = field.copy()
         field.update(new)

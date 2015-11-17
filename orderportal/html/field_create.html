@@ -18,7 +18,7 @@
       <div class="col-md-4">
 	<label class="control-label" for="group">Group</label>
 	<select class="form-control" name="group" id="group">
-	  <option value="__none__">[top level]</option>
+	  <option value="">[top level]</option>
 	  {% for field in fields %}
 	    {% if field['type'] == constants.GROUP %}
 	      <option>{{ field['identifier'] }}</option>

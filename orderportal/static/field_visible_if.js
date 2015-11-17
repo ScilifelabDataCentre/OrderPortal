@@ -8,8 +8,8 @@ $(document).ready(function() {
 	$('.visible-if').each(function () {
 	    if (fieldId === $(this).data('if-id')) {
 		/* Cast explicitly to string, since 'true' is interpreted. */
-		var thisVal = String($(this).data('if-val'));
-		if (fieldVal === thisVal) {
+		var theseValues = String($(this).data('if-val')).split('|');
+		if (theseValues.indexOf(fieldVal) > -1) {
 		    $(this).show('slow');
 		} else {
 		    $(this).hide('slow');

@@ -99,10 +99,11 @@ def load_settings(filepath=None, verbose=False):
             raise ValueError("order status '%s' multiple definitions" %
                              status['identifier'])
         lookup[status['identifier']] = status
-        initial = initial or status.get('initial')
+        if status.get('initial'): initial = status
     if not initial:
         raise ValueError('no initial order status defined')
     settings['ORDER_STATUS_INITIAL'] = initial
+    logging.debug('ORDER_STATUS_INITIAL %s', initial)
     settings['ORDER_STATUSES_LOOKUP'] = lookup
     settings['ORDER_TRANSITIONS'] = \
         yaml.safe_load(open(settings['ORDER_TRANSITIONS_FILENAME']))

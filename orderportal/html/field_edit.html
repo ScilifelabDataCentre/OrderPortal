@@ -55,11 +55,14 @@ in '{{ form['title'] }}'
     <div class="row">
       <div class="col-md-6">
 	<label for="type">Type</label>
-	<p class="form-control-static"><i>{{ field['type']}}</i></p>
+	<p class="form-control-static">
+	  <i>{{ constants.TYPE_LABELS.get(field['type'], field['type'])}}</i>
+	</p>
       </div>
     </div>
     <span class="help-block">
       Data type for the field. Cannot be changed.
+      {% module Help('help_datatypes') %}
     </span>
   </div>
 
@@ -69,10 +72,11 @@ in '{{ form['title'] }}'
 	<label for="visible_if_field">Visible if: Field identifier</label>
 	<select class="form-control"
 		name="visible_if_field" id="visible_if_field">
-	  <option value="__none__">[none]</option>
+	  <option value="">[none]</option>
 	  {% for other in fields %}
 	    {% if other is not field and other['depth'] <= field['depth'] %}
-	      <option>{{ other['identifier'] }}</option>
+	      {% set sel = field.get('visible_if_field') == other['identifier'] and 'selected' or '' %}
+	      <option {{ sel }}>{{ other['identifier'] }}</option>
 	    {% end %}
 	  {% end %}
 	</select>
@@ -80,7 +84,7 @@ in '{{ form['title'] }}'
     </div>
     <span class="help-block">
       Field is visible if another field with the given identifier has
-      a specific value.
+      a specific value. Multiple values are given by using the vertical bar '|' to delimit them.
     </span>
   </div>
 
@@ -89,7 +93,8 @@ in '{{ form['title'] }}'
       <div class="col-md-6">
 	<label for="visible_if_value">Visible if: Field value</label>
 	<input type="text" class="form-control"
-	       name="visible_if_value" id="visible_if_value">
+	       name="visible_if_value" id="visible_if_value"
+	       value="{{ field.get('visible_if_value') or '' }}">
 	</input>
       </div>
     </div>

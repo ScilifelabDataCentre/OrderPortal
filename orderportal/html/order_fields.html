@@ -9,7 +9,7 @@
 
 {# Is there a visibility condition? If so, check it. #}
 {% set fid = field.get('visible_if_field') %}
-{% if fid and str(order['fields'].get(fid)).lower() != str(field.get('visible_if_value')).lower() %}
+{% if fid and str(order['fields'].get(fid)).lower() not in str(field.get('visible_if_value')).lower().split('|') %}
 {% continue %}
 {% end %}
 
