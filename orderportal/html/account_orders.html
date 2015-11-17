@@ -60,12 +60,15 @@ Orders
 </div>
 
 <div class="row">
-  <div class="col-md-10 col-md-offset-1">
-    <table class="table table-striped">
+  <div class="col-md-12">
+    <table width="100%" class="table table-striped">
       <tr>
-	<th width="65">Order</th>
+	<th width="30%">Order</th>
 	<th width="15%">Status</th>
-	<th width="20%">Modified</th>
+	{% for st in settings['ORDER_LIST_MILESTONES'] %}
+	<th>{% module Icon(st, label=True) %}</th>
+	{% end %}
+	<th width="10%">Modified</th>
       </tr>
       {% for order in orders %}
       <tr>
@@ -73,12 +76,13 @@ Orders
 	  <a href="{{ reverse_url('order', order['_id']) }}">{{ order.get('title', order['_id']) }}</a>
 	</td>
 	<td>{% module Icon(order['status'], label=True) %}</td>
+	{% for st in settings['ORDER_LIST_MILESTONES'] %}
+	<td>{{ order['milestones'].get(st) or '-' }}</td>
+	{% end %}
 	<td class="localtime">{{ order['modified'] }}</td>
       </tr>
       {% end %}
     </table>
-  </div>
-  <div class="col-md-1">
   </div>
 </div>
 {% end %}
