@@ -82,6 +82,7 @@ def get_handlers():
                 AccountDisable, name='account_disable'),
             url(r'/forms', Forms, name='forms'),
             url(r'/form/([0-9a-f]{32})', Form, name='form'),
+            url(r'/api/1/form/([0-9a-f]{32})', ApiV1Form, name='api_v1_form'),
             url(r'/form/([0-9a-f]{32})/logs', FormLogs, name='form_logs'),
             url(r'/form', FormCreate, name='form_create'),
             url(r'/form/([0-9a-f]{32})/edit', FormEdit, name='form_edit'),

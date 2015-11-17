@@ -10,7 +10,6 @@
 {% end %}
 
 {% block meta_content %}
-
 {% if form['status'] == constants.PENDING %}
 <br>
 <form action="{{ reverse_url('form_testing', form['_id']) }}"
@@ -109,6 +108,13 @@
     Clone
   </button>
 </form>
+
+<br>
+<p>
+  <a href="{{ reverse_url('api_v1_form', form['_id']) }}">
+    {% module Icon('json', label=True) %}
+  </a>
+</p>
 {% end %} {# block meta_content #}
 
 {% block main_content %}

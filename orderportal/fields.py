@@ -26,9 +26,9 @@ class Fields(object):
         result = []
         for field in fields:
             if parent is None:
-                field['_parent'] = None
+                field['parent'] = None
             else:
-                field['_parent'] = parent['identifier']
+                field['parent'] = parent['identifier']
             field['depth'] = depth
             result.append(field)
             if field['type'] == constants.GROUP:

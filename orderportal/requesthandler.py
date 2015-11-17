@@ -280,3 +280,12 @@ class RequestHandler(tornado.web.RequestHandler):
                             endkey=[iuid, constants.CEILING])
         for row in view:
             del self.db[row.id]
+
+
+class ApiV1Mixin(object):
+    "Mixin containing some API methods; JSON generation."
+
+    def cleanup(self, doc):
+        "Change _id to iuid and remove _id."
+        doc['iuid'] = doc.pop('_id')
+        del doc['_rev']

@@ -12,6 +12,7 @@ Create
 {% block main_content %}
 <form action="{{ reverse_url('form_create') }}"
       role="form"
+      enctype="multipart/form-data"
       method="POST">
   {% module xsrf_form_html() %}
 
@@ -44,6 +45,20 @@ Create
       Description to display for the form as information to the user, using
       <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
       format.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+	<label class="control-label" for="import">Import JSON file</label>
+	<input type="file" class="form-control" name="import" id="import">
+      </div>
+    </div>
+    <span class="help-block">
+      Optional import of a JSON file representation for a form.
+      The format must be correct, so <b>do not</b> try to create it by hand.
+      Always use the JSON output provided by the link in the form page.
     </span>
   </div>
 

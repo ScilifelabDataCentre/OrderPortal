@@ -23,10 +23,10 @@ in '{{ form['title'] }}'
       <div class="col-md-6">
 	<label for="type">Parent field</label>
 	<p class="form-control-static"><i>
-	  {% if field is None or field.get('_parent') is None %}
+	  {% if field is None or field.get('parent') is None %}
 	  [none]
 	  {% else %}
-	  {{ field['_parent'] }}
+	  {{ field['parent'] }}
 	  {% end %}
 	</i></p>
       </div>

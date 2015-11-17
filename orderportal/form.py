@@ -2,6 +2,7 @@
 
 from __future__ import print_function, absolute_import
 
+import json
 import logging
 
 import tornado.web
@@ -11,7 +12,7 @@ from . import saver
 from . import settings
 from . import utils
 from .fields import Fields
-from .requesthandler import RequestHandler
+from .requesthandler import RequestHandler, ApiV1Mixin
 
 
 class FormSaver(saver.Saver):
@@ -136,6 +137,15 @@ class Form(FormMixin, RequestHandler):
         return False
 
 
+class ApiV1Form(ApiV1Mixin, Form):
+    "Form API; JSON."
+
+    def render(self, filename, form, order_count, fields,
+               is_deletable, are_fields_editable, logs):
+        self.cleanup(form)
+        self.write(form)
+
+
 class FormLogs(RequestHandler):
     "Form log entries page."
 
@@ -167,6 +177,15 @@ class FormCreate(RequestHandler):
                 raise tornado.web.HTTPError(400, reason='no title given')
             saver['description'] = self.get_argument('description', None)
             saver['status'] = constants.PENDING
+            try:
+                infile = self.request.files['import'][0]
+                data = json.loads(infile.body)
+                assert data[constants.DOCTYPE] == constants.FORM, 'doc must be form'
+                if not saver['description']:
+                    saver['description'] = data['description']
+                saver['fields'] = data['fields']
+            except Exception, msg:
+                logging.info("Error importing form: %s", msg)
         self.see_other('form', saver.doc['_id'])
 
 
