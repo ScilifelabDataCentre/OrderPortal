@@ -15,6 +15,7 @@
 		    }
 .table-fields tr td {vertical-align: top; }
 
+.table-noborder > tbody + tbody   {border-width: 0px; }
 .table-noborder > tbody > tr > th {border-width: 0px; }
 .table-noborder > tbody > tr > td {border-width: 0px; }
 

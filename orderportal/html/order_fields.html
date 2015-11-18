@@ -18,9 +18,16 @@
 {% if field['type'] == constants.GROUP %}
 <tr>
   <th width="20%">
+    {% if field['depth'] == 0 %}
+    <button data-toggle="collapse" data-target="#{{ field['identifier'] }}"
+	    class="btn btn-md glyphicon glyphicon-triangle-bottom">
+      {{ label }}
+    </button>
+    {% else %}
     <span style="padding-left:{{ 1.5*field['depth'] }}em; display:block;">
       {{ label }}
     </span>
+    {% end %}
   </th>
   <td width="60%"></td>
   <td>
@@ -42,7 +49,15 @@
 </tr>
 
 {# Recursion: 'include' cannot be used! #}
+{% if field['fields'] %}
+{% if field['depth'] == 0 %}
+  <tbody id="{{ field['identifier'] }}" class="collapse">
+{% end %}
 {% module Template('order_fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
+{% if field['depth'] == 0 %}
+  </tbody>
+{% end %}
+{% end %} {# if field['fields'] #}
 
 {% else %}
 <tr>
