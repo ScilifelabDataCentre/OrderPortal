@@ -99,10 +99,3 @@ class Help(tornado.web.UIModule):
 title="Help" data-toggle="collapse" href="#{id}"></a>
 <div id="{id}" class="collapse">{html}</div>
 """.format(id=name, html=html)
-
-
-class Indent(tornado.web.UIModule):
-    "Output indentation blanks."
-
-    def render(self, number, multiple=4):
-        return '&nbsp;' * multiple * max(0, number)

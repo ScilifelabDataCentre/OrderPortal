@@ -188,7 +188,7 @@
 
     <table class="table">
       <tr>
-	<th>Identifier</th>
+	<th width="20%">Identifier</th>
 	<th>Label</th>
 	<th>Type</th>
 	<th>Visible</th>
@@ -198,9 +198,10 @@
       </tr>
       {% for field in fields %}
       <tr>
-	<td class="text-nowrap">
-	  {% module Indent(field['depth']) %}
-	  {{ field['identifier'] }}
+	<td width="20%" class="text-nowrap">
+	  <span style="padding-left:{{ 1.5*field['depth'] }}em; display:block;">
+	    {{ field['identifier'] }}
+	  </span>
 	</td>
 	<td>{{ field.get('label') or '-' }}</td>
 	<td>

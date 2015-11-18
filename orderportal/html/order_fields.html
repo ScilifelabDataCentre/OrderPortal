@@ -17,8 +17,12 @@
 
 {% if field['type'] == constants.GROUP %}
 <tr>
-  <th>{% module Indent(field['depth']) %}{{ label }}</th>
-  <td></td>
+  <th width="20%">
+    <span style="padding-left:{{ 1.5*field['depth'] }}em; display:block;">
+      {{ label }}
+    </span>
+  </th>
+  <td width="60%"></td>
   <td>
     {% if field['restrict_read'] %}
     [Staff only]
@@ -42,8 +46,12 @@
 
 {% else %}
 <tr>
-  <th>{% module Indent(field['depth']) %}{{ label }}</th>
-  <td>
+  <th width="20%">
+    <span style="padding-left:{{ 1.5*field['depth'] }}em; display:block;">
+      {{ label }}
+    </span>
+  </th>
+  <td width="60%">
     {% set value = order['fields'][field['identifier']] %}
     {% if field['type'] == constants.TEXT %}
       {% module Markdown(value or '-') %}
