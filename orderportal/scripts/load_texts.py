@@ -26,18 +26,11 @@ def load_texts(db, textfilepath, verbose=False):
             if verbose:
                 print("Text '{0}' loaded".format(key))
 
-def get_args():
-    parser = utils.get_command_line_parser(description=
-        'Load texts from file into the database.')
-    parser.add_option("-L", "--load",
-                      action='store', dest='FILE',
-                      default='{ROOT}/data/texts.yaml',
-                      metavar="FILE", help="filepath of texts file to load")
-    return parser.parse_args()
-
 
 if __name__ == '__main__':
-    (options, args) = get_args()
+    parser = utils.get_command_line_parser(description=
+        'Load texts from file into the database.')
+    (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings,
                         verbose=options.verbose)
     if not options.force:
@@ -45,5 +38,5 @@ if __name__ == '__main__':
         if not utils.to_bool(response):
             sys.exit('aborted')
     load_texts(utils.get_db(),
-               textfilepath=options.FILE,
+               textfilepath=args[0],
                verbose=options.verbose)

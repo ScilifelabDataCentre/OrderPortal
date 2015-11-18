@@ -205,6 +205,7 @@ def to_utf8(value):
 
 def to_bool(value):
     "Convert the value into a boolean, interpreting various string values."
+    if isinstance(value, bool): return value
     if not value: return False
     lowvalue = value.lower()
     if lowvalue in constants.TRUE: return True

@@ -1,0 +1,42 @@
+# OrderPortal order status transitions
+
+- source: preparation
+  targets: [submitted]
+  permission: [user, admin]
+  require: valid
+
+- source: submitted
+  targets: [review, accepted, rejected, onhold]
+  permission: [admin]
+
+- source: review
+  targets: [accepted, preparation, rejected, onhold]
+  permission: [admin]
+
+- source: accepted
+  targets: [onhold, processing]
+  permission: [admin]
+
+- source: rejected
+  targets: [preparation]
+  permission: [user]
+
+- source: onhold
+  targets: [processing]
+  permission: [admin]
+
+- source: processing
+  targets: [onhold, aborted, closed]
+  permission: [admin]
+
+- source: aborted
+  targets: [archived]
+  permission: [admin]
+
+- source: closed
+  targets: [archived]
+  permission: [admin]
+
+- source: undefined
+  targets: [preparation, submitted, review, accepted, rejected, onhold, processing, aborted, closed, archived]
+  permission: [admin]

@@ -1,7 +1,7 @@
 """ OrderPortal: Initialize the order database, directly towards CouchDB.
 1) Wipeout the old database.
 2) Load the design documents.
-3) Load the initial texts from 'texts.yaml'.
+Texts are *not* loaded! Use load_texts.py to do this.
 """
 
 from __future__ import print_function, absolute_import
