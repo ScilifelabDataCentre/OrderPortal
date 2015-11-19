@@ -133,7 +133,7 @@ class Form(FormMixin, RequestHandler):
         "Can the form be deleted?."
         if form['status'] == constants.PENDING: return True
         if form['status'] == constants.ENABLED: return False
-        if self.get_order_count(form) == 0: return
+        if self.get_order_count(form) == 0: return True
         return False
 
 
