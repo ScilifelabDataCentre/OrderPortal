@@ -67,7 +67,7 @@
     </span>
   </th>
   <td width="50%">
-    {% set value = order['fields'][field['identifier']] %}
+    {% set value = order['fields'].get(field['identifier']) %}
     {% if field['type'] == constants.TEXT %}
       {% module Markdown(value or '-') %}
     {% else %}
