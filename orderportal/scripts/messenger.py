@@ -99,7 +99,7 @@ class Messager(object):
         view = self.db.view('log/modified',
                             include_docs=True,
                             descending=True,
-                            startkey=constants.HIGH_CHAR,
+                            startkey=constants.CEILING,
                             endkey=endkey)
         for row in view:
             if self.verbose:

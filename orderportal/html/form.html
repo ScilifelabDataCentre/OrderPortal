@@ -131,7 +131,6 @@
 	<th>Description</th>
 	<td>{% module Markdown(form.get('description')) %}</td>
       </tr>
-
       <tr>
 	<th>Orders</th>
 	<td>
@@ -141,12 +140,10 @@
 	  </a>
 	</td>
       </tr>
-
       <tr>
 	<th>Status</th>
 	<td>{% module Icon(form['status'], label=True) %}</td>
       </tr>
-
       <tr>
 	<th>Modified</th>
 	<td>
@@ -156,12 +153,14 @@
 	  </a>
 	</td>
       </tr>
-
       <tr>
 	<th>Created</th>
 	<td class="localtime">{{ form['created'] }}</td>
       </tr>
-
+      <tr>
+	<th>IUID</th>
+	<td>{{ form['_id'] }}</td>
+      </tr>
     </table>
   </div>
 </div>

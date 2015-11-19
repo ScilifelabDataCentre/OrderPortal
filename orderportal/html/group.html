@@ -76,7 +76,6 @@
 	  </a>
 	</td>
       </tr>
-
       <tr>
 	<th>Members</th>
 	<td>
@@ -89,7 +88,6 @@
 	  {% end %}
 	</td>
       </tr>
-
       <tr>
 	<th>Invited</th>
 	<td>
@@ -106,7 +104,6 @@
 	  {% end %}
 	</td>
       </tr>
-
       <tr>
 	<th>Modified</th>
 	<td>
@@ -116,9 +113,15 @@
 	  </a>
 	</td>
       </tr>
-
+      <tr>
+	<th>Created</th>
+	<td class="localtime">{{ group['created'] }}</td>
+      </tr>
+      <tr>
+	<th>IUID</th>
+	<td>{{ group['_id'] }}</td>
+      </tr>
     </table>
-
   </div>
 </div>
 {% end %} {# block main_content #}

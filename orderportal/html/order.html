@@ -87,7 +87,6 @@
 {% block main_content %}
 <div class="panel panel-default">
   <div class="panel-body">
-
     <table class="table table-condensed table-fields table-noborder">
       <tr>
 	<th>Owner</th>
@@ -97,7 +96,6 @@
 	  </a>
 	</td>
       </tr>
-
       <tr>
 	<th>Status</th>
 	<td>
@@ -105,7 +103,6 @@
 	  ({{ status['description'] }})
 	</td>
       </tr>
-
       <tr>
 	<th>Milestones</th>
 	<td>
@@ -119,7 +116,6 @@
 	  </table>
 	</td>
       </tr>
-
       <tr>
 	<th>Modified</th>
 	<td>
@@ -128,6 +124,14 @@
 	    {% module Icon('logs', label=True) %}
 	  </a>
 	</td>
+      </tr>
+      <tr>
+	<th>Created</th>
+	<td class="localtime">{{ order['created'] }}</td>
+      </tr>
+      <tr>
+	<th>IUID</th>
+	<td>{{ order['_id'] }}</td>
       </tr>
 
       {% if is_admin %}
@@ -179,9 +183,7 @@
 	  {% end %}{# if is_attachable #}
 	</td>
       </tr>
-
     </table>
-
   </div>
 </div>
 
