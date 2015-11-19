@@ -2,9 +2,9 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}Account {{ account['email'] }}{% end %}
+{% block head_title %}Account: {{ account['email'] }}{% end %}
 {% block body_title %}
-{% module Icon('account', label=True) %}
+{% module Icon('account', label=True) %}:
 {{ account['email'] }}
 {% end %}
 

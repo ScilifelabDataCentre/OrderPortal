@@ -1,9 +1,9 @@
 {# Group page. #}
 
-{% block head_title %}Group {{ group['name'] }}{% end %}
+{% block head_title %}Group: {{ group['name'] }}{% end %}
 
 {% block body_title %}
-{% module Icon('group', label=True) %}
+{% module Icon('group', label=True) %}:
 {{ group['name'] }}
 {% end %}
 

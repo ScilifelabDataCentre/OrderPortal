@@ -29,7 +29,7 @@
     </span>
     {% end %}
   </th>
-  <td width="60%"></td>
+  <td width="50%"></td>
   <td>
     {% if field['restrict_read'] %}
     [Staff only]
@@ -66,7 +66,7 @@
       {{ label }}
     </span>
   </th>
-  <td width="60%">
+  <td width="50%">
     {% set value = order['fields'][field['identifier']] %}
     {% if field['type'] == constants.TEXT %}
       {% module Markdown(value or '-') %}
