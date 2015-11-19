@@ -182,6 +182,13 @@ def timestamp(days=None):
     instant = instant.isoformat()
     return instant[:-9] + "%06.3f" % float(instant[-9:]) + "Z"
 
+def epoch_to_iso(epoch):
+    """Convert the given number of seconds since the epoch
+    to date and time in ISO format.
+    """
+    dt = datetime.datetime.fromtimestamp(float(epoch))
+    return dt.isoformat() + 'Z'
+
 def today(days=None):
     """Current date (UTC) in ISO format.
     Add the specified offset in days, if given.

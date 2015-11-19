@@ -1,7 +1,7 @@
 """ OrderPortal: Initialize the order database, directly towards CouchDB.
 1) Wipeout the old database.
 2) Load the design documents.
-Texts are *not* loaded! Use load_texts.py to do this.
+3) Load the texts file, using SITE_DIR if available, else ROOT.
 """
 
 from __future__ import print_function, absolute_import
@@ -11,9 +11,11 @@ import sys
 import yaml
 
 from orderportal import home
+from orderportal import settings
 from orderportal import utils
 from orderportal.scripts.dump import undump
 from orderportal.scripts.load_designs import load_designs
+from orderportal.scripts.load_texts import load_texts
 
 
 def get_args():
@@ -27,12 +29,15 @@ def get_args():
 
 def init_database(verbose=False, dumpfilepath=None):
     db = utils.get_db(create=True)
+    if verbose:
+        print('wiping out database...')
     wipeout_database(db)
     if verbose:
-        print('wiped out order database', file=sys.stderr)
-    load_designs(db)
+        print('wiped out order database')
+    load_designs(db, verbose=verbose)
     if verbose:
-        print('loaded designs', file=sys.stderr)
+        print('loaded designs')
+    load_texts(db, verbose=verbose)
     if dumpfilepath:
         dumpfilepath = utils.expand_filepath(dumpfilepath)
         try:
@@ -40,7 +45,7 @@ def init_database(verbose=False, dumpfilepath=None):
         except IOError:
             print('Warning: could not load', dumpfilepath)
     elif verbose:
-        print('no dump file loaded', file=sys.stderr)
+        print('no dump file loaded')
 
 def wipeout_database(db):
     """Wipe out the contents of the database.

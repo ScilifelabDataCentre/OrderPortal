@@ -11,7 +11,7 @@ from orderportal import constants
 from orderportal import utils
 
 
-def load_designs(db, verbose=False, root=None):
+def load_designs(db, root=None, verbose=False):
     "Load all CouchDB database design documents."
     if root is None:
         root = os.path.join(constants.ROOT, 'designs')
@@ -48,6 +48,33 @@ def load_designs(db, verbose=False, root=None):
             elif verbose:
                 print('no change', id, file=sys.stderr)
 
+def regenerate_views(db, root=None, verbose=False):
+    "Trigger CouchDB to regenerate views by accessing them."
+    if root is None:
+        root = os.path.join(constants.ROOT, 'designs')
+    viewnames = []
+    for design in os.listdir(root):
+        path = os.path.join(root, design)
+        if not os.path.isdir(path): continue
+        path = os.path.join(root, design, 'views')
+        for filename in os.listdir(path):
+            name, ext = os.path.splitext(filename)
+            if ext != '.js': continue
+            if name.startswith('map_'):
+                name = name[len('map_'):]
+            elif name.startswith('reduce_'):
+                name = name[len('reduce_'):]
+            viewname = design + '/' + name
+            if viewname not in viewnames:
+                viewnames.append(viewname)
+    for viewname in viewnames:
+        if verbose:
+            print('regenerating view', viewname)
+        view = db.view(viewname)
+        for row in view:
+            break
+        
+
 def get_args():
     parser = utils.get_command_line_parser(description=
         'Reload all CouchDB design documents.')
@@ -60,3 +87,5 @@ if __name__ == '__main__':
                         verbose=options.verbose)
     load_designs(utils.get_db(),
                  verbose=options.verbose)
+    regenerate_views(utils.get_db(),
+                     verbose=options.verbose)

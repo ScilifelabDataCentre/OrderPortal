@@ -6,11 +6,17 @@ import sys
 
 import yaml
 
+from orderportal import settings
 from orderportal import utils
 from orderportal import admin
 
 
-def load_texts(db, textfilepath, verbose=False):
+def load_texts(db, textfilepath=None, verbose=False):
+    if textfilepath is None:
+        if settings.get('SITE_DIR'):
+            textfilepath = utils.expand_filepath('{SITE_DIR}texts.yaml')
+        else:
+            textfilepath = utils.expand_filepath('{ROOT}data/texts.yaml')
     with open(utils.expand_filepath(textfilepath)) as infile:
         texts = yaml.safe_load(infile)
         for key, text in texts.items():
@@ -37,6 +43,10 @@ if __name__ == '__main__':
         response = raw_input('about to overwrite all current texts; really sure? [n] > ')
         if not utils.to_bool(response):
             sys.exit('aborted')
+    try:
+        textfilepath = args[0]
+    except IndexError:
+        textfilepath = None
     load_texts(utils.get_db(),
-               textfilepath=args[0],
+               textfilepath=textfilepath,
                verbose=options.verbose)

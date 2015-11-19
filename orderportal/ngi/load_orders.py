@@ -15,12 +15,8 @@ from orderportal import settings
 from orderportal import utils
 from orderportal.fields import Fields
 from orderportal.order import OrderSaver
+from orderportal.scripts.load_designs import regenerate_views
 
-
-def epoch_to_iso(epoch):
-    epoch = float(epoch)
-    dt = datetime.datetime.fromtimestamp(epoch)
-    return dt.isoformat() + 'Z'
 
 class OldOrderSaver(OrderSaver):
 
@@ -28,10 +24,10 @@ class OldOrderSaver(OrderSaver):
         self.doc['owner'] = authors[record['author']['id']]
 
     def set_created(self, record):
-        self.doc['created'] = epoch_to_iso(record['created'])
+        self.doc['created'] = utils.epoch_to_iso(record['created'])
 
     def set_modified(self, record):
-        self.doc['modified'] = epoch_to_iso(record['changed'])
+        self.doc['modified'] = utils.epoch_to_iso(record['changed'])
 
     def finalize(self):
         "Already set."
@@ -48,14 +44,13 @@ def load_users(filename='users.json', verbose=False):
         assert uid
         email = record['mail']
         assert email
-        result[uid] = email
+        result[uid] = email.lower()
     if verbose:
         print(len(result), 'accounts')
     return result
 
-def load_orders(form_iuid, authors, filename='orders.json', verbose=False):
+def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
     "Load the order and use the form given by IUID to transfer field values."
-    db = utils.get_db()
     form = db[form_iuid]
     fields = Fields(form)
     # Get the set of already loaded old orders; nid values
@@ -80,8 +75,16 @@ def load_orders(form_iuid, authors, filename='orders.json', verbose=False):
             saver.set_modified(record)
             saver['form'] = form_iuid
             saver['title'] = record['title']
-            saver['fields'] = dict([(f['identifier'], record[f['identifier']])
-                                    for f in fields if f['type']!='group'])
+            values = {}
+            for field in fields:
+                if field['type'] == constants.GROUP: continue
+                value = record[field['identifier']]
+                if isinstance(value, list):
+                    value = '\n'.join(value)
+                values[field['identifier']] = value
+            saver['fields'] = values
+            # saver['fields'] = dict([(f['identifier'], record[f['identifier']])
+            #                         for f in fields if f['type']!='group'])
             saver['milestones'] = {}
             saver.set_status('undefined')
             saver.check_fields_validity(fields)
@@ -98,7 +101,9 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings,
                         verbose=options.verbose)
-    load_orders(authors=load_users(verbose=options.verbose),
-                form_iuid='667b54c434534d5fa30c231ca9a87ab6',
+    db = utils.get_db()
+    load_orders(db,
+                authors=load_users(verbose=options.verbose),
+                form_iuid='2742aaa225304dc0afb5db17c5c2df21',
                 verbose=options.verbose)
-    
+    regenerate_views(db, verbose=options.verbose)

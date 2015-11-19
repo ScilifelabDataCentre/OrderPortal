@@ -13,6 +13,8 @@ import pprint
 from orderportal import constants
 from orderportal import settings
 from orderportal import utils
+from orderportal.scripts.load_designs import regenerate_views
+
 
 UNI_LOOKUP = dict(
     karolinska='KI',
@@ -46,17 +48,11 @@ UNI_LOOKUP['sveriges lantbruksuniversitet'] = 'SLU'
 UNI_LOOKUP['university of gothenburg'] = 'GU'
 
 
-def epoch_to_iso(epoch):
-    epoch = float(epoch)
-    dt = datetime.datetime.fromtimestamp(epoch)
-    return dt.isoformat() + 'Z'
-
-def load_accounts(filepath='users.json', verbose=False):
+def load_accounts(db, filepath='users.json', verbose=False):
     with open(filepath) as infile:
         accounts = json.load(infile)
     if verbose:
         print(len(accounts), 'accounts in input file')
-    db = utils.get_db()
     count = 0
     for account in accounts:
         email = account['mail'].lower()
@@ -134,8 +130,8 @@ def load_accounts(filepath='users.json', verbose=False):
         doc['address'] = address
         doc['other_data'] = other_data
         doc['owner'] = email
-        doc['created'] = epoch_to_iso(account['created'])
-        doc['modified'] = epoch_to_iso(account.get('last_access') or account['created'])
+        doc['created'] = utils.epoch_to_iso(account['created'])
+        doc['modified'] = utils.epoch_to_iso(account.get('last_access') or account['created'])
         doc['status'] = constants.DISABLED
         if verbose:
             for key, value in doc.items():
@@ -154,4 +150,6 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings,
                         verbose=options.verbose)
-    load_accounts(verbose=options.verbose)
+    db = utils.get_db()
+    load_accounts(db, verbose=options.verbose)
+    regenerate_views(db, verbose=options.verbose)
