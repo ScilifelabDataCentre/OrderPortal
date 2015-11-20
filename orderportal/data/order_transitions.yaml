@@ -28,11 +28,3 @@
 - source: processing
   targets: [onhold, aborted, closed]
   permission: [admin]
-
-- source: aborted
-  targets: [archived]
-  permission: [admin]
-
-- source: closed
-  targets: [archived]
-  permission: [admin]

@@ -29,14 +29,6 @@
   targets: [onhold, aborted, closed]
   permission: [admin]
 
-- source: aborted
-  targets: [archived]
-  permission: [admin]
-
-- source: closed
-  targets: [archived]
-  permission: [admin]
-
 - source: undefined
-  targets: [preparation, submitted, review, accepted, rejected, onhold, processing, aborted, closed, archived]
+  targets: [preparation, submitted, review, accepted, rejected, onhold, processing, aborted, closed]
   permission: [admin]

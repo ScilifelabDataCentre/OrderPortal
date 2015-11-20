@@ -39,9 +39,6 @@
   description: All work and other actions for the order have been performed.
   attach: [admin]
 
-- identifier: archived
-  description: The order and its data have been archived and cannot be changed.
-
 - identifier: undefined
-  description: The order was loaded from the old portal, which did not allow transfer of status information.
+  description: The order was loaded from the old portal, which did not transfer of status information.
   edit: [admin]

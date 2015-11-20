@@ -39,6 +39,3 @@
 - identifier: closed
   description: All work and other actions for the order have been performed.
   attach: [admin]
-
-- identifier: archived
-  description: The order and its data have been archived and cannot be changed.
