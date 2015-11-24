@@ -51,7 +51,7 @@ class InfoLogs(RequestHandler):
         self.check_admin()
         info = self.get_entity_view('info/name', name)
         self.render('logs.html',
-                    title="Logs for info '{0}'".format(name),
+                    title=u"Logs for info '{0}'".format(name),
                     entity=info,
                     logs=self.get_logs(info['_id']))
 

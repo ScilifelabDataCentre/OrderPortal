@@ -78,7 +78,7 @@ def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
             values = {}
             for field in fields:
                 if field['type'] == constants.GROUP: continue
-                value = record[field['identifier']]
+                value = record.get(field['identifier'])
                 if isinstance(value, list):
                     value = '\n'.join(value)
                 values[field['identifier']] = value

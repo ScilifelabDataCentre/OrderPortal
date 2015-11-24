@@ -217,7 +217,7 @@ def to_bool(value):
     lowvalue = value.lower()
     if lowvalue in constants.TRUE: return True
     if lowvalue in constants.FALSE: return False
-    raise ValueError("invalid boolean: '{0}'".format(value))
+    raise ValueError(u"invalid boolean: '{0}'".format(value))
 
 def convert(type, value):
     "Convert the string representation to the given type."

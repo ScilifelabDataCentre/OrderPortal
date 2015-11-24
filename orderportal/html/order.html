@@ -12,7 +12,6 @@
 {% block meta_content %}
 
 {% if is_editable %}
-<br>
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
       role="form"
       method="GET">
@@ -21,25 +20,6 @@
     Edit
   </button>
 </form>
-{% end %} {# if is_editable #}
-
-{% for target in targets %}
-<br>
-<form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
-      role="form"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <button type="submit" class="btn btn-default"
-	  {% if not is_admin %}
-	  onclick="return confirm('Cannot be undone! Really change status?');"
-	  {% end %}
-	  >
-    Set to {% module Icon(target['identifier'], label=True) %}
-  </button>
-</form>
-{% end %}
-
-{% if is_editable %}
 <br>
 <form action="{{ reverse_url('order', order['_id']) }}"
       role="form"
@@ -52,15 +32,15 @@
     Delete
   </button>
 </form>
-{% elif not global_modes['allow_order_editing'] %}
 <br>
+{% elif not global_modes['allow_order_editing'] %}
 <div class="well text-danger">
   Order editing is currently disabled.
 </div>
+<br>
 {% end %} {# if is_editable #}
 
 {% if is_clonable %}
-<br>
 <form action="{{ reverse_url('order_clone', order['_id']) }}"
       role="form"
       method="POST">
@@ -71,16 +51,37 @@
   </button>
 </form>
 {% elif not global_modes['allow_order_creation'] %}
-<br>
 <div class="well text-danger">
   Order creation is currently disabled.
 </div>
 {% else %}
-<br>
 <div class="well">
   This order cannot be cloned.
 </div>
 {% end %} {# if is_clonable #}
+
+<br>
+<div class="panel panel-success">
+  <div class="panel-heading">Change status</div>
+  <div class="panel-body">
+{% for target in targets %}
+<form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+  <button type="submit" class="btn btn-default"
+	  {% if not is_admin %}
+	  onclick="return confirm('Cannot be undone! Really change status?');"
+	  {% end %}
+	  >
+    {% module Icon(target['identifier']) %}
+    {{ target.get('action', target['identifier']) }}
+  </button>
+</form>
+<br>
+{% end %} {# for target in targets #}
+</div>
+</div>
 
 {% end %} {# block meta_content #}
 

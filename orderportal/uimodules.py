@@ -60,7 +60,7 @@ class Entity(tornado.web.UIModule):
             except KeyError, msg:
                 raise KeyError(str(msg) + ':', doctype)
         icon = ICON_TEMPLATE.format(url=icon_url, alt=alt, title=alt)
-        return """<a href="{url}">{icon} {title}</a>""".format(
+        return u"""<a href="{url}">{icon} {title}</a>""".format(
             url=url, icon=icon, title=title)
 
 
@@ -79,7 +79,7 @@ class Text(tornado.web.UIModule):
             doc = self.handler.get_entity_view('text/name', name)
             text = doc['text']
         except (tornado.web.HTTPError, KeyError):
-            text = default or "<i>No text for '{0}'.</i>".format(name)
+            text = default or u"<i>No text for '{0}'.</i>".format(name)
         return markdown.markdown(text, output_format='html5')
 
 
@@ -93,9 +93,9 @@ class Help(tornado.web.UIModule):
             doc = self.handler.get_entity_view('text/name', name)
             text = doc['text']
         except (tornado.web.HTTPError, KeyError):
-            text = default or "<i>No text for '{0}'.</i>".format(name)
+            text = default or u"<i>No text for '{0}'.</i>".format(name)
         html = markdown.markdown(text, output_format='html5')
-        return """<a class="glyphicon glyphicon-info-sign"
+        return u"""<a class="glyphicon glyphicon-info-sign"
 title="Help" data-toggle="collapse" href="#{id}"></a>
 <div id="{id}" class="collapse">{html}</div>
 """.format(id=name, html=html)

@@ -44,7 +44,7 @@ class FormSaver(saver.Saver):
         "Clone all fields from the given form."
         for field in form['fields']:
             self.fields.clone(field)
-        self.changed['copied'] = "from {0}".format(form['_id'])
+        self.changed['copied'] = u"from {0}".format(form['_id'])
 
     def delete_field(self, identifier):
         if identifier not in self.fields:
@@ -154,7 +154,7 @@ class FormLogs(RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.render('logs.html',
-                    title="Logs for form'{0}'".format(form['title']),
+                    title=u"Logs for form'{0}'".format(form['title']),
                     entity=form,
                     logs=self.get_logs(form['_id']))
 
@@ -197,7 +197,7 @@ class FormEdit(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.render('form_edit.html',
-                    title="Edit form '{0}'".format(form['title']),
+                    title=u"Edit form '{0}'".format(form['title']),
                     form=form)
 
     @tornado.web.authenticated
@@ -225,7 +225,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
             identifiers.update(self._get_identifiers(row.doc['fields']))
         identifiers.difference_update(self._get_identifiers(form['fields']))
         self.render('field_create.html',
-                    title="Create field in form '{0}'".format(form['title']),
+                    title=u"Create field in form '{0}'".format(form['title']),
                     form=form,
                     fields=Fields(form),
                     identifiers=identifiers)
@@ -315,7 +315,7 @@ class FormClone(RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(rqh=self) as saver:
-            saver['title'] = "Clone of {0}".format(form['title'])
+            saver['title'] = u"Clone of {0}".format(form['title'])
             saver['description'] = form.get('description')
             saver.clone_fields(form)
             saver['status'] = constants.PENDING

@@ -5,7 +5,6 @@ from __future__ import print_function, absolute_import
 import urlparse
 from xml.etree import ElementTree
 
-# http://docs.python-requests.org/
 import requests
 import yaml
 
@@ -135,7 +134,7 @@ def get_old_portal_projects(db):
 
 def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
     """Process the project from the old portal which are not closed or aborted.
-    Get each from the Clarity lookup, and add the values.
+    Get info on each from the Clarity lookup, and add the values.
     """
     for project in projects:
         changed = False
@@ -166,8 +165,8 @@ def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
                       cp.get('sample information received'),
                       cp.get('queued')]
         processing = [p for p in processing if p is not None]
-        processing = reduce(min, processing)
         if processing:
+            processing = reduce(min, processing)
             if processing and processing != project['milestones'].get('processing'):
                 project['milestones']['processing'] = processing
                 changed = True
@@ -192,6 +191,13 @@ def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
         if current != project.get('status'):
             project['status'] = current
             changed = True
+        if len(project['milestones']) > 2:
+            try:
+                del project['milestones']['undefined']
+            except KeyError:
+                pass
+            else:
+                changed = True
         if changed:
             if verbose:
                 print('saving',
@@ -224,15 +230,15 @@ if __name__ == '__main__':
     clarity = Clarity()
     clarity_projects = clarity.get_all_projects(verbose=options.verbose)
     print(len(clarity_projects), 'projects in Clarity')
-    for record in clarity_projects[:1000]:
+    for record in clarity_projects:
         clarity.fetch_project_info(record, verbose=options.verbose)
-        print('nid', record['lims_id'], record.get('nid'))
+        print(record['lims_id'], 'nid', record.get('nid'))
 
     clarity_lookup = {}
     for p in clarity_projects:
         nid = p.get('nid')
         if nid: clarity_lookup[nid] = p
-    print(len(clarity_lookup), 'project from Clarity')
+    print(len(clarity_lookup), 'projects from Clarity')
 
     process_old_portal_projects(db,
                                 projects,

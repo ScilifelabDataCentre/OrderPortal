@@ -646,7 +646,7 @@ class Register(RequestHandler):
                     university = self.get_argument('university', default=None)
                 saver['university'] = university or None
             except (tornado.web.MissingArgumentError, ValueError):
-                reason = "invalid '{0}' value provided".format(key)
+                reason = u"invalid '{0}' value provided".format(key)
                 raise tornado.web.HTTPError(400, reason=reason)
             saver['department'] = self.get_argument('department', default=None)
             saver['address'] = self.get_argument('address', default=None)

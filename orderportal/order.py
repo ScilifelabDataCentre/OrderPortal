@@ -171,7 +171,7 @@ class OrderMixin(object):
         return settings['ORDER_STATUSES_LOOKUP'][order['status']]
 
     def get_targets(self, order):
-        "Get the allowed transition targets."
+        "Get the allowed status transition targets."
         result = []
         for transition in settings['ORDER_TRANSITIONS']:
             if transition['source'] != order['status']: continue
@@ -257,7 +257,7 @@ class Order(OrderMixin, RequestHandler):
                 files.sort(lambda i,j: cmp(i['filename'].lower(),
                                            j['filename'].lower()))
         self.render('order.html',
-                    title="Order '{0}'".format(title),
+                    title=u"Order '{0}'".format(title),
                     order=order,
                     account_names=self.get_account_names([order['owner']]),
                     status=self.get_order_status(order),
@@ -294,7 +294,7 @@ class OrderLogs(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_readable(order)
         self.render('logs.html',
-                    title="Logs for order '{0}'".format(order['title']),
+                    title=u"Logs for order '{0}'".format(order['title']),
                     entity=order,
                     logs=self.get_logs(order['_id']))
 
@@ -340,7 +340,7 @@ class OrderEdit(OrderMixin, RequestHandler):
         colleagues = sorted(self.get_account_colleagues(self.current_user['email']))
         form = self.get_entity(order['form'], doctype=constants.FORM)
         self.render('order_edit.html',
-                    title="Edit order '{0}'".format(order['title']),
+                    title=u"Edit order '{0}'".format(order['title']),
                     order=order,
                     colleagues=colleagues,
                     fields=form['fields'])
@@ -387,7 +387,7 @@ class OrderClone(OrderMixin, RequestHandler):
         form = self.get_entity(order['form'], doctype=constants.FORM)
         with OrderSaver(rqh=self) as saver:
             saver['form'] = form['_id']
-            saver['title'] = "Clone of {0}".format(order['title'])
+            saver['title'] = u"Clone of {0}".format(order['title'])
             saver['fields'] = order['fields'].copy()
             saver['milestones'] = {}
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
