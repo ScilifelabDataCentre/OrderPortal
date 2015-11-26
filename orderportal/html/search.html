@@ -29,7 +29,7 @@
     <div class="col-md-4">
       <i>
 	Searches titles of orders and the order fields indexed by the
-	administrator. Accounts are also searched by first and last names.
+	administrator. Accounts are searched by first and last names.
       </i>
     </div>
   </div>
@@ -53,6 +53,7 @@
 	<th>Status</th>
 	<th>Modified</th>
       </tr>
+      {% if items %}
       {% for item in items %}
       <tr>
 	<td>
@@ -86,7 +87,12 @@
 	  {% end %}
 	</td>
       </tr>
-      {% end %}
+      {% end %} {# for item in items #}
+      {% else %}
+      <tr>
+	<td colspan="3"><i>[Empty list]</i></td>
+      </tr>
+      {% end %} {# if items #}
     </table>
   </div>
   <div class="col-md-1">

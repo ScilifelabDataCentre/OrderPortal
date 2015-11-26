@@ -55,6 +55,7 @@
 	{% end %}
 	<th width="10%">Modified</th>
       </tr>
+      {% if orders %}
       {% for order in orders %}
       <tr>
 	<td>
@@ -74,7 +75,12 @@
 	{% end %}
 	<td class="localtime">{{ order['modified'] }}</td>
       </tr>
-      {% end %}
+      {% end %} {# for order in orders #}
+      {% else %}
+      <tr>
+	<td colspan="3"><i>[Empty list]</i></td>
+      </tr>
+      {% end %} {# if orders #}
     </table>
   </div>
 </div>
