@@ -10,10 +10,17 @@
 {% except KeyError %}
   {% set url = static_url('orderportal_144.png') %}
 {% end %}
-<img src="{{ url }}"
-     title="{{ settings['SITE_NAME'] }}"
-     alt="{{ settings['SITE_NAME'] }}">
-{{ settings['SITE_NAME'] }}
+<div class="row">
+  <div class="col-md-4">
+    <img class="img-responsive"
+	 src="{{ url }}"
+	 title="{{ settings['SITE_NAME'] }}"
+	 alt="{{ settings['SITE_NAME'] }}">
+  </div>
+  <div class="col-md-8" style="margin-top: 1em; margin-bottom:0.5em">
+    {{ settings['SITE_NAME'] }}
+  </div>
+</div>
 {% end %}
 
 {% block content %}
@@ -54,7 +61,7 @@
 	  <div class="form-group">
 	    <label for="email">Email (=username)</label>
 	    <input type="text" class="form-control" name="email"
-		   placeholder="Email address of existing account">
+		   placeholder="Email address of account">
 	  </div>
 	  <div class="form-group">
 	    <label for="password">Password</label>
@@ -292,7 +299,8 @@
 	    <div class="row">
 	      <div class="col-md-8">
 		<label class="control-label" for="title">Title</label>
-		<input type="text" class="form-control" name="title" id="title"
+		<input type="text" class="form-control"
+		       name="title" id="title"
 		       value="{{ event['title'] }}">
 		<span style="color:red; margin-right: 1em;"
 		      class="glyphicon glyphicon-star form-control-feedback"
