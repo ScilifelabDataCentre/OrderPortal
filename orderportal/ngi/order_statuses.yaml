@@ -28,12 +28,6 @@
   edit: [user, admin]
   action: Reject
 
-- identifier: onhold
-  description: The facility is awaiting further input from the user.
-  edit: [admin]
-  attach: [user, admin]
-  action: On hold
-
 - identifier: processing
   description: The facility is working on the order, in the lab or in data analysis.
   attach: [admin]

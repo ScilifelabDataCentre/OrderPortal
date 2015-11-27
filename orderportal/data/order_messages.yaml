@@ -1,4 +1,9 @@
 # Message definitions for order status events.
+# The following parameters may be used:
+# {order} Order title
+# {owner} The name of the order owner (=author)
+# {site}  The name of the OrderPortal site.
+# {url}   The URL for the order.
 
 submitted:
   recipients: [admin, owner, group]
@@ -10,6 +15,11 @@ submitted:
 
     Go to {url} to view the order.
 
+    Yours sincerely,
+    The {site} administrators
+
+    Make any queries to: {support}
+
 accepted:
   recipients: [owner, group]
   subject: "The order '{order}' has been accepted at the {site}."
@@ -20,6 +30,8 @@ accepted:
 
     Yours sincerely,
     The {site} administrators.
+
+    Make any queries to: {support}
 
 rejected:
   recipients: [owner, group]
@@ -34,19 +46,7 @@ rejected:
     Yours sincerely,
     The {site} administrators.
 
-onhold:
-  recipients: [owner, group]
-  subject: "The order '{order}' is on hold at the {site}."
-  text: |
-    The order '{order}' is on hold at the {site}.
-
-    NOTE: You must contact the {site} administrators to provide
-    essential information for proceeding with the order.
-
-    Go to {url} to view the order.
-
-    Yours sincerely,
-    The {site} administrators.
+    Make any queries to: {support}
 
 processing:
   recipients: [owner, group]
@@ -58,6 +58,8 @@ processing:
 
     Yours sincerely,
     The {site} administrators.
+
+    Make any queries to: {support}
 
 aborted:
   recipients: [owner, group]
@@ -72,6 +74,8 @@ aborted:
     Yours sincerely,
     The {site} administrators.
 
+    Make any queries to: {support}
+
 closed:
   recipients: [owner, group]
   subject: "The order '{order}' has been closed at the {site}."
@@ -82,3 +86,6 @@ closed:
 
     Yours sincerely,
     The {site} administrators.
+
+    Make any queries to: {support}
+

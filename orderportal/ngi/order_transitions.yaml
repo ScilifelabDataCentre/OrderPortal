@@ -6,29 +6,25 @@
   require: valid
 
 - source: submitted
-  targets: [review, accepted, rejected, onhold]
+  targets: [review, accepted, rejected]
   permission: [admin]
 
 - source: review
-  targets: [accepted, preparation, rejected, onhold]
+  targets: [accepted, preparation, rejected]
   permission: [admin]
 
 - source: accepted
-  targets: [onhold, processing]
+  targets: [processing, rejected]
   permission: [admin]
 
 - source: rejected
   targets: [preparation]
   permission: [user]
 
-- source: onhold
-  targets: [processing]
-  permission: [admin]
-
 - source: processing
-  targets: [onhold, aborted, closed]
+  targets: [aborted, closed]
   permission: [admin]
 
 - source: undefined
-  targets: [preparation, submitted, review, accepted, rejected, onhold, processing, aborted, closed]
+  targets: [preparation, submitted, review, accepted, rejected, processing, aborted, closed]
   permission: [admin]

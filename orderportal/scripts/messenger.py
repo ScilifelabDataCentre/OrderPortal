@@ -1,5 +1,13 @@
 """OrderPortal: Send messages to users about recent events from log records.
-To be run as a cron job.
+
+The logic is that it gets the timestamp for the latest message, and looks
+through all log entries since that timestamp for new events that require
+messages to be sent.
+
+The messaging rules and texts are configured in the files defined by
+settings ACCOUNT_MESSAGES_FILENAME and ORDER_MESSAGES_FILENAME.
+
+This script is to be run as a cron job.
 """
 
 from __future__ import print_function, absolute_import
@@ -25,7 +33,7 @@ class MessageSaver(saver.Saver):
         pass
 
 
-class Messager(object):
+class Messenger(object):
     "Process log records and send messages for interesting events."
 
     def __init__(self, db, verbose=False, dry_run=False):
@@ -51,12 +59,8 @@ class Messager(object):
             return self._server
         except AttributeError:
             host = settings['EMAIL']['HOST']
-            if self.verbose:
-                print('host', host)
             try:
                 port = settings['EMAIL']['PORT']
-                if self.verbose:
-                    print('port', port)
             except KeyError:
                 self._server = smtplib.SMTP(host)
             else:
@@ -86,8 +90,10 @@ class Messager(object):
             path += '?' + urllib.urlencode(query)
         return settings['BASE_URL'].rstrip('/') + path
 
-    def process_logs(self):
-        "Go through unprocessed log entries for items to send messages about."
+    def process(self):
+        """Go through unprocessed log entries for items to send messages about.
+        Currently, account and order logs are checked.
+        """
         view = self.db.view('message/modified', descending=True, limit=1)
         messages = list(view)
         try:
@@ -110,7 +116,7 @@ class Messager(object):
                 self.process_order_log(row.doc)
 
     def process_account_log(self, logdoc):
-        "Send message for an interesting account log record."
+        "Check for relevant event in account log entry and send message(s)."
         message = None
         if logdoc['changed'].get('status') == constants.PENDING:
             self.process_account_pending(logdoc)
@@ -149,7 +155,7 @@ class Messager(object):
         self.send_email([account['owner']], message, params)
 
     def process_order_log(self, logdoc):
-        "Send message for an interesting order log record."
+        "Check for relevant event in order log entry and send message(s)."
         status = logdoc['changed'].get('status')
         message = self.order_messages.get(status)
         if not message: return
@@ -163,7 +169,8 @@ class Messager(object):
         params = dict(site=settings['SITE_NAME'],
                       owner=owner['email'],
                       order=order.get('title') or order['_id'],
-                      url=self.absolute_url('order', order['_id']))
+                      url=self.absolute_url('order', order['_id']),
+                      support=settings.get('SITE_SUPPORT', '[not defined]'))
         # Send to administrators, if so configured
         for role in message['recipients']:
             if role == 'admin':
@@ -241,7 +248,7 @@ if __name__ == '__main__':
     (options, args) = get_args()
     utils.load_settings(filepath=options.settings,
                         verbose=options.verbose)
-    messager = Messager(utils.get_db(),
+    messenger = Messenger(utils.get_db(),
                         verbose=options.verbose,
                         dry_run=options.dry_run)
-    messager.process_logs()
+    messenger.process()
