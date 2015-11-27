@@ -19,5 +19,22 @@ enabled:
     In case that link does not work, go to {url} and
     fill in your email address and the one-time code {code}.
 
+    If you have any questions, use {support}
+
+    Yours sincerely,
+    The {site} administrators.
+
+reset:
+  subject: "The password has been reset for your account in the {site}."
+  text: |
+    The password has been reset for your account {account} in the {site}.
+
+    Go to {url_code} to set a new password.
+
+    In case that link does not work, go to {url} and
+    fill in your email address and the one-time code {code}.
+
+    If you have any questions, use {support}
+
     Yours sincerely,
     The {site} administrators.

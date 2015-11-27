@@ -577,15 +577,17 @@ class Reset(RequestHandler):
     "Reset the password of a account account."
 
     def get(self):
-        email = self.current_user and self.current_user['email']
-        self.render('reset.html', email=email)
+        self.render('reset.html', email=self.get_argument('account', ''))
 
     def post(self):
         self.check_xsrf_cookie()
         account = self.get_account(self.get_argument('email'))
         with AccountSaver(doc=account, rqh=self) as saver:
             saver.reset_password()
-        self.see_other('password')
+        if self.current_user and self.current_user['email'] == account['email']:
+            self.see_other('password')
+        else:
+            self.see_other('home')
 
 
 class Password(RequestHandler):

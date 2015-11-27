@@ -1,8 +1,10 @@
 # Message definitions for order status events.
+
 # The following parameters may be used:
-# {order} Order title
-# {owner} The name of the order owner (=author)
 # {site}  The name of the OrderPortal site.
+# {support} Contact address.
+# {order} Order title.
+# {owner} The name of the order owner (=author).
 # {url}   The URL for the order.
 
 submitted:
@@ -15,10 +17,10 @@ submitted:
 
     Go to {url} to view the order.
 
+    If you have any questions, use {support}
+
     Yours sincerely,
     The {site} administrators
-
-    Make any queries to: {support}
 
 accepted:
   recipients: [owner, group]
@@ -28,10 +30,10 @@ accepted:
 
     Go to {url} to view the order.
 
+    If you have any questions, use {support}
+
     Yours sincerely,
     The {site} administrators.
-
-    Make any queries to: {support}
 
 rejected:
   recipients: [owner, group]
@@ -43,10 +45,10 @@ rejected:
 
     Go to {url} to view the order.
 
+    If you have any questions, use {support}
+
     Yours sincerely,
     The {site} administrators.
-
-    Make any queries to: {support}
 
 processing:
   recipients: [owner, group]
@@ -56,10 +58,10 @@ processing:
 
     Go to {url} to view the order.
 
+    If you have any questions, use {support}
+
     Yours sincerely,
     The {site} administrators.
-
-    Make any queries to: {support}
 
 aborted:
   recipients: [owner, group]
@@ -71,10 +73,10 @@ aborted:
 
     Go to {url} to view the order.
 
+    If you have any questions, use {support}
+
     Yours sincerely,
     The {site} administrators.
-
-    Make any queries to: {support}
 
 closed:
   recipients: [owner, group]
@@ -84,8 +86,7 @@ closed:
 
     Go to {url} to view the order.
 
+    If you have any questions, use {support}
+
     Yours sincerely,
     The {site} administrators.
-
-    Make any queries to: {support}
-

@@ -35,7 +35,7 @@
 {% if is_admin or current_user['email'] == account['email'] %}
 <br>
 <div>
-  <a href="{{ reverse_url('reset') }}"
+  <a href="{{ reverse_url('reset', account=account['email']) }}"
      role="button"
      class="btn btn-warning glyphicon glyphicon-step-backward">
     Reset password

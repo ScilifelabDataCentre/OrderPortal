@@ -111,11 +111,11 @@ class Messenger(object):
             if self.verbose:
                 print('log', row.id)
             if row.value == constants.ACCOUNT:
-                self.process_account_log(row.doc)
+                self.process_account(row.doc)
             elif row.value == constants.ORDER:
-                self.process_order_log(row.doc)
+                self.process_order(row.doc)
 
-    def process_account_log(self, logdoc):
+    def process_account(self, logdoc):
         "Check for relevant event in account log entry and send message(s)."
         message = None
         if logdoc['changed'].get('status') == constants.PENDING:
@@ -123,42 +123,78 @@ class Messenger(object):
         # Account has been enabled.
         elif logdoc['changed'].get('status') == constants.ENABLED:
             self.process_account_enabled(logdoc)
+        # Account password has been reset; must be checked after 'enabled'!
+        elif logdoc['changed'].get('code'):
+            self.process_account_reset(logdoc)
+
+    def get_account_params(self, account, **kwargs):
+        "Get the template parameters for the account message."
+        result = dict(site=settings['SITE_NAME'],
+                      support=settings.get('SITE_SUPPORT', '[not defined]'),
+                      account=account['email'],
+                      url=self.absolute_url('account', account['email']))
+        result.update(kwargs)
+        return result
 
     def process_account_pending(self, logdoc):
         "Account was created, is pending. Tell the admins to enable it."
         message = self.account_messages.get('pending')
-        if not message: return
+        if not message:
+            if self.verbose: print('No message for account pending.')
+            return
         try:
             account = self.db[logdoc['entity']]
         except couchdb.ResourceNotFound:
             return
-        params = dict(site=settings['SITE_NAME'],
-                      account=account['email'],
-                      url=self.absolute_url('account', account['email']))
+        params = self.get_account_params(account)
         self.send_email(self.get_admins(), message, params)
 
     def process_account_enabled(self, logdoc):
         """Account was enabled. Send URL and code for setting password."""
         message = self.account_messages.get('enabled')
-        if not message: return
+        if not message:
+            if self.verbose: print('No message for account enabled.')
+            return
         try:
             account = self.db[logdoc['entity']]
         except couchdb.ResourceNotFound:
             return
-        params = dict(site=settings['SITE_NAME'],
-                      account=account['email'],
-                      url=self.absolute_url('password'),
-                      url_code=self.absolute_url('password',
-                                                 email=account['email'],
-                                                 code=account['code']),
-                      code=account['code'])
+        params = self.get_account_params(
+            account,
+            password=self.absolute_url('password'),
+            password_code=self.absolute_url('password',
+                                            email=account['email'],
+                                            code=account['code']),
+            code=account['code'])
         self.send_email([account['owner']], message, params)
 
-    def process_order_log(self, logdoc):
+    def process_account_reset(self, logdoc):
+        "Account password was reset. Send URL and code for setting password."
+        message = self.account_messages.get('reset')
+        if not message:
+            if self.verbose: print('No message for account reset.')
+            return
+        try:
+            account = self.db[logdoc['entity']]
+        except couchdb.ResourceNotFound:
+            return
+        params = self.get_account_params(
+            account,
+            password=self.absolute_url('password'),
+            password_code=self.absolute_url('password',
+                                            email=account['email'],
+                                            code=account['code']),
+            code=account['code'])
+        self.send_email([account['owner']], message, params)
+
+    def process_order(self, logdoc):
         "Check for relevant event in order log entry and send message(s)."
         status = logdoc['changed'].get('status')
         message = self.order_messages.get(status)
-        if not message: return
+        if not message:
+            if self.verbose:
+                print("No message for order status {0}.".format(status))
+            return
         try:
             order = self.db[logdoc['entity']]
         except couchdb.ResourceNotFound:
@@ -166,11 +202,7 @@ class Messenger(object):
         owner = self.get_account(order['owner'])
         # Owner may have disappeared (OK, OK, unlikely)
         if not owner: return
-        params = dict(site=settings['SITE_NAME'],
-                      owner=owner['email'],
-                      order=order.get('title') or order['_id'],
-                      url=self.absolute_url('order', order['_id']),
-                      support=settings.get('SITE_SUPPORT', '[not defined]'))
+        params = self.get_order_params(order)
         # Send to administrators, if so configured
         for role in message['recipients']:
             if role == 'admin':
@@ -184,6 +216,16 @@ class Messenger(object):
             elif role == 'group':
                 recipients.update(self.get_colleagues(owner['email']))
         self.send_email(list(recipients), message, params)
+
+    def get_order_params(self, order, **kwargs):
+        "Get the template parameters for the order message."
+        result = dict(site=settings['SITE_NAME'],
+                      support=settings.get('SITE_SUPPORT', '[not defined]'),
+                      owner=owner['email'],
+                      order=order.get('title') or order['_id'],
+                      url=self.absolute_url('order', order['_id']))
+        result.update(kwargs)
+        return result
 
     def send_email(self, recipients, message, params):
         "Actually send the message as email; not if the dry_run flag is set."

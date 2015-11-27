@@ -1,8 +1,10 @@
 # Message definitions for order status events.
+
 # The following parameters may be used:
-# {order} Order title
-# {owner} The name of the order owner (=author)
 # {site}  The name of the OrderPortal site.
+# {support} Contact address.
+# {order} Order title.
+# {owner} The email of the order owner (=author).
 # {url}   The URL for the order.
 
 submitted:
@@ -20,6 +22,9 @@ submitted:
 
     If you have any questions, use {support}
 
+    Yours sincerely,
+    The {site} administrators.
+
 accepted:
   recipients: [owner, group]
   subject: "The order '{order}' has been accepted at the {site}."
@@ -27,6 +32,8 @@ accepted:
     The order '{order}' has been accepted at the {site}.
 
     Go to {url} to view the order.
+
+    If you have any questions, use {support}
 
     Yours sincerely,
     The {site} administrators.
@@ -41,6 +48,8 @@ rejected:
 
     Go to {url} to view the order.
 
+    If you have any questions, use {support}
+
     Yours sincerely,
     The {site} administrators.
 
@@ -51,6 +60,8 @@ processing:
     The order '{order}' is being processed at the {site}.
 
     Go to {url} to view the order.
+
+    If you have any questions, use {support}
 
     Yours sincerely,
     The {site} administrators.
@@ -65,6 +76,8 @@ aborted:
 
     Go to {url} to view the order.
 
+    If you have any questions, use {support}
+
     Yours sincerely,
     The {site} administrators.
 
@@ -75,6 +88,8 @@ closed:
     The order '{order}' has been closed at the {site}.
 
     Go to {url} to view the order.
+
+    If you have any questions, use {support}
 
     Yours sincerely,
     The {site} administrators.

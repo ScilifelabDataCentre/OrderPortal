@@ -25,8 +25,11 @@ reset: |
   this has been done.
 
   An email with a link to a page for setting a new password will be sent
-  to you. This contains a one-time code. If you loose this code, simply use
-  this page again, and a new code will be sent.
+  to you. This may take a few minutes.
+
+  The email contains a one-time code required for setting a new password.
+  If you loose this code, simply use this page again, and a new code will
+  be sent.
 
 password: |
   Set the password for your account. You need the one-time code which was
