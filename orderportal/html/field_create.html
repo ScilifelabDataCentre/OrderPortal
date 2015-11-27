@@ -78,7 +78,8 @@
     <div class="row">
       <div class="col-md-3">
 	<label class="control-label" for="type">Type</label>
-	<select class="form-control" name="type" id="type">
+	<select class="form-control visible-if-source"
+		name="type" id="type">
 	  {% for type in constants.TYPES %}
 	  <option value="{{ type }}">{{ constants.TYPE_LABELS.get(type, type) }}</option>
 	  {% end %}
@@ -86,8 +87,42 @@
       </div>
     </div>
     <span class="help-block">
-      Data type for the field. Cannot be changed.
+      Data type for the field. Cannot be changed once field has been created.
       {% module Help('help_datatypes') %}
+    </span>
+  </div>
+
+  <div class="form-group visible-if"
+       data-if-id="type"
+       data-if-val="select">
+    <div class="row">
+      <div class="col-md-3">
+	<label class="control-label" for="select">Select</label>
+	<textarea class="form-control" name="select" rows="4"></textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      Values to select among. One per line. The first value is the default.
+      May be edited later.
+    </span>
+  </div>
+
+  <div class="form-group visible-if"
+       data-if-id="type"
+       data-if-val="select">
+    <div class="row">
+      <div class="col-md-3">
+	<label class="control-label" for="display">Display</label>
+	<div>
+	  <label class="radio-inline">
+	    <input type="radio" name="display" value="menu" checked>Menu</label>
+	  <label class="radio-inline">
+	    <input type="radio" name="display" value="radio">Radio buttons</label>
+	</div>
+      </div>
+    </div>
+    <span class="help-block">
+      Display element to use for the field.
     </span>
   </div>
 
@@ -190,4 +225,5 @@ $(document).ready(function() {
   });
 });
 </script>
+<script src="{{ static_url('field_visible_if.js') }}"></script>
 {% end %}

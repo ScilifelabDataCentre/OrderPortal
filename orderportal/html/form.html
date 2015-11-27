@@ -206,6 +206,7 @@
 	<td>
 	  {{ field['type'] }}
 	  {% if field['type'] == constants.SELECT %}
+	  ({{ field.get('display') or 'menu' }})
 	  <pre>{{ '\n'.join(field.get('select') or []) }}</pre>
 	  {% end %}
 	</td>

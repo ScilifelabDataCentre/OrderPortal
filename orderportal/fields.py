@@ -73,6 +73,12 @@ class Fields(object):
                    description=rqh.get_argument('description', None))
         if type == constants.GROUP:
             new['fields'] = []
+        elif type == constants.SELECT:
+            values = rqh.get_argument('select', '').split('\n')
+            values = [v.strip() for v in values]
+            values = [v for v in values if v]
+            new['select'] = values
+            new['display'] = rqh.get_argument('display', None) or 'menu'
         group = rqh.get_argument('group', None)
         if group == '': group = None
         for field in self:
@@ -109,6 +115,7 @@ class Fields(object):
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new['select'] = values
+            new['display'] = rqh.get_argument('display', None) or 'menu'
         identifier = rqh.get_argument('visible_if_field', None)
         if identifier == '': identifier = None
         new['visible_if_field'] = identifier

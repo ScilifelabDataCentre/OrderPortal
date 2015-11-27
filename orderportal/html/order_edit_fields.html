@@ -77,22 +77,44 @@
       </label>
 
       {% if field['type'] == constants.SELECT %}
-      <select class="form-control visible-if-source"
-	      name="{{ field['identifier'] }}"
-	      id="{{ field['identifier'] }}">
-	{% if value is None %}
-	<option selected value="">[no value]</option>
-	{% else %}
-	<option value="">[no value]</option>
-	{% end %}
-	{% for v in field['select'] %}
-	  {% if v == value %}
-	  <option selected>{{ v }}</option>
-	  {% else %}
-	  <option>{{ v }}</option>
-	  {% end %}
-	{% end %}
-      </select>
+        {% if field.get('display') == 'radio' %}
+          <div>
+	    {% set checked = value is None and 'checked' or '' %}
+	    <label class="radio-inline">
+	      <input type="radio"
+		     name="{{ field['identifier'] }}"
+		     value=""
+		     {{ checked }}>[no value]
+	    </label>
+	    {% for v in field['select'] %}
+	    {% set checked = v == value and 'checked' or '' %}
+	    <label class="radio-inline">
+	      <input type="radio"
+		     name="{{ field['identifier'] }}"
+		     value="{{ v }}"
+		     {{ checked }}>{{ v }}
+	    </label>
+	    {% end %}
+	  </div>
+        
+        {% else %} {# default 'menu' #}
+          <select class="form-control visible-if-source"
+		  name="{{ field['identifier'] }}"
+		  id="{{ field['identifier'] }}">
+	    {% if value is None %}
+	    <option selected value="">[no value]</option>
+	    {% else %}
+	    <option value="">[no value]</option>
+	    {% end %}
+	    {% for v in field['select'] %}
+	      {% if v == value %}
+	      <option selected>{{ v }}</option>
+	      {% else %}
+	      <option>{{ v }}</option>
+	      {% end %}
+	    {% end %}
+	  </select>
+	{% end %} {# if field.get('display') == 'radio' #}
 
       {% elif field['type'] == constants.TEXT %}
       <textarea class="form-control"
