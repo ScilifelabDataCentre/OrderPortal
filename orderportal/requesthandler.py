@@ -147,8 +147,14 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_news(self):
         "Get all news items in descending 'modified' order."
-        view = self.db.view('news/modified', include_docs=True, descending=True)
-        return [r.doc for r in view]
+        view = self.db.view('news/modified', include_docs=True)
+        news = [r.doc for r in view]
+        # Fill in date from modified, if not explicit
+        for new in news:
+            if not new.get('date'):
+                new['date'] = new['modified'].split('T')[0]
+        news.sort(lambda i,j:cmp(i['date'],j['date']), reverse=True)
+        return news
 
     def get_events(self):
         "Get all events items in descending 'date' order."

@@ -30,7 +30,8 @@ class News(RequestHandler):
         if news is None:
             raise tornado.web.HTTPError(404)
         with NewsSaver(doc=news, rqh=self) as saver:
-            saver['text'] = self.get_argument('text')
+            saver['date'] = self.get_argument('date', None)
+            saver['text'] = self.get_argument('text', '')
         self.see_other('home')
 
     @tornado.web.authenticated
@@ -50,5 +51,6 @@ class NewsCreate(RequestHandler):
     def post(self):
         self.check_admin()
         with NewsSaver(rqh=self) as saver:
-            saver['text'] = self.get_argument('text')
+            saver['date'] = self.get_argument('date', None)
+            saver['text'] = self.get_argument('text', '')
         self.see_other('home')

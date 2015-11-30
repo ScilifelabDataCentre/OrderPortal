@@ -155,9 +155,7 @@
 	    <td>
 	      {% module Markdown(news.get('text')) %}
 	    </td>
-	    <td class="text-right small">
-	      [{{ news['modified'].split('T')[0] }}]
-	    </td>
+	    <td class="text-right small">[{{ news['date'] }}]</td>
 	  </tr>
 	  {% end %}
 	</table>
@@ -226,7 +224,7 @@
 
 {% if is_admin %}
 {# Modals for editing news items. #}
-{% for news in news_items %}
+{% for pos, news in enumerate(news_items) %}
 <div id="{{ news['_id'] }}" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -241,7 +239,9 @@
 	      method="POST">
 	  {% module xsrf_form_html() %}
 	  <div class="form-group">
-	    <textarea class="form-control" rows="5" name="text" id="text"
+	    <label for="text{{ pos }}">News item text</label>
+	    <textarea class="form-control" rows="5"
+		      name="text" id="text{{ pos }}"
 		      >{% raw news.get('text') or '' %}</textarea>
 	    <span class="help-block">
 	      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
@@ -249,6 +249,20 @@
 	    </span>
 	  </div>
 	  
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-4">
+		<label class="control-label" for="newsdate{{ pos }}">Date</label>
+		<input type="text" class="datepicker form-control"
+		       name="date" id="newsdate{{ pos }}"
+		       value="{{ news['date'] or '' }}">
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Date of publication for the news item.
+	    </span>
+	  </div>
+
 	  <div class="form-group">
 	    <label class="control-label"></label>
 	    <button type="submit"
@@ -285,7 +299,7 @@
 		<label class="control-label" for="date{{ pos }}">Date</label>
 		<input type="text" class="datepicker form-control"
 		       name="date" id="date{{ pos }}"
-		       value="{{ event['date']}}">
+		       value="{{ event['date'] }}">
 		<span style="color:red; margin-right: 1em;"
 		      class="glyphicon glyphicon-star form-control-feedback"
 		      aria-hidden="true"></span>
