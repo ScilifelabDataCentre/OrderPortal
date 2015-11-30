@@ -135,7 +135,15 @@
 		{{ value == False and 'selected' or '' }}>False</option>
       </select>
 
-      {# All other field types: string, integer, float, url, date. #}
+      {% elif field['type'] == constants.DATE %}
+      {# This requires inclusion of jQuery datepicker! #}
+      <input type="text"
+	     class="datepicker form-control visible-if-source"
+	     name="{{ field['identifier'] }}"
+	     id="{{ field['identifier'] }}"
+	     value="{{ value }}">
+
+      {# All other field types: string, integer, float, url #}
       {% else %}
       {% if value is None %}
       {% set value = '' %}
@@ -145,13 +153,14 @@
 	     name="{{ field['identifier'] }}"
 	     id="{{ field['identifier'] }}"
 	     value="{{ value }}">
+      {% end %} {# elif field['type'] == #}
+
       {% if field['required'] %}
       <span style="color:red; margin-right: 1em;"
 	    class="glyphicon glyphicon-star form-control-feedback"
 	    aria-hidden="true">
       </span>
       {% end %}
-      {% end %} {# elif field['type'] == #}
     </div>
   </div>
   <span class="help-block">

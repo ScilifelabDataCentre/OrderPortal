@@ -265,7 +265,7 @@
 {% end %}{# for news in news_items #}
 
 {# Modals for editing event items. #}
-{% for event in events %}
+{% for pos, event in enumerate(events) %}
 <div id="{{ event['_id'] }}" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -282,9 +282,10 @@
 	  <div class="form-group has-feedback">
 	    <div class="row">
 	      <div class="col-md-4">
-		<label class="control-label" for="date">Date</label>
-		<input type="date" class="form-control"
-		       name="date" id="date" value="{{ event['date']}}">
+		<label class="control-label" for="date{{ pos }}">Date</label>
+		<input type="text" class="datepicker form-control"
+		       name="date" id="date{{ pos }}"
+		       value="{{ event['date']}}">
 		<span style="color:red; margin-right: 1em;"
 		      class="glyphicon glyphicon-star form-control-feedback"
 		      aria-hidden="true"></span>
@@ -339,7 +340,7 @@
 
   </div>
 </div>
-{% end %}{# for event in events #}
+{% end %}{# for pos, event in enum(events) #}
 
 {# Modal for creating a news item. #}
 <div id="news_create" class="modal fade" role="dialog">
@@ -396,7 +397,7 @@
 	    <div class="row">
 	      <div class="col-md-4">
 		<label class="control-label" for="date">Date</label>
-		<input type="date" class="form-control"
+		<input type="text" class="datepicker form-control"
 		       name="date" id="date">
 		<span style="color:red; margin-right: 1em;"
 		      class="glyphicon glyphicon-star form-control-feedback"
@@ -463,3 +464,17 @@
 {% end %} {# block content-footer #}
 
 {% end %} {# block content #}
+
+{% block header-css %}
+<link rel="stylesheet" href="{{ static_url('jquery-ui-themes-1.11.4/themes/smoothness/jquery-ui.min.css') }}">
+{% end %}
+
+{% block javascript_code %}
+<script src="{{ static_url('jquery-ui-1.11.4/jquery-ui.min.js') }}"></script>
+<script>
+  $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
+  $(document).ready(function(){
+    $(".datepicker").datepicker();
+  });
+</script>
+{% end %}

@@ -11,7 +11,9 @@
     {% end %}
     <link rel="shortcut icon" type="image/png" href="{{ url }}">
     <link rel="stylesheet"
-	  href="{{ static_url('bootstrap-3.3.4/css/bootstrap.min.css') }}">
+	  href="{{ static_url('Bootstrap-3.3.5/css/bootstrap.min.css') }}">
+    {% block header-css %}
+    {% end %}
     <link rel="stylesheet" href="{{ static_url('mods.css') }}">
   </head>
 
@@ -273,7 +275,7 @@
     {# NOTE: jQuery has to be loaded before bootstrap! #}
     <script src="{{ static_url('jquery-1.11.3.min.js') }}"></script>
     <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
-    <script src="{{ static_url('bootstrap-3.3.4/js/bootstrap.min.js') }}"></script>
+    <script src="{{ static_url('Bootstrap-3.3.5/js/bootstrap.min.js') }}"></script>
     <script>
       $(document).ready(function(){
         $('.dropdown-submenu a.submenu').on("click", function(e){
