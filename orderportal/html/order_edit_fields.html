@@ -76,7 +76,20 @@
 	{% end %}
       </label>
 
-      {% if field['type'] == constants.SELECT %}
+      {% if field['type'] == constants.BOOLEAN %}
+      {# Simplifies a lot to use a Select element rather than Radio. #}
+      <select class="form-control visible-if-source"
+	      id="{{ field['identifier'] }}"
+	      name="{{ field['identifier'] }}">
+	<option value="__none__"
+		{{ value is None and 'selected' or '' }}>[no value]</option>
+	<option value="true"
+		{{ value == True and 'selected' or '' }}>True</option>
+	<option value="false"
+		{{ value == False and 'selected' or '' }}>False</option>
+      </select>
+
+      {% elif field['type'] == constants.SELECT %}
         {% if field.get('display') == 'radio' %}
           <div>
 	    {% set checked = value is None and 'checked' or '' %}
@@ -122,29 +135,15 @@
 		id="{{ field['identifier'] }}"
 		>{{ value or '' }}</textarea>
 
-      {% elif field['type'] == constants.BOOLEAN %}
-      {# Simplifies a lot to use a Select element rather than Radio. #}
-      <select class="form-control visible-if-source"
-	      id="{{ field['identifier'] }}"
-	      name="{{ field['identifier'] }}">
-	<option value="__none__"
-		{{ value is None and 'selected' or '' }}>[no value]</option>
-	<option value="true"
-		{{ value == True and 'selected' or '' }}>True</option>
-	<option value="false"
-		{{ value == False and 'selected' or '' }}>False</option>
-      </select>
-
       {% elif field['type'] == constants.DATE %}
-      {# This requires inclusion of jQuery datepicker! #}
+      {# This requires jQuery datepicker! #}
       <input type="text"
 	     class="datepicker form-control visible-if-source"
 	     name="{{ field['identifier'] }}"
 	     id="{{ field['identifier'] }}"
 	     value="{{ value }}">
 
-      {# All other field types: string, integer, float, url #}
-      {% else %}
+      {% else %} {# All other field types: string, integer, float, url #}
       {% if value is None %}
       {% set value = '' %}
       {% end %}
