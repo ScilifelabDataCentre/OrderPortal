@@ -105,10 +105,10 @@
 	</td>
       </tr>
       <tr>
-	<th>Milestones</th>
+	<th>History</th>
 	<td>
 	  <table>
-	  {% for st, date in sorted(order['milestones'].items(), lambda i,j: cmp(j[1], i[1])) %}
+	  {% for st, date in sorted(order['history'].items(), lambda i,j: cmp(j[1], i[1])) %}
 	  <tr>
 	    <td>{% module Icon(st, label=True) %}</td>
 	    <td>&nbsp;{{ date }}</td>

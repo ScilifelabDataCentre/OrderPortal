@@ -50,7 +50,7 @@
 	<th width="30%">Order</th>
 	<th width="10%">Owner</th>
 	<th width="10%">Status</th>
-	{% for st in settings['ORDER_LIST_MILESTONES'] %}
+	{% for st in settings['ORDER_LIST_HISTORY'] %}
 	<th>{% module Icon(st, label=True) %}</th>
 	{% end %}
 	<th width="10%">Modified</th>
@@ -70,8 +70,8 @@
 	  </a>
 	</td>
 	<td>{% module Icon(order['status'], label=True) %}</td>
-	{% for st in settings['ORDER_LIST_MILESTONES'] %}
-	<td>{{ order['milestones'].get(st) or '-' }}</td>
+	{% for st in settings['ORDER_LIST_HISTORY'] %}
+	<td>{{ order['history'].get(st) or '-' }}</td>
 	{% end %}
 	<td class="localtime">{{ order['modified'] }}</td>
       </tr>

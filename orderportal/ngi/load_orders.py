@@ -85,7 +85,7 @@ def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
             saver['fields'] = values
             # saver['fields'] = dict([(f['identifier'], record[f['identifier']])
             #                         for f in fields if f['type']!='group'])
-            saver['milestones'] = {}
+            saver['history'] = {}
             saver.set_status('undefined')
             saver.check_fields_validity(fields)
         if verbose:

@@ -31,8 +31,8 @@ class BaseFixer(object):
     def fix_documents(self):
         """Go through all documents in the database and
         execute the callable for each.
-        If the document needs modification, it performs it and returns
-        the modified document. Otherwise it returns None.
+        If the document needs modification, the callable performs it
+        and returns the modified document. Otherwise it returns None.
         This procedure will then save the modified document.
         """
         total = 0

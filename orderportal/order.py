@@ -20,7 +20,7 @@ class OrderSaver(saver.Saver):
 
     def set_status(self, new):
         self['status'] = new
-        self.doc['milestones'][new] = utils.today()
+        self.doc['history'][new] = utils.today()
 
     def update_fields(self, fields):
         "Update all fields from the HTML form input."
@@ -320,7 +320,7 @@ class OrderCreate(RequestHandler):
             saver['form'] = form['_id']
             saver['title'] = self.get_argument('title', None) or form['title']
             saver['fields'] = dict([(f['identifier'], None) for f in fields])
-            saver['milestones'] = {}
+            saver['history'] = {}
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
             saver.check_fields_validity(fields)
         self.see_other('order_edit', saver.doc['_id'])
@@ -389,7 +389,7 @@ class OrderClone(OrderMixin, RequestHandler):
             saver['form'] = form['_id']
             saver['title'] = u"Clone of {0}".format(order['title'])
             saver['fields'] = order['fields'].copy()
-            saver['milestones'] = {}
+            saver['history'] = {}
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
             saver.check_fields_validity(Fields(form))
         self.see_other('order', saver.doc['_id'])
