@@ -89,6 +89,20 @@
 <div class="panel panel-default">
   <div class="panel-body">
     <table class="table table-condensed table-fields table-noborder">
+      {% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
+      <tr>
+	<th>Identifier</th>
+	<td colspan="2">
+	  {% if order.get('identifier') %}
+	  <a href="{{ reverse_url('order_id', order['identifier']) }}">
+	    {{ order['identifier'] }}
+	  </a>
+	  {% else %}
+	  -
+	  {% end %}
+	</td>
+      </tr>
+      {% end %}
       <tr>
 	<th>Owner</th>
 	<td colspan="2">

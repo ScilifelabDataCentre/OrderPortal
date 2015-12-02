@@ -47,7 +47,12 @@
   <div class="col-md-12">
     <table class="table table-striped table-condensed">
       <tr>
+	{% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
+	<th width="5%">Id</th>
+	<th width="25%">Order</th>
+	{% else %}
 	<th width="30%">Order</th>
+	{% end %}
 	<th width="10%">Owner</th>
 	<th width="10%">Status</th>
 	{% for st in settings['ORDER_LIST_HISTORY'] %}
@@ -58,6 +63,19 @@
       {% if orders %}
       {% for order in orders %}
       <tr>
+	{% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
+	<td>
+	  {% if order.get('identifier') %}
+	  <a href="{{ reverse_url('order_id', order['identifier']) }}">
+	    {{ order['identifier'] }}
+	  </a>
+	  {% else %}
+	  <a href="{{ reverse_url('order', order['_id']) }}">
+	    {{ order['_id'][:6] + '...' }}
+	  </a>
+	  {% end %}
+	</td>
+	{% end %}
 	<td>
 	  <a href="{{ reverse_url('order', order['_id']) }}">
 	    {{ order.get('title', order['_id']) }}

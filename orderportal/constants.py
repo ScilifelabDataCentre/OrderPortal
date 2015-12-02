@@ -36,6 +36,7 @@ INFO    = 'info'
 FILE    = 'file'
 LOG     = 'log'
 MESSAGE = 'message'
+META    = 'meta'
 ENTITIES = frozenset([ACCOUNT, GROUP, FIELD, FORM, ORDER, INFO, FILE, MESSAGE])
 
 # Field types

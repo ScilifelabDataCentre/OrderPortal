@@ -1,4 +1,4 @@
-"Clarity LIMS interface. Check contact."
+"Clarity LIMS interface."
 
 from __future__ import print_function, absolute_import
 
@@ -41,7 +41,7 @@ for prefix, url in NSMAP.iteritems():
 class Clarity(object):
 
     def __init__(self):
-        with open('settings.yaml') as infile:
+        with open('clarity_settings.yaml') as infile:
             clarity_settings = yaml.safe_load(infile)
         self.API_URL = clarity_settings['API_URL']
         self.session = requests.Session()
@@ -87,8 +87,6 @@ class Clarity(object):
             print('getting', url)
         response = self.session.get(record['uri'])
         assert response.status_code == 200
-        # with open("{0}.xml".format(record['lims_id']), 'w') as outfile:
-        #     outfile.write(response.content)
         etree = ElementTree.fromstring(response.content)
         element = etree.find('open-date') # processing
         if element is not None:
@@ -117,19 +115,19 @@ class Clarity(object):
         except (KeyError, ValueError, TypeError):
             pass
         else:
-            record['nid'] = str(value)
+            record['identifier'] = 'NGI{0:=05d}'.format(value)
 
 def get_old_portal_projects(db):
-    """Get all projects in the database having a 'nid' field which
-    are not closed or aborted. Return a lookup with 'nid' as key.
+    """Get all projects in the database having a 'identifier' field which
+    are not closed or aborted. Return a lookup with 'identifier' as key.
     """
     result = {}
     for row in db.view('order/modified', include_docs=True):
         doc = row.doc
         if doc['status'] in ('closed', 'aborted'): continue
-        nid = doc['fields'].get('nid')
-        if not nid: continue
-        result[nid] = doc
+        identifier = doc.get('identifier')
+        if not identifier: continue
+        result[identifier] = doc
     return result
 
 def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
@@ -138,7 +136,7 @@ def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
     """
     for project in projects:
         changed = False
-        cp = clarity_lookup.get(project['fields']['nid'])
+        cp = clarity_lookup.get(project['identifier'])
         if not cp: continue
         if project['fields'].get('project_name') != cp.get('project_name'):
             project['fields']['project_name'] = cp['project_name']
@@ -146,11 +144,11 @@ def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
         if project['fields'].get('lims_id') != cp.get('lims_id'):
             project['fields']['lims_id'] = cp['lims_id']
             changed = True
-        # Map Clarity dates to milestones as best as possible.
+        # Map Clarity dates to history as best as possible.
         # XXX This must be reviewed!
         submitted = cp.get('order received')
-        if submitted and submitted != project['milestones'].get('submitted'):
-            project['milestones']['submitted'] = submitted
+        if submitted and submitted != project['history'].get('submitted'):
+            project['history']['submitted'] = submitted
             changed = True
         accepted = [cp.get('contract sent'),
                     cp.get('contract received'),
@@ -158,8 +156,8 @@ def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
         accepted = [a for a in accepted if a is not None]
         if accepted:
             accepted = reduce(min, accepted)
-            if accepted and accepted != project['milestones'].get('accepted'):
-                project['milestones']['accepted'] = accepted
+            if accepted and accepted != project['history'].get('accepted'):
+                project['history']['accepted'] = accepted
                 changed = True
         processing = [cp.get('samples received'),
                       cp.get('sample information received'),
@@ -167,8 +165,8 @@ def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
         processing = [p for p in processing if p is not None]
         if processing:
             processing = reduce(min, processing)
-            if processing and processing != project['milestones'].get('processing'):
-                project['milestones']['processing'] = processing
+            if processing and processing != project['history'].get('processing'):
+                project['history']['processing'] = processing
                 changed = True
         closed = [cp.get('close-date'),
                   cp.get('all raw data delivered'),
@@ -176,24 +174,24 @@ def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
         closed = [c for c in closed if c is not None]
         if closed:
             closed = reduce(min, closed)
-            if closed and closed != project['milestones'].get('closed'):
-                project['milestones']['closed'] = closed
+            if closed and closed != project['history'].get('closed'):
+                project['history']['closed'] = closed
                 changed = True
         aborted = cp.get('aborted')
-        if aborted and aborted != project['milestones'].get('aborted'):
-            project['milestones']['aborted'] = aborted
+        if aborted and aborted != project['history'].get('aborted'):
+            project['history']['aborted'] = aborted
             changed = True
         current = None
         for status in settings['ORDER_STATUSES']:
             if status['identifier'] == 'undefined': continue
-            if project['milestones'].get(status['identifier']):
+            if project['history'].get(status['identifier']):
                 current = status['identifier']
         if current != project.get('status'):
             project['status'] = current
             changed = True
-        if len(project['milestones']) > 2:
+        if len(project['history']) > 2:
             try:
-                del project['milestones']['undefined']
+                del project['history']['undefined']
             except KeyError:
                 pass
             else:
@@ -201,14 +199,14 @@ def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
         if changed:
             if verbose:
                 print('saving',
-                      project['fields']['nid'],
+                      project['identifier'],
                       project['fields']['lims_id'],
                       project['status'],
                       project['title'])
             db.save(project)
         else:
             if verbose:
-                print('no change for', project['fields']['nid'])
+                print('no change for', project['identifier'])
 
 
 if __name__ == '__main__':
@@ -225,19 +223,19 @@ if __name__ == '__main__':
     projects.sort(lambda i,j: cmp(i['modified'], j['modified']))
     if options.verbose:
         for project in projects:
-            print(project['fields']['nid'], project['modified'])
+            print(project['identifier'], project['modified'])
 
     clarity = Clarity()
     clarity_projects = clarity.get_all_projects(verbose=options.verbose)
     print(len(clarity_projects), 'projects in Clarity')
     for record in clarity_projects:
         clarity.fetch_project_info(record, verbose=options.verbose)
-        print(record['lims_id'], 'nid', record.get('nid'))
+        print(record['lims_id'], record.get('identifier'))
 
     clarity_lookup = {}
     for p in clarity_projects:
-        nid = p.get('nid')
-        if nid: clarity_lookup[nid] = p
+        identifier = p.get('identifier')
+        if identifier: clarity_lookup[identifier] = p
     print(len(clarity_lookup), 'projects from Clarity')
 
     process_old_portal_projects(db,

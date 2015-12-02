@@ -10,7 +10,7 @@ import sys
 
 import yaml
 
-from orderportal import home
+from orderportal import constants
 from orderportal import settings
 from orderportal import utils
 from orderportal.scripts.dump import undump
@@ -33,8 +33,13 @@ def init_database(verbose=False, dumpfilepath=None):
         print('wiping out database...')
     wipeout_database(db)
     if verbose:
-        print('wiped out order database')
+        print('wiped out database')
     load_designs(db, verbose=verbose)
+    # No specific items set here; done on-the-fly in e.g. get_next_number
+    db.save(dict(_id='orders',
+                 orderportal_doctype=constants.META))
+    if verbose:
+        print('created meta documents')
     if verbose:
         print('loaded designs')
     load_texts(db, verbose=verbose)

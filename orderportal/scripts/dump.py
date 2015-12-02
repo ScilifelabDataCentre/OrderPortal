@@ -14,6 +14,8 @@ import os
 import tarfile
 import time
 
+import couchdb
+
 from orderportal import constants
 from orderportal import settings
 from orderportal import utils
@@ -39,8 +41,9 @@ def dump(db, filepath, verbose=False):
         mode = 'w'
     outfile = tarfile.open(filepath, mode=mode)
     for key in db:
-        if not constants.IUID_RX.match(key): continue
         doc = db[key]
+        # Only documents that explicitly belong to the application
+        if doc.get(constants.DOCTYPE) is None: continue
         del doc['_rev']
         info = tarfile.TarInfo(doc['_id'])
         data = json.dumps(doc)
@@ -81,11 +84,20 @@ def undump(db, filename, verbose=False):
             count_files += 1
         else:
             doc = json.loads(itemdata)
-            # If the account document already exists, do not load again.
+            # If the email already exists, do not load document.
             if doc[constants.DOCTYPE] == constants.ACCOUNT:
                 rows = db.view('account/email', key=doc['email'])
                 if len(list(rows)) != 0: continue
             atts = doc.pop('_attachments', dict())
+            # Overwrite meta documents
+            if doc[constants.DOCTYPE] == constants.META:
+                try:
+                    doc2 = db[doc['_id']]
+                except couchdb.ResourceNotFound:
+                    pass
+                else:
+                    doc2.update(doc)
+                    doc = doc2
             db.save(doc)
             count_items += 1
             for attname, attinfo in atts.items():

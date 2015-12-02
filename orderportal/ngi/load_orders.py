@@ -9,6 +9,7 @@ from __future__ import print_function, absolute_import
 
 import datetime
 import json
+import sys
 
 from orderportal import constants
 from orderportal import settings
@@ -50,10 +51,20 @@ def load_users(filename='users.json', verbose=False):
     return result
 
 def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
-    "Load the order and use the form given by IUID to transfer field values."
-    form = db[form_iuid]
+    """Load the order and use the form given by IUID to transfer field values.
+    The order identifier counter has to be updated."""
+    meta = db['orders']
+    counter = meta.get('counter')
+    if counter is None:
+        counter = meta['counter'] = 1
+    else:
+        sys.exit("Some orders already loaded!")
+    try:
+        form = db[form_iuid]
+    except couchdb.ResourceNotFound:
+        raise KeyError('given form iuid is invalid or obsolete')
     fields = Fields(form)
-    # Get the set of already loaded old orders; nid values
+    # Get the set of already loaded old orders; integer part of 'identifier'
     already_loaded = set()
     view = db.view('order/form',
                    reduce=False,
@@ -61,12 +72,15 @@ def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
                    startkey=[form_iuid],
                    endkey=[form_iuid, constants.CEILING])
     for row in view:
-        already_loaded.add(row.doc['fields']['nid'])
+        try:
+            already_loaded.add(int(row.doc['identifier'][3:]))
+        except (KeyError, ValueError):
+            pass
     with open(filename) as infile:
         data = json.load(infile)
     if verbose:
         print(len(data), 'records in dump file')
-    count = 0
+    total = 0
     for record in data:
         if record['nid'] in already_loaded: continue
         with OldOrderSaver(db=db) as saver:
@@ -83,16 +97,19 @@ def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
                     value = '\n'.join(value)
                 values[field['identifier']] = value
             saver['fields'] = values
-            # saver['fields'] = dict([(f['identifier'], record[f['identifier']])
-            #                         for f in fields if f['type']!='group'])
+            saver['identifier'] = \
+                settings['ORDER_IDENTIFIER_FORMAT'].format(int(record['nid']))
+            counter = max(counter, int(record['nid']))
             saver['history'] = {}
             saver.set_status('undefined')
             saver.check_fields_validity(fields)
         if verbose:
-            print('loaded order', saver.doc['fields']['nid'], saver.doc['title'])
-        count += 1
+            print('loaded', saver.doc['identifier'], saver.doc['title'])
+        total += 1
     if verbose:
-        print(count, 'orders loaded')
+        print(total, 'orders loaded, counter', counter)
+    meta['counter'] = counter
+    db.save(meta)
 
 
 if __name__ == '__main__':
@@ -104,6 +121,6 @@ if __name__ == '__main__':
     db = utils.get_db()
     load_orders(db,
                 authors=load_users(verbose=options.verbose),
-                form_iuid='2742aaa225304dc0afb5db17c5c2df21',
+                form_iuid='5ac08057ad0f4a729a038f6f576f198f',
                 verbose=options.verbose)
     regenerate_views(db, verbose=options.verbose)

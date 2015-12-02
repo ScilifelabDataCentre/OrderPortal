@@ -119,6 +119,21 @@ class RequestHandler(tornado.web.RequestHandler):
             raise tornado.web.HTTPError(403,
                                         reason="you do not have role 'staff'")
 
+    def get_next_number(self, doctype):
+        "Get the next number for the doctype and increment the counter."
+        while True:
+            doc = self.db[doctype] # Doc must be reloaded each iteration
+            try:
+                number = doc['counter'] + 1
+            except KeyError:
+                number = 1
+            doc['counter'] = number
+            try:
+                self.db.save(doc)
+                return number
+            except couchdb.ResourceConflict:
+                pass
+
     def get_entity(self, iuid, doctype=None):
         """Get the entity by the IUID. Check the doctype, if given.
         Raise HTTP 404 if no such entity.

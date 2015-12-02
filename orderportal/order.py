@@ -2,6 +2,7 @@
 
 from __future__ import print_function, absolute_import
 
+import re
 import logging
 import urlparse
 
@@ -243,7 +244,14 @@ class Order(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        try:
+            match = re.match(settings['ORDER_IDENTIFIER_REGEXP'], iuid)
+            if not match: raise KeyError
+        except KeyError:
+            order = self.get_entity(iuid, doctype=constants.ORDER)
+        else:
+            logging.debug(">>> order identifier %s", iuid)
+            order = self.get_entity_view('order/identifier', match.group())
         self.check_readable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
         title = order.get('title') or order['_id']
@@ -323,7 +331,16 @@ class OrderCreate(RequestHandler):
             saver['history'] = {}
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
             saver.check_fields_validity(fields)
-        self.see_other('order_edit', saver.doc['_id'])
+            # Set identifier only if form properly enabled
+            if form['status'] == constants.ENABLED:
+                try:
+                    fmt = settings['ORDER_IDENTIFIER_FORMAT']
+                except KeyError:    # No identifier; sequential numbers not used
+                    pass
+                else:               # Identifier; sequential number are used
+                    number = self.get_next_number(constants.ORDER)
+                    saver['identifier'] = fmt.format(number)
+            self.see_other('order_edit', saver.doc['_id'])
 
 
 class OrderEdit(OrderMixin, RequestHandler):
