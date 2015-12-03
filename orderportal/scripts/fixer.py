@@ -46,11 +46,12 @@ class BaseFixer(object):
             total += 1
             if result:
                 count += 1
-                if self.verbose:
-                    if self.dry_run:
+                if self.dry_run:
+                    if self.verbose:
                         print('would have saved', docid)
-                    else:
-                        self.db.save(result)
+                else:
+                    self.db.save(result)
+                    if self.verbose:
                         print('saved', docid)
             else:
                 if self.verbose:
