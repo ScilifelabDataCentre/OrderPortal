@@ -49,9 +49,9 @@
       <tr>
 	{% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
 	<th width="5%">Id</th>
-	<th width="25%">Order</th>
+	<th width="25%">Title</th>
 	{% else %}
-	<th width="30%">Order</th>
+	<th width="30%">Title</th>
 	{% end %}
 	<th width="10%">Owner</th>
 	<th width="10%">Status</th>
@@ -75,12 +75,14 @@
 	  </a>
 	  {% end %}
 	</td>
-	{% end %}
+	<td>{% raw order.get('title') or '<i>[No title]</i>' %}</td>
+	{% else %}
 	<td>
 	  <a href="{{ reverse_url('order', order['_id']) }}">
 	    {{ order.get('title', order['_id']) }}
 	  </a>
 	</td>
+	{% end %}
 	<td>
 	  <a href="{{ reverse_url('account', order['owner']) }}">
 	    {% module Icon('account') %}
