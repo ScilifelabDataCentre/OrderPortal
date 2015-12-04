@@ -53,8 +53,11 @@ def load_accounts(db, filepath='users.json', verbose=False):
         accounts = json.load(infile)
     if verbose:
         print(len(accounts), 'accounts in input file')
-    count = 0
+    counter = 0
     for account in accounts:
+        doc = collections.OrderedDict()
+        doc['_id'] = utils.get_iuid()
+        doc[constants.DOCTYPE] = constants.ACCOUNT
         email = account['mail'].lower()
         docs = [r.doc
                 for r in db.view('account/email', include_docs=True, key=email)]
@@ -67,23 +70,29 @@ def load_accounts(db, filepath='users.json', verbose=False):
             if verbose:
                 print(email, 'status', status, '; skipped')
             continue
-        first_name = account['field_user_address'].get('first_name')
-        last_name = account['field_user_address'].get('last_name')
-        roles = set(account['roles'])
-        role = roles.difference(set([2])) and constants.ADMIN or constants.USER
-        address = []
-        street = account['field_user_address'].get('thoroughfare')
-        if street:
-            address.append(street)
-        locality = account['field_user_address'].get('locality')
-        postal_code = account['field_user_address'].get('postal_code')
-        postal = [postal_code, locality]
-        postal = ' '.join([p for p in postal if p])
-        if postal:
-            address.append(postal)
-        address.append(account['field_user_address'].get('country') or 'SE')
-        address = '\n'.join(address)
+        doc['email'] = email
+        doc['status'] = constants.DISABLED
+        doc['first_name'] = account['field_user_address'].get('first_name')
+        doc['last_name'] = account['field_user_address'].get('last_name')
+        # Address
+        address = account['field_user_address'].get('thoroughfare') or ''
         premise = account['field_user_address'].get('premise')
+        if address and premise:
+            address += '\n' + premise
+        elif premise:
+            address = premise
+        postal_code = account['field_user_address'].get('postal_code')
+        city = account['field_user_address'].get('locality')
+        country = account['field_user_address'].get('country') or 'SE'
+        doc['address'] = dict(address=address,
+                              postal_code=postal_code,
+                              city=city,
+                              country=country)
+        doc['invoice_address'] = dict(invoice_code=None,
+                                      address=address,
+                                      postal_code=postal_code,
+                                      city=city,
+                                      country=country)
         university = account['field_user_address'].get('organisation_name')
         university = ' '.join(university.replace(',', ' ').strip().split())
         uni = utils.to_ascii(university)
@@ -104,6 +113,8 @@ def load_accounts(db, filepath='users.json', verbose=False):
                             if uni in university_lower:
                                 university = UNI_LOOKUP[uni]
                                 break
+        doc['university'] = university
+        doc['department'] = None
         other_data = []
         try:
             other_data.append(u"old portal name: {0}".format(account['name']))
@@ -113,35 +124,21 @@ def load_accounts(db, filepath='users.json', verbose=False):
             other_data.append(u"old portal uid: {0}".format(account['uid']))
         except KeyError:
             pass
-        other_data = '\n'.join(other_data)
-
-        if verbose and university not in settings['UNIVERSITIES']:
-            print(email, ':', university)
-        doc = collections.OrderedDict()
-        doc['_id'] = utils.get_iuid()
-        doc[constants.DOCTYPE] = constants.ACCOUNT
-        doc['email'] = email
-        doc['role'] = role
+        doc['other_data'] = '\n'.join(other_data)
         doc['password'] = None
-        doc['first_name'] = first_name
-        doc['last_name'] = last_name
-        doc['university'] = university
-        doc['department'] = premise
-        doc['address'] = address
-        doc['other_data'] = other_data
+        # Role '2' is Drupal admin
+        doc['role'] = set(account['roles']).difference(set([2])) \
+            and constants.ADMIN or constants.USER
         doc['owner'] = email
         doc['created'] = utils.epoch_to_iso(account['created'])
         doc['modified'] = utils.epoch_to_iso(account.get('last_access') or account['created'])
-        doc['status'] = constants.DISABLED
         if verbose:
-            for key, value in doc.items():
-                print(key, ':', value)
-            print()
+            print('loaded', email)
         db.save(doc)
 
-        count += 1
+        counter += 1
     if verbose:
-        print(count, 'accounts loaded')
+        print(counter, 'accounts loaded')
 
 
 if __name__ == '__main__':

@@ -43,5 +43,5 @@
   action: Close
 
 - identifier: undefined
-  description: The order was loaded from the old portal, which did not transfer of status information.
+  description: The order was loaded from the old portal, which did not transfer any status information.
   edit: [admin]

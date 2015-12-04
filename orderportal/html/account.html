@@ -10,6 +10,20 @@
 
 {% block meta_content %}
 
+{% if current_user['email'] == account['email'] %}
+<form action="{{ reverse_url('logout') }}"
+      role="form"
+      class="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+  <button type="submit"
+	  title="Logout"
+	  class="btn btn-default glyphicon glyphicon-log-out">
+    Logout
+  </button>
+</form>
+{% end %}
+
 {% if is_admin or current_user['email'] == account['email'] %}
 <br>
 <div>
@@ -196,27 +210,27 @@
   </tr>
   <tr>
     <th>First name</th>
-    <td>{{ account.get('first_name') or '-' }}</td>
+    <td>{{ account['first_name'] or '-' }}</td>
   </tr>
   <tr>
     <th>Last name</th>
-    <td>{{ account.get('last_name') or '-' }}</td>
+    <td>{{ account['last_name'] or '-' }}</td>
   </tr>
   <tr>
     <th>University</th>
-    <td>{{ account.get('university') or '-' }}</td>
+    <td>{{ account['university'] or '-' }}</td>
   </tr>
   <tr>
     <th>Department</th>
-    <td>{{ account.get('department') or '-' }}</td>
+    <td>{{ account['department'] or '-' }}</td>
   </tr>
   <tr>
-    <th>Address</th>
-    <td class="pre">{{ account.get('address') or '-' }}</td>
+    <th>Postal address</th>
+    <td class="pre">{% module Address(account.get('address') or dict()) %}</td>
   </tr>
   <tr>
     <th>Invoice address</th>
-    <td class="pre">{{ account.get('invoice_address') or '-' }}</td>
+    <td class="pre">{% module Address(account.get('invoice_address') or dict()) %}</td>
   </tr>
   <tr>
     <th>Phone</th>

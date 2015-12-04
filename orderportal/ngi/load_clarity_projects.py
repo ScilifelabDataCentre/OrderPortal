@@ -11,6 +11,7 @@ import yaml
 from orderportal import settings
 from orderportal import utils
 
+CUTOFF_DATE = '2015-01-01'
 
 NSMAP = dict(
     artgr='http://genologics.com/ri/artifactgroup',
@@ -188,6 +189,12 @@ def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
                 current = status['identifier']
         if current != project.get('status'):
             project['status'] = current
+            changed = True
+        # Old project in 'undefined' set to 'close'
+        if project.get('status') == 'undefined' \
+                and project['modified'] < CUTOFF_DATE:
+            project['history']['closed'] = project['modified'][:10] # Only date
+            project['status'] = 'closed'
             changed = True
         if len(project['history']) > 2:
             try:

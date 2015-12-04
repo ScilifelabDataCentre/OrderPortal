@@ -64,6 +64,18 @@ class Entity(tornado.web.UIModule):
             url=url, icon=icon, title=title)
 
 
+class Address(tornado.web.UIModule):
+    "Format user account address."
+
+    def render(self, address):
+        result = []
+        for key in ['invoice_code', 'address', 'postal_code', 'city', 'country']:
+            value = address.get(key)
+            if value:
+                result.append(value)
+        return '\n'.join(result)
+
+
 class Markdown(tornado.web.UIModule):
     "Process the text as Markdown."
 

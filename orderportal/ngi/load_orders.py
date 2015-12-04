@@ -11,6 +11,8 @@ import datetime
 import json
 import sys
 
+import couchdb
+
 from orderportal import constants
 from orderportal import settings
 from orderportal import utils
@@ -121,6 +123,6 @@ if __name__ == '__main__':
     db = utils.get_db()
     load_orders(db,
                 authors=load_users(verbose=options.verbose),
-                form_iuid='5ac08057ad0f4a729a038f6f576f198f',
+                form_iuid='abc8bd6232ec489d82680172e7054c2f',
                 verbose=options.verbose)
     regenerate_views(db, verbose=options.verbose)

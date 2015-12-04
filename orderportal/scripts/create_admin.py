@@ -21,7 +21,10 @@ def create_admin(email, password, first_name, last_name, university,
         saver.set_email(email)
         saver['first_name'] = first_name
         saver['last_name'] = last_name
+        saver['address'] = dict()
+        saver['invoice_address'] = dict()
         saver['university'] = university
+        saver['department'] = None
         saver['owner'] = email
         saver.set_password(password)
         saver['role'] = constants.ADMIN

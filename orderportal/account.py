@@ -183,10 +183,14 @@ class AccountsCsv(Accounts):
         csvfile = StringIO()
         writer = csv.writer(csvfile)
         writer.writerow(('Email', 'Last name', 'First name', 'Role', 'Status',
-                         'University', 'Department', 'Address',
-                         'Invoice address', 'Phone', 'Other data',
+                         'University', 'Department', 'Address', 'Postal code',
+                         'City', 'Country', 'Invoice code', 'Invoice address',
+                         'Invoice postal code', 'Invoice city',
+                         'Invoice country', 'Phone', 'Other data',
                          'Latest login', 'Modified', 'Created'))
         for account in accounts:
+            address = account.get('address') or dict()
+            iaddress = account.get('invoice_address') or dict()
             writer.writerow((utils.to_utf8(account['email']),
                              utils.to_utf8(account.get('last_name') or ''),
                              utils.to_utf8(account.get('first_name') or ''),
@@ -194,8 +198,15 @@ class AccountsCsv(Accounts):
                              account['status'],
                              utils.to_utf8(account.get('university') or ''),
                              utils.to_utf8(account.get('department') or ''),
-                             utils.to_utf8(account.get('address') or ''),
-                             utils.to_utf8(account.get('invoice_address') or ''),
+                             utils.to_utf8(address.get('address') or ''),
+                             utils.to_utf8(address.get('postal_code') or ''),
+                             utils.to_utf8(address.get('city') or ''),
+                             utils.to_utf8(address.get('country') or ''),
+                             utils.to_utf8(iaddress.get('invoice_code') or ''),
+                             utils.to_utf8(iaddress.get('address') or ''),
+                             utils.to_utf8(iaddress.get('postal_code') or ''),
+                             utils.to_utf8(iaddress.get('city') or ''),
+                             utils.to_utf8(iaddress.get('country') or ''),
                              utils.to_utf8(account.get('phone') or ''),
                              utils.to_utf8(account.get('other_data') or ''),
                              utils.to_utf8(account.get('login') or ''),
@@ -501,15 +512,17 @@ class AccountEdit(AccountMixin, RequestHandler):
                 university = self.get_argument('university', default=None)
             saver['university'] = university or None
             saver['department'] = self.get_argument('department', default=None)
-            saver['address'] = self.get_argument('address', default=None)
-            saver['invoice_address'] = \
-                self.get_argument('invoice_address', default=None)
-            if not saver['invoice_address']:
-                try:
-                    saver['invoice_address'] = \
-                        settings['UNIVERSITIES'][saver['university']]['invoice_address']
-                except KeyError:
-                    pass
+            saver['address'] = dict(
+                address=self.get_argument('address', default=None),
+                postal_code=self.get_argument('postal_code', default=None),
+                city=self.get_argument('city', default=None),
+                country=self.get_argument('country', default=None))
+            saver['invoice_address'] = dict(
+                invoice_code=self.get_argument('invoice_code', default=None),
+                address=self.get_argument('invoice_address', default=None),
+                postal_code=self.get_argument('invoice_postal_code', default=None),
+                city=self.get_argument('invoice_city', default=None),
+                country=self.get_argument('invoice_country', default=None))
             saver['phone'] = self.get_argument('phone', default=None)
             try:
                 value = int(self.get_argument('page_size', 0))
@@ -651,10 +664,18 @@ class Register(RequestHandler):
                 reason = u"invalid '{0}' value provided".format(key)
                 raise tornado.web.HTTPError(400, reason=reason)
             saver['department'] = self.get_argument('department', default=None)
-            saver['address'] = self.get_argument('address', default=None)
-            saver['invoice_address'] = \
-                self.get_argument('invoice_address', default=None)
-            if not saver['invoice_address']:
+            saver['address'] = dict(
+                address=self.get_argument('address', default=None),
+                postal_code=self.get_argument('postal_code', default=None),
+                city=self.get_argument('city', default=None),
+                country=self.get_argument('country', default=None))
+            saver['invoice_address'] = dict(
+                invoice_code=self.get_argument('invoice_code', default=None),
+                address=self.get_argument('invoice_address', default=None),
+                postal_code=self.get_argument('invoice_postal_code', default=None),
+                city=self.get_argument('invoice_city', default=None),
+                country=self.get_argument('invoice_country', default=None))
+            if not saver['invoice_address'].get('address'):
                 try:
                     saver['invoice_address'] = \
                         settings['UNIVERSITIES'][saver['university']]['invoice_address']

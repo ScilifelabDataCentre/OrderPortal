@@ -4,10 +4,14 @@ KI:
 SU:
   name: Stockholms universitet
   rank: 1
-  invoice_address: |
-    Stockholms universitet
-    Postbox 50741
-    202 70 Malmö
+  invoice_address:
+      address: >-
+          Stockholms universitet
+          
+          Postbox 50741
+      postal_code: 202 70
+      city: Malmö
+      country: Sverige
 KTH:
   name: Kungl. Tekniska högskolan
   rank: 1

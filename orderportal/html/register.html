@@ -115,44 +115,128 @@
     </span>
   </div>
 
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-8">
-	<label class="control-label" for="address">Address</label>
-	<textarea rows="3" class="form-control"
-		  id="address" name="address"></textarea>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Postal address for delivery of paper documents, returned samples, etc.
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="street">Address</label>
+	    <textarea class="form-control" rownum="2"
+		      id="address" name="address"></textarea>
+	  </div>
+	</div>
+	<span class="help-block">
+	  Institution, street, number or post box.
+	</span>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="postal_code">Postal code</label>
+	    <input type="text" class="form-control"
+		   id="postal_code" name="postal_code">
+	  </div>
+	</div>
+	<span class="help-block">
+	  Postal code, zip code.
+	</span>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="city">City</label>
+	    <input type="text" class="form-control" id="city" name="city">
+	  </div>
+	</div>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="country">Country</label>
+	    <input type="text" class="form-control"
+		   id="country" name="country" value="Sweden">
+	  </div>
+	</div>
       </div>
     </div>
-    <span class="help-block">
-      Postal address; for delivery of paper documents, returned
-      samples, etc.
-    </span>
   </div>
 
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-8">
-	<label class="control-label" for="invoice_address">Invoice address</label>
-	<textarea rows="3" class="form-control"
-		  id="invoice_address" name="invoice_address"></textarea>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Invoice address. If none given, the university standard invoice
+      address will be used, if known.
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="invoice_code">Invoice code</label>
+	    <input type="text" class="form-control"
+		   id="invoice_code" name="invoice_code">
+	  </div>
+	</div>
+	<span class="help-block">
+	  Any required information or label for your accounts.
+	</span>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="invoice_address">Address</label>
+	    <textarea class="form-control" rownum="2"
+		      id="invoice_address" name="invoice_address"></textarea>
+	  </div>
+	</div>
+	<span class="help-block">
+	  Institution, street, number or post box.
+	</span>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="invoice_postal_code">Postal code</label>
+	    <input type="text" class="form-control"
+		   id="invoice_postal_code" name="invoice_postal_code">
+	  </div>
+	</div>
+	<span class="help-block">
+	  Postal code, zip code.
+	</span>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="invoice_city">City</label>
+	    <input type="text" class="form-control"
+		   id="invoice_city" name="invoice_city">
+	  </div>
+	</div>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="invoice_country">Country</label>
+	    <input type="text" class="form-control"
+		   id="invoice_country" name="invoice_country" value="Sweden">
+	  </div>
+	</div>
       </div>
     </div>
-    <span class="help-block">
-      Invoice address. If none given, the university standard invoice
-      address will be used if known.
-    </span>
   </div>
 
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
 	<label class="control-label" for="phone">Phone</label>
-	<input type="text" class="form-control"
-	       name="phone" id="phone">
+	<textarea rows="3" class="form-control"
+		  name="phone" id="phone"></textarea>
       </div>
     </div>
     <span class="help-block">
-      One or more telephone numbers, separated by comma ",".
+      One or more telephone numbers, one per line.
     </span>
   </div>
 
