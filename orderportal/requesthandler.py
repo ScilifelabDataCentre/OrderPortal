@@ -63,6 +63,7 @@ class RequestHandler(tornado.web.RequestHandler):
         url = super(RequestHandler, self).reverse_url(name, *args)
         url = url.rstrip('?')   # tornado bug? left-over '?' sometimes
         if query:
+            query = dict([(k, utils.to_utf8(v)) for k,v in query.items()])
             url += '?' + urllib.urlencode(query)
         return url
 
