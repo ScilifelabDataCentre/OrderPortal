@@ -9,7 +9,6 @@ from __future__ import print_function, absolute_import
 
 import datetime
 import json
-import sys
 
 import couchdb
 
@@ -60,7 +59,9 @@ def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
     if counter is None:
         counter = meta['counter'] = 1
     else:
-        sys.exit("Some orders already loaded!")
+        print('WARNING: Some orders already loaded!')
+        answer = raw_input('continue? [y] > ')
+        if answer and answer.upper()[0] != 'Y': return
     try:
         form = db[form_iuid]
     except couchdb.ResourceNotFound:
@@ -84,7 +85,7 @@ def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
         print(len(data), 'records in dump file')
     total = 0
     for record in data:
-        if record['nid'] in already_loaded: continue
+        if int(record['nid']) in already_loaded: continue
         with OldOrderSaver(db=db) as saver:
             saver.doc['owner'] = authors[record['author']['id']]
             saver.set_created(record)

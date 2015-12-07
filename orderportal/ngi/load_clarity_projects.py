@@ -1,4 +1,4 @@
-"Clarity LIMS interface."
+"Load status info to orders from projects in Clarity LIMS."
 
 from __future__ import print_function, absolute_import
 

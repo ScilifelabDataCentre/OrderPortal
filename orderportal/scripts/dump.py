@@ -66,14 +66,14 @@ def dump(db, filepath, verbose=False):
         print('dumped', count_items, 'items and',
               count_files, 'files to', filepath, file=sys.stderr)
 
-def undump(db, filename, verbose=False):
+def undump(db, filepath, verbose=False):
     """Reverse of dump; load all items from a tar file.
     Items are just added to the database, ignoring existing items.
     """
     count_items = 0
     count_files = 0
     attachments = dict()
-    infile = tarfile.open(filename, mode='r')
+    infile = tarfile.open(filepath, mode='r')
     for item in infile:
         itemfile = infile.extractfile(item)
         itemdata = itemfile.read()
