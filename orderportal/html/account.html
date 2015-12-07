@@ -11,55 +11,61 @@
 {% block meta_content %}
 
 {% if current_user['email'] == account['email'] %}
-<form action="{{ reverse_url('logout') }}"
-      role="form"
-      class="form"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <button type="submit"
-	  title="Logout"
-	  class="btn btn-default glyphicon glyphicon-log-out">
-    Logout
-  </button>
-</form>
-{% end %}
+<p>
+  <form action="{{ reverse_url('logout') }}"
+	role="form"
+	class="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <button type="submit"
+	    title="Logout"
+	    class="btn btn-default glyphicon glyphicon-log-out">
+      Logout
+    </button>
+  </form>
+</p>
+{% end %} {# if current_user['email'] == account['email'] #}
 
 {% if is_admin or current_user['email'] == account['email'] %}
-<br>
-<div>
-  <a href="{{ reverse_url('account_edit', account['email']) }}"
-     role="button"
-     class="btn btn-primary glyphicon glyphicon-edit">
-    Edit
-  </a>
-</div>
+<p>
+  <div>
+    <a href="{{ reverse_url('account_edit', account['email']) }}"
+       role="button"
+       class="btn btn-primary glyphicon glyphicon-edit">
+      Edit
+    </a>
+  </div>
+</p>
 {% end %}
 
 {% if current_user['email'] == account['email'] %}
-<br>
-<div>
-  <a href="{{ reverse_url('group_create') }}"
-     role="button"
-     class="btn btn-success glyphicon glyphicon-plus">
-    Create group
-  </a>
-</div>
+<p>
+  <div>
+    <a href="{{ reverse_url('group_create') }}"
+       role="button"
+       class="btn btn-success glyphicon glyphicon-plus">
+      Create group
+    </a>
+  </div>
+</p>
 {% end %}{# if current_user['email'] == account['email'] #}
 
 {% if is_admin or current_user['email'] == account['email'] %}
-<br>
-<div>
-  <a href="{{ reverse_url('reset', account=account['email']) }}"
-     role="button"
-     class="btn btn-warning glyphicon glyphicon-step-backward">
-    Reset password
-  </a>
-</div>
+<p>
+  <div>
+    <a href="{{ reverse_url('reset', account=account['email']) }}"
+       role="button"
+       class="btn btn-warning glyphicon glyphicon-step-backward">
+      Reset password
+    </a>
+  </div>
+</p>
 {% end %}
 
 {% if is_admin and current_user['email'] != account['email'] %}
-  <br>
-  {% if account['status'] in (constants.PENDING, constants.DISABLED) %}
+
+{% if account['status'] in (constants.PENDING, constants.DISABLED) %}
+<p>
   <form action="{{ reverse_url('account_enable', account['email']) }}"
 	role="form"
 	method="POST">
@@ -71,8 +77,9 @@
       </button>
     </div>
   </form>
-
-  {% else %}
+</p>
+{% else %}
+<p>
   <form action="{{ reverse_url('account_disable', account['email']) }}"
 	role="form"
 	method="POST">
@@ -85,9 +92,11 @@
       </button>
     </div>
   </form>
-  {% end %}
+</p>
+{% end %} {# if account['status'] in (constants.PENDING, constants.DISABLED) #}
 
-  {% if is_deletable %}
+{% if is_deletable %}
+<p>
   <form action="{{ reverse_url('account', account['email']) }}"
 	role="form"
 	method="POST">
@@ -101,9 +110,9 @@
       </button>
     </div>
   </form>
-  {% end %}
+</p>
+{% end %} {# if is_deletable #}
 {% end %} {# if is_admin #}
-
 {% end %} {# block meta_content #}
 
 {% block main_content %}

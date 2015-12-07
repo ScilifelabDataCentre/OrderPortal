@@ -11,104 +11,108 @@
 
 {% block meta_content %}
 {% if form['status'] == constants.PENDING %}
-<form action="{{ reverse_url('form_testing', form['_id']) }}"
-      role="form"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <button type="submit" class="btn btn-default">
-    Set to
-    {% module Icon('testing', label=True) %}
-  </button>
-</form>
-
-<br>
-<form action="{{ reverse_url('form_enable', form['_id']) }}"
-      role="form"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <button type="submit" class="btn btn-default"
-	  onclick="return confirm('Cannot be undone! Really enable?');">
-    Set to
-    {% module Icon('enabled', label=True) %}
-  </button>
-</form>
+<p>
+  <form action="{{ reverse_url('form_testing', form['_id']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <button type="submit" class="btn btn-default">
+      Set to
+      {% module Icon('testing', label=True) %}
+    </button>
+  </form>
+</p>
+<p>
+  <form action="{{ reverse_url('form_enable', form['_id']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <button type="submit" class="btn btn-default"
+	    onclick="return confirm('Cannot be undone! Really enable?');">
+      Set to
+      {% module Icon('enabled', label=True) %}
+    </button>
+  </form>
+</p>
 
 {% elif form['status'] == constants.TESTING %}
-<br>
-<form action="{{ reverse_url('order_create') }}"
-      role="form"
-      method="GET">
-  <input type="hidden" name="form" value="{{ form['_id'] }}">
-  <button type="submit"
-	  class="btn btn-success glyphicon glyphicon-plus">
-    Create order
-  </button>
-</form>
-
-<br>
-<form action="{{ reverse_url('form_pending', form['_id']) }}"
-      role="form"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <button type="submit" class="btn btn-default">
-    Set to
-    {% module Icon('pending', label=True) %}
-  </button>
-</form>
+<p>
+  <form action="{{ reverse_url('order_create') }}"
+	role="form"
+	method="GET">
+    <input type="hidden" name="form" value="{{ form['_id'] }}">
+    <button type="submit"
+	    class="btn btn-success glyphicon glyphicon-plus">
+      Create order
+    </button>
+  </form>
+</p>
+<p>
+  <form action="{{ reverse_url('form_pending', form['_id']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <button type="submit" class="btn btn-default">
+      Set to
+      {% module Icon('pending', label=True) %}
+    </button>
+  </form>
+</p>
 
 {% elif form['status'] == constants.ENABLED %}
-<br>
-<form action="{{ reverse_url('order_create') }}"
-      role="form"
-      method="GET">
-  <input type="hidden" name="form" value="{{ form['_id'] }}">
-  <button type="submit"
-	  class="btn btn-success glyphicon glyphicon-plus">
-    Create order
-  </button>
-</form>
-
-<br>
-<form action="{{ reverse_url('form_disable', form['_id']) }}"
-      role="form"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <button type="submit"
-	  class="btn btn-default"
-	  onclick="return confirm('Orders will not be creatable from this form. Cannot be undone! Really disable?');">
-    {% module Icon('disabled') %}
-    Disable
-  </button>
-</form>
-{% end %}
+<p>
+  <form action="{{ reverse_url('order_create') }}"
+	role="form"
+	method="GET">
+    <input type="hidden" name="form" value="{{ form['_id'] }}">
+    <button type="submit"
+	    class="btn btn-success glyphicon glyphicon-plus">
+      Create order
+    </button>
+  </form>
+</p>
+<p>
+  <form action="{{ reverse_url('form_disable', form['_id']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <button type="submit"
+	    class="btn btn-default"
+	    onclick="return confirm('Orders will not be creatable from this form. Cannot be undone! Really disable?');">
+      {% module Icon('disabled') %}
+      Disable
+    </button>
+  </form>
+</p>
+{% end %} {# if form['status'] == ... #}
 
 {% if is_deletable %}
-<br>
-<form action="{{ reverse_url('form', form['_id']) }}"
-      role="form"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <input type="hidden" name="_http_method" value="delete">
-  <button type="submit"
-	  class="btn btn-danger glyphicon glyphicon-trash"
-	  onclick="return confirm('Cannot be undone! Really delete?');">
-    Delete
-  </button>
-</form>
-{% end %}
+<p>
+  <form action="{{ reverse_url('form', form['_id']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <input type="hidden" name="_http_method" value="delete">
+    <button type="submit"
+	    class="btn btn-danger glyphicon glyphicon-trash"
+	    onclick="return confirm('Cannot be undone! Really delete?');">
+      Delete
+    </button>
+  </form>
+</p>
+{% end %} {# if is_deletable #}
 
-<br>
-<form action="{{ reverse_url('form_clone', form['_id']) }}"
-      role="form"
-      method="POST">
-  {% module xsrf_form_html() %}
-  <button type="submit"
-	  class="btn btn-primary glyphicon glyphicon-plus-sign">
-    Clone
-  </button>
-</form>
-
-<br>
+<p>
+  <form action="{{ reverse_url('form_clone', form['_id']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <button type="submit"
+	    class="btn btn-primary glyphicon glyphicon-plus-sign">
+      Clone
+    </button>
+  </form>
+</p>
 <p>
   <a href="{{ reverse_url('api_v1_form', form['_id']) }}">
     {% module Icon('json', label=True) %}
