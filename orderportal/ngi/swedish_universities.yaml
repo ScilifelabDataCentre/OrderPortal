@@ -51,9 +51,6 @@ HIG:
 HJ:
   name: Högskolan i Jönköping
   rank: 3
-HK:
-  name: Högskolan i Kalmar
-  rank: 2
 HKR:
   name: Högskolan Kristianstad
   rank: 3
@@ -101,7 +98,4 @@ SLU:
   rank: 2
 UMU:
   name: Umeå universitet
-  rank: 2
-VXU:
-  name: Växjö universitet
   rank: 2
