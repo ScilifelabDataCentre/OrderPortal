@@ -14,7 +14,7 @@ Form:
 
 <div class="row">
   <div class="col-md-10 col-md-offset-1">
-    {% set url_func = functools.partial(reverse_url, 'orders_form', form['_id'], **params) %}
+    {% set url_func = functools.partial(reverse_url, 'form_orders', form['_id'], **params) %}
     {% include 'paging.html' %}
   </div>
   <div class="col-md-1">

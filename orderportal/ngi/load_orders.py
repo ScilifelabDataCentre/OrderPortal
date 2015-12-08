@@ -93,6 +93,8 @@ def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
             saver['form'] = form_iuid
             saver['title'] = record['title']
             values = {}
+            # Change this single field key, for future compatibility
+            record['assigned_node'] = record.pop('field_admin_assigned_node', None)
             for field in fields:
                 if field['type'] == constants.GROUP: continue
                 value = record.get(field['identifier'])
