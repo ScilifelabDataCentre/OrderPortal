@@ -1,0 +1,47 @@
+# OrderPortal: Example settings file.
+
+# Official URL to portal
+BASE_URL: 'http://ngisweden.scilifelab.se/'
+
+# tornado server port
+PORT: 8882
+
+# CouchDB server
+DB_SERVER: 'http://localhost:5984/'
+DATABASE: 'orderportal_ngi'
+
+# Logging and debug.
+TORNADO_DEBUG: True
+LOGGING_DEBUG: True
+
+# Login
+COOKIE_SECRET: 'whatever'
+PASSWORD_SALT: 'whatever'
+
+# Site customization
+SITE_NAME: 'NGI Sweden Order Portal'
+SITE_DIR: '{ROOT}/ngi/'
+SITE_FAVICON: 'favicon.png'
+SITE_NAVBAR_ICON: 'favicon.png'
+SITE_HOME_ICON: 'logo-white-background.png'
+SITE_SUPPORT_EMAIL: 'your@email.com'
+
+# Use sequentially numbered order identifiers
+ORDER_ID_FORMAT: 'NGI{0:=05d}'
+ORDER_ID_REGEXP: 'NGI\d+'
+
+ORDER_STATUSES_FILENAME: '{SITE_DIR}order_statuses.yaml'
+ORDER_TRANSITIONS_FILENAME: '{SITE_DIR}order_transitions.yaml'
+UNIVERSITIES_FILENAME: '{SITE_DIR}swedish_universities.yaml'
+ACCOUNT_MESSAGES_FILENAME: '{SITE_DIR}account_messages.yaml'
+ORDER_MESSAGES_FILENAME: '{SITE_DIR}order_messages.yaml'
+ORDER_LIST_HISTORY:
+  - submitted
+  - accepted
+  - processing
+  - closed
+
+# Messages; email server info.
+MESSAGE_SENDER_EMAIL: '"NGI Sweden Support" <support@ngisweden.se>'
+EMAIL:
+  HOST: 'localhost'
