@@ -1,0 +1,4 @@
+tornado>=4.2
+CouchDB>=1.0
+pyyaml>=3.10
+markdown>=2.3.1

@@ -1,0 +1,262 @@
+{# Order page. #}
+
+{% block head_title %}Order: {{ order.get('title') or order['_id'] }}{% end %}
+
+{% block body_title %}
+{% module Icon('order', label=True) %}:
+{{ order.get('title') or order['_id'] }}
+{% end %}
+
+{% extends "base.html" %}
+
+{% block meta_content %}
+
+{% if is_editable %}
+<p>
+  <form action="{{ reverse_url('order_edit', order['_id']) }}"
+	role="form"
+	method="GET">
+    <button type="submit"
+	    class="btn btn-primary glyphicon glyphicon-edit">
+      Edit
+    </button>
+  </form>
+</p>
+<p>
+  <form action="{{ reverse_url('order', order['_id']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <input type="hidden" name="_http_method" value="delete">
+    <button type="submit"
+	    class="btn btn-danger glyphicon glyphicon-trash"
+	    onclick="return confirm('Cannot be undone! Really delete?');">
+      Delete
+    </button>
+  </form>
+</p>
+{% elif not global_modes['allow_order_editing'] %}
+<p>
+  <div class="well text-danger">
+    Order editing is currently disabled.
+  </div>
+</p>
+{% end %} {# if is_editable #}
+
+{% if is_clonable %}
+<p>
+  <form action="{{ reverse_url('order_clone', order['_id']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <button type="submit"
+	    class="btn btn-primary glyphicon glyphicon-plus-sign">
+      Clone
+    </button>
+  </form>
+</p>
+{% elif not global_modes['allow_order_creation'] %}
+<p>
+  <div class="well text-danger">
+    Order creation is currently disabled.
+  </div>
+</p>
+{% else %}
+<p>
+  <div class="well">
+    This order cannot be cloned.
+  </div>
+<p>
+{% end %} {# if is_clonable #}
+
+<p>
+  <div class="panel panel-success">
+    <div class="panel-heading">Change status</div>
+    <div class="panel-body">
+      {% for target in targets %}
+      <form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
+	    role="form"
+	    method="POST">
+	{% module xsrf_form_html() %}
+	<p>
+	  <button type="submit" class="btn btn-default"
+		  {% if not is_admin %}
+		  onclick="return confirm('Cannot be undone! Really change status?');"
+		  {% end %}
+		  >
+	    {% module Icon(target['identifier']) %}
+	    {{ target.get('action', target['identifier']) }}
+	  </button>
+	</p>
+      </form>
+      {% end %} {# for target in targets #}
+    </div>
+  </div>
+</p>
+
+{% end %} {# block meta_content #}
+
+{% block main_content %}
+<div class="panel panel-default">
+  <div class="panel-body">
+    <table class="table table-condensed table-fields table-noborder">
+      {% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
+      <tr>
+	<th>Identifier</th>
+	<td colspan="2">
+	  {% if order.get('identifier') %}
+	  <a href="{{ reverse_url('order_id', order['identifier']) }}">
+	    {{ order['identifier'] }}
+	  </a>
+	  {% else %}
+	  -
+	  {% end %}
+	</td>
+      </tr>
+      {% end %}
+      <tr>
+	<th>Owner</th>
+	<td colspan="2">
+	  <a href="{{ reverse_url('account', order['owner']) }}">
+	    {{ account_names.get(order['owner'], order['owner']) }}
+	  </a>
+	</td>
+      </tr>
+      <tr>
+	<th>Status</th>
+	<td>
+	  {% module Icon(order['status'], label=True) %}
+	  ({{ status['description'] }})
+	</td>
+      </tr>
+      <tr>
+	<th>History</th>
+	<td>
+	  <table>
+	  {% for st, date in sorted(order['history'].items(), lambda i,j: cmp(j[1], i[1])) %}
+	  <tr>
+	    <td>{% module Icon(st, label=True) %}</td>
+	    <td>&nbsp;{{ date }}</td>
+	  <tr>
+	  {% end %}
+	  </table>
+	</td>
+      </tr>
+      <tr>
+	<th>Modified</th>
+	<td>
+	  <span class="localtime">{{ order['modified'] }}</span>
+	  <a href="{{ reverse_url('order_logs', order['_id']) }}">
+	    {% module Icon('logs', label=True) %}
+	  </a>
+	</td>
+      </tr>
+      <tr>
+	<th>Created</th>
+	<td class="localtime">{{ order['created'] }}</td>
+      </tr>
+      <tr>
+	<th>IUID</th>
+	<td>{{ order['_id'] }}</td>
+      </tr>
+
+      {% if is_admin %}
+      <tr>
+	<th>Form</th>
+	<td>
+	  <a href="{{ reverse_url('form', form['_id']) }}">
+	    {{ form['title'] }}
+	  </a>
+	</td>
+      </tr>
+      {% end %}
+
+      <tr>
+	<th>Files</th>
+	<td colspan="2">
+	  <table class="table table-condensed table-striped">
+	    {% for file in attached_files %}
+	    <tr>
+	      <td>
+		<a href="{{ reverse_url('order_file', order['_id'], file['filename']) }}">
+		  {{ file['filename'] }}
+		</a>
+	      </td>
+	      <td>{{ file['content_type'] }}</td>
+	      <td>{{ file['size'] }}</td>
+	      <td>
+		<form action="{{ reverse_url('order_file', order['_id'], file['filename']) }}"
+		      role="form"
+		      method="POST">
+		  {% module xsrf_form_html() %}
+		  <input type="hidden" name="_http_method" value="delete">
+		  <button type="submit"
+			  class="btn btn-danger btn-xs glyphicon glyphicon-trash"
+			  onclick="return confirm('Cannot be undone! Really delete?');">
+		    Delete
+		  </button>
+		</form>
+	      </td>
+	    </tr>
+	    {% end %}
+	  </table>
+	  {% if is_attachable %}
+	  <button type="button"
+		  class="btn btn-primary btn-xs glyphicon glyphicon-paperclip"
+		  data-toggle="modal" data-target="#attach">
+	    Attach
+	  </button>
+	  {% end %}{# if is_attachable #}
+	</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<table class="table table-condensed table-noborder table-hierarchy">
+{# Recursion: 'include' cannot be used! #}
+{% module Template('order_fields.html', fields=fields, order=order, is_staff=is_staff) %}
+</table>
+
+{% if is_attachable %}
+{# Modal for attaching a file. #}
+<div id="attach" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+
+    {# Modal content #}
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close glyphicon glyphicon-remove"
+		data-dismiss="modal"></button>
+        <h4 class="modal-title">Attach a file</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('order_attach', order['_id']) }}"
+	      role="form"
+	      enctype="multipart/form-data"
+	      method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group">
+	    <label for="file">File</label>
+	    <input type="file" name="file" class="form-control">
+	    <span class="help-block">
+	      The file to upload and attach to the order.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit"
+		    class="btn btn-success glyphicon glyphicon-floppy-disk">
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% end %}{# if is_attachable #}
+
+{% end %} {# block main_content #}

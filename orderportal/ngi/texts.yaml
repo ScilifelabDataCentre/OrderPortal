@@ -1,0 +1,103 @@
+# Texts for the NGI Sweden site.
+header: |
+  This is a portal for placing orders. You need to have an account and
+  be logged in to create, edit, submit and view orders.
+
+footer: |
+  This text should be a description of the organisation running the portal.
+
+register: |
+  Use this page to register a new account. Your email address is the account
+  name in this portal.
+
+  The administrator of the portal will view your account details and if
+  everything seems fine, the account will be enabled.
+
+  You will receive an email with a link to a page for setting the password
+  when the account is enabled.
+
+registered: |
+  An activation email will be sent to you from the administrator when your
+  account has been enabled. This may take up to two working days.
+
+reset: |
+  Use this page to reset your password. You will not be able to login once
+  this has been done.
+
+  An email with a link to a page for setting a new password will be sent
+  to you. This may take a few minutes.
+
+  The email contains a one-time code required for setting a new password.
+  If you loose this code, simply use this page again, and a new code will
+  be sent.
+
+password: |
+  Set the password for your account. You need the one-time code which was
+  contained in the URL sent to you by email. If the code has been used or
+  lost, go to [the reset page](/reset) to obtain a new code.
+
+help_datatypes: |
+  An input field must have a data type, which determines what values are
+  considered valid for the field. The types are:
+
+  - **string**: A string of characters. Intended for one-line text input.
+  - **integer**: A valid integer value, e.g. 12, -39 or 1098009.
+  - **float**: A valid floating point value, e.g. 1.0, 3.141 or 9.1e10.
+  - **boolean**: A logical value of either "true" or "false". Shown as a dropdown menu.
+  - **url**: A value that looks like a URL; no check is made that it actually is reachable.
+  - **select**: A selection of predefined string values. The values are specificed in the field edit page.
+  - **text**: A string of characters spanning more than one line.
+  - **date**: A valid date. Shown as a date selection widget.
+  - **group**: A group of fields. Does not contain any value of its own.
+
+admin_tutorial: |
+  For an end-user to create an order, the admin will have to prepare a form.
+  Like this:
+
+  - Go to the [forms list page](/forms).
+  - Click the button "Create form".
+  - Fill in the title and description. These can be edited later.
+  - Click "Save".
+
+  Now add fields. A "group" field is a container for other fields, and does
+  not contain a value of its own. The other types of fields are pretty
+  self-explanatory.
+
+  - Click "Create field".
+  - Choose group. If no groups have been created, only the top level is
+    available. This choice cannot be edited.
+  - The identifier must be like a common programming language identifier:
+    Begin with an alphabetical character, and then any number of alphanumerical
+    and underscore characters. No blanks. It must be unique within the form.
+    (We should agree on a convention for common fields in many forms here.)
+  - The label is what is shown for the user. If none, then the identifer will
+    be shown, somewhat prettified. Can be edited later.
+  - The field can be made read-only for user, or invisible to the user.
+  - The description is the help text visible to the user. Can be edited later.
+  - Click "Save."
+  - The field will be added below the others in its group. The placement in
+    the group can be edited later.
+  - If you make a mistake (giving wrong identifier, placing in wrong group,
+    etc) you will probably have to delete the field and try again. Currently,
+    only the label, access, placement and description can be edited later.
+  - Conditional visibility is specified when editing a field. Currently,
+    only a single value in another select field can be tested against.
+
+  After having added some fields, it is possible to test what an order for it
+  will look like: Click "Testing". This will allow only admins to create and
+  edit orders for the form.
+
+  Once done with testing, click "Pending" to allow editing of the form again.
+  Any orders created while "Testing" will automatically be deleted.
+
+  **Do not click "Enable"!** That will enable the form for users to create
+  orders. This **cannot be undone!** So be sure that the form is OK before
+  you do this.
+
+  Currently, the site is in test mode. All forms and orders will be erased
+  before going into production mode, so go wild.
+
+contact: |
+  Info on how to contact the facility...
+
+  Email: support@ngisweden.se

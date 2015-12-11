@@ -1,0 +1,99 @@
+{# Information create page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Create information page{% end %}
+
+{% block body_title %}
+Create
+{% module Icon('info') %}
+information page
+{% end %}
+
+{% block main_content %}
+
+<form action="{{ reverse_url('info_create') }}"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-md-6">
+	<label for="name">Name</label>
+	<input type="text" class="form-control"
+	       id="name" name="name">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+    </div>
+    <span class="help-block">
+      Name of the information page, which determines its URL. Cannot
+      be changed once set. Must be unique.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+	<label for="title">Title</label>
+	<input type="text" class="form-control"
+	       id="title" name="title">
+      </div>
+    </div>
+    <span class="help-block">
+      Title to display for the information page.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-2">
+	<label for="menu">Menu</label>
+	<input type="number" class="form-control"
+	       id="menu" name="menu">
+      </div>
+    </div>
+    <span class="help-block">
+      Relative position in 'Information' dropdown menu; an
+      integer. All items with a number will be shown in the dropdown
+      menu after sorting. If blank, the information page will not
+      appear in the menu. It must then be linked to explicitly from
+      elsewhere, or it will be hard for the user to find it.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label for="text">Text</label>
+    <textarea rows="16" class="form-control"
+	      id="text" name="text"></textarea>
+    <span class="help-block">
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+      format is used.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-success glyphicon glyphicon-floppy-disk">
+      Save
+    </button>
+  </div>
+</form>
+
+<br>
+<form action="{{ reverse_url('home') }}"
+      role="form"
+      method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default btn-sm glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+{% end %} {# block main_content #}

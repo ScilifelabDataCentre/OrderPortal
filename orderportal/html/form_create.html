@@ -1,0 +1,74 @@
+{# Form create page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Create Form{% end %}
+
+{% block body_title %}
+Create
+{% module Icon('form', label=True) %}
+{% end %}
+
+{% block main_content %}
+<form action="{{ reverse_url('form_create') }}"
+      role="form"
+      enctype="multipart/form-data"
+      method="POST">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-md-8">
+	<label class="control-label" for="title">Title</label>
+	<input type="text" class="form-control" name="title" id="title">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true">
+	</span>
+      </div>
+    </div>
+    <span class="help-block">
+      Brief, descriptive title for the form. It is not required to be
+      unique, but it is a good idea to make it so anyway.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+	<label class="control-label" for="description">Description</label>
+	<textarea rows="6" class="form-control"
+		  name="description" id="description"></textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      Description to display for the form as information to the user, using
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+      format.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+	<label class="control-label" for="import">Import JSON file</label>
+	<input type="file" class="form-control" name="import" id="import">
+      </div>
+    </div>
+    <span class="help-block">
+      Optional import of a JSON file representation for a form.
+      The format must be correct, so <b>do not</b> try to create it by hand.
+      Always use the JSON output provided by the link in the form page.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-success glyphicon glyphicon-floppy-disk">
+      Save
+    </button>
+  </div>
+
+</form>
+{% end %} {# block main_content #}

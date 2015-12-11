@@ -1,0 +1,101 @@
+KI:
+  name: Karolinska institutet
+  rank: 1
+SU:
+  name: Stockholms universitet
+  rank: 1
+  invoice_address:
+      address: >-
+          Stockholms universitet
+          
+          Postbox 50741
+      postal_code: 202 70
+      city: Malmö
+      country: Sverige
+KTH:
+  name: Kungl. Tekniska högskolan
+  rank: 1
+UU:
+  name: Uppsala universitet
+  rank: 1
+BTH:
+  name: Blekinge tekniska högskola
+  rank: 2
+CTH:
+  name: Chalmers tekniska högskola
+  rank: 2
+FHS:
+  name: Försvarshögskolan
+  rank: 3
+GIH:
+  name: Gymnastik och -idrottshögskolan
+  rank: 3
+GU:
+  name: Göteborgs universitet
+  rank: 2
+HB:
+  name: Högskolan i Borås
+  rank: 3
+HDA:
+  name: Högskolan Dalarna
+  rank: 3
+HH:
+  name: Högskolan i Halmstad
+  rank: 3
+HHS:
+  name: Handelshögskolan i Stockholm
+  rank: 3
+HIG:
+  name: Högskolan i Gävle
+  rank: 3
+HJ:
+  name: Högskolan i Jönköping
+  rank: 3
+HKR:
+  name: Högskolan Kristianstad
+  rank: 3
+HS:
+  name: Högskolan i Skövde
+  rank: 2
+HV:
+  name: Högskolan Väst
+  rank: 3
+KAU:
+  name: Karlstads universitet
+  rank: 2
+LIU:
+  name: Linköpings universitet
+  rank: 2
+LNU:
+  name: Linnéuniversitetet
+  rank: 2
+LTU:
+  name: Luleå tekniska universitet
+  rank: 3
+LU:
+  name: Lunds universitet
+  rank: 2
+MAH:
+  name: Malmö högskola
+  rank: 2
+MDH:
+  name: Mälardalens högskola
+  rank: 2
+MIU:
+  name: Mittuniversitetet
+  rank: 2
+NRM:
+  name: Naturhistoriska riksmuseet
+  rank: 2
+ORU:
+  name: Örebro universitet
+  rank: 2
+SH:
+  name: Södertörns högskola
+  rank: 2
+SLU:
+  name: Sveriges lantbruksuniversitet
+  rank: 2
+UMU:
+  name: Umeå universitet
+  rank: 2

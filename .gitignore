@@ -1,8 +1,6 @@
+*~
 *.yaml
 *.pyc
-*~
 dist
 orderportal.egg-info
-orderportal/dump.tar*
-orderportal/*.log
-orderportal/data
+orderportal/scripts/dump.tar*

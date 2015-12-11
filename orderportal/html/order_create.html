@@ -1,0 +1,40 @@
+{# Order create page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Create a new order based on '{{ form['title'] }}'{% end %}
+
+{% block body_title %}Create a new order based on '{{ form['title'] }}'{% end %}
+
+{% block main_content %}
+<form action="{{ reverse_url('order_create') }}"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+
+  <input type="hidden" name="form" value="{{ form['_id'] }}">
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+	<label class="control-label" for="title">Title</label>
+	<input type="text" class="form-control" name="title" id="title">
+      </div>
+    </div>
+    <span class="help-block">
+      Brief, descriptive title for the order. It is not required to be
+      unique, but it is a good idea to make it so anyway. If none
+      given, then the form's title is used. May be edited later.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-primary glyphicon glyphicon-plus">
+      Create
+    </button>
+  </div>
+</form>
+
+{% end %} {# block main_content #}

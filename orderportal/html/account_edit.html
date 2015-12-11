@@ -1,0 +1,327 @@
+{# Account edit page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Edit {{ account['email'] }}{% end %}
+{% block body_title %}
+Edit
+{% module Icon('account') %}
+{{ account['email'] }}
+{% end %}
+
+{% block main_content %}
+<form action="{{ reverse_url('account_edit', account['email']) }}"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+
+  {% if is_admin %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+	<label class="control-label" for="role">Role</label>
+	<select class="form-control" name="role" id="role">
+	  {% for role in constants.ACCOUNT_ROLES %}
+	  {% set selected = role == account['role'] and 'selected' or '' %}
+	  <option {{ selected }} value="{{ role }}">
+	    {{ role.capitalize() }}
+	  </option>
+	  {% end %}
+	</select>
+      </div>
+    </div>
+  </div>
+  {% end %}
+
+  <div class="panel panel-success">
+    <div class="panel-heading">User information</div>
+    <div class="panel-body">
+
+      <div class="form-group has-feedback">
+	<div class="row">
+	  <div class="col-md-6">
+	    <label class="control-label" for="first_name">First name</label>
+	    <input type="text" class="form-control"
+		   name="first_name" id="first_name"
+		   value="{{ account.get('first_name') or '' }}">
+	    <span style="color:red; margin-right: 1em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true"></span>
+	  </div>
+	</div>
+      </div>
+      <div class="form-group has-feedback">
+	<div class="row">
+	  <div class="col-md-6">
+	    <label class="control-label" for="last_name">Last name</label>
+	    <input type="text" class="form-control"
+		   name="last_name" id="last_name"
+		   value="{{ account.get('last_name') or '' }}">
+	    <span style="color:red; margin-right: 1em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true"></span>
+	  </div>
+	</div>
+      </div>
+      <div class="form-group has-feedback">
+	<label class="control-label" for="university">University</label>
+	<div class="row">
+	  {% if settings['UNIVERSITIES'] %}
+	  {% set other = True %}
+	  <div class="col-md-6">
+	    <select class="form-control" name="university" id="university">
+	      {# OrderedDict ! #}
+	      {% for abbrev, data in settings['UNIVERSITIES'].items() %}
+	      {% if account.get('university') == abbrev %}
+	      {% set other = False %}
+	      {% set selected = 'selected' %}
+	      {% else %}
+	      {% set selected = '' %}
+	      {% end %}
+	      <option {{selected}} value="{{ abbrev }}">{{ abbrev }}
+		{% if data.get('name') %}
+		({{ data.get('name') }})
+		{% end %}
+	      </option>
+	      {% end %}
+	      {% if other %}
+	      <option selected value="">[not available in list]</option>
+	      {% else %}
+	      <option value="">[not available in list]</option>
+	      {% end %}
+	    </select>
+	    <span style="color:red; margin-right: 2em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true"></span>
+	  </div>
+	  <div class="col-md-6">
+	    <input type="text" class="form-control"
+		   name="university_other" id="university_other"
+		   placeholder="Provide full name if not available in the list."
+		   value="{{ other and account.get('university') or '' }}">
+	  </div>
+	  {% else %}
+	  <div class="col-md-6">
+	    <input type="text" class="form-control"
+		   name="university" id="university"
+		   value="{{ account.get('university') or '' }}">
+	    <span style="color:red; margin-right: 1em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true"></span>
+	  </div>
+	  {% end %}
+	</div>
+	<span class="help-block">
+	  Main affiliation: University, college, company, organization, or
+	  similar.
+	</span>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-6">
+	    <label class="control-label" for="department">Department</label>
+	    <input type="text" class="form-control"
+		   name="department" id="department"
+		   value="{{ account.get('department') or '' }}">
+	  </div>
+	</div>
+	<span class="help-block">
+	  University department, company section, group, or similar.
+	</span>
+      </div>
+      <div class="panel panel-default">
+	<div class="panel-heading">
+	  Postal address; for delivery of paper documents, returned
+	  samples, etc.
+	</div>
+
+	<div class="panel-body">
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="address">Address</label>
+		<textarea class="form-control" rownum="2"
+			  id="address" name="address"
+			  >{{ account['address'].get('address') or '' }}</textarea>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Institution, street, number or post box.
+	    </span>
+	  </div>
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="postal_code">Postal code</label>
+		<input type="text" class="form-control"
+		       id="postal_code" name="postal_code"
+		       value="{{ account['address'].get('postal_code') or '' }}">
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Postal code, zip code.
+	    </span>
+	  </div>
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="city">City</label>
+		<input type="text" class="form-control"
+		       id="city" name="city"
+		       value="{{ account['address'].get('city') or '' }}">
+	      </div>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="country">Country</label>
+		<input type="text" class="form-control"
+		       id="country" name="country" value="Sweden"
+		       value="{{ account['address'].get('country') or '' }}">
+	      </div>
+	    </div>
+	  </div>
+	</div>
+      </div>
+      <div class="panel panel-default">
+	<div class="panel-heading">
+	  Invoice address.
+	</div>
+	<div class="panel-body">
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="invoice_code">Invoice code</label>
+		<input type="text" class="form-control"
+		       id="invoice_code" name="invoice_code"
+		       value="{{ account['invoice_address'].get('invoice_code') or '' }}">
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Any required information or label for your accounts.
+	    </span>
+	  </div>
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="invoice_address">Address</label>
+		<textarea class="form-control" rownum="2"
+			  id="invoice_address" name="invoice_address"
+			  >{{ account['invoice_address'].get('address') or '' }}</textarea>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Institution, street, number or post box.
+	    </span>
+	  </div>
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="invoice_postal_code">Postal code</label>
+		<input type="text" class="form-control"
+		       id="invoice_postal_code" name="invoice_postal_code"
+		       value="{{ account['invoice_address'].get('postal_code') or '' }}">
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Postal code, zip code.
+	    </span>
+	  </div>
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="invoice_city">City</label>
+		<input type="text" class="form-control"
+		       id="invoice_city" name="invoice_city"
+		       value="{{ account['invoice_address'].get('city') or '' }}">
+	      </div>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="invoice_country">Country</label>
+		<input type="text" class="form-control"
+		       id="invoice_country" name="invoice_country"
+		       value="{{ account['invoice_address'].get('country') or '' }}">
+	      </div>
+	    </div>
+	  </div>
+	</div>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-6">
+	    <label class="control-label" for="phone">Phone</label>
+	    <textarea rows="3" class="form-control"
+		      name="phone" id="phone"
+		      >{{ account.get('phone') or '' }}</textarea>
+	  </div>
+	</div>
+	<span class="help-block">
+	  One or more telephone numbers, one per line.
+	</span>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="other_data">Other data</label>
+	    <textarea rows="3" class="form-control"
+		      id="other_data" name="other_data"
+		      >{{ account.get('other_data') or '' }}</textarea>
+	  </div>
+	</div>
+	<span class="help-block">
+	  Miscellaneous user data from other sources.
+	</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="panel panel-warning">
+    <div class="panel-heading">Site configuration</div>
+    <div class="panel-body">
+
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-6">
+	    <label class="control-label" for="phone">Page size</label>
+	    <input type="int" class="form-control"
+		   name="page_size" id="page_size"
+		   value="{{ account.get('page_size') or '' }}">
+	  </div>
+	</div>
+	<span class="help-block">
+	  Max number of items (e.g. orders) shown on each list page.
+	</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-success glyphicon glyphicon-floppy-disk">
+      Save
+    </button>
+  </div>
+
+</form>
+
+<br>
+<form action="{{ reverse_url('account', account['email']) }}"
+      role="form"
+      method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+{% end %} {# block main_content #}

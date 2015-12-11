@@ -1,0 +1,82 @@
+{# Search fields setup page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Search fields{% end %}
+
+{% block body_title %}Search fields{% end %}
+
+{% block main_content %}
+
+<div class="row">
+  <div class="col-md-10">
+    <div class="well">
+      <p>
+	Only the titles of orders are searched by default.
+      </p>
+      <p>
+	If other order fields are to be searched, the identifiers for
+	those fields must be specified here. All order fields
+	containing the identifier will be indexed to allow search.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-5">
+    <form action="{{ reverse_url('search_fields') }}"
+	  role="form"
+	  method="POST">
+      {% module xsrf_form_html() %}
+
+      <div class="form-group">
+	<label for="add_field">
+	  Give identifier of a field to index for searching
+	</label>
+	<input type="text" class="form-control"
+	       name="add_field" id="add_field">
+      </div>
+
+      <div class="form-group">
+	<label class="control-label"></label>
+	<button type="submit"
+		class="btn btn-success glyphicon glyphicon-floppy-disk">
+	  Save
+	</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<br>
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-condensed">
+      <tr>
+	<th>Field indexed for search</th>
+	<td></td>
+      </tr>
+      {% for key in sorted(views.keys()) %}
+      <tr>
+	<td>{{ key }}</td>
+	<td>
+	  <form action="{{ reverse_url('search_fields') }}"
+		role="form"
+		method="POST">
+	    {% module xsrf_form_html() %}
+	    <input type="hidden" value="{{ key }}"
+		   name="delete_field" id="delete_field">
+	    <button type="submit"
+		    class="btn btn-xs btn-danger glyphicon glyphicon-minus pull-right">
+	      Delete
+	    </button>
+	  </form>
+	</td>
+      </tr>
+      {% end %}
+    </table>
+  </div>
+</div>
+
+{% end %} {# block main_content #}

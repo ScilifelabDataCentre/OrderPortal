@@ -1,0 +1,196 @@
+{# Order edit page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}
+Edit order
+'{{ order.get('title') or order['_id'] }}'
+{% end %}
+
+{% block body_title %}
+Edit order
+'{{ order.get('title') or order['_id'] }}'
+{% end %}
+
+{% block main_content %}
+<form action="{{ reverse_url('order_edit', order['_id']) }}"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+	<label class="control-label" for="__title__">Title</label>
+	<input type="text" class="form-control"
+	       name="__title__" id="__title__"
+	       value="{{ order.get('title') or '' }}">
+      </div>
+    </div>
+    <span class="help-block">
+      Brief, descriptive title for the order. It is not required to
+      be unique, but it is a good idea to make it so anyway.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+	<label class="control-label" for="__owner__">Owner</label>
+	{% if is_admin %}
+	<input type="text" class="form-control"
+	       name="__owner__" id="__owner__"
+	       value="{{ order['owner'] }}">
+	{% else %}
+	<select class="form-control" name="__owner__" id="__owner__">
+	  {% for colleague in colleagues %}
+	    {% set sel = colleague == current_user['email'] and 'selected' or '' %}
+	    <option {{ sel }}>{{ colleague }}</option>
+	  {% end %}
+	</select>
+	{% end %}
+      </div>
+    </div>
+    <span class="help-block">
+      {% if is_admin %}
+      The order's owner specified by email address. May be changed to
+      another account.
+      {% else %}
+      The order's owner may be changed to an account in your groups.
+      <strong>NOTE:</strong>
+      You will then no longer be able to edit the order.
+      {% end %}
+    </span>
+  </div>
+
+  {# Recursion: 'include' cannot be used! #}
+  {% module Template('order_edit_fields.html', fields=fields, order=order, is_staff=is_staff) %}
+
+{#
+  {% set stack = [0] %}
+  {% for field in fields %}
+    {% while field['depth'] < stack[-1] %}
+      {% set stack.pop() %}
+		</div>
+              </div>
+	    </td>
+	  </tr>
+    {% end %}
+    {% if field['restrict_read'] and not is_staff %}
+    {% continue %}
+    {% end %}
+    {% if field['type'] == constants.GROUP %}
+      {% set stack.append(field['depth'] + 1) %}
+      <div class="panel panel-default">
+	<div class="panel-heading">
+	  <h4>
+	    {{ field.get('label') or field['identifier'].capitalize() }}
+	    <small>
+	      {% if field['identifier'] in order['invalid'] %}
+	      <span class="text-danger glyphicon glyphicon-remove">
+		({{ order['invalid'][field['identifier']] }})
+	      </span>
+	      {% else %}
+	      <span class="text-success glyphicon glyphicon-ok">
+	      </span>
+	      {% end %}
+	      {{ field.get('description') or '' }}
+	    </small>
+	  </h4>
+	</div>
+	<div class="panel-body">
+    {% else %}
+      <div class="form-group has-feedback">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="{{ field['identifier'] }}">
+	      {{ field.get('label') or field['identifier'].capitalize() }}
+	      {% if field['identifier'] in order['invalid'] %}
+	      <span class="text-danger glyphicon glyphicon-remove">
+		({{ order['invalid'][field['identifier']] }})
+	      </span>
+	      {% else %}
+	      <span class="text-success glyphicon glyphicon-ok">
+	      </span>
+	      {% end %}
+	    </label>
+	    <input type="text" class="form-control"
+		   name="{{ field['identifier'] }}"
+		   id="{{ field['identifier'] }}"
+		   value="{{ order['fields'][field['identifier']] or '' }}">
+	    {% if field['required'] %}
+	    <span style="color:red; margin-right: 1em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true">
+	    </span>
+	    {% end %}
+	  </div>
+	</div>
+	<span class="help-block">
+	  {{ field.get('description') or '' }}
+	</span>
+      </div>
+    {% end %}
+    {% end %}
+
+    {% while stack.pop() %}
+	</div>
+      </div>
+    {% end %}
+#}
+
+  <div class="row">
+    <div class="col-md-4">
+      <div class="form-group">
+	<label class="control-label"></label>
+	<button type="submit" name="__save__" value="continue"
+		class="btn btn-success glyphicon glyphicon-floppy-disk">
+	  Save and continue
+	</button>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+	<label class="control-label"></label>
+	<button type="submit"
+		class="btn btn-success glyphicon glyphicon-floppy-save">
+	  Save and quit
+	</button>
+      </div>
+    </div>
+    <div class="col-md-4">
+    </div>
+  </div>
+
+</form>
+
+<br>
+<form action="{{ reverse_url('order', order['_id']) }}"
+      role="form"
+      method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+{% end %} {# block main_content #}
+
+{% block header-css %}
+<link rel="stylesheet" href="{{ static_url('jquery-ui-themes-1.11.4/themes/smoothness/jquery-ui.min.css') }}">
+{% end %}
+
+{% block javascript_code %}
+<script src="{{ static_url('field_visible_if.js') }}"></script>
+{# This is required for input fields for date. #}
+<script src="{{ static_url('jquery-ui-1.11.4/jquery-ui.min.js') }}"></script>
+<script>
+  $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
+  $(document).ready(function(){
+    $(".datepicker").datepicker();
+  });
+</script>
+{% end %}

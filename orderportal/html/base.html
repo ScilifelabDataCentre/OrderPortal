@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block head_title %}OrderPortal{% end %}</title>
+    {% try %}
+      {% set url = reverse_url('site', settings['SITE_FAVICON']) %}
+    {% except KeyError %}
+      {% set url = static_url('orderportal_32.png') %}
+    {% end %}
+    <link rel="shortcut icon" type="image/png" href="{{ url }}">
+    <link rel="stylesheet"
+	  href="{{ static_url('Bootstrap-3.3.5/css/bootstrap.min.css') }}">
+    {% block header-css %}
+    {% end %}
+    <link rel="stylesheet" href="{{ static_url('mods.css') }}">
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid">
+	<div class="navbar-header">
+	  <button type="button" class="navbar-toggle"
+		  data-toggle="collapse" data-target="#myNavbar">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span> 
+	  </button>
+	  <a class="navbar-brand" href="{{ reverse_url('home') }}">
+	    {% try %}
+	      {% set url = reverse_url('site', settings['SITE_NAVBAR_ICON']) %}
+	    {% except KeyError %}
+	      {% set url = static_url('orderportal_32.png') %}
+	    {% end %}
+	    <img src="{{ url }}"
+		 title="{{ settings['SITE_NAME'] }}"
+		 alt="{{ settings['SITE_NAME'] }}">
+	  </a>
+	</div>
+	<div class="collapse navbar-collapse" id="myNavbar">
+	  <ul class="nav navbar-nav">
+	    <li>
+	      <a class="glyphicon glyphicon-home"
+		 href="{{ reverse_url('home') }}"></a>
+	    </li>
+	    {% if current_user %}
+	    {% if is_staff %}
+            <li><a href="{{ reverse_url('orders') }}">Orders</a></li>
+	    {% else %}
+	    <li>
+	      <a href="{{ reverse_url('account_orders', current_user['email']) }}">
+		My orders
+	      </a>
+	    </li>
+	    {% end %} {# if is_staff #}
+	    {% end %} {# if current_user #}
+
+	    {% if is_admin %}
+            <li><a href="{{ reverse_url('forms') }}">Forms</a></li>
+	    {% end %} {# if is_admin #}
+
+	    {% if is_staff %}
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+		Accounts
+		<span class="caret"></span>
+	      </a>
+              <ul class="dropdown-menu">
+		<li>
+		  <a href="{{ reverse_url('accounts') }}">All accounts</a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('groups') }}">All groups</a>
+		</li>
+		{% if is_admin %}
+		<li>
+		  <a href="{{ reverse_url('register') }}">
+		    Register new account
+		  </a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('reset') }}">Reset password</a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('password') }}">Set password</a>
+		</li>
+		{% end %} {# if is_admin #}
+	      </ul>
+	    </li>
+	    {% end %} {# if is_staff #}
+
+	    <li>
+	      <a href="{{ reverse_url('contact') }}">Contact</a>
+	    </li>
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+		Information
+		<span class="caret"></span>
+	      </a>
+              <ul class="dropdown-menu">
+		{% if is_admin %}
+		<li>
+		  <a href="{{ reverse_url('infos') }}">All info pages</a>
+		</li>
+		{% end %} {# if is_admin #}
+		{% for n, t in infos %}
+		<li>
+		  <a href="{{ reverse_url('info', n) }}">
+		    {{ t or n }}
+		  </a>
+		</li>
+		{% end %}
+              </ul>
+            </li>
+
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+		Files
+		<span class="caret"></span>
+	      </a>
+              <ul class="dropdown-menu">
+		<li>
+		  <a href="{{ reverse_url('files') }}">All files</a>
+		</li>
+		{% for name in files %}
+		<li>
+		  <a href="{{ reverse_url('file_meta', name) }}">- {{ name }}</a>
+		</li>
+		{% end %}
+              </ul>
+            </li>
+
+	    <li>
+	      <a href="{{ reverse_url('about') }}">About</a>
+	    </li>
+
+	    {% if is_admin %}
+            <li class="dropdown">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">Admin
+		<span class="caret"></span>
+	      </a>
+              <ul class="dropdown-menu">
+		<li>
+		  <a href="{{ reverse_url('search_fields') }}">Search fields</a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('global_modes') }}">Global modes</a>
+		</li>
+		<li><a href="{{ reverse_url('statuses') }}">Statuses</a></li>
+		<li><a href="{{ reverse_url('config') }}">Configuration</a></li>
+		<li class="dropdown-submenu">
+		  <a class="submenu" href="#">Text
+		    <span class="caret"></span>
+		  </a>
+		  <ul class="dropdown-menu">
+		    {% for name in texts %}
+		    <li>
+		      <a href="{{ reverse_url('text', name) }}">{{ name }}</a>
+		    </li>
+		    {% end %}
+		  </ul>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('admin_tutorial') }}">Tutorial</a>
+		</li>
+	      </ul>
+	    </li>
+	    {% end %} {# if is_admin #}
+
+	  </ul>
+
+	  <div>
+	    <ul class="nav navbar-nav navbar-right">
+	      {% if current_user %}
+	      <li>
+		<p class="navbar-text">
+		  <a href="{{ reverse_url('account', current_user['email']) }}">
+		    {% module Entity(current_user) %}
+		  </a>
+		</p>
+	      </li>
+	      <li>
+		<form action="{{ reverse_url('logout') }}"
+		      role="form"
+		      class="navbar-form"
+		      method="POST">
+		  {% module xsrf_form_html() %}
+		  <button type="submit"
+			  title="Logout"
+			  class="btn btn-default btn-sm glyphicon glyphicon-log-out">
+		  </button>
+		</form>
+	      </li>
+	      {% end %} {# if current_user #}
+	      {% block search_field %}
+	      <li>
+		<form action="{{ reverse_url('search') }}"
+		      role="form"
+		      class="navbar-form form-inline"
+		      method="GET">
+		  <div class="form-group has-feedback">
+		    <input type="search" id="term" name="term" autofocus
+			   class="form-control"
+			   placeholder="Search">
+		    <span class="glyphicon glyphicon-search form-control-feedback"></span>
+		  </div>
+		</form>
+	      </li>
+	      {% end %} {# block search_field #}
+	    </ul>
+	  </div>
+	</div>
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+
+      <div class="row">
+	<div class="col-md-11 col-md-offset-1">
+	  <h1>{% block body_title %}OrderPortal{% end %}</h1>
+	</div>
+      </div>
+
+      {% block error %}
+      {% try %}
+      {% if error %}
+      <div class="row">
+	<div class="col-md-10 col-md-offset-1 lead alert alert-danger">
+	  <strong>Error:</strong> {{ error }}
+	</div>
+	<div class="col-md-1"></div>
+      </div>
+      {% end %} {# if error #}
+      {% except NameError %}
+      {% end %} {# try #}
+      {% end %} {# block error #}
+
+      {% block message %}
+      {% try %}
+      {% if message %}
+      <div class="row">
+	<div class="col-md-10 col-md-offset-1 alert alert-warning">
+	  {# Allow links in message #}
+	  <strong>Message:</strong> {% raw message %}
+	</div>
+	<div class="col-md-1"></div>
+      </div>
+      {% end %} {# if message #}
+      {% except NameError %}
+      {% end %} {# try #}
+      {% end %} {# block message #}
+
+      {% block content %}
+      <div class="row">
+	{% block outer_main_content %}
+	<div class="col-md-9 col-md-offset-1">
+	  {% block main_content %}
+	  {% end %} {# block main_content #}
+	</div>
+	{% end %} {# block outer_main_content #}
+	<div class="col-md-2">
+	  {% block meta_content %}
+	  {% end %} {# block meta_content #}
+	</div>
+      </div>
+      {% block sub_main_content %}
+      {% end %} {# block sub_main_content #}
+      {% end %} {# block content #}
+
+    </div>
+
+    {% block javascript_standard %}
+    {# NOTE: jQuery has to be loaded before bootstrap! #}
+    <script src="{{ static_url('jquery-1.11.3.min.js') }}"></script>
+    <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
+    <script src="{{ static_url('Bootstrap-3.3.5/js/bootstrap.min.js') }}"></script>
+    <script>
+      $(document).ready(function(){
+        $('.dropdown-submenu a.submenu').on("click", function(e){
+          $(this).next('ul').toggle();
+          e.stopPropagation();
+          e.preventDefault();
+        });
+      });
+    </script>
+    {% end %} {# block javascript_standard #}
+
+    {% block javascript_code %}
+    {% end %}
+  </body>
+</html>

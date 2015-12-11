@@ -1,0 +1,272 @@
+{# Form field edit page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}
+Edit field '{{ field['identifier'] }}' 
+in '{{ form['title'] }}'
+{% end %}
+
+{% block body_title %}
+Edit field '{{ field['identifier'] }}' 
+in '{{ form['title'] }}'
+{% end %}
+
+{% block main_content %}
+<form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label for="type">Parent field</label>
+	<p class="form-control-static"><i>
+	  {% if field is None or field.get('parent') is None %}
+	  [none]
+	  {% else %}
+	  {{ field['parent'] }}
+	  {% end %}
+	</i></p>
+      </div>
+    </div>
+    <span class="help-block">
+      Parent group for the field. Cannot be changed.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+	<label for="label">Label</label>
+	<input type="text" class="form-control"
+	       id="label" name="label"
+	       value="{{ field.get('label') or ''}}">
+      </div>
+    </div>
+    <span class="help-block">
+      Label to display for the field in the order form. The identifier
+      will be used if no label is provided.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label for="type">Type</label>
+	<p class="form-control-static">
+	  <i>{{ constants.TYPE_LABELS.get(field['type'], field['type'])}}</i>
+	</p>
+      </div>
+    </div>
+    <span class="help-block">
+      Data type for the field. Cannot be changed.
+      {% module Help('help_datatypes') %}
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label for="visible_if_field">Visible if: Field identifier</label>
+	<select class="form-control"
+		name="visible_if_field" id="visible_if_field">
+	  <option value="">[none]</option>
+	  {% for other in fields %}
+	    {% if other is not field and other['depth'] <= field['depth'] %}
+	      {% set sel = field.get('visible_if_field') == other['identifier'] and 'selected' or '' %}
+	      <option {{ sel }}>{{ other['identifier'] }}</option>
+	    {% end %}
+	  {% end %}
+	</select>
+      </div>
+    </div>
+    <span class="help-block">
+      Field is visible if another field with the given identifier has
+      a specific value.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label for="visible_if_value">Visible if: Field value</label>
+	<input type="text" class="form-control"
+	       name="visible_if_value" id="visible_if_value"
+	       value="{{ field.get('visible_if_value') or '' }}">
+	</input>
+      </div>
+    </div>
+    <span class="help-block">
+      Field is visible if the other field (defined above) has the given value.
+      Multiple values are given by using the vertical bar '|' as delimiter.
+    </span>
+  </div>
+
+  {% if field['type'] == constants.SELECT %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+	<label class="control-label" for="select">Select</label>
+	<textarea class="form-control" name="select" rows="4"
+		  >{{ '\n'.join(field.get('select') or []) }}</textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      Values to select among. One per line. The first value is the default.
+    </span>
+  </div>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+	<label class="control-label" for="display">Display</label>
+	<div>
+	  <label class="radio-inline">
+	    {% set checked = field.get('display', 'menu') == 'menu' and 'checked' %}
+	    <input type="radio" name="display" value="menu" {{ checked }}>Menu</label>
+	  <label class="radio-inline">
+	    {% set checked = field.get('display') == 'radio' and 'checked' %}
+	    <input type="radio" name="display" value="radio" {{ checked }}>Radio buttons</label>
+	</div>
+      </div>
+    </div>
+    <span class="help-block">
+      Display element to use for the field.
+    </span>
+  </div>
+
+  {% end %}
+
+  {% if field['type'] != constants.GROUP %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+	<label class="control-label" for="required">Required</label>
+	<div class="checkbox">
+	  {% set checked = field['required'] and 'checked' or ''%}
+	  <label>
+	    <input type="checkbox" value="yes"
+		   id="required" name="required" {{ checked }}>
+	    Require the field to have a defined value for the order to
+	    be submittable.
+	  </label>
+	</div>
+      </div>
+    </div>
+  </div>
+  {% end %}
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+	<label class="control-label" for="restrict_read">Restricted read</label>
+	<div class="checkbox">
+	  {% set checked = field['restrict_read'] and 'checked' or ''%}
+	  <label>
+	    <input type="checkbox" value="yes"
+		   id="restrict_read" name="restrict_read" {{ checked }}>
+	    The field in the form is visible only to staff, not the user.
+	  </label>
+	</div>
+      </div>
+    </div>
+  </div>
+
+  {% if field['type'] != constants.GROUP %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+	<label class="control-label" for="restrict_write">Restricted write</label>
+	<div class="checkbox">
+	  {% set checked = field['restrict_write'] and 'checked' or ''%}
+	  <label>
+	    <input type="checkbox" value="yes"
+		   id="restrict_write" name="restrict_write" {{ checked }}>
+	    The field in the form is editable only by admin, not the user.
+	  </label>
+	</div>
+      </div>
+    </div>
+  </div>
+  {% end %}
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+	<label class="control-label" for="move">Change position</label>
+	<div>
+	  <label class="radio-inline">
+	    <input type="radio" name="move" value="" checked>No change</label>
+	  <label class="radio-inline">
+	    <input type="radio" name="move" value="first">First</label>
+	  <label class="radio-inline">
+	    <input type="radio" name="move" value="previous">Previous</label>
+	  <label class="radio-inline">
+	    <input type="radio" name="move" value="next">Next</label>
+	  <label class="radio-inline">
+	    <input type="radio" name="move" value="last">Last</label>
+	</div>
+      </div>
+    </div>
+    <span class="help-block">
+      Move the field relative to its current position.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+	<label class="control-label" for="description">Description</label>
+	<textarea class="form-control"
+		  id="description" name="description"
+		  >{{ field.get('description') or '' }}</textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      Description to display in the order to help the user fill in the
+      field correctly, using
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+      format.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-success glyphicon glyphicon-floppy-disk">
+      Save
+    </button>
+  </div>
+
+</form>
+
+<br>
+<form action="{{ reverse_url('form', form['_id']) }}"
+      role="form"
+      method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+<br>
+<form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+  <div class="form-group">
+    <label class="control-label"></label>
+    <input type="hidden" name="_http_method" value="delete">
+    <button type="submit"
+	    class="btn btn-danger glyphicon glyphicon-trash"
+	    onclick="return confirm('Cannot be undone! Really delete?');">
+      Delete
+    </button>
+  </div>
+</form>
+{% end %} {# block main_content #}

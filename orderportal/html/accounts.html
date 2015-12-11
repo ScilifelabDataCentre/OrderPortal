@@ -1,0 +1,161 @@
+{# Accounts list page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Accounts{% end %}
+
+{% block body_title %}
+{% module Icon('account') %}
+Accounts
+{% end %}
+
+{% block content %}
+<form action="{{ reverse_url('accounts', **params) }}"
+      id="refresh"
+      role="form" class="form-inline"
+      method="GET">
+  <input type="hidden" name="page" value="{{ params.get('page') or 0 }}">
+  <div class="row">
+    <div class="col-md-9 col-md-offset-1">
+      <span class="glyphicon glyphicon-sort"></span>
+      <div class="form-group">
+	<label for="university">Sort by</label>
+	<select name="sort" id="sort" class="form-control refresh">
+	  {% set sort = params.get('sort') %}
+	  <option {{ sort == 'name' and 'selected' or ''}}
+		  value="name">Name</option>
+	  <option {{ sort == 'login' and 'selected' or ''}}
+		  value="login">Latest login</option>
+	  <option {{ sort == 'modified' and 'selected' or ''}}
+		  value="modified">Modified</option>
+	  <option {{ sort == 'email' and 'selected' or ''}}
+		  value="email">Email</option>
+	</select>
+      </div>
+      <div class="form-group">
+	<label class="radio-inline">
+	  <input type="radio" name="descending" value="false" class="refresh"
+		 {{ params.get('descending') == 'false' and 'checked' or '' }}>
+	  Ascending
+	</label>
+	<label class="radio-inline">
+	  <input type="radio" name="descending" value="true" class="refresh"
+		 {{ params.get('descending') == 'true' and 'checked' or '' }}>
+	  Descending
+	</label>
+	<label class="radio-inline">
+	  <input type="radio" name="descending" value="" class="refresh"
+		 {{ params.get('descending') is None and 'checked' or '' }}>
+	  Default
+	</label>
+      </div>
+    </div>
+    <div class="col-md-2">
+    </div>
+  </div>
+
+  <br>
+  <div class="row">
+    <div class="col-md-9 col-md-offset-1">
+      <label class="glyphicon glyphicon-filter"></label>
+      <div class="form-group">
+	<label for="university">Filter by</label>
+	<select name="university" id="university" class="form-control refresh">
+	  <option value="">[any university]</option>
+	  {% set sel = params.get('university') == '[other]' and 'selected' or '' %}
+	  <option value="[other]" {{ sel }}>[other]</option>
+	  {# OrderedDict ! #}
+	  {% for abbrev, data in settings['UNIVERSITIES'].items() %}
+	  {% set sel = abbrev == params.get('university') and 'selected' or '' %}
+	  <option {{ sel }} value="{{ abbrev }}">{{ abbrev }} ({{ data.get('name', abbrev) }})</option>
+	  {% end %}
+	</select>
+      </div>
+      <div class="form-group">
+	<select name="role" id="role" class="form-control refresh">
+	  <option value="">[any role]</option>
+	  {% for role in constants.ACCOUNT_ROLES %}
+	  {% set sel = role == params.get('role') and 'selected' or '' %}
+	  <option {{ sel }} value="{{ role }}">{{ role.capitalize() }}</option>
+	  {% end %}
+	</select>
+      </div>
+      <div class="form-group">
+	<select name="status" id="status" class="form-control refresh">
+	  <option value="">[any status]</option>
+	  {% for status in constants.ACCOUNT_STATUSES %}
+	  {% set sel = status == params.get('status') and 'selected' or '' %}
+	  <option {{ sel }} value="{{ status }}">{{ status.capitalize() }}</option>
+	  {% end %}
+	</select>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <a href="{{ reverse_url('accounts_csv', **params) }}">
+	{% module Icon('csv', title='CSV file', label=True) %}
+      </a>
+    </div>
+  </div>
+</form>
+
+<div class="row">
+  <div class="col-md-10 col-md-offset-1">
+    {% set url_func = functools.partial(reverse_url, 'accounts', **params) %}
+    {% include 'paging.html' %}
+  </div>
+  <div class="col-md-1">
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <table class="table table-striped table-condensed">
+      <tr>
+	<th width="25%">Account</th>
+	<th width="20%">Name</th>
+	<th width="5%">Orders</th>
+	<th width="15%">University</th>
+	<th width="5%">Role</th>
+	<th width="10%">Status</th>
+	<th width="10%">Latest login</th>
+	<th width="10%">Modified</th>
+      </tr>
+      {% for account in accounts %}
+      <tr>
+	<td>
+	  <a href="{{ reverse_url('account', account['email']) }}">
+	    {{ account['email'] }}
+	  </a>
+	</td>
+	<td>{{ account['last_name'] + ', ' + account['first_name'] }}</td>
+	<td>
+	  <a class="badge"
+	     href="{{ reverse_url('account_orders', account['email']) }}">
+	    {{ account['order_count'] }}
+	  </a>
+	</td>
+	<td>{{ account['university'] }}</td>
+	<td>{% module Icon(account['role'], label=True) %}</td>
+	<td>{% module Icon(account['status'], label=True) %}</td>
+	{% if account.get('login') %}
+	<td class="localtime">{{ account['login'] }}</td>
+	{% else %}
+	<td>-</td>
+	{% end %}
+	<td class="localtime">{{ account['modified'] }}</td>
+      </tr>
+      {% end %}
+    </table>
+  </div>
+</div>
+{% end %}
+
+{% block javascript_code %}
+<script>
+$(document).ready(function() {
+    $('.refresh').change(function () {
+	$('#refresh').submit();
+    });
+});
+</script>
+{% end %}

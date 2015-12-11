@@ -1,0 +1,294 @@
+{# Account page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Account: {{ account['email'] }}{% end %}
+{% block body_title %}
+{% module Icon('account', label=True) %}:
+{{ account['email'] }}
+{% end %}
+
+{% block meta_content %}
+
+{% if current_user['email'] == account['email'] %}
+<p>
+  <form action="{{ reverse_url('logout') }}"
+	role="form"
+	class="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <button type="submit"
+	    title="Logout"
+	    class="btn btn-default glyphicon glyphicon-log-out">
+      Logout
+    </button>
+  </form>
+</p>
+{% end %} {# if current_user['email'] == account['email'] #}
+
+{% if is_admin or current_user['email'] == account['email'] %}
+<p>
+  <div>
+    <a href="{{ reverse_url('account_edit', account['email']) }}"
+       role="button"
+       class="btn btn-primary glyphicon glyphicon-edit">
+      Edit
+    </a>
+  </div>
+</p>
+{% end %}
+
+{% if current_user['email'] == account['email'] %}
+<p>
+  <div>
+    <a href="{{ reverse_url('group_create') }}"
+       role="button"
+       class="btn btn-success glyphicon glyphicon-plus">
+      Create group
+    </a>
+  </div>
+</p>
+{% end %}{# if current_user['email'] == account['email'] #}
+
+{% if is_admin or current_user['email'] == account['email'] %}
+<p>
+  <div>
+    <a href="{{ reverse_url('reset', account=account['email']) }}"
+       role="button"
+       class="btn btn-warning glyphicon glyphicon-step-backward">
+      Reset password
+    </a>
+  </div>
+</p>
+{% end %}
+
+{% if is_admin and current_user['email'] != account['email'] %}
+
+{% if account['status'] in (constants.PENDING, constants.DISABLED) %}
+<p>
+  <form action="{{ reverse_url('account_enable', account['email']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <button type="submit"
+	      class="btn btn-success glyphicon glyphicon-ok">
+	Enable
+      </button>
+    </div>
+  </form>
+</p>
+{% else %}
+<p>
+  <form action="{{ reverse_url('account_disable', account['email']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <button type="submit"
+	      class="btn btn-danger glyphicon glyphicon-ban-circle"
+	      onclick="return confirm('Really disable?');">
+	Disable
+      </button>
+    </div>
+  </form>
+</p>
+{% end %} {# if account['status'] in (constants.PENDING, constants.DISABLED) #}
+
+{% if is_deletable %}
+<p>
+  <form action="{{ reverse_url('account', account['email']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <input type="hidden" name="_http_method" value="delete">
+      <button type="submit"
+	      class="btn btn-danger glyphicon glyphicon-trash"
+	      onclick="return confirm('Cannot be undone! Really delete?');">
+	Delete
+      </button>
+    </div>
+  </form>
+</p>
+{% end %} {# if is_deletable #}
+{% end %} {# if is_admin #}
+{% end %} {# block meta_content #}
+
+{% block main_content %}
+<table class="table-condensed table-fields">
+  <tr>
+    <th>Orders</th>
+    <td>
+      <a class="badge"
+	 href="{{ reverse_url('account_orders', account['email']) }}">
+	{{ account['order_count'] }}
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <th>Role</th>
+    <td>{% module Icon(account['role'], label=True) %}</td>
+  </tr>
+  <tr>
+    <th>Status</th>
+    <td>{% module Icon(account['status'], label=True) %}</td>
+  </tr>
+  <tr>
+    <th>Groups</th>
+    <td>
+      <table>
+	{% for group in groups %}
+	<tr>
+	  <td>
+	    {% module Entity(group) %}
+            {% if group['owner'] == account['email'] %}
+            (owner)
+	    {% end %}
+	  </td>
+	  {% if current_user['email'] == account['email'] and account['email'] != group['owner'] %}
+	  <td>
+            <form action="{{ reverse_url('group_decline', group['_id']) }}"
+		  role="form"
+		  class="form-inline"
+		  method="POST">
+	      {% module xsrf_form_html() %}
+	      <div class="form-group">
+		&nbsp;
+		<button type="submit"
+			class="btn btn-xs btn-danger glyphicon glyphicon-remove"
+			onclick="return confirm('Cannot be undone! Really decline?');">
+		  Decline
+		</button>
+	      </div>
+	    </form>
+	  </td>
+	  {% end %}
+	</tr>
+	{% end %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <th>Group invitations</th>
+    <td>
+      <table>
+      {% for group in invitations %}
+        <tr>
+	  <td>
+	    {{ group['name'] }}
+            (owner {% module Icon('account') %} {{ group['owner'] }})
+	  </td>
+	  {% if current_user['email'] == account['email'] %}
+	  <td>
+            <form action="{{ reverse_url('group_accept', group['_id']) }}"
+		  role="form"
+		  class="form-inline"
+		  method="POST">
+	      {% module xsrf_form_html() %}
+	      <div class="form-group">
+		&nbsp;
+		<button type="submit"
+			class="btn btn-xs btn-success glyphicon glyphicon-ok"
+			onclick="return confirm('All members of this group will be able to see all your orders. Really accept?');">
+		  Accept
+		</button>
+	      </div>
+	    </form>
+	  </td>
+	  <td>
+            <form action="{{ reverse_url('group_decline', group['_id']) }}"
+		  role="form"
+		  class="form-inline"
+		  method="POST">
+	      {% module xsrf_form_html() %}
+	      <div class="form-group">
+		&nbsp;
+		<button type="submit"
+			class="btn btn-xs btn-danger glyphicon glyphicon-remove">
+		  Decline
+		</button>
+	      </div>
+	    </form>
+	  </td>
+	  {% end %}
+	</tr>
+      {% end %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <th>First name</th>
+    <td>{{ account['first_name'] or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Last name</th>
+    <td>{{ account['last_name'] or '-' }}</td>
+  </tr>
+  <tr>
+    <th>University</th>
+    <td>{{ account['university'] or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Department</th>
+    <td>{{ account['department'] or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Postal address</th>
+    <td class="pre">{% module Address(account.get('address') or dict()) %}</td>
+  </tr>
+  <tr>
+    <th>Invoice address</th>
+    <td class="pre">{% module Address(account.get('invoice_address') or dict()) %}</td>
+  </tr>
+  <tr>
+    <th>Phone</th>
+    <td>{{ account.get('phone') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Page size</th>
+    <td>{{ account.get('page_size') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Other data</th>
+    <td class="pre">{{ account.get('other_data') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Latest activity</th>
+    <td>
+      <span class="localtime">{{ latest_activity }}</span>
+    </td>
+  </tr>
+  <tr>
+    <th>Latest login</th>
+    <td>
+      <span class="localtime">{{ account.get('login') or '-' }}</span>
+    </td>
+  </tr>
+  <tr>
+    <th>Messages</th>
+    <td>
+      <a href="{{ reverse_url('account_messages', account['email']) }}">
+	{% module Icon('message', label=True, title='Messages') %}
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <th>Modified</th>
+    <td>
+      <span class="localtime">{{ account['modified'] }}</span>
+      <a href="{{ reverse_url('account_logs', account['email']) }}">
+	{% module Icon('logs', label=True) %}
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <th>Created</th>
+    <td class="localtime">{{ account['created'] }}</td>
+  </tr>
+  <tr>
+    <th>IUID</th>
+    <td>{{ account['_id'] }}</td>
+  </tr>
+</table>
+{% end %} {# block content #}

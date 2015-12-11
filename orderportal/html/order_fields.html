@@ -1,0 +1,103 @@
+{# Order fields recursive display. #}
+
+{% for field in fields %}
+
+{# Check if field may not be seen. #}
+{% if field['restrict_read'] and not is_staff %}
+{% continue %}
+{% end %}
+
+{# Is there a visibility condition? If so, check it. #}
+{% set fid = field.get('visible_if_field') %}
+{% if fid and str(order['fields'].get(fid)).lower() not in str(field.get('visible_if_value')).lower().split('|') %}
+{% continue %}
+{% end %}
+
+{% set label = field.get('label') or field['identifier'].capitalize().replace('_', ' ') %}
+
+{% if field['type'] == constants.GROUP %}
+<tr>
+  <th width="20%">
+    {% if field['depth'] == 0 %}
+    <button data-toggle="collapse" data-target="#{{ field['identifier'] }}"
+	    class="btn btn-md glyphicon glyphicon-triangle-bottom">
+      {{ label }}
+    </button>
+    {% else %}
+    <span style="padding-left:{{ 1.5*field['depth'] }}em; display:block;">
+      {{ label }}
+    </span>
+    {% end %}
+  </th>
+  <td width="50%"></td>
+  <td>
+    {% if field['restrict_read'] %}
+    [Staff only]
+    {% end %}
+    {% module Markdown(field.get('description')) %}
+  </td>
+  <td>
+    {% if field['identifier'] in order['invalid'] %}
+    <span class="text-danger glyphicon glyphicon-remove">
+      {{ order['invalid'][field['identifier']] }}
+    </span>
+    {% else %}
+    <span class="text-success glyphicon glyphicon-ok">
+    </span>
+    {% end %}
+  </td>
+</tr>
+
+{# Recursion: 'include' cannot be used! #}
+{% if field['fields'] %}
+{% if field['depth'] == 0 %}
+  <tbody id="{{ field['identifier'] }}" class="collapse">
+{% end %}
+{% module Template('order_fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
+{% if field['depth'] == 0 %}
+  </tbody>
+{% end %}
+{% end %} {# if field['fields'] #}
+
+{% else %}
+<tr>
+  <th width="20%">
+    <span style="padding-left:{{ 1.5*field['depth'] }}em; display:block;">
+      {{ label }}
+    </span>
+  </th>
+  <td width="50%">
+    {% set value = order['fields'].get(field['identifier']) %}
+    {% if field['type'] == constants.TEXT %}
+      {% module Markdown(value or '-') %}
+    {% else %}
+      {% if value is None %}
+      -
+      {% else %}
+      {{ value }}
+      {% end %}
+    {% end %}
+  </td>
+  <td>
+    {% if field['restrict_read'] %}
+    [Staff only]
+    {% end %}
+    {% module Markdown(field.get('description')) %}
+  </td>
+  <td>
+    {% if field['identifier'] in order['invalid'] %}
+    <span class="text-danger glyphicon glyphicon-remove">
+      {{ order['invalid'][field['identifier']] }}
+    </span>
+    {% elif value in (None, '') %}
+    <span class="text-danger glyphicon glyphicon-question-sign">
+    </span>
+    {% else %}
+    <span class="text-success glyphicon glyphicon-ok">
+    </span>
+    {% end %}
+  </td>
+</tr>
+
+{% end %}
+{% end %} {# for field in fields #}

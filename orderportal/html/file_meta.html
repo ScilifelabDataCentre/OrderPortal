@@ -1,0 +1,80 @@
+{# File metadata page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}File {{ title }}{% end %}
+
+{% block body_title %}
+{% module Icon('file', label=True) %}
+{{ title }}
+{% end %}
+
+{% block main_content %}
+
+{% if is_admin %}
+<div class="pull-right">
+  <form action="{{ reverse_url('file_edit', file['name']) }}"
+	role="form"
+	method="GET">
+    <button type="submit"
+	    class="btn btn-sm btn-primary glyphicon glyphicon-edit">
+      Edit
+    </button>
+  </form>
+
+  <br>
+  <form action="{{ reverse_url('file_meta', file['name']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <input type="hidden" name="_http_method" value="delete">
+    <button type="submit"
+	    class="btn btn-danger glyphicon glyphicon-trash"
+	    onclick="return confirm('Cannot be undone! Really delete?');">
+      Delete
+    </button>
+  </form>
+</div>
+{% end %}
+
+<table class="table-condensed table-fields">
+
+  <tr>
+    <th>Size</th>
+    <td>{{ file['size'] }}
+  </tr>
+  <tr>
+    <th>Content type</th>
+    <td>{{ file['content_type'] }}
+  </tr>
+  <tr>
+    <th>Modified</th>
+    <td>
+      <span class="localtime">{{ file['modified'] }}</span>
+      <a href="{{ reverse_url('file_logs', file['name']) }}">
+	{% module Icon('logs', label=True) %}
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <th>Created</th>
+    <td class="localtime">{{ file['created'] }}
+  </tr>
+  <tr>
+    <th>Description</th>
+    <td>{% module Markdown(file.get('description')) %}
+  </tr>
+
+</table>
+
+<br>
+<form action="{{ reverse_url('file_download', file['name']) }}"
+      role="form"
+      method="GET">
+  <button type="submit"
+	  class="btn btn-sm btn-primary glyphicon glyphicon-download-alt">
+    Download
+  </button>
+</form>
+
+{% end %} {# block main_content #}

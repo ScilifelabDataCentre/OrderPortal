@@ -1,0 +1,98 @@
+{# File edit page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Edit {{ file['name'] }}{% end %}
+
+{% block body_title %}
+Edit
+{% module Icon('file') %}
+{{ file['name'] }}
+{% end %}
+
+{% block main_content %}
+
+<form action="{{ reverse_url('file_edit', file['name']) }}"
+      role="form"
+      enctype="multipart/form-data"
+      method="POST">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+	<label for="name">Name</label>
+	<input type="text" class="form-control"
+	       id="name" name="name"
+	       value="{{ file.get('name') or '' }}">
+      </div>
+    </div>
+    <span class="help-block">
+      Name to display for the file page.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-2">
+	<label for="menu">Menu</label>
+	<input type="number" class="form-control"
+	       id="menu" name="menu"
+	       value="{{ file.get('menu') or '' }}">
+      </div>
+    </div>
+    <span class="help-block">
+      Relative position in 'File' dropdown menu; an integer. All items
+      with a number here will be sorted in the menu. If blank, the
+      file page will not appear in the menu. It must then be linked to
+      explicitly from elsewhere, or it will be hard for the user to
+      find it.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+	<label for="text">File upload</label>
+	<input type="file" name="file" class="form-control">
+	<span class="help-block">
+	  Provide a file to overwrite the current data. If none given,
+	  then no change.
+	</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label" for="description">Description</label>
+    <textarea class="form-control" rows="5" name="description" id="description"
+	      >{% raw file.get('description') or '' %}</textarea>
+    <span class="help-block">
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+      format is used.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-success glyphicon glyphicon-floppy-disk">
+      Save
+    </button>
+  </div>
+</form>
+
+<br>
+<form action="{{ reverse_url('file_meta', file['name']) }}"
+      role="form"
+      method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default btn-sm glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+{% end %} {# block main_content #}

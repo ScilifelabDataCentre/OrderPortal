@@ -1,0 +1,229 @@
+{# Form field create page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Create field in form '{{ form['title'] }}'{% end %}
+
+{% block body_title %}Create field in form '{{ form['title'] }}'{% end %}
+
+{% block main_content %}
+
+<form action="{{ reverse_url('field_create', form['_id']) }}"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-md-4">
+	<label class="control-label" for="group">Group</label>
+	<select class="form-control" name="group" id="group">
+	  <option value="">[top level]</option>
+	  {% for field in fields %}
+	    {% if field['type'] == constants.GROUP %}
+	      <option>{{ field['identifier'] }}</option>
+	    {% end %}
+	  {% end %}
+	</select>
+	<span style="color:red; margin-right: 2em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+    </div>
+    <span class="help-block">
+      Parent group for the field. Cannot be changed.
+    </span>
+  </div>
+
+  <div class="form-group has-feedback">
+    <label class="control-label" for="identifier">Identifier</label>
+    <div class="row">
+      <div class="col-md-4">
+	<input type="text" class="form-control"
+	       name="identifier" id="identifier">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+      <div class="col-md-4">
+	<select class="form-control" id="_identifier">
+	  <option value="">[available existing identifiers]</option>
+	  {% for identifier in identifiers %}
+	  <option>{{ identifier }}</option>
+	  {% end %}
+	</select>
+      </div>
+    </div>
+    <span class="help-block">
+      Identifier for the field, which must be unique within this
+      form. It must contain only alphanumerical characters and
+      underscore; no blanks! It is case sensitive. Cannot be changed.
+    </span
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="label">Label</label>
+	<input type="text" class="form-control" name="label" id="label">
+      </div>
+    </div>
+    <span class="help-block">
+      Label to display for the field in the order form. The identifier
+      will be used if this is not provided.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+	<label class="control-label" for="type">Type</label>
+	<select class="form-control visible-if-source"
+		name="type" id="type">
+	  {% for type in constants.TYPES %}
+	  <option value="{{ type }}">{{ constants.TYPE_LABELS.get(type, type) }}</option>
+	  {% end %}
+	</select>
+      </div>
+    </div>
+    <span class="help-block">
+      Data type for the field. Cannot be changed once field has been created.
+      {% module Help('help_datatypes') %}
+    </span>
+  </div>
+
+  <div class="form-group visible-if"
+       data-if-id="type"
+       data-if-val="select">
+    <div class="row">
+      <div class="col-md-3">
+	<label class="control-label" for="select">Select</label>
+	<textarea class="form-control" name="select" rows="4"></textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      Values to select among. One per line. The first value is the default.
+      May be edited later.
+    </span>
+  </div>
+
+  <div class="form-group visible-if"
+       data-if-id="type"
+       data-if-val="select">
+    <div class="row">
+      <div class="col-md-3">
+	<label class="control-label" for="display">Display</label>
+	<div>
+	  <label class="radio-inline">
+	    <input type="radio" name="display" value="menu" checked>Menu</label>
+	  <label class="radio-inline">
+	    <input type="radio" name="display" value="radio">Radio buttons</label>
+	</div>
+      </div>
+    </div>
+    <span class="help-block">
+      Display element to use for the field.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="required">Required</label>
+	<div class="checkbox">
+	  <label>
+	    <input type="checkbox" name="required" id="required" value="yes">Yes
+	  </label>
+	</div>
+      </div>
+    </div>
+    <span class="help-block">
+      Require that the field must have a value specified in the order.
+      If no value, then the order is incomplete, which means it cannot
+      be submitted.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="restrict_read">Restricted read</label>
+	<div class="checkbox">
+	  <label>
+	    <input type="checkbox" name="restrict_read" id="restrict_read" value="yes">Yes
+	  </label>
+	</div>
+      </div>
+    </div>
+    <span class="help-block">
+      The field is restricted to be visible only to staff, not the user.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="restrict_write">Restricted write</label>
+	<div class="checkbox">
+	  <label>
+	    <input type="checkbox" name="restrict_write" id="restrict_write" value="yes">Yes
+	  </label>
+	</div>
+      </div>
+    </div>
+    <span class="help-block">
+      The field is restricted to be editable only by staff, not the
+      user. Note that it is visible to the user.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+	<label class="control-label" for="description">Description</label>
+	<textarea class="form-control" name="description" id="description"></textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      Description to display in the order to help the user fill in the
+      field correctly, using
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+      format.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-success glyphicon glyphicon-floppy-disk">
+      Save
+    </button>
+  </div>
+
+</form>
+
+<br>
+<form action="{{ reverse_url('form', form['_id']) }}"
+      role="form"
+      method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default btn-sm glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+{% end %} {# block main_content #}
+
+{% block javascript_code %}
+<script>
+$(document).ready(function() {
+  $("#_identifier").change(function(event) {
+    $("#identifier").val(event.target.value);
+  });
+});
+</script>
+<script src="{{ static_url('field_visible_if.js') }}"></script>
+{% end %}

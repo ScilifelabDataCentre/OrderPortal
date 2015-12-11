@@ -1,0 +1,65 @@
+{# Messages page for a recipient. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Messages to {{ account['email'] }}{% end %}
+{% block body_title %}
+{% module Icon('message') %}
+Messages to {{ account['email'] }}
+{% end %}
+
+{% block main_content %}
+<div class="panel panel-default">
+  <div class="panel-body">
+    {% module Entity(account) %}
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-10 col-md-offset-1">
+    {% set url_func = functools.partial(reverse_url, 'account_messages', account['email']) %}
+    {% include 'paging.html' %}
+  </div>
+  <div class="col-md-1">
+  </div>
+</div>
+
+<table class="table table-striped">
+  <tr>
+    <th>Date</th>
+    <th>Type</th>
+    <th width="80%">Message</th>
+  </tr>
+  {% for message in messages %}
+  <tr>
+    <td class="localtime">{{ message['modified'] }}</td>
+    <td>{{ message['type'] }}</td>
+    <td>
+      <table>
+	<tr>
+	  <td>
+	    <button type="button"
+		    class="btn btn-default btn-xs glyphicon glyphicon-chevron-down"
+		    data-toggle="collapse" data-target="#{{ message['_id'] }}">
+	    </button>
+	    {{ message['subject'] }}
+	  </td>
+	</tr>
+	<tr id="{{ message['_id'] }}" class="collapse">
+	  <td>
+	    <div class="panel panel-default">
+	      <div class="panel-heading">
+		Recipients: {{ ', '.join(message['recipients']) }}
+	      </div>
+	      <div class="panel-body pre">
+		{{ message['text'] }}
+	      </div>
+	    </div>
+	  </td>
+	</tr>
+      </table>
+    </td>
+  </tr>
+  {% end %}
+</table>
+{% end %} {# block main_content #}

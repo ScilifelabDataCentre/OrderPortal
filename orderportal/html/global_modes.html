@@ -1,0 +1,53 @@
+{# Global modes page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Global modes{% end %}
+
+{% block body_title %}Global modes{% end %}
+
+{% block main_content %}
+
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-noborder">
+      {% for key in sorted([k for k in global_modes if not k.startswith('_')]) %}
+      {% set value = global_modes[key] %}
+      <tr>
+	<th>{{ key }}</th>
+	<td>
+	  {% if value %}
+	  <span class="glyphicon glyphicon-ok text-success"> True</span>
+	  {% else %}
+	  <span class="glyphicon glyphicon-remove text-danger"> False</span>
+	  {% end %}
+	</td>
+	<td>
+	  <form action="{{ reverse_url('global_modes') }}"
+		role="form"
+		method="POST">
+	    {% module xsrf_form_html() %}
+	    <input type="hidden" name="mode" value="{{ key }}">
+	    {% if value %}
+	    <input type="hidden" name="value" value="false">
+	    <button type="submit"
+		    class="btn btn-xs btn-danger glyphicon glyphicon-remove-circle">
+	      Off
+	    </button>
+	    {% else %}
+	    <input type="hidden" name="value" value="true">
+	    <button type="submit"
+		    class="btn btn-xs btn-success glyphicon glyphicon-ok-circle">
+	      On
+	      {% end %}
+	  </form>
+	</td>
+      </tr>
+      {% end %}
+    </table>
+  </div>
+  <div class="col-md-6">
+  </div>
+</div>
+
+{% end %} {# block main_content #}

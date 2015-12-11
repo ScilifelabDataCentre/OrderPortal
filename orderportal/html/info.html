@@ -1,0 +1,39 @@
+{# Information page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}{{ info.get('title') or info['name'] }}{% end %}
+
+{% block body_title %}{{ info.get('title') or info['name'] }}{% end %}
+
+{% block main_content %}
+
+{% if is_admin %}
+<div class="pull-right">
+  <form action="{{ reverse_url('info_edit', info['name']) }}"
+	role="form"
+	method="GET">
+    <button type="submit"
+	    class="btn btn-sm btn-primary glyphicon glyphicon-edit">
+      Edit
+    </button>
+  </form>
+
+  <br>
+  <form action="{{ reverse_url('info', info['name']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <input type="hidden" name="_http_method" value="delete">
+    <button type="submit"
+	    class="btn btn-danger glyphicon glyphicon-trash"
+	    onclick="return confirm('Cannot be undone! Really delete?');">
+      Delete
+    </button>
+  </form>
+</div>
+{% end %}
+
+{% module Markdown(info.get('text')) %}
+
+{% end %} {# block main_content #}

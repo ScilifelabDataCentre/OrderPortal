@@ -1,0 +1,57 @@
+{# About page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}About{% end %}
+
+{% block body_title %}About{% end %}
+
+{% block main_content %}
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+	The OrderPortal system is written in
+	<a href="https://www.python.org/download/releases/2.7/">Python 2.7</a>.
+      </div>
+      <div class="panel-body">
+	Python code is available at the GitHub repo
+	<a href="https://github.com/pekrau/OrderPortal">pekrau/OrderPortal</a>.
+      </div>
+    </div>
+      <div class="panel panel-default">
+	<div class="panel-heading">
+	  The system uses a number of Python packages available from
+	  <a href="https://pypi.python.org/pypi">PyPi</a>:
+	</div>
+	<div class="panel-body">
+	  <table class="table table-noborder">
+	    {% for key, value in versions['python'] %}
+	    <tr>
+	      <th width="60%">{{ key }}</th>
+	      <td width="40%">{{ value }}</td>
+	    </tr>
+	    {% end %}
+	  </table>
+	</div>
+      </div>
+      <div class="panel panel-default">
+	<div class="panel-heading">
+	  The system uses the following non-Python software:
+	</div>
+	<div class="panel-body">
+	  <table class="table table-noborder">
+	    {% for key, value in versions['other'] %}
+	    <tr>
+	      <th width="60%">{% raw key %}</th>
+	      <td width="40%">{{ value }}</td>
+	    </tr>
+	    {% end %}
+	  </table>
+	</div>
+      </div>
+  </div>
+</div>
+
+{% end %} {# block main_content #}

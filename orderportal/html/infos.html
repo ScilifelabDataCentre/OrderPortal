@@ -1,0 +1,54 @@
+{# Information pages list page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Infomation pages{% end %}
+
+{% block body_title %}
+{% module Icon('info') %}
+Information pages
+{% end %}
+
+{% block main_content %}
+<table class="table table-striped table-condensed">
+  <tr>
+    <th>Name</th>
+    <th>Title</th>
+    <th>Menu</th>
+    <th>Modified</th>
+    <th>Created</th>
+  </tr>
+  {% for info in all_infos %}
+  <tr>
+    <td>
+      <a href="{{ reverse_url('info', info['name']) }}">
+	{% module Icon('info') %}
+	{{ info['name'] }}
+      </a>
+    </td>
+    <td>{{ info.get('title') or '-' }}</td>
+    <td>{{ info.get('menu') or '-' }}</td>
+    <td>
+      <span  class="localtime">{{ info['modified'] }}</span>
+      <a href="{{ reverse_url('info_logs', info['name']) }}">
+	{% module Icon('logs', label=True) %}
+      </a>
+    </td>
+    <td class="localtime">{{ info['created'] }}</td>
+  </tr>
+  {% end %}
+</table>
+{% end %}{# block main_content #}
+
+{% if is_admin %}
+{% block meta_content %}
+<form action="{{ reverse_url('info_create') }}"
+      role="form"
+      method="GET">
+  <button type="submit"
+	  class="btn btn-sm btn-primary glyphicon glyphicon-plus">
+    Create
+  </button>
+</form>
+{% end %} {# block meta_content #}
+{% end %}

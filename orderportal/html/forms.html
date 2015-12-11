@@ -1,0 +1,59 @@
+{# Forms list page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Forms{% end %}
+
+{% block body_title %}
+{% module Icon('form') %}
+Forms
+{% end %}
+
+{% block main_content %}
+<table class="table table-striped table-condensed">
+  <tr>
+    <th>Form</th>
+    <th>Status</th>
+    <th>Orders</th>
+    <th>Owner</th>
+    <th>Modified</th>
+  </tr>
+  {% for form in forms %}
+  <tr>
+    <td>
+      <a href="{{ reverse_url('form', form['_id']) }}">
+	{{ form['title'] }}
+      </a>
+    </td>
+    <td>{% module Icon(form['status'], label=True) %}</td>
+    <td>
+      <a class="badge"
+	 href="{{ reverse_url('form_orders', form['_id']) }}">
+	{{ order_counts[form['_id']] }}
+      </a>
+    </td>
+    <td>
+      <a href="{{ reverse_url('account', form['owner']) }}">
+	{% module Icon('account') %}
+	{{ account_names.get(form['owner'], form['owner']) }}
+      </a>
+    </td>
+    <td class="localtime">{{ form['modified'] }}</td>
+  </tr>
+  {% end %}
+</table>
+{% end %} {# block main_content #}
+
+{% block meta_content %}
+<form action="{{ reverse_url('form_create') }}"
+      role="form"
+      method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-primary btn-sm glyphicon glyphicon-plus">
+      Create form
+    </button>
+  </div>
+</form>
+{% end %} {# block meta_content #}

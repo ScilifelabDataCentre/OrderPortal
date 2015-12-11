@@ -1,0 +1,54 @@
+{# Text edit page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Edit text '{{ text['name'] }}'{% end %}
+{% block body_title %}Edit text '{{ text['name'] }}'{% end %}
+
+{% block main_content %}
+<form action="{{ reverse_url('text', text['name']) }}"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+	<label class="control-label" for="text">Text</label>
+	<textarea rows="16" class="form-control"
+		  id="text" name="text"
+		  >{{ text.get('text') or '' }}</textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+      format is used.
+    </span>
+  </div>
+
+  <input type="hidden" name="origin" value="{{ origin }}">
+
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-success glyphicon glyphicon-floppy-disk">
+      Save
+    </button>
+  </div>
+
+</form>
+
+<br>
+<form action="{{ origin }}"
+      role="form"
+      method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+{% end %} {# block main_content #}

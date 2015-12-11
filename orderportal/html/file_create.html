@@ -1,0 +1,102 @@
+{# File create page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Create file{% end %}
+
+{% block body_title %}
+Create
+{% module Icon('file', label=True) %}
+{% end %}
+
+{% block main_content %}
+
+<form action="{{ reverse_url('file_create') }}"
+      role="form"
+      enctype="multipart/form-data"
+      method="POST">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-md-6">
+	<label for="name">Name</label>
+	<input type="text" class="form-control"
+	       id="name" name="name">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+    </div>
+    <span class="help-block">
+      Name of the file, which determines its URL. Cannot be changed
+      once set. Must be unique. If not provided, then the filename of
+      the uploaded file is used.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-2">
+	<label for="menu">Menu</label>
+	<input type="number" class="form-control"
+	       id="menu" name="menu">
+      </div>
+    </div>
+    <span class="help-block">
+      Relative position in 'File' dropdown menu; an integer. All items
+      with a number here will be sorted in the menu. If blank, the
+      file page will not appear in the menu. It must then be linked to
+      explicitly from elsewhere, or it will be hard for the user to
+      find it.
+    </span>
+  </div>
+
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-md-8">
+	<label for="text">File upload</label>
+	<input type="file" name="file" class="form-control">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+	<span class="help-block">
+	  The file to upload.
+	</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label" for="description">Description</label>
+    <textarea class="form-control" rows="5" name="description" id="description">
+    </textarea>
+    <span class="help-block">
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+      format is used.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-success glyphicon glyphicon-floppy-disk">
+      Save
+    </button>
+  </div>
+</form>
+
+<br>
+<form action="{{ reverse_url('home') }}"
+      role="form"
+      method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default btn-sm glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+{% end %} {# block main_content #}

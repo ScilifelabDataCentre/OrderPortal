@@ -1,0 +1,111 @@
+{# List of orders. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Orders{% end %}
+{% block body_title %}
+{% module Icon('order', title='Orders', label=True) %}
+{% end %}
+
+{% block content %}
+<form action="{{ reverse_url('orders', **params) }}"
+      id="refresh"
+      role="form"
+      class="form-inline"
+      method="GET">
+  <input type="hidden" name="page" value="{{ params.get('page') or 0 }}">
+  <div class="row">
+    <div class="col-md-7 col-md-offset-3">
+      <label class="glyphicon glyphicon-filter"></label>
+      <div class="form-group">
+	<label for="status">Filter by</label>
+	<select name="status" id="status" class="form-control refresh">
+	  <option value="">[any status]</option>
+	  {% for status in settings['ORDER_STATUSES'] %}
+	  {% set sid = status['identifier'] %}
+	  {% set sel = sid == params.get('status') and 'selected' or '' %}
+	  <option {{ sel }} value="{{ sid }}">{{ sid.capitalize() }}</option>
+	  {% end %}
+	</select>
+      </div>
+    </div>
+    <div class="col-md-2">
+    </div>
+  </div>
+</form>
+
+<div class="row">
+  <div class="col-md-10 col-md-offset-1">
+    {% set url_func = functools.partial(reverse_url, 'orders', **params) %}
+    {% include 'paging.html' %}
+  </div>
+  <div class="col-md-1">
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <table class="table table-striped table-condensed">
+      <tr>
+	<th width="8%">Id</th>
+	<th width="25%">Title</th>
+	<th width="12%">Owner</th>
+	<th width="8%">Status</th>
+	{% for st in settings['ORDER_LIST_HISTORY'] %}
+	<th>{% module Icon(st, label=True) %}</th>
+	{% end %}
+	<th width="10%">Modified</th>
+      </tr>
+      {% if orders %}
+      {% for order in orders %}
+      <tr>
+	<td>
+	  {% if order.get('identifier') %}
+	  <a href="{{ reverse_url('order_id', order['identifier']) }}">
+	    {{ order['identifier'] }}
+	  </a>
+	  {% else %}
+	  <a href="{{ reverse_url('order', order['_id']) }}">
+	    {{ order['_id'][:6] + '...' }}
+	  </a>
+	  {% end %}
+	</td>
+	<td>
+	  {% if order.get('title') %}
+	  {{ order['title'] }}
+	  {% else %}
+	  <i>[no title]</i>
+	  {% end %}
+	</td>
+	<td>
+	  <a href="{{ reverse_url('account', order['owner']) }}">
+	    {% module Icon('account') %}
+	    {{ account_names.get(order['owner'], order['owner']) }}
+	  </a>
+	</td>
+	<td>{% module Icon(order['status'], label=True) %}</td>
+	{% for st in settings['ORDER_LIST_HISTORY'] %}
+	<td>{{ order['history'].get(st) or '-' }}</td>
+	{% end %}
+	<td class="localtime">{{ order['modified'] }}</td>
+      </tr>
+      {% end %} {# for order in orders #}
+      {% else %}
+      <tr>
+	<td colspan="3"><i>[empty list]</i></td>
+      </tr>
+      {% end %} {# if orders #}
+    </table>
+  </div>
+</div>
+{% end %}{# block content #}
+
+{% block javascript_code %}
+<script>
+$(document).ready(function() {
+    $('.refresh').change(function () {
+	$('#refresh').submit();
+    });
+});
+</script>
+{% end %}

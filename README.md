@@ -1,111 +1,181 @@
 OrderPortal
 ===========
 
-A portal for orders (_aka._ requests, project applications) for a facility.
+Background
+----------
 
-The system has been created to satisfy the needs of a lab facility
-which produces DNA sequence data from biological samples. The samples
-are provided by external researchers. The facility processes the
-samples according to the order from the scientist, and this system
-keeps the user up to date with the current status of the order and any
-resulting data and metadata.
+The OrderPortal system was created to satisfy the needs of the
+[National Genomics Infrastructure Sweden](http://www.scilifelab.se/platforms/ngi/),
+which is a service facility producing sequence data from DNA and
+RNA samples provided by external researchers. The facility processes
+the samples according to the order from the scientist.
 
-OrderPortal has been written to extend to the needs of other similar
-scientific facilities operating within the same organisation. It
-can be instantiated for any number of facilities, using a common
-database of user accounts.
 
-The design of the order form setup must allow its application to other
-domains; there is nothing that is hardcoded for scientific or genomics
-data _per se_. The form content must be easy to change, and previously
-submitted orders must not be affected by such changes, unless
-explicitly requested.
+Features
+--------
 
-We are striving to keep the design as flexible and general as possible.
-The base template and CSS will be editable, allowing the appearance of
-the OrderPortal to be customised.
+A portal where users (researchers) can place orders for a project to
+be executed by a research service facility was required. The portal
+should have the following features:
+
+* Allow the user to specify an order.
+* Allow the user to submit the order to the facility.
+* Let the facility staff keep track of review and agreements.
+* The facility staff can accept an order, thus transforming it
+  into a project.
+* Allow input from the user of required project data, such as sample sheets.
+* Allow attaching various documents to an order.
+* Display project status reports.
+* Allow keeping track of Key Performance Indicators (KPIs), facilitating
+  resource usage reports for the facility.
+
+Design outline
+--------------
+
+The system is a portal for orders (_a.k.a._ requests, project
+applications) to one single facility from its users. A user is a
+researcher external to the service facility, and is usually the
+Principal Investigator (PI) for one or more projects.
+
+The OrderPortal system is designed for only one facility, having a
+single order input form, which can be hierarchically organized. The
+system can be used for several facilities within the same organisation
+by running several completely separate instances of it.
+
+A user account is defined within each OrderPortal instance separately.
+We decided against a design based on a single central user account
+database for all facilities.  The email address of the user is used as
+the user account identifier.
+
+The design of the order form setup is fairly general; there is nothing
+that is hardcoded for specific domains of science. The content of the
+order form is defined by the facility admins.
+
+The design of the system is kept as flexible and general as
+possible. The base template and CSS are to some extend modifiable (via
+command line operations), allowing the appearance of the OrderPortal
+to be customised.
+
+The order form
+--------------
+
+The order form fields are fully configurable by the facility admins
+via the web interface. The field definitions are generic, and allow
+order forms to be designed for a wide variety of facilities.
+
+The order form must allow hierarchical grouping of fields, with
+dynamic display according to rules. This allows for cases where a
+top-level selection of e.g. a specific technology determines which
+further input fields are required to be filled in.
+
+When the order form for a facility is changed, previously submitted
+orders are not affected. It will not be possible (at least in the
+initial version) to change the form for previously created orders.
 
 Only orders, no info pages
 --------------------------
 
 The system is minimalistic in the sense that it handles only
 orders. There is no general wiki or blog function for describing the
-context of the orders. Such needs should be handled by other systems.
+context of the orders. Such needs must be handled by other systems.
 
 Facility
 --------
 
 The term facility is used for the organisation providing the service
 specified by the order form. One instance (database) of the system
-handles one facility. All entities in the database, except the user
-account, belong to one and only one facility.
+handles one facility. All entities in the database belong to one and
+only one facility.
 
-There are two reasons for this design choice:
+There are three reasons for this design choice:
 
-1. Security between facilities. The fact that a particular project is
-   present in one facility must not be visible to the administrators of
-   another facility. This is a strict requirement from some facilities,
-   and it is easier to implement if the databases for each facility is
-   strictly separate from one another.
+1. Security between facilities. The existence and contents of a
+   particular project in one facility must not be visible to the
+   admins or staff of another facility. This is a strict requirement
+   for some facilities, and it is easier to implement if the databases
+   for each facility is separate from one another.
 
 2. The styling of an order portal is much easier to implement if each
    facility has its own portal instance.
 
-One drawback with this design choice is that it makes it more
-difficult to allow the users to see all their orders in all
-facilities.
+3. The introduction, or elimination, of a facility in the overall
+   organisation becomes much easier if every instance of the system is
+   independent of the other.
+
+One drawback with this design choice is that it complicates the
+communication between and linking of different but related projects in
+different facilities.
 
 
 Users
 -----
 
-A user is an account in the system. All editing operations, and most
-viewing operations, require that the user is logged in.
+A user is an account in the system. Almost all operation require that
+the user is logged in. The email address is the user account identifier.
 
 There are basically three kinds of users:
 
-1. An external scientist, who uses the portal to place one or more
-   orders, and to follow the progress of an order. In principle, this
-   type of user can place orders with any facility.
+1. User: An external scientist, who uses the portal to place one or
+   more orders, and to follow the progress of their own orders. The
+   "customer" of the facility.
 
-2. Facility staff, including facility administrator, who may view and edit 
-   all orders for their facility.
+2. Staff: Facility staff, who may view all orders, but not change anything.
 
-3. System administrators, who are allowed to view and edit all aspects
-   of the system. This user account should only be used to perform system
-   maintenance. It should not be used for any actual processing of orders.
+3. Admin: Facility administrators, a.k.a. project coordinators, who
+   are allowed to view and edit all aspects of the system that can be
+   modified via the web interface. This includes processing orders,
+   modifying the order fields, and handling user accounts.
 
-Authentication uses one single database, meaning that the same user account
-can be used to access to different facilities.
+User accounts can be set as disabled, for example if the person leaves
+her position, or as a means of blocking invalid use. Deletion of a
+user account is not allowed, to allow full traceability of old
+orders. An account can always be enabled again.
 
-User accounts can be set as inactive, for example if the person leaves, or
-as a means of blocking invalid use. Deletion of a user account is
-never allowed (except in special circumstances, only by system administrators).
+It must be possible to reassign an order from one user to another, to
+facilitate personnel changes.
 
-New registrations must be approved by facility staff.
+An external scientist applies for a user account by providing the
+relevant information. Such an account is created with a status of
+"pending".  The admin reviews the pending user account and enables it
+if it appears legitimate. The user gets an email about the account
+having been enabled and with instructions on how to set the password
+for it.
 
 
 Access privileges
 -----------------
 
-The facility staff is allowed to view and edit only data belonging to
-their facility.
+The user can place orders as soon has she has logged in.
 
-An external scientist should by default be able to place orders with
-any facility, once the user has been allowed into the system.
-
-A user should be allowed to specify which other users will be
-allowed access to their orders within each facility. 
+A user is allowed to specify which other users will be able to access
+to her orders. Access can also be granted to specific users for each
+individual order.
 
 
-Order template
---------------
+Order: form and fields
+----------------------
 
-The order template describes the currently valid set of fields and
-options that can be entered into an actual order prepared by a
-user. The order template contains fields that are editable by the
-facility staff, determining name, data type, order in the form,
-default value, required or not, and other properties.
+The admin designs the set of fields which are to be filled in by the
+user for an order. This involves the following parameters for a field:
+
+- Field identifier
+- Field data type
+- Is a field value required?
+- Field description
+- Value options, if relevant
+- Hierarchy and order, including conditional visibility
+- Visibility to the user; some fields may be visible only to the staff
+
+When an order is created, its fields definitions are copied from the
+current set. Thus, an order is always self-contained.  Once an order
+has been created, its fields and selected options are effectively
+frozen, and remain fixed even if the current fields are updated.
+
+The set of fields defined for the site may change, but the structure
+of the order stays the same. This allows any change of the current set
+of fields, while maintaining the integrity of old orders. The
+disadvantage is that it makes it hard to update old orders with any
+new fields.
 
 A field may be conditional, meaning that it is displayed only of some
 other field has been assigned a specific value. This is necessary for
@@ -117,77 +187,82 @@ high-level conditional field should be set as undetermined when the
 order is saved by the user. This simplifies interpretation of the
 order data by other external systems.
 
-Each time an order is edited by the user, the order is displayed
-according to the current order template.
-
-Once an order has been submitted, its fields and selected options are
-effectively frozen, and remain fixed even if the order template is
-updated. The facility administrators are allowed to edit a submitted
-order.
-
-This design allows the facility staff to modify the order template
-without invalidating any existing submitted orders. Fields and options
-are never deleted, only removed from the current template when depreciated.
-
-The order template can be modified only by the facility staff.
 
 Order
 -----
 
-An order is an instance of the order template. It belongs to a
-user. It is editable by the user until it has been submitted for
-approval by the facility staff.
+An order is a copy of all fields at the time of its creation. It
+belongs to a user. It is editable by the user until it has been
+submitted for approval by the facility staff.
 
 An order may contain fields which require a value. An order lacking a
 required value can be saved, but it cannot be submitted. This allows
 the user to create and fill in orders only partially, and to return to
 the order at a later date to complete it.
 
-An order can have one of the following states:
+An order can have one and only one state. The following is the list
+of standard states:
 
 | State       | Semantics                                            |
 |-------------|------------------------------------------------------|
-| PREPARATION | Created, edited, but lacking some required value.    |
-| READY       | All require values are present; submittable.         |
+| PREPARATION | Created, and possibly edited.                        |
 | SUBMITTED   | Submitted by user.                                   |
 | REVIEW      | Under review by the facility.                        |
-| ACCEPTED    | Checked by facility, and found OK.                   |
+| ACCEPTED    | Checked and accepted by the facility.                |
 | REJECTED    | Rejected by facility.                                |
 | PENDING     | Awaiting further input from user.                    |
-| WORKING     | Work is on-going, in the lab or in data analysis.    |
 | QUEUED      | Facility has placed the order in its work queue.     |
-| WAITING     | Work has paused, due to either user or facility.     |
-| ABORTED     | Stopped by the user.                                 |
-| CANCELLED   | Stopped by the facility.                             |
+| WORKING     | Work is on-going, in the lab or in data analysis.    |
+| WAITING     | Work has paused, for whatever reason.                |
+| CANCELLED   | Project stopped by the user.                         |
+| ABORTED     | Project stopped by the facility.                     |
 | FINISHED    | Work has been finalized.                             |
 | DELIVERED   | The results have been delivered to the user.         |
 | INVOICED    | The user has been invoiced.                          |
 | CLOSED      | All work and steps for the order have been done.     |
-| ARCHIVED    | The order has been archived, no longer visible.      |
+| ARCHIVED    | The order has been archived; cannot be changed.      |
 
-**Implementation note**: The states and allowed transitions should be
-defined in a databse or configuration file (e.g. YAML) for each facility. This
-allows a facility to define other states than the default ones. It
-also allows new states to be added to an existing setup. The question
-whether current states should be possible to remove is left for a
-future decision; the assumption is that this is not allowed.
+The states and allowed transitions are defined in a YAML configuration
+file for a facility. This allows a facility to define other states and
+transitions than the standard ones. It also allows new states and
+transitions to be added to an existing setup. Removing existing states
+may break the system, and should not be attempted; instead, the transitions
+should be modified to avoid the redundant state.
+
+Publications
+------------
+
+The system should include a feature to allow facility coordinators
+and/or users to curate a list of publication references associated
+with the user, and possibly the order.
+
+This will be of help when preparing reports for the grant review of a
+facility.
 
 Interface
 ---------
 
-There are three interfaces to the system:
+There are two main interfaces to the system, the web and the API. The
+web interface behaves differently depending on the type of the user
+account logged in.
 
-### The facility web interface
+### User web interface
 
 This is for human users. It should provide the user with sufficient
 help and visual cues to allow filling in the form in a productive
 manner. Missing values and values outside of allowed ranges must be
 highlighted to help the user prepare a valid order.
 
-### User administration web interface
+### Staff web interface
 
-For system administrators only, this is a simple interface that allows
-deletion and other non-standard modifications to existing users.
+This is for normal facility staff usage. Display of orders according
+to state and other parameters.
+
+### Admin web interface
+
+For admins only, this interface enables editing orders, users and
+fields. This includes the ability to move orders along into different
+states.
 
 ### The Application Programming Interface (API)
 
@@ -230,5 +305,5 @@ Log
 ---
 
 Each change of an order is logged, and the information "who, when,
-what" is stored. Neither facility staff nor users are allowed to edit
-the log trace explicitly.
+what" is stored. The log trace is written by the system automatically
+and cannot be edited by any user.

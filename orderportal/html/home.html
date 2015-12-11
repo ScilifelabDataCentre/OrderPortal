@@ -1,0 +1,494 @@
+{# Home page when not logged in; base for other home page variants. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}{{ settings['SITE_NAME'] }}{% end %}
+
+{% block body_title %}
+{% try %}
+  {% set url = reverse_url('site', settings['SITE_HOME_ICON']) %}
+{% except KeyError %}
+  {% set url = static_url('orderportal_144.png') %}
+{% end %}
+<div class="row">
+  <div class="col-md-4">
+    <img class="img-responsive"
+	 src="{{ url }}"
+	 title="{{ settings['SITE_NAME'] }}"
+	 alt="{{ settings['SITE_NAME'] }}">
+  </div>
+  <div class="col-md-8" style="margin-top: 1em; margin-bottom:0.5em">
+    {{ settings['SITE_NAME'] }}
+  </div>
+</div>
+{% end %}
+
+{% block content %}
+
+{% block content-header %}
+{% if not current_user %}
+<div class="row">
+  <div class="well well-sm col-md-10 col-md-offset-1">
+    {% module Text('header') %}
+  </div>
+  <div class="col-md-1">
+  </div>
+</div>
+{% end %} {# if not current_user #}
+{% end %} {# block content-header #}
+
+<div class="row">
+
+  {% block content-left %}
+  <div class="col-md-5">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+	<span class="glyphicon glyphicon-user">
+	  Login
+	</span>
+      </div>
+      <div class="panel-body">
+	{% if not global_modes['allow_login'] %}
+	  <div class="well text-danger">
+	    Login is currently disabled (except for administrators).
+	    Try again later.
+	  </div>
+	{% end %}
+	<form action="{{ reverse_url('login') }}"
+	      role="form"
+	      method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group">
+	    <label for="email">Email (=username)</label>
+	    <input type="text" class="form-control" name="email"
+		   placeholder="Email address of account">
+	  </div>
+	  <div class="form-group">
+	    <label for="password">Password</label>
+	    <input type="password" class="form-control" name="password">
+	  </div>
+	  <div class="form-group"> 
+	    <button type="submit"
+		    class="btn btn-primary glyphicon glyphicon-log-in">
+	      Login
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-body">
+	<div>
+	  {% if global_modes['allow_registration'] %}
+	  <a href="{{ reverse_url('register') }}"
+	     class="btn btn-success glyphicon glyphicon-user" role="button">
+	    Register account
+	  </a>
+	  {% else %}
+	  <div class="well text-danger">
+	    Registration is currently disabled. Try again later.
+	  </div>
+	  {% end %} {# if global_modes['allow_registration'] #}
+	</div>
+	<br>
+	<div>
+	  <a href="{{ reverse_url('reset') }}" role="button"
+	     class="btn btn-warning glyphicon glyphicon-step-backward">
+	    Reset password
+	  </a>
+	</div>
+	<br>
+	<div>
+	  <a href="{{ reverse_url('password') }}"
+	     class="btn btn-danger glyphicon glyphicon-lock" role="button">
+	    Set password
+	  </a>
+	</div>
+      </div>
+    </div>
+
+  </div>
+  {% end %} {# block content-left #}
+
+  {% block content-right %}
+  <div class="col-md-7">
+
+    <div class="panel panel-info">
+      <div class="panel-heading">
+	<span class="glyphicon glyphicon-info-sign">
+	  News
+	</span>
+	{% if is_admin %}
+	<button type="button"
+		class="btn btn-info btn-xs glyphicon glyphicon-plus pull-right"
+		data-toggle="modal" data-target="#news_create">
+	  Create
+	</button>
+	{% end %}{# if is_admin #}
+      </div>
+      <div class="panel-body">
+	{% if news_items %}
+	<table class="table table-condensed">
+	  {% for news in news_items %}
+	  <tr>
+	    {% if is_admin %}
+	    <td>
+	      <button type="button"
+		      class="btn btn-primary btn-xs glyphicon glyphicon-edit"
+		      data-toggle="modal" data-target="#{{ news['_id'] }}">
+		Edit
+	      </button>
+	      <p></p>
+	      <form action="{{ reverse_url('news', news['_id']) }}"
+		    role="form"
+		    method="POST">
+		{% module xsrf_form_html() %}
+		<input type="hidden" name="_http_method" value="delete">
+		<button type="submit"
+			class="btn btn-danger btn-xs glyphicon glyphicon-trash"
+			onclick="return confirm('Cannot be undone! Really delete?');">
+		  Delete
+		</button>
+	      </form>
+	    </td>
+	    {% end %}{# if is_admin #}
+	    <td>
+	      {% module Markdown(news.get('text')) %}
+	    </td>
+	    <td class="text-right small">[{{ news['date'] }}]</td>
+	  </tr>
+	  {% end %}
+	</table>
+	{% else %}
+	<i>Currently none. Check again later.</i>
+	{% end %}
+      </div>
+    </div>
+
+    <div class="panel panel-success">
+      <div class="panel-heading">
+	<span class="glyphicon glyphicon-calendar">
+	  Events
+	</span>
+	{% if is_admin %}
+	<button type="button"
+		class="btn btn-success btn-xs glyphicon glyphicon-plus pull-right"
+		data-toggle="modal" data-target="#event_create">
+	  Create
+	</button>
+	{% end %}{# if is_admin #}
+      </div>
+      <div class="panel-body">
+	{% if events %}
+	<table class="table table-condensed">
+	  {% for event in events %}
+	  <tr>
+	    {% if is_admin %}
+	    <td>
+	      <button type="button"
+		      class="btn btn-primary btn-xs glyphicon glyphicon-edit"
+		      data-toggle="modal" data-target="#{{ event['_id'] }}">
+		Edit
+	      </button>
+	      <p></p>
+	      <form action="{{ reverse_url('event', event['_id']) }}"
+		    role="form"
+		    method="POST">
+		{% module xsrf_form_html() %}
+		<input type="hidden" name="_http_method" value="delete">
+		<button type="submit"
+			class="btn btn-danger btn-xs glyphicon glyphicon-trash"
+			onclick="return confirm('Cannot be undone! Really delete?');">
+		  Delete
+		</button>
+	      </form>
+	    </td>
+	    {% end %}{# if is_admin #}
+	    <th class="nobr">{{ event['date'] }}</th>
+	    <td>
+	      <strong>{{ event['title'] }}</strong>
+	      {% module Markdown(event.get('text')) %}
+	    </td>
+	  </tr>
+	  {% end %}
+	</table>
+	{% else %}
+	<i>Currently none. Check again later.</i>
+	{% end %}
+      </div>
+    </div>
+  </div>
+  {% end %} {# block content-right #}
+
+</div>
+
+{% if is_admin %}
+{# Modals for editing news items. #}
+{% for pos, news in enumerate(news_items) %}
+<div id="{{ news['_id'] }}" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close glyphicon glyphicon-remove"
+		data-dismiss="modal"></button>
+        <h4 class="modal-title">Edit news item</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('news', news['_id']) }}"
+	      role="form"
+	      method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group">
+	    <label for="text{{ pos }}">News item text</label>
+	    <textarea class="form-control" rows="5"
+		      name="text" id="text{{ pos }}"
+		      >{% raw news.get('text') or '' %}</textarea>
+	    <span class="help-block">
+	      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+	      format is used.
+	    </span>
+	  </div>
+	  
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-4">
+		<label class="control-label" for="newsdate{{ pos }}">Date</label>
+		<input type="text" class="datepicker form-control"
+		       name="date" id="newsdate{{ pos }}"
+		       value="{{ news['date'] or '' }}">
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Date of publication for the news item.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit"
+		    class="btn btn-success glyphicon glyphicon-floppy-disk">
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% end %}{# for news in news_items #}
+
+{# Modals for editing event items. #}
+{% for pos, event in enumerate(events) %}
+<div id="{{ event['_id'] }}" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close glyphicon glyphicon-remove"
+		data-dismiss="modal"></button>
+        <h4 class="modal-title">Edit event item</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('event', event['_id']) }}"
+	      role="form"
+	      method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-4">
+		<label class="control-label" for="date{{ pos }}">Date</label>
+		<input type="text" class="datepicker form-control"
+		       name="date" id="date{{ pos }}"
+		       value="{{ event['date'] }}">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Date for the event; start date if multi-day event.
+	    </span>
+	  </div>
+
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="title">Title</label>
+		<input type="text" class="form-control"
+		       name="title" id="title"
+		       value="{{ event['title'] }}">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Title for the event.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-10">
+		<label class="control-label" for="text">Text</label>
+		<textarea class="form-control" rows="5" name="text" id="text"
+			  >{% raw event.get('text') or '' %}</textarea>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+	      format is used.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit"
+		    class="btn btn-success glyphicon glyphicon-floppy-disk">
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% end %}{# for pos, event in enum(events) #}
+
+{# Modal for creating a news item. #}
+<div id="news_create" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close glyphicon glyphicon-remove"
+		data-dismiss="modal"></button>
+        <h4 class="modal-title">Create a news item</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('news_create') }}"
+	      role="form"
+	      method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group">
+	    <textarea class="form-control" rows="5"
+		      name="text" id="text"></textarea>
+	    <span class="help-block">
+	      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+	      format is used.
+	    </span>
+	  </div>
+	  
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit"
+		    class="btn btn-success glyphicon glyphicon-floppy-disk">
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{# Modal for creating an event item. #}
+<div id="event_create" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close glyphicon glyphicon-remove"
+		data-dismiss="modal"></button>
+        <h4 class="modal-title">Create an event item</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('event_create') }}"
+	      role="form"
+	      method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-4">
+		<label class="control-label" for="date">Date</label>
+		<input type="text" class="datepicker form-control"
+		       name="date" id="date">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Date for the event; start date if multi-day event.
+	    </span>
+	  </div>
+
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label" for="title">Title</label>
+		<input type="text" class="form-control" name="title" id="title">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Title for the event.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-10">
+		<label class="control-label" for="text">Text</label>
+		<textarea class="form-control" rows="5"
+			  name="text" id="text"></textarea>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+	      format is used.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit"
+		    class="btn btn-success glyphicon glyphicon-floppy-disk">
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% end %}{# if is_admin #}
+
+{% block content-footer %}
+<div class="row">
+  <div class="well well-sm col-md-10 col-md-offset-1">
+    {% module Text('footer') %}
+  </div>
+  <div class="col-md-1">
+  </div>
+</div>
+{% end %} {# block content-footer #}
+
+{% end %} {# block content #}
+
+{% block header-css %}
+<link rel="stylesheet" href="{{ static_url('jquery-ui-themes-1.11.4/themes/smoothness/jquery-ui.min.css') }}">
+{% end %}
+
+{% block javascript_code %}
+<script src="{{ static_url('jquery-ui-1.11.4/jquery-ui.min.js') }}"></script>
+<script>
+  $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
+  $(document).ready(function(){
+    $(".datepicker").datepicker();
+  });
+</script>
+{% end %}

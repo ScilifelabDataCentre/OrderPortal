@@ -1,0 +1,266 @@
+{# Register new account page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Register new account{% end %}
+
+{% block body_title %}Register new account{% end %}
+
+{% block main_content %}
+
+<div class="well">
+  {% module Text('register') %}
+</div>
+
+<form action="{{ reverse_url('register') }}"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="email">Email</label>
+	<input type="email" class="form-control"
+	       name="email" id="email">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+    </div>
+    <span class="help-block">
+      Your email address is your account name in this portal.  Cannot
+      be changed once set.  Please use an institutional email address,
+      not your personal Google, Yahoo or similar address.
+    </span>
+  </div>
+
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="first_name">First name</label>
+	<input type="text" class="form-control"
+	       name="first_name" id="first_name">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="last_name">Last name</label>
+	<input type="text" class="form-control"
+	       name="last_name" id="last_name">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group has-feedback">
+    <label class="control-label" for="university">University</label>
+    <div class="row">
+      {% if settings['UNIVERSITIES'] %}
+      <div class="col-md-6">
+	<select class="form-control" name="university" id="university">
+	  {# OrderedDict ! #}
+	  <option value="">[select from the list below]</option>
+	  {% for abbrev, data in settings['UNIVERSITIES'].items() %}
+	    <option value="{{ abbrev }}">{{ abbrev }}
+	      {% if data.get('name') %}
+	      ({{ data.get('name') }})
+	      {% end %}
+	    </option>
+	  {% end %}
+	</select>
+	<span style="color:red; margin-right: 2em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+      <div class="col-md-6">
+	<input type="text" class="form-control"
+	       name="university_other" id="university_other"
+	       placeholder="Provide full name of organization if not in list.">
+      </div>
+      {% else %}
+      <div class="col-md-6">
+	<input type="text" class="form-control"
+	       name="university" id="university">
+	<span style="color:red; margin-right: 1em;"
+	      class="glyphicon glyphicon-star form-control-feedback"
+	      aria-hidden="true"></span>
+      </div>
+      {% end %}
+    </div>
+    <span class="help-block">
+      Main affiliation: University, college, company, organization, or
+      similar.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="department">Department</label>
+	<input type="text" class="form-control"
+	       name="department" id="department">
+      </div>
+    </div>
+    <span class="help-block">
+      University department, company section, group, or similar.
+    </span>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Postal address for delivery of paper documents, returned samples, etc.
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="street">Address</label>
+	    <textarea class="form-control" rownum="2"
+		      id="address" name="address"></textarea>
+	  </div>
+	</div>
+	<span class="help-block">
+	  Institution, street, number or post box.
+	</span>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="postal_code">Postal code</label>
+	    <input type="text" class="form-control"
+		   id="postal_code" name="postal_code">
+	  </div>
+	</div>
+	<span class="help-block">
+	  Postal code, zip code.
+	</span>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="city">City</label>
+	    <input type="text" class="form-control" id="city" name="city">
+	  </div>
+	</div>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="country">Country</label>
+	    <input type="text" class="form-control"
+		   id="country" name="country" value="Sweden">
+	  </div>
+	</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Invoice address. If none given, the university standard invoice
+      address will be used, if known.
+    </div>
+    <div class="panel-body">
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="invoice_code">Invoice code</label>
+	    <input type="text" class="form-control"
+		   id="invoice_code" name="invoice_code">
+	  </div>
+	</div>
+	<span class="help-block">
+	  Any required information or label for your accounts.
+	</span>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="invoice_address">Address</label>
+	    <textarea class="form-control" rownum="2"
+		      id="invoice_address" name="invoice_address"></textarea>
+	  </div>
+	</div>
+	<span class="help-block">
+	  Institution, street, number or post box.
+	</span>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="invoice_postal_code">Postal code</label>
+	    <input type="text" class="form-control"
+		   id="invoice_postal_code" name="invoice_postal_code">
+	  </div>
+	</div>
+	<span class="help-block">
+	  Postal code, zip code.
+	</span>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="invoice_city">City</label>
+	    <input type="text" class="form-control"
+		   id="invoice_city" name="invoice_city">
+	  </div>
+	</div>
+      </div>
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-8">
+	    <label class="control-label" for="invoice_country">Country</label>
+	    <input type="text" class="form-control"
+		   id="invoice_country" name="invoice_country" value="Sweden">
+	  </div>
+	</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="phone">Phone</label>
+	<textarea rows="3" class="form-control"
+		  name="phone" id="phone"></textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      One or more telephone numbers, one per line.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-success glyphicon glyphicon-floppy-disk">
+      Register
+    </button>
+  </div>
+
+</form>
+
+<br>
+<form action="{{ reverse_url('home') }}"
+      role="form"
+      method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit"
+	    class="btn btn-default glyphicon glyphicon-remove">
+      Cancel
+    </button>
+  </div>
+</form>
+
+{% end %} {# block main_content #}

@@ -1,0 +1,54 @@
+{# Logs page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Logs{% end %}
+{% block body_title %}
+{% module Icon('logs', label=True) %}
+{% end %}
+
+{% block main_content %}
+<div class="panel panel-default">
+  <div class="panel-body">
+    {% module Entity(entity) %}
+  </div>
+</div>
+
+<table class="table table-striped">
+  <tr>
+    <th>Log entry</th>
+    <th>Account</th>
+    <th>Changed</th>
+  </tr>
+  {% for log in logs %}
+  <tr>
+    <td>
+      <a href="{{ reverse_url('log', log['iuid']) }}">
+	<span class="localtime">{{ log['modified'] }}</span>
+      </a>
+    </td>
+    <td>{{ log.get('account') or '-' }}</td>
+    <td>
+      <table class="table-condensed">
+	{% for key, value in sorted(log['changed'].items()) %}
+	<tr>
+	  <th class="key">{{ key }}</th>
+	  <td>
+	    {% if key == 'fields' %}
+	      {% for k, v in sorted(value.items()) %}
+	        {{ k }}: {{ repr(v) }}<br>
+	      {% end %}
+	    {% elif key == 'copied from' %}
+	      <a href="{{ reverse_url('entity', value) }}">{{ value }}</a>
+	    {% else %}
+	      {{ value }}
+	    {% end %}
+	  </td>
+	</tr>
+	{% end %}
+      </table>
+    </td>
+  </tr>
+  {% end %}
+</table>
+{% end %} {# block main_content #}

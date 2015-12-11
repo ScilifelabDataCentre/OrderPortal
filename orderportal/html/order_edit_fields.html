@@ -1,0 +1,174 @@
+{# Order edit fields recursive display. #}
+
+{% for field in fields %}
+
+{# Check if field may not be read or edited. #}
+{% if (field['restrict_read'] or field['restrict_write']) and not is_staff %}
+{% continue %}
+{% end %}
+
+{% set label = field.get('label') or field['identifier'].capitalize().replace('_', ' ') %}
+
+{# Is there a visibility condition? #}
+{% set visible_if_field = field.get('visible_if_field') %}
+
+{% if field['type'] == constants.GROUP %}
+
+{% if visible_if_field %}
+<div class="panel panel-default visible-if"
+     data-if-id="{{ visible_if_field }}"
+     data-if-val="{{ field.get('visible_if_value') or '' }}">
+{% else %}
+<div class="panel panel-default">
+{% end %}
+  <div class="panel-heading">
+    <h4>
+      {{ label }}
+      {% if field['identifier'] in order['invalid'] %}
+      <span class="text-danger glyphicon glyphicon-remove">
+	{{ order['invalid'][field['identifier']] }}
+      </span>
+      {% else %}
+      <span class="text-success glyphicon glyphicon-ok">
+      </span>
+      {% end %}
+      <small>
+	{% if field['restrict_read'] %}
+	[Read: Staff only]
+	{% end %}
+	{% if field['restrict_write'] %}
+	[Write: Staff only]
+	{% end %}
+	{% module Markdown(field.get('description')) %}
+      </small>
+    </h4>
+  </div>
+  <div class="panel-body">
+    {# Recursion: 'include' cannot be used! #}
+    {% module Template('order_edit_fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
+  </div>
+</div>
+
+{% else %}
+
+{% if visible_if_field %}
+<div class="form-group has-feedback visible-if"
+     data-if-id="{{ visible_if_field }}"
+     data-if-val="{{ field.get('visible_if_value') or '' }}">
+{% else %}
+<div class="form-group has-feedback">
+{% end %}
+{% set value = order['fields'][field['identifier']] %}
+  <div class="row">
+    <div class="col-md-8">
+      <label class="control-label" for="{{ field['identifier'] }}">
+	{{ label }}
+	{% if field['identifier'] in order['invalid'] %}
+	<span class="text-danger glyphicon glyphicon-remove">
+	  {{ order['invalid'][field['identifier']] }}
+	</span>
+	{% elif value in (None, '') %}
+	<span class="text-danger glyphicon glyphicon-question-sign">
+	</span>
+	{% else %}
+	<span class="text-success glyphicon glyphicon-ok">
+	</span>
+	{% end %}
+      </label>
+
+      {% if field['type'] == constants.BOOLEAN %}
+      {# Simplifies a lot to use a Select element rather than Radio. #}
+      <select class="form-control visible-if-source"
+	      id="{{ field['identifier'] }}"
+	      name="{{ field['identifier'] }}">
+	<option value="__none__"
+		{{ value is None and 'selected' or '' }}>[no value]</option>
+	<option value="true"
+		{{ value == True and 'selected' or '' }}>True</option>
+	<option value="false"
+		{{ value == False and 'selected' or '' }}>False</option>
+      </select>
+
+      {% elif field['type'] == constants.SELECT %}
+        {% if field.get('display') == 'radio' %}
+          <div>
+	    {% set checked = value is None and 'checked' or '' %}
+	    <label class="radio-inline">
+	      <input type="radio"
+		     name="{{ field['identifier'] }}"
+		     value=""
+		     {{ checked }}>[no value]
+	    </label>
+	    {% for v in field['select'] %}
+	    {% set checked = v == value and 'checked' or '' %}
+	    <label class="radio-inline">
+	      <input type="radio"
+		     name="{{ field['identifier'] }}"
+		     value="{{ v }}"
+		     {{ checked }}>{{ v }}
+	    </label>
+	    {% end %}
+	  </div>
+        
+        {% else %} {# default 'menu' #}
+          <select class="form-control visible-if-source"
+		  name="{{ field['identifier'] }}"
+		  id="{{ field['identifier'] }}">
+	    {% if value is None %}
+	    <option selected value="">[no value]</option>
+	    {% else %}
+	    <option value="">[no value]</option>
+	    {% end %}
+	    {% for v in field['select'] %}
+	      {% if v == value %}
+	      <option selected>{{ v }}</option>
+	      {% else %}
+	      <option>{{ v }}</option>
+	      {% end %}
+	    {% end %}
+	  </select>
+	{% end %} {# if field.get('display') == 'radio' #}
+
+      {% elif field['type'] == constants.TEXT %}
+      <textarea class="form-control"
+		name="{{ field['identifier'] }}"
+		id="{{ field['identifier'] }}"
+		>{{ value or '' }}</textarea>
+
+      {% elif field['type'] == constants.DATE %}
+      {# This requires jQuery datepicker! #}
+      <input type="text"
+	     class="datepicker form-control visible-if-source"
+	     name="{{ field['identifier'] }}"
+	     id="{{ field['identifier'] }}"
+	     value="{{ value }}">
+
+      {% else %} {# All other field types: string, integer, float, url #}
+      {% if value is None %}
+      {% set value = '' %}
+      {% end %}
+      <input type="{{ constants.TYPE_HTML.get(field['type'], 'text') }}"
+	     class="form-control visible-if-source"
+	     name="{{ field['identifier'] }}"
+	     id="{{ field['identifier'] }}"
+	     value="{{ value }}">
+      {% end %} {# elif field['type'] == #}
+
+      {% if field['required'] %}
+      <span style="color:red; margin-right: 1em;"
+	    class="glyphicon glyphicon-star form-control-feedback"
+	    aria-hidden="true">
+      </span>
+      {% end %}
+    </div>
+  </div>
+  <span class="help-block">
+    {% module Markdown(field.get('description')) %}
+    {% if field['type'] == constants.TEXT %}
+    <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+    format is used.
+    {% end %}
+  </span>
+</div>
+{% end %} {# if field['type'] == constants.GROUP #}
+{% end %} {# for field in fields #}
