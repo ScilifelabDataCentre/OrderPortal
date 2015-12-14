@@ -11,6 +11,7 @@ from __future__ import print_function, absolute_import
 import cStringIO
 import json
 import os
+import sys
 import tarfile
 import time
 
