@@ -205,6 +205,15 @@ def to_ascii(value):
         value = unicode(value, 'utf-8')
     return unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
 
+def to_utf8(value):
+    "Convert value to UTF-8 representation."
+    if isinstance(value, unicode):
+        return value.encode('utf-8')
+    elif not isinstance(value, basestring):
+        return str(value)
+    else:
+        return value
+
 def to_bool(value):
     "Convert the value into a boolean, interpreting various string values."
     if isinstance(value, bool): return value
