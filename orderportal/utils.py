@@ -207,10 +207,9 @@ def to_ascii(value):
 
 def to_utf8(value):
     "Convert value to UTF-8 representation."
-    if isinstance(value, unicode):
-        return value.encode('utf-8')
-    elif not isinstance(value, basestring):
-        return str(value)
+    if isinstance(value, basestring):
+        if not isinstance(value, unicode):
+            value = unicode(value, 'utf-8')
     else:
         return value
 
