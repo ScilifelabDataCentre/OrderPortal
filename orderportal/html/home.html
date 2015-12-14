@@ -31,8 +31,6 @@
   <div class="well well-sm col-md-10 col-md-offset-1">
     {% module Text('header') %}
   </div>
-  <div class="col-md-1">
-  </div>
 </div>
 {% end %} {# if not current_user #}
 {% end %} {# block content-header #}
@@ -43,23 +41,19 @@
   <div class="col-md-5">
     <div class="panel panel-primary">
       <div class="panel-heading">
-	<span class="glyphicon glyphicon-user">
-	  Login
-	</span>
+        <span class="glyphicon glyphicon-user"></span> Login
       </div>
       <div class="panel-body">
 	{% if not global_modes['allow_login'] %}
-	  <div class="well text-danger">
-	    Login is currently disabled (except for administrators).
-	    Try again later.
-	  </div>
+      <div class="alert alert-danger" role="alert">
+        <strong>Login is currently disabled (except for administrators).</strong>
+	    Please try again later.
+      </div>
 	{% end %}
-	<form action="{{ reverse_url('login') }}"
-	      role="form"
-	      method="POST">
+	<form action="{{ reverse_url('login') }}" role="form" method="POST">
 	  {% module xsrf_form_html() %}
 	  <div class="form-group">
-	    <label for="email">Email (=username)</label>
+	    <label for="email">Email</label>
 	    <input type="text" class="form-control" name="email"
 		   placeholder="Email address of account">
 	  </div>
@@ -68,8 +62,8 @@
 	    <input type="password" class="form-control" name="password">
 	  </div>
 	  <div class="form-group"> 
-	    <button type="submit"
-		    class="btn btn-primary glyphicon glyphicon-log-in">
+	    <button type="submit" class="btn btn-primary">
+		  <span class="glyphicon glyphicon-log-in"></span>
 	      Login
 	    </button>
 	  </div>
@@ -80,27 +74,28 @@
       <div class="panel-body">
 	<div>
 	  {% if global_modes['allow_registration'] %}
-	  <a href="{{ reverse_url('register') }}"
-	     class="btn btn-success glyphicon glyphicon-user" role="button">
+	  <a href="{{ reverse_url('register') }}" class="btn btn-success" role="button">
+		<span class="glyphicon glyphicon-user">
 	    Register account
 	  </a>
 	  {% else %}
-	  <div class="well text-danger">
-	    Registration is currently disabled. Try again later.
-	  </div>
+	  <div class="alert alert-danger" role="alert">
+        <strong>Registration is currently disabled.</strong>
+	    Please try again later.
+      </div>
 	  {% end %} {# if global_modes['allow_registration'] #}
 	</div>
 	<br>
 	<div>
-	  <a href="{{ reverse_url('reset') }}" role="button"
-	     class="btn btn-warning glyphicon glyphicon-step-backward">
+	  <a href="{{ reverse_url('reset') }}" role="button" class="btn btn-warning">
+		<span class="glyphicon glyphicon-step-backward"></span>
 	    Reset password
 	  </a>
 	</div>
 	<br>
 	<div>
-	  <a href="{{ reverse_url('password') }}"
-	     class="btn btn-danger glyphicon glyphicon-lock" role="button">
+	  <a href="{{ reverse_url('password') }}" role="button" class="btn btn-danger">
+		<span class="glyphicon glyphicon-lock"></span>
 	    Set password
 	  </a>
 	</div>
@@ -115,14 +110,10 @@
 
     <div class="panel panel-info">
       <div class="panel-heading">
-	<span class="glyphicon glyphicon-info-sign">
-	  News
-	</span>
+	<span class="glyphicon glyphicon-info-sign"></span> News
 	{% if is_admin %}
-	<button type="button"
-		class="btn btn-info btn-xs glyphicon glyphicon-plus pull-right"
-		data-toggle="modal" data-target="#news_create">
-	  Create
+	<button type="button" class="btn btn-info btn-xs pull-right" data-toggle="modal" data-target="#news_create">
+	  <span class="glyphicon glyphicon-plus"></span> Create
 	</button>
 	{% end %}{# if is_admin #}
       </div>
@@ -133,10 +124,9 @@
 	  <tr>
 	    {% if is_admin %}
 	    <td>
-	      <button type="button"
-		      class="btn btn-primary btn-xs glyphicon glyphicon-edit"
+	      <button type="button" class="btn btn-primary btn-xs"
 		      data-toggle="modal" data-target="#{{ news['_id'] }}">
-		Edit
+			<span class="glyphicon glyphicon-edit"></span> Edit
 	      </button>
 	      <p></p>
 	      <form action="{{ reverse_url('news', news['_id']) }}"
@@ -144,10 +134,9 @@
 		    method="POST">
 		{% module xsrf_form_html() %}
 		<input type="hidden" name="_http_method" value="delete">
-		<button type="submit"
-			class="btn btn-danger btn-xs glyphicon glyphicon-trash"
+		<button type="submit" class="btn btn-danger btn-xs"
 			onclick="return confirm('Cannot be undone! Really delete?');">
-		  Delete
+		  <span class="glyphicon glyphicon-trash"></span> Delete
 		</button>
 	      </form>
 	    </td>
@@ -167,14 +156,12 @@
 
     <div class="panel panel-success">
       <div class="panel-heading">
-	<span class="glyphicon glyphicon-calendar">
-	  Events
-	</span>
+	<span class="glyphicon glyphicon-calendar"></span> Events
 	{% if is_admin %}
 	<button type="button"
-		class="btn btn-success btn-xs glyphicon glyphicon-plus pull-right"
+		class="btn btn-success btn-xs pull-right"
 		data-toggle="modal" data-target="#event_create">
-	  Create
+	  <span class="glyphicon glyphicon-plus"></span> Create
 	</button>
 	{% end %}{# if is_admin #}
       </div>
@@ -186,9 +173,9 @@
 	    {% if is_admin %}
 	    <td>
 	      <button type="button"
-		      class="btn btn-primary btn-xs glyphicon glyphicon-edit"
+		      class="btn btn-primary btn-xs"
 		      data-toggle="modal" data-target="#{{ event['_id'] }}">
-		Edit
+		<span class="glyphicon glyphicon-edit"></span> Edit
 	      </button>
 	      <p></p>
 	      <form action="{{ reverse_url('event', event['_id']) }}"
@@ -197,9 +184,9 @@
 		{% module xsrf_form_html() %}
 		<input type="hidden" name="_http_method" value="delete">
 		<button type="submit"
-			class="btn btn-danger btn-xs glyphicon glyphicon-trash"
+			class="btn btn-danger btn-xs"
 			onclick="return confirm('Cannot be undone! Really delete?');">
-		  Delete
+		  <span class="glyphicon glyphicon-trash"></span> Delete
 		</button>
 	      </form>
 	    </td>
@@ -213,7 +200,7 @@
 	  {% end %}
 	</table>
 	{% else %}
-	<i>Currently none. Check again later.</i>
+	<em>Currently none. Check again later.</em>
 	{% end %}
       </div>
     </div>
@@ -229,8 +216,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close glyphicon glyphicon-remove"
-		data-dismiss="modal"></button>
+		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Edit news item</h4>
       </div>
       <div class="modal-body">
@@ -265,8 +251,8 @@
 
 	  <div class="form-group">
 	    <label class="control-label"></label>
-	    <button type="submit"
-		    class="btn btn-success glyphicon glyphicon-floppy-disk">
+	    <button type="submit" class="btn btn-success">
+		  <span class="glyphicon glyphicon-floppy-disk"></span>
 	      Save
 	    </button>
 	  </div>
@@ -284,8 +270,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close glyphicon glyphicon-remove"
-		data-dismiss="modal"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Edit event item</h4>
       </div>
       <div class="modal-body">
@@ -343,8 +328,8 @@
 
 	  <div class="form-group">
 	    <label class="control-label"></label>
-	    <button type="submit"
-		    class="btn btn-success glyphicon glyphicon-floppy-disk">
+	    <button type="submit" class="btn btn-success">
+		  <span class="glyphicon glyphicon-floppy-disk"></span>
 	      Save
 	    </button>
 	  </div>
@@ -361,8 +346,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close glyphicon glyphicon-remove"
-		data-dismiss="modal"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Create a news item</h4>
       </div>
       <div class="modal-body">
@@ -381,8 +365,8 @@
 	  
 	  <div class="form-group">
 	    <label class="control-label"></label>
-	    <button type="submit"
-		    class="btn btn-success glyphicon glyphicon-floppy-disk">
+	    <button type="submit" class="btn btn-success">
+		  <span class="glyphicon glyphicon-floppy-disk"></span>
 	      Save
 	    </button>
 	  </div>
@@ -398,8 +382,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close glyphicon glyphicon-remove"
-		data-dismiss="modal"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title">Create an event item</h4>
       </div>
       <div class="modal-body">
@@ -454,8 +437,8 @@
 
 	  <div class="form-group">
 	    <label class="control-label"></label>
-	    <button type="submit"
-		    class="btn btn-success glyphicon glyphicon-floppy-disk">
+	    <button type="submit" class="btn btn-success">
+		  <span class="glyphicon glyphicon-floppy-disk"></span>
 	      Save
 	    </button>
 	  </div>
