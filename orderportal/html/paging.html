@@ -6,11 +6,15 @@
 <ul class="pager">
   <li>
     <a href="{{ url_func(page=0) }}">
-      <span class="glyphicon glyphicon-fast-backward"></span>First</a>
+      <span class="glyphicon glyphicon-fast-backward"></span>
+      First
+    </a>
   </li>
   <li>
     <a href="{{ url_func(page=max(0, page['current']-1)) }}">
-      <span class="glyphicon glyphicon-step-backward"></span>Previous</a>
+      <span class="glyphicon glyphicon-step-backward"></span>
+      Previous
+    </a>
   </li>
   <li>
     <a href="{{ url_func(page=page['current']) }}">

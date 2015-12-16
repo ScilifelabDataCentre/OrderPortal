@@ -13,8 +13,8 @@
   <form action="{{ reverse_url('info_edit', info['name']) }}"
 	role="form"
 	method="GET">
-    <button type="submit"
-	    class="btn btn-sm btn-primary glyphicon glyphicon-edit">
+    <button type="submit" class="btn btn-sm btn-primary">
+      <span class="glyphicon glyphicon-edit"></span>
       Edit
     </button>
   </form>
@@ -25,9 +25,9 @@
 	method="POST">
     {% module xsrf_form_html() %}
     <input type="hidden" name="_http_method" value="delete">
-    <button type="submit"
-	    class="btn btn-danger glyphicon glyphicon-trash"
+    <button type="submit" class="btn btn-danger"
 	    onclick="return confirm('Cannot be undone! Really delete?');">
+      <span class="glyphicon glyphicon-trash"></span>
       Delete
     </button>
   </form>

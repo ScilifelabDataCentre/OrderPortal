@@ -41,8 +41,8 @@
 	role="form"
 	method="GET">
     <input type="hidden" name="form" value="{{ form['_id'] }}">
-    <button type="submit"
-	    class="btn btn-success glyphicon glyphicon-plus">
+    <button type="submit" class="btn btn-success">
+      <span class="glyphicon glyphicon-plus"></span>
       Create order
     </button>
   </form>
@@ -65,8 +65,8 @@
 	role="form"
 	method="GET">
     <input type="hidden" name="form" value="{{ form['_id'] }}">
-    <button type="submit"
-	    class="btn btn-success glyphicon glyphicon-plus">
+    <button type="submit" class="btn btn-success">
+      <span class="glyphicon glyphicon-plus"></span>
       Create order
     </button>
   </form>
@@ -93,9 +93,9 @@
 	method="POST">
     {% module xsrf_form_html() %}
     <input type="hidden" name="_http_method" value="delete">
-    <button type="submit"
-	    class="btn btn-danger glyphicon glyphicon-trash"
+    <button type="submit" class="btn btn-danger"
 	    onclick="return confirm('Cannot be undone! Really delete?');">
+      <span class="glyphicon glyphicon-trash"></span>
       Delete
     </button>
   </form>
@@ -107,8 +107,8 @@
 	role="form"
 	method="POST">
     {% module xsrf_form_html() %}
-    <button type="submit"
-	    class="btn btn-primary glyphicon glyphicon-plus-sign">
+    <button type="submit" class="btn btn-primary">
+      <span class="glyphicon glyphicon-plus-sign"></span>
       Clone
     </button>
   </form>
@@ -125,8 +125,8 @@
   <div class="panel-body">
     <form action="{{ reverse_url('form_edit', form['_id']) }}"
 	  role="form" class="panel-form pull-right" method="GET">
-      <button type="submit"
-	      class="btn btn-xs btn-primary glyphicon glyphicon-edit">
+      <button type="submit" class="btn btn-xs btn-primary">
+	<span class="glyphicon glyphicon-edit"></span>
 	Edit
       </button>
     </form>
@@ -179,8 +179,8 @@
 	  role="form"
 	  class="pull-right"
 	  method="GET">
-      <button type="submit"
-	      class="btn btn-xs btn-primary glyphicon glyphicon-plus">
+      <button type="submit" class="btn btn-xs btn-primary">
+	<span class="glyphicon glyphicon-plus"></span>
 	Create field
       </button>
     </form>
@@ -222,17 +222,17 @@
 	</td>
 	<td>
 	  {% if field['required'] %}
-	  <span class="glyphicon glyphicon-star" style="color: red;">
+	  <span class="glyphicon glyphicon-star" style="color: red;"></span>
 	  {% elif field['type'] == constants.GROUP %}
 	  -
 	  {% end %}
 	</td>
 	<td>
 	  {% if field['restrict_read'] %}
-	  <span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
+	  <span class="glyphicon glyphicon-eye-open" title="Readable by staff only."></span>
 	  {% end %}
 	  {% if field['restrict_write'] %}
-	  <span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
+	  <span class="glyphicon glyphicon-pencil" title="Writeable by admin only."></span>
 	  {% end %}
 	</td>
 	<td>{% module Markdown(field.get('description')) %}</td>
@@ -241,16 +241,16 @@
 	  <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
 		role="form"
 		method="GET">
-	    <button type="submit"
-		    class="btn btn-xs btn-primary glyphicon glyphicon-plus">
+	    <button type="submit" class="btn btn-xs btn-primary">
+	      <span class="glyphicon glyphicon-edit"></span>
 	      Edit
 	    </button>
 	  </form>
 	{% else %}
 	{# Allow edit of label and description even when not really editable. #}
-	  <button type="button"
-		  class="btn btn-primary btn-xs glyphicon glyphicon-edit"
+	  <button type="button" class="btn btn-primary btn-xs"
 		  data-toggle="modal" data-target="#{{ field['identifier'] }}">
+	    <span class="glyphicon glyphicon-edit"></span>
 	    Edit
 	  </button>
 	{% end %}{# if are_fields_editable #}
@@ -270,8 +270,10 @@
     {# Modal content #}
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close glyphicon glyphicon-remove"
-		data-dismiss="modal"></button>
+	<button type="button" class="close"
+		data-dismiss="modal" aria-label="Close">
+	  <span aria-hidden="true">&times;</span>
+	</button>
         <h4 class="modal-title">Edit field</h4>
       </div>
       <div class="modal-body">
@@ -309,8 +311,8 @@
 	  </div>
 	  <div class="form-group">
 	    <label class="control-label"></label>
-	    <button type="submit"
-		    class="btn btn-success glyphicon glyphicon-floppy-disk">
+	    <button type="submit" class="btn btn-success">
+	      <span class="glyphicon glyphicon-floppy-disk"></span>
 	      Save
 	    </button>
 	  </div>

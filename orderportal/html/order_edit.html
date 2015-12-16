@@ -87,11 +87,13 @@ Edit order
 	    {{ field.get('label') or field['identifier'].capitalize() }}
 	    <small>
 	      {% if field['identifier'] in order['invalid'] %}
-	      <span class="text-danger glyphicon glyphicon-remove">
+	      <span class="text-danger">
+		<span class="glyphicon glyphicon-remove"></span>
 		({{ order['invalid'][field['identifier']] }})
 	      </span>
 	      {% else %}
-	      <span class="text-success glyphicon glyphicon-ok">
+	      <span class="text-success">
+		<span class="glyphicon glyphicon-ok"></span>
 	      </span>
 	      {% end %}
 	      {{ field.get('description') or '' }}
@@ -106,11 +108,13 @@ Edit order
 	    <label class="control-label" for="{{ field['identifier'] }}">
 	      {{ field.get('label') or field['identifier'].capitalize() }}
 	      {% if field['identifier'] in order['invalid'] %}
-	      <span class="text-danger glyphicon glyphicon-remove">
+	      <span class="text-danger">
+		<span class="glyphicon glyphicon-remove"></span>
 		({{ order['invalid'][field['identifier']] }})
 	      </span>
 	      {% else %}
-	      <span class="text-success glyphicon glyphicon-ok">
+	      <span class="text-success">
+		<span class="glyphicon glyphicon-ok"></span>
 	      </span>
 	      {% end %}
 	    </label>
@@ -143,8 +147,9 @@ Edit order
     <div class="col-md-4">
       <div class="form-group">
 	<label class="control-label"></label>
-	<button type="submit" name="__save__" value="continue"
-		class="btn btn-success glyphicon glyphicon-floppy-disk">
+	<button type="submit" class="btn btn-success"
+		name="__save__" value="continue">
+	  <span class="glyphicon glyphicon-floppy-disk"></span>
 	  Save and continue
 	</button>
       </div>
@@ -152,8 +157,8 @@ Edit order
     <div class="col-md-4">
       <div class="form-group">
 	<label class="control-label"></label>
-	<button type="submit"
-		class="btn btn-success glyphicon glyphicon-floppy-save">
+	<button type="submit" class="btn btn-success">
+	  <span class="glyphicon glyphicon-floppy-save"></span>
 	  Save and quit
 	</button>
       </div>
@@ -170,8 +175,8 @@ Edit order
       method="GET">
   <div class="form-group">
     <label class="control-label"></label>
-    <button type="submit"
-	    class="btn btn-default glyphicon glyphicon-remove">
+    <button type="submit" class="btn btn-default">
+      <span class="glyphicon glyphicon-remove"></span>
       Cancel
     </button>
   </div>

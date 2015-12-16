@@ -25,11 +25,13 @@
     <h4>
       {{ label }}
       {% if field['identifier'] in order['invalid'] %}
-      <span class="text-danger glyphicon glyphicon-remove">
+      <span class="text-danger">
+	<span class="glyphicon glyphicon-remove"></span>
 	{{ order['invalid'][field['identifier']] }}
       </span>
       {% else %}
-      <span class="text-success glyphicon glyphicon-ok">
+      <span class="text-success">
+	<span class="glyphicon glyphicon-ok"></span>
       </span>
       {% end %}
       <small>
@@ -64,14 +66,17 @@
       <label class="control-label" for="{{ field['identifier'] }}">
 	{{ label }}
 	{% if field['identifier'] in order['invalid'] %}
-	<span class="text-danger glyphicon glyphicon-remove">
+	<span class="text-danger">
+	  <span class="glyphicon glyphicon-remove"></span>
 	  {{ order['invalid'][field['identifier']] }}
 	</span>
 	{% elif value in (None, '') %}
-	<span class="text-danger glyphicon glyphicon-question-sign">
+	<span class="text-danger">
+	  <span class="glyphicon glyphicon-question-sign"></span>
 	</span>
 	{% else %}
-	<span class="text-success glyphicon glyphicon-ok">
+	<span class="text-success">
+	  <span class="glyphicon glyphicon-ok"></span>
 	</span>
 	{% end %}
       </label>

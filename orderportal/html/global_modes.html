@@ -17,9 +17,15 @@
 	<th>{{ key }}</th>
 	<td>
 	  {% if value %}
-	  <span class="glyphicon glyphicon-ok text-success"> True</span>
+	  <span class="text-success">
+	    <span class="glyphicon glyphicon-ok"></span>
+	    True
+	  </span>
 	  {% else %}
-	  <span class="glyphicon glyphicon-remove text-danger"> False</span>
+	  <span class="text-danger">
+	    <span class="glyphicon glyphicon-remove"></span>
+	    False
+	  </span>
 	  {% end %}
 	</td>
 	<td>
@@ -30,16 +36,17 @@
 	    <input type="hidden" name="mode" value="{{ key }}">
 	    {% if value %}
 	    <input type="hidden" name="value" value="false">
-	    <button type="submit"
-		    class="btn btn-xs btn-danger glyphicon glyphicon-remove-circle">
+	    <button type="submit" class="btn btn-xs btn-danger">
+	      <span class="glyphicon glyphicon-remove-circle"></span>
 	      Off
 	    </button>
 	    {% else %}
 	    <input type="hidden" name="value" value="true">
-	    <button type="submit"
-		    class="btn btn-xs btn-success glyphicon glyphicon-ok-circle">
+	    <button type="submit" class="btn btn-xs btn-success">
+	      <span class="glyphicon glyphicon-on-circle"></span>
 	      On
-	      {% end %}
+	    </button>
+	    {% end %}
 	  </form>
 	</td>
       </tr>

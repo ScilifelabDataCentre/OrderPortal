@@ -1,8 +1,8 @@
 /* OrderPortal
    Text documents indexed by name.
-   Value: null.
+   Value: modified.
 */
 function(doc) {
     if (doc.orderportal_doctype !== 'text') return;
-    emit(doc.name, null);
+    emit(doc.name, doc.modified);
 }

@@ -16,8 +16,8 @@
   <form action="{{ reverse_url('order_edit', order['_id']) }}"
 	role="form"
 	method="GET">
-    <button type="submit"
-	    class="btn btn-primary glyphicon glyphicon-edit">
+    <button type="submit" class="btn btn-primary">
+      <span class="glyphicon glyphicon-edit"></span>
       Edit
     </button>
   </form>
@@ -28,9 +28,9 @@
 	method="POST">
     {% module xsrf_form_html() %}
     <input type="hidden" name="_http_method" value="delete">
-    <button type="submit"
-	    class="btn btn-danger glyphicon glyphicon-trash"
+    <button type="submit" class="btn btn-danger"
 	    onclick="return confirm('Cannot be undone! Really delete?');">
+      <span class="glyphicon glyphicon-trash"></span>
       Delete
     </button>
   </form>
@@ -49,8 +49,8 @@
 	role="form"
 	method="POST">
     {% module xsrf_form_html() %}
-    <button type="submit"
-	    class="btn btn-primary glyphicon glyphicon-plus-sign">
+    <button type="submit" class="btn btn-primary">
+      <span class="glyphicon glyphicon-plus-sign"></span>
       Clone
     </button>
   </form>
@@ -190,9 +190,9 @@
 		      method="POST">
 		  {% module xsrf_form_html() %}
 		  <input type="hidden" name="_http_method" value="delete">
-		  <button type="submit"
-			  class="btn btn-danger btn-xs glyphicon glyphicon-trash"
+		  <button type="submit" class="btn btn-danger btn-xs"
 			  onclick="return confirm('Cannot be undone! Really delete?');">
+		    <span class="glyphicon glyphicon-trash"></span>
 		    Delete
 		  </button>
 		</form>
@@ -201,9 +201,9 @@
 	    {% end %}
 	  </table>
 	  {% if is_attachable %}
-	  <button type="button"
-		  class="btn btn-primary btn-xs glyphicon glyphicon-paperclip"
+	  <button type="button" class="btn btn-primary btn-xs"
 		  data-toggle="modal" data-target="#attach">
+	    <span class="glyphicon glyphicon-paperclip"></span>
 	    Attach
 	  </button>
 	  {% end %}{# if is_attachable #}
@@ -226,8 +226,10 @@
     {# Modal content #}
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close glyphicon glyphicon-remove"
-		data-dismiss="modal"></button>
+	<button type="button" class="close"
+		data-dismiss="modal" aria-label="Close">
+	  <span aria-hidden="true">&times;</span>
+	</button>
         <h4 class="modal-title">Attach a file</h4>
       </div>
       <div class="modal-body">
@@ -246,8 +248,8 @@
 
 	  <div class="form-group">
 	    <label class="control-label"></label>
-	    <button type="submit"
-		    class="btn btn-success glyphicon glyphicon-floppy-disk">
+	    <button type="submit" class="btn btn-success">
+	      <span class="glyphicon glyphicon-floppy-disk"></span>
 	      Save
 	    </button>
 	  </div>

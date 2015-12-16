@@ -16,8 +16,8 @@
   <form action="{{ reverse_url('file_edit', file['name']) }}"
 	role="form"
 	method="GET">
-    <button type="submit"
-	    class="btn btn-sm btn-primary glyphicon glyphicon-edit">
+    <button type="submit" class="btn btn-sm btn-primary">
+      <span class="glyphicon glyphicon-edit"></span>
       Edit
     </button>
   </form>
@@ -28,9 +28,9 @@
 	method="POST">
     {% module xsrf_form_html() %}
     <input type="hidden" name="_http_method" value="delete">
-    <button type="submit"
-	    class="btn btn-danger glyphicon glyphicon-trash"
+    <button type="submit" class="btn btn-danger"
 	    onclick="return confirm('Cannot be undone! Really delete?');">
+      <span class="glyphicon glyphicon-floppy-trash"></span>
       Delete
     </button>
   </form>
@@ -71,8 +71,8 @@
 <form action="{{ reverse_url('file_download', file['name']) }}"
       role="form"
       method="GET">
-  <button type="submit"
-	  class="btn btn-sm btn-primary glyphicon glyphicon-download-alt">
+  <button type="submit" class="btn btn-sm btn-primary">
+    <span class="glyphicon glyphicon-floppy-download-alt"></span>
     Download
   </button>
 </form>

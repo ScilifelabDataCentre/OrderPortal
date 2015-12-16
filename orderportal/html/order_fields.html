@@ -20,7 +20,8 @@
   <th width="20%">
     {% if field['depth'] == 0 %}
     <button data-toggle="collapse" data-target="#{{ field['identifier'] }}"
-	    class="btn btn-md glyphicon glyphicon-triangle-bottom">
+	    class="btn btn-md">
+      <span class="glyphicon glyphicon-triangle-bottom"></span>
       {{ label }}
     </button>
     {% else %}
@@ -38,11 +39,13 @@
   </td>
   <td>
     {% if field['identifier'] in order['invalid'] %}
-    <span class="text-danger glyphicon glyphicon-remove">
+    <span class="text-danger">
+      <span class="glyphicon glyphicon-remove"></span>
       {{ order['invalid'][field['identifier']] }}
     </span>
     {% else %}
-    <span class="text-success glyphicon glyphicon-ok">
+    <span class="text-success">
+      <span class="glyphicon glyphicon-ok"></span>
     </span>
     {% end %}
   </td>
@@ -86,14 +89,17 @@
   </td>
   <td>
     {% if field['identifier'] in order['invalid'] %}
-    <span class="text-danger glyphicon glyphicon-remove">
+    <span class="text-danger">
+      <span class="glyphicon glyphicon-remove"></span>
       {{ order['invalid'][field['identifier']] }}
     </span>
     {% elif value in (None, '') %}
-    <span class="text-danger glyphicon glyphicon-question-sign">
+    <span class="text-danger">
+      <span class="glyphicon glyphicon-quesion-sign"></span>
     </span>
     {% else %}
-    <span class="text-success glyphicon glyphicon-ok">
+    <span class="text-success">
+      <span class="glyphicon glyphicon-ok"></span>
     </span>
     {% end %}
   </td>

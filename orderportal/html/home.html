@@ -41,7 +41,8 @@
   <div class="col-md-5">
     <div class="panel panel-primary">
       <div class="panel-heading">
-        <span class="glyphicon glyphicon-user"></span> Login
+        <span class="glyphicon glyphicon-user"></span>
+	Login
       </div>
       <div class="panel-body">
 	{% if not global_modes['allow_login'] %}
@@ -63,7 +64,7 @@
 	  </div>
 	  <div class="form-group"> 
 	    <button type="submit" class="btn btn-primary">
-		  <span class="glyphicon glyphicon-log-in"></span>
+	      <span class="glyphicon glyphicon-log-in"></span>
 	      Login
 	    </button>
 	  </div>
@@ -75,7 +76,7 @@
 	<div>
 	  {% if global_modes['allow_registration'] %}
 	  <a href="{{ reverse_url('register') }}" class="btn btn-success" role="button">
-		<span class="glyphicon glyphicon-user">
+	    <span class="glyphicon glyphicon-user"></span>
 	    Register account
 	  </a>
 	  {% else %}
@@ -88,14 +89,14 @@
 	<br>
 	<div>
 	  <a href="{{ reverse_url('reset') }}" role="button" class="btn btn-warning">
-		<span class="glyphicon glyphicon-step-backward"></span>
+	    <span class="glyphicon glyphicon-step-backward"></span>
 	    Reset password
 	  </a>
 	</div>
 	<br>
 	<div>
 	  <a href="{{ reverse_url('password') }}" role="button" class="btn btn-danger">
-		<span class="glyphicon glyphicon-lock"></span>
+	    <span class="glyphicon glyphicon-lock"></span>
 	    Set password
 	  </a>
 	</div>
@@ -110,10 +111,12 @@
 
     <div class="panel panel-info">
       <div class="panel-heading">
-	<span class="glyphicon glyphicon-info-sign"></span> News
+	<span class="glyphicon glyphicon-info-sign"></span>
+	News
 	{% if is_admin %}
 	<button type="button" class="btn btn-info btn-xs pull-right" data-toggle="modal" data-target="#news_create">
-	  <span class="glyphicon glyphicon-plus"></span> Create
+	  <span class="glyphicon glyphicon-plus"></span>
+	  Create
 	</button>
 	{% end %}{# if is_admin #}
       </div>
@@ -126,7 +129,8 @@
 	    <td>
 	      <button type="button" class="btn btn-primary btn-xs"
 		      data-toggle="modal" data-target="#{{ news['_id'] }}">
-			<span class="glyphicon glyphicon-edit"></span> Edit
+		<span class="glyphicon glyphicon-edit"></span>
+		Edit
 	      </button>
 	      <p></p>
 	      <form action="{{ reverse_url('news', news['_id']) }}"
@@ -136,7 +140,8 @@
 		<input type="hidden" name="_http_method" value="delete">
 		<button type="submit" class="btn btn-danger btn-xs"
 			onclick="return confirm('Cannot be undone! Really delete?');">
-		  <span class="glyphicon glyphicon-trash"></span> Delete
+		  <span class="glyphicon glyphicon-trash"></span>
+		  Delete
 		</button>
 	      </form>
 	    </td>
@@ -156,12 +161,14 @@
 
     <div class="panel panel-success">
       <div class="panel-heading">
-	<span class="glyphicon glyphicon-calendar"></span> Events
+	<span class="glyphicon glyphicon-calendar"></span>
+	Events
 	{% if is_admin %}
 	<button type="button"
 		class="btn btn-success btn-xs pull-right"
 		data-toggle="modal" data-target="#event_create">
-	  <span class="glyphicon glyphicon-plus"></span> Create
+	  <span class="glyphicon glyphicon-plus"></span>
+	  Create
 	</button>
 	{% end %}{# if is_admin #}
       </div>
@@ -175,7 +182,8 @@
 	      <button type="button"
 		      class="btn btn-primary btn-xs"
 		      data-toggle="modal" data-target="#{{ event['_id'] }}">
-		<span class="glyphicon glyphicon-edit"></span> Edit
+		<span class="glyphicon glyphicon-edit"></span>
+		Edit
 	      </button>
 	      <p></p>
 	      <form action="{{ reverse_url('event', event['_id']) }}"
@@ -186,7 +194,8 @@
 		<button type="submit"
 			class="btn btn-danger btn-xs"
 			onclick="return confirm('Cannot be undone! Really delete?');">
-		  <span class="glyphicon glyphicon-trash"></span> Delete
+		  <span class="glyphicon glyphicon-trash"></span>
+		  Delete
 		</button>
 	      </form>
 	    </td>
@@ -216,7 +225,10 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	<button type="button" class="close"
+		data-dismiss="modal" aria-label="Close">
+	  <span aria-hidden="true">&times;</span>
+	</button>
         <h4 class="modal-title">Edit news item</h4>
       </div>
       <div class="modal-body">
@@ -252,7 +264,7 @@
 	  <div class="form-group">
 	    <label class="control-label"></label>
 	    <button type="submit" class="btn btn-success">
-		  <span class="glyphicon glyphicon-floppy-disk"></span>
+	      <span class="glyphicon glyphicon-floppy-disk"></span>
 	      Save
 	    </button>
 	  </div>
@@ -270,7 +282,10 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close"
+		data-dismiss="modal" aria-label="Close">
+	  <span aria-hidden="true">&times;</span>
+	</button>
         <h4 class="modal-title">Edit event item</h4>
       </div>
       <div class="modal-body">
@@ -329,7 +344,7 @@
 	  <div class="form-group">
 	    <label class="control-label"></label>
 	    <button type="submit" class="btn btn-success">
-		  <span class="glyphicon glyphicon-floppy-disk"></span>
+	      <span class="glyphicon glyphicon-floppy-disk"></span>
 	      Save
 	    </button>
 	  </div>
@@ -346,7 +361,10 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close"
+		data-dismiss="modal" aria-label="Close">
+	  <span aria-hidden="true">&times;</span>
+	</button>
         <h4 class="modal-title">Create a news item</h4>
       </div>
       <div class="modal-body">
@@ -366,7 +384,7 @@
 	  <div class="form-group">
 	    <label class="control-label"></label>
 	    <button type="submit" class="btn btn-success">
-		  <span class="glyphicon glyphicon-floppy-disk"></span>
+	      <span class="glyphicon glyphicon-floppy-disk"></span>
 	      Save
 	    </button>
 	  </div>
@@ -382,7 +400,10 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <button type="button" class="close"
+		data-dismiss="modal" aria-label="Close">
+	  <span aria-hidden="true">&times;</span>
+	</button>
         <h4 class="modal-title">Create an event item</h4>
       </div>
       <div class="modal-body">
@@ -438,7 +459,7 @@
 	  <div class="form-group">
 	    <label class="control-label"></label>
 	    <button type="submit" class="btn btn-success">
-		  <span class="glyphicon glyphicon-floppy-disk"></span>
+	      <span class="glyphicon glyphicon-floppy-disk"></span>
 	      Save
 	    </button>
 	  </div>

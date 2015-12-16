@@ -40,8 +40,8 @@
 
       <div class="form-group">
 	<label class="control-label"></label>
-	<button type="submit"
-		class="btn btn-success glyphicon glyphicon-floppy-disk">
+	<button type="submit" class="btn btn-success">
+	  <span class="glyphicon glyphicon-floppy-disk"></span>
 	  Save
 	</button>
       </div>
@@ -67,8 +67,8 @@
 	    {% module xsrf_form_html() %}
 	    <input type="hidden" value="{{ key }}"
 		   name="delete_field" id="delete_field">
-	    <button type="submit"
-		    class="btn btn-xs btn-danger glyphicon glyphicon-minus pull-right">
+	    <button type="submit" class="btn btn-xs btn-danger pull-right">
+	      <span class="glyphicon glyphicon-minus"></span>
 	      Delete
 	    </button>
 	  </form>
