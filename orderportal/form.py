@@ -264,7 +264,11 @@ class FormFieldEdit(FormMixin, RequestHandler):
             field = fields[identifier]
         except KeyError:
             raise tornado.web.HTTPError(404, reason='no such field')
-        self.render('field_edit.html', form=form, field=field, fields=fields)
+        self.render('field_edit.html',
+                    form=form,
+                    field=field,
+                    fields=fields,
+                    alt_parents=fields.get_alt_parents(field))
 
     @tornado.web.authenticated
     def post(self, iuid, identifier):

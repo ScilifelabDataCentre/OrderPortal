@@ -18,12 +18,15 @@ class Fields(object):
         self.setup()
 
     def setup(self):
-        self._lookup = dict([(f['identifier'], f)
-                             for f in self.flatten(self.form['fields'])])
+        self._lookup = dict([(f['identifier'], f) for f in self.flatten()])
 
-    def flatten(self, fields, depth=0, parent=None):
-        "Pre-order traversal to produce a list of all fields."
+    def flatten(self, fields=None, depth=0, parent=None):
+        """Pre-order traversal to produce a list of all fields.
+        Also updates the parents and depths of each field.
+        """
         result = []
+        if fields is None:
+            fields = self.form['fields']
         for field in fields:
             if parent is None:
                 field['parent'] = None
@@ -32,7 +35,7 @@ class Fields(object):
             field['depth'] = depth
             result.append(field)
             if field['type'] == constants.GROUP:
-                result.extend(self.flatten(field['fields'],
+                result.extend(self.flatten(fields=field['fields'],
                                            depth=depth+1,
                                            parent=field))
         return result
@@ -46,9 +49,27 @@ class Fields(object):
                 result = self.get_siblings(field, f['fields'])
                 if result is not None: return result
 
+    def get_alt_parents(self, field, fields=None):
+        """Get the group fields which the given field can be
+        moved to while keeping a proper hierarchical tree.
+        """
+        result = []
+        if fields is None:
+            fields = self.form['fields']
+            if field.get('parent') is not None:
+                result.append(None)
+        for f in fields:
+            if f['type'] == constants.GROUP:
+                if field['type'] == constants.GROUP:
+                    if f['identifier'] == field['identifier']: continue
+                if f['identifier'] != field.get('parent'):
+                    result.append(f)
+                result.extend(self.get_alt_parents(field, f['fields']))
+        return result
+
     def __iter__(self):
         "Pre-order iteration over all fields."
-        return iter(self.flatten(self.form['fields']))
+        return iter(self.flatten())
 
     def __contains__(self, identifier):
         return identifier in self._lookup
@@ -130,31 +151,62 @@ class Fields(object):
             if key == 'fields': continue
             if old.get(key) != value:
                 diff[key] = value
-        move = rqh.get_argument('move', '').lower()
-        if move:
-            siblings = self.get_siblings(field, self.form['fields'])
-            if move == 'first':
-                siblings.remove(field)
-                siblings.insert(0, field)
-            elif move == 'previous':
-                pos = siblings.index(field)
-                if pos > 0:
-                    siblings.remove(field)
-                    pos -= 1
-                    siblings.insert(pos, field)
-            elif move == 'next':
-                pos = siblings.index(field)
-                if pos < len(siblings) - 1:
-                    siblings.remove(field)
-                    pos += 1
-                    siblings.insert(pos, field)
-            elif move == 'last':
-                siblings.remove(field)
-                siblings.append(field)
+        new_parent = rqh.get_argument('parent', '')
+        if new_parent:
+            if new_parent == '[top level]':
+                new_parent = -1 # Special value that is 'true'
             else:
-                move = None
+                for alt_parent in self.get_alt_parents(field):
+                    if alt_parent is None: continue
+                    if alt_parent['identifier'] == new_parent:
+                        new_parent = alt_parent
+                        break
+                else:
+                    new_parent = None
+        if new_parent:          # Including special value
+            try:
+                old_parent = self._lookup[field['parent']]
+            except KeyError:
+                self.form['fields'].remove(field)
+            else:
+                old_parent['fields'].remove(field)
+            if new_parent == -1:
+                self.form['fields'].append(field)
+                # diff['parent'] = field['parent'] = None
+                diff['parent'] = None
+            else:
+                new_parent['fields'].append(field)
+                # diff['parent'] = field['parent'] = new_parent['identifier']
+                diff['parent'] = new_parent['identifier']
+            # This is required to refresh the parent and depth entries
+            self.flatten()
+        # Moving a field is relevant only if parent stays the same.
+        else:
+            move = rqh.get_argument('move', '').lower()
             if move:
-                diff['move'] = move
+                siblings = self.get_siblings(field, self.form['fields'])
+                if move == 'first':
+                    siblings.remove(field)
+                    siblings.insert(0, field)
+                elif move == 'previous':
+                    pos = siblings.index(field)
+                    if pos > 0:
+                        siblings.remove(field)
+                        pos -= 1
+                        siblings.insert(pos, field)
+                elif move == 'next':
+                    pos = siblings.index(field)
+                    if pos < len(siblings) - 1:
+                        siblings.remove(field)
+                        pos += 1
+                        siblings.insert(pos, field)
+                elif move == 'last':
+                    siblings.remove(field)
+                    siblings.append(field)
+                else:
+                    move = None
+                if move:
+                    diff['move'] = move
         return diff
 
     def delete(self, identifier):
