@@ -22,12 +22,12 @@ class AccountSaver(saver.Saver):
 
     def set_email(self, email):
         assert self.get('email') is None # Email must not have been set.
-        if not email: raise ValueError('no email given')
+        if not email: raise ValueError('No email given.')
         if not constants.EMAIL_RX.match(email):
-            raise ValueError('invalid email value')
+            raise ValueError('Malformed email value.')
         email = email.lower()
         if len(list(self.db.view('account/email', key=email))) > 0:
-            raise ValueError('email already in use')
+            raise ValueError('Email already in use. Do reset password if lost.')
         self['email'] = email
 
     def erase_password(self):
@@ -652,7 +652,8 @@ class Register(RequestHandler):
                 email = self.get_argument('email', '')
                 saver.set_email(email)
             except ValueError, msg:
-                raise tornado.web.HTTPError(400, reason=str(msg))
+                self.see_other('register', error=str(msg))
+                # raise tornado.web.HTTPError(400, reason=str(msg))
             try:
                 saver['first_name'] = self.get_argument('first_name')
                 saver['last_name'] = self.get_argument('last_name')
