@@ -35,7 +35,7 @@ class OrderSaver(saver.Saver):
             identifier = field['identifier']
             try:
                 value = self.rqh.get_argument(identifier) or None
-                if value == '__none__': value = None
+                if value == '': value = None
             except tornado.web.MissingArgumentError:
                 pass            # Missing arg means no change,
                                 # which is not the same as value None!

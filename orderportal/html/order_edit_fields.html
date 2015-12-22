@@ -92,8 +92,8 @@
       <select class="form-control visible-if-source"
 	      id="{{ field['identifier'] }}"
 	      name="{{ field['identifier'] }}">
-	<option value="__none__"
-		{{ value is None and 'selected' or '' }}>[no value]</option>
+	<option value=""
+		{{ value is None and 'selected' or '' }}>-----</option>
 	<option value="true"
 		{{ value == True and 'selected' or '' }}>True</option>
 	<option value="false"
@@ -105,9 +105,11 @@
           <div>
 	    {% for v in field['select'] %}
 	    {% set checked = v == value and 'checked' or '' %}
-	    <label class="radio-inline">
+	    <label class="radio-inline visible-if-source">
 	      <input type="radio"
 		     name="{{ field['identifier'] }}"
+		     {# XXX This is not legal HTML. But it works... #}
+		     id="{{ field['identifier'] }}"
 		     value="{{ v }}"
 		     {{ checked }}>{{ v }}
 	    </label>
@@ -119,9 +121,9 @@
 		  name="{{ field['identifier'] }}"
 		  id="{{ field['identifier'] }}">
 	    {% if value is None %}
-	    <option selected value="">[no value]</option>
+	    <option selected value="">-----</option>
 	    {% else %}
-	    <option value="">[no value]</option>
+	    <option value="">-----</option>
 	    {% end %}
 	    {% for v in field['select'] %}
 	      {% if v == value %}
