@@ -103,13 +103,6 @@
       {% elif field['type'] == constants.SELECT %}
         {% if field.get('display') == 'radio' %}
           <div>
-	    {% set checked = value is None and 'checked' or '' %}
-	    <label class="radio-inline">
-	      <input type="radio"
-		     name="{{ field['identifier'] }}"
-		     value=""
-		     {{ checked }}>[no value]
-	    </label>
 	    {% for v in field['select'] %}
 	    {% set checked = v == value and 'checked' or '' %}
 	    <label class="radio-inline">
