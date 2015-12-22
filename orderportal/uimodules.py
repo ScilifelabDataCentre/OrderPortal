@@ -108,6 +108,6 @@ class Help(tornado.web.UIModule):
             text = default or u"<i>No text for '{0}'.</i>".format(name)
         html = markdown.markdown(text, output_format='html5')
         return u"""<a class="glyphicon glyphicon-info-sign"
-title="Help" data-toggle="collapse" href="#{id}"></a>
+title="Help information" data-toggle="collapse" href="#{id}"></a>
 <div id="{id}" class="collapse">{html}</div>
 """.format(id=name, html=html)

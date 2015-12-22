@@ -46,7 +46,7 @@ help_datatypes: |
   - **boolean**: A logical value of either "true" or "false". Shown as a dropdown menu.
   - **url**: A value that looks like a URL; no check is made that it actually is reachable.
   - **select**: A selection of predefined string values. The values are specificed in the field edit page.
-  - **text**: A string of characters spanning more than one line.
+  - **text**: A block of text spanning more than one line.
   - **date**: A valid date. Shown as a date selection widget.
   - **group**: A group of fields. Does not contain any value of its own.
 

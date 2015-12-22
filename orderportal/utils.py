@@ -210,6 +210,7 @@ def to_utf8(value):
     if isinstance(value, basestring):
         if not isinstance(value, unicode):
             value = unicode(value, 'utf-8')
+        return value.encode('utf-8')
     else:
         return value
 

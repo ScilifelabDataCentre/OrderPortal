@@ -26,12 +26,14 @@
       {{ label }}
       {% if field['identifier'] in order['invalid'] %}
       <span class="text-danger">
-	<span class="glyphicon glyphicon-remove"></span>
+	<span data-toggle="tooltip" title="Invalid value; order cannot be submitted."
+	      class="glyphicon glyphicon-remove"></span>
 	{{ order['invalid'][field['identifier']] }}
       </span>
       {% else %}
       <span class="text-success">
-	<span class="glyphicon glyphicon-ok"></span>
+	<span data-toggle="tooltip" title="Valid value."
+	      class="glyphicon glyphicon-ok"></span>
       </span>
       {% end %}
       <small>
@@ -67,16 +69,20 @@
 	{{ label }}
 	{% if field['identifier'] in order['invalid'] %}
 	<span class="text-danger">
-	  <span class="glyphicon glyphicon-remove"></span>
+	  <span data-toggle="tooltip"
+		title="Invalid value; order cannot be submitted."
+		class="glyphicon glyphicon-remove"></span>
 	  {{ order['invalid'][field['identifier']] }}
 	</span>
 	{% elif value in (None, '') %}
 	<span class="text-danger">
-	  <span class="glyphicon glyphicon-question-sign"></span>
+	  <span data-toggle="tooltip" title="Field does not require a value."
+		class="glyphicon glyphicon-question-sign"></span>
 	</span>
 	{% else %}
 	<span class="text-success">
-	  <span class="glyphicon glyphicon-ok"></span>
+	  <span data-toggle="tooltip" title="Valid value."
+		class="glyphicon glyphicon-ok"></span>
 	</span>
 	{% end %}
       </label>
