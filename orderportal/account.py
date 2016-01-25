@@ -533,6 +533,7 @@ class AccountEdit(AccountMixin, RequestHandler):
             else:
                 saver['page_size'] = value
             saver['other_data'] = self.get_argument('other_data', default=None)
+            saver['update_info'] = False
         self.see_other('account', email)
 
 
@@ -567,6 +568,10 @@ class Login(RequestHandler):
                                    expires_days=settings['LOGIN_MAX_AGE_DAYS'])
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver['login'] = utils.timestamp() # Set login timestamp.
+            if account.get('update_info'):
+                self.see_other('account_edit', account['email'],
+                               message='Please update your account information.')
+                return
             next = self.get_argument('next', None)
             if next is None:
                 self.see_other('home')
@@ -630,8 +635,12 @@ class Password(RequestHandler):
             saver['login'] = utils.timestamp() # Set login session.
         self.set_secure_cookie(constants.USER_COOKIE, account['email'],
                                expires_days=settings['LOGIN_MAX_AGE_DAYS'])
-        self.redirect(self.reverse_url('home'))
-            
+        if account.get('update_info'):
+            self.see_other('account_edit', account['email'],
+                           message='Please update your account information.')
+        else:
+            self.redirect(self.reverse_url('home'))
+
 
 class Register(RequestHandler):
     "Register a new account account."

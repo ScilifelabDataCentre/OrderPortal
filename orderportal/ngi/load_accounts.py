@@ -125,6 +125,7 @@ def load_accounts(db, filepath='users.json', verbose=False):
         except KeyError:
             pass
         doc['other_data'] = '\n'.join(other_data)
+        doc['update_info'] = True
         doc['password'] = None
         # Role '2' is Drupal admin
         doc['role'] = set(account['roles']).difference(set([2])) \
