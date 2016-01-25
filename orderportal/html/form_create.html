@@ -51,6 +51,21 @@ Create
   <div class="form-group">
     <div class="row">
       <div class="col-md-8">
+	<label class="control-label" for="remark">Remark</label>
+	<textarea rows="6" class="form-control"
+		  name="remark" id="remark"></textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      Remark visible for administrators only, using
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+      format.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
 	<label class="control-label" for="import">Import JSON file</label>
 	<input type="file" class="form-control" name="import" id="import">
       </div>

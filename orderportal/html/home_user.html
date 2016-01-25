@@ -23,7 +23,7 @@
 	</form>
       </div>
       <div class="panel-body">
-	  {{ form['description'] }}
+	{% module Markdown(form.get('description')) %}
       </div>
     </div>
     {% end %}

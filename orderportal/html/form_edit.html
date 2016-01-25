@@ -37,7 +37,21 @@ Edit
 	      id="description" name="description"
 	      >{{ form.get('description') or '' }}</textarea>
     <span class="help-block">
-      Description of the form. Basic text format (not Markdown) is used.
+      Description to display for the form as information to the user, using
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+      format.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <label for="remark">Remark</label>
+    <textarea rows="8" class="form-control"
+	      id="remark" name="remark"
+	      >{{ form.get('remark') or '' }}</textarea>
+    <span class="help-block">
+      Remark visible for administrators only, using
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+      format.
     </span>
   </div>
 
