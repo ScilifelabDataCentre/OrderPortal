@@ -2,6 +2,11 @@
 
 {% extends "base.html" %}
 
+{% block header-css %}
+<link rel="stylesheet" type="text/css"
+      href="{{ static_url('DataTables-1.10.10/css/dataTables.bootstrap.css') }}">
+{% end %}
+
 {% block head_title %}Accounts{% end %}
 
 {% block body_title %}
@@ -148,14 +153,54 @@ Accounts
     </table>
   </div>
 </div>
+
+<div class="row">
+  <div class="col-md-12">
+    <table id="accountsTable" class="table table-striped"
+	   data-page-length='25'>
+      <thead>
+	<tr>
+	  <th>Email</th>
+	  <th>Name</th>
+	  <th>University</th>
+	  <th>Role</th>
+	  <th>Status</th>
+	  <th>Modified</th>
+	</tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>
 {% end %}
 
 {% block javascript_code %}
+<script type="text/javascript" charset="utf8"
+	src="{{ static_url('DataTables-1.10.10/js/jquery.dataTables.js') }}">
+</script>
+<script type="text/javascript" charset="utf8"
+	src="{{ static_url('DataTables-1.10.10/js/dataTables.bootstrap.js') }}">
+</script>
 <script>
 $(document).ready(function() {
-    $('.refresh').change(function () {
-	$('#refresh').submit();
-    });
+  $('.refresh').change(function () {
+    $('#refresh').submit();
+  });
+  $('#accountsTable').DataTable( {
+    ajax: {
+      url: '/api/v1/accounts',
+      dataSrc: 'data'
+    },
+    columns: [
+      {data: 'email'},
+      {data: 'name'},
+      {data: 'university'},
+      {data: 'role'},
+      {data: 'status'},
+      {data: 'modified'}
+    ]
+  });
 });
 </script>
 {% end %}

@@ -175,6 +175,33 @@ class Accounts(RequestHandler):
         return page, accounts
 
 
+class ApiV1Accounts(RequestHandler):
+    "Accounts API; JSON"
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_staff()
+        view = self.db.view('account/email', include_docs=True)
+        accounts = [r.doc for r in view]
+        data = []
+        for account in accounts:
+            name = account.get('last_name')
+            first_name = account.get('first_name')
+            if name:
+                if first_name:
+                    name += ', ' + first_name
+            else:
+                name = first_name
+            data.append(
+                dict(email=utils.to_utf8(account['email']),
+                     name=utils.to_utf8(name),
+                     university=utils.to_utf8(account['university']),
+                     role=account['role'],
+                     status=account['status'],
+                     modified=account['modified']))
+        self.write(dict(data=data))
+
+
 class AccountsCsv(Accounts):
     "Return a CSV file containing all data for all or filtered set of accounts."
 
