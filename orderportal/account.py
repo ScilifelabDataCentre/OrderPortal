@@ -183,6 +183,13 @@ class ApiV1Accounts(RequestHandler):
         self.check_staff()
         view = self.db.view('account/email', include_docs=True)
         accounts = [r.doc for r in view]
+        # This is optimized for retrieval speed. The single-valued
+        # function 'get_account_order_count' is not good enough for this.
+        view = self.db.view('order/owner',
+                            group_level=1,
+                            startkey=[''],
+                            endkey=[constants.CEILING])
+        order_counts = dict([(r.key[0], r.value) for r in view])
         data = []
         for account in accounts:
             name = account.get('last_name')
@@ -196,9 +203,13 @@ class ApiV1Accounts(RequestHandler):
                 dict(email=account['email'],
                      href=self.reverse_url('account', account['email']),
                      name=utils.to_utf8(name),
+                     order_count=order_counts.get(account['email'], 0),
+                     orders_href=self.reverse_url('account_orders',
+                                                  account['email']),
                      university=utils.to_utf8(account['university']),
                      role=account['role'],
                      status=account['status'],
+                     login=account.get('login', '-'),
                      modified=account['modified']))
         self.write(dict(data=data))
 

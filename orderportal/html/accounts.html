@@ -162,9 +162,11 @@ Accounts
 	<tr>
 	  <th>Email</th>
 	  <th>Name</th>
-	  <th width="20%">University</th>
+	  <th>Orders</th>
+	  <th width="15%">University</th>
 	  <th>Role</th>
 	  <th>Status</th>
+	  <th>Login</th>
 	  <th>Modified</th>
 	</tr>
       </thead>
@@ -178,9 +180,6 @@ Accounts
 {% block javascript_code %}
 <script type="text/javascript" charset="utf8"
 	src="{{ static_url('DataTables-1.10.10/js/jquery.dataTables.js') }}">
-</script>
-<script type="text/javascript" charset="utf8"
-	src="{{ static_url('DataTables-1.10.10/js/dataTables.bootstrap.js') }}">
 </script>
 <script>
 $(document).ready(function() {
@@ -199,9 +198,15 @@ $(document).ready(function() {
        }
       },
       {data: 'name'},
+      {data: 'order_count',
+       fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+         $(nTd).html("<a class='badge' href='"+oData.orders_href+"'>"+oData.order_count+"</a>");
+       }
+      },
       {data: 'university'},
       {data: 'role'},
       {data: 'status'},
+      {data: 'login'},
       {data: 'modified',
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html($.localtime.toLocalTime(oData.modified));
@@ -210,5 +215,8 @@ $(document).ready(function() {
     ]
   });
 });
+</script>
+<script type="text/javascript" charset="utf8"
+	src="{{ static_url('DataTables-1.10.10/js/dataTables.bootstrap.js') }}">
 </script>
 {% end %}
