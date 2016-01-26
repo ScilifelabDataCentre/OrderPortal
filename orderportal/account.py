@@ -193,7 +193,8 @@ class ApiV1Accounts(RequestHandler):
             else:
                 name = first_name
             data.append(
-                dict(email=utils.to_utf8(account['email']),
+                dict(email=account['email'],
+                     href=self.reverse_url('account', account['email']),
                      name=utils.to_utf8(name),
                      university=utils.to_utf8(account['university']),
                      role=account['role'],

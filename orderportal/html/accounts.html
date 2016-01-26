@@ -162,7 +162,7 @@ Accounts
 	<tr>
 	  <th>Email</th>
 	  <th>Name</th>
-	  <th>University</th>
+	  <th width="20%">University</th>
 	  <th>Role</th>
 	  <th>Status</th>
 	  <th>Modified</th>
@@ -193,12 +193,20 @@ $(document).ready(function() {
       dataSrc: 'data'
     },
     columns: [
-      {data: 'email'},
+      {data: 'email',
+       fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+         $(nTd).html("<a href='"+oData.href+"'>"+oData.email+"</a>");
+       }
+      },
       {data: 'name'},
       {data: 'university'},
       {data: 'role'},
       {data: 'status'},
-      {data: 'modified'}
+      {data: 'modified',
+       fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+         $(nTd).html($.localtime.toLocalTime(oData.modified));
+       }
+      }
     ]
   });
 });
