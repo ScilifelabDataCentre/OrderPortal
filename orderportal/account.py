@@ -52,78 +52,57 @@ class AccountSaver(saver.Saver):
 
 
 class Accounts(RequestHandler):
-    """Accounts list page.
-    Handles filtering by university, role and status.
-    Handles sort by email, name and login."""
+    "Accounts list page."
 
     @tornado.web.authenticated
     def get(self):
+        """HTML template output.
+        Uses DataTables which calls the API to get accounts."""
         self.check_staff()
-        params = dict()
-        accounts = self.filter_by_university(params)
-        accounts = self.filter_by_role(params, accounts=accounts)
-        accounts = self.filter_by_status(params, accounts=accounts)
+        self.render('accounts.html', params=self.get_filter_params())
+
+    def get_filter_params(self):
+        result = dict()
+        for key in ['university', 'status', 'role']:
+            try:
+                value = self.get_argument(key)
+                if not value: raise KeyError
+                result[key] = value
+            except (tornado.web.MissingArgumentError, KeyError):
+                pass
+        return result
+
+class _AccountsFilter(Accounts):
+    "Get accounts according to filter parameters."
+
+    def get_accounts(self):
+        params = self.get_filter_params()
+        accounts = self.filter_by_university(params.get('university'))
+        accounts = self.filter_by_role(params.get('role'), accounts=accounts)
+        accounts = self.filter_by_status(params.get('status'),accounts=accounts)
         # No filter; all accounts
         if accounts is None:
             view = self.db.view('account/email', include_docs=True)
             accounts = [r.doc for r in view]
-        # Direction; different default depending on sort key, set below
-        try:
-            value = self.get_argument('descending')
-            if value == '': raise ValueError
-            descending = utils.to_bool(value)
-        except (tornado.web.MissingArgumentError, TypeError, ValueError):
-            descending = None
-        else:
-            params['descending'] = str(descending).lower()
-        # Sort list
-        sort = self.get_argument('sort', '').lower()
-        if sort:
-            params['sort'] = sort
-        if sort == 'login':
-            if descending is None: descending = True
-            func = lambda i, j: cmp(i.get('login'), j.get('login'))
-        elif sort == 'modified':
-            if descending is None: descending = True
-            func = lambda i, j: cmp(i['modified'], j['modified'])
-        elif sort == 'name':
-            if descending is None: descending = False
-            func = lambda i, j: cmp((i['last_name'], i['first_name']),
-                                    (j['last_name'], j['first_name']))
-        elif sort == 'email':
-            if descending is None: descending = False
-            func = lambda i, j: cmp(i['email'], j['email'])
-        # Default: name
-        else:
-            if descending is None: descending = False
-            func = lambda i, j: cmp((i['last_name'], i['first_name']),
-                                    (j['last_name'], j['first_name']))
-        accounts.sort(func, reverse=descending)
-        page, accounts = self.do_paging(accounts)
-        self.output(accounts, params, page)
-
-    def output(self, accounts, params, page):
-        "HTML template output."
-        # Get number of orders per account
+        # This is optimized for retrieval speed. The single-valued
+        # function 'get_account_order_count' is not good enough here.
+        view = self.db.view('order/owner',
+                            group_level=1,
+                            startkey=[''],
+                            endkey=[constants.CEILING])
+        counts = dict([(r.key[0], r.value) for r in view])
         for account in accounts:
-            account['order_count'] = self.get_account_order_count(account['email'])
-        self.render('accounts.html',
-                    accounts=accounts,
-                    params=params,
-                    page=page)
+            account['order_count'] = counts.get(account['email'], 0)
+        return accounts
 
-    def filter_by_university(self, params, accounts=None):
-        """Return accounts list if any university filter, or None if none.
-        The 'params' dictionary is updated by the filter parameter.
-        """
-        university = self.get_argument('university', None)
+    def filter_by_university(self, university, accounts=None):
+        "Return accounts list if any university filter, or None if none."
         if university == '[other]':
             if accounts is None:
                 view = self.db.view('account/email', include_docs=True)
                 accounts = [r.doc for r in view]
             accounts = [a for a in accounts
                         if a['university'] not in settings['UNIVERSITIES']]
-            params['university'] = university
         elif university:
             if accounts is None:
                 view = self.db.view('account/university',
@@ -133,14 +112,10 @@ class Accounts(RequestHandler):
             else:
                 account = [a for a in accounts
                            if a['university'] == university]
-            params['university'] = university
         return accounts
 
-    def filter_by_role(self, params, accounts=None):
-        """Return accounts list if any role filter, or None if none.
-        The 'params' dictionary is updated by the filter parameter.
-        """
-        role = self.get_argument('role', None)
+    def filter_by_role(self, role, accounts=None):
+        "Return accounts list if any role filter, or None if none."
         if role:
             if accounts is None:
                 view = self.db.view('account/role',
@@ -149,14 +124,10 @@ class Accounts(RequestHandler):
                 accounts = [r.doc for r in view]
             else:
                 accounts = [a for a in accounts if a['role'] == role]
-            params['role'] = role
         return accounts
 
-    def filter_by_status(self, params, accounts=None):
-        """Return accounts list if any status filter, or None if none.
-        The 'params' dictionary is updated by the filter parameter.
-        """
-        status = self.get_argument('status', '')
+    def filter_by_status(self, status, accounts=None):
+        "Return accounts list if any status filter, or None if none."
         if status:
             if accounts is None:
                 view = self.db.view('account/status',
@@ -165,31 +136,17 @@ class Accounts(RequestHandler):
                 accounts = [r.doc for r in view]
             else:
                 accounts = [a for a in accounts if a['status'] == status]
-            params['status'] = status
         return accounts
 
-    def do_paging(self, accounts):
-        "Get paging parameters and cut the list of account accordingly."
-        page = self.get_page(count=len(accounts))
-        accounts = accounts[page['start'] : page['end']]
-        return page, accounts
 
-
-class ApiV1Accounts(RequestHandler):
+class ApiV1Accounts(_AccountsFilter):
     "Accounts API; JSON"
 
     @tornado.web.authenticated
     def get(self):
+        "JSON output."
         self.check_staff()
-        view = self.db.view('account/email', include_docs=True)
-        accounts = [r.doc for r in view]
-        # This is optimized for retrieval speed. The single-valued
-        # function 'get_account_order_count' is not good enough for this.
-        view = self.db.view('order/owner',
-                            group_level=1,
-                            startkey=[''],
-                            endkey=[constants.CEILING])
-        order_counts = dict([(r.key[0], r.value) for r in view])
+        accounts = self.get_accounts()
         data = []
         for account in accounts:
             name = account.get('last_name')
@@ -203,9 +160,9 @@ class ApiV1Accounts(RequestHandler):
                 dict(email=account['email'],
                      href=self.reverse_url('account', account['email']),
                      name=utils.to_utf8(name),
-                     order_count=order_counts.get(account['email'], 0),
-                     orders_href=self.reverse_url('account_orders',
-                                                  account['email']),
+                     order_count=account['order_count'],
+                     orders_href=
+                         self.reverse_url('account_orders', account['email']),
                      university=utils.to_utf8(account['university']),
                      role=account['role'],
                      status=account['status'],
@@ -214,19 +171,22 @@ class ApiV1Accounts(RequestHandler):
         self.write(dict(data=data))
 
 
-class AccountsCsv(Accounts):
+class AccountsCsv(_AccountsFilter):
     "Return a CSV file containing all data for all or filtered set of accounts."
 
-    def output(self, accounts, params, page):
+    @tornado.web.authenticated
+    def get(self):
         "CSV file output."
+        self.check_staff()
+        accounts = self.get_accounts()
         csvfile = StringIO()
         writer = csv.writer(csvfile)
         writer.writerow(('Email', 'Last name', 'First name', 'Role', 'Status',
-                         'University', 'Department', 'Address', 'Postal code',
-                         'City', 'Country', 'Invoice code', 'Invoice address',
-                         'Invoice postal code', 'Invoice city',
-                         'Invoice country', 'Phone', 'Other data',
-                         'Latest login', 'Modified', 'Created'))
+                         'Order count', 'University', 'Department', 'Address',
+                         'Postal code', 'City', 'Country', 'Invoice code',
+                         'Invoice address', 'Invoice postal code',
+                         'Invoice city', 'Invoice country', 'Phone',
+                         'Other data', 'Latest login', 'Modified', 'Created'))
         for account in accounts:
             address = account.get('address') or dict()
             iaddress = account.get('invoice_address') or dict()
@@ -235,6 +195,7 @@ class AccountsCsv(Accounts):
                              utils.to_utf8(account.get('first_name') or ''),
                              account['role'],
                              account['status'],
+                             account['order_count'],
                              utils.to_utf8(account.get('university') or ''),
                              utils.to_utf8(account.get('department') or ''),
                              utils.to_utf8(address.get('address') or ''),
@@ -256,10 +217,6 @@ class AccountsCsv(Accounts):
         self.set_header('Content-Type', constants.CSV_MIME)
         self.set_header('Content-Disposition',
                         'attachment; filename="accounts.csv"')
-
-    def do_paging(self, accounts):
-        "No paging for CSV."
-        return dict(), accounts
 
 
 class AccountMixin(object):
