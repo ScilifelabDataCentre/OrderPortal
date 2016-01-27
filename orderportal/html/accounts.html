@@ -206,7 +206,13 @@ $(document).ready(function() {
       {data: 'university'},
       {data: 'role'},
       {data: 'status'},
-      {data: 'login'},
+      {data: 'login',
+       fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+         if (oData.login !== '-') {
+           $(nTd).html($.localtime.toLocalTime(oData.login));
+         };
+       }
+      },
       {data: 'modified',
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html($.localtime.toLocalTime(oData.modified));
