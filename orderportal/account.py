@@ -52,7 +52,7 @@ class AccountSaver(saver.Saver):
 
 
 class Accounts(RequestHandler):
-    "Accounts list page."
+    "Accounts list page; just HTML, data obtained via Datatables API call."
 
     @tornado.web.authenticated
     def get(self):
@@ -71,6 +71,7 @@ class Accounts(RequestHandler):
             except (tornado.web.MissingArgumentError, KeyError):
                 pass
         return result
+
 
 class _AccountsFilter(Accounts):
     "Get accounts according to filter parameters."

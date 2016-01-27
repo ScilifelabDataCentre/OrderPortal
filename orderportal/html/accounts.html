@@ -87,6 +87,7 @@ Accounts
 {% end %}
 
 {% block javascript_code %}
+{% import json %}
 <script type="text/javascript" charset="utf8"
 	src="{{ static_url('DataTables-1.10.10/js/jquery.dataTables.js') }}">
 </script>
@@ -99,11 +100,7 @@ $(document).ready(function() {
     ajax: {
       url: '/api/v1/accounts',
       dataSrc: 'data',
-      data: {
-        'university': '{{ params.get("university", "") }}',
-        'role': '{{ params.get("role", "") }}',
-        'status': '{{ params.get("status", "") }}'
-      }
+      data: {% raw json.dumps(params) %}
     },
     columns: [
       {data: 'email',
