@@ -53,7 +53,7 @@ def get_handlers():
         url(r'/order/([0-9a-f]{32})/file', OrderAttach, name='order_attach'),
         url(r'/order/([0-9a-f]{32})/file/([^/]+)', OrderFile,name='order_file'),
         url(r'/orders', Orders, name='orders'),
-        # url(r'/api/v1/orders', ApiV1Orders, name='api_v1_orders'),
+        url(r'/api/v1/orders', ApiV1Orders, name='api_v1_orders'),
         url(r'/accounts', Accounts, name='accounts'),
         url(r'/api/v1/accounts', ApiV1Accounts, name='api_v1_accounts'),
         url(r'/accounts.csv', AccountsCsv, name='accounts_csv'),

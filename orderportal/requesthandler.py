@@ -265,16 +265,36 @@ class RequestHandler(tornado.web.RequestHandler):
         return self.current_user['email'] in self.get_account_colleagues(email)
 
     def get_account_names(self, emails):
-        "Get the names (first + last) of the persons for the emails."
+        """Get dictionary with emails as key and names (last, first) as value.
+        If emails is None, then for all accounts."""
         result = {}
         view = self.db.view('account/email')
-        for email in emails:
-            try:
-                names = list(view[email])[0].value
-            except IndexError:
-                pass
-            else:
-                result[email] = ' '.join([n for n in names if n])
+        if emails is None:
+            for row in view:
+                first, last = row.value
+                if last:
+                    if first:
+                        name = u"{}, {}".format(last, first)
+                    else:
+                        name = last
+                else:
+                    name = first
+                result[row.key] = name
+        else:
+            for email in emails:
+                try:
+                    first, last = list(view[email])[0].value
+                except IndexError:
+                    name = '[unknown]'
+                else:
+                    if last:
+                        if first:
+                            name = u"{}, {}".format(last, first)
+                        else:
+                            name = last
+                    else:
+                        name = first
+                    result[email] = name
         return result
 
     def get_logs(self, iuid, limit=constants.DEFAULT_MAX_DISPLAY_LOG+1):

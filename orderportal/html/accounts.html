@@ -2,16 +2,16 @@
 
 {% extends "base.html" %}
 
-{% block header-css %}
-<link rel="stylesheet" type="text/css"
-      href="{{ static_url('DataTables-1.10.10/css/dataTables.bootstrap.css') }}">
-{% end %}
-
 {% block head_title %}Accounts{% end %}
 
 {% block body_title %}
 {% module Icon('account') %}
 Accounts
+{% end %}
+
+{% block header-css %}
+<link rel="stylesheet" type="text/css"
+      href="{{ static_url('DataTables-1.10.10/css/dataTables.bootstrap.min.css') }}">
 {% end %}
 
 {% block content %}
@@ -65,11 +65,11 @@ Accounts
 
 <div class="row">
   <div class="col-md-12">
-    <table id="accountsTable" class="table table-striped table-condensed"
+    <table id="accounts" class="table table-striped table-condensed"
 	   data-page-length='25'>
       <thead>
 	<tr>
-	  <th>Email</th>
+	  <th>Account</th>
 	  <th>Name</th>
 	  <th>Orders</th>
 	  <th width="15%">University</th>
@@ -88,15 +88,18 @@ Accounts
 
 {% block javascript_code %}
 {% import json %}
-<script type="text/javascript" charset="utf8"
-	src="{{ static_url('DataTables-1.10.10/js/jquery.dataTables.js') }}">
+<script type="text/javascript"  charset="utf8"
+	src="{{ static_url('DataTables-1.10.10/js/jquery.dataTables.min.js') }}">
 </script>
-<script>
+
+<script type="text/javascript" >
 $(document).ready(function() {
   $('.refresh').change(function () {
     $('#refresh').submit();
   });
-  $('#accountsTable').DataTable( {
+  $('#accounts').DataTable( {
+    "pagingType": "full_numbers",
+    "order": [[0, 'asc']],
     ajax: {
       url: '/api/v1/accounts',
       dataSrc: 'data',
@@ -133,7 +136,8 @@ $(document).ready(function() {
   });
 });
 </script>
+
 <script type="text/javascript" charset="utf8"
-	src="{{ static_url('DataTables-1.10.10/js/dataTables.bootstrap.js') }}">
+	src="{{ static_url('DataTables-1.10.10/js/dataTables.bootstrap.min.js') }}">
 </script>
 {% end %}

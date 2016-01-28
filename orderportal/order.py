@@ -194,49 +194,90 @@ class OrderMixin(object):
 
 
 class Orders(RequestHandler):
-    "Page for a list of all orders."
+    "Orders list page; just HTML, Datatables obtains data via API call."
 
     @tornado.web.authenticated
     def get(self):
+        "Ordinary users are not allowed to see the overall orders list."
         if not self.is_staff():
             self.see_other('account_orders', self.current_user['email'])
             return
-        params = dict()
-        # Filter for status
-        status = self.get_argument('status', '')
-        if status:
-            view = self.db.view('order/status',
-                                startkey=[status],
-                                endkey=[status, constants.CEILING])
-            params['status'] = status
-        # No filter
-        else:
-            view = self.db.view('order/owner')
-        page = self.get_page(view=view)
-        # Filter for status
-        if status:
-            view = self.db.view('order/status',
-                                reduce=False,
-                                include_docs=True,
-                                descending=True,
-                                startkey=[status, constants.CEILING],
-                                endkey=[status],
-                                skip=page['start'],
-                                limit=page['size'])
-        # No filter
-        else:
+        self.render('orders.html', params=self.get_filter_params())
+
+    def get_filter_params(self):
+        "Return a dictionary with the given filter parameters."
+        result = dict()
+        for key in ['status']:
+            try:
+                value = self.get_argument(key)
+                if not value: raise KeyError
+                result[key] = value
+            except (tornado.web.MissingArgumentError, KeyError):
+                pass
+        return result
+
+
+class _OrdersFilter(Orders):
+    "Get orders according to filter parameters."
+
+    def get_orders(self):
+        params = self.get_filter_params()
+        orders = self.filter_by_status(params.get('status'))
+        # No filter; all orders
+        if orders is None:
             view = self.db.view('order/modified',
                                 include_docs=True,
-                                descending=True,
-                                skip=page['start'],
-                                limit=page['size'])
-        orders = [r.doc for r in view]
-        account_names = self.get_account_names([o['owner'] for o in orders])
-        self.render('orders.html',
-                    orders=orders,
-                    account_names=account_names,
-                    params=params,
-                    page=page)
+                                descending=True)
+            orders = [r.doc for r in view]
+        return orders
+
+    def filter_by_status(self, status, orders=None):
+        "Return orders list if any status filter, or None if none."
+        if status:
+            if orders is None:
+                view = self.db.view('order/status',
+                                    reduce=False,
+                                    key=status,
+                                    include_docs=True,
+                                    descending=True,
+                                    startkey=[status, constants.CEILING],
+                                    endkey=[status])
+                orders = [r.doc for r in view]
+            else:
+                orders = [o for o in orders if o['status'] == status]
+        return orders
+
+
+class ApiV1Orders(_OrdersFilter):
+    "Orders API; JSON output."
+
+    @tornado.web.authenticated
+    def get(self):
+        "JSON output."
+        self.check_staff()
+        orders = self.get_orders()
+        names = self.get_account_names(None)
+        data = []
+        for order in orders:
+            identifier = order.get('identifier')
+            if identifier:
+                href = self.reverse_url('order_id', identifier)
+            else:
+                identifier = order['_id'][:6] + '...'
+                href = self.reverse_url('order', order['_id'])
+            history = order['history']
+            for st in settings['ORDER_LIST_HISTORY']:
+                history[st] = history.get(st)
+            data.append(
+                dict(identifier=identifier,
+                     href=href,
+                     title=order.get('title') or '[no title]',
+                     owner_name=names[order['owner']],
+                     owner_href=self.reverse_url('account', order['owner']),
+                     status=order['status'],
+                     history=history,
+                     modified=order['modified']))
+        self.write(dict(data=data))
 
 
 class Order(OrderMixin, RequestHandler):
@@ -250,7 +291,6 @@ class Order(OrderMixin, RequestHandler):
         except KeyError:
             order = self.get_entity(iuid, doctype=constants.ORDER)
         else:
-            logging.debug(">>> order identifier %s", iuid)
             order = self.get_entity_view('order/identifier', match.group())
         self.check_readable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)

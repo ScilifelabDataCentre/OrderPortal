@@ -52,7 +52,7 @@ class AccountSaver(saver.Saver):
 
 
 class Accounts(RequestHandler):
-    "Accounts list page; just HTML, data obtained via Datatables API call."
+    "Accounts list page; just HTML, Datatables obtains data via API call."
 
     @tornado.web.authenticated
     def get(self):
@@ -62,6 +62,7 @@ class Accounts(RequestHandler):
         self.render('accounts.html', params=self.get_filter_params())
 
     def get_filter_params(self):
+        "Return a dictionary with the given filter parameters."
         result = dict()
         for key in ['university', 'status', 'role']:
             try:
@@ -77,6 +78,7 @@ class _AccountsFilter(Accounts):
     "Get accounts according to filter parameters."
 
     def get_accounts(self):
+        "Get the accounts."
         params = self.get_filter_params()
         accounts = self.filter_by_university(params.get('university'))
         accounts = self.filter_by_role(params.get('role'), accounts=accounts)
@@ -141,7 +143,7 @@ class _AccountsFilter(Accounts):
 
 
 class ApiV1Accounts(_AccountsFilter):
-    "Accounts API; JSON"
+    "Accounts API; JSON output."
 
     @tornado.web.authenticated
     def get(self):
