@@ -274,7 +274,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 first, last = row.value
                 if last:
                     if first:
-                        name = u"{}, {}".format(last, first)
+                        name = u"{0}, {1}".format(last, first)
                     else:
                         name = last
                 else:
