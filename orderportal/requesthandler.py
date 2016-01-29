@@ -205,11 +205,8 @@ class RequestHandler(tornado.web.RequestHandler):
             count = list(view)[0].value
         except (TypeError, IndexError):
             pass
-        result = dict(count=count)
-        if self.current_user:
-            result['size'] = self.current_user.get('page_size')
-        if not result.get('size'):
-            result['size'] = constants.DEFAULT_PAGE_SIZE
+        result = dict(count=count,
+                      size=constants.DEFAULT_PAGE_SIZE)
         result['max_page'] = (count - 1) / result['size']
         try:
             result['current'] = max(0,

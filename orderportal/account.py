@@ -523,14 +523,6 @@ class AccountEdit(AccountMixin, RequestHandler):
                 city=self.get_argument('invoice_city', default=None),
                 country=self.get_argument('invoice_country', default=None))
             saver['phone'] = self.get_argument('phone', default=None)
-            try:
-                value = int(self.get_argument('page_size', 0))
-                if value <= 1:
-                    raise ValueError
-            except (ValueError, TypeError):
-                saver['page_size'] = None
-            else:
-                saver['page_size'] = value
             saver['other_data'] = self.get_argument('other_data', default=None)
             saver['update_info'] = False
         self.see_other('account', email)
