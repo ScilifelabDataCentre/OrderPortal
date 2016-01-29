@@ -286,7 +286,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 else:
                     if last:
                         if first:
-                            name = u"{}, {}".format(last, first)
+                            name = u"{0}, {1}".format(last, first)
                         else:
                             name = last
                     else:

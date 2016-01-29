@@ -236,12 +236,11 @@ class _OrdersFilter(Orders):
         if status:
             if orders is None:
                 view = self.db.view('order/status',
-                                    reduce=False,
-                                    key=status,
-                                    include_docs=True,
                                     descending=True,
                                     startkey=[status, constants.CEILING],
-                                    endkey=[status])
+                                    endkey=[status],
+                                    reduce=False,
+                                    include_docs=True)
                 orders = [r.doc for r in view]
             else:
                 orders = [o for o in orders if o['status'] == status]
