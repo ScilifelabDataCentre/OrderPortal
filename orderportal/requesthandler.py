@@ -120,10 +120,14 @@ class RequestHandler(tornado.web.RequestHandler):
             raise tornado.web.HTTPError(403,
                                         reason="you do not have role 'staff'")
 
-    def get_next_number(self, doctype):
-        "Get the next number for the doctype and increment the counter."
+    def get_next_counter(self, doctype):
+        "Get the next counter number for the doctype."
         while True:
-            doc = self.db[doctype] # Doc must be reloaded each iteration
+            try:
+                doc = self.db[doctype] # Doc must be reloaded each iteration
+            except couchdb.ResourceNotFound:
+                doc = dict(_id=doctype)
+                doc[constants.DOCTYPE] = constants.META
             try:
                 number = doc['counter'] + 1
             except KeyError:

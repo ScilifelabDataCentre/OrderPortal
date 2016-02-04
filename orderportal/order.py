@@ -374,11 +374,11 @@ class OrderCreate(RequestHandler):
             if form['status'] == constants.ENABLED:
                 try:
                     fmt = settings['ORDER_IDENTIFIER_FORMAT']
-                except KeyError:    # No identifier; sequential numbers not used
+                except KeyError:    # No identifier; sequential counter not used
                     pass
-                else:               # Identifier; sequential number are used
-                    number = self.get_next_number(constants.ORDER)
-                    saver['identifier'] = fmt.format(number)
+                else:               # Identifier; sequential counter is used
+                    counter = self.get_next_counter(constants.ORDER)
+                    saver['identifier'] = fmt.format(counter)
             self.see_other('order_edit', saver.doc['_id'])
 
 
