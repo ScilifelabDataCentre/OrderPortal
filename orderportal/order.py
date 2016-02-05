@@ -202,12 +202,16 @@ class Orders(RequestHandler):
         if not self.is_staff():
             self.see_other('account_orders', self.current_user['email'])
             return
-        self.render('orders.html', params=self.get_filter_params())
+        view = self.db.view('form/enabled')
+        forms = [(r.value, r.id) for r in view]
+        self.render('orders.html',
+                    forms=forms,
+                    params=self.get_filter_params())
 
     def get_filter_params(self):
         "Return a dictionary with the given filter parameters."
         result = dict()
-        for key in ['status']:
+        for key in ['status', 'form']:
             try:
                 value = self.get_argument(key)
                 if not value: raise KeyError
@@ -223,6 +227,7 @@ class _OrdersFilter(Orders):
     def get_orders(self):
         params = self.get_filter_params()
         orders = self.filter_by_status(params.get('status'))
+        orders = self.filter_by_form(params.get('form'), orders=orders)
         # No filter; all orders
         if orders is None:
             view = self.db.view('order/modified',
@@ -244,6 +249,21 @@ class _OrdersFilter(Orders):
                 orders = [r.doc for r in view]
             else:
                 orders = [o for o in orders if o['status'] == status]
+        return orders
+
+    def filter_by_form(self, form, orders=None):
+        "Return orders list if any form filter, or None if none."
+        if form:
+            if orders is None:
+                view = self.db.view('order/form',
+                                    descending=True,
+                                    startkey=[form, constants.CEILING],
+                                    endkey=[form],
+                                    reduce=False,
+                                    include_docs=True)
+                orders = [r.doc for r in view]
+            else:
+                orders = [o for o in orders if o['form'] == form]
         return orders
 
 
