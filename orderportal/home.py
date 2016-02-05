@@ -98,21 +98,23 @@ class Contact(RequestHandler):
         self.render('contact.html')
 
 
-class About(RequestHandler):
+class TechInfo(RequestHandler):
     "Display information about the web site technology."
 
     def get(self):
-        versions = dict(python=[('OrderPortal', orderportal.__version__),
-                                ('CouchDB-Python', couchdb.__version__),
+        versions = dict(python=[('CouchDB-Python', couchdb.__version__),
                                 ('tornado', tornado.version),
                                 ('PyYAML', yaml.__version__),
                                 ('markdown', markdown.version)],
                         other=[('<a href="http://couchdb.apache.org/">Apache CouchDB</a>',
                                 utils.get_dbserver().version()),
                                ('<a href="http://getbootstrap.com/">bootstrap</a>', '3.3.4'),
-                              ('<a href="https://jquery.com/">jQuery</a>', '1.11.13'),
-                              ('<a href="https://github.com/GregDThomas/jquery-localtime">jQuery localtime</a>', '0.9.1')])
-        self.render('about.html', versions=versions)
+                               ('<a href="https://jquery.com/">jQuery</a>', '1.11.13'),
+                               ('<a href="https://github.com/GregDThomas/jquery-localtime">jQuery localtime</a>', '0.9.1'),
+                               ('<a href="https://www.datatables.net/">jQuery DataTables</a>', '1.10.10')])
+        self.render('techinfo.html',
+                    version=orderportal.__version__,
+                    versions=versions)
 
 
 class Log(RequestHandler):

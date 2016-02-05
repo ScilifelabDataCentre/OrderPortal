@@ -474,10 +474,21 @@
 
 {% block content-footer %}
 <div class="row">
-  <div class="well well-sm col-md-10 col-md-offset-1">
-    {% module Text('footer') %}
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+	{% module Text('footer') %}
+      </div>
+    </div>
   </div>
-  <div class="col-md-1">
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="well">
+      This site is based on the OrderPortal system.
+      More technical information can be found
+      <a href="{{ reverse_url('techinfo') }}">here</a>.
+    </div>
   </div>
 </div>
 {% end %} {# block content-footer #}

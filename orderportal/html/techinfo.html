@@ -1,10 +1,10 @@
-{# About page. #}
+{# Tech info page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}About{% end %}
+{% block head_title %}Technical information{% end %}
 
-{% block body_title %}About{% end %}
+{% block body_title %}Technical information{% end %}
 
 {% block main_content %}
 
@@ -12,11 +12,14 @@
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-	The OrderPortal system is written in
-	<a href="https://www.python.org/download/releases/2.7/">Python 2.7</a>.
+	The OrderPortal system version {{ version }} is written in
+	<a href="https://www.python.org/download/releases/2.7/">Python
+	2.7</a> and is built on top of the Tornado web server and
+	template system using bootstrap. The CouchDB database
+	system is the back-end storage.
       </div>
       <div class="panel-body">
-	Python code is available at the GitHub repo
+	The Python code is available at the GitHub repo
 	<a href="https://github.com/pekrau/OrderPortal">pekrau/OrderPortal</a>.
       </div>
     </div>
