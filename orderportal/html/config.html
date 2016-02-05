@@ -9,8 +9,24 @@
 {% block main_content %}
 
 <div class="row">
+  <div class="col-md-6 well">
+    <p>
+      The values of various configuration settings. Mainly for
+      debugging purposes when setting up a portal. The default values
+      are set in the <code>__init__.py</code> file, and then changed
+      by the site-dependent YAML configuration file.
+    </p>
+    <p>
+      To change any value here, one needs to modify the configuration
+      and restart the OrderPortal server. Only the IT responsible for
+      the system is allowed to do this.
+    </p>
+  </div>
+</div>
+
+<div class="row">
   <div class="col-md-10">
-    <table class="table table-condensed">
+    <table class="table">
       {% for key, value in params %}
       <tr>
 	<th>{{ key }}</th>
