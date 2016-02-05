@@ -171,8 +171,8 @@
   <span class="help-block">
     {% module Markdown(field.get('description')) %}
     {% if field['type'] == constants.TEXT %}
-    <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
-    format is used.
+    This text will be formatted using
+    <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>.
     {% end %}
   </span>
 </div>
