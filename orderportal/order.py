@@ -204,6 +204,7 @@ class Orders(RequestHandler):
             return
         view = self.db.view('form/enabled')
         forms = [(r.value, r.id) for r in view]
+        forms.sort() # By form title
         self.render('orders.html',
                     forms=forms,
                     params=self.get_filter_params())

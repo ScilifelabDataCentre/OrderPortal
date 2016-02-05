@@ -1,4 +1,4 @@
-{# List of orders. #}
+{# List of all orders; for staff. #}
 
 {% extends "base.html" %}
 
@@ -32,17 +32,15 @@
 	  {% end %}
 	</select>
       </div>
-      {% if is_staff %}
       <div class="form-group">
 	<select name="form" id="form" class="form-control refresh">
 	  <option value="">[any form]</option>
-	  {% for fname, fid in forms %}
+	  {% for ftitle, fid in forms %}
 	  {% set sel = fid == params.get('form') and 'selected' or '' %}
-	  <option {{ sel }} value="{{ fid }}">{{ fname }}</option>
+	  <option {{ sel }} value="{{ fid }}">{{ ftitle }}</option>
 	  {% end %}
 	</select>
       </div>
-      {% end %} {# if is_staff #}
     </div>
     <div class="col-md-2">
     </div>
