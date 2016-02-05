@@ -177,7 +177,7 @@
 {% block sub_main_content %}
 <div class="panel panel-default">
   <div class="panel-heading">
-    Specification fields
+    Fields
     {% if are_fields_editable %}
     <form action="{{ reverse_url('field_create', form['_id']) }}"
 	  role="form"
@@ -195,13 +195,13 @@
 
     <table class="table">
       <tr>
-	<th width="20%">Identifier</th>
-	<th>Label</th>
+	<th width="15%">Identifier</th>
+	<th width="15%">Label</th>
 	<th>Type</th>
 	<th>Visible</th>
 	<th>Required</th>
 	<th>Restrictions</th>
-	<th>Description</th>
+	<th width="35%">Description</th>
       </tr>
       {% for field in fields %}
       <tr>
