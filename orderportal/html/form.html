@@ -201,7 +201,7 @@
 	<th>Visible</th>
 	<th>Required</th>
 	<th>Restrictions</th>
-	<th width="35%">Description</th>
+	<th width="40%">Description</th>
       </tr>
       {% for field in fields %}
       <tr>
@@ -215,7 +215,7 @@
 	  {{ field['type'] }}
 	  {% if field['type'] == constants.SELECT %}
 	  ({{ field.get('display') or 'menu' }})
-	  <pre>{{ '\n'.join(field.get('select') or []) }}</pre>
+<pre>{{ '\n'.join(field.get('select') or []) }}</pre>
 	  {% end %}
 	</td>
 	<td>
