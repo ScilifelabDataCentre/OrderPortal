@@ -8,6 +8,7 @@
 {% end %}
 
 {% block content %}
+{% import functools %}
 <form action="{{ reverse_url('groups', **params) }}"
       id="refresh"
       role="form"

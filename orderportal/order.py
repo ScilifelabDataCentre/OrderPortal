@@ -202,8 +202,11 @@ class Orders(RequestHandler):
         if not self.is_staff():
             self.see_other('account_orders', self.current_user['email'])
             return
+        order_column = 5 + len(settings['ORDERS_LIST_STATUSES']) + \
+            len(settings['ORDERS_LIST_FIELDS'])
         self.render('orders.html',
                     forms=self.get_forms(),
+                    order_column=order_column,
                     params=self.get_filter_params())
 
     def get_filter_params(self):
@@ -278,26 +281,38 @@ class ApiV1Orders(_OrdersFilter):
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
         data = []
         for order in orders:
+            item = dict(title=order.get('title') or '[no title]',
+                        form_title=forms[order['form']],
+                        form_href=self.reverse_url('form', order['form']),
+                        owner_name=names[order['owner']],
+                        owner_href=self.reverse_url('account', order['owner']),
+                        fields={},
+                        status=order['status'],
+                        history={},
+                        modified=order['modified'])
             identifier = order.get('identifier')
             if identifier:
-                href = self.reverse_url('order_id', identifier)
+                item['href'] = self.reverse_url('order_id', identifier)
             else:
                 identifier = order['_id'][:6] + '...'
-                href = self.reverse_url('order', order['_id'])
-            history = order['history']
-            for st in settings['ORDER_LIST_HISTORY']:
-                history[st] = history.get(st)
-            data.append(
-                dict(identifier=identifier,
-                     href=href,
-                     title=order.get('title') or '[no title]',
-                     form_title=forms[order['form']],
-                     form_href=self.reverse_url('form', order['form']),
-                     owner_name=names[order['owner']],
-                     owner_href=self.reverse_url('account', order['owner']),
-                     status=order['status'],
-                     history=history,
-                     modified=order['modified']))
+                item['href'] = self.reverse_url('order', order['_id'])
+            item['identifier'] = identifier
+            for f in settings['ORDERS_LIST_FIELDS']:
+                item['fields'][f] = order['fields'].get(f)
+            for s in settings['ORDERS_LIST_STATUSES']:
+                item['history'][s] = order['history'].get(s)
+            # data.append(
+            #     dict(identifier=identifier,
+            #          href=href,
+            #          title=order.get('title') or '[no title]',
+            #          form_title=forms[order['form']],
+            #          form_href=self.reverse_url('form', order['form']),
+            #          owner_name=names[order['owner']],
+            #          owner_href=self.reverse_url('account', order['owner']),
+            #          status=order['status'],
+            #          history=history,
+            #          modified=order['modified']))
+            data.append(item)
         self.write(dict(data=data))
 
 

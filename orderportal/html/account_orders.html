@@ -10,6 +10,7 @@ Orders
 {% end %}
 
 {% block content %}
+{% import functools %}
 <form action="{{ reverse_url('account_orders', account['email']) }}"
       id="refresh"
       role="form"
@@ -65,7 +66,7 @@ Orders
       <tr>
 	<th width="30%">Order</th>
 	<th width="15%">Status</th>
-	{% for st in settings['ORDER_LIST_HISTORY'] %}
+	{% for st in settings['ORDERS_LIST_STATUSES'] %}
 	<th>{% module Icon(st, label=True) %}</th>
 	{% end %}
 	<th width="10%">Modified</th>
@@ -76,7 +77,7 @@ Orders
 	  <a href="{{ reverse_url('order', order['_id']) }}">{{ order.get('title', order['_id']) }}</a>
 	</td>
 	<td>{% module Icon(order['status'], label=True) %}</td>
-	{% for st in settings['ORDER_LIST_HISTORY'] %}
+	{% for st in settings['ORDERS_LIST_STATUSES'] %}
 	<td>{{ order['history'].get(st) or '-' }}</td>
 	{% end %}
 	<td class="localtime">{{ order['modified'] }}</td>

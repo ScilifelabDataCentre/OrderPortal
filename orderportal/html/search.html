@@ -8,6 +8,7 @@
 {% block search_field %}{% end %}
 
 {% block content %}
+{% import functools %}
 <form action="{{ reverse_url('search', **params) }}"
       role="form"
       class="form-inline"

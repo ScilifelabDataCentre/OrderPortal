@@ -9,6 +9,7 @@ Messages to {{ account['email'] }}
 {% end %}
 
 {% block main_content %}
+{% import functools %}
 <div class="panel panel-default">
   <div class="panel-body">
     {% module Entity(account) %}

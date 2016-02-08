@@ -2,7 +2,6 @@
 
 from __future__ import print_function, absolute_import
 
-import functools
 import logging
 import urllib
 
@@ -34,7 +33,6 @@ class RequestHandler(tornado.web.RequestHandler):
         result['constants'] = constants
         result['global_modes'] = self.global_modes
         result['absolute_reverse_url'] = self.absolute_reverse_url
-        result['functools'] = functools
         result['is_staff'] = self.is_staff()
         result['is_admin'] = self.is_admin()
         result['error'] = self.get_argument('error', None)

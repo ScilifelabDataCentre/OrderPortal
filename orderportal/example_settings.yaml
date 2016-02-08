@@ -35,7 +35,7 @@ ORDER_TRANSITIONS_FILENAME: '{SITE_DIR}order_transitions.yaml'
 UNIVERSITIES_FILENAME: '{SITE_DIR}swedish_universities.yaml'
 ACCOUNT_MESSAGES_FILENAME: '{SITE_DIR}account_messages.yaml'
 ORDER_MESSAGES_FILENAME: '{SITE_DIR}order_messages.yaml'
-ORDER_LIST_HISTORY:
+ORDERS_LIST_STATUSES:
   - submitted
   - accepted
   - processing

@@ -11,6 +11,7 @@
 {% end %}
 
 {% block content %}
+{% import functools %}
 <form action="{{ reverse_url('account_groups_orders', account['email']) }}"
       id="refresh"
       role="form"

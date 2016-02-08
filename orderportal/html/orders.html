@@ -58,9 +58,12 @@
 	  <th width="35%">Title</th>
 	  <th>{% module Icon('form', label=True) %}</th>
 	  <th>{% module Icon('account', label=True, title='Owner') %}</th>
+	  {% for f in settings['ORDERS_LIST_FIELDS'] %}
+	  <th>{{ f.capitalize().replace('_', ' ') }}</th>
+	  {% end %}
 	  <th>Status</th>
-	  {% for st in settings['ORDER_LIST_HISTORY'] %}
-	  <th>{% module Icon(st, label=True) %}</th>
+	  {% for s in settings['ORDERS_LIST_STATUSES'] %}
+	  <th>{% module Icon(s, label=True) %}</th>
 	  {% end %}
 	  <th>Modified</th>
 	</tr>
@@ -85,7 +88,7 @@ $(document).ready(function() {
   });
   $('#orders').DataTable( {
     "pagingType": "full_numbers",
-    "order": [[{{ 4 + len(settings['ORDER_LIST_HISTORY']) }}, 'desc']],
+    "order": [[{{ order_column }}, 'desc']],
     ajax: {
       url: '/api/v1/orders',
       dataSrc: 'data',
@@ -108,9 +111,12 @@ $(document).ready(function() {
          $(nTd).html("<a href='"+oData.owner_href+"'>"+oData.owner_name+"</a>");
        }
       },
+      {% for f in settings['ORDERS_LIST_FIELDS'] %}
+      { data: 'fields.{{ f }}'},
+      {% end %}
       {data: 'status'},
-      {% for st in settings['ORDER_LIST_HISTORY'] %}
-      {data: 'history.{{ st }}'},
+      {% for s in settings['ORDERS_LIST_STATUSES'] %}
+      {data: 'history.{{ s }}'},
       {% end %}
       {data: 'modified',
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
