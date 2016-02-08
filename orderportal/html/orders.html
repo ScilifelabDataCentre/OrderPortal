@@ -56,6 +56,7 @@
 	<tr>
 	  <th>{% module Icon('order', label=True) %}</th>
 	  <th width="35%">Title</th>
+	  <th>{% module Icon('form', label=True) %}</th>
 	  <th>{% module Icon('account', label=True, title='Owner') %}</th>
 	  <th>Status</th>
 	  {% for st in settings['ORDER_LIST_HISTORY'] %}
@@ -97,6 +98,11 @@ $(document).ready(function() {
        }
       },
       {data: 'title'},
+      {data: 'form_title',
+       fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+         $(nTd).html("<a href='"+oData.form_href+"'>"+oData.form_title+"</a>");
+       }
+      },
       {data: 'owner_name',
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html("<a href='"+oData.owner_href+"'>"+oData.owner_name+"</a>");

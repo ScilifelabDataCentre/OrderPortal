@@ -202,11 +202,8 @@ class Orders(RequestHandler):
         if not self.is_staff():
             self.see_other('account_orders', self.current_user['email'])
             return
-        view = self.db.view('form/enabled')
-        forms = [(r.value, r.id) for r in view]
-        forms.sort() # By form title
         self.render('orders.html',
-                    forms=forms,
+                    forms=self.get_forms(),
                     params=self.get_filter_params())
 
     def get_filter_params(self):
@@ -277,6 +274,8 @@ class ApiV1Orders(_OrdersFilter):
         self.check_staff()
         orders = self.get_orders()
         names = self.get_account_names(None)
+        # Forms lookup on iuid
+        forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
         data = []
         for order in orders:
             identifier = order.get('identifier')
@@ -292,6 +291,8 @@ class ApiV1Orders(_OrdersFilter):
                 dict(identifier=identifier,
                      href=href,
                      title=order.get('title') or '[no title]',
+                     form_title=forms[order['form']],
+                     form_href=self.reverse_url('form', order['form']),
                      owner_name=names[order['owner']],
                      owner_href=self.reverse_url('account', order['owner']),
                      status=order['status'],

@@ -298,6 +298,17 @@ class RequestHandler(tornado.web.RequestHandler):
                     result[email] = name
         return result
 
+    def get_forms(self, enabled=True):
+        """Get forms, enabled or all.
+        Return list of tuple (title, iuid) sorted by title."""
+        if enabled:
+            view = self.db.view('form/enabled')
+        else:
+            view = self.db.view('form/modified')
+        forms = [(r.value, r.id) for r in view]
+        forms.sort()
+        return forms
+
     def get_logs(self, iuid, limit=constants.DEFAULT_MAX_DISPLAY_LOG+1):
         "Return the event log documents for the given entity iuid."
         kwargs = dict(include_docs=True,
