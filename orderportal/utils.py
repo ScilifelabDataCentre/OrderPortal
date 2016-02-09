@@ -124,6 +124,14 @@ def load_settings(filepath=None, verbose=False):
     unis.sort(lambda i,j: cmp((i[1].get('rank'), i[0]),
                               (j[1].get('rank'), j[0])))
     settings['UNIVERSITIES'] = collections.OrderedDict(unis)
+    # Read country codes
+    try:
+        filepath = expand_filepath(settings['COUNTRY_CODES_FILENAME'])
+        countries = yaml.safe_load(open(filepath))
+    except (IOError, KeyError), msg:
+        countries = []
+    settings['countries_lookup'] = dict([(c['code'], c['name']) for c in countries])
+    settings['countries'] = countries
     # Settings computable from others
     settings['DB_SERVER_VERSION'] = couchdb.Server(settings['DB_SERVER']).version()
     if 'PORT' not in settings:

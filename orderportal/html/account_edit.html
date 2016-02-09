@@ -176,9 +176,12 @@ Edit
 	    <div class="row">
 	      <div class="col-md-8">
 		<label class="control-label" for="country">Country</label>
-		<input type="text" class="form-control"
-		       id="country" name="country" value="Sweden"
-		       value="{{ account['address'].get('country') or '' }}">
+		<select class="form-control" name="country" id="country">
+		  {% for c in settings['countries'] %}
+		  {% set sel = account['address'].get('country') == c['code'] and 'selected' or '' %}
+		  <option {{ sel }} value="{{ c['code'] }}">{{ c['name'] }}</option>
+		  {% end %}
+		</select>
 	      </div>
 	    </div>
 	  </div>
@@ -242,9 +245,13 @@ Edit
 	    <div class="row">
 	      <div class="col-md-8">
 		<label class="control-label" for="invoice_country">Country</label>
-		<input type="text" class="form-control"
-		       id="invoice_country" name="invoice_country"
-		       value="{{ account['invoice_address'].get('country') or '' }}">
+		<select class="form-control"
+			name="invoice_country" id="invoice_country">
+		  {% for c in settings['countries'] %}
+		  {% set sel = account['invoice_address'].get('country') == c['code'] and 'selected' or '' %}
+		  <option {{ sel }} value="{{ c['code'] }}">{{ c['name'] }}</option>
+		  {% end %}
+		</select>
 	      </div>
 	    </div>
 	  </div>

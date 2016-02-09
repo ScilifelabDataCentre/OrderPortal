@@ -239,11 +239,55 @@
   </tr>
   <tr>
     <th>Postal address</th>
-    <td class="pre">{% module Address(account.get('address') or dict()) %}</td>
+    <td>
+      {% set address = account.get('address') or dict() %}
+      <table class="table table-condensed table-noborder">
+	<tr>
+	  <th>Address</th>
+	  <td class="pre">{{ address.get('address') or '-' }}</td>
+	</tr>
+	<tr>
+	  <th>Postal code</th>
+	  <td>{{ address.get('postal_code') or '-' }}</td>
+	</tr>
+	<tr>
+	  <th>City</th>
+	  <td>{{ address.get('city') or '-' }}</td>
+	</tr>
+	<tr>
+	  <th>Country</th>
+	  <td>{{ settings['countries_lookup'].get(address.get('country')) or '-' }}</td>
+	</tr>
+      </table>
+    </td>
   </tr>
   <tr>
     <th>Invoice address</th>
-    <td class="pre">{% module Address(account.get('invoice_address') or dict()) %}</td>
+    <td>
+      {% set address = account.get('invoice_address') or dict() %}
+      <table class="table table-condensed table-noborder">
+	<tr>
+	  <th>Invoice code</th>
+	  <td>{{ address.get('invoice_code') or '-' }}</td>
+	</tr>
+	<tr>
+	  <th>Address</th>
+	  <td class="pre">{{ address.get('address') or '-' }}</td>
+	</tr>
+	<tr>
+	  <th>Postal code</th>
+	  <td>{{ address.get('postal_code') or '-' }}</td>
+	</tr>
+	<tr>
+	  <th>City</th>
+	  <td>{{ address.get('city') or '-' }}</td>
+	</tr>
+	<tr>
+	  <th>Country</th>
+	  <td>{{ settings['countries_lookup'].get(address.get('country')) or '-' }}</td>
+	</tr>
+      </table>
+    </td>
   </tr>
   <tr>
     <th>Phone</th>
