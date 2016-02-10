@@ -298,7 +298,7 @@ class ApiV1Orders(_OrdersFilter):
                 item['href'] = self.reverse_url('order', order['_id'])
             item['identifier'] = identifier
             for f in settings['ORDERS_LIST_FIELDS']:
-                item['fields'][f] = order['fields'].get(f)
+                item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
             for s in settings['ORDERS_LIST_STATUSES']:
                 item['history'][s] = order['history'].get(s)
             # data.append(

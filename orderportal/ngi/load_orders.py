@@ -54,7 +54,7 @@ def load_users(filename='users.json', verbose=False):
 def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
     """Load the order and use the form given by IUID to transfer field values.
     The order identifier counter has to be updated."""
-    meta = db['orders']
+    meta = db['order']
     counter = meta.get('counter')
     if counter is None:
         counter = meta['counter'] = 1

@@ -147,7 +147,7 @@
 		<li><a href="{{ reverse_url('statuses') }}">Statuses</a></li>
 		<li><a href="{{ reverse_url('config') }}">Configuration</a></li>
 		<li class="dropdown-submenu">
-		  <a class="submenu" href="#">Text
+		  <a class="submenu" href="#">Texts
 		    <span class="caret"></span>
 		  </a>
 		  <ul class="dropdown-menu">
@@ -158,13 +158,13 @@
 		    {% end %}
 		  </ul>
 		</li>
-		<li>
-		  <a href="{{ reverse_url('admin_tutorial') }}">Tutorial</a>
-		</li>
 	      </ul>
 	    </li>
 	    {% end %} {# if is_admin #}
 
+	    <li>
+	      <a href="{{ settings['DOCUMENTATION_URL'] }}">Documentation</a>
+	    </li>
 	  </ul>
 
 	  <div>
