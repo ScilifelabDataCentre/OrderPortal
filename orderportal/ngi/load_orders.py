@@ -54,7 +54,10 @@ def load_users(filename='users.json', verbose=False):
 def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
     """Load the order and use the form given by IUID to transfer field values.
     The order identifier counter has to be updated."""
-    meta = db['order']
+    try:
+        meta = db['order']
+    except couchdb.ResourceNotFound:
+        meta = dict(orderportal_doctype=constants.META)
     counter = meta.get('counter')
     if counter is None:
         counter = meta['counter'] = 1
@@ -126,6 +129,6 @@ if __name__ == '__main__':
     db = utils.get_db()
     load_orders(db,
                 authors=load_users(verbose=options.verbose),
-                form_iuid='abc8bd6232ec489d82680172e7054c2f',
+                form_iuid='0cee6da94ace4b5b968a9d042fe6271f',
                 verbose=options.verbose)
     regenerate_views(db, verbose=options.verbose)
