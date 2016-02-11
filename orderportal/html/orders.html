@@ -31,8 +31,19 @@
 	  {% end %}
 	</select>
       </div>
+      {% for f in settings['ORDERS_LIST_FIELDS'] %}
       <div class="form-group">
-	<select name="status" id="status" class="form-control refresh">
+	<select name="{{ f['identifier'] }}" class="form-control refresh">
+	  <option value="">[any {{ f['identifier'].replace('_', ' ') }}]</option>
+	  {% for v in f['values'] %}
+	  {% set sel = v == params.get(f['identifier']) and 'selected' or '' %}
+	  <option {{ sel }} value="{{ v }}">{{ v }}</option>
+	  {% end %}
+	</select>
+      </div>
+      {% end %} {# for f in settings['ORDERS_LIST_FIELDS'] #}
+      <div class="form-group">
+	<select name="status" class="form-control refresh">
 	  <option value="">[any status]</option>
 	  {% for s in settings['ORDER_STATUSES'] %}
 	  {% set sid = s['identifier'] %}

@@ -1,4 +1,10 @@
 """ OrderPortal: Load orders from JSON dump from the old Drupal site.
+
+This is specific to the configuration for old NGI Sweden portal,
+so it will at the very least have to be modified for your setup.
+
+However, it might prove useful as a starting point.
+
 The order JSON files are in tools:/var/local/ngiportal
 Assumes that all old user accounts exist in new system,
 with email address as identifier.

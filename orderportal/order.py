@@ -212,7 +212,8 @@ class Orders(RequestHandler):
     def get_filter_params(self):
         "Return a dictionary with the given filter parameters."
         result = dict()
-        for key in ['status', 'form']:
+        for key in ['status', 'form'] + \
+                   [f['identifier'] for f in settings['ORDERS_LIST_FIELDS']]:
             try:
                 value = self.get_argument(key)
                 if not value: raise KeyError
@@ -229,6 +230,10 @@ class _OrdersFilter(Orders):
         params = self.get_filter_params()
         orders = self.filter_by_status(params.get('status'))
         orders = self.filter_by_form(params.get('form'), orders=orders)
+        for f in settings['ORDERS_LIST_FIELDS']:
+            orders = self.filter_by_field(f['identifier'],
+                                          params.get(f['identifier']),
+                                          orders=orders)
         # No filter; all orders
         if orders is None:
             view = self.db.view('order/modified',
@@ -265,6 +270,17 @@ class _OrdersFilter(Orders):
                 orders = [r.doc for r in view]
             else:
                 orders = [o for o in orders if o['form'] == form]
+        return orders
+
+    def filter_by_field(self, identifier, value, orders=None):
+        "Return orders list if any field filter, or None if none."
+        if value:
+            if orders is None:
+                view = self.db.view('order/modified',
+                                    include_docs=True,
+                                    descending=True)
+                orders = [r.doc for r in view]
+            orders = [o for o in orders if o['fields'].get(identifier) == value]
         return orders
 
 

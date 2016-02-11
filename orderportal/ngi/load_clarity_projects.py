@@ -1,4 +1,10 @@
-"Load status info to orders from projects in Clarity LIMS."
+"""Load status info to orders from projects in Clarity LIMS.
+
+This is specific to the Clarity LIMS configuration for NGI Stockholm,
+so it will at the very least have to be modified for your setup.
+
+However, it might prove useful as a starting point.
+"""
 
 from __future__ import print_function, absolute_import
 
