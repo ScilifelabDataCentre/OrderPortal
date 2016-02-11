@@ -1,7 +1,7 @@
 """ OrderPortal: Initialize the order database, directly towards CouchDB.
 1) Wipeout the old database.
 2) Load the design documents.
-3) Load the texts file, using SITE_DIR if available, else ROOT.
+3) Load the initial texts file, as defined in the configuration file.
 """
 
 from __future__ import print_function, absolute_import
@@ -42,7 +42,7 @@ def init_database(verbose=False, dumpfilepath=None):
         print('created meta documents')
     if verbose:
         print('loaded designs')
-    load_texts(db, verbose=verbose)
+    load_texts(db, settings['INITIAL_TEXTS_FILENAME'], verbose=verbose)
     if dumpfilepath:
         dumpfilepath = utils.expand_filepath(dumpfilepath)
         try:

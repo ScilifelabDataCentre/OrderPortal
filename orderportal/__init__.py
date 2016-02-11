@@ -22,6 +22,7 @@ settings = dict(SITE_NAME='OrderPortal',
                 COUNTRY_CODES_FILENAME='{ROOT}/data/country_codes.yaml',
                 ACCOUNT_MESSAGES_FILENAME='{ROOT}/data/account_messages.yaml',
                 ORDER_MESSAGES_FILENAME='{ROOT}/data/order_messages.yaml',
+                INITIAL_TEXTS_FILENAME='{ROOT}/data/initial_texts.yaml',
                 DOCUMENTATION_URL='https://github.com/pekrau/OrderPortal/wiki',
                 MARKDOWN_URL='http://daringfireball.net/projects/markdown/',
                 )

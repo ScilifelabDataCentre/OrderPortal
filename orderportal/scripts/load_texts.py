@@ -11,12 +11,7 @@ from orderportal import utils
 from orderportal import admin
 
 
-def load_texts(db, textfilepath=None, verbose=False):
-    if textfilepath is None:
-        if settings.get('SITE_DIR'):
-            textfilepath = utils.expand_filepath('{SITE_DIR}texts.yaml')
-        else:
-            textfilepath = utils.expand_filepath('{ROOT}data/texts.yaml')
+def load_texts(db, textfilepath, verbose=False):
     with open(utils.expand_filepath(textfilepath)) as infile:
         texts = yaml.safe_load(infile)
         for key, text in texts.items():
@@ -46,7 +41,7 @@ if __name__ == '__main__':
     try:
         textfilepath = args[0]
     except IndexError:
-        textfilepath = None
+        textfilepath = settings['INITIAL_TEXTS_FILENAME']
     load_texts(utils.get_db(),
                textfilepath=textfilepath,
                verbose=options.verbose)
