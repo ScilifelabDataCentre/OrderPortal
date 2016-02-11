@@ -65,10 +65,10 @@ class Config(RequestHandler):
                   ('Site directory', settings['SITE_DIR']),
                   ('Tornado debug', settings['TORNADO_DEBUG']),
                   ('logging debug', settings['LOGGING_DEBUG']),
-                  ('account messages', settings['ACCOUNT_MESSAGES_FILENAME']),
-                  ('order statuses', settings['ORDER_STATUSES_FILENAME']),
-                  ('order transitions', settings['ORDER_TRANSITIONS_FILENAME']),
-                  ('universities', settings['UNIVERSITIES_FILENAME'])]
+                  ('account messages', settings['ACCOUNT_MESSAGES_FILEPATH']),
+                  ('order statuses', settings['ORDER_STATUSES_FILEPATH']),
+                  ('order transitions', settings['ORDER_TRANSITIONS_FILEPATH']),
+                  ('universities', settings['UNIVERSITIES_FILEPATH'])]
         self.render('config.html', params=params)
 
 

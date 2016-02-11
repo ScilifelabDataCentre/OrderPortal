@@ -30,11 +30,12 @@ SITE_SUPPORT_EMAIL: 'your@email.com'
 ORDER_ID_FORMAT: 'NGI{0:=05d}'
 ORDER_ID_REGEXP: 'NGI\d+'
 
-ORDER_STATUSES_FILENAME: '{SITE_DIR}order_statuses.yaml'
-ORDER_TRANSITIONS_FILENAME: '{SITE_DIR}order_transitions.yaml'
-UNIVERSITIES_FILENAME: '{SITE_DIR}swedish_universities.yaml'
-ACCOUNT_MESSAGES_FILENAME: '{SITE_DIR}account_messages.yaml'
-ORDER_MESSAGES_FILENAME: '{SITE_DIR}order_messages.yaml'
+ORDER_STATUSES_FILEPATH: '{SITE_DIR}order_statuses.yaml'
+ORDER_TRANSITIONS_FILEPATH: '{SITE_DIR}order_transitions.yaml'
+UNIVERSITIES_FILEPATH: '{SITE_DIR}swedish_universities.yaml'
+ACCOUNT_MESSAGES_FILEPATH: '{SITE_DIR}account_messages.yaml'
+ORDER_MESSAGES_FILEPATH: '{SITE_DIR}order_messages.yaml'
+
 ORDERS_LIST_STATUSES:
   - submitted
   - accepted

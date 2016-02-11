@@ -42,7 +42,7 @@ def init_database(verbose=False, dumpfilepath=None):
         print('created meta documents')
     if verbose:
         print('loaded designs')
-    load_texts(db, settings['INITIAL_TEXTS_FILENAME'], verbose=verbose)
+    load_texts(db, settings['INITIAL_TEXTS_FILEPATH'], verbose=verbose)
     if dumpfilepath:
         dumpfilepath = utils.expand_filepath(dumpfilepath)
         try:

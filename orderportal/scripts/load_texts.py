@@ -41,7 +41,7 @@ if __name__ == '__main__':
     try:
         textfilepath = args[0]
     except IndexError:
-        textfilepath = settings['INITIAL_TEXTS_FILENAME']
+        textfilepath = settings['INITIAL_TEXTS_FILEPATH']
     load_texts(utils.get_db(),
                textfilepath=textfilepath,
                verbose=options.verbose)

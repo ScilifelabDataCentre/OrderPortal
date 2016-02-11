@@ -5,7 +5,7 @@ through all log entries since that timestamp for new events that require
 messages to be sent.
 
 The messaging rules and texts are configured in the files defined by
-settings ACCOUNT_MESSAGES_FILENAME and ORDER_MESSAGES_FILENAME.
+settings ACCOUNT_MESSAGES_FILEPATH and ORDER_MESSAGES_FILEPATH.
 
 This script is to be run as a cron job.
 """
@@ -43,12 +43,12 @@ class Messenger(object):
         if self.verbose:
             print('Messenger', utils.timestamp())
         try:
-            with open(settings['ACCOUNT_MESSAGES_FILENAME']) as infile:
+            with open(settings['ACCOUNT_MESSAGES_FILEPATH']) as infile:
                 self.account_messages = yaml.safe_load(infile)
         except (IOError, KeyError):
             self.account_messages = {}
         try:
-            with open(settings['ORDER_MESSAGES_FILENAME']) as infile:
+            with open(settings['ORDER_MESSAGES_FILEPATH']) as infile:
                 self.order_messages = yaml.safe_load(infile)
         except (IOError, KeyError):
             self.order_messages = {}

@@ -81,7 +81,7 @@ def load_settings(filepath=None, verbose=False):
     except KeyError:
         pass
     try:
-        kwargs['filename'] = settings['LOGGING_FILENAME']
+        kwargs['filename'] = settings['LOGGING_FILEPATH']
     except KeyError:
         pass
     try:
@@ -91,7 +91,7 @@ def load_settings(filepath=None, verbose=False):
     logging.basicConfig(**kwargs)
     # Read order state definitions and transitions
     settings['ORDER_STATUSES'] = \
-        yaml.safe_load(open(settings['ORDER_STATUSES_FILENAME']))
+        yaml.safe_load(open(settings['ORDER_STATUSES_FILEPATH']))
     lookup = dict()
     initial = None
     for status in settings['ORDER_STATUSES']:
@@ -105,7 +105,7 @@ def load_settings(filepath=None, verbose=False):
     settings['ORDER_STATUS_INITIAL'] = initial
     settings['ORDER_STATUSES_LOOKUP'] = lookup
     settings['ORDER_TRANSITIONS'] = \
-        yaml.safe_load(open(settings['ORDER_TRANSITIONS_FILENAME']))
+        yaml.safe_load(open(settings['ORDER_TRANSITIONS_FILEPATH']))
     # Check settings
     for key in ['BASE_URL', 'DB_SERVER', 'COOKIE_SECRET', 'DATABASE']:
         if key not in settings:
@@ -116,7 +116,7 @@ def load_settings(filepath=None, verbose=False):
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short")
     # Read universities lookup
     try:
-        filepath = expand_filepath(settings['UNIVERSITIES_FILENAME'])
+        filepath = expand_filepath(settings['UNIVERSITIES_FILEPATH'])
         unis = yaml.safe_load(open(filepath))
     except (IOError, KeyError):
         unis = dict()
@@ -126,7 +126,7 @@ def load_settings(filepath=None, verbose=False):
     settings['UNIVERSITIES'] = collections.OrderedDict(unis)
     # Read country codes
     try:
-        filepath = expand_filepath(settings['COUNTRY_CODES_FILENAME'])
+        filepath = expand_filepath(settings['COUNTRY_CODES_FILEPATH'])
         countries = yaml.safe_load(open(filepath))
     except (IOError, KeyError), msg:
         countries = []
