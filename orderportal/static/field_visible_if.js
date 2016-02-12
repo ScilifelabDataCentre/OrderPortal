@@ -4,15 +4,34 @@
 $(document).ready(function() {
     var set_visible_if = function() {
 	var fieldId = $(this).attr('id');
+	var fieldType = $(this).attr('type');
 	var fieldVal = $(this).val();
+	var fieldChecked = $(this).is(':checked');
 	$('.visible-if').each(function () {
 	    if (fieldId === $(this).data('if-id')) {
-		/* Cast explicitly to string, since 'true' is interpreted. */
-		var theseValues = String($(this).data('if-val')).split('|');
-		if (theseValues.indexOf(fieldVal) > -1) {
-		    $(this).show('slow');
+		/* Explicit cast to string, since 'true' is interpreted. */
+		var thisValue = String($(this).data('if-val'));
+		var theseValues = thisValue.split('|');
+		if (fieldType === 'checkbox') {
+		    if (thisValue === 'true') {
+			if (fieldChecked) {
+			    $(this).show('slow');
+			} else {
+			    $(this).hide('slow');
+			};
+		    } else if (thisValue === 'false') {
+			if (fieldChecked) {
+			    $(this).hide('slow');
+			} else {
+			    $(this).show('slow');
+			};
+		    };
 		} else {
-		    $(this).hide('slow');
+		    if (theseValues.indexOf(fieldVal) > -1) {
+			$(this).show('slow');
+		    } else {
+			$(this).hide('slow');
+		    };
 		};
 	    };
 	});

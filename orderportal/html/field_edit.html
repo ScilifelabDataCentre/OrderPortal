@@ -102,8 +102,11 @@ in '{{ form['title'] }}'
       </div>
     </div>
     <span class="help-block">
-      Field is visible if the other field (defined above) has the given value.
-      Multiple values are given by using the vertical bar '|' as delimiter.
+      Field is visible if the other field (defined above) has the
+      given value.  Multiple values are given by using the vertical
+      bar '|' as delimiter. If the other field is a checkbox, then
+      only the values "true" and "false" are allowed. Any other value
+      is ignored.
     </span>
   </div>
 
@@ -139,7 +142,24 @@ in '{{ form['title'] }}'
     </span>
   </div>
 
-  {% end %}
+  {% elif field['type'] == constants.BOOLEAN %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+	<label class="control-label" for="checkbox">Checkbox</label>
+	<div class="checkbox">
+	  {% set checked = field.get('checkbox') and 'checked' or '' %}
+	  <label>
+	    <input type="checkbox" value="yes"
+		   id="checkbox" name="checkbox" {{ checked }}>
+	    Display the field as a checkbox: Otherwise a selection menu
+	    with the choices of '-----' (= none), 'True' or 'False' is shown.
+	  </label>
+	</div>
+      </div>
+    </div>
+  </div>
+  {% end %} {# if field['type'] == ... #}
 
   {% if field['type'] != constants.GROUP %}
   <div class="form-group">
@@ -147,7 +167,7 @@ in '{{ form['title'] }}'
       <div class="col-md-10">
 	<label class="control-label" for="required">Required</label>
 	<div class="checkbox">
-	  {% set checked = field['required'] and 'checked' or ''%}
+	  {% set checked = field['required'] and 'checked' or '' %}
 	  <label>
 	    <input type="checkbox" value="yes"
 		   id="required" name="required" {{ checked }}>

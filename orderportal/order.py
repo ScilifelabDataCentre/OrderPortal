@@ -27,7 +27,8 @@ class OrderSaver(saver.Saver):
         "Update all fields from the HTML form input."
         assert self.rqh is not None
         # Loop over fields defined in the form document and get values.
-        # Do not change values for a field if that argument is missing.
+        # Do not change values for a field if that argument is missing,
+        # except for checkbox, in which case missing value means False.
         docfields = self.doc['fields']
         for field in fields:
             if field['type'] == constants.GROUP: continue
@@ -37,13 +38,16 @@ class OrderSaver(saver.Saver):
                 value = self.rqh.get_argument(identifier) or None
                 if value == '': value = None
             except tornado.web.MissingArgumentError:
-                pass            # Missing arg means no change,
-                                # which is not the same as value None!
-            else:
-                if value != docfields.get(identifier):
-                    changed = self.changed.setdefault('fields', dict())
-                    changed[identifier] = value
-                    docfields[identifier] = value
+                # Missing arg means no change, which is not same as value None!
+                # Except for boolean checkbox:
+                if field['type'] == constants.BOOLEAN and field.get('checkbox'):
+                    value = False
+                else:
+                    continue
+            if value != docfields.get(identifier):
+                changed = self.changed.setdefault('fields', dict())
+                changed[identifier] = value
+                docfields[identifier] = value
         self.check_fields_validity(fields)
 
     def check_fields_validity(self, fields):

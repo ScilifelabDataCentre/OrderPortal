@@ -88,17 +88,31 @@
       </label>
 
       {% if field['type'] == constants.BOOLEAN %}
-      {# Simplifies a lot to use a Select element rather than Radio. #}
-      <select class="form-control visible-if-source"
-	      id="{{ field['identifier'] }}"
-	      name="{{ field['identifier'] }}">
-	<option value=""
-		{{ value is None and 'selected' or '' }}>-----</option>
-	<option value="true"
-		{{ value == True and 'selected' or '' }}>True</option>
-	<option value="false"
-		{{ value == False and 'selected' or '' }}>False</option>
-      </select>
+        {% if field.get('checkbox') %}
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+		   class="visible-if-source"
+		   id="{{ field['identifier'] }}"
+		   name="{{ field['identifier'] }}"
+		   {{ value == True and 'checked' or '' }}
+		   value="true">
+	    Check box if "yes".
+	  </label>
+	</div>
+        {% else %}
+        {# Simplifies a lot to use a Select element rather than Radio. #}
+        <select class="form-control visible-if-source"
+		id="{{ field['identifier'] }}"
+		name="{{ field['identifier'] }}">
+	  <option value=""
+		  {{ value is None and 'selected' or '' }}>-----</option>
+	  <option value="true"
+		  {{ value == True and 'selected' or '' }}>True</option>
+	  <option value="false"
+		  {{ value == False and 'selected' or '' }}>False</option>
+	</select>
+	{% end %}
 
       {% elif field['type'] == constants.SELECT %}
         {% if field.get('display') == 'radio' %}

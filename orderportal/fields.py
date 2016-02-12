@@ -137,6 +137,8 @@ class Fields(object):
             values = [v for v in values if v]
             new['select'] = values
             new['display'] = rqh.get_argument('display', None) or 'menu'
+        elif field['type'] == constants.BOOLEAN:
+            new['checkbox'] = utils.to_bool(rqh.get_argument('checkbox', None))
         identifier = rqh.get_argument('visible_if_field', None)
         if identifier == '': identifier = None
         new['visible_if_field'] = identifier
