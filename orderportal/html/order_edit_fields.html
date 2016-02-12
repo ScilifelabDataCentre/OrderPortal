@@ -97,7 +97,7 @@
 		   name="{{ field['identifier'] }}"
 		   {{ value == True and 'checked' or '' }}
 		   value="true">
-	    Check box if "yes".
+	    Check box if "true".
 	  </label>
 	</div>
         {% else %}
@@ -105,12 +105,10 @@
         <select class="form-control visible-if-source"
 		id="{{ field['identifier'] }}"
 		name="{{ field['identifier'] }}">
-	  <option value=""
-		  {{ value is None and 'selected' or '' }}>-----</option>
-	  <option value="true"
-		  {{ value == True and 'selected' or '' }}>True</option>
 	  <option value="false"
-		  {{ value == False and 'selected' or '' }}>False</option>
+		  {{ bool(value) and 'selected' or '' }}>False</option>
+	  <option value="true"
+		  {{ bool(value) and 'selected' or '' }}>True</option>
 	</select>
 	{% end %}
 
@@ -122,7 +120,7 @@
 	    <label class="radio-inline visible-if-source">
 	      <input type="radio"
 		     name="{{ field['identifier'] }}"
-		     {# XXX This is not legal HTML. But it works... #}
+		     {# XXX This is not proper HTML. But it works... #}
 		     id="{{ field['identifier'] }}"
 		     value="{{ v }}"
 		     {{ checked }}>{{ v }}
@@ -134,11 +132,6 @@
           <select class="form-control visible-if-source"
 		  name="{{ field['identifier'] }}"
 		  id="{{ field['identifier'] }}">
-	    {% if value is None %}
-	    <option selected value="">-----</option>
-	    {% else %}
-	    <option value="">-----</option>
-	    {% end %}
 	    {% for v in field['select'] %}
 	      {% if v == value %}
 	      <option selected>{{ v }}</option>
