@@ -8,9 +8,11 @@
   {% if global_modes['allow_order_creation'] %}
   <div class="panel-group">
     {% for form in forms %}
-    <div class="panel panel-default">
+    <div class="panel panel-primary">
       <div class="panel-heading">
 	{{ form['title'] }}
+      </div>
+      <div class="panel-body">
 	<form action="{{ reverse_url('order_create') }}"
 	      role="form"
 	      class="pull-right"
@@ -21,8 +23,6 @@
 	    Create order
 	  </button>
 	</form>
-      </div>
-      <div class="panel-body">
 	{% module Markdown(form.get('description')) %}
       </div>
     </div>
@@ -38,13 +38,13 @@
   <div class="panel panel-warning">
     <div class="panel-heading">
       My recently modified orders
+    </div>
+    <div class="panel-body">
       <a href="{{ reverse_url('account_orders', current_user['email']) }}"
-	 class="btn btn-primary btn-xs pull-right">
+	 class="btn btn-warning btn-xs pull-right">
 	{% module Icon('order') %}
 	All my orders
       </a>
-    </div>
-    <div class="panel-body">
       <table class="table-condensed">
 	{% for order in orders %}
 	<tr>
