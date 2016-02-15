@@ -41,11 +41,11 @@
 
   <tr>
     <th>Size</th>
-    <td>{{ file['size'] }}
+    <td>{{ int(0.5 + file['size'] / 1000.0) }} kB
   </tr>
   <tr>
     <th>Content type</th>
-    <td>{{ file['content_type'] }}
+    <td>{{ file['content_type'] }}</td>
   </tr>
   <tr>
     <th>Modified</th>

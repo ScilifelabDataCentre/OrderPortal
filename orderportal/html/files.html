@@ -15,7 +15,7 @@ Files
     <th>Name</th>
     <th>Menu</th>
     <th>Content type</th>
-    <th>Size (bytes)</th>
+    <th>Size (kB)</th>
     <th>Modified</th>
     <th>Created</th>
   </tr>
@@ -29,7 +29,7 @@ Files
     </td>
     <td>{{ file.get('menu') or '-' }}</td>
     <td>{{ file['content_type'] }}</td>
-    <td>{{ file['size'] }}</td>
+    <td>{{ int(0.5 + file['size'] / 1000.0) }}</td>
     <td>
       <span class="localtime">{{ file['modified'] }}</span>
       <a href="{{ reverse_url('file_logs', file['name']) }}">

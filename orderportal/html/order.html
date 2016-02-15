@@ -184,7 +184,7 @@
 		</a>
 	      </td>
 	      <td>{{ file['content_type'] }}</td>
-	      <td>{{ file['size'] }}</td>
+	      <td>{{ int(0.5 + file['size'] / 1000.0) }} kB</td>
 	      <td>
 		<form action="{{ reverse_url('order_file', order['_id'], file['filename']) }}"
 		      role="form"
