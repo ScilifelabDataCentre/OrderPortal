@@ -176,7 +176,7 @@ class FormCreate(RequestHandler):
             if not saver['title']:
                 raise tornado.web.HTTPError(400, reason='no title given')
             saver['description'] = self.get_argument('description', None)
-            saver['remark'] = self.get_argument('remark', None)
+            saver['version'] = self.get_argument('version', None)
             saver['status'] = constants.PENDING
             try:
                 infile = self.request.files['import'][0]
@@ -184,8 +184,8 @@ class FormCreate(RequestHandler):
                 assert data[constants.DOCTYPE] == constants.FORM, 'doc must be form'
                 if not saver['description']:
                     saver['description'] = data.get('description')
-                if not saver['remark']:
-                    saver['remark'] = data.get('remark')
+                if not saver['version']:
+                    saver['version'] = data.get('version')
                 saver['fields'] = data['fields']
             except Exception, msg:
                 logging.info("Error importing form: %s", msg)
@@ -193,7 +193,7 @@ class FormCreate(RequestHandler):
 
 
 class FormEdit(FormMixin, RequestHandler):
-    "Page for editing an form; title, description, remark."
+    "Page for editing an form; title, description, version."
 
     @tornado.web.authenticated
     def get(self, iuid):
@@ -211,7 +211,7 @@ class FormEdit(FormMixin, RequestHandler):
         with FormSaver(doc=form, rqh=self) as saver:
             saver['title'] = self.get_argument('title')
             saver['description'] = self.get_argument('description', None)
-            saver['remark'] = self.get_argument('remark', None)
+            saver['version'] = self.get_argument('version', None)
         self.see_other('form', form['_id'])
 
 
@@ -325,7 +325,7 @@ class FormClone(RequestHandler):
         with FormSaver(rqh=self) as saver:
             saver['title'] = u"Clone of {0}".format(form['title'])
             saver['description'] = form.get('description')
-            saver['remark'] = form.get('remark')
+            saver['version'] = form.get('version')
             saver.clone_fields(form)
             saver['status'] = constants.PENDING
         self.see_other('form_edit', saver.doc['_id'])
