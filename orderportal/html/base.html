@@ -91,9 +91,6 @@
 	    </li>
 	    {% end %} {# if is_staff #}
 
-	    <li>
-	      <a href="{{ reverse_url('contact') }}">Contact</a>
-	    </li>
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">
 		Information
@@ -163,8 +160,9 @@
 	    {% end %} {# if is_admin #}
 
 	    <li>
-	      <a href="{{ settings['DOCUMENTATION_URL'] }}">Documentation</a>
+	      <a href="{{ reverse_url('contact') }}">Contact</a>
 	    </li>
+
 	  </ul>
 
 	  <div>
