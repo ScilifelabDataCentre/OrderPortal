@@ -160,17 +160,19 @@
 	<td>{{ order['_id'] }}</td>
       </tr>
 
-      {% if is_admin %}
       <tr>
 	<th>Form</th>
 	<td>
+	  {% if is_admin %}
 	  <a href="{{ reverse_url('form', form['_id']) }}">
 	    {{ form['title'] }}
 	    ({{ form.get('version') or '-' }})
 	  </a>
+	  {% else %}
+	  {{ form['title'] }}
+	  {% end %}
 	</td>
       </tr>
-      {% end %}
 
       <tr>
 	<th>Files</th>
