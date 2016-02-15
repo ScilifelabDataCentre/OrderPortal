@@ -166,6 +166,7 @@
 	<td>
 	  <a href="{{ reverse_url('form', form['_id']) }}">
 	    {{ form['title'] }}
+	    ({{ form.get('version') or '-' }})
 	  </a>
 	</td>
       </tr>

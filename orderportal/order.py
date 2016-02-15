@@ -321,17 +321,6 @@ class ApiV1Orders(_OrdersFilter):
                 item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
             for s in settings['ORDERS_LIST_STATUSES']:
                 item['history'][s] = order['history'].get(s)
-            # data.append(
-            #     dict(identifier=identifier,
-            #          href=href,
-            #          title=order.get('title') or '[no title]',
-            #          form_title=forms[order['form']],
-            #          form_href=self.reverse_url('form', order['form']),
-            #          owner_name=names[order['owner']],
-            #          owner_href=self.reverse_url('account', order['owner']),
-            #          status=order['status'],
-            #          history=history,
-            #          modified=order['modified']))
             data.append(item)
         self.write(dict(data=data))
 

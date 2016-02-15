@@ -137,7 +137,7 @@
       </tr>
       <tr>
 	<th>Version</th>
-	<td>{% module Markdown(form.get('version')) %}</td>
+	<td>{{ form.get('version') or '-' }}</td>
       </tr>
       <tr>
 	<th>Orders</th>

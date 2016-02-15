@@ -45,13 +45,10 @@ Edit
 
   <div class="form-group">
     <label for="version">Version</label>
-    <textarea rows="2" class="form-control"
-	      id="version" name="version"
-	      >{{ form.get('version') or '' }}</textarea>
+    <input type="text" class="form-control" name="version" id="version"
+	   value="{{ form.get('version') or '' }}">
     <span class="help-block">
-      Version visible for administrators only, using
-      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
-      format.
+      Version visible for administrators only.
     </span>
   </div>
 
