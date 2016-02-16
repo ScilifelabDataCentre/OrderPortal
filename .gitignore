@@ -2,6 +2,6 @@
 *.yaml
 *.pyc
 dist
-ngi_misc
+misc
 orderportal.egg-info
 orderportal/scripts/dump.tar*

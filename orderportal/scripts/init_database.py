@@ -1,7 +1,7 @@
 """ OrderPortal: Initialize the order database, directly towards CouchDB.
-1) Wipeout the old database.
-2) Load the design documents.
-3) Load the initial texts file, as defined in the configuration file.
+1) Wipes out the old database.
+2) Loads the design documents.
+3) Loads the initial texts file, as defined in the configuration file.
 """
 
 from __future__ import print_function, absolute_import
