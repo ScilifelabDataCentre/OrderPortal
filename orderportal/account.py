@@ -169,6 +169,7 @@ class ApiV1Accounts(_AccountsFilter):
                      university=utils.to_utf8(account['university']),
                      role=account['role'],
                      status=account['status'],
+                     gender=account.get('gender') or '-',
                      login=account.get('login', '-'),
                      modified=account['modified']))
         self.write(dict(data=data))
@@ -185,11 +186,12 @@ class AccountsCsv(_AccountsFilter):
         csvfile = StringIO()
         writer = csv.writer(csvfile)
         writer.writerow(('Email', 'Last name', 'First name', 'Role', 'Status',
-                         'Order count', 'University', 'Department', 'Address',
-                         'Postal code', 'City', 'Country', 'Invoice code',
-                         'Invoice address', 'Invoice postal code',
-                         'Invoice city', 'Invoice country', 'Phone',
-                         'Other data', 'Latest login', 'Modified', 'Created'))
+                         'Gender', 'Order count', 'University', 'Department',
+                         'Address', 'Postal code', 'City', 'Country',
+                         'Invoice code', 'Invoice address',
+                         'Invoice postal code', 'Invoice city',
+                         'Invoice country', 'Phone', 'Other data',
+                         'Latest login', 'Modified', 'Created'))
         for account in accounts:
             address = account.get('address') or dict()
             iaddress = account.get('invoice_address') or dict()
@@ -198,6 +200,7 @@ class AccountsCsv(_AccountsFilter):
                              utils.to_utf8(account.get('first_name') or ''),
                              account['role'],
                              account['status'],
+                             account.get('gender') or '-',
                              account['order_count'],
                              utils.to_utf8(account.get('university') or ''),
                              utils.to_utf8(account.get('department') or ''),
@@ -506,6 +509,7 @@ class AccountEdit(AccountMixin, RequestHandler):
                 saver['role'] = role
             saver['first_name'] = self.get_argument('first_name')
             saver['last_name'] = self.get_argument('last_name')
+            saver['gender'] = self.get_argument('gender')
             university = self.get_argument('university_other', default=None)
             if not university or 'unknown' in university:
                 university = self.get_argument('university', default=None)
@@ -657,6 +661,7 @@ class Register(RequestHandler):
             try:
                 saver['first_name'] = self.get_argument('first_name')
                 saver['last_name'] = self.get_argument('last_name')
+                saver['gender'] = self.get_argument('gender')
                 university = self.get_argument('university_other', default=None)
                 if not university:
                     university = self.get_argument('university', default=None)
