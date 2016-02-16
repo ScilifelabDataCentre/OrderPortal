@@ -15,10 +15,9 @@
       <div class="panel-body">
 	<form action="{{ reverse_url('order_create') }}"
 	      role="form"
-	      class="pull-right"
 	      method="GET">
 	  <input type="hidden" name="form" value="{{ form['_id'] }}">
-	  <button type="submit" class="btn btn-primary btn-xs">
+	  <button type="submit" class="btn btn-primary btn-sm pull-right">
 	    <span class="glyphicon glyphicon-plus"></span>
 	    Create order
 	  </button>
@@ -41,7 +40,7 @@
     </div>
     <div class="panel-body">
       <a href="{{ reverse_url('account_orders', current_user['email']) }}"
-	 class="btn btn-warning btn-xs pull-right">
+	 class="btn btn-warning btn-sm pull-right">
 	{% module Icon('order') %}
 	All my orders
       </a>

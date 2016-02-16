@@ -148,6 +148,7 @@
 	    </td>
 	    {% end %}{# if is_admin #}
 	    <td>
+	      <strong>{{ news.get('title') or '[no title]' }}</strong>
 	      {% module Markdown(news.get('text')) %}
 	    </td>
 	    <td class="text-right small">[{{ news['date'] }}]</td>
@@ -237,13 +238,31 @@
 	      role="form"
 	      method="POST">
 	  {% module xsrf_form_html() %}
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label"
+		       for="news_title_edit_{{ pos }}">Title</label>
+		<input type="text" class="form-control"
+		       name="title" id="news_title_edit_{{ pos }}"
+		       value="{{ news.get('title') or '' }}">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Title for the news item.
+	    </span>
+	  </div>
+
 	  <div class="form-group">
-	    <label for="text{{ pos }}">News item text</label>
-	    <textarea class="form-control" rows="5"
-		      name="text" id="text{{ pos }}"
+	    <label for="news_text_edit_{{ pos }}">Text</label>
+	    <textarea class="form-control" rows="4"
+		      name="text" id="news_text_edit_{{ pos }}"
 		      >{% raw news.get('text') or '' %}</textarea>
 	    <span class="help-block">
-	      This text will be formatted using
+	      Text for the news item, which will be formatted using
 	      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>.
 	    </span>
 	  </div>
@@ -251,9 +270,10 @@
 	  <div class="form-group">
 	    <div class="row">
 	      <div class="col-md-4">
-		<label class="control-label" for="newsdate{{ pos }}">Date</label>
+		<label class="control-label"
+		       for="news_date_edit_{{ pos }}">Date</label>
 		<input type="text" class="datepicker form-control"
-		       name="date" id="newsdate{{ pos }}"
+		       name="date" id="news_date_edit_{{ pos }}"
 		       value="{{ news['date'] or '' }}">
 	      </div>
 	    </div>
@@ -297,9 +317,10 @@
 	  <div class="form-group has-feedback">
 	    <div class="row">
 	      <div class="col-md-4">
-		<label class="control-label" for="date{{ pos }}">Date</label>
+		<label class="control-label"
+		       for="event_date_edit_{{ pos }}">Date</label>
 		<input type="text" class="datepicker form-control"
-		       name="date" id="date{{ pos }}"
+		       name="date" id="event_date_edit_{{ pos }}"
 		       value="{{ event['date'] }}">
 		<span style="color:red; margin-right: 1em;"
 		      class="glyphicon glyphicon-star form-control-feedback"
@@ -314,9 +335,10 @@
 	  <div class="form-group has-feedback">
 	    <div class="row">
 	      <div class="col-md-8">
-		<label class="control-label" for="title">Title</label>
+		<label class="control-label"
+		       for="event_title_edit_{{ pos }}">Title</label>
 		<input type="text" class="form-control"
-		       name="title" id="title"
+		       name="title" id="event_title_edit_{{ pos }}"
 		       value="{{ event['title'] }}">
 		<span style="color:red; margin-right: 1em;"
 		      class="glyphicon glyphicon-star form-control-feedback"
@@ -331,13 +353,15 @@
 	  <div class="form-group">
 	    <div class="row">
 	      <div class="col-md-10">
-		<label class="control-label" for="text">Text</label>
-		<textarea class="form-control" rows="5" name="text" id="text"
+		<label class="control-label"
+		       for="event_text_edit_{{ pos }}">Text</label>
+		<textarea class="form-control" rows="4"
+			  name="text" id="event_text_edit_{{ pos }}"
 			  >{% raw event.get('text') or '' %}</textarea>
 	      </div>
 	    </div>
 	    <span class="help-block">
-	      This text will be formatted using
+	      text for the event, which will be formatted using
 	      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>.
 	    </span>
 	  </div>
@@ -373,11 +397,29 @@
 	      role="form"
 	      method="POST">
 	  {% module xsrf_form_html() %}
-	  <div class="form-group">
-	    <textarea class="form-control" rows="5"
-		      name="text" id="text"></textarea>
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label"
+		       for="news_title_create">Title</label>
+		<input type="text" class="form-control"
+		       name="title" id="news_title_create">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
 	    <span class="help-block">
-	      This text will be formatted using
+	      Title for the news item.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <label for="news_text_create">Text</label>
+	    <textarea class="form-control" rows="4"
+		      name="text" id="news_text_create"></textarea>
+	    <span class="help-block">
+	      Text for the news item, which will be formatted using
 	      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>.
 	    </span>
 	  </div>
@@ -415,9 +457,10 @@
 	  <div class="form-group has-feedback">
 	    <div class="row">
 	      <div class="col-md-4">
-		<label class="control-label" for="date">Date</label>
+		<label class="control-label"
+		       for="event_date_create">Date</label>
 		<input type="text" class="datepicker form-control"
-		       name="date" id="date">
+		       name="date" id="event_date_create">
 		<span style="color:red; margin-right: 1em;"
 		      class="glyphicon glyphicon-star form-control-feedback"
 		      aria-hidden="true"></span>
@@ -431,8 +474,10 @@
 	  <div class="form-group has-feedback">
 	    <div class="row">
 	      <div class="col-md-8">
-		<label class="control-label" for="title">Title</label>
-		<input type="text" class="form-control" name="title" id="title">
+		<label class="control-label"
+		       for="event_title_create">Title</label>
+		<input type="text" class="form-control"
+		       name="title" id="event_title_create">
 		<span style="color:red; margin-right: 1em;"
 		      class="glyphicon glyphicon-star form-control-feedback"
 		      aria-hidden="true"></span>
@@ -446,13 +491,14 @@
 	  <div class="form-group">
 	    <div class="row">
 	      <div class="col-md-10">
-		<label class="control-label" for="text">Text</label>
-		<textarea class="form-control" rows="5"
-			  name="text" id="text"></textarea>
+		<label class="control-label"
+		       for="event_text_create">Text</label>
+		<textarea class="form-control" rows="4"
+			  name="text" id="event_text_create"></textarea>
 	      </div>
 	    </div>
 	    <span class="help-block">
-	      This text will be formatted using
+	      Text for the event, which will be formatted using
 	      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>.
 	    </span>
 	  </div>
