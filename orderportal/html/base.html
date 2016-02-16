@@ -168,13 +168,7 @@
 	  <div>
 	    <ul class="nav navbar-nav navbar-right">
 	      {% if current_user %}
-	      <li>
-		<p class="navbar-text">
-		  <a href="{{ reverse_url('account', current_user['email']) }}">
-		    {% module Entity(current_user) %}
-		  </a>
-		</p>
-	      </li>
+	      <li>{% module Entity(current_user) %}</li>
 	      <li>
 		<form action="{{ reverse_url('logout') }}"
 		      role="form"
