@@ -163,7 +163,7 @@ class ApiV1Accounts(_AccountsFilter):
                 dict(email=account['email'],
                      href=self.reverse_url('account', account['email']),
                      name=utils.to_utf8(name),
-                     gender=account.get('gender') or '-',
+                     gender=account.get('gender'),
                      pi=bool(account.get('pi')),
                      order_count=account['order_count'],
                      orders_href=
@@ -511,7 +511,10 @@ class AccountEdit(AccountMixin, RequestHandler):
                 saver['role'] = role
             saver['first_name'] = self.get_argument('first_name')
             saver['last_name'] = self.get_argument('last_name')
-            saver['gender'] = self.get_argument('gender')
+            try:
+                saver['gender'] = self.get_argument('gender').lower()
+            except tornado.web.MissingArgumentError:
+                saver['gender'] = None
             university = self.get_argument('university_other', default=None)
             if not university or 'unknown' in university:
                 university = self.get_argument('university', default=None)
@@ -664,7 +667,10 @@ class Register(RequestHandler):
             try:
                 saver['first_name'] = self.get_argument('first_name')
                 saver['last_name'] = self.get_argument('last_name')
-                saver['gender'] = self.get_argument('gender')
+                try:
+                    saver['gender'] = self.get_argument('gender').lower()
+                except tornado.web.MissingArgumentError:
+                    saver['gender'] = None
                 university = self.get_argument('university_other', default=None)
                 if not university:
                     university = self.get_argument('university', default=None)

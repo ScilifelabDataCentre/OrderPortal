@@ -49,9 +49,9 @@ Edit
 	<label class="control-label" for="gender">Gender</label>
 	<select class="form-control" size="3" name="gender" id="gender">
 	  {% set gender = account.get('gender') %}
-	  <option {{gender == 'male' and 'selected' or ''}}>male</option>
-	  <option {{gender == 'female' and 'selected' or ''}}>female</option>
-	  <option {{gender == 'other' and 'selected' or ''}}>other</option>
+	  <option {{gender == 'male' and 'selected' or ''}}>Male</option>
+	  <option {{gender == 'female' and 'selected' or ''}}>Female</option>
+	  <option {{gender == 'other' and 'selected' or ''}}>Other</option>
 	</select>
 	<span style="color:red; margin-right: 2em;"
 	      class="glyphicon glyphicon-star form-control-feedback"

@@ -131,7 +131,7 @@
   </tr>
   <tr>
     <th>Gender</th>
-    <td>{{ account.get('gender') or '-' }}</td>
+    <td>{{ (account.get('gender') or '-').capitalize() }}</td>
   </tr>
   <tr>
     <th>Role</th>
