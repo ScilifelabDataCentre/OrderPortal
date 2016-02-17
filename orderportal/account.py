@@ -163,13 +163,14 @@ class ApiV1Accounts(_AccountsFilter):
                 dict(email=account['email'],
                      href=self.reverse_url('account', account['email']),
                      name=utils.to_utf8(name),
+                     gender=account.get('gender') or '-',
+                     pi=bool(account.get('pi')),
                      order_count=account['order_count'],
                      orders_href=
                          self.reverse_url('account_orders', account['email']),
                      university=utils.to_utf8(account['university']),
                      role=account['role'],
                      status=account['status'],
-                     gender=account.get('gender') or '-',
                      login=account.get('login', '-'),
                      modified=account['modified']))
         self.write(dict(data=data))
@@ -185,9 +186,9 @@ class AccountsCsv(_AccountsFilter):
         accounts = self.get_accounts()
         csvfile = StringIO()
         writer = csv.writer(csvfile)
-        writer.writerow(('Email', 'Last name', 'First name', 'Role', 'Status',
-                         'Gender', 'Order count', 'University', 'Department',
-                         'Address', 'Postal code', 'City', 'Country',
+        writer.writerow(('Email', 'Last name', 'First name', 'Gender', 'Role',
+                         'Status', 'Order count', 'University', 'Department',
+                         'PI', 'Address', 'Postal code', 'City', 'Country',
                          'Invoice code', 'Invoice address',
                          'Invoice postal code', 'Invoice city',
                          'Invoice country', 'Phone', 'Other data',
@@ -198,12 +199,13 @@ class AccountsCsv(_AccountsFilter):
             writer.writerow((utils.to_utf8(account['email']),
                              utils.to_utf8(account.get('last_name') or ''),
                              utils.to_utf8(account.get('first_name') or ''),
+                             account.get('gender') or '-',
                              account['role'],
                              account['status'],
-                             account.get('gender') or '-',
                              account['order_count'],
                              utils.to_utf8(account.get('university') or ''),
                              utils.to_utf8(account.get('department') or ''),
+                             account.get('pi') and 'yes' or 'no',
                              utils.to_utf8(address.get('address') or ''),
                              utils.to_utf8(address.get('postal_code') or ''),
                              utils.to_utf8(address.get('city') or ''),
@@ -515,6 +517,7 @@ class AccountEdit(AccountMixin, RequestHandler):
                 university = self.get_argument('university', default=None)
             saver['university'] = university or None
             saver['department'] = self.get_argument('department', default=None)
+            saver['pi'] = utils.to_bool(self.get_argument('pi', default=False))
             saver['address'] = dict(
                 address=self.get_argument('address', default=None),
                 postal_code=self.get_argument('postal_code', default=None),
@@ -670,6 +673,7 @@ class Register(RequestHandler):
                 reason = u"invalid '{0}' value provided".format(key)
                 raise tornado.web.HTTPError(400, reason=reason)
             saver['department'] = self.get_argument('department', default=None)
+            saver['pi'] = utils.to_bool(self.get_argument('pi', default=False))
             saver['address'] = dict(
                 address=self.get_argument('address', default=None),
                 postal_code=self.get_argument('postal_code', default=None),

@@ -64,12 +64,12 @@
 
   <div class="form-group has-feedback">
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-3">
 	<label class="control-label" for="gender">Gender</label>
 	<select class="form-control" size="3" name="gender" id="gender">
-	  <option value="male">Male</option>
-	  <option value="female">Female</option>
-	  <option value="other">Other</option>
+	  <option>male</option>
+	  <option>female</option>
+	  <option>other</option>
 	</select>
 	<span style="color:red; margin-right: 2em;"
 	      class="glyphicon glyphicon-star form-control-feedback"
@@ -133,6 +133,17 @@
     <span class="help-block">
       University department, company section, group, or similar.
     </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="pi">Principal Investigator</label>
+	<div  class="form-control">
+	  <input type="checkbox" name="pi" id="pi" value="true"> Yes
+	</div>
+      </div>
+    </div>
   </div>
 
   <div class="panel panel-default">

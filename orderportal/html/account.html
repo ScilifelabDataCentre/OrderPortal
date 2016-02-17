@@ -122,13 +122,16 @@
 {% block main_content %}
 <table class="table-condensed table-fields">
   <tr>
-    <th>Orders</th>
-    <td>
-      <a class="badge"
-	 href="{{ reverse_url('account_orders', account['email']) }}">
-	{{ account['order_count'] }}
-      </a>
-    </td>
+    <th>First name</th>
+    <td>{{ account['first_name'] or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Last name</th>
+    <td>{{ account['last_name'] or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Gender</th>
+    <td>{{ account.get('gender') or '-' }}</td>
   </tr>
   <tr>
     <th>Role</th>
@@ -222,16 +225,13 @@
     </td>
   </tr>
   <tr>
-    <th>First name</th>
-    <td>{{ account['first_name'] or '-' }}</td>
-  </tr>
-  <tr>
-    <th>Last name</th>
-    <td>{{ account['last_name'] or '-' }}</td>
-  </tr>
-  <tr>
-    <th>Gender</th>
-    <td>{{ account.get('gender') or '-' }}</td>
+    <th>Orders</th>
+    <td>
+      <a class="badge"
+	 href="{{ reverse_url('account_orders', account['email']) }}">
+	{{ account['order_count'] }}
+      </a>
+    </td>
   </tr>
   <tr>
     <th>University</th>
@@ -240,6 +240,10 @@
   <tr>
     <th>Department</th>
     <td>{{ account['department'] or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Principal Investigator</th>
+    <td>{{ account.get('pi') and 'Yes' or 'No' }}</td>
   </tr>
   <tr>
     <th>Postal address</th>
