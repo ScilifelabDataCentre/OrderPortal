@@ -2,68 +2,55 @@
 
 {% extends "home.html" %}
 
-{% block content-header %}
-{% end %} {# block content-header #}
-
-{% block content-left %}
-<div class="col-md-5">
-  <div class="panel panel-danger">
-    <div class="panel-heading">
-      <span class="glyphicon glyphicon-user"></span>
-      Pending accounts
-    </div>
-
-    <div class="panel-body">
-      <table class="table table-condensed">
-	<tr>
-	  <th>Account</th>
-	  <th>Role</th>
-	  <th>Created</th>
-	</tr>
-	{% if pending %}
-	{% for account in pending %}
-	<tr>
-	  <td>
-	    <a href="{{ reverse_url('account', account['email']) }}">
-	      {{ account['email'] }}
-	    </a>
-	  </td>
-	  <td>{% module Icon(account['role'], label=True) %}</td>
-	  <td class="localtime">{{ account['created'] }}</td>
-	</tr>
-	{% end %}
-	{% else %}
-	<tr>
-	  <td colspan="4"><i>Currently none.</i></td>
-	</tr>
-	{% end %}
-      </table>
-    </div>
+{% block body_header_right %}
+<div class="panel panel-danger">
+  <div class="panel-heading">
+    <span class="glyphicon glyphicon-user"></span>
+    Pending accounts
   </div>
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      Recently submitted orders
-      <a href="{{ reverse_url('orders') }}"
-	 class="btn btn-primary btn-xs pull-right">
-	{% module Icon('order') %}
-	All orders
-      </a>
-    </div>
-    <div class="panel-body">
-      <table class="table-condensed">
-	{% for order in orders %}
-	<tr>
-	  <th>
-	    <a href="{{ reverse_url('order', order['_id']) }}">{{ order['title'] }}</a>
-	  </th>
-	  <td>{% module Icon(order['status'], label=True) %}</td>
-	  <td class="localtime">{{ order['modified'] }}</td>
-	</tr>
-	{% end %}
-      </table>
-    </div>
+  <div class="panel-body">
+    {% if pending %}
+    <table class="table table-condensed">
+      <tr>
+	<th>Account</th>
+	<th>Role</th>
+	<th>Created</th>
+      </tr>
+      {% for account in pending %}
+      <tr>
+	<td>
+	  <a href="{{ reverse_url('account', account['email']) }}">
+	    {{ account['email'] }}
+	  </a>
+	</td>
+	<td>{% module Icon(account['role'], label=True) %}</td>
+	<td class="localtime">{{ account['created'] }}</td>
+      </tr>
+      {% end %}
+    </table>
+    {% else %}
+    <i>Currently none.</i>
+    {% end %}
   </div>
-
 </div>
-{% end %} {# block content-left #}
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    Recently submitted orders
+  </div>
+  <div class="panel-body">
+    <table class="table-condensed">
+      {% for order in orders %}
+      <tr>
+	<th>
+	  <a href="{{ reverse_url('order', order['_id']) }}">{{ order['title'] }}</a>
+	</th>
+	<td>{% module Icon(order['status'], label=True) %}</td>
+	<td class="localtime">{{ order['modified'] }}</td>
+      </tr>
+      {% end %}
+    </table>
+  </div>
+</div>
+{% end %} {# block body_header_right #}

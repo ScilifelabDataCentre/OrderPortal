@@ -12,7 +12,7 @@
     <link rel="shortcut icon" type="image/png" href="{{ url }}">
     <link rel="stylesheet" type="text/css"
 	  href="{{ static_url('Bootstrap-3.3.5/css/bootstrap.min.css') }}">
-    {% block header-css %}
+    {% block header_css %}
     {% end %}
     <link rel="stylesheet" href="{{ static_url('mods.css') }}">
   </head>
@@ -204,22 +204,29 @@
       </div>
     </nav>
 
-    <div class="container-fluid">
+    <div class="container">
 
+      <div class="row">
+	<div class="col-md-12">
+	  &nbsp;
+	</div>
+      </div>
+
+      {% block body_header %}
       <div class="row">
 	<div class="col-md-11 col-md-offset-1">
 	  <h1>{% block body_title %}OrderPortal{% end %}</h1>
 	</div>
       </div>
+      {% end %} {# block body_header #}
 
       {% block error %}
       {% try %}
       {% if error %}
       <div class="row">
-	<div class="col-md-10 col-md-offset-1 lead alert alert-danger">
+	<div class="col-md-12 lead alert alert-danger">
 	  <strong>Error:</strong> {{ error }}
 	</div>
-	<div class="col-md-1"></div>
       </div>
       {% end %} {# if error #}
       {% except NameError %}
@@ -230,11 +237,10 @@
       {% try %}
       {% if message %}
       <div class="row">
-	<div class="col-md-10 col-md-offset-1 alert alert-warning">
+	<div class="col-md-12 alert alert-warning">
 	  {# Allow links in message #}
 	  <strong>Message:</strong> {% raw message %}
 	</div>
-	<div class="col-md-1"></div>
       </div>
       {% end %} {# if message #}
       {% except NameError %}

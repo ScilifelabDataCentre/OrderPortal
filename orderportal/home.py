@@ -22,7 +22,9 @@ class Home(RequestHandler):
     "Home page; dashboard. Contents according to role of logged-in account."
 
     def get(self):
-        kwargs = dict(news_items=self.get_news(),
+        kwargs = dict(forms=[r.doc for r in
+                             self.db.view('form/enabled', include_docs=True)],
+                      news_items=self.get_news(),
                       events=self.get_events())
         if self.current_user and self.get_invitations(self.current_user['email']):
             url = self.reverse_url('account', self.current_user['email'])
@@ -75,7 +77,6 @@ See your <a href="{0}">account</a>.""".format(url)
 
     def home_user(self, **kwargs):
         "Home page for a current user having role 'user'."
-        forms = [r.doc for r in self.db.view('form/enabled', include_docs=True)]
         view = self.db.view('order/owner',
                             reduce=False,
                             include_docs=True,
@@ -86,7 +87,6 @@ See your <a href="{0}">account</a>.""".format(url)
                             limit=constants.MAX_ACCOUNT_RECENT_ORDERS)
         orders = [r.doc for r in view]
         self.render('home_user.html',
-                    forms=forms,
                     orders=orders,
                     **kwargs)
 

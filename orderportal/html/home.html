@@ -4,42 +4,57 @@
 
 {% block head_title %}{{ settings['SITE_NAME'] }}{% end %}
 
-{% block body_title %}
+{% block body_header %}
+
 {% try %}
   {% set url = reverse_url('site', settings['SITE_HOME_ICON']) %}
 {% except KeyError %}
   {% set url = static_url('orderportal_144.png') %}
 {% end %}
 <div class="row">
+
   <div class="col-md-4">
     <img class="img-responsive"
 	 src="{{ url }}"
 	 title="{{ settings['SITE_NAME'] }}"
 	 alt="{{ settings['SITE_NAME'] }}">
-  </div>
-  <div class="col-md-8" style="margin-top: 1em; margin-bottom:0.5em">
-    {{ settings['SITE_NAME'] }}
-  </div>
-</div>
-{% end %}
-
-{% block content %}
-
-{% block content-header %}
-{% if not current_user %}
-<div class="row">
-  <div class="well well-sm col-md-10 col-md-offset-1">
+    <h2>{{ settings['SITE_NAME'] }}</h2>
     {% module Text('header') %}
   </div>
-</div>
-{% end %} {# if not current_user #}
-{% end %} {# block content-header #}
 
-<div class="row">
+  <div class="col-md-4">
+    {% if global_modes['allow_order_creation'] %}
+    <div class="panel-group">
+      {% for form in forms %}
+      <div class="panel panel-primary">
+	<div class="panel-heading">{{ form['title'] }}</div>
+	<div class="panel-body">
+	  {% if current_user %}
+	  <form action="{{ reverse_url('order_create') }}"
+		role="form"
+		method="GET">
+	    <input type="hidden" name="form" value="{{ form['_id'] }}">
+	    <button type="submit" class="btn btn-primary btn-sm pull-right">
+	      <span class="glyphicon glyphicon-plus"></span>
+	      Create order
+	    </button>
+	  </form>
+	  {% end %} {# if current_user  #}
+	  {% module Markdown(form.get('description')) %}
+	</div>
+      </div>
+      {% end %} {# for form in forms #}
+    </div>
+    {% else %}
+    <div class="well text-danger">
+      Order creation is currently disabled. Try again later.
+    </div>
+    {% end %} {# if global_modes['allow_order_creation'] #}
+  </div>
 
-  {% block content-left %}
-  <div class="col-md-5">
-    <div class="panel panel-primary">
+  <div class="col-md-4">
+    {% block body_header_right %}
+    <div class="panel panel-default">
       <div class="panel-heading">
         <span class="glyphicon glyphicon-user"></span>
 	Login
@@ -63,7 +78,7 @@
 	    <input type="password" class="form-control" name="password">
 	  </div>
 	  <div class="form-group"> 
-	    <button type="submit" class="btn btn-primary">
+	    <button type="submit" class="btn btn-default">
 	      <span class="glyphicon glyphicon-log-in"></span>
 	      Login
 	    </button>
@@ -101,14 +116,18 @@
 	  </a>
 	</div>
       </div>
-    </div>
-
+    {% end %} {# block body_header_right #}
   </div>
-  {% end %} {# block content-left #}
 
-  {% block content-right %}
-  <div class="col-md-7">
+</div>
 
+{% end %} {# block body_header #}
+
+{% block content %}
+
+<div class="row">
+
+  <div class="col-md-6">
     <div class="panel panel-info">
       <div class="panel-heading">
 	<span class="glyphicon glyphicon-info-sign"></span>
@@ -160,7 +179,9 @@
 	{% end %}
       </div>
     </div>
+  </div>
 
+  <div class="col-md-6">
     <div class="panel panel-success">
       <div class="panel-heading">
 	<span class="glyphicon glyphicon-calendar"></span>
@@ -216,7 +237,6 @@
       </div>
     </div>
   </div>
-  {% end %} {# block content-right #}
 
 </div>
 
@@ -379,7 +399,7 @@
 
   </div>
 </div>
-{% end %}{# for pos, event in enum(events) #}
+{% end %} {# for pos, event in enum(events) #}
 
 {# Modal for creating a news item. #}
 <div id="news_create" class="modal fade" role="dialog">
@@ -516,7 +536,7 @@
 
   </div>
 </div>
-{% end %}{# if is_admin #}
+{% end %} {# if is_admin #}
 
 {% block content-footer %}
 <div class="row">
@@ -531,10 +551,7 @@
 <div class="row">
   <div class="col-md-12">
     <div class="well well-sm">
-      This is an
-      <a href="https://github.com/pekrau/OrderPortal">OrderPortal</a>
-      system site containing the software and
-      <a href="https://github.com/pekrau/OrderPortal/wiki">documentation</a>.
+      This site runs the OrderPortal system, which is Open Source.
       Technical information and links can be found
       <a href="{{ reverse_url('techinfo') }}">here</a>.
     </div>
@@ -544,7 +561,7 @@
 
 {% end %} {# block content #}
 
-{% block header-css %}
+{% block header_css %}
 <link rel="stylesheet" href="{{ static_url('jquery-ui-themes-1.11.4/themes/smoothness/jquery-ui.min.css') }}">
 {% end %}
 

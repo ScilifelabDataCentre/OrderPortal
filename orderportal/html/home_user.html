@@ -2,61 +2,23 @@
 
 {% extends "home.html" %}
 
-{% block content-left %}
-<div class="col-md-5">
-  
-  {% if global_modes['allow_order_creation'] %}
-  <div class="panel-group">
-    {% for form in forms %}
-    <div class="panel panel-primary">
-      <div class="panel-heading">
-	{{ form['title'] }}
-      </div>
-      <div class="panel-body">
-	<form action="{{ reverse_url('order_create') }}"
-	      role="form"
-	      method="GET">
-	  <input type="hidden" name="form" value="{{ form['_id'] }}">
-	  <button type="submit" class="btn btn-primary btn-sm pull-right">
-	    <span class="glyphicon glyphicon-plus"></span>
-	    Create order
-	  </button>
-	</form>
-	{% module Markdown(form.get('description')) %}
-      </div>
-    </div>
-    {% end %}
+{% block body_header_right %}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    My recently modified orders
   </div>
-  {% else %}
-  <div class="well text-danger">
-    Order creation is currently disabled.
-    Try again later.
+  <div class="panel-body">
+    <table class="table-condensed">
+      {% for order in orders %}
+      <tr>
+	<th>
+	  <a href="{{ reverse_url('order', order['_id']) }}">{{ order['title'] }}</a>
+	</th>
+	<td>{% module Icon(order['status'], label=True) %}</td>
+	<td class="localtime">{{ order['modified'] }}</td>
+      </tr>
+      {% end %}
+    </table>
   </div>
-  {% end %} {# if global_modes['allow_order_creation'] #}
-
-  <div class="panel panel-warning">
-    <div class="panel-heading">
-      My recently modified orders
-    </div>
-    <div class="panel-body">
-      <a href="{{ reverse_url('account_orders', current_user['email']) }}"
-	 class="btn btn-warning btn-sm pull-right">
-	{% module Icon('order') %}
-	All my orders
-      </a>
-      <table class="table-condensed">
-	{% for order in orders %}
-	<tr>
-	  <th>
-	    <a href="{{ reverse_url('order', order['_id']) }}">{{ order['title'] }}</a>
-	  </th>
-	  <td>{% module Icon(order['status'], label=True) %}</td>
-	  <td class="localtime">{{ order['modified'] }}</td>
-	</tr>
-	{% end %}
-      </table>
-    </div>
-  </div>
-
 </div>
-{% end %} {# block content-left #}
+{% end %} {# block body_header_right #}
