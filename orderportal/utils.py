@@ -115,23 +115,31 @@ def load_settings(filepath=None, verbose=False):
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short")
     # Read universities lookup
-    try:
+    if settings['UNIVERSITIES_FILEPATH']:
         filepath = expand_filepath(settings['UNIVERSITIES_FILEPATH'])
         unis = yaml.safe_load(open(filepath))
-    except (IOError, KeyError):
+    else:
         unis = dict()
     unis = unis.items()
     unis.sort(lambda i,j: cmp((i[1].get('rank'), i[0]),
                               (j[1].get('rank'), j[0])))
     settings['UNIVERSITIES'] = collections.OrderedDict(unis)
     # Read country codes
-    try:
+    if settings['COUNTRY_CODES_FILEPATH']:
         filepath = expand_filepath(settings['COUNTRY_CODES_FILEPATH'])
         countries = yaml.safe_load(open(filepath))
-    except (IOError, KeyError), msg:
+    else:
         countries = []
     settings['countries_lookup'] = dict([(c['code'], c['name']) for c in countries])
     settings['countries'] = countries
+    # Read subject terms
+    if settings['SUBJECT_TERMS_FILEPATH']:
+        filepath = expand_filepath(settings['SUBJECT_TERMS_FILEPATH'])
+        settings['subjects'] = yaml.safe_load(open(filepath))
+    else:
+        settings['subjects'] = []
+    settings['subjects_lookup'] = dict([(s['code'], s['term'])
+                                        for s in settings['subjects']])
     # Settings computable from others
     settings['DB_SERVER_VERSION'] = couchdb.Server(settings['DB_SERVER']).version()
     if 'PORT' not in settings:

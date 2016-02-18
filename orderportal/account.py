@@ -188,14 +188,20 @@ class AccountsCsv(_AccountsFilter):
         writer = csv.writer(csvfile)
         writer.writerow(('Email', 'Last name', 'First name', 'Gender', 'Role',
                          'Status', 'Order count', 'University', 'Department',
-                         'PI', 'Address', 'Postal code', 'City', 'Country',
-                         'Invoice code', 'Invoice address',
+                         'PI', 'Subject', 'Address', 'Postal code', 'City',
+                         'Country', 'Invoice code', 'Invoice address',
                          'Invoice postal code', 'Invoice city',
                          'Invoice country', 'Phone', 'Other data',
                          'Latest login', 'Modified', 'Created'))
         for account in accounts:
             address = account.get('address') or dict()
             iaddress = account.get('invoice_address') or dict()
+            try:
+                subject = "{0}: {1}".format(
+                    account.get('subject'),
+                    settings['subjects_lookup'][account.get('subject')])
+            except KeyError:
+                subject = ''
             writer.writerow((utils.to_utf8(account['email']),
                              utils.to_utf8(account.get('last_name') or ''),
                              utils.to_utf8(account.get('first_name') or ''),
@@ -206,6 +212,7 @@ class AccountsCsv(_AccountsFilter):
                              utils.to_utf8(account.get('university') or ''),
                              utils.to_utf8(account.get('department') or ''),
                              account.get('pi') and 'yes' or 'no',
+                             subject,
                              utils.to_utf8(address.get('address') or ''),
                              utils.to_utf8(address.get('postal_code') or ''),
                              utils.to_utf8(address.get('city') or ''),
@@ -521,6 +528,10 @@ class AccountEdit(AccountMixin, RequestHandler):
             saver['university'] = university or None
             saver['department'] = self.get_argument('department', default=None)
             saver['pi'] = utils.to_bool(self.get_argument('pi', default=False))
+            try:
+                saver['subject'] = int(self.get_argument('subject'))
+            except (tornado.web.MissingArgumentError, ValueError, TypeError):
+                saver['subject'] = None
             saver['address'] = dict(
                 address=self.get_argument('address', default=None),
                 postal_code=self.get_argument('postal_code', default=None),
@@ -680,6 +691,10 @@ class Register(RequestHandler):
                 raise tornado.web.HTTPError(400, reason=reason)
             saver['department'] = self.get_argument('department', default=None)
             saver['pi'] = utils.to_bool(self.get_argument('pi', default=False))
+            try:
+                saver['subject'] = int(self.get_argument('subject'))
+            except (tornado.web.MissingArgumentError, ValueError, TypeError):
+                saver['subject'] = None
             saver['address'] = dict(
                 address=self.get_argument('address', default=None),
                 postal_code=self.get_argument('postal_code', default=None),

@@ -245,6 +245,12 @@
     <th>Principal Investigator</th>
     <td>{{ account.get('pi') and 'Yes' or 'No' }}</td>
   </tr>
+  {% if settings['subjects_lookup'] %}
+  <tr>
+    <th>Subject</th>
+    <td>{{ settings['subjects_lookup'].get(account.get('subject')) or '-' }}</td>
+  </tr>
+  {% end %}
   <tr>
     <th>Postal address</th>
     <td>
