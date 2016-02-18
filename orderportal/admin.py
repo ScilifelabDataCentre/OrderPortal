@@ -94,12 +94,3 @@ class GlobalModes(RequestHandler):
                 self.global_modes['_id'] = 'global_modes'
             self.db.save(self.global_modes)
         self.see_other('global_modes')
-
-
-class AdminTutorial(RequestHandler):
-    "Page displaying a basic tutorial for administrators."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        self.render('admin_tutorial.html')

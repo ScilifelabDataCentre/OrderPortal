@@ -12,6 +12,11 @@
       href="{{ static_url('DataTables-1.10.10/css/dataTables.bootstrap.min.css') }}">
 {% end %}
 
+{% block container %}
+<div class="container-fluid">
+{% end %}
+
+
 {% block content %}
 <form action="{{ reverse_url('orders', **params) }}"
       id="refresh"

@@ -125,7 +125,6 @@ def get_handlers():
         url(r'/admin/global_modes', GlobalModes, name='global_modes'),
         url(r'/admin/statuses', Statuses, name='statuses'),
         url(r'/admin/config', Config, name='config'),
-        url(r'/admin/tutorial', AdminTutorial, name='admin_tutorial'),
         ])
     return urls
 
