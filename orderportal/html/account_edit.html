@@ -205,14 +205,13 @@ Edit
       <div class="form-group">
 	<div class="row">
 	  <div class="col-md-8">
-	    <label class="control-label" for="postal_code">Postal code</label>
-	    <input type="text" class="form-control"
-		   id="postal_code" name="postal_code"
-		   value="{{ account['address'].get('postal_code') or '' }}">
+	    <label class="control-label" for="zip">Zip code</label>
+	    <input type="text" class="form-control" id="zip" name="zip"
+		   value="{{ account['address'].get('zip') or '' }}">
 	  </div>
 	</div>
 	<span class="help-block">
-	  Postal code, zip code.
+	  Postal number code.
 	</span>
       </div>
       <div class="form-group">
@@ -252,7 +251,7 @@ Edit
 	    <label class="control-label" for="invoice_code">Invoice code</label>
 	    <input type="text" class="form-control"
 		   id="invoice_code" name="invoice_code"
-		   value="{{ account['invoice_address'].get('invoice_code') or '' }}">
+		   value="{{ account['invoice_address'].get('code') or '' }}">
 	  </div>
 	</div>
 	<span class="help-block">
@@ -275,14 +274,14 @@ Edit
       <div class="form-group">
 	<div class="row">
 	  <div class="col-md-8">
-	    <label class="control-label" for="invoice_postal_code">Postal code</label>
+	    <label class="control-label" for="invoice_zip">Zip code</label>
 	    <input type="text" class="form-control"
-		   id="invoice_postal_code" name="invoice_postal_code"
-		   value="{{ account['invoice_address'].get('postal_code') or '' }}">
+		   id="invoice_zip" name="invoice_zip"
+		   value="{{ account['invoice_address'].get('zip') or '' }}">
 	  </div>
 	</div>
 	<span class="help-block">
-	  Postal code, zip code.
+	  Postal number code.
 	</span>
       </div>
       <div class="form-group">

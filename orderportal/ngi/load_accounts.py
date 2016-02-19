@@ -81,16 +81,16 @@ def load_accounts(db, filepath='users.json', verbose=False):
             address += '\n' + premise
         elif premise:
             address = premise
-        postal_code = account['field_user_address'].get('postal_code')
+        zip = account['field_user_address'].get('postal_code')
         city = account['field_user_address'].get('locality')
         country = account['field_user_address'].get('country') or 'SE'
         doc['address'] = dict(address=address,
-                              postal_code=postal_code,
+                              zip=zip,
                               city=city,
                               country=country)
-        doc['invoice_address'] = dict(invoice_code=None,
+        doc['invoice_address'] = dict(code=None,
                                       address=address,
-                                      postal_code=postal_code,
+                                      zip=zip,
                                       city=city,
                                       country=country)
         university = account['field_user_address'].get('organisation_name')
