@@ -276,12 +276,16 @@
     </td>
   </tr>
   <tr>
+    <th>Invoice reference</th>
+    <td>{{ account.get('invoice_ref') or '-'  }}</td>
+  </tr>
+  <tr>
     <th>Invoice address</th>
     <td>
       {% set address = account.get('invoice_address') or dict() %}
       <table class="table table-condensed table-noborder">
 	<tr>
-	  <th>Invoice code</th>
+	  <th>Invoice reference</th>
 	  <td>{{ address.get('code') or '-' }}</td>
 	</tr>
 	<tr>

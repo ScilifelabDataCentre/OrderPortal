@@ -189,7 +189,7 @@ class AccountsCsv(_AccountsFilter):
         writer.writerow(('Email', 'Last name', 'First name', 'Gender', 'Role',
                          'Status', 'Order count', 'University', 'Department',
                          'PI', 'Subject', 'Address', 'Zip', 'City', 'Country',
-                         'Invoice code', 'Invoice address', 'Invoice zip',
+                         'Invoice ref', 'Invoice address', 'Invoice zip',
                          'Invoice city', 'Invoice country', 'Phone',
                          'Other data', 'Latest login', 'Modified', 'Created'))
         for account in accounts:
@@ -216,7 +216,7 @@ class AccountsCsv(_AccountsFilter):
                              utils.to_utf8(address.get('zip') or ''),
                              utils.to_utf8(address.get('city') or ''),
                              utils.to_utf8(address.get('country') or ''),
-                             utils.to_utf8(iaddress.get('code') or ''),
+                             utils.to_utf8(account.get('invoice_ref') or ''),
                              utils.to_utf8(iaddress.get('address') or ''),
                              utils.to_utf8(iaddress.get('zip') or ''),
                              utils.to_utf8(iaddress.get('city') or ''),
@@ -537,11 +537,11 @@ class AccountEdit(AccountMixin, RequestHandler):
                 city=self.get_argument('city', default=None),
                 country=self.get_argument('country', default=None))
             saver['invoice_address'] = dict(
-                code=self.get_argument('invoice_code', default=None),
                 address=self.get_argument('invoice_address', default=None),
                 zip=self.get_argument('invoice_zip', default=None),
                 city=self.get_argument('invoice_city', default=None),
                 country=self.get_argument('invoice_country', default=None))
+            saver['invoice_ref'] = self.get_argument('invoice_ref',default=None)
             saver['phone'] = self.get_argument('phone', default=None)
             saver['other_data'] = self.get_argument('other_data', default=None)
             saver['update_info'] = False
@@ -700,11 +700,11 @@ class Register(RequestHandler):
                 city=self.get_argument('city', default=None),
                 country=self.get_argument('country', default=None))
             saver['invoice_address'] = dict(
-                code=self.get_argument('invoice_code', default=None),
                 address=self.get_argument('invoice_address', default=None),
                 zip=self.get_argument('invoice_zip', default=None),
                 city=self.get_argument('invoice_city', default=None),
                 country=self.get_argument('invoice_country', default=None))
+            saver['invoice_ref'] = self.get_argument('invoice_ref',default=None)
             if not saver['invoice_address'].get('address'):
                 try:
                     saver['invoice_address'] = \

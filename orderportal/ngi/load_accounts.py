@@ -88,11 +88,11 @@ def load_accounts(db, filepath='users.json', verbose=False):
                               zip=zip,
                               city=city,
                               country=country)
-        doc['invoice_address'] = dict(code=None,
-                                      address=address,
+        doc['invoice_address'] = dict(address=address,
                                       zip=zip,
                                       city=city,
                                       country=country)
+        doc['invoice_ref'] = None
         university = account['field_user_address'].get('organisation_name')
         university = ' '.join(university.replace(',', ' ').strip().split())
         uni = utils.to_ascii(university)

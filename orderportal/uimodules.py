@@ -69,7 +69,7 @@ class Address(tornado.web.UIModule):
 
     def render(self, address):
         result = []
-        for key in ['invoice_code', 'address', 'postal_code', 'city', 'country']:
+        for key in ['address', 'postal_code', 'city', 'country']:
             value = address.get(key)
             if value:
                 result.append(value)

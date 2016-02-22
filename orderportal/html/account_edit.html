@@ -199,7 +199,7 @@ Edit
 	  </div>
 	</div>
 	<span class="help-block">
-	  Institution, street, number or post box.
+	  Institution, building, street, number, post box, etc.
 	</span>
       </div>
       <div class="form-group">
@@ -211,7 +211,7 @@ Edit
 	  </div>
 	</div>
 	<span class="help-block">
-	  Postal number code.
+	  Postal code.
 	</span>
       </div>
       <div class="form-group">
@@ -240,24 +240,26 @@ Edit
     </div>
   </div>
 
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="invoice_ref">Invoice reference</label>
+	<input type="text" class="form-control"
+	       name="invoice_ref" id="invoice_ref"
+	       value="{{ account.get('invoice_ref') or '' }}">
+      </div>
+    </div>
+    <span class="help-block">
+      Invoice reference code that may be required on your invoices for
+      your accounting.
+    </span>
+  </div>
+
   <div class="panel panel-default">
     <div class="panel-heading">
       Invoice address.
     </div>
     <div class="panel-body">
-      <div class="form-group">
-	<div class="row">
-	  <div class="col-md-8">
-	    <label class="control-label" for="invoice_code">Invoice code</label>
-	    <input type="text" class="form-control"
-		   id="invoice_code" name="invoice_code"
-		   value="{{ account['invoice_address'].get('code') or '' }}">
-	  </div>
-	</div>
-	<span class="help-block">
-	  Any required information or label that must appear on your invoices.
-	</span>
-      </div>
       <div class="form-group">
 	<div class="row">
 	  <div class="col-md-8">
@@ -268,7 +270,7 @@ Edit
 	  </div>
 	</div>
 	<span class="help-block">
-	  Institution, street, number or post box.
+	  Institution, building, street, number, post box, etc.
 	</span>
       </div>
       <div class="form-group">
@@ -281,7 +283,7 @@ Edit
 	  </div>
 	</div>
 	<span class="help-block">
-	  Postal number code.
+	  Postal code.
 	</span>
       </div>
       <div class="form-group">
