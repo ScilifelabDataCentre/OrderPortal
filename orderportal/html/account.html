@@ -130,10 +130,6 @@
     <td>{{ account['last_name'] or '-' }}</td>
   </tr>
   <tr>
-    <th>Gender</th>
-    <td>{{ (account.get('gender') or '-').capitalize() }}</td>
-  </tr>
-  <tr>
     <th>Role</th>
     <td>{% module Icon(account['role'], label=True) %}</td>
   </tr>
@@ -245,10 +241,26 @@
     <th>Principal Investigator</th>
     <td>{{ account.get('pi') and 'Yes' or 'No' }}</td>
   </tr>
+  <tr>
+    <th>Gender</th>
+    <td>
+      {% try %}
+      {{ account['gender'].capitalize() }}
+      {% except KeyError %}
+      <span class="error">?</span>
+      {% end %}
+    </td>
+  </tr>
   {% if settings['subjects_lookup'] %}
   <tr>
     <th>Subject</th>
-    <td>{{ settings['subjects_lookup'].get(account.get('subject')) or '-' }}</td>
+    <td>
+      {% try %}
+      {{ settings['subjects_lookup'].get(account['subject']) or '-' }}
+      {% except KeyError %}
+      <span class="error">?</span>
+      {% end %}
+    </td>
   </tr>
   {% end %}
   <tr>

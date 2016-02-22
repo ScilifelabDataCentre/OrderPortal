@@ -43,26 +43,6 @@ Edit
     </div>
   </div>
 
-  <div class="form-group has-feedback">
-    <div class="row">
-      <div class="col-md-3">
-	<label class="control-label" for="gender">Gender</label>
-	<select class="form-control" size="3" name="gender" id="gender">
-	  {% set gender = account.get('gender') %}
-	  <option {{ gender == 'male' and 'selected' or '' }}>Male</option>
-	  <option {{ gender == 'female' and 'selected' or '' }}>Female</option>
-	  <option {{ gender == 'other' and 'selected' or '' }}>Other</option>
-	</select>
-	<span style="color:red; margin-right: 2em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
-      </div>
-    </div>
-    <span class="help-block">
-      We are required by Vetenskapsrådet (VR) to collect this information.
-    </span>
-  </div>
-
   {% if is_admin %}
   <div class="form-group">
     <div class="row">
@@ -161,26 +141,52 @@ Edit
     </div>
   </div>
 
-  {% if settings['subjects'] %}
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-6">
-	<label class="control-label" for="subject">Subject</label>
-	<select class="form-control" name="subject" id="subject">
-	  {% for subject in settings['subjects'] %}
-	  <option value="{{ subject['code'] }}"
-		  {{ subject['code'] == account.get('subject') and 'selected' or '' }}>
-	    {{ '- ' * subject['level'] + subject['term'] }}
-	  </option>
-	  {% end %}
-	</select>
-      </div>
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      Information required by our funders for reporting purposes.
     </div>
-    <span class="help-block">
-      Select the subject term that best characterizes your field.
-    </span>
+    <div class="panel-body">
+
+      <div class="form-group has-feedback">
+	<div class="row">
+	  <div class="col-md-3">
+	    <label class="control-label" for="gender">Gender</label>
+	    <select class="form-control" size="3" name="gender" id="gender">
+	      {% set gender = account.get('gender') %}
+	      <option {{ gender == 'male' and 'selected' or '' }}>Male</option>
+	      <option {{ gender == 'female' and 'selected' or '' }}>Female</option>
+	      <option {{ gender == 'other' and 'selected' or '' }}>Other</option>
+	    </select>
+	    <span style="color:red; margin-right: 2em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true"></span>
+	  </div>
+	</div>
+      </div>
+
+      {% if settings['subjects'] %}
+      <div class="form-group">
+	<div class="row">
+	  <div class="col-md-6">
+	    <label class="control-label" for="subject">Subject</label>
+	    <select class="form-control" name="subject" id="subject">
+	      {% for subject in settings['subjects'] %}
+	      <option value="{{ subject['code'] }}"
+		      {{ subject['code'] == account.get('subject') and 'selected' or '' }}>
+		{{ '- ' * subject['level'] + subject['term'] }}
+	      </option>
+	      {% end %}
+	    </select>
+	  </div>
+	</div>
+	<span class="help-block">
+	  Select the subject term that best characterizes your field.
+	</span>
+      </div>
+      {% end %}
+
+    </div>
   </div>
-  {% end %}
 
   <div class="panel panel-default">
     <div class="panel-heading">

@@ -1,5 +1,9 @@
 /* OrderPortal minor modifications to the standard bootstrap CSS. */
 
+.error {color: red;
+        font-weight: bold;
+       }
+
 /* The icon image padding must be adjusted for the navbar */
 .navbar-brand {padding: 9px; }
 

@@ -163,8 +163,8 @@ class ApiV1Accounts(_AccountsFilter):
                 dict(email=account['email'],
                      href=self.reverse_url('account', account['email']),
                      name=utils.to_utf8(name),
-                     gender=account.get('gender'),
                      pi=bool(account.get('pi')),
+                     gender=account.get('gender'),
                      order_count=account['order_count'],
                      orders_href=
                          self.reverse_url('account_orders', account['email']),
@@ -186,15 +186,16 @@ class AccountsCsv(_AccountsFilter):
         accounts = self.get_accounts()
         csvfile = StringIO()
         writer = csv.writer(csvfile)
-        writer.writerow(('Email', 'Last name', 'First name', 'Gender', 'Role',
-                         'Status', 'Order count', 'University', 'Department',
-                         'PI', 'Subject', 'Address', 'Zip', 'City', 'Country',
-                         'Invoice ref', 'Invoice address', 'Invoice zip',
-                         'Invoice city', 'Invoice country', 'Phone',
-                         'Other data', 'Latest login', 'Modified', 'Created'))
+        writer.writerow(('Email', 'Last name', 'First name', 'Role', 'Status',
+                         'Order count', 'University', 'Department', 'PI',
+                         'Gender', 'Subject', 'Address', 'Zip', 'City',
+                         'Country', 'Invoice ref', 'Invoice address',
+                         'Invoice zip', 'Invoice city', 'Invoice country',
+                         'Phone', 'Other data', 'Latest login',
+                         'Modified', 'Created'))
         for account in accounts:
-            address = account.get('address') or dict()
-            iaddress = account.get('invoice_address') or dict()
+            addr = account.get('address') or dict()
+            iaddr = account.get('invoice_address') or dict()
             try:
                 subject = "{0}: {1}".format(
                     account.get('subject'),
@@ -204,23 +205,23 @@ class AccountsCsv(_AccountsFilter):
             writer.writerow((utils.to_utf8(account['email']),
                              utils.to_utf8(account.get('last_name') or ''),
                              utils.to_utf8(account.get('first_name') or ''),
-                             account.get('gender') or '-',
                              account['role'],
                              account['status'],
                              account['order_count'],
                              utils.to_utf8(account.get('university') or ''),
                              utils.to_utf8(account.get('department') or ''),
                              account.get('pi') and 'yes' or 'no',
+                             account.get('gender') or '-',
                              subject,
-                             utils.to_utf8(address.get('address') or ''),
-                             utils.to_utf8(address.get('zip') or ''),
-                             utils.to_utf8(address.get('city') or ''),
-                             utils.to_utf8(address.get('country') or ''),
+                             utils.to_utf8(addr.get('address') or ''),
+                             utils.to_utf8(addr.get('zip') or ''),
+                             utils.to_utf8(addr.get('city') or ''),
+                             utils.to_utf8(addr.get('country') or ''),
                              utils.to_utf8(account.get('invoice_ref') or ''),
-                             utils.to_utf8(iaddress.get('address') or ''),
-                             utils.to_utf8(iaddress.get('zip') or ''),
-                             utils.to_utf8(iaddress.get('city') or ''),
-                             utils.to_utf8(iaddress.get('country') or ''),
+                             utils.to_utf8(iaddr.get('address') or ''),
+                             utils.to_utf8(iaddr.get('zip') or ''),
+                             utils.to_utf8(iaddr.get('city') or ''),
+                             utils.to_utf8(iaddr.get('country') or ''),
                              utils.to_utf8(account.get('phone') or ''),
                              utils.to_utf8(account.get('other_data') or ''),
                              utils.to_utf8(account.get('login') or ''),
@@ -517,16 +518,16 @@ class AccountEdit(AccountMixin, RequestHandler):
                 saver['role'] = role
             saver['first_name'] = self.get_argument('first_name')
             saver['last_name'] = self.get_argument('last_name')
-            try:
-                saver['gender'] = self.get_argument('gender').lower()
-            except tornado.web.MissingArgumentError:
-                saver['gender'] = None
             university = self.get_argument('university_other', default=None)
             if not university or 'unknown' in university:
                 university = self.get_argument('university', default=None)
             saver['university'] = university or None
             saver['department'] = self.get_argument('department', default=None)
             saver['pi'] = utils.to_bool(self.get_argument('pi', default=False))
+            try:
+                saver['gender'] = self.get_argument('gender').lower()
+            except tornado.web.MissingArgumentError:
+                saver['gender'] = None
             try:
                 saver['subject'] = int(self.get_argument('subject'))
             except (tornado.web.MissingArgumentError, ValueError, TypeError):
@@ -677,10 +678,6 @@ class Register(RequestHandler):
             try:
                 saver['first_name'] = self.get_argument('first_name')
                 saver['last_name'] = self.get_argument('last_name')
-                try:
-                    saver['gender'] = self.get_argument('gender').lower()
-                except tornado.web.MissingArgumentError:
-                    saver['gender'] = None
                 university = self.get_argument('university_other', default=None)
                 if not university:
                     university = self.get_argument('university', default=None)
@@ -690,6 +687,10 @@ class Register(RequestHandler):
                 raise tornado.web.HTTPError(400, reason=reason)
             saver['department'] = self.get_argument('department', default=None)
             saver['pi'] = utils.to_bool(self.get_argument('pi', default=False))
+            try:
+                saver['gender'] = self.get_argument('gender').lower()
+            except tornado.web.MissingArgumentError:
+                saver['gender'] = None
             try:
                 saver['subject'] = int(self.get_argument('subject'))
             except (tornado.web.MissingArgumentError, ValueError, TypeError):
