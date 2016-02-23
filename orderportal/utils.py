@@ -89,9 +89,17 @@ def load_settings(filepath=None, verbose=False):
     except KeyError:
         pass
     logging.basicConfig(**kwargs)
+    # Check settings
+    for key in ['BASE_URL', 'DB_SERVER', 'COOKIE_SECRET', 'DATABASE']:
+        if key not in settings:
+            raise KeyError("no settings['{0}'] item".format(key))
+        if not settings[key]:
+            raise ValueError("settings['{0}'] has invalid value".format(key))
+    if len(settings.get('COOKIE_SECRET', '')) < 10:
+        raise ValueError("settings['COOKIE_SECRET'] not set, or too short")
     # Read order state definitions and transitions
-    settings['ORDER_STATUSES'] = \
-        yaml.safe_load(open(settings['ORDER_STATUSES_FILEPATH']))
+    with open(settings['ORDER_STATUSES_FILEPATH']) as infile:
+        settings['ORDER_STATUSES'] = yaml.safe_load(infile)
     lookup = dict()
     initial = None
     for status in settings['ORDER_STATUSES']:
@@ -104,40 +112,50 @@ def load_settings(filepath=None, verbose=False):
         raise ValueError('no initial order status defined')
     settings['ORDER_STATUS_INITIAL'] = initial
     settings['ORDER_STATUSES_LOOKUP'] = lookup
-    settings['ORDER_TRANSITIONS'] = \
-        yaml.safe_load(open(settings['ORDER_TRANSITIONS_FILEPATH']))
-    # Check settings
-    for key in ['BASE_URL', 'DB_SERVER', 'COOKIE_SECRET', 'DATABASE']:
-        if key not in settings:
-            raise KeyError("no settings['{0}'] item".format(key))
-        if not settings[key]:
-            raise ValueError("settings['{0}'] has invalid value".format(key))
-    if len(settings.get('COOKIE_SECRET', '')) < 10:
-        raise ValueError("settings['COOKIE_SECRET'] not set, or too short")
+    with open(settings['ORDER_TRANSITIONS_FILEPATH']) as infile:
+        settings['ORDER_TRANSITIONS'] = yaml.safe_load(infile)
+    # Read order autopopulate mapping
+    try:
+        filepath = expand_filepath(settings['ORDER_AUTOPOPULATE_FILEPATH'])
+        if not filepath: raise KeyError
+    except KeyError:
+        settings['order_autopopulate'] = dict()
+    else:
+        with open(filepath) as infile:
+            settings['order_autopopulate'] = yaml.safe_load(infile)
     # Read universities lookup
-    if settings['UNIVERSITIES_FILEPATH']:
-        filepath = expand_filepath(settings['UNIVERSITIES_FILEPATH'])
-        unis = yaml.safe_load(open(filepath))
+    try:
+        filepath = settings['UNIVERSITIES_FILEPATH']
+        if not filepath: raise KeyError
+    except KeyError:
+        settings['UNIVERSITIES'] = dict()
     else:
-        unis = dict()
-    unis = unis.items()
-    unis.sort(lambda i,j: cmp((i[1].get('rank'), i[0]),
-                              (j[1].get('rank'), j[0])))
-    settings['UNIVERSITIES'] = collections.OrderedDict(unis)
+        with open(filepath) as infile:
+            unis = yaml.safe_load(infile)
+        unis = unis.items()
+        unis.sort(lambda i,j: cmp((i[1].get('rank'), i[0]),
+                                  (j[1].get('rank'), j[0])))
+        settings['UNIVERSITIES'] = collections.OrderedDict(unis)
     # Read country codes
-    if settings['COUNTRY_CODES_FILEPATH']:
+    try:
         filepath = expand_filepath(settings['COUNTRY_CODES_FILEPATH'])
-        countries = yaml.safe_load(open(filepath))
+        if not filepath: raise KeyError
+    except KeyError:
+        settings['countries'] = []
     else:
-        countries = []
-    settings['countries_lookup'] = dict([(c['code'], c['name']) for c in countries])
-    settings['countries'] = countries
+        with open(filepath) as infile:
+            settings['countries'] = yaml.safe_load(infile)
+        settings['countries_lookup'] = dict([(c['code'], c['name'])
+                                             for c in settings['countries']])
     # Read subject terms
-    if settings['SUBJECT_TERMS_FILEPATH']:
+    try:
         filepath = expand_filepath(settings['SUBJECT_TERMS_FILEPATH'])
-        settings['subjects'] = yaml.safe_load(open(filepath))
-    else:
+        if not filepath: raise KeyError
+    except KeyError:
         settings['subjects'] = []
+    else:
+        with open(filepath) as infile:
+            settings['subjects'] = yaml.safe_load(infile)
     settings['subjects_lookup'] = dict([(s['code'], s['term'])
                                         for s in settings['subjects']])
     # Settings computable from others
@@ -157,14 +175,14 @@ def load_settings(filepath=None, verbose=False):
 def expand_filepath(filepath):
     "Expand environment variables, the ROOT and SITE_DIR in filepaths."
     filepath = os.path.expandvars(filepath)
-    while True:
+    old = None
+    while filepath != old:
         old = filepath
         try:
             filepath = filepath.replace('{SITE_DIR}', settings['SITE_DIR'])
         except KeyError:
             pass
         filepath = filepath.replace('{ROOT}', constants.ROOT)
-        if filepath == old: break
     return filepath
 
 def get_dbserver():
