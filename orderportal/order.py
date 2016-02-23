@@ -415,6 +415,13 @@ class OrderCreate(RequestHandler):
             saver['fields'] = dict([(f['identifier'], None) for f in fields])
             saver['history'] = {}
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
+            for target, source in settings['ORDER_AUTOPOPULATE'].iteritems():
+                if target not in fields: continue
+                value = self.current_user
+                for key in source.split(':'):
+                    value = value.get(key)
+                    if value is None: break
+                saver['fields'][target] = value
             saver.check_fields_validity(fields)
             # Set identifier only if form properly enabled
             if form['status'] == constants.ENABLED:
@@ -425,7 +432,7 @@ class OrderCreate(RequestHandler):
                 else:               # Identifier; sequential counter is used
                     counter = self.get_next_counter(constants.ORDER)
                     saver['identifier'] = fmt.format(counter)
-            self.see_other('order_edit', saver.doc['_id'])
+        self.see_other('order_edit', saver.doc['_id'])
 
 
 class OrderEdit(OrderMixin, RequestHandler):

@@ -119,10 +119,10 @@ def load_settings(filepath=None, verbose=False):
         filepath = expand_filepath(settings['ORDER_AUTOPOPULATE_FILEPATH'])
         if not filepath: raise KeyError
     except KeyError:
-        settings['order_autopopulate'] = dict()
+        settings['ORDER_AUTOPOPULATE'] = dict()
     else:
         with open(filepath) as infile:
-            settings['order_autopopulate'] = yaml.safe_load(infile)
+            settings['ORDER_AUTOPOPULATE'] = yaml.safe_load(infile)
     # Read universities lookup
     try:
         filepath = settings['UNIVERSITIES_FILEPATH']
