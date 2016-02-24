@@ -130,7 +130,8 @@ class Messenger(object):
     def get_account_params(self, account, **kwargs):
         "Get the template parameters for the account message."
         result = dict(site=settings['SITE_NAME'],
-                      support=settings.get('SITE_SUPPORT', '[not defined]'),
+                      support=settings.get('SITE_SUPPORT_EMAIL',
+                                           '[not defined]'),
                       account=account['email'],
                       url=self.absolute_url('account', account['email']))
         result.update(kwargs)
@@ -150,7 +151,8 @@ class Messenger(object):
         self.send_email(self.get_admins(), message, params)
 
     def process_account_enabled(self, logdoc):
-        """Account was enabled. Send URL and code for setting password."""
+        """Account was enabled.
+        Send URL and code for setting password to the account."""
         message = self.account_messages.get('enabled')
         if not message:
             if self.verbose: print('No message for account enabled.')
@@ -161,15 +163,16 @@ class Messenger(object):
             return
         params = self.get_account_params(
             account,
-            password=self.absolute_url('password'),
-            password_code=self.absolute_url('password',
-                                            email=account['email'],
-                                            code=account['code']),
+            password_url=self.absolute_url('password'),
+            password_code_url=self.absolute_url('password',
+                                                email=account['email'],
+                                                code=account['code']),
             code=account['code'])
         self.send_email([account['owner']], message, params)
 
     def process_account_reset(self, logdoc):
-        "Account password was reset. Send URL and code for setting password."
+        """Account password was reset.
+        Send URL and code for setting password to the account."""
         message = self.account_messages.get('reset')
         if not message:
             if self.verbose: print('No message for account reset.')
@@ -180,10 +183,10 @@ class Messenger(object):
             return
         params = self.get_account_params(
             account,
-            password=self.absolute_url('password'),
-            password_code=self.absolute_url('password',
-                                            email=account['email'],
-                                            code=account['code']),
+            password_url=self.absolute_url('password'),
+            password_code_url=self.absolute_url('password',
+                                                email=account['email'],
+                                                code=account['code']),
             code=account['code'])
         self.send_email([account['owner']], message, params)
 
@@ -220,7 +223,8 @@ class Messenger(object):
     def get_order_params(self, order, **kwargs):
         "Get the template parameters for the order message."
         result = dict(site=settings['SITE_NAME'],
-                      support=settings.get('SITE_SUPPORT', '[not defined]'),
+                      support=settings.get('SITE_SUPPORT_EMAIL',
+                                           '[not defined]'),
                       owner=owner['email'],
                       order=order.get('title') or order['_id'],
                       url=self.absolute_url('order', order['_id']))

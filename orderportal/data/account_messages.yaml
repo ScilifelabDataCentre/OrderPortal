@@ -1,5 +1,15 @@
 # Message definitions for account status events.
 
+# The following parameters may be used:
+# {site}    The name of the OrderPortal site.
+# {support} Contact address.
+# {account} Account email.
+# {url}     The URL for the account.
+#     When applicable also:
+# {password_url} URL for password setting page.
+# {password_code_url} URL for password setting page, including code and email.
+# {code}    The password setting code itself.
+
 pending:
   subject: "An account {account} in the {site} is pending approval."
   text: |
@@ -14,9 +24,9 @@ enabled:
 
     However, you will first have to set your password for the account.
 
-    Go to {url_code} to set the password.
+    Go to {password_code_url} to set the password.
 
-    In case that link does not work, go to {url} and
+    In case that link does not work, go to {password_url} and
     fill in your email address and the one-time code {code}.
 
     If you have any questions, use {support}
@@ -29,9 +39,9 @@ reset:
   text: |
     The password has been reset for your account {account} in the {site}.
 
-    Go to {url_code} to set a new password.
+    Go to {password_code_url} to set a new password.
 
-    In case that link does not work, go to {url} and
+    In case that link does not work, go to {password_url} and
     fill in your email address and the one-time code {code}.
 
     If you have any questions, use {support}

@@ -73,6 +73,7 @@
   <div class="panel panel-success">
     <div class="panel-heading">Change status</div>
     <div class="panel-body">
+      {% if targets %}
       {% for target in targets %}
       <form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
 	    role="form"
@@ -90,6 +91,12 @@
 	</p>
       </form>
       {% end %} {# for target in targets #}
+      {% else %}
+      <i>
+	Status cannot be changed due to missing or invalid data,
+	or status being final.
+      </i>
+      {% end %} {# if targets #}
     </div>
   </div>
 </p>

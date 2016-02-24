@@ -556,7 +556,8 @@ class Login(RequestHandler):
         self.render('login.html', next=self.get_argument('next', None))
 
     def post(self):
-        "Login to a account account. Set a secure cookie."
+        """Login to a account account. Set a secure cookie.
+        Forward to account edit page if first login."""
         self.check_xsrf_cookie()
         try:
             email = self.get_argument('email')
@@ -582,7 +583,7 @@ class Login(RequestHandler):
                 saver['login'] = utils.timestamp() # Set login timestamp.
             if account.get('update_info'):
                 self.see_other('account_edit', account['email'],
-                               message='Please update your account information.')
+                               message='Please review and update your account information.')
                 return
             next = self.get_argument('next', None)
             if next is None:
@@ -649,7 +650,7 @@ class Password(RequestHandler):
                                expires_days=settings['LOGIN_MAX_AGE_DAYS'])
         if account.get('update_info'):
             self.see_other('account_edit', account['email'],
-                           message='Please update your account information.')
+                           message='Please review and update your account information.')
         else:
             self.redirect(self.reverse_url('home'))
 
