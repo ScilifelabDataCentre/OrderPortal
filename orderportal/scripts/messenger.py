@@ -225,7 +225,7 @@ class Messenger(object):
         result = dict(site=settings['SITE_NAME'],
                       support=settings.get('SITE_SUPPORT_EMAIL',
                                            '[not defined]'),
-                      owner=owner['email'],
+                      owner=order['owner'],
                       order=order.get('title') or order['_id'],
                       url=self.absolute_url('order', order['_id']))
         result.update(kwargs)
