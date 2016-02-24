@@ -527,7 +527,7 @@ class AccountEdit(AccountMixin, RequestHandler):
             try:
                 saver['gender'] = self.get_argument('gender').lower()
             except tornado.web.MissingArgumentError:
-                saver['gender'] = None
+                del saver['gender']
             try:
                 saver['subject'] = int(self.get_argument('subject'))
             except (tornado.web.MissingArgumentError, ValueError, TypeError):
@@ -537,12 +537,12 @@ class AccountEdit(AccountMixin, RequestHandler):
                 zip=self.get_argument('zip', default=None),
                 city=self.get_argument('city', default=None),
                 country=self.get_argument('country', default=None))
+            saver['invoice_ref'] = self.get_argument('invoice_ref',default=None)
             saver['invoice_address'] = dict(
                 address=self.get_argument('invoice_address', default=None),
                 zip=self.get_argument('invoice_zip', default=None),
                 city=self.get_argument('invoice_city', default=None),
                 country=self.get_argument('invoice_country', default=None))
-            saver['invoice_ref'] = self.get_argument('invoice_ref',default=None)
             saver['phone'] = self.get_argument('phone', default=None)
             saver['other_data'] = self.get_argument('other_data', default=None)
             saver['update_info'] = False
@@ -691,7 +691,7 @@ class Register(RequestHandler):
             try:
                 saver['gender'] = self.get_argument('gender').lower()
             except tornado.web.MissingArgumentError:
-                saver['gender'] = None
+                del saver['gender']
             try:
                 saver['subject'] = int(self.get_argument('subject'))
             except (tornado.web.MissingArgumentError, ValueError, TypeError):
@@ -701,18 +701,14 @@ class Register(RequestHandler):
                 zip=self.get_argument('zip', default=None),
                 city=self.get_argument('city', default=None),
                 country=self.get_argument('country', default=None))
+            saver['invoice_ref'] = self.get_argument('invoice_ref',default=None)
             saver['invoice_address'] = dict(
                 address=self.get_argument('invoice_address', default=None),
                 zip=self.get_argument('invoice_zip', default=None),
                 city=self.get_argument('invoice_city', default=None),
                 country=self.get_argument('invoice_country', default=None))
-            saver['invoice_ref'] = self.get_argument('invoice_ref',default=None)
             if not saver['invoice_address'].get('address'):
-                try:
-                    saver['invoice_address'] = \
-                        settings['UNIVERSITIES'][saver['university']]['invoice_address']
-                except KeyError:
-                    pass
+                saver['invoice_address'] = saver['address'].copy()
             saver['phone'] = self.get_argument('phone', default=None)
             saver['owner'] = email
             saver['role'] = constants.USER

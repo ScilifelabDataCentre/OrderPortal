@@ -73,6 +73,14 @@ class Saver(object):
     def __getitem__(self, key):
         return self.doc[key]
 
+    def __delitem__(self, key):
+        try:
+            del self.doc[key]
+        except AttributeError:
+            pass
+        else:
+            self.changed[key] == '__del__'
+
     def get(self, key, default=None):
         try:
             return self[key]
