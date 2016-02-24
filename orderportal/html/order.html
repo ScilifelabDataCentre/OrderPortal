@@ -16,7 +16,7 @@
   <form action="{{ reverse_url('order_edit', order['_id']) }}"
 	role="form"
 	method="GET">
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-lg btn-primary">
       <span class="glyphicon glyphicon-edit"></span>
       Edit
     </button>
@@ -69,36 +69,35 @@
 <p>
 {% end %} {# if is_clonable #}
 
+<br>
+<br>
+
 <p>
-  <div class="panel panel-success">
-    <div class="panel-heading">Change status</div>
-    <div class="panel-body">
-      {% if targets %}
-      {% for target in targets %}
-      <form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
-	    role="form"
-	    method="POST">
-	{% module xsrf_form_html() %}
-	<p>
-	  <button type="submit" class="btn btn-default"
-		  {% if not is_admin %}
-		  onclick="return confirm('Cannot be undone! Really change status?');"
-		  {% end %}
-		  >
-	    {% module Icon(target['identifier']) %}
-	    {{ target.get('action', target['identifier']) }}
-	  </button>
-	</p>
-      </form>
-      {% end %} {# for target in targets #}
-      {% else %}
-      <i>
-	Status cannot be changed due to missing or invalid data,
-	or status being final.
-      </i>
-      {% end %} {# if targets #}
-    </div>
+  {% if targets %}
+  {% for target in targets %}
+  <form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <p>
+      <button type="submit" class="btn btn-lg btn-success"
+	      {% if not is_admin %}
+	      onclick="return confirm('Cannot be undone! Really change status?');"
+	      {% end %}
+	      >
+	{% module Icon(target['identifier']) %}
+	{{ target.get('action', target['identifier']) }}
+      </button>
+    </p>
+  </form>
+  {% end %} {# for target in targets #}
+  {% else %}
+  {% if order['invalid'] %}
+  <div class="well well-lg text-danger">
+    Order cannot be submitted due to invalid or missing values.
   </div>
+  {% end %}
+  {% end %} {# if targets #}
 </p>
 
 {% end %} {# block meta_content #}

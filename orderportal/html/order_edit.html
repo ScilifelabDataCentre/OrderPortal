@@ -13,6 +13,11 @@ Edit order
 {% end %}
 
 {% block main_content %}
+<div class="well text-danger">
+  It is possible to save incomplete orders. Partially filled-in orders
+  cannot be submitted.
+</div>
+
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
       role="form"
       method="POST">
@@ -150,7 +155,7 @@ Edit order
 	<button type="submit" class="btn btn-success"
 		name="__save__" value="continue">
 	  <span class="glyphicon glyphicon-floppy-disk"></span>
-	  Save and continue
+	  Save
 	</button>
       </div>
     </div>
@@ -159,7 +164,7 @@ Edit order
 	<label class="control-label"></label>
 	<button type="submit" class="btn btn-success">
 	  <span class="glyphicon glyphicon-floppy-save"></span>
-	  Save and quit
+	  Save and view
 	</button>
       </div>
     </div>
