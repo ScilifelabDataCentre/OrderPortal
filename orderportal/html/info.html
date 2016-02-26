@@ -6,34 +6,40 @@
 
 {% block body_title %}{{ info.get('title') or info['name'] }}{% end %}
 
-{% block main_content %}
+{% block content %}
+<div class="row">
 
-{% if is_admin %}
-<div class="pull-right">
-  <form action="{{ reverse_url('info_edit', info['name']) }}"
-	role="form"
-	method="GET">
-    <button type="submit" class="btn btn-primary">
-      <span class="glyphicon glyphicon-edit"></span>
-      Edit
-    </button>
-  </form>
+  <div class="col-md-8">
+    {% module Markdown(info.get('text')) %}
+  </div>
 
-  <br>
-  <form action="{{ reverse_url('info', info['name']) }}"
-	role="form"
-	method="POST">
-    {% module xsrf_form_html() %}
-    <input type="hidden" name="_http_method" value="delete">
-    <button type="submit" class="btn btn-danger"
-	    onclick="return confirm('Cannot be undone! Really delete?');">
-      <span class="glyphicon glyphicon-trash"></span>
-      Delete
-    </button>
-  </form>
+  <div class="col-md-2">
+    {% if is_admin %}
+    <div class="pull-right">
+      <form action="{{ reverse_url('info_edit', info['name']) }}"
+	    role="form"
+	    method="GET">
+	<button type="submit" class="btn btn-primary">
+	  <span class="glyphicon glyphicon-edit"></span>
+	  Edit
+	</button>
+      </form>
+
+      <br>
+      <form action="{{ reverse_url('info', info['name']) }}"
+	    role="form"
+	    method="POST">
+	{% module xsrf_form_html() %}
+	<input type="hidden" name="_http_method" value="delete">
+	<button type="submit" class="btn btn-danger"
+		onclick="return confirm('Cannot be undone! Really delete?');">
+	  <span class="glyphicon glyphicon-trash"></span>
+	  Delete
+	</button>
+      </form>
+    </div>
+    {% end %}
+  </div>
+
 </div>
-{% end %}
-
-{% module Markdown(info.get('text')) %}
-
-{% end %} {# block main_content #}
+{% end %} {# block content #}
