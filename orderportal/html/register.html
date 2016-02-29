@@ -10,6 +10,18 @@
 
 <div class="well">
   {% module Text('register') %}
+  {% if is_admin %}
+  <form action="{{ reverse_url('text', 'register') }}"
+	class="pull-right"
+	role="form"
+	method="GET">
+    <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
+    <button type="submit" class="btn btn-primary btn-xs">
+      <span class="glyphicon glyphicon-edit"></span>
+      Edit
+    </button>
+  </form>
+  {% end %}
 </div>
 
 <form action="{{ reverse_url('register') }}"

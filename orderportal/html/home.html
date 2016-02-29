@@ -23,6 +23,13 @@
   <div class="col-md-8">
     <h2>{{ settings['SITE_NAME'] }}</h2>
     {% module Text('header') %}
+    {% if is_admin %}
+    <a href="{{ reverse_url('text', 'header') }}"
+       class="btn btn-primary btn-xs pull-right" role="button">
+      <span class="glyphicon glyphicon-edit"></span>
+      Edit
+    </a>
+    {% end %}
   </div>
 
 </div>
@@ -78,7 +85,8 @@
       <div class="panel-body">
 	<div>
 	  {% if global_modes['allow_registration'] %}
-	  <a href="{{ reverse_url('register') }}" class="btn btn-success" role="button">
+	  <a href="{{ reverse_url('register') }}"
+	     class="btn btn-success" role="button">
 	    <span class="glyphicon glyphicon-user"></span>
 	    Register account
 	  </a>
@@ -538,6 +546,13 @@
     <div class="panel panel-default">
       <div class="panel-body">
 	{% module Text('general') %}
+	{% if is_admin %}
+	<a href="{{ reverse_url('text', 'general') }}"
+	   class="btn btn-primary btn-xs pull-right" role="button">
+	  <span class="glyphicon glyphicon-edit"></span>
+	  Edit
+	</a>
+	{% end %}
       </div>
     </div>
   </div>
