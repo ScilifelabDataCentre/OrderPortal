@@ -13,15 +13,13 @@ Edit order
 {% end %}
 
 {% block main_content %}
-<div class="well text-danger">
-  It is possible to save incomplete orders. Partially filled-in orders
-  cannot be submitted.
-</div>
-
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
+      class="myForm"
       role="form"
       method="POST">
   {% module xsrf_form_html() %}
+
+  {% include 'order_edit_save.html' %}
 
   <div class="form-group">
     <div class="row">
@@ -71,111 +69,12 @@ Edit order
   {# Recursion: 'include' cannot be used! #}
   {% module Template('order_edit_fields.html', fields=fields, order=order, is_staff=is_staff) %}
 
-{#
-  {% set stack = [0] %}
-  {% for field in fields %}
-    {% while field['depth'] < stack[-1] %}
-      {% set stack.pop() %}
-		</div>
-              </div>
-	    </td>
-	  </tr>
-    {% end %}
-    {% if field['restrict_read'] and not is_staff %}
-    {% continue %}
-    {% end %}
-    {% if field['type'] == constants.GROUP %}
-      {% set stack.append(field['depth'] + 1) %}
-      <div class="panel panel-default">
-	<div class="panel-heading">
-	  <h4>
-	    {{ field.get('label') or field['identifier'].capitalize() }}
-	    <small>
-	      {% if field['identifier'] in order['invalid'] %}
-	      <span class="text-danger">
-		<span class="glyphicon glyphicon-remove"></span>
-		({{ order['invalid'][field['identifier']] }})
-	      </span>
-	      {% else %}
-	      <span class="text-success">
-		<span class="glyphicon glyphicon-ok"></span>
-	      </span>
-	      {% end %}
-	      {{ field.get('description') or '' }}
-	    </small>
-	  </h4>
-	</div>
-	<div class="panel-body">
-    {% else %}
-      <div class="form-group has-feedback">
-	<div class="row">
-	  <div class="col-md-8">
-	    <label class="control-label" for="{{ field['identifier'] }}">
-	      {{ field.get('label') or field['identifier'].capitalize() }}
-	      {% if field['identifier'] in order['invalid'] %}
-	      <span class="text-danger">
-		<span class="glyphicon glyphicon-remove"></span>
-		({{ order['invalid'][field['identifier']] }})
-	      </span>
-	      {% else %}
-	      <span class="text-success">
-		<span class="glyphicon glyphicon-ok"></span>
-	      </span>
-	      {% end %}
-	    </label>
-	    <input type="text" class="form-control"
-		   name="{{ field['identifier'] }}"
-		   id="{{ field['identifier'] }}"
-		   value="{{ order['fields'][field['identifier']] or '' }}">
-	    {% if field['required'] %}
-	    <span style="color:red; margin-right: 1em;"
-		  class="glyphicon glyphicon-star form-control-feedback"
-		  aria-hidden="true">
-	    </span>
-	    {% end %}
-	  </div>
-	</div>
-	<span class="help-block">
-	  {{ field.get('description') or '' }}
-	</span>
-      </div>
-    {% end %}
-    {% end %}
-
-    {% while stack.pop() %}
-	</div>
-      </div>
-    {% end %}
-#}
-
-  <div class="row">
-    <div class="col-md-4">
-      <div class="form-group">
-	<label class="control-label"></label>
-	<button type="submit" class="btn btn-success"
-		name="__save__" value="continue">
-	  <span class="glyphicon glyphicon-floppy-disk"></span>
-	  Save
-	</button>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="form-group">
-	<label class="control-label"></label>
-	<button type="submit" class="btn btn-success">
-	  <span class="glyphicon glyphicon-floppy-save"></span>
-	  Save and view
-	</button>
-      </div>
-    </div>
-    <div class="col-md-4">
-    </div>
-  </div>
-
+  {% include 'order_edit_save.html' %}
 </form>
 
 <br>
 <form action="{{ reverse_url('order', order['_id']) }}"
+      class="myForm"
       role="form"
       method="GET">
   <div class="form-group">
@@ -197,6 +96,7 @@ Edit order
 <script src="{{ static_url('field_visible_if.js') }}"></script>
 {# This is required for input fields for date. #}
 <script src="{{ static_url('jquery-ui-1.11.4/jquery-ui.min.js') }}"></script>
+<script src="{{ static_url('quit_through_submit.js') }}"></script>
 <script>
   $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
   $(document).ready(function(){

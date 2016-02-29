@@ -1,0 +1,43 @@
+{# Order edit save buttons row. #}
+
+<div class="row">
+  <div class="col-md-4">
+    <div class="form-group">
+      <label class="control-label"></label>
+      <button type="submit" class="btn btn-success"
+	      name="__save__" value="continue">
+	<span class="glyphicon glyphicon-floppy-disk"></span>
+	Save
+      </button>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="form-group">
+      <label class="control-label"></label>
+      <button type="submit" class="btn btn-success">
+	<span class="glyphicon glyphicon-floppy-save"></span>
+	Save and view
+      </button>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="form-group">
+      <label class="control-label"></label>
+      <button type="submit" class="btn btn-success"
+	      name="__save__" value="submit">
+	{% module Icon('submitted') %}
+	Save and submit
+      </button>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-body">
+	It is possible to save incomplete orders. Partially filled-in
+	orders cannot be submitted.
+      </div>
+    </div>
+  </div>
+</div>

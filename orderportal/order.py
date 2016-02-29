@@ -475,10 +475,26 @@ class OrderEdit(OrderMixin, RequestHandler):
                 else:
                     saver['owner'] = account['email']
                 saver.update_fields(Fields(form))
-            if self.get_argument('__save__', None) == 'continue':
+            flag = self.get_argument('__save__', None)
+            if flag == 'continue':
                 self.see_other('order_edit', order['_id'])
+            elif flag == 'submit': # Hard-wired, currently
+                targets = self.get_targets(order)
+                for target in targets:
+                    if target['identifier'] == 'submitted':
+                        with OrderSaver(doc=order, rqh=self) as saver:
+                            saver.set_status('submitted')
+                        self.see_other('order', order['_id'],
+                                       message='Order saved and submitted.')
+                        break
+                else:
+                    self.see_other('order', order['_id'],
+                                   message='Order saved.',
+                                   error='Order could not be submitted due to'
+                                   ' invalid or missing values.')
             else:
-                self.see_other('order', order['_id'])
+                self.see_other('order', order['_id'],
+                               message='Order saved.')
         except ValueError, msg:
             self.see_other('order_edit', order['_id'], error=str(msg))
 
