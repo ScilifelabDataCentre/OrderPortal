@@ -66,9 +66,13 @@ class Config(RequestHandler):
                   ('Tornado debug', settings['TORNADO_DEBUG']),
                   ('logging debug', settings['LOGGING_DEBUG']),
                   ('account messages', settings['ACCOUNT_MESSAGES_FILEPATH']),
+                  ('order messages', settings['ORDER_MESSAGES_FILEPATH']),
                   ('order statuses', settings['ORDER_STATUSES_FILEPATH']),
                   ('order transitions', settings['ORDER_TRANSITIONS_FILEPATH']),
-                  ('universities', settings['UNIVERSITIES_FILEPATH'])]
+                  ('universities', settings.get('UNIVERSITIES_FILEPATH')),
+                  ('country codes', settings.get('COUNTRY_CODES_FILEPATH')),
+                  ('subject terms', settings.get('SUBJECT_TERMS_FILEPATH')),
+                  ]
         self.render('config.html', params=params)
 
 

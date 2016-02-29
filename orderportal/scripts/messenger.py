@@ -42,16 +42,6 @@ class Messenger(object):
         self.dry_run = dry_run
         if self.verbose:
             print('Messenger', utils.timestamp())
-        try:
-            with open(settings['ACCOUNT_MESSAGES_FILEPATH']) as infile:
-                self.account_messages = yaml.safe_load(infile)
-        except (IOError, KeyError):
-            self.account_messages = {}
-        try:
-            with open(settings['ORDER_MESSAGES_FILEPATH']) as infile:
-                self.order_messages = yaml.safe_load(infile)
-        except (IOError, KeyError):
-            self.order_messages = {}
 
     @property
     def server(self):
@@ -139,7 +129,7 @@ class Messenger(object):
 
     def process_account_pending(self, logdoc):
         "Account was created, is pending. Tell the admins to enable it."
-        message = self.account_messages.get('pending')
+        message = settings['ACCOUNT_MESSAGES'].get('pending')
         if not message:
             if self.verbose: print('No message for account pending.')
             return
@@ -153,7 +143,7 @@ class Messenger(object):
     def process_account_enabled(self, logdoc):
         """Account was enabled.
         Send URL and code for setting password to the account."""
-        message = self.account_messages.get('enabled')
+        message = settings['ACCOUNT_MESSAGES'].get('enabled')
         if not message:
             if self.verbose: print('No message for account enabled.')
             return
@@ -173,7 +163,7 @@ class Messenger(object):
     def process_account_reset(self, logdoc):
         """Account password was reset.
         Send URL and code for setting password to the account."""
-        message = self.account_messages.get('reset')
+        message = settings['ACCOUNT_MESSAGES'].get('reset')
         if not message:
             if self.verbose: print('No message for account reset.')
             return
@@ -193,7 +183,7 @@ class Messenger(object):
     def process_order(self, logdoc):
         "Check for relevant event in order log entry and send message(s)."
         status = logdoc['changed'].get('status')
-        message = self.order_messages.get(status)
+        message = settings['ORDER_MESSAGES'].get(status)
         if not message:
             if self.verbose:
                 print("No message for order status {0}.".format(status))
@@ -295,6 +285,6 @@ if __name__ == '__main__':
     utils.load_settings(filepath=options.settings,
                         verbose=options.verbose)
     messenger = Messenger(utils.get_db(),
-                        verbose=options.verbose,
-                        dry_run=options.dry_run)
+                          verbose=options.verbose,
+                          dry_run=options.dry_run)
     messenger.process()

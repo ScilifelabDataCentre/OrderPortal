@@ -9,7 +9,7 @@
 {% block main_content %}
 
 <div class="row">
-  <div class="col-md-6 well">
+  <div class="col-md-8 well">
     <p>
       The values of various configuration settings. Mainly for
       debugging purposes when setting up a portal. The default values
@@ -39,4 +39,27 @@
   </div>
 </div>
 
+<div class="row">
+  <div class="col-md-12">
+    <table class="table">
+      <caption>Order messages</caption>
+      <tr>
+	<th>Event</th>
+	<th>Recipients</th>
+	<th>Subject</th>
+	<th>Text</th>
+      </tr>
+      {% for key, value in settings['ORDER_MESSAGES'].iteritems() %}
+      <tr>
+	<td>{{ key }}</td>
+	<td>{{ ', '.join(value['recipients']) }}</td>
+	<td>{{ value['subject'] }}</td>
+	<td class="pre">{{ value['text'] }}</td>
+      </tr>
+      {% end %}
+    </table>
+  </div>
+  <div class="col-md-2">
+  </div>
+</div>
 {% end %} {# block main_content #}

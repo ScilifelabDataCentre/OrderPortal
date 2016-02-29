@@ -114,6 +114,24 @@ def load_settings(filepath=None, verbose=False):
     settings['ORDER_STATUSES_LOOKUP'] = lookup
     with open(settings['ORDER_TRANSITIONS_FILEPATH']) as infile:
         settings['ORDER_TRANSITIONS'] = yaml.safe_load(infile)
+    # Account messages
+    try:
+        filepath = expand_filepath(settings['ACCOUNT_MESSAGES_FILEPATH'])
+        if not filepath: raise KeyError
+    except KeyError:
+        settings['ACCOUNT_MESSAGES'] = dict()
+    else:
+        with open(filepath) as infile:
+            settings['ACCOUNT_MESSAGES'] = yaml.safe_load(infile)
+    # Order messages
+    try:
+        filepath = expand_filepath(settings['ORDER_MESSAGES_FILEPATH'])
+        if not filepath: raise KeyError
+    except KeyError:
+        settings['ORDER_MESSAGES'] = dict()
+    else:
+        with open(filepath) as infile:
+            settings['ORDER_MESSAGES'] = yaml.safe_load(infile)
     # Read order autopopulate mapping
     try:
         filepath = expand_filepath(settings['ORDER_AUTOPOPULATE_FILEPATH'])
