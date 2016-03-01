@@ -3,6 +3,7 @@
 from __future__ import print_function, absolute_import
 
 import logging
+import traceback
 import urllib
 
 import couchdb
@@ -89,6 +90,28 @@ class RequestHandler(tornado.web.RequestHandler):
             return None
         return account
 
+    def write_error(self, status_code, **kwargs):
+        """Override to implement custom error pages.
+
+        ``write_error`` may call `write`, `render`, `set_header`, etc
+        to produce output as usual.
+
+        If this error was caused by an uncaught exception (including
+        HTTPError), an ``exc_info`` triple will be available as
+        ``kwargs["exc_info"]``.  Note that this exception may not be
+        the "current" exception for purposes of methods like
+        ``sys.exc_info()`` or ``traceback.format_exc``.
+        """
+        if self.settings.get("serve_traceback") and "exc_info" in kwargs:
+            # in debug mode, try to send a traceback
+            self.set_header('Content-Type', 'text/plain')
+            for line in traceback.format_exception(*kwargs["exc_info"]):
+                self.write(line)
+            self.finish()
+        else:
+            msg = "{0} (code {1})".format(self._reason, status_code)
+            self.see_other('home', error=msg)
+
     def is_owner(self, entity):
         "Does the current user own the given entity?"
         return self.current_user and \
@@ -109,14 +132,14 @@ class RequestHandler(tornado.web.RequestHandler):
     def check_admin(self):
         "Check if current user is admin."
         if not self.is_admin():
-            raise tornado.web.HTTPError(403,
-                                        reason="you do not have role 'admin'")
+            raise tornado.web.HTTPError(
+                403, reason="role 'admin' is required for this")
 
     def check_staff(self):
         "Check if current user is staff or admin."
         if not self.is_staff():
-            raise tornado.web.HTTPError(403,
-                                        reason="you do not have role 'staff'")
+            raise tornado.web.HTTPError(
+                403, reason="role 'staff' is required for this")
 
     def get_next_counter(self, doctype):
         "Get the next counter number for the doctype."
@@ -149,7 +172,8 @@ class RequestHandler(tornado.web.RequestHandler):
             if doctype is not None and entity[constants.DOCTYPE] != doctype:
                 raise KeyError
         except KeyError:
-            raise tornado.web.HTTPError(404, reason='invalid entity doctype')
+            raise tornado.web.HTTPError(
+                404, reason='internal problem: invalid entity doctype')
         return entity
 
     def get_entity_view(self, viewname, key, reason='no such entity'):

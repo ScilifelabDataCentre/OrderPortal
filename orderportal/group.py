@@ -76,7 +76,8 @@ class Group(GroupMixin, RequestHandler):
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid)
             return
-        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
+        raise tornado.web.HTTPError(
+            405, reason='internal problem; POST only allowed for DELETE')
 
     @tornado.web.authenticated
     def delete(self, iuid):
@@ -181,7 +182,7 @@ class GroupAccept(RequestHandler):
             try:
                 invited.remove(self.current_user['email'])
             except KeyError:
-                raise tornado.web.HTTPError(403,reason='you are not invited')
+                raise tornado.web.HTTPError(403, reason='you are not invited')
             members = set(group['members'])
             members.add(self.current_user['email'])
             saver['invited'] = sorted(invited)

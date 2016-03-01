@@ -46,8 +46,8 @@ class OrderSaver(saver.Saver):
                     continue
             if value != docfields.get(identifier):
                 changed = self.changed.setdefault('fields', dict())
-                changed[identifier] = value
-                docfields[identifier] = value
+                changed[identifier] = utils.to_utf8(value)
+                docfields[identifier] = utils.to_utf8(value)
         self.check_fields_validity(fields)
 
     def check_fields_validity(self, fields):
@@ -368,7 +368,8 @@ class Order(OrderMixin, RequestHandler):
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid)
             return
-        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
+        raise tornado.web.HTTPError(
+            405, reason='internal problem; POST only allowed for DELETE')
 
     @tornado.web.authenticated
     def delete(self, iuid):
@@ -531,7 +532,8 @@ class OrderTransition(OrderMixin, RequestHandler):
         for target in self.get_targets(order):
             if target['identifier'] == targetid: break
         else:
-            raise tornado.web.HTTPError(403, reason='invalid target')
+            raise tornado.web.HTTPError(
+                403, reason='invalid order transition target')
         with OrderSaver(doc=order, rqh=self) as saver:
             saver.set_status(targetid)
         self.see_other('order', order['_id'])
@@ -561,7 +563,8 @@ class OrderFile(OrderMixin, RequestHandler):
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid, filename)
             return
-        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
+        raise tornado.web.HTTPError(
+            405, reason='internal problem; POST only allowed for DELETE')
 
     @tornado.web.authenticated
     def delete(self, iuid, filename):

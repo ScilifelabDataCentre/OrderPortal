@@ -2,7 +2,7 @@
 
 {% extends "home.html" %}
 
-{% block body_header_middle %}
+{% block content_middle %}
 
 {% if global_modes['allow_order_creation'] %}
 <div class="panel-group">
@@ -30,10 +30,10 @@
 </div>
 {% end %} {# if global_modes['allow_order_creation'] #}
 
-{% end %} {# block body_header_middle #}
+{% end %} {# block content_middle #}
 
 
-{% block body_header_right %}
+{% block content_right %}
 
 {% if global_modes['allow_order_creation'] %}
 <div class="panel-group">
@@ -57,4 +57,4 @@
 </div>
 {% end %} {# if global_modes['allow_order_creation'] #}
 
-{% end %} {# block body_header_right #}
+{% end %} {# block content_right #}

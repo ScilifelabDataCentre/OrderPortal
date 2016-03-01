@@ -40,10 +40,14 @@
   </div>
 </div>
 
+{% end %} {# block body_header #}
+
+{% block content %}
+
 <div class="row">
 
   <div class="col-md-4">
-    {% block body_header_left %}
+    {% block content_left %}
     <div class="panel panel-default">
       <div class="panel-heading">
         <span class="glyphicon glyphicon-user"></span>
@@ -76,11 +80,11 @@
 	</form>
       </div>
     </div>
-    {% end %} {# block body_header_left #}
+    {% end %} {# block content_left #}
   </div>
 
   <div class="col-md-4">
-    {% block body_header_middle %}
+    {% block content_middle %}
     <div class="panel panel-default">
       <div class="panel-body">
 	<div>
@@ -113,19 +117,16 @@
 	</div>
       </div>
     </div>
-    {% end %} {# block body_header_middle #}
+    {% end %} {# block content_middle #}
   </div>
 
   <div class="col-md-4">
-    {% block body_header_right %}
+    {% block content_right %}
     To place an order, you must be logged in. If you do not have an
     account, register one.
-    {% end %} {# block body_header_right #}
+    {% end %} {# block content_right #}
   </div>
 </div>
-{% end %} {# block body_header #}
-
-{% block content %}
 
 <div class="row">
 

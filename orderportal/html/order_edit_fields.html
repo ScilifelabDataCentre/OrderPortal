@@ -168,10 +168,17 @@
       {% end %} {# elif field['type'] == #}
 
       {% if field['required'] %}
+      {% if field.get('display') == 'menu' %} {# field type SELECT #}
+      <span style="color:red; margin-right: 2em;"
+	    class="glyphicon glyphicon-star form-control-feedback"
+	    aria-hidden="true">
+      </span>
+      {% else %}
       <span style="color:red; margin-right: 1em;"
 	    class="glyphicon glyphicon-star form-control-feedback"
 	    aria-hidden="true">
       </span>
+      {% end %}
       {% end %}
     </div>
   </div>

@@ -296,7 +296,8 @@ class Account(AccountMixin, RequestHandler):
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(email)
             return
-        raise tornado.web.HTTPError(405, reason='POST only allowed for DELETE')
+        raise tornado.web.HTTPError(
+            405, reason='internal problem; POST only allowed for DELETE')
 
     @tornado.web.authenticated
     def delete(self, email):
@@ -422,8 +423,8 @@ class AccountGroupsOrders(RequestHandler):
         email = email.lower()
         account = self.get_account(email)
         if not (self.is_staff() or email == self.current_user['email']):
-            raise tornado.web.HTTPError(403,
-                                        reason='you may not view these orders')
+            raise tornado.web.HTTPError(
+                403, reason='you may not view these orders')
         orders = []
         # XXX This does not scale!
         for colleague in self.get_account_colleagues(email):
@@ -570,8 +571,8 @@ class Login(RequestHandler):
         except (tornado.web.MissingArgumentError,
                 tornado.web.HTTPError,
                 ValueError), msg:
-            self.see_other('home',
-                           error='Invalid email (=username) or password.')
+            raise tornado.web.HTTPError(
+                403, reason='Invalid email (username) or password.')
         else:
             if not self.global_modes['allow_login'] \
                and account['role'] != constants.ADMIN:
@@ -675,7 +676,6 @@ class Register(RequestHandler):
                 saver.set_email(email)
             except ValueError, msg:
                 self.see_other('register', error=str(msg))
-                # raise tornado.web.HTTPError(400, reason=str(msg))
             try:
                 saver['first_name'] = self.get_argument('first_name')
                 saver['last_name'] = self.get_argument('last_name')
@@ -684,8 +684,8 @@ class Register(RequestHandler):
                     university = self.get_argument('university', default=None)
                 saver['university'] = university or None
             except (tornado.web.MissingArgumentError, ValueError):
-                reason = u"invalid '{0}' value provided".format(key)
-                raise tornado.web.HTTPError(400, reason=reason)
+                raise tornado.web.HTTPError(
+                    400, reason=u"invalid '{0}' value provided".format(key))
             saver['department'] = self.get_argument('department', default=None)
             saver['pi'] = utils.to_bool(self.get_argument('pi', default=False))
             try:
