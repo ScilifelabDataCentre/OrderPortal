@@ -4,9 +4,6 @@ header: |
   This is a portal for placing orders. You need to have an account and
   be logged in to create, edit, submit and view orders.
 
-information: |
-  [This ought be a description of the facility running the portal.]
-
 register: |
   Use this page to register a new account. Your email address is the account
   name in this portal.

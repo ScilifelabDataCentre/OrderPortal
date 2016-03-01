@@ -36,13 +36,12 @@ def init_database(verbose=False, dumpfilepath=None):
         print('wiped out database')
     load_designs(db, verbose=verbose)
     # No specific items set here; done on-the-fly in e.g. get_next_number
-    db.save(dict(_id='orders',
+    db.save(dict(_id='order',
                  orderportal_doctype=constants.META))
     if verbose:
         print('created meta documents')
     if verbose:
         print('loaded designs')
-    load_texts(db, settings['INITIAL_TEXTS_FILEPATH'], verbose=verbose)
     if dumpfilepath:
         dumpfilepath = utils.expand_filepath(dumpfilepath)
         try:
@@ -51,6 +50,9 @@ def init_database(verbose=False, dumpfilepath=None):
             print('Warning: could not load', dumpfilepath)
     elif verbose:
         print('no dump file loaded')
+    load_texts(db, settings['INITIAL_TEXTS_FILEPATH'],
+               overwrite=False,
+               verbose=verbose)
 
 def wipeout_database(db):
     """Wipe out the contents of the database.

@@ -11,7 +11,8 @@ from orderportal import utils
 from orderportal import admin
 
 
-def load_texts(db, textfilepath, verbose=False):
+def load_texts(db, textfilepath, overwrite=True, verbose=False):
+    "Load the texts from the YAML file, overwriting by default."
     with open(utils.expand_filepath(textfilepath)) as infile:
         texts = yaml.safe_load(infile)
         for key, text in texts.items():
@@ -21,6 +22,7 @@ def load_texts(db, textfilepath, verbose=False):
                 doc = docs[0]
             except IndexError:
                 doc = None
+            if doc and not overwrite: continue
             with admin.TextSaver(doc=doc, db=db) as saver:
                 saver['name'] = key
                 saver['text'] = text
@@ -35,7 +37,7 @@ if __name__ == '__main__':
     utils.load_settings(filepath=options.settings,
                         verbose=options.verbose)
     if not options.force:
-        response = raw_input('about to overwrite all current texts; really sure? [n] > ')
+        response = raw_input('about to overwrite all current texts; are really sure? [n] > ')
         if not utils.to_bool(response):
             sys.exit('aborted')
     try:

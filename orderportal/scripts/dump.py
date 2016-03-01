@@ -32,7 +32,7 @@ def get_command_line_parser():
 
 def dump(db, filepath, verbose=False):
     """Dump contents of the database to a tar file, optionally gzip compressed.
-    Only entities with IUID key as name are dumped; all others are ignored.
+    Skip any entity that does not contain a doctype field.
     """
     count_items = 0
     count_files = 0
@@ -85,7 +85,7 @@ def undump(db, filepath, verbose=False):
             count_files += 1
         else:
             doc = json.loads(itemdata)
-            # If the email already exists, do not load document.
+            # If the account already exists, do not load document.
             if doc[constants.DOCTYPE] == constants.ACCOUNT:
                 rows = db.view('account/email', key=doc['email'])
                 if len(list(rows)) != 0: continue

@@ -138,6 +138,6 @@ if __name__ == '__main__':
     db = utils.get_db()
     load_orders(db,
                 authors=load_users(verbose=options.verbose),
-                form_iuid='0cee6da94ace4b5b968a9d042fe6271f',
+                form_iuid='ed37e428cd0e4b43894c9686555018a1',
                 verbose=options.verbose)
     regenerate_views(db, verbose=options.verbose)
