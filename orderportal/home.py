@@ -143,3 +143,10 @@ class Entity(RequestHandler):
             self.see_other('account', doc['email'])
         else:
             raise tornado.web.HTTPError(404)
+
+
+class NoSuchEntity(RequestHandler):
+    "Error message on home page, if in non-debug mode."
+
+    def get(self):
+        raise tornado.web.HTTPError(404)
