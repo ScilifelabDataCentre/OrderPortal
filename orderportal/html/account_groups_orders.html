@@ -113,7 +113,11 @@ $(document).ready(function() {
       {% for f in settings['ORDERS_LIST_FIELDS'] %}
       { data: 'fields.{{ f['identifier'] }}'},
       {% end %}
-      {data: 'status'},
+      {data: 'status',
+       fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+         $(nTd).html("<img src='"+oData.status_href+"'> "+sData);
+       }
+      },
       {% for s in settings['ORDERS_LIST_STATUSES'] %}
       {data: 'history.{{ s }}'},
       {% end %}

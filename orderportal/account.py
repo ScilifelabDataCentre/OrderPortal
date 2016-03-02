@@ -418,7 +418,8 @@ class ApiV1AccountOrders(AccountOrdersMixin, RequestHandler):
                         owner_name=names[order['owner']],
                         owner_href=self.reverse_url('account', order['owner']),
                         fields={},
-                        status=order['status'],
+                        status=order['status'].capitalize(),
+                        status_href=self.reverse_url('site', order['status'] + '.png'),
                         history={},
                         modified=order['modified'])
             identifier = order.get('identifier')
@@ -483,7 +484,8 @@ class ApiV1AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
                         owner_name=names[order['owner']],
                         owner_href=self.reverse_url('account', order['owner']),
                         fields={},
-                        status=order['status'],
+                        status=order['status'].capitalize(),
+                        status_href=self.reverse_url('site', order['status'] + '.png'),
                         history={},
                         modified=order['modified'])
             identifier = order.get('identifier')

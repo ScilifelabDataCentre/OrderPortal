@@ -107,7 +107,7 @@ $(document).ready(function() {
       {% end %}
       {data: 'status',
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<img src='/static/"+sData+".png'> "+sData);
+         $(nTd).html("<img src='"+oData.status_href+"'> "+sData);
        }
       },
       {% for s in settings['ORDERS_LIST_STATUSES'] %}

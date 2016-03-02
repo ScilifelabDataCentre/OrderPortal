@@ -227,8 +227,42 @@ class Orders(RequestHandler):
         return result
 
 
-class _OrdersFilter(Orders):
-    "Get orders according to filter parameters."
+class ApiV1Orders(Orders):
+    "Orders API; JSON output."
+
+    @tornado.web.authenticated
+    def get(self):
+        "JSON output."
+        self.check_staff()
+        orders = self.get_orders()
+        names = self.get_account_names(None)
+        # Forms lookup on iuid
+        forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
+        data = []
+        for order in orders:
+            item = dict(title=order.get('title') or '[no title]',
+                        form_title=forms[order['form']],
+                        form_href=self.reverse_url('form', order['form']),
+                        owner_name=names[order['owner']],
+                        owner_href=self.reverse_url('account', order['owner']),
+                        fields={},
+                        status=order['status'].capitalize(),
+                        status_href=self.reverse_url('site', order['status'] + '.png'),
+                        history={},
+                        modified=order['modified'])
+            identifier = order.get('identifier')
+            if identifier:
+                item['href'] = self.reverse_url('order_id', identifier)
+            else:
+                identifier = order['_id'][:6] + '...'
+                item['href'] = self.reverse_url('order', order['_id'])
+            item['identifier'] = identifier
+            for f in settings['ORDERS_LIST_FIELDS']:
+                item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
+            for s in settings['ORDERS_LIST_STATUSES']:
+                item['history'][s] = order['history'].get(s)
+            data.append(item)
+        self.write(dict(data=data))
 
     def get_orders(self):
         params = self.get_filter_params()
@@ -286,43 +320,6 @@ class _OrdersFilter(Orders):
                 orders = [r.doc for r in view]
             orders = [o for o in orders if o['fields'].get(identifier) == value]
         return orders
-
-
-class ApiV1Orders(_OrdersFilter):
-    "Orders API; JSON output."
-
-    @tornado.web.authenticated
-    def get(self):
-        "JSON output."
-        self.check_staff()
-        orders = self.get_orders()
-        names = self.get_account_names(None)
-        # Forms lookup on iuid
-        forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
-        data = []
-        for order in orders:
-            item = dict(title=order.get('title') or '[no title]',
-                        form_title=forms[order['form']],
-                        form_href=self.reverse_url('form', order['form']),
-                        owner_name=names[order['owner']],
-                        owner_href=self.reverse_url('account', order['owner']),
-                        fields={},
-                        status=order['status'],
-                        history={},
-                        modified=order['modified'])
-            identifier = order.get('identifier')
-            if identifier:
-                item['href'] = self.reverse_url('order_id', identifier)
-            else:
-                identifier = order['_id'][:6] + '...'
-                item['href'] = self.reverse_url('order', order['_id'])
-            item['identifier'] = identifier
-            for f in settings['ORDERS_LIST_FIELDS']:
-                item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
-            for s in settings['ORDERS_LIST_STATUSES']:
-                item['history'][s] = order['history'].get(s)
-            data.append(item)
-        self.write(dict(data=data))
 
 
 class Order(OrderMixin, RequestHandler):
