@@ -4,8 +4,7 @@
 
 {% block head_title %}Orders {{ account['email'] }}{% end %}
 {% block body_title %}
-{% module Icon('order') %}
-Orders
+{% module Icon('order', title='Orders', label=True) %}
 {% module Entity(account) %}
 {% end %}
 
@@ -45,7 +44,6 @@ Orders
 	  {% if is_staff %}
 	  <th>{% module Icon('form', label=True) %}</th>
 	  {% end %} {# if is_staff #}
-	  <th>{% module Icon('account', label=True, title='Owner') %}</th>
 	  {% for f in settings['ORDERS_LIST_FIELDS'] %}
 	  <th>{{ f['identifier'].capitalize().replace('_', ' ') }}</th>
 	  {% end %}
@@ -104,11 +102,6 @@ $(document).ready(function() {
        }
       },
 {% end %} {# if is_staff #}
-      {data: 'owner_name',
-       fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a href='"+oData.owner_href+"'>"+oData.owner_name+"</a>");
-       }
-      },
       {% for f in settings['ORDERS_LIST_FIELDS'] %}
       { data: 'fields.{{ f['identifier'] }}'},
       {% end %}

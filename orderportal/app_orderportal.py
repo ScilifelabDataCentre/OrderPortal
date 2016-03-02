@@ -64,6 +64,8 @@ def get_handlers():
             ApiV1AccountOrders, name='api_v1_account_orders'),
         url(r'/account/([^/]+)/groups/orders',
             AccountGroupsOrders, name='account_groups_orders'),
+        url(r'/api/v1/account/([^/]+)/groups/orders',
+            ApiV1AccountGroupsOrders, name='api_v1_account_groups_orders'),
         url(r'/account/([^/]+)/logs', AccountLogs, name='account_logs'),
         url(r'/account/([^/]+)/messages',
             AccountMessages, name='account_messages'),

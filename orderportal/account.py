@@ -357,8 +357,8 @@ class AccountCurrent(RequestHandler):
         self.see_other('account', self.current_user['email'])
 
 
-class AccountOrders(RequestHandler):
-    "Page for a list of all orders for an account."
+class AccountOrdersMixin(object):
+    "Mixin containing access tests."
 
     def is_readable(self, account):
         "Is the account readable by the current user?"
@@ -372,24 +372,27 @@ class AccountOrders(RequestHandler):
         if self.is_readable(account): return
         raise tornado.web.HTTPError(403, reason='you may not view these orders')
 
+
+class AccountOrders(AccountOrdersMixin, RequestHandler):
+    "Page for a list of all orders for an account."
+
     @tornado.web.authenticated
     def get(self, email):
         email = email.lower()
         account = self.get_account(email)
         self.check_readable(account)
         if self.is_staff():
-            order_column = 5
-        else:
             order_column = 4
+        else:
+            order_column = 3
         order_column += len(settings['ORDERS_LIST_STATUSES']) + \
             len(settings['ORDERS_LIST_FIELDS'])
         self.render('account_orders.html',
-                    forms=self.get_forms(),
                     order_column=order_column,
                     account=account)
 
 
-class ApiV1AccountOrders(AccountOrders):
+class ApiV1AccountOrders(AccountOrdersMixin, RequestHandler):
     "Account orders API; JSON output."
 
     @tornado.web.authenticated
@@ -398,15 +401,15 @@ class ApiV1AccountOrders(AccountOrders):
         email = email.lower()
         account = self.get_account(email)
         self.check_readable(account)
-        # Forms lookup on iuid
-        forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
         view = self.db.view('order/owner',
-                            startkey=[email],
-                            endkey=[email, constants.CEILING],
                             reduce=False,
-                            include_docs=True)
+                            include_docs=True,
+                            startkey=[email],
+                            endkey=[email, constants.CEILING])
         orders = [r.doc for r in view]
         names = self.get_account_names(None)
+        # Forms lookup on iuid
+        forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
         data = []
         for order in orders:
             item = dict(title=order.get('title') or '[no title]',
@@ -433,18 +436,35 @@ class ApiV1AccountOrders(AccountOrders):
         self.write(dict(data=data))
 
 
-class AccountGroupsOrders(RequestHandler):
+class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
     "Page for a list of all orders for the groups of an account."
 
     @tornado.web.authenticated
     def get(self, email):
         email = email.lower()
         account = self.get_account(email)
-        if not (self.is_staff() or email == self.current_user['email']):
-            raise tornado.web.HTTPError(
-                403, reason='you may not view these orders')
+        self.check_readable(account)
+        if self.is_staff():
+            order_column = 5
+        else:
+            order_column = 4
+        order_column += len(settings['ORDERS_LIST_STATUSES']) + \
+            len(settings['ORDERS_LIST_FIELDS'])
+        self.render('account_groups_orders.html',
+                    order_column=order_column,
+                    account=account)
+
+
+class ApiV1AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
+    "Account group orders API; JSON output."
+
+    @tornado.web.authenticated
+    def get(self, email):
+        "JSON output."
+        email = email.lower()
+        account = self.get_account(email)
+        self.check_readable(account)
         orders = []
-        # XXX This does not scale!
         for colleague in self.get_account_colleagues(email):
             view = self.db.view('order/owner',
                                 reduce=False,
@@ -452,23 +472,33 @@ class AccountGroupsOrders(RequestHandler):
                                 startkey=[colleague],
                                 endkey=[colleague, constants.CEILING])
             orders.extend([r.doc for r in view])
-        params = dict()
-        # Filter list
-        status = self.get_argument('status', '')
-        if status:
-            params['status'] = status
-            orders = [o for o in orders if o.get('status') == status]
-        orders.sort(lambda i, j: cmp(i['modified'], j['modified']),
-                    reverse=True)
-        page = self.get_page(count=len(orders))
-        orders = orders[page['start'] : page['end']]
-        account_names = self.get_account_names([o['owner'] for o in orders])
-        self.render('account_groups_orders.html',
-                    account=account,
-                    orders=orders,
-                    account_names=account_names,
-                    params=params,
-                    page=page)
+        names = self.get_account_names(None)
+        # Forms lookup on iuid
+        forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
+        data = []
+        for order in orders:
+            item = dict(title=order.get('title') or '[no title]',
+                        form_title=forms[order['form']],
+                        form_href=self.reverse_url('form', order['form']),
+                        owner_name=names[order['owner']],
+                        owner_href=self.reverse_url('account', order['owner']),
+                        fields={},
+                        status=order['status'],
+                        history={},
+                        modified=order['modified'])
+            identifier = order.get('identifier')
+            if identifier:
+                item['href'] = self.reverse_url('order_id', identifier)
+            else:
+                identifier = order['_id'][:6] + '...'
+                item['href'] = self.reverse_url('order', order['_id'])
+            item['identifier'] = identifier
+            for f in settings['ORDERS_LIST_FIELDS']:
+                item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
+            for s in settings['ORDERS_LIST_STATUSES']:
+                item['history'][s] = order['history'].get(s)
+            data.append(item)
+        self.write(dict(data=data))
 
 
 class AccountLogs(AccountMixin, RequestHandler):
