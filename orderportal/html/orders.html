@@ -17,13 +17,13 @@
 {% end %}
 
 {% block content %}
-<form action="{{ reverse_url('orders', **params) }}"
-      id="refresh"
-      role="form"
-      class="form-inline"
-      method="GET">
-  <div class="row">
-    <div class="col-md-7 col-md-offset-3">
+<div class="row">
+  <div class="col-md-7 col-md-offset-3">
+    <form action="{{ reverse_url('orders', **params) }}"
+	  id="refresh"
+	  role="form"
+	  class="form-inline"
+	  method="GET">
       <span class="glyphicon glyphicon-filter"></span>
       <div class="form-group">
 	<label for="form">Filter by</label>
@@ -56,11 +56,10 @@
 	  {% end %}
 	</select>
       </div>
-    </div>
-    <div class="col-md-2">
-    </div>
+    </form>
   </div>
-</form>
+  <div class="col-md-2"></div>
+</div>
 
 <div class="row">
   <div class="col-md-12">
@@ -88,7 +87,7 @@
     </table>
   </div>
 </div>
-{% end %}{# block content #}
+{% end %} {# block content #}
 
 {% block javascript_code %}
 {% import json %}

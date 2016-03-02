@@ -60,6 +60,8 @@ def get_handlers():
         url(r'/account', AccountCurrent, name='account_current'),
         url(r'/account/([^/]+)', Account, name='account'),
         url(r'/account/([^/]+)/orders', AccountOrders, name='account_orders'),
+        url(r'/api/v1/account/([^/]+)/orders',
+            ApiV1AccountOrders, name='api_v1_account_orders'),
         url(r'/account/([^/]+)/groups/orders',
             AccountGroupsOrders, name='account_groups_orders'),
         url(r'/account/([^/]+)/logs', AccountLogs, name='account_logs'),
@@ -125,8 +127,15 @@ def get_handlers():
         url(r'/admin/global_modes', GlobalModes, name='global_modes'),
         url(r'/admin/statuses', Statuses, name='statuses'),
         url(r'/admin/config', Config, name='config'),
-        url(r'/.*', NoSuchEntity),
         ])
+    try:
+        urls.append(tornado.web.url(r'/site/([^/]+)',
+                                    tornado.web.StaticFileHandler,
+                                    {'path': settings['SITE_DIR']},
+                                    name='site'))
+    except KeyError:
+        pass
+    urls.append(url(r'/.*', NoSuchEntity))
     return urls
 
 def main():
@@ -135,16 +144,8 @@ def main():
         logging.info('tornado debug')
     if settings['LOGGING_DEBUG']:
         logging.info('logging debug')
-    handlers = get_handlers()
-    try:
-        handlers.append(tornado.web.url(r'/site/([^/]+)',
-                                        tornado.web.StaticFileHandler,
-                                        {'path': settings['SITE_DIR']},
-                                        name='site'))
-    except KeyError:
-        pass
     application = tornado.web.Application(
-        handlers=handlers,
+        handlers=get_handlers(),
         debug=settings.get('TORNADO_DEBUG', False),
         cookie_secret=settings['COOKIE_SECRET'],
         ui_modules=uimodules,
