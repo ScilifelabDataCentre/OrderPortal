@@ -129,14 +129,9 @@ def get_handlers():
         url(r'/admin/global_modes', GlobalModes, name='global_modes'),
         url(r'/admin/statuses', Statuses, name='statuses'),
         url(r'/admin/config', Config, name='config'),
+        url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
+            {'path': settings['SITE_DIR']}, name='site'),
         ])
-    try:
-        urls.append(tornado.web.url(r'/site/([^/]+)',
-                                    tornado.web.StaticFileHandler,
-                                    {'path': settings['SITE_DIR']},
-                                    name='site'))
-    except KeyError:
-        pass
     urls.append(url(r'/.*', NoSuchEntity))
     return urls
 
@@ -154,6 +149,9 @@ def main():
         template_path='html',
         static_path='static',
         login_url=r'/login')
+    # Add href URLs for the status icons
+    for key, value in settings['ORDER_STATUSES_LOOKUP'].iteritems():
+        value['href'] = application.reverse_url('site', key + '.png')
     application.listen(settings['PORT'], xheaders=True)
     logging.info("web server PID %s on port %s", os.getpid(), settings['PORT'])
     tornado.ioloop.IOLoop.instance().start()

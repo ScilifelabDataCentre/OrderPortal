@@ -6,6 +6,7 @@ import markdown
 import tornado.web
 
 from . import constants
+from . import settings
 
 
 ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""
@@ -19,7 +20,10 @@ class Icon(tornado.web.UIModule):
             name = 'unknown'
         elif not isinstance(name, basestring):
             name = name[constants.DOCTYPE]
-        url = self.handler.static_url(name + '.png')
+        if name in settings['ORDER_STATUSES_LOOKUP']:
+            url = self.handler.reverse_url('site', name + '.png')
+        else:
+            url = self.handler.static_url(name + '.png')
         alt = name.capitalize()
         title = title or alt
         value = ICON_TEMPLATE.format(url=url, alt=alt, title=title)

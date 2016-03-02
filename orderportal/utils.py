@@ -100,7 +100,7 @@ def load_settings(filepath=None, verbose=False):
     # Read order state definitions and transitions
     with open(settings['ORDER_STATUSES_FILEPATH']) as infile:
         settings['ORDER_STATUSES'] = yaml.safe_load(infile)
-    lookup = dict()
+    settings['ORDER_STATUSES_LOOKUP'] = lookup = dict()
     initial = None
     for status in settings['ORDER_STATUSES']:
         if status['identifier'] in lookup:
@@ -111,7 +111,6 @@ def load_settings(filepath=None, verbose=False):
     if not initial:
         raise ValueError('no initial order status defined')
     settings['ORDER_STATUS_INITIAL'] = initial
-    settings['ORDER_STATUSES_LOOKUP'] = lookup
     with open(settings['ORDER_TRANSITIONS_FILEPATH']) as infile:
         settings['ORDER_TRANSITIONS'] = yaml.safe_load(infile)
     # Account messages
