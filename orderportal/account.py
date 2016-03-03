@@ -170,7 +170,9 @@ class ApiV1Accounts(_AccountsFilter):
                          self.reverse_url('account_orders', account['email']),
                      university=utils.to_utf8(account['university']),
                      role=account['role'],
-                     status=account['status'],
+                     status=account['status'].capitalize(),
+                     status_href=
+                         self.static_url(account['status'] + '.png'),
                      login=account.get('login', '-'),
                      modified=account['modified']))
         self.write(dict(data=data))

@@ -123,7 +123,11 @@ $(document).ready(function() {
       },
       {data: 'university'},
       {data: 'role'},
-      {data: 'status'},
+      {data: 'status',
+       fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+         $(nTd).html("<img src='"+oData.status_href+"'> "+sData);
+       }
+      },
       {data: 'login',
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          if (oData.login !== '-') {

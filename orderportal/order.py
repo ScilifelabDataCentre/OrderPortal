@@ -247,7 +247,8 @@ class ApiV1Orders(Orders):
                         owner_href=self.reverse_url('account', order['owner']),
                         fields={},
                         status=order['status'].capitalize(),
-                        status_href=self.reverse_url('site', order['status'] + '.png'),
+                        status_href=
+                            self.reverse_url('site', order['status'] + '.png'),
                         history={},
                         modified=order['modified'])
             identifier = order.get('identifier')
