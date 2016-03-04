@@ -2,8 +2,9 @@
 
 from __future__ import print_function, absolute_import
 
-import re
+import cStringIO
 import logging
+import re
 import urlparse
 
 import tornado.web
@@ -117,14 +118,15 @@ class OrderSaver(saver.Saver):
             self.changed['file_deleted'] = filename
             return
         # No new file uploaded, just skip out.
-        try:
-            if self.content is None: return
-        except AttributeError:
-            return
+        if not hasattr(self, 'file'): return
+        # Using cStringIO here is a kludge.
+        # Don't ask me why this was required on one machine, but not another.
+        # The problem appeared on a Python 2.6 system, and involved Unicode.
+        # But I was unable to isolate it. I tested this in desperation...
         self.db.put_attachment(self.doc,
-                               self.content,
-                               filename=self['filename'],
-                               content_type=self['content_type'])
+                               cStringIO.StringIO(self.file.body),
+                               filename=self.file.filename,
+                               content_type=self.file.content_type)
 
 class OrderMixin(object):
     "Mixin for various useful methods."
@@ -587,8 +589,8 @@ class OrderAttach(OrderMixin, RequestHandler):
             pass
         else:
             with OrderSaver(doc=order, rqh=self) as saver:
-                saver.content = infile['body']
-                saver['filename'] = infile['filename']
-                saver['size'] = len(saver.content)
-                saver['content_type'] = infile['content_type'] or 'application/octet-stream'
+                saver.file = infile
+                saver['filename'] = infile.filename
+                saver['size'] = len(infile.body)
+                saver['content_type'] = infile.content_type or 'application/octet-stream'
         self.see_other('order', order['_id'])
