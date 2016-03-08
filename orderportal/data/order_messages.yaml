@@ -42,7 +42,7 @@ rejected:
   recipients: [owner, group]
   subject: "The order '{order}' has been rejected at the {site}."
   text: |
-    The order ''{order}'' has been rejected at the {site}.
+    The order '{order}' has been rejected at the {site}.
 
     Contact the {site} administrators for further information.
 
