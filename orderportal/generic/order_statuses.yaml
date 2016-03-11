@@ -1,0 +1,44 @@
+# OrderPortal order status definitions.
+
+- identifier: preparation
+  initial: true
+  description: The order has been created and is being edited by the user.
+  edit: [user, admin]
+  attach: [user, admin]
+  action: Prepare
+
+- identifier: submitted
+  label: Submit
+  description: The order has been submitted by the user for consideration by the facility.
+  attach: [user, admin]
+  action: Submit
+
+- identifier: review
+  description: The order is under review by the facility.
+  edit: [admin]
+  attach: [user, admin]
+  action: Review
+
+- identifier: accepted
+  description: The order has been checked and accepted by the facility.
+  attach: [user, admin]
+  action: Accept
+
+- identifier: rejected
+  description: The order has been rejected by the facility.
+  edit: [user, admin]
+  action: reject
+
+- identifier: processing
+  description: The facility is working on the order, in the lab or in data analysis.
+  attach: [admin]
+  action: Process
+
+- identifier: aborted
+  description: The work on the order has been permanently stopped.
+  action: Abort
+
+- identifier: closed
+  description: All work and other actions for the order have been performed.
+  attach: [admin]
+  action: Close
