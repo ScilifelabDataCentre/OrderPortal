@@ -67,7 +67,7 @@ def load_settings(filepath=None, verbose=False):
         print('settings from', filepath, file=sys.stderr)
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
-    # Expand environment variables and the constants.ROOT
+    # Expand environment variables, ROOT and SITE_DIR, once and for all
     for key, value in settings.items():
         if isinstance(value, (str, unicode)):
             settings[key] = expand_filepath(value)
@@ -115,7 +115,7 @@ def load_settings(filepath=None, verbose=False):
         settings['ORDER_TRANSITIONS'] = yaml.safe_load(infile)
     # Account messages
     try:
-        filepath = expand_filepath(settings['ACCOUNT_MESSAGES_FILEPATH'])
+        filepath = settings['ACCOUNT_MESSAGES_FILEPATH']
         if not filepath: raise KeyError
     except KeyError:
         settings['ACCOUNT_MESSAGES'] = dict()
@@ -124,7 +124,7 @@ def load_settings(filepath=None, verbose=False):
             settings['ACCOUNT_MESSAGES'] = yaml.safe_load(infile)
     # Order messages
     try:
-        filepath = expand_filepath(settings['ORDER_MESSAGES_FILEPATH'])
+        filepath = settings['ORDER_MESSAGES_FILEPATH']
         if not filepath: raise KeyError
     except KeyError:
         settings['ORDER_MESSAGES'] = dict()
@@ -133,7 +133,7 @@ def load_settings(filepath=None, verbose=False):
             settings['ORDER_MESSAGES'] = yaml.safe_load(infile)
     # Read order autopopulate mapping
     try:
-        filepath = expand_filepath(settings['ORDER_AUTOPOPULATE_FILEPATH'])
+        filepath = settings['ORDER_AUTOPOPULATE_FILEPATH']
         if not filepath: raise KeyError
     except KeyError:
         settings['ORDER_AUTOPOPULATE'] = dict()
@@ -155,7 +155,7 @@ def load_settings(filepath=None, verbose=False):
         settings['UNIVERSITIES'] = collections.OrderedDict(unis)
     # Read country codes
     try:
-        filepath = expand_filepath(settings['COUNTRY_CODES_FILEPATH'])
+        filepath = settings['COUNTRY_CODES_FILEPATH']
         if not filepath: raise KeyError
     except KeyError:
         settings['countries'] = []
@@ -166,7 +166,7 @@ def load_settings(filepath=None, verbose=False):
                                              for c in settings['countries']])
     # Read subject terms
     try:
-        filepath = expand_filepath(settings['SUBJECT_TERMS_FILEPATH'])
+        filepath = settings['SUBJECT_TERMS_FILEPATH']
         if not filepath: raise KeyError
     except KeyError:
         settings['subjects'] = []

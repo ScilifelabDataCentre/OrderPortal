@@ -19,8 +19,8 @@ COOKIE_SECRET: 'make this a long string with apparent garbage'
 PASSWORD_SALT: 'make this a long string with apparent garbage'
 
 # Site customization
-SITE_NAME: 'Your Order Portal'
 SITE_DIR: '{ROOT}/your/'
+SITE_NAME: 'Your Order Portal'
 SITE_FAVICON: 'favicon.png'
 SITE_NAVBAR_ICON: 'favicon.png'
 SITE_HOME_ICON: 'logo-white-background.png'
