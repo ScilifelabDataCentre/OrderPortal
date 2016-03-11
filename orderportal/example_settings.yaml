@@ -1,13 +1,14 @@
 # OrderPortal: Example settings file.
 
 # Official URL to portal
-BASE_URL: 'http://your.domain.com/'
+BASE_URL: 'http://your-domain.com/'
 
 # tornado server port
 PORT: 8882
 
 # CouchDB server
 DB_SERVER: 'http://localhost:5984/'
+# DB_SERVER: 'http://username:password@localhost:5984/'
 DATABASE: 'orderportal'
 
 # Logging and debug.
@@ -19,19 +20,16 @@ COOKIE_SECRET: 'make this a long string with apparent garbage'
 PASSWORD_SALT: 'make this a long string with apparent garbage'
 
 # Site customization
-SITE_DIR: '{ROOT}/your/'
+SITE_DIR: '{ROOT}/your'
 SITE_NAME: 'Your Order Portal'
 SITE_FAVICON: 'favicon.png'
 SITE_NAVBAR_ICON: 'favicon.png'
 SITE_HOME_ICON: 'logo-white-background.png'
-SITE_SUPPORT_EMAIL: 'your.email@domain.com'
+SITE_SUPPORT_EMAIL: 'your.email@your-domain.com'
 
 # Use sequentially numbered order identifiers
 ORDER_ID_FORMAT: 'YOUR{0:=05d}'
 ORDER_ID_REGEXP: 'YOUR\d+'
-
-ORDER_STATUSES_FILEPATH: '{ROOT}/data/order_statuses.yaml'
-ORDER_TRANSITIONS_FILEPATH: '{ROOT}/data/order_transitions.yaml'
 
 ORDERS_LIST_STATUSES:
   - submitted
@@ -39,14 +37,7 @@ ORDERS_LIST_STATUSES:
   - processing
   - closed
 
-ACCOUNT_MESSAGES_FILEPATH: '{ROOT}/data/account_messages.yaml'
-ORDER_MESSAGES_FILEPATH: '{ROOT}/data/order_messages.yaml'
-ORDER_AUTOPOPULATE_FILEPATH: '{ROOT}/data/order_autopopulate.yaml'
-UNIVERSITIES_FILEPATH: '{ROOT}/data/swedish_universities.yaml'
-COUNTRY_CODES_FILEPATH: '{ROOT}/data/country_codes.yaml'
-SUBJECT_TERMS_FILEPATH: '{ROOT}/data/subjects.yaml'
-
 # Messages; email server info.
-MESSAGE_SENDER_EMAIL: '"NGI Sweden Support" <support@ngisweden.se>'
+MESSAGE_SENDER_EMAIL: '"OrderPortal Support" <support@your-domain.com>'
 EMAIL:
   HOST: 'localhost'
