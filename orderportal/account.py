@@ -615,36 +615,41 @@ class Login(RequestHandler):
         try:
             email = self.get_argument('email')
             password = self.get_argument('password')
+        except tornado.web.MissingArgumentError:
+            self.see_other('home', error='Missing email or password argument.')
+            return
+        try:
             account = self.get_account(email)
             if not utils.hashed_password(password) == account.get('password'):
-                raise ValueError('invalid password')
+                raise ValueError
+        except (tornado.web.HTTPError, ValueError):
+            self.see_other('home', error='No such account or invalid password.')
+            return
+        try:
             if not account.get('status') == constants.ENABLED:
-                raise ValueError('disabled account account')
-        except (tornado.web.MissingArgumentError,
-                tornado.web.HTTPError,
-                ValueError), msg:
-            raise tornado.web.HTTPError(
-                403, reason='Invalid email (username) or password.')
+                raise ValueError
+        except ValueError:
+            self.see_other('home', error='Account is disabled.')
+            return
+        if not self.global_modes['allow_login'] \
+           and account['role'] != constants.ADMIN:
+            self.see_other('home', error='Login is currently disabled.')
+            return
+        self.set_secure_cookie(constants.USER_COOKIE, account['email'],
+                               expires_days=settings['LOGIN_MAX_AGE_DAYS'])
+        with AccountSaver(doc=account, rqh=self) as saver:
+            saver['login'] = utils.timestamp() # Set login timestamp.
+        if account.get('update_info'):
+            self.see_other('account_edit', account['email'],
+                           message='Please review and update your account information.')
+            return
+        next = self.get_argument('next', None)
+        if next is None:
+            self.see_other('home')
         else:
-            if not self.global_modes['allow_login'] \
-               and account['role'] != constants.ADMIN:
-                self.see_other('home', error='Login is currently disabled.')
-                return
-            self.set_secure_cookie(constants.USER_COOKIE, account['email'],
-                                   expires_days=settings['LOGIN_MAX_AGE_DAYS'])
-            with AccountSaver(doc=account, rqh=self) as saver:
-                saver['login'] = utils.timestamp() # Set login timestamp.
-            if account.get('update_info'):
-                self.see_other('account_edit', account['email'],
-                               message='Please review and update your account information.')
-                return
-            next = self.get_argument('next', None)
-            if next is None:
-                self.see_other('home')
-            else:
-                # Not quite right: should be an absolute URL to redirect.
-                # But seems to work anyway.
-                self.redirect(next)
+            # Not quite right: should be an absolute URL to redirect.
+            # But seems to work anyway.
+            self.redirect(next)
 
 
 class Logout(RequestHandler):
@@ -665,13 +670,19 @@ class Reset(RequestHandler):
 
     def post(self):
         self.check_xsrf_cookie()
-        account = self.get_account(self.get_argument('email'))
-        with AccountSaver(doc=account, rqh=self) as saver:
-            saver.reset_password()
-        if self.current_user and self.current_user['email'] == account['email']:
-            self.see_other('password')
-        else:
+        try:
+            account = self.get_account(self.get_argument('email'))
+        except (tornado.web.MissingArgumentError,
+                tornado.web.HTTPError):
             self.see_other('home')
+        else:
+            with AccountSaver(doc=account, rqh=self) as saver:
+                saver.reset_password()
+            if self.current_user and \
+               self.current_user['email'] == account['email']:
+                self.see_other('password', email=account['email'])
+            else:
+                self.see_other('home')
 
 
 class Password(RequestHandler):
