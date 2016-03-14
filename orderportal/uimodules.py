@@ -20,6 +20,8 @@ class Icon(tornado.web.UIModule):
             name = 'unknown'
         elif not isinstance(name, basestring):
             name = name[constants.DOCTYPE]
+        # Order status icons are located in the site directory,
+        # since they depend on the setup.
         if name in settings['ORDER_STATUSES_LOOKUP']:
             url = self.handler.reverse_url('site', name + '.png')
         else:
