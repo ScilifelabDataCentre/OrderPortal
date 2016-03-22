@@ -141,6 +141,22 @@ class RequestHandler(tornado.web.RequestHandler):
             raise tornado.web.HTTPError(
                 403, reason="role 'staff' is required for this")
 
+    def get_admins(self):
+        "Get the list of enabled admin accounts."
+        view = self.db.view('account/role', include_docs=True)
+        admins = [r.doc for r in view[constants.ADMIN]]
+        return [a for a in admins if a['status'] == constants.ENABLED]
+
+    def get_colleagues(self, email):
+        "Get list of accounts in same groups as the account given by email."
+        colleagues = dict()
+        for row in self.db.view('group/member', include_docs=True, key=email):
+            for member in row.doc['members']:
+                account = self.get_account(member)
+                if account['status'] == constants.ENABLED:
+                    colleagues[account['email']] = account
+        return colleagues.values()
+
     def get_next_counter(self, doctype):
         "Get the next counter number for the doctype."
         while True:

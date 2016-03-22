@@ -14,6 +14,7 @@ from orderportal import saver
 from orderportal import settings
 from orderportal import utils
 from orderportal.group import GroupSaver
+from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler
 
 
@@ -678,6 +679,24 @@ class Reset(RequestHandler):
         else:
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver.reset_password()
+            # Prepare message to send later
+            try:
+                template = settings['ACCOUNT_MESSAGES']['reset']
+            except KeyError:
+                pass
+            else:
+                with MessageSaver(rqh=self) as saver:
+                    saver.set_params(
+                        account=account['email'],
+                        url=self.absolute_reverse_url('password'),
+                        password_url=self.absolute_reverse_url('password'),
+                        password_code_url=self.absolute_reverse_url(
+                            'password',
+                            email=account['email'],
+                            code=account['code']),
+                        code=account['code'])
+                    saver.set_template(template)
+                    saver['recipients'] = [account['email']]
             if self.current_user and \
                self.current_user['email'] == account['email']:
                 self.see_other('password', email=account['email'])
@@ -777,6 +796,19 @@ class Register(RequestHandler):
             saver['role'] = constants.USER
             saver['status'] = constants.PENDING
             saver.erase_password()
+        # Prepare message to send later
+        try:
+            template = settings['ACCOUNT_MESSAGES']['pending']
+        except KeyError:
+            pass
+        else:
+            account = saver.doc
+            with MessageSaver(rqh=self) as saver:
+                saver.set_params(
+                    account=account['email'],
+                    url=self.absolute_reverse_url('account', account['email']))
+                saver.set_template(template)
+                saver['recipients'] = [a['email'] for a in self.get_admins()]
         self.see_other('registered')
 
 
@@ -790,7 +822,6 @@ class Registered(RequestHandler):
 class AccountEnable(RequestHandler):
     "Enable the account; from status pending or disabled."
 
-
     @tornado.web.authenticated
     def post(self, email):
         self.check_xsrf_cookie()
@@ -799,6 +830,24 @@ class AccountEnable(RequestHandler):
         with AccountSaver(account, rqh=self) as saver:
             saver['status'] = constants.ENABLED
             saver.reset_password()
+        # Prepare message to send later
+        try:
+            template = settings['ACCOUNT_MESSAGES']['enabled']
+        except KeyError:
+            pass
+        else:
+            with MessageSaver(rqh=self) as saver:
+                saver.set_params(
+                    account=account['email'],
+                    url=self.absolute_reverse_url('password'),
+                    password_url=self.absolute_reverse_url('password'),
+                    password_code_url=self.absolute_reverse_url(
+                        'password',
+                        email=account['email'],
+                        code=account['code']),
+                    code=account['code'])
+                saver.set_template(template)
+                saver['recipients'] = [account['email']]
         self.see_other('account', email)
 
 

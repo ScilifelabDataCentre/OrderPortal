@@ -9,12 +9,13 @@ import urlparse
 
 import tornado.web
 
-from . import constants
-from . import saver
-from . import settings
-from . import utils
-from .fields import Fields
-from .requesthandler import RequestHandler
+from orderportal import constants
+from orderportal import saver
+from orderportal import settings
+from orderportal import utils
+from orderportal.fields import Fields
+from orderportal.message import MessageSaver
+from orderportal.requesthandler import RequestHandler
 
 
 class OrderSaver(saver.Saver):
@@ -197,6 +198,37 @@ class OrderMixin(object):
         if not self.global_modes['allow_order_creation']: return False
         form = self.get_entity(order['form'], doctype=constants.FORM)
         return form['status'] in (constants.ENABLED, constants.TESTING)
+
+    def prepare_message(self, order):
+        "Prepare a message to send after status change."
+        try:
+            template = settings['ORDER_MESSAGES'][order['status']]
+        except KeyError:
+            return
+        logging.debug(">>> template found")
+        owner = self.get_account(order['owner'])
+        # Owner account may have disappeared; not very likely...
+        if owner and 'owner' in template['recipients']:
+            recipients = set([owner['email']])
+        else:
+            recipients = set()
+        if 'group' in template['recipients']:
+            recipients.update([a['email']
+                               for a in self.get_colleagues(owner['email'])])
+        if 'admin' in template['recipients']:
+            recipients.update([a['email'] for a in self.get_admins()])
+        logging.debug(">>> recipients %s", recipients)
+        with MessageSaver(rqh=self) as saver:
+            try:
+                url = self.absolute_reverse_url('order_id', order['identifier'])
+            except KeyError:
+                url = self.absolute_reverse_url('order', order['_id'])
+            saver.set_params(
+                owner=order['owner'],
+                order=order.get('title') or order.get('identifier') or order['_id'],
+                url=url)
+            saver.set_template(template)
+            saver['recipients'] = list(recipients)
 
 
 class Orders(RequestHandler):
@@ -424,7 +456,7 @@ class OrderCreate(RequestHandler):
                     if value is None: break
                 saver['fields'][target] = value
             saver.check_fields_validity(fields)
-            # Set identifier only if form properly enabled
+            # Set identifier only if form is enabled; not when testing
             if form['status'] == constants.ENABLED:
                 try:
                     fmt = settings['ORDER_IDENTIFIER_FORMAT']
@@ -453,6 +485,7 @@ class OrderEdit(OrderMixin, RequestHandler):
                     title=u"Edit order '{0}'".format(order['title']),
                     order=order,
                     colleagues=colleagues,
+                    form=form,
                     fields=form['fields'])
 
     @tornado.web.authenticated
@@ -485,6 +518,7 @@ class OrderEdit(OrderMixin, RequestHandler):
                     if target['identifier'] == 'submitted':
                         with OrderSaver(doc=order, rqh=self) as saver:
                             saver.set_status('submitted')
+                        self.prepare_message(order)
                         self.see_other('order', order['_id'],
                                        message='Order saved and submitted.')
                         break
@@ -494,8 +528,7 @@ class OrderEdit(OrderMixin, RequestHandler):
                                    error='Order could not be submitted due to'
                                    ' invalid or missing values.')
             else:
-                self.see_other('order', order['_id'],
-                               message='Order saved.')
+                self.see_other('order', order['_id'], message='Order saved.')
         except ValueError, msg:
             self.see_other('order_edit', order['_id'], error=str(msg))
 
@@ -536,6 +569,7 @@ class OrderTransition(OrderMixin, RequestHandler):
                 403, reason='invalid order transition target')
         with OrderSaver(doc=order, rqh=self) as saver:
             saver.set_status(targetid)
+        self.prepare_message(order)
         self.see_other('order', order['_id'])
 
 

@@ -8,33 +8,21 @@
 Messages to {{ account['email'] }}
 {% end %}
 
-{% block main_content %}
-{% import functools %}
+{% block content %}
 <div class="panel panel-default">
   <div class="panel-body">
     {% module Entity(account) %}
   </div>
 </div>
 
-<div class="row">
-  <div class="col-md-10 col-md-offset-1">
-    {% set url_func = functools.partial(reverse_url, 'account_messages', account['email']) %}
-    {% include 'paging.html' %}
-  </div>
-  <div class="col-md-1">
-  </div>
-</div>
-
 <table class="table table-striped">
   <tr>
     <th>Date</th>
-    <th>Type</th>
     <th width="80%">Message</th>
   </tr>
   {% for message in messages %}
   <tr>
     <td class="localtime">{{ message['modified'] }}</td>
-    <td>{{ message['type'] }}</td>
     <td>
       <table>
 	<tr>
@@ -63,4 +51,4 @@ Messages to {{ account['email'] }}
   </tr>
   {% end %}
 </table>
-{% end %} {# block main_content #}
+{% end %} {# block content #}

@@ -185,7 +185,7 @@
   <span class="help-block">
     {% module Markdown(field.get('description')) %}
     {% if field['type'] == constants.TEXT %}
-    Use <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
+    Use <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
     if you want fancy display of this text data.
     {% end %}
   </span>

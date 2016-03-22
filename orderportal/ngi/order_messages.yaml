@@ -14,13 +14,13 @@ submitted:
     This is to confirm that the  order '{order}' has been submitted by
     {owner} to {site}.
 
-    It will be reviewed by the {site} administrators who will contact you
-    if further infomation is needed. When the review is done, we will send
-    a quote and information about sample delivery. For more information on
-    how orders are processed, see the page "How to place an order"
-    http://ngisweden.scilifelab.se/info/how_to_place_an_order .
+    The order will be reviewed by the {site} administrators.
+    A quote and information about sample delivery will be sent later.
 
-    Go to {url} to view the order.
+    For more information on how orders are processed, see the page
+    "How to place an order" http://ngisweden.scilifelab.se/info/how_to_place_an_order
+
+    To view the order, go to {url}
 
     If you have any questions, use {support}
 
@@ -33,7 +33,7 @@ accepted:
   text: |
     The order '{order}' has been accepted at the {site}.
 
-    Go to {url} to view the order.
+    To view the order, go to {url}
 
     If you have any questions, use {support}
 
@@ -48,7 +48,7 @@ rejected:
 
     Contact the {site} administrators for further information.
 
-    Go to {url} to view the order.
+    To view the order, go to {url}
 
     If you have any questions, use {support}
 
@@ -61,7 +61,7 @@ processing:
   text: |
     The order '{order}' is being processed at the {site}.
 
-    Go to {url} to view the order.
+    To view the order, go to {url}
 
     If you have any questions, use {support}
 
@@ -74,9 +74,7 @@ aborted:
   text: |
     The order '{order}' has been aborted at the {site}.
 
-    Contact the {site} administrators for further information.
-
-    Go to {url} to view the order.
+    To view the order, go to {url}
 
     If you have any questions, use {support}
 
@@ -89,7 +87,7 @@ closed:
   text: |
     The order '{order}' has been closed at the {site}.
 
-    Go to {url} to view the order.
+    To view the order, go to {url}
 
     If you have any questions, use {support}
 

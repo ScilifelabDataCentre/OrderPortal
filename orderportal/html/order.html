@@ -105,6 +105,7 @@
 {% block main_content %}
 <div class="panel panel-default">
   <div class="panel-body">
+    <h3>{{ form['title'] }}</h3>
     <table class="table table-condensed table-fields table-noborder">
       {% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
       <tr>
@@ -120,6 +121,19 @@
 	</td>
       </tr>
       {% end %}
+
+      {% if is_admin %}
+      <tr>
+	<th>Order form</th>
+	<td>
+	  <a href="{{ reverse_url('form', form['_id']) }}">
+	    {{ form['title'] }}
+	    ({{ form.get('version') or '-' }})
+	  </a>
+	</td>
+      </tr>
+      {% end %}
+
       <tr>
 	<th>Owner</th>
 	<td colspan="2">
@@ -135,6 +149,7 @@
 	  ({{ status['description'] }})
 	</td>
       </tr>
+
       <tr>
 	<th>History</th>
 	<td>
@@ -148,6 +163,7 @@
 	  </table>
 	</td>
       </tr>
+
       <tr>
 	<th>Modified</th>
 	<td>
@@ -157,6 +173,7 @@
 	  </a>
 	</td>
       </tr>
+
       <tr>
 	<th>Created</th>
 	<td class="localtime">{{ order['created'] }}</td>
@@ -164,20 +181,6 @@
       <tr>
 	<th>IUID</th>
 	<td>{{ order['_id'] }}</td>
-      </tr>
-
-      <tr>
-	<th>Form</th>
-	<td>
-	  {% if is_admin %}
-	  <a href="{{ reverse_url('form', form['_id']) }}">
-	    {{ form['title'] }}
-	    ({{ form.get('version') or '-' }})
-	  </a>
-	  {% else %}
-	  {{ form['title'] }}
-	  {% end %}
-	</td>
       </tr>
 
       <tr>

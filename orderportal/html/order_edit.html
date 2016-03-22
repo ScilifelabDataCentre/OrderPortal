@@ -12,7 +12,21 @@ Edit order
 '{{ order.get('title') or order['_id'] }}'
 {% end %}
 
-{% block main_content %}
+{% block content %}
+<h3>{{ form['title'] }}</h3>
+
+<form action="{{ reverse_url('order', order['_id']) }}"
+      class="myForm"
+      role="form"
+      method="GET">
+  <div class="form-group">
+    <button type="submit" class="btn btn-default">
+      <span class="glyphicon glyphicon-remove"></span>
+      Cancel edit
+    </button>
+  </div>
+</form>
+
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
       class="myForm"
       role="form"
@@ -80,12 +94,12 @@ Edit order
   <div class="form-group">
     <button type="submit" class="btn btn-default">
       <span class="glyphicon glyphicon-remove"></span>
-      Cancel
+      Cancel edit
     </button>
   </div>
 </form>
 
-{% end %} {# block main_content #}
+{% end %} {# block content #}
 
 {% block header_css %}
 <link rel="stylesheet" href="{{ static_url('jquery-ui-themes-1.11.4/themes/smoothness/jquery-ui.min.css') }}">
