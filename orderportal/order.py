@@ -205,7 +205,6 @@ class OrderMixin(object):
             template = settings['ORDER_MESSAGES'][order['status']]
         except KeyError:
             return
-        logging.debug(">>> template found")
         owner = self.get_account(order['owner'])
         # Owner account may have disappeared; not very likely...
         if owner and 'owner' in template['recipients']:
@@ -217,7 +216,6 @@ class OrderMixin(object):
                                for a in self.get_colleagues(owner['email'])])
         if 'admin' in template['recipients']:
             recipients.update([a['email'] for a in self.get_admins()])
-        logging.debug(">>> recipients %s", recipients)
         with MessageSaver(rqh=self) as saver:
             try:
                 url = self.absolute_reverse_url('order_id', order['identifier'])

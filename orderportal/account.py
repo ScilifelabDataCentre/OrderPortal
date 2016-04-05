@@ -581,7 +581,10 @@ class AccountEdit(AccountMixin, RequestHandler):
             try:
                 saver['gender'] = self.get_argument('gender').lower()
             except tornado.web.MissingArgumentError:
-                del saver['gender']
+                try:
+                    del saver['gender']
+                except KeyError:
+                    pass
             try:
                 saver['subject'] = int(self.get_argument('subject'))
             except (tornado.web.MissingArgumentError, ValueError, TypeError):
