@@ -1,8 +1,8 @@
 {# Home page for a logged in user having role 'staff'. #}
 
-{% extends "home_loggedin.html" %}
+{% extends "home.html" %}
 
-{% block body_header_left %}
+{% block content_left %}
 <div class="panel panel-default">
   <div class="panel-heading">
     Recently accepted orders
@@ -21,4 +21,4 @@
     </table>
   </div>
 </div>
-{% end %} {# block body_header_left #}
+{% end %} {# block content_left #}

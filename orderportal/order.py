@@ -424,10 +424,14 @@ class OrderLogs(OrderMixin, RequestHandler):
 
 
 class OrderCreate(RequestHandler):
-    "Create a new order."
+    "Create a new order. Redirect with error message if not logged in."
 
-    @tornado.web.authenticated
     def get(self):
+        if not self.current_user:
+            self.see_other('home',
+                           error='You need to be logged in to create an order.'
+                           ' Register to get an account.')
+            return
         if not self.global_modes['allow_order_creation'] \
            and self.current_user['role'] != constants.ADMIN:
             self.see_other('home',error='Order creation is currently disabled.')
