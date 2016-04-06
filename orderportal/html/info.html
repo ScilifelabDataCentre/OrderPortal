@@ -13,7 +13,7 @@
     {% module Markdown(info.get('text')) %}
   </div>
 
-  <div class="col-md-2">
+  <div class="col-md-3 col-md-offset-1">
     {% if is_admin %}
     <div class="pull-right">
       <form action="{{ reverse_url('info_edit', info['name']) }}"
@@ -38,7 +38,16 @@
 	</button>
       </form>
     </div>
-    {% end %}
+    {% end %} {# if is_admin #}
+    <div>
+      {% for n, t in infos %}
+      <li>
+	<a href="{{ reverse_url('info', n) }}">
+	  {{ t or n }}
+	</a>
+      </li>
+      {% end %}
+    </div>
   </div>
 
 </div>
