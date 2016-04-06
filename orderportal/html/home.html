@@ -116,7 +116,8 @@
 
     {% if global_modes['allow_order_creation'] %}
     <div class="panel-group">
-      {% for form in forms[0::2] %}
+      {% set last = (len(forms) + 1) / 2 %}
+      {% for form in forms[:last] %}
       <div class="panel panel-primary">
 	<div class="panel-heading">{{ form['title'] }}</div>
 	<div class="panel-body">
@@ -148,7 +149,7 @@
 
     {% if global_modes['allow_order_creation'] %}
     <div class="panel-group">
-      {% for form in forms[1::2] %}
+      {% for form in forms[last:] %}
       <div class="panel panel-primary">
 	<div class="panel-heading">{{ form['title'] }}</div>
 	<div class="panel-body">

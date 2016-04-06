@@ -53,6 +53,15 @@ Edit
   </div>
 
   <div class="form-group">
+    <label for="ordinal">Ordinal</label>
+    <input type="text" class="form-control" name="ordinal" id="ordinal"
+	   value="{{ form.get('ordinal') or 0 }}">
+    <span class="help-block">
+      Integer value determining order of forms in display for users.
+    </span>
+  </div>
+
+  <div class="form-group">
     <label class="control-label"></label>
     <button type="submit" class="btn btn-success">
       <span class="glyphicon glyphicon-floppy-disk"></span>

@@ -22,8 +22,11 @@ class Home(RequestHandler):
     "Home page; dashboard. Contents according to role of logged-in account."
 
     def get(self):
-        kwargs = dict(forms=[r.doc for r in
-                             self.db.view('form/enabled', include_docs=True)],
+        forms = [r.doc for r in self.db.view('form/enabled', include_docs=True)]
+        for f in forms:
+            if f.get('ordinal') is None: f['ordinal'] = 0
+        forms.sort(lambda i,j: cmp(i['ordinal'], j['ordinal']))
+        kwargs = dict(forms=forms,
                       news_items=self.get_news(),
                       events=self.get_events())
         if self.current_user and self.get_invitations(self.current_user['email']):

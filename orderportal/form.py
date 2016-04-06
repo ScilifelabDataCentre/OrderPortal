@@ -21,6 +21,7 @@ class FormSaver(saver.Saver):
     def initialize(self):
         super(FormSaver, self).initialize()
         self.doc['fields'] = []
+        self.doc['ordinal'] = 0
 
     def setup(self):
         self.fields = Fields(self.doc)
@@ -189,7 +190,7 @@ class FormCreate(RequestHandler):
                     saver['version'] = data.get('version')
                 saver['fields'] = data['fields']
             except Exception, msg:
-                logging.info("Error importing form: %s", msg)
+                logging.error("Error importing form: %s", msg)
         self.see_other('form', saver.doc['_id'])
 
 
@@ -213,6 +214,10 @@ class FormEdit(FormMixin, RequestHandler):
             saver['title'] = self.get_argument('title')
             saver['description'] = self.get_argument('description', None)
             saver['version'] = self.get_argument('version', None)
+            try:
+                saver['ordinal'] = int(self.get_argument('ordinal', 0))
+            except (ValueError, TypeError):
+                pass
         self.see_other('form', form['_id'])
 
 

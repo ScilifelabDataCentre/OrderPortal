@@ -153,6 +153,10 @@
 	<td>{% module Icon(form['status'], label=True) %}</td>
       </tr>
       <tr>
+	<th>Ordinal</th>
+	<td>{{ form.get('ordinal') or 0 }}</td>
+      </tr>
+      <tr>
 	<th>Modified</th>
 	<td>
 	  <span class="localtime">{{ form['modified'] }}</span>

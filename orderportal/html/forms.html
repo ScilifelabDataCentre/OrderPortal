@@ -20,6 +20,7 @@ Forms
     <th>Description</th>
     <th>Version</th>
     <th>Status</th>
+    <th>Ordinal</th>
     <th>Orders</th>
     <th>Owner</th>
     <th>Modified</th>
@@ -34,6 +35,7 @@ Forms
     <td>{% module Markdown(form.get('description')) %}</td>
     <td>{{ form.get('version') or '-' }}</td>
     <td>{% module Icon(form['status'], label=True) %}</td>
+    <td>{{ form.get('ordinal') or 0 }}</td>
     <td>
       <a class="badge"
 	 href="{{ reverse_url('form_orders', form['_id']) }}">
