@@ -50,3 +50,6 @@ help_datatypes: |
 
 contact: |
   [This ought to contain information on how to contact the facility.]
+
+about: |
+  [This ought to contain information about the facility.]

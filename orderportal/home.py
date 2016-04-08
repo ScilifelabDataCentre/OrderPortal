@@ -101,6 +101,13 @@ class Contact(RequestHandler):
         self.render('contact.html')
 
 
+class About(RequestHandler):
+    "Display 'About us' information."
+
+    def get(self):
+        self.render('about.html')
+
+
 class TechInfo(RequestHandler):
     "Display information about the web site technology."
 
