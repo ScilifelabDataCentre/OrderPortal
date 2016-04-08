@@ -720,15 +720,22 @@ class Password(RequestHandler):
         self.check_xsrf_cookie()
         account = self.get_account(self.get_argument('email'))
         if account.get('code') != self.get_argument('code'):
-            raise tornado.web.HTTPError(400, reason='invalid email or code')
+            self.see_other('home',
+                           error=
+"""Either the email address or the code for setting password was wrong.
+ You should probably request a new code using the 'Reset password' button.""")
+            return
         password = self.get_argument('password')
         if len(password) < constants.MIN_PASSWORD_LENGTH:
             mgs = "password shorter than {0} characters".format(
                 constants.MIN_PASSWORD_LENGTH)
             raise tornado.web.HTTPError(400, reason=msg)
         if password != self.get_argument('confirm_password'):
-            msg = 'password not the same! mistyped'
-            raise tornado.web.HTTPError(400, reason=msg)
+            self.see_other('password',
+                           email=self.get_argument('email') or '',
+                           code=self.get_argument('code') or '',
+                           error='password confirmation failed. Not the same!')
+            return
         with AccountSaver(doc=account, rqh=self) as saver:
             saver.set_password(password)
             saver['login'] = utils.timestamp() # Set login session.
