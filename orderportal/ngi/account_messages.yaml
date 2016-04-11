@@ -22,7 +22,7 @@ enabled:
   text: |
     Your account {account} in the {site} has been enabled.
 
-    However, you will first have to set your password for the account.
+    You will now have to set a new password for your account.
 
     Go to {password_code_url} to set the password.
 

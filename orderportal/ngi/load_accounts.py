@@ -71,7 +71,7 @@ def load_accounts(db, filepath='users.json', verbose=False):
                 print(email, 'status', status, '; skipped')
             continue
         doc['email'] = email
-        doc['status'] = constants.DISABLED
+        doc['status'] = constants.PENDING
         doc['first_name'] = account['field_user_address'].get('first_name')
         doc['last_name'] = account['field_user_address'].get('last_name')
         # Address
