@@ -2,6 +2,7 @@
 
 from __future__ import print_function, absolute_import
 
+import cStringIO
 import logging
 
 import tornado.web
@@ -27,12 +28,22 @@ class FileSaver(saver.Saver):
         else:
             raise tornado.web.HTTPError(400, reason='file name already exists')
 
+    def set_file(self, infile, name=None):
+        self.file = infile
+        self['name'] = name or infile.filename
+        self['size'] = len(infile.body)
+        self['content_type'] = infile.content_type or 'application/octet-stream'
+
     def post_process(self):
         "Save the file as an attachment to the document."
         # No new file uploaded, just skip out.
-        if self.content is None: return
+        if self.file is None: return
+        # Using cStringIO here is a kludge.
+        # Don't ask me why this was required on one machine, but not another.
+        # The problem appeared on a Python 2.6 system, and involved Unicode.
+        # But I was unable to isolate it. I tested this in desperation...
         self.db.put_attachment(self.doc,
-                               self.content,
+                               cStringIO.StringIO(self.file.body),
                                filename=self['name'],
                                content_type=self['content_type'])
         
@@ -128,10 +139,7 @@ class FileCreate(RequestHandler):
                 infile = self.request.files['file'][0]
             except (KeyError, IndexError):
                 raise tornado.web.HTTPError(400, reason='no file uploaded')
-            saver.content = infile['body']
-            saver['name'] = self.get_argument('name',None) or infile['filename']
-            saver['size'] = len(infile['body'])
-            saver['content_type'] = infile['content_type'] or 'application/octet-stream'
+            saver.set_file(infile, self.get_argument('name', None))
             try:
                 saver['menu'] = int(self.get_argument('menu', None))
             except (ValueError, TypeError):
@@ -163,11 +171,8 @@ class FileEdit(RequestHandler):
                 infile = self.request.files['file'][0]
             except (KeyError, IndexError):
                 # No new file upload, just leave it alone.
-                saver.content = None
+                saver.file = None
             else:
-                saver.content = infile['body']
-                saver['filename'] = infile['filename']
-                saver['size'] = len(saver.content)
-                saver['content_type'] = infile['content_type']
+                saver.set_file(infile, self.get_argument('name', None))
             saver['description'] = self.get_argument('description', None)
-        self.see_other('file_meta', name)
+        self.see_other('file_meta', saver['name'])

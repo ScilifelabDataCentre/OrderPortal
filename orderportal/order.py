@@ -588,12 +588,12 @@ class OrderFile(OrderMixin, RequestHandler):
     def get(self, iuid, filename):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_readable(order)
-        infile = self.db.get_attachment(order, filename)
-        if infile is None:
+        outfile = self.db.get_attachment(order, filename)
+        if outfile is None:
             self.write('')
         else:
-            self.write(infile.read())
-            infile.close()
+            self.write(outfile.read())
+            outfile.close()
         self.set_header('Content-Type',
                         order['_attachments'][filename]['content_type'])
         self.set_header('Content-Disposition',
