@@ -59,7 +59,8 @@ class Config(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        params = [('Database server', settings['DB_SERVER']),
+        params = [('Settings', settings['SETTINGS_FILEPATH']),
+                  ('Database server', settings['DB_SERVER']),
                   ('Database', settings['DATABASE']),
                   ('Site name', settings['SITE_NAME']),
                   ('Site directory', settings['SITE_DIR']),

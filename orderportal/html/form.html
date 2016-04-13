@@ -4,6 +4,10 @@
 
 {% block head_title %}Form: {{ form['title'] }}{% end %}
 
+{% block container %}
+<div class="container-fluid">
+{% end %}
+
 {% block body_title %}
 {% module Icon('form', label=True) %}:
 {{ form['title'] }}

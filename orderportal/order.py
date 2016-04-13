@@ -21,6 +21,18 @@ from orderportal.requesthandler import RequestHandler
 class OrderSaver(saver.Saver):
     doctype = constants.ORDER
 
+    def set_identifier(self, form):
+        """Set the order identifier if format defined.
+        Only if form is enabled; not when testing."""
+        if form['status'] != constants.ENABLED: return
+        try:
+            fmt = settings['ORDER_IDENTIFIER_FORMAT']
+        except KeyError:    # No identifier; sequential counter not used
+            pass
+        else:               # Identifier; sequential counter is used
+            counter = self.rqh.get_next_counter(constants.ORDER)
+            self['identifier'] = fmt.format(counter)
+
     def set_status(self, new):
         self['status'] = new
         self.doc['history'][new] = utils.today()
@@ -223,7 +235,8 @@ class OrderMixin(object):
                 url = self.absolute_reverse_url('order', order['_id'])
             saver.set_params(
                 owner=order['owner'],
-                order=order.get('title') or order.get('identifier') or order['_id'],
+                title=order.get('title', '[no title]'),
+                identifier=order.get('identifier') or order['_id'],
                 url=url)
             saver.set_template(template)
             saver['recipients'] = list(recipients)
@@ -458,15 +471,7 @@ class OrderCreate(RequestHandler):
                     if value is None: break
                 saver['fields'][target] = value
             saver.check_fields_validity(fields)
-            # Set identifier only if form is enabled; not when testing
-            if form['status'] == constants.ENABLED:
-                try:
-                    fmt = settings['ORDER_IDENTIFIER_FORMAT']
-                except KeyError:    # No identifier; sequential counter not used
-                    pass
-                else:               # Identifier; sequential counter is used
-                    counter = self.get_next_counter(constants.ORDER)
-                    saver['identifier'] = fmt.format(counter)
+            saver.set_identifier(form)
         self.see_other('order_edit', saver.doc['_id'])
 
 
@@ -553,6 +558,7 @@ class OrderClone(OrderMixin, RequestHandler):
             saver['history'] = {}
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
             saver.check_fields_validity(Fields(form))
+            saver.set_identifier(form)
         self.see_other('order', saver.doc['_id'])
 
 

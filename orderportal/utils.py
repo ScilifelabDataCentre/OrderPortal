@@ -67,6 +67,7 @@ def load_settings(filepath=None, verbose=False):
         print('settings from', filepath, file=sys.stderr)
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
+    settings['SETTINGS_FILEPATH'] = filepath
     # Expand environment variables, ROOT and SITE_DIR, once and for all
     for key, value in settings.items():
         if isinstance(value, (str, unicode)):

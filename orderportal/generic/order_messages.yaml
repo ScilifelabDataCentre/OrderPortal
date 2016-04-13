@@ -1,18 +1,19 @@
 # Message definitions for order status events.
 
 # The following parameters may be used:
-# {site}  The name of the OrderPortal site.
-# {support} Contact address.
-# {order} Order title.
-# {owner} The email of the order owner (=author).
-# {url}   The URL for the order.
+# {site}       The name of the OrderPortal site.
+# {support}    Contact address.
+# {title}      Order title.
+# {identifier} Order identifier.
+# {owner}      The email of the order owner (=author).
+# {url}        The URL for the order.
 
 submitted:
   recipients: [admin, owner, group]
-  subject: "The order '{order}' has been submitted by {owner} to {site}."
+  subject: "The order '{title}' ({identifier}) has been submitted by {owner} to {site}."
   text: |
-    This is to confirm that the  order '{order}' has been submitted by
-    {owner} to {site}.
+    This is to confirm that the  order '{title}' ({identifier}) has been
+    submitted by {owner} to {site}.
 
     It will be reviewed by the {site} administrators who will contact you
     if further infomation is needed. When the review is done, we will send
@@ -27,9 +28,9 @@ submitted:
 
 accepted:
   recipients: [owner, group]
-  subject: "The order '{order}' has been accepted at the {site}."
+  subject: "The order '{title}' ({identifier}) has been accepted at the {site}."
   text: |
-    The order '{order}' has been accepted at the {site}.
+    The order '{title}' ({identifier}) has been accepted at the {site}.
 
     Go to {url} to view the order.
 
@@ -40,9 +41,9 @@ accepted:
 
 rejected:
   recipients: [owner, group]
-  subject: "The order '{order}' has been rejected at the {site}."
+  subject: "The order '{title}' ({identifier}) has been rejected at the {site}."
   text: |
-    The order '{order}' has been rejected at the {site}.
+    The order '{title}' ({identifier}) has been rejected at the {site}.
 
     Contact the {site} administrators for further information.
 
@@ -55,9 +56,9 @@ rejected:
 
 processing:
   recipients: [owner, group]
-  subject: "The order '{order}' is being processed at the {site}."
+  subject: "The order '{title}' ({identifier}) is being processed at the {site}."
   text: |
-    The order '{order}' is being processed at the {site}.
+    The order '{title}' ({identifier}) is being processed at the {site}.
 
     Go to {url} to view the order.
 
@@ -68,9 +69,9 @@ processing:
 
 aborted:
   recipients: [owner, group]
-  subject: "The order '{order}' has been aborted at the {site}."
+  subject: "The order '{title}' ({identifier}) has been aborted at the {site}."
   text: |
-    The order '{order}' has been aborted at the {site}.
+    The order '{title}' ({identifier}) has been aborted at the {site}.
 
     Contact the {site} administrators for further information.
 
@@ -83,9 +84,9 @@ aborted:
 
 closed:
   recipients: [owner, group]
-  subject: "The order '{order}' has been closed at the {site}."
+  subject: "The order '{title}' ({identifier}) has been closed at the {site}."
   text: |
-    The order '{order}' has been closed at the {site}.
+    The order '{title}' ({identifier}) has been closed at the {site}.
 
     Go to {url} to view the order.
 
