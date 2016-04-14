@@ -442,8 +442,8 @@ class OrderCreate(RequestHandler):
     def get(self):
         if not self.current_user:
             self.see_other('home',
-                           error='You need to be logged in to create an order.'
-                           ' Register to get an account.')
+                           error="You need to be logged in to create an order."
+                           " Register to get an account if you don't have one.")
             return
         if not self.global_modes['allow_order_creation'] \
            and self.current_user['role'] != constants.ADMIN:
