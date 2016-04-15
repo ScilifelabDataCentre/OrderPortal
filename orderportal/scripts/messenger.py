@@ -80,7 +80,7 @@ class Messenger(object):
         if self.verbose:
             print("sent email '{0}' to {1}".format(
                     message['subject'],
-                    ', '.join(message['recipients'])))
+                    ', '.join(message['recipients'])).encode('utf-8'))
 
 
 def get_args():
