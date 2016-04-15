@@ -78,7 +78,7 @@ class Messenger(object):
                              message['recipients'],
                              mail.as_string())
         if self.verbose:
-            print("sent email '{0}' to {1}".format(
+            print(u"sent email '{0}' to {1}".format(
                     message['subject'],
                     ', '.join(message['recipients'])).encode('utf-8'))
 
