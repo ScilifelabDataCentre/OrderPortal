@@ -69,7 +69,7 @@ class Messenger(object):
 
     def send_email(self, message):
         "Actually send the message as email."
-        mail = email.mime.text.MIMEText(message['text'])
+        mail = email.mime.text.MIMEText(message['text'], 'plain', 'utf-8')
         mail['Subject'] = message['subject']
         mail['From'] = message['sender']
         for recipient in message['recipients']:
