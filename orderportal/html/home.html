@@ -22,7 +22,6 @@
 
   <div class="col-md-8">
     <h2>{{ settings['SITE_NAME'] }}</h2>
-    {% module Text('header') %}
     {% if is_admin %}
     <a href="{{ reverse_url('text', 'header') }}"
        class="btn btn-primary btn-xs pull-right" role="button">
@@ -30,6 +29,7 @@
       Edit
     </a>
     {% end %}
+    {% module Text('header') %}
   </div>
 
 </div>
@@ -571,7 +571,6 @@
   <div class="col-md-12">
     <div class="panel panel-default">
       <div class="panel-body">
-	{% module Text('general') %}
 	{% if is_admin %}
 	<a href="{{ reverse_url('text', 'general') }}"
 	   class="btn btn-primary btn-xs pull-right" role="button">
@@ -579,6 +578,7 @@
 	  Edit
 	</a>
 	{% end %}
+	{% module Text('general') %}
       </div>
     </div>
   </div>
