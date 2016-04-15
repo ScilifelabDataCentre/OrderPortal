@@ -64,6 +64,7 @@ def send_info_email(filepath, sender, options):
             recipients.append(record[0])
     for r in [recipients[i:i+20] for i in xrange(0, len(recipients), 20)]:
         send_email(server, sender, recipients, options)
+        time.sleep(3.0)
     server.quit()
 
 def send_email(server, sender, recipients, options):
