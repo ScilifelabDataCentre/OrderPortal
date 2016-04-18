@@ -12,6 +12,7 @@ import time
 from orderportal import settings
 from orderportal import utils
 
+MAX_RECIPIENTS = 10
 
 SUBJECT = "Information about new order portal for NGI Sweden"
 MESSAGE = """Dear user of the National Genomics Infrastructure (NGI) Sweden,
@@ -62,8 +63,9 @@ def send_info_email(filepath, sender, options):
         reader.next()
         for record in reader:
             recipients.append(record[0])
-    for r in [recipients[i:i+20] for i in xrange(0, len(recipients), 20)]:
-        send_email(server, sender, recipients, options)
+    for r in [recipients[i:i+MAX_RECIPIENTS]
+              for i in xrange(0, len(recipients), MAX_RECIPIENTS)]:
+        send_email(server, sender, r, options)
         time.sleep(3.0)
     server.quit()
 
@@ -78,6 +80,10 @@ def send_email(server, sender, recipients, options):
                 SUBJECT, ', '.join(recipients)))
     if not options.dry_run:
         server.sendmail(sender, recipients, mail.as_string())
+        with open('sent.log', 'a') as sentfile:
+            for recipient in recipients:
+                sentfile.write(recipient)
+                sentfile.write('\n')
 
 def get_server():
     host = settings['EMAIL']['HOST']
