@@ -43,6 +43,7 @@
 
 <div class="panel panel-default">
   <div class="panel-heading">
+    <span class="glyphicon glyphicon-list-alt"></span>
     Recently submitted orders
   </div>
   <div class="panel-body">
@@ -57,6 +58,11 @@
       </tr>
       {% end %}
     </table>
+    <a href="{{ reverse_url('orders', status='submitted') }}"
+       class="btn btn-default btn-xs pull-right" role="button">
+      <span class="glyphicon glyphicon-list-alt"></span>
+      All submitted
+    </a>
   </div>
 </div>
 
