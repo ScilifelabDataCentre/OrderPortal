@@ -30,6 +30,11 @@
       </tr>
       {% end %}
     </table>
+    <a href="{{ reverse_url('accounts', status='pending') }}"
+       class="btn btn-warning btn-xs pull-right" role="button">
+      <span class="glyphicon glyphicon-user"></span>
+      All pending
+    </a>
     {% else %}
     <i>Currently none.</i>
     {% end %}
