@@ -42,7 +42,7 @@
 
 <div class="row">
 
-  <div class="col-md-4">
+  <div class="col-md-6">
     {% block content_left %}
     <div class="panel panel-default">
       <div class="panel-heading">
@@ -111,8 +111,8 @@
     {% end %} {# block content_left #}
   </div>
 
-  <div class="col-md-8">
-    {% block content_middle %}
+  <div class="col-md-6">
+    {% block content_right %}
 
     {% if global_modes['allow_order_creation'] %}
     <div class="panel-group">
@@ -148,7 +148,7 @@
     </div>
     {% end %} {# if global_modes['allow_order_creation'] #}
 
-    {% end %} {# block content_middle #}
+    {% end %} {# block content_right #}
   </div>
 
 </div>

@@ -49,12 +49,13 @@ See your <a href="{0}">account</a>.""".format(url)
                             include_docs=True)
         pending = [r.doc for r in view]
         pending.sort(utils.cmp_modified, reverse=True)
+        pending = pending[:constants.MAX_PENDING_ACCOUNTS]
         # XXX This status should not be hard-wired!
         view = self.db.view('order/status',
                             descending=True,
                             startkey=['submitted', constants.CEILING],
                             endkey=['submitted'],
-                            limit=constants.MAX_STAFF_RECENT_ORDERS,
+                            limit=constants.MAX_RECENT_ORDERS,
                             reduce=False,
                             include_docs=True)
         orders = [r.doc for r in view]
@@ -70,7 +71,7 @@ See your <a href="{0}">account</a>.""".format(url)
                             descending=True,
                             startkey=['accepted', constants.CEILING],
                             endkey=['accepted'],
-                            limit=constants.MAX_STAFF_RECENT_ORDERS,
+                            limit=constants.MAX_RECENT_ORDERS,
                             reduce=False,
                             include_docs=True)
         orders = [r.doc for r in view]
@@ -87,7 +88,7 @@ See your <a href="{0}">account</a>.""".format(url)
                             startkey=[self.current_user['email'],
                                       constants.CEILING],
                             endkey=[self.current_user['email']],
-                            limit=constants.MAX_ACCOUNT_RECENT_ORDERS)
+                            limit=constants.MAX_RECENT_ORDERS)
         orders = [r.doc for r in view]
         self.render('home_user.html',
                     orders=orders,
