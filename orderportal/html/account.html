@@ -68,7 +68,7 @@
 
 {% if is_admin and current_user['email'] != account['email'] %}
 
-{% if account['status'] in (constants.PENDING, constants.DISABLED) %}
+{% if account['status'] != constants.ENABLED %}
 <p>
   <form action="{{ reverse_url('account_enable', account['email']) }}"
 	role="form"
@@ -82,7 +82,8 @@
     </div>
   </form>
 </p>
-{% else %}
+{% end %} {# if  account['status'] != constants.ENABLED #}
+{% if account['status'] != constants.DISABLED %}
 <p>
   <form action="{{ reverse_url('account_disable', account['email']) }}"
 	role="form"
@@ -97,7 +98,7 @@
     </div>
   </form>
 </p>
-{% end %} {# if account['status'] in (constants.PENDING, constants.DISABLED) #}
+{% end %} {# if  account['status'] != constants.DISABLED #}
 
 {% if is_deletable %}
 <p>
