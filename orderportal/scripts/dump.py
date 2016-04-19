@@ -2,8 +2,9 @@
 The settings file may be given as the first command line argument,
 otherwise it is obtained as usual.
 The dump file will be called 'dump_{ISO date}.tar.gz' using today's date.
-Create the dump file in the directory specified by BACKUP_DIR variable
-in the settings, otherwise in the current working directory.
+If the filename does not contain any directory specification (either relative
+or absolute), then the dump file is created in the directory specified
+by the BACKUP_DIR variable in the settings. 
 """
 
 from __future__ import print_function, absolute_import
@@ -121,8 +122,9 @@ if __name__ == '__main__':
         filepath = options.dumpfile
     else:
         filepath = "dump_{0}.tar.gz".format(time.strftime("%Y-%m-%d"))
-    try:
-        filepath = os.path.join(settings['BACKUP_DIR'], filepath)
-    except KeyError:
-        pass
+    if os.path.basename(filepath) == filepath:
+        try:
+            filepath = os.path.join(settings['BACKUP_DIR'], filepath)
+        except KeyError:
+            pass
     dump(db, filepath, verbose=options.verbose)
