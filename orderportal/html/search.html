@@ -15,7 +15,7 @@
       method="GET">
   <input type="hidden" name="page" value="{{ params.get('page') or 0 }}">
   <div class="row">
-    <div class="col-md-6 col-md-offset-2">
+    <div class="col-md-7">
       <div class="form-group">
 	<input type="text" name="term" id="term" size="40"
 	       class="form-control" value="{{ params.get('term') or '' }}">
@@ -27,7 +27,7 @@
 	</button>
       </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-5">
       <i>
 	Searches titles of orders and the order fields indexed by the
 	administrator. Accounts are searched by first and last names.
@@ -37,16 +37,14 @@
 </form>
 
 <div class="row">
-  <div class="col-md-10 col-md-offset-1">
+  <div class="col-md-12">
     {% set url_func = functools.partial(reverse_url, 'search', **params) %}
     {% include 'paging.html' %}
-  </div>
-  <div class="col-md-1">
   </div>
 </div>
 
 <div class="row">
-  <div class="col-md-10 col-md-offset-1">
+  <div class="col-md-12">
     <table class="table table-striped table-condensed">
       <tr>
 	<th>Item</th>
@@ -95,8 +93,6 @@
       </tr>
       {% end %} {# if items #}
     </table>
-  </div>
-  <div class="col-md-1">
   </div>
 </div>
 {% end %}{# block content #}

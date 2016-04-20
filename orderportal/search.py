@@ -44,6 +44,17 @@ class Search(RequestHandler):
             id_set = reduce(lambda i,j: i.intersection(j), id_sets)
             items.extend([self.get_entity(id, doctype=constants.ORDER)
                           for id in id_set])
+        # Search account email
+        view = self.db.view('account/email')
+        id_sets = []
+        for part in parts:
+            id_sets.append(set([r.id for r in
+                                view[part : part+constants.CEILING]]))
+        # Only require one hit in email
+        if id_sets:
+            id_set = reduce(lambda i,j: i.union(j), id_sets)
+            items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
+                          for id in id_set])
         # Search account last names
         view = self.db.view('account/last_name')
         id_sets = []
