@@ -194,11 +194,11 @@
 	      </form>
 	    </td>
 	    {% end %}{# if is_admin #}
+	    <th class="nobr">{{ news['date'] }}</th>
 	    <td>
 	      <strong>{{ news.get('title') or '[no title]' }}</strong>
 	      {% module Markdown(news.get('text')) %}
 	    </td>
-	    <td class="text-right small">[{{ news['date'] }}]</td>
 	  </tr>
 	  {% end %}
 	</table>
@@ -253,7 +253,7 @@
 	    {% end %}{# if is_admin #}
 	    <th class="nobr">{{ event['date'] }}</th>
 	    <td>
-	      <strong>{{ event['title'] }}</strong>
+	      <strong>{{ event.get('title') or '[no title]' }}</strong>
 	      {% module Markdown(event.get('text')) %}
 	    </td>
 	  </tr>
