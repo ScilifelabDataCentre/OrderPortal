@@ -634,7 +634,8 @@ class Login(RequestHandler):
             if not account.get('status') == constants.ENABLED:
                 raise ValueError
         except ValueError:
-            self.see_other('home', error='Account is disabled.')
+            self.see_other('home', error='Account is disabled.'
+                           ' Contact the site admin.')
             return
         if not self.global_modes['allow_login'] \
            and account['role'] != constants.ADMIN:
