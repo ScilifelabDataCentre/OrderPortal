@@ -28,7 +28,8 @@ class AccountSaver(saver.Saver):
             raise ValueError('Malformed email value.')
         email = email.lower()
         if len(list(self.db.view('account/email', key=email))) > 0:
-            raise ValueError('Email already in use. Do reset password if lost.')
+            raise ValueError('Email is already in use.'
+                             ' Do reset password if it has been lost.')
         self['email'] = email
 
     def erase_password(self):
@@ -680,6 +681,14 @@ class Reset(RequestHandler):
                 tornado.web.HTTPError):
             self.see_other('home')
         else:
+            if account.get('status') == constants.PENDING:
+                self.see_other('home', error='Cannot reset password.'
+                               ' Account has not been enabled.')
+                return
+            elif account.get('status') == constants.DISABLED:
+                self.see_other('home', error='Cannot reset password.'
+                               ' Account is disabled; contact the site admin.')
+                return
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver.reset_password()
             # Prepare message to send later
