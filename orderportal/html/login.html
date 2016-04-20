@@ -10,7 +10,7 @@
 
 {% if next %}
 <div class="row">
-  <div class="well well-sm col-md-5 col-md-offset-1">
+  <div class="well well-sm col-md-5">
     You need to login to access the requested page.
   </div>
   <div class="col-md-6">
@@ -19,7 +19,7 @@
 {% end %} {# if next #}
 
 <div class="row">
-  <div class="col-md-5 col-md-offset-1">
+  <div class="col-md-5">
     {% if not global_modes['allow_login'] %}
     <div class="well text-danger">
       Login is currently disabled (except for administrators).
