@@ -13,7 +13,8 @@ Edit order
 {% end %}
 
 {% block content %}
-<h3 style="padding-left: 4em;">{{ form['title'] }}</h3>
+<h3>{{ form['title'] }}</h3>
+<br>
 
 <form action="{{ reverse_url('order', order['_id']) }}"
       class="myForm"
