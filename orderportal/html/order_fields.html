@@ -32,12 +32,17 @@
   </th>
   <td></td>
   <td class="small">
-    {% if field['restrict_read'] %}
-    [Staff only]
-    {% end %}
     {% module Markdown(field.get('description')) %}
   </td>
   <td>
+    {% if field['restrict_read'] %}
+    <span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
+    </span>
+    {% end %}
+    {% if field['restrict_write'] %}
+    <span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
+    </span>
+    {% end %}
     {% if field['identifier'] in order['invalid'] %}
     <span class="text-danger">
       <span class="glyphicon glyphicon-remove"></span>
@@ -65,11 +70,6 @@
 {% else %}
 <tr>
   <th>
-{#
-    <span style="padding-left:{{ 1.5*field['depth'] }}em; display:block;">
-      {{ label }}
-    </span>
-#}
     <div style="padding-left:{{ 1.5*field['depth'] }}em;">
       {{ label }}
     </div>
@@ -87,12 +87,17 @@
     {% end %}
   </td>
   <td class="small">
-    {% if field['restrict_read'] %}
-    [Staff only]
-    {% end %}
     {% module Markdown(field.get('description')) %}
   </td>
   <td>
+    {% if field['restrict_read'] %}
+    <span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
+    </span>
+    {% end %}
+    {% if field['restrict_write'] %}
+    <span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
+    </span>
+    {% end %}
     {% if field['identifier'] in order['invalid'] %}
     <span class="text-danger">
       <span data-toggle="tooltip"
