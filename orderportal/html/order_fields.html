@@ -24,15 +24,20 @@
       <span class="glyphicon glyphicon-triangle-bottom"></span>
       {{ label }}
     </button>
+    {% if field.get('description') %}
+    <href data-toggle="collapse"
+	  data-target="#_collapsible_{{ field['identifier'] }}"
+	  style="padding-left:1em;">
+      <span class="glyphicon glyphicon-info-sign"></span>
+    </href>
+    {% end %}
     {% else %}
     <div style="padding-left:{{ 1.5*field['depth'] }}em;">
       {{ label }}
     </div>
     {% end %}
   </th>
-  <td></td>
-  <td class="small">
-    {% module Markdown(field.get('description')) %}
+  <td width="50%" class="left">
   </td>
   <td>
     {% if field['restrict_read'] %}
@@ -67,14 +72,21 @@
 {% end %}
 {% end %} {# if field['fields'] #}
 
-{% else %}
+{% else %} {# if field['type'] == constants.GROUP #}
 <tr>
   <th>
     <div style="padding-left:{{ 1.5*field['depth'] }}em;">
       {{ label }}
+      {% if field.get('description') %}
+      <href data-toggle="collapse"
+	    data-target="#_collapsible_{{ field['identifier'] }}"
+	    style="padding-left:1em;">
+	<span class="glyphicon glyphicon-info-sign"></span>
+      </href>
+      {% end %}
     </div>
   </th>
-  <td>
+  <td width="50%" class="left">
     {% set value = order['fields'].get(field['identifier']) %}
     {% if field['type'] == constants.TEXT %}
       {% module Markdown(value or '-') %}
@@ -85,9 +97,6 @@
       {{ value }}
       {% end %}
     {% end %}
-  </td>
-  <td class="small">
-    {% module Markdown(field.get('description')) %}
   </td>
   <td>
     {% if field['restrict_read'] %}
@@ -118,6 +127,11 @@
     {% end %}
   </td>
 </tr>
-
+{% end %}
+{% if field.get('description') %}
+<tr id="_collapsible_{{ field['identifier'] }}" class="collapse">
+  <td></td>
+  <td class="left">{% module Markdown(field.get('description')) %}</td>
+</tr>
 {% end %}
 {% end %} {# for field in fields #}
