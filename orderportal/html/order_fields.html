@@ -131,7 +131,7 @@
 {% if field.get('description') %}
 <tr id="_collapsible_{{ field['identifier'] }}" class="collapse">
   <td></td>
-  <td class="left">{% module Markdown(field.get('description')) %}</td>
+  <td class="left small">{% module Markdown(field.get('description')) %}</td>
 </tr>
 {% end %}
 {% end %} {# for field in fields #}
