@@ -20,6 +20,7 @@
 .table-noborder > tbody > tr > td {border-width: 0px; }
 
 .table-hierarchy { margin-bottom: 0px; }
+.table-hierarchy td.left { text-align: left; padding-left: 1em; }
 
 /* Pre-formatted text variants. */
 .pre {white-space: pre; }
