@@ -24,6 +24,14 @@
   <div class="panel-heading">
     <h4>
       {{ label }}
+      {% if field['restrict_read'] %}
+      <span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
+      </span>
+      {% end %}
+      {% if field['restrict_write'] %}
+      <span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
+      </span>
+      {% end %}
       {% if field['identifier'] in order['invalid'] %}
       <span class="text-danger">
 	<span data-toggle="tooltip" title="Invalid value; order cannot be submitted."
@@ -36,16 +44,10 @@
 	      class="glyphicon glyphicon-ok"></span>
       </span>
       {% end %}
-      <small>
-	{% if field['restrict_read'] %}
-	[Read: Staff only]
-	{% end %}
-	{% if field['restrict_write'] %}
-	[Write: Staff only]
-	{% end %}
-	{% module Markdown(field.get('description')) %}
-      </small>
     </h4>
+    <div>
+      {% module Markdown(field.get('description')) %}
+    </div>
   </div>
   <div class="panel-body">
     {# Recursion: 'include' cannot be used! #}
@@ -67,6 +69,14 @@
     <div class="col-md-8">
       <label class="control-label" for="{{ field['identifier'] }}">
 	{{ label }}
+	{% if field['restrict_read'] %}
+	<span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
+	</span>
+	{% end %}
+	{% if field['restrict_write'] %}
+	<span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
+	</span>
+	{% end %}
 	{% if field['identifier'] in order['invalid'] %}
 	<span class="text-danger">
 	  <span data-toggle="tooltip"

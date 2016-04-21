@@ -17,7 +17,7 @@
 
 {% if field['type'] == constants.GROUP %}
 <tr>
-  <th width="20%">
+  <th>
     {% if field['depth'] == 0 %}
     <button data-toggle="collapse" data-target="#{{ field['identifier'] }}"
 	    class="btn btn-md">
@@ -25,19 +25,24 @@
       {{ label }}
     </button>
     {% else %}
-    <span style="padding-left:{{ 1.5*field['depth'] }}em; display:block;">
+    <div style="padding-left:{{ 1.5*field['depth'] }}em;">
       {{ label }}
-    </span>
+    </div>
     {% end %}
   </th>
   <td></td>
-  <td class="small" width="50%">
-    {% if field['restrict_read'] %}
-    [Staff only]
-    {% end %}
+  <td class="small">
     {% module Markdown(field.get('description')) %}
   </td>
   <td>
+    {% if field['restrict_read'] %}
+    <span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
+    </span>
+    {% end %}
+    {% if field['restrict_write'] %}
+    <span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
+    </span>
+    {% end %}
     {% if field['identifier'] in order['invalid'] %}
     <span class="text-danger">
       <span class="glyphicon glyphicon-remove"></span>
@@ -64,10 +69,10 @@
 
 {% else %}
 <tr>
-  <th width="20%">
-    <span style="padding-left:{{ 1.5*field['depth'] }}em; display:block;">
+  <th>
+    <div style="padding-left:{{ 1.5*field['depth'] }}em;">
       {{ label }}
-    </span>
+    </div>
   </th>
   <td>
     {% set value = order['fields'].get(field['identifier']) %}
@@ -81,13 +86,18 @@
       {% end %}
     {% end %}
   </td>
-  <td class="small" width="50%">
-    {% if field['restrict_read'] %}
-    [Staff only]
-    {% end %}
+  <td class="small">
     {% module Markdown(field.get('description')) %}
   </td>
   <td>
+    {% if field['restrict_read'] %}
+    <span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
+    </span>
+    {% end %}
+    {% if field['restrict_write'] %}
+    <span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
+    </span>
+    {% end %}
     {% if field['identifier'] in order['invalid'] %}
     <span class="text-danger">
       <span data-toggle="tooltip"

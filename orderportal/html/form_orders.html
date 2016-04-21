@@ -14,16 +14,14 @@ Form:
 {% import functools %}
 
 <div class="row">
-  <div class="col-md-10 col-md-offset-1">
+  <div class="col-md-12">
     {% set url_func = functools.partial(reverse_url, 'form_orders', form['_id'], **params) %}
     {% include 'paging.html' %}
-  </div>
-  <div class="col-md-1">
   </div>
 </div>
 
 <div class="row">
-  <div class="col-md-10 col-md-offset-1">
+  <div class="col-md-12">
     <table class="table table-striped">
       <tr>
 	<th width="45%">Order</th>
@@ -47,8 +45,6 @@ Form:
       </tr>
       {% end %}
     </table>
-  </div>
-  <div class="col-md-1">
   </div>
 </div>
 {% end %}
