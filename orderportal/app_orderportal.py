@@ -88,6 +88,8 @@ def get_handlers():
         url(r'/registered', Registered, name='registered'),
         url(r'/account/([^/]+)/enable', AccountEnable, name='account_enable'),
         url(r'/account/([^/]+)/disable', AccountDisable,name='account_disable'),
+        url(r'/account/([^/]+)/updateinfo',
+            AccountUpdateInfo, name='account_update_info'),
         url(r'/forms', Forms, name='forms'),
         url(r'/form/([0-9a-f]{32})', Form, name='form'),
         url(r'/api/1/form/([0-9a-f]{32})', ApiV1Form, name='api_v1_form'),

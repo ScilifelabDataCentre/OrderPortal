@@ -883,3 +883,17 @@ class AccountDisable(RequestHandler):
             saver['status'] = constants.DISABLED
             saver.erase_password()
         self.see_other('account', email)
+
+
+class AccountUpdateInfo(RequestHandler):
+    "Request an update of the account information by the user."
+
+    @tornado.web.authenticated
+    def post(self, email):
+        self.check_xsrf_cookie()
+        account = self.get_account(email)
+        self.check_admin()
+        if not account.get('update_info'):
+            with AccountSaver(account, rqh=self) as saver:
+                saver['update_info'] = True
+        self.see_other('account', email)
