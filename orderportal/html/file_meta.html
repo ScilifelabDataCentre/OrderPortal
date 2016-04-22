@@ -11,8 +11,17 @@
 
 {% block main_content %}
 
-{% if is_admin %}
 <div class="pull-right">
+  <form action="{{ reverse_url('file_download', file['name']) }}"
+	role="form"
+	method="GET">
+    <button type="submit" class="btn btn-primary">
+      <span class="glyphicon glyphicon-download-alt"></span>
+      Download
+    </button>
+  </form>
+
+  <br>
   <form action="{{ reverse_url('file_edit', file['name']) }}"
 	role="form"
 	method="GET">
@@ -35,7 +44,6 @@
     </button>
   </form>
 </div>
-{% end %}
 
 <table class="table-condensed table-fields">
 
@@ -66,15 +74,4 @@
   </tr>
 
 </table>
-
-<br>
-<form action="{{ reverse_url('file_download', file['name']) }}"
-      role="form"
-      method="GET">
-  <button type="submit" class="btn btn-primary">
-    <span class="glyphicon glyphicon-download-alt"></span>
-    Download
-  </button>
-</form>
-
 {% end %} {# block main_content #}

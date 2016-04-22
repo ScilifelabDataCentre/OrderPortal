@@ -48,6 +48,16 @@ class FileSaver(saver.Saver):
                                content_type=self['content_type'])
         
 
+class Files(RequestHandler):
+    "List of files page."
+
+    def get(self):
+        view = self.db.view('file/name', include_docs=True)
+        files = [r.doc for r in view]
+        files.sort(lambda i,j: cmp(i['modified'], j['modified']), reverse=True)
+        self.render('files.html', all_files=files)
+
+
 class File(RequestHandler):
     "Send the file data."
 
@@ -75,7 +85,9 @@ class FileDownload(File):
 class FileMeta(RequestHandler):
     "Display the file metadata."
 
+    @tornado.web.authenticated
     def get(self, name):
+        self.check_admin()
         file = self.get_entity_view('file/name', name)
         title = file.get('title') or file['name']
         self.render('file_meta.html', file=file, title=title)
@@ -109,17 +121,6 @@ class FileLogs(RequestHandler):
                     title="Logs for file '{0}'".format(name),
                     entity=file,
                     logs=self.get_logs(file['_id']))
-
-
-class Files(RequestHandler):
-    "List of file pages."
-
-    def get(self):
-        view = self.db.view('file/menu', include_docs=True)
-        menu_files = [r.doc for r in view]
-        view = self.db.view('file/name', include_docs=True)
-        rest_files = [r.doc for r in view if r.doc.get('menu') is None]
-        self.render('files.html', all_files=menu_files + rest_files)
 
 
 class FileCreate(RequestHandler):

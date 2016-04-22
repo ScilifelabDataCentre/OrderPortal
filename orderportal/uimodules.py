@@ -33,6 +33,17 @@ class Icon(tornado.web.UIModule):
             value += ' ' + title
         return value
 
+class ContentType(tornado.web.UIModule):
+    "HTML for an entity type icon."
+
+    def render(self, content_type):
+        url = self.handler.static_url(
+            constants.CONTENT_TYPE_ICONS.get(
+                content_type, constants.DEFAULT_CONTENT_TYPE_ICON))
+        return ICON_TEMPLATE.format(url=url,
+                                    alt=content_type,
+                                    title=content_type)
+
 
 class Entity(tornado.web.UIModule):
     "HTML for a link to an entity with an icon."

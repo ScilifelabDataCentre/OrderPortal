@@ -112,22 +112,9 @@
               </ul>
             </li>
 
-            <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-		Files
-		<span class="caret"></span>
-	      </a>
-              <ul class="dropdown-menu">
-		<li>
-		  <a href="{{ reverse_url('files') }}">All files</a>
-		</li>
-		{% for name in files %}
-		<li>
-		  <a href="{{ reverse_url('file_meta', name) }}">- {{ name }}</a>
-		</li>
-		{% end %}
-              </ul>
-            </li>
+	    <li>
+	      <a href="{{ reverse_url('files') }}">Files</a>
+	    </li>
 
 	    {% if is_admin %}
             <li class="dropdown">

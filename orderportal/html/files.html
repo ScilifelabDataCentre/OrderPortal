@@ -10,33 +10,38 @@ Files
 {% end %}
 
 {% block main_content %}
-<table class="table table-striped">
-  <tr>
-    <th>Name</th>
-    <th>Menu</th>
-    <th>Content type</th>
-    <th>Size (kB)</th>
-    <th>Modified</th>
-    <th>Created</th>
-  </tr>
+<div class="well">
+Various files for download are available here. These may include
+presentations (slide shows), price lists, specifications and similar
+documents.
+</div>
+
+<table class="table">
   {% for file in all_files %}
   <tr>
     <td>
-      <a href="{{ reverse_url('file_meta', file['name']) }}">
-	{% module Icon('file') %}
-	{{ file['name'] }}
-      </a>
+      <h4>
+	<a href="{{ reverse_url('file_download', file['name']) }}">
+	  {{ file['name'] }}
+	  {% module ContentType(file['content_type']) %}
+	</a>
+      </h4>
+      {% module Markdown(file.get('description')) %}
     </td>
-    <td>{{ file.get('menu') or '-' }}</td>
-    <td>{{ file['content_type'] }}</td>
-    <td>{{ int(0.5 + file['size'] / 1000.0) }}</td>
+    <td>{{ int(0.5 + file['size'] / 1000.0) }} kB</td>
+    <td><span class="localtime">{{ file['modified'] }}</span></td>
+    {% if is_admin %}
     <td>
-      <span class="localtime">{{ file['modified'] }}</span>
-      <a href="{{ reverse_url('file_logs', file['name']) }}">
-	{% module Icon('logs', label=True) %}
-      </a>
+      <form action="{{ reverse_url('file_meta', file['name']) }}"
+	    role="form"
+	    method="GET">
+	<button type="submit" class="btn btn-md btn-primary">
+	  <span class="glyphicon glyphicon-edit"></span>
+	  Edit
+	</button>
+      </form>
     </td>
-    <td class="localtime">{{ file['created'] }}</td>
+    {% end %}
   </tr>
   {% end %}
 </table>
