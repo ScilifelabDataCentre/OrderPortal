@@ -96,5 +96,23 @@ MAX_RECENT_ORDERS = 10
 MAX_PENDING_ACCOUNTS = 10
 DEFAULT_MAX_DISPLAY_LOG = 20
 
+# Content-type to icon mapping
+CONTENT_TYPE_ICONS = {
+    JSON_MIME: 'json.png',
+    CSV_MIME: 'csv.png',
+    'application/pdf': 'pdf.png',
+    'image/png': 'image.png',
+    'image/jpeg': 'image.png',
+    'application/vnd.ms-excel': 'excel.png',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'excel.png',
+    'application/vnd.ms-excel': 'excel.png',
+    'application/msword': 'word.png',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'word.png',
+    'application/vnd.ms-powerpoint': 'ppt.png',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'ppt.png',
+    'text/plain': 'text.png',
+    }
+DEFAULT_CONTENT_TYPE_ICON = 'binary.png'
+
 # Source code directory
 ROOT = os.path.dirname(__file__)
