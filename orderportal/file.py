@@ -22,11 +22,14 @@ class FileSaver(saver.Saver):
         if not constants.NAME_RX.match(value):
             raise tornado.web.HTTPError(400, reason='invalid file name')
         try:
-            self.rqh.get_entity_view('file/name', value)
+            doc = self.rqh.get_entity_view('file/name', value)
         except tornado.web.HTTPError:
             pass
         else:
-            raise tornado.web.HTTPError(400, reason='file name already exists')
+            # Error if same name as file of another doc
+            if doc['_id'] != self.doc.get('_id'):
+                raise tornado.web.HTTPError(400,
+                                            reason='file name already exists')
 
     def set_file(self, infile, name=None):
         self.file = infile
