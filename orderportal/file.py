@@ -141,10 +141,6 @@ class FileCreate(RequestHandler):
             except (KeyError, IndexError):
                 raise tornado.web.HTTPError(400, reason='no file uploaded')
             saver.set_file(infile, self.get_argument('name', None))
-            try:
-                saver['menu'] = int(self.get_argument('menu', None))
-            except (ValueError, TypeError):
-                saver['menu'] = None
             saver['description'] = self.get_argument('description', None)
         self.see_other('file_meta', saver['name'])
 
@@ -164,10 +160,6 @@ class FileEdit(RequestHandler):
         file = self.get_entity_view('file/name', name)
         with FileSaver(doc=file, rqh=self) as saver:
             saver['title'] = self.get_argument('title', None)
-            try:
-                saver['menu'] = int(self.get_argument('menu', None))
-            except (ValueError, TypeError):
-                saver['menu'] = None
             try:
                 infile = self.request.files['file'][0]
             except (KeyError, IndexError):

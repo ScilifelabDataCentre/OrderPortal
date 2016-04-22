@@ -48,6 +48,10 @@
 <table class="table-condensed table-fields">
 
   <tr>
+    <th>URL</th>
+    <td>{{ reverse_url('file', file['name']) }}</td>
+  </tr>
+  <tr>
     <th>Size</th>
     <td>{{ int(0.5 + file['size'] / 1000.0) }} kB
   </tr>
