@@ -51,7 +51,7 @@
     </a>
   </div>
 </p>
-{% end %}{# if current_user['email'] == account['email'] #}
+{% end %} {# if current_user['email'] == account['email'] #}
 
 {% if is_admin or current_user['email'] == account['email'] %}
 <p>
@@ -64,9 +64,23 @@
     </a>
   </div>
 </p>
-{% end %}
+{% end %} {# if is_admin or current_user['email'] == account['email'] #}
 
 {% if is_admin and current_user['email'] != account['email'] %}
+
+<p>
+  <form action="{{ reverse_url('account_update_info', account['email']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <button type="submit" class="btn btn-warning" {{ account.get('update_info') and 'disabled' or ''}}>
+	<span class="glyphicon glyphicon-exclamation-sign"></span>
+	Request update
+      </button>
+    </div>
+  </form>
+</p>
 
 {% if account['status'] != constants.ENABLED %}
 <p>
@@ -82,7 +96,8 @@
     </div>
   </form>
 </p>
-{% end %} {# if  account['status'] != constants.ENABLED #}
+{% end %} {# if account['status'] != constants.ENABLED #}
+
 {% if account['status'] != constants.DISABLED %}
 <p>
   <form action="{{ reverse_url('account_disable', account['email']) }}"
@@ -117,7 +132,8 @@
   </form>
 </p>
 {% end %} {# if is_deletable #}
-{% end %} {# if is_admin #}
+
+{% end %} {# if is_admin and current_user['email'] != account['email'] #}
 {% end %} {# block meta_content #}
 
 {% block main_content %}
