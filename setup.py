@@ -3,17 +3,16 @@
 from setuptools import setup
 
 setup(name='OrderPortal',
-      version='0.2',
+      version='2.0',
       description='A portal for orders (aka. requests, project applications) to a facility from its users.',
       license='MIT',
       author='Per Kraulis',
       author_email='per.kraulis@scilifelab.se',
       url='https://github.com/pekrau/OrderPortal',
-      packages=['orderportal'],
-      package_dir={'orderportal': 'orderportal'},
+      packages = find_packages(),
       include_package_data=True,
-      install_requires=['tornado>=4.2',
-                        'CouchDB>=1.0',
-                        'pyyaml>=3.10',
-                        'markdown>=2.3.1'],
+      install_requires=['tornado',
+                        'CouchDB',
+                        'pyyaml',
+                        'markdown'],
      )
