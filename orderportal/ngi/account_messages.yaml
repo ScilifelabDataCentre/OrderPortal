@@ -21,13 +21,18 @@ enabled:
   subject: "Your account in the {site} has been enabled."
   text: |
     Your account {account} in the {site} has been enabled.
-
     You will now have to set a new password for your account.
 
-    Go to {password_code_url} to set the password.
+    You may be asked to check the information for your account,
+    such as address and invoice information.
 
+    Go to {password_code_url} to set the password.
     In case that link does not work, go to {password_url} and
     fill in your email address and the one-time code {code}.
+
+    Please note that the so-called user name is no longer used in
+    the new portal system. Your email address is the identifier
+    for your account.
 
     If you have any questions, use {support}
 
