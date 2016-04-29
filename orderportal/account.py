@@ -23,10 +23,10 @@ class AccountSaver(saver.Saver):
 
     def set_email(self, email):
         assert self.get('email') is None # Email must not have been set.
+        email = email.lower().strip()
         if not email: raise ValueError('No email given.')
         if not constants.EMAIL_RX.match(email):
             raise ValueError('Malformed email value.')
-        email = email.lower()
         if len(list(self.db.view('account/email', key=email))) > 0:
             raise ValueError('Email is already in use.'
                              ' Do reset password if it has been lost.')
@@ -270,7 +270,7 @@ class Account(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        email = email.lower()
+        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         account['order_count'] = self.get_account_order_count(email)
@@ -306,7 +306,7 @@ class Account(AccountMixin, RequestHandler):
     @tornado.web.authenticated
     def delete(self, email):
         "Delete a account that is pending; to get rid of spam application."
-        email = email.lower()
+        email = email.lower().strip()
         account = self.get_account(email)
         self.check_admin()
         if not self.is_deletable(account):
@@ -382,7 +382,7 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        email = email.lower()
+        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         if self.is_staff():
@@ -402,7 +402,7 @@ class ApiV1AccountOrders(AccountOrdersMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, email):
         "JSON output."
-        email = email.lower()
+        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         view = self.db.view('order/owner',
@@ -446,7 +446,7 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        email = email.lower()
+        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         if self.is_staff():
@@ -466,7 +466,7 @@ class ApiV1AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, email):
         "JSON output."
-        email = email.lower()
+        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         orders = []
@@ -512,7 +512,7 @@ class AccountLogs(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        email = email.lower()
+        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         self.render('logs.html',
@@ -526,7 +526,7 @@ class AccountMessages(AccountMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, email):
         "Show list of messages sent to the account given by email address."
-        email = email.lower()
+        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         view = self.db.view('message/recipient',
@@ -553,7 +553,7 @@ class AccountEdit(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        email = email.lower()
+        email = email.lower().strip()
         account = self.get_account(email)
         self.check_editable(account)
         self.render('account_edit.html', account=account)
@@ -561,7 +561,7 @@ class AccountEdit(AccountMixin, RequestHandler):
     @tornado.web.authenticated
     def post(self, email):
         self.check_xsrf_cookie()
-        email = email.lower()
+        email = email.lower().strip()
         account = self.get_account(email)
         self.check_editable(account)
         with AccountSaver(doc=account, rqh=self) as saver:
@@ -778,6 +778,7 @@ class Register(RequestHandler):
                 saver.set_email(email)
             except ValueError, msg:
                 self.see_other('register', error=str(msg))
+                return
             try:
                 saver['first_name'] = self.get_argument('first_name')
                 saver['last_name'] = self.get_argument('last_name')
@@ -793,7 +794,10 @@ class Register(RequestHandler):
             try:
                 saver['gender'] = self.get_argument('gender').lower()
             except tornado.web.MissingArgumentError:
-                del saver['gender']
+                try:
+                    del saver['gender']
+                except KeyError:
+                    pass
             try:
                 saver['subject'] = int(self.get_argument('subject'))
             except (tornado.web.MissingArgumentError, ValueError, TypeError):
