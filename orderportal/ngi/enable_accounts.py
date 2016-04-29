@@ -5,11 +5,13 @@ from __future__ import print_function, absolute_import
 import csv
 import logging
 import time
+import urllib
 
 import orderportal
 from orderportal import constants
 from orderportal import settings
 from orderportal import utils
+from orderportal.message import MessageSaver
 
 PAUSE = 2.0
 
@@ -18,17 +20,70 @@ def enable_accounts(db, verbose=False):
                    include_docs=True,
                    key=constants.PENDING)
     for row in view:
-        doc = row.doc
-        doc['status'] = constants.ENABLED
-        doc['password'] = None
-        doc['code'] = utils.get_iuid()
-        doc['modified'] = utils.timestamp()
-        db.save(doc)
-        utils.log(db, None, doc,
+        account = row.doc
+        account['status'] = constants.ENABLED
+        account['password'] = None
+        account['code'] = utils.get_iuid()
+        account['modified'] = utils.timestamp()
+        db.save(account)
+        utils.log(db, None, account,
                   changed=dict(password=None, status=constants.ENABLED))
+        # Prepare message to send later
+        try:
+            template = settings['ACCOUNT_MESSAGES']['enabled']
+        except KeyError:
+            pass
+        else:
+            with MessageSaver(db=db) as saver:
+                saver.set_params(
+                    account=account['email'],
+                    password_url=absolute_reverse_url('password'),
+                    password_code_url=absolute_reverse_url(
+                        'password',
+                        email=account['email'],
+                        code=account['code']),
+                    code=account['code'])
+                saver.set_template(template)
+                saver['recipients'] = [account['email']]
         if verbose:
-            print(doc['email'])
+            print(account['email'])
         time.sleep(PAUSE)
+
+def fix_previously_enabled_accounts(db, verbose=True):
+    view = db.view('account/status',
+                   include_docs=True,
+                   key=constants.ENABLED)
+    for row in view:
+        account = row.doc
+        if not account.get('code'): continue
+        if account['modified'] < '2016-04-11T13:09:03Z': continue
+        # if account['modified'] < '2016-04-29T12:04:39.190Z': continue
+        # Prepare message to send later
+        try:
+            template = settings['ACCOUNT_MESSAGES']['enabled']
+        except KeyError:
+            pass
+        else:
+            with MessageSaver(db=db) as saver:
+                saver.set_params(
+                    account=account['email'],
+                    password_url=absolute_reverse_url('password'),
+                    password_code_url=absolute_reverse_url(
+                        'password',
+                        email=account['email'],
+                        code=account['code']),
+                    code=account['code'])
+                saver.set_template(template)
+                saver['recipients'] = [account['email']]
+        if verbose:
+            print(account['email'])
+        time.sleep(PAUSE)
+
+def absolute_reverse_url(path, **kwargs):
+    url = "https://ngisweden.scilifelab.se/{0}".format(path)
+    if kwargs:
+        url += '?' + urllib.urlencode(kwargs)
+    return url
 
 
 if __name__ == '__main__':
@@ -38,4 +93,5 @@ if __name__ == '__main__':
     utils.load_settings(filepath=options.settings,
                         verbose=options.verbose)
     db = utils.get_db()
-    enable_accounts(db, verbose=options.verbose)
+    fix_previously_enabled_accounts(db)
+    # enable_accounts(db, verbose=options.verbose)

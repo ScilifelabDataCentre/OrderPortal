@@ -863,7 +863,6 @@ class AccountEnable(RequestHandler):
             with MessageSaver(rqh=self) as saver:
                 saver.set_params(
                     account=account['email'],
-                    url=self.absolute_reverse_url('password'),
                     password_url=self.absolute_reverse_url('password'),
                     password_code_url=self.absolute_reverse_url(
                         'password',
