@@ -21,7 +21,6 @@ class News(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         self.check_admin()
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid)

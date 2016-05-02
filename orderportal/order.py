@@ -407,7 +407,6 @@ class Order(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid)
             return
@@ -454,7 +453,6 @@ class OrderCreate(RequestHandler):
 
     @tornado.web.authenticated
     def post(self):
-        self.check_xsrf_cookie()
         form = self.get_entity(self.get_argument('form'),doctype=constants.FORM)
         fields = Fields(form)
         with OrderSaver(rqh=self) as saver:
@@ -497,7 +495,6 @@ class OrderEdit(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_editable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
@@ -545,7 +542,6 @@ class OrderClone(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_readable(order)
         if not self.is_clonable(order):
@@ -567,7 +563,6 @@ class OrderTransition(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid, targetid):
-        self.check_xsrf_cookie()
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_editable(order)
         for target in self.get_targets(order):
@@ -601,7 +596,6 @@ class OrderFile(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid, filename):
-        self.check_xsrf_cookie()
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid, filename)
             return
@@ -622,7 +616,6 @@ class OrderAttach(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_attachable(order)
         try:
