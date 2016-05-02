@@ -493,48 +493,88 @@ class OrderEdit(OrderMixin, RequestHandler):
                     form=form,
                     fields=form['fields'])
 
+    # @tornado.web.authenticated
+    # def post(self, iuid):
+    #     order = self.get_entity(iuid, doctype=constants.ORDER)
+    #     self.check_editable(order)
+    #     form = self.get_entity(order['form'], doctype=constants.FORM)
+    #     try:
+    #         with OrderSaver(doc=order, rqh=self) as saver:
+    #             saver['title'] = self.get_argument('__title__', order['_id'])
+    #             try:
+    #                 owner = self.get_argument('__owner__')
+    #                 account = self.get_account(owner)
+    #                 if account.get('status') != constants.ENABLED:
+    #                     raise ValueError('owner account is not enabled')
+    #             except tornado.web.MissingArgumentError:
+    #                 pass
+    #             except tornado.web.HTTPError:
+    #                 raise ValueError('no such owner account')
+    #             else:
+    #                 saver['owner'] = account['email']
+    #             saver.update_fields(Fields(form))
+    #         flag = self.get_argument('__save__', None)
+    #         if flag == 'continue':
+    #             self.see_other('order_edit', order['_id'])
+    #         elif flag == 'submit': # Hard-wired, currently
+    #             targets = self.get_targets(order)
+    #             for target in targets:
+    #                 if target['identifier'] == 'submitted':
+    #                     with OrderSaver(doc=order, rqh=self) as saver:
+    #                         saver.set_status('submitted')
+    #                     self.prepare_message(order)
+    #                     self.see_other('order', order['_id'],
+    #                                    message='Order saved and submitted.')
+    #                     break
+    #             else:
+    #                 self.see_other('order', order['_id'],
+    #                                message='Order saved.',
+    #                                error='Order could not be submitted due to'
+    #                                ' invalid or missing values.')
+    #         else:
+    #             self.see_other('order', order['_id'], message='Order saved.')
+    #     except ValueError, msg:
+    #         self.see_other('order_edit', order['_id'], error=str(msg))
+
     @tornado.web.authenticated
     def post(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_editable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
-        try:
-            with OrderSaver(doc=order, rqh=self) as saver:
-                saver['title'] = self.get_argument('__title__', order['_id'])
-                try:
-                    owner = self.get_argument('__owner__')
-                    account = self.get_account(owner)
-                    if account.get('status') != constants.ENABLED:
-                        raise ValueError('owner account is not enabled')
-                except tornado.web.MissingArgumentError:
-                    pass
-                except tornado.web.HTTPError:
-                    raise ValueError('no such owner account')
-                else:
-                    saver['owner'] = account['email']
-                saver.update_fields(Fields(form))
-            flag = self.get_argument('__save__', None)
-            if flag == 'continue':
-                self.see_other('order_edit', order['_id'])
-            elif flag == 'submit': # Hard-wired, currently
-                targets = self.get_targets(order)
-                for target in targets:
-                    if target['identifier'] == 'submitted':
-                        with OrderSaver(doc=order, rqh=self) as saver:
-                            saver.set_status('submitted')
-                        self.prepare_message(order)
-                        self.see_other('order', order['_id'],
-                                       message='Order saved and submitted.')
-                        break
-                else:
-                    self.see_other('order', order['_id'],
-                                   message='Order saved.',
-                                   error='Order could not be submitted due to'
-                                   ' invalid or missing values.')
+        with OrderSaver(doc=order, rqh=self) as saver:
+            saver['title'] = self.get_argument('__title__', order['_id'])
+            try:
+                owner = self.get_argument('__owner__')
+                account = self.get_account(owner)
+                if account.get('status') != constants.ENABLED:
+                    raise ValueError('owner account is not enabled')
+            except tornado.web.MissingArgumentError:
+                pass
+            except tornado.web.HTTPError:
+                raise ValueError('no such owner account')
             else:
-                self.see_other('order', order['_id'], message='Order saved.')
-        except ValueError, msg:
-            self.see_other('order_edit', order['_id'], error=str(msg))
+                saver['owner'] = account['email']
+            saver.update_fields(Fields(form))
+        flag = self.get_argument('__save__', None)
+        if flag == 'continue':
+            self.see_other('order_edit', order['_id'])
+        elif flag == 'submit': # Hard-wired, currently
+            targets = self.get_targets(order)
+            for target in targets:
+                if target['identifier'] == 'submitted':
+                    with OrderSaver(doc=order, rqh=self) as saver:
+                        saver.set_status('submitted')
+                    self.prepare_message(order)
+                    self.see_other('order', order['_id'],
+                                   message='Order saved and submitted.')
+                    break
+            else:
+                self.see_other('order', order['_id'],
+                               message='Order saved.',
+                               error='Order could not be submitted due to'
+                               ' invalid or missing values.')
+        else:
+            self.see_other('order', order['_id'], message='Order saved.')
 
 
 class OrderClone(OrderMixin, RequestHandler):
