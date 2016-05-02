@@ -72,7 +72,6 @@ class Group(GroupMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid)
             return
@@ -175,7 +174,6 @@ class GroupAccept(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         group = self.get_entity(iuid, doctype=constants.GROUP)
         with GroupSaver(doc=group, rqh=self) as saver:
             invited = set(group['invited'])
@@ -195,7 +193,6 @@ class GroupDecline(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         group = self.get_entity(iuid, doctype=constants.GROUP)
         with GroupSaver(doc=group, rqh=self) as saver:
             invited = set(group['invited'])

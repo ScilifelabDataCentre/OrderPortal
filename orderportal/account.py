@@ -296,7 +296,6 @@ class Account(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        self.check_xsrf_cookie()
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(email)
             return
@@ -560,7 +559,6 @@ class AccountEdit(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        self.check_xsrf_cookie()
         email = email.lower().strip()
         account = self.get_account(email)
         self.check_editable(account)
@@ -616,7 +614,6 @@ class Login(RequestHandler):
     def post(self):
         """Login to a account account. Set a secure cookie.
         Forward to account edit page if first login."""
-        self.check_xsrf_cookie()
         try:
             email = self.get_argument('email')
             password = self.get_argument('password')
@@ -663,7 +660,6 @@ class Logout(RequestHandler):
 
     @tornado.web.authenticated
     def post(self):
-        self.check_xsrf_cookie()
         self.set_secure_cookie(constants.USER_COOKIE, '')
         self.redirect(self.reverse_url('home'))
 
@@ -675,7 +671,6 @@ class Reset(RequestHandler):
         self.render('reset.html', email=self.get_argument('account', ''))
 
     def post(self):
-        self.check_xsrf_cookie()
         try:
             account = self.get_account(self.get_argument('email'))
         except (tornado.web.MissingArgumentError,
@@ -727,7 +722,6 @@ class Password(RequestHandler):
                     code=self.get_argument('code', default=''))
 
     def post(self):
-        self.check_xsrf_cookie()
         account = self.get_account(self.get_argument('email'))
         if account.get('code') != self.get_argument('code'):
             self.see_other('home',
@@ -771,7 +765,6 @@ class Register(RequestHandler):
         if not self.global_modes['allow_registration']:
             self.see_other('home', error='Registration is currently disabled.')
             return
-        self.check_xsrf_cookie()
         with AccountSaver(rqh=self) as saver:
             try:
                 email = self.get_argument('email', '')
@@ -848,7 +841,6 @@ class AccountEnable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        self.check_xsrf_cookie()
         account = self.get_account(email)
         self.check_admin()
         with AccountSaver(account, rqh=self) as saver:
@@ -879,7 +871,6 @@ class AccountDisable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        self.check_xsrf_cookie()
         account = self.get_account(email)
         self.check_admin()
         with AccountSaver(account, rqh=self) as saver:
@@ -893,7 +884,6 @@ class AccountUpdateInfo(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        self.check_xsrf_cookie()
         account = self.get_account(email)
         self.check_admin()
         if not account.get('update_info'):

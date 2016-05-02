@@ -27,7 +27,6 @@ class Info(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, name):
-        self.check_xsrf_cookie()
         self.check_admin()
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(name)
@@ -79,7 +78,6 @@ class InfoCreate(RequestHandler):
 
     @tornado.web.authenticated
     def post(self):
-        self.check_xsrf_cookie()
         self.check_admin()
         name = self.get_argument('name')
         if not constants.NAME_RX.match(name):
@@ -112,7 +110,6 @@ class InfoEdit(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, name):
-        self.check_xsrf_cookie()
         self.check_admin()
         info = self.get_entity_view('info/name', name)
         with InfoSaver(doc=info, rqh=self) as saver:

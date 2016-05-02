@@ -97,7 +97,6 @@ class FileMeta(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, name):
-        self.check_xsrf_cookie()
         self.check_admin()
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(name)
@@ -136,7 +135,6 @@ class FileCreate(RequestHandler):
 
     @tornado.web.authenticated
     def post(self):
-        self.check_xsrf_cookie()
         self.check_admin()
         with FileSaver(rqh=self) as saver:
             try:

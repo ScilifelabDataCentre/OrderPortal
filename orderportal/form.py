@@ -113,7 +113,6 @@ class Form(FormMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         self.check_admin()
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid)
@@ -171,7 +170,6 @@ class FormCreate(RequestHandler):
 
     @tornado.web.authenticated
     def post(self):
-        self.check_xsrf_cookie()
         self.check_admin()
         with FormSaver(rqh=self) as saver:
             saver['title'] = self.get_argument('title')
@@ -207,7 +205,6 @@ class FormEdit(FormMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(doc=form, rqh=self) as saver:
@@ -252,7 +249,6 @@ class FormFieldCreate(FormMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.check_fields_editable(form)
@@ -282,7 +278,6 @@ class FormFieldEdit(FormMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid, identifier):
-        self.check_xsrf_cookie()
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid, identifier)
             return
@@ -309,7 +304,6 @@ class FormFieldEditDescr(FormMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid, identifier):
-        self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(doc=form, rqh=self) as saver:
@@ -325,7 +319,6 @@ class FormClone(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(rqh=self) as saver:
@@ -344,7 +337,6 @@ class FormPending(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         if form['status'] != constants.TESTING:
@@ -367,7 +359,6 @@ class FormTesting(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         if form['status'] != constants.PENDING:
@@ -383,7 +374,6 @@ class FormEnable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         if form['status'] == constants.PENDING:
@@ -398,7 +388,6 @@ class FormDisable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        self.check_xsrf_cookie()
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         if form['status'] == constants.ENABLED:
