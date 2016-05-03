@@ -72,12 +72,8 @@ $(document).ready(function() {
 {% end %}
 
 {% block javascript_code %}
-<script type="text/javascript"
-	src="{{ settings['DATATABLES_JS_URL'] }}">
-</script>
-<script type="text/javascript"
-	src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}">
-</script>
+<script src="{{ settings['DATATABLES_JS_URL'] }}"></script>
+<script src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
 <script type="text/javascript" >
 $(document).ready(function() {
   $(".refresh").change(function () {

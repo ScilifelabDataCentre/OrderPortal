@@ -8,12 +8,12 @@ __version__ = '2.1'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
+    BASE_URL='http://localhost:8885/',
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
     LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',
     SITE_DIR='{ROOT}/generic',
     SITE_NAME='OrderPortal',
-    BASE_URL='http://localhost:8885/',
     DB_SERVER='http://localhost:5984/',
     JQUERY_URL='https://code.jquery.com/jquery-1.12.3.min.js',
     JQUERY_UI_URL='https://code.jquery.com/ui/1.11.4/jquery-ui.min.js',
