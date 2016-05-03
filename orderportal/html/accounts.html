@@ -11,7 +11,7 @@ Accounts
 
 {% block header_css %}
 <link rel="stylesheet" type="text/css"
-      href="{{ static_url('DataTables-1.10.10/css/dataTables.bootstrap.min.css') }}">
+      href="{{ settings['DATATABLES_CSS_URL'] }}">
 {% end %}
 
 {% block container %}
@@ -92,50 +92,48 @@ Accounts
 
 {% block javascript_code %}
 {% import json %}
-<script type="text/javascript"  charset="utf8"
-	src="{{ static_url('DataTables-1.10.10/js/jquery.dataTables.min.js') }}">
-</script>
-
+<script src="{{ settings['DATATABLES_JS_URL'] }}"></script>
+<script src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
 <script type="text/javascript" >
 $(document).ready(function() {
-  $('.refresh').change(function () {
-    $('#refresh').submit();
+  $(".refresh").change(function () {
+    $("#refresh").submit();
   });
-  $('#accounts').DataTable( {
-    "pagingType": "full_numbers",
-    "order": [[0, 'asc']],
+  $("#accounts").DataTable( {
+    pagingType: "full_numbers",
+    order: [[0, "asc"]],
     ajax: {
-      url: '/api/v1/accounts',
-      dataSrc: 'data',
+      url: "/api/v1/accounts",
+      dataSrc: "data",
       data: {% raw json.dumps(params) %}
     },
     columns: [
-      {data: 'email',
+      {data: "email",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html("<a href='"+oData.href+"'>"+oData.email+"</a>");
        }
       },
-      {data: 'name'},
-      {data: 'order_count',
+      {data: "name"},
+      {data: "order_count",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html("<a class='badge' href='"+oData.orders_href+"'>"+oData.order_count+"</a>");
        }
       },
-      {data: 'university'},
-      {data: 'role'},
-      {data: 'status',
+      {data: "university"},
+      {data: "role"},
+      {data: "status",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html("<img src='"+oData.status_href+"'> "+sData);
        }
       },
-      {data: 'login',
+      {data: "login",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          if (oData.login !== '-') {
            $(nTd).html($.localtime.toLocalTime(oData.login));
          };
        }
       },
-      {data: 'modified',
+      {data: "modified",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html($.localtime.toLocalTime(oData.modified));
        }
@@ -143,8 +141,5 @@ $(document).ready(function() {
     ]
   });
 });
-</script>
-<script type="text/javascript" charset="utf8"
-	src="{{ static_url('DataTables-1.10.10/js/dataTables.bootstrap.min.js') }}">
 </script>
 {% end %} {# block javascript_code #}
