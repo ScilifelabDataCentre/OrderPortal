@@ -9,7 +9,7 @@
 
 {% block header_css %}
 <link rel="stylesheet" type="text/css"
-      href="{{ static_url('DataTables-1.10.10/css/dataTables.bootstrap.min.css') }}">
+      href="{{ settings['DATATABLES_CSS_URL'] }}">
 {% end %}
 
 {% block container %}
@@ -91,52 +91,54 @@
 
 {% block javascript_code %}
 {% import json %}
-<script type="text/javascript" charset="utf8"
-	src="{{ static_url('DataTables-1.10.10/js/jquery.dataTables.min.js') }}">
+<script type="text/javascript"
+	src="{{ settings['DATATABLES_JS_URL'] }}">
 </script>
-
+<script type="text/javascript"
+	src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}">
+</script>
 <script type="text/javascript" >
 $(document).ready(function() {
-  $('.refresh').change(function () {
-    $('#refresh').submit();
+  $(".refresh").change(function () {
+    $("#refresh").submit();
   });
-  $('#orders').DataTable( {
-    "pagingType": "full_numbers",
-    "order": [[{{ order_column }}, 'desc']],
+  $("#orders").DataTable( {
+    pagingType: "full_numbers",
+    order: [[{{ order_column }}, "desc"]],
     ajax: {
-      url: '/api/v1/orders',
-      dataSrc: 'data',
+      url: "/api/v1/orders",
+      dataSrc: "data",
       data: {% raw json.dumps(params) %}
     },
     columns: [
-      {data: 'identifier',
+      {data: "identifier",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html("<a href='"+oData.href+"'>"+oData.identifier+"</a>");
        }
       },
-      {data: 'title'},
-      {data: 'form_title',
+      {data: "title"},
+      {data: "form_title",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html("<a href='"+oData.form_href+"'>"+oData.form_title+"</a>");
        }
       },
-      {data: 'owner_name',
+      {data: "owner_name",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html("<a href='"+oData.owner_href+"'>"+oData.owner_name+"</a>");
        }
       },
       {% for f in settings['ORDERS_LIST_FIELDS'] %}
-      { data: 'fields.{{ f['identifier'] }}'},
+        { data: "fields.{{ f['identifier'] }}" },
       {% end %}
-      {data: 'status',
+      {data: "status",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html("<img src='"+oData.status_href+"'> "+sData);
        }
       },
       {% for s in settings['ORDERS_LIST_STATUSES'] %}
-      {data: 'history.{{ s }}'},
+        {data: "history.{{ s }}"},
       {% end %}
-      {data: 'modified',
+      {data: "modified",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html($.localtime.toLocalTime(oData.modified));
        }
@@ -144,8 +146,5 @@ $(document).ready(function() {
     ]
   });
 });
-</script>
-<script type="text/javascript" charset="utf8"
-	src="{{ static_url('DataTables-1.10.10/js/dataTables.bootstrap.min.js') }}">
 </script>
 {% end %} {# block javascript_code #}

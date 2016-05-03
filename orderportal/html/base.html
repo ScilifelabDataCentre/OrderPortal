@@ -11,7 +11,9 @@
     {% end %}
     <link rel="shortcut icon" type="image/png" href="{{ url }}">
     <link rel="stylesheet" type="text/css"
-	  href="{{ static_url('Bootstrap-3.3.5/css/bootstrap.min.css') }}">
+	  href="{{ settings['JQUERY_UI_THEME_URL'] }}">
+    <link rel="stylesheet" type="text/css"
+	  href="{{ settings['BOOTSTRAP_CSS_URL'] }}">
     {% block header_css %}
     {% end %}
     <link rel="stylesheet" href="{{ static_url('mods.css') }}">
@@ -258,9 +260,10 @@
 
     {% block javascript_standard %}
     {# NOTE: jQuery has to be loaded before bootstrap! #}
-    <script src="{{ static_url('jquery-1.11.3.min.js') }}"></script>
+    <script src="{{ settings['JQUERY_URL'] }}"></script>
+    <script src="{{ settings['JQUERY_UI_URL'] }}"></script>
     <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
-    <script src="{{ static_url('Bootstrap-3.3.5/js/bootstrap.min.js') }}"></script>
+    <script src="{{ settings['BOOTSTRAP_JS_URL'] }}"></script>
     <script>
       $(document).ready(function(){
         $('.dropdown-submenu a.submenu').on("click", function(e){
@@ -268,6 +271,12 @@
           e.stopPropagation();
           e.preventDefault();
         });
+      });
+    </script>
+    <script>
+      $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
+      $(document).ready(function(){
+        $(".datepicker").datepicker();
       });
     </script>
     {% end %} {# block javascript_standard #}
