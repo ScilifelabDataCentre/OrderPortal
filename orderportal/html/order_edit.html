@@ -4,12 +4,12 @@
 
 {% block head_title %}
 Edit order
-'{{ order.get('title') or order['_id'] }}'
+'{{ order['title'] }}'
 {% end %}
 
 {% block body_title %}
 Edit order
-'{{ order.get('title') or order['_id'] }}'
+'{{ order['title'] }}'
 {% end %}
 
 {% block content %}
@@ -42,7 +42,7 @@ Edit order
 	<label class="control-label" for="__title__">Title</label>
 	<input type="text" class="form-control"
 	       name="__title__" id="__title__"
-	       value="{{ order.get('title') or '' }}">
+	       value="{{ order['title'] }}">
       </div>
     </div>
     <span class="help-block">

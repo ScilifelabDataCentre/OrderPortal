@@ -425,12 +425,10 @@ class ApiV1AccountOrders(AccountOrdersMixin, RequestHandler):
                         status_href=self.reverse_url('site', order['status'] + '.png'),
                         history={},
                         modified=order['modified'])
+            item['href'] = self.order_reverse_url(order)
             identifier = order.get('identifier')
-            if identifier:
-                item['href'] = self.reverse_url('order_id', identifier)
-            else:
+            if not identifier:
                 identifier = order['_id'][:6] + '...'
-                item['href'] = self.reverse_url('order', order['_id'])
             item['identifier'] = identifier
             for f in settings['ORDERS_LIST_FIELDS']:
                 item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
@@ -491,12 +489,10 @@ class ApiV1AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
                         status_href=self.reverse_url('site', order['status'] + '.png'),
                         history={},
                         modified=order['modified'])
+            item['href'] = self.order_reverse_url(order)
             identifier = order.get('identifier')
-            if identifier:
-                item['href'] = self.reverse_url('order_id', identifier)
-            else:
+            if not identifier:
                 identifier = order['_id'][:6] + '...'
-                item['href'] = self.reverse_url('order', order['_id'])
             item['identifier'] = identifier
             for f in settings['ORDERS_LIST_FIELDS']:
                 item['fields'][f['identifier']] = order['fields'].get(f['identifier'])

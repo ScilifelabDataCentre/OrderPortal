@@ -58,7 +58,7 @@
 	<td>
 	  {% if item['orderportal_doctype'] == constants.ORDER %}
 	  {% module Icon('order') %}
-	  <a href="{{ reverse_url('order', item['_id']) }}">{{ item.get('title', item['title']) }}</a>
+	  <a href="{{ order_reverse_url(item) }}">{{ item['title'] }}</a>
 	  {% elif item['orderportal_doctype'] == constants.ACCOUNT %}
 	  {% module Icon('account') %}
 	  <a href="{{ reverse_url('account', item['email']) }}">{{ item['email'] }}</a>

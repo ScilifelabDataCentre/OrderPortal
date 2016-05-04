@@ -231,15 +231,11 @@ class OrderMixin(object):
         if 'admin' in template['recipients']:
             recipients.update([a['email'] for a in self.get_admins()])
         with MessageSaver(rqh=self) as saver:
-            try:
-                url = self.absolute_reverse_url('order_id', order['identifier'])
-            except KeyError:
-                url = self.absolute_reverse_url('order', order['_id'])
             saver.set_params(
                 owner=order['owner'],
-                title=order.get('title', '[no title]'),
+                title=order['title'],
                 identifier=order.get('identifier') or order['_id'],
-                url=url)
+                url=self.order_reverse_url(order))
             saver.set_template(template)
             saver['recipients'] = list(recipients)
 
@@ -287,7 +283,7 @@ class ApiV1Orders(Orders):
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
         data = []
         for order in orders:
-            item = dict(title=order.get('title') or '[no title]',
+            item = dict(title=order['title'],
                         form_title=forms[order['form']],
                         form_href=self.reverse_url('form', order['form']),
                         owner_name=names[order['owner']],
@@ -298,12 +294,10 @@ class ApiV1Orders(Orders):
                             self.reverse_url('site', order['status'] + '.png'),
                         history={},
                         modified=order['modified'])
+            item['href'] = self.order_reverse_url(order)
             identifier = order.get('identifier')
-            if identifier:
-                item['href'] = self.reverse_url('order_id', identifier)
-            else:
+            if not identifier:
                 identifier = order['_id'][:6] + '...'
-                item['href'] = self.reverse_url('order', order['_id'])
             item['identifier'] = identifier
             for f in settings['ORDERS_LIST_FIELDS']:
                 item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
@@ -384,7 +378,6 @@ class Order(OrderMixin, RequestHandler):
             order = self.get_entity_view('order/identifier', match.group())
         self.check_readable(order)
         form = self.get_entity(order['form'], doctype=constants.FORM)
-        title = order.get('title') or order['_id']
         files = []
         if self.is_attachable(order):
             for filename in order.get('_attachments', []):
@@ -395,7 +388,7 @@ class Order(OrderMixin, RequestHandler):
                 files.sort(lambda i,j: cmp(i['filename'].lower(),
                                            j['filename'].lower()))
         self.render('order.html',
-                    title=u"Order '{0}'".format(title),
+                    title=u"Order '{0}'".format(order['title']),
                     order=order,
                     account_names=self.get_account_names([order['owner']]),
                     status=self.get_order_status(order),
@@ -502,7 +495,7 @@ class OrderEdit(OrderMixin, RequestHandler):
         form = self.get_entity(order['form'], doctype=constants.FORM)
         try:
             with OrderSaver(doc=order, rqh=self) as saver:
-                saver['title'] = self.get_argument('__title__', order['_id'])
+                saver['title'] = self.get_argument('__title__', None) or '[no title]'
                 try:
                     owner = self.get_argument('__owner__')
                     account = self.get_account(owner)
@@ -518,25 +511,28 @@ class OrderEdit(OrderMixin, RequestHandler):
             flag = self.get_argument('__save__', None)
             if flag == 'continue':
                 self.see_other('order_edit', order['_id'])
-            elif flag == 'submit': # Hard-wired, currently
+            elif flag == 'submit': # XXX Hard-wired, currently
                 targets = self.get_targets(order)
                 for target in targets:
                     if target['identifier'] == 'submitted':
                         with OrderSaver(doc=order, rqh=self) as saver:
                             saver.set_status('submitted')
                         self.prepare_message(order)
-                        self.see_other('order', order['_id'],
-                                       message='Order saved and submitted.')
+                        self.redirect(self.order_reverse_url(
+                                order,
+                                message='Order saved and submitted.'))
                         break
                 else:
-                    self.see_other('order', order['_id'],
-                                   message='Order saved.',
-                                   error='Order could not be submitted due to'
-                                   ' invalid or missing values.')
+                        self.redirect(self.order_reverse_url(
+                                order,
+                                message='Order saved.',
+                                error='Order could not be submitted due to'
+                                ' invalid or missing values.'))
             else:
-                self.see_other('order', order['_id'], message='Order saved.')
+                self.redirect(self.order_reverse_url(order,
+                                                     message='Order saved.'))
         except ValueError, msg:
-            self.see_other('order_edit', order['_id'], error=str(msg))
+            self.redirect(self.order_reverse_url(order, error=str(msg)))
 
 
 class OrderClone(OrderMixin, RequestHandler):
@@ -557,7 +553,7 @@ class OrderClone(OrderMixin, RequestHandler):
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
             saver.check_fields_validity(Fields(form))
             saver.set_identifier(form)
-        self.see_other('order', saver.doc['_id'])
+        self.redirect(self.order_reverse_url(saver.doc))
 
 
 class OrderTransition(OrderMixin, RequestHandler):
@@ -575,7 +571,7 @@ class OrderTransition(OrderMixin, RequestHandler):
         with OrderSaver(doc=order, rqh=self) as saver:
             saver.set_status(targetid)
         self.prepare_message(order)
-        self.see_other('order', order['_id'])
+        self.redirect(self.order_reverse_url(order))
 
 
 class OrderFile(OrderMixin, RequestHandler):
@@ -610,7 +606,7 @@ class OrderFile(OrderMixin, RequestHandler):
         self.check_attachable(order)
         with OrderSaver(doc=order, rqh=self) as saver:
             saver.delete_filename = filename
-        self.see_other('order', order['_id'])
+        self.redirect(self.order_reverse_url(order))
 
 
 class OrderAttach(OrderMixin, RequestHandler):
@@ -630,4 +626,4 @@ class OrderAttach(OrderMixin, RequestHandler):
                 saver['filename'] = infile.filename
                 saver['size'] = len(infile.body)
                 saver['content_type'] = infile.content_type or 'application/octet-stream'
-        self.see_other('order', order['_id'])
+        self.redirect(self.order_reverse_url(order))
