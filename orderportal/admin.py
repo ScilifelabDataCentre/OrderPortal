@@ -95,7 +95,9 @@ class GlobalModes(RequestHandler):
         except (tornado.web.MissingArgumentError, ValueError, TypeError):
             pass
         else:
+            # Create global_modes meta document if it does not exist.
             if '_id' not in self.global_modes:
                 self.global_modes['_id'] = 'global_modes'
+                self.global_modes[constants.DOCTYPE] = constants.META
             self.db.save(self.global_modes)
         self.see_other('global_modes')

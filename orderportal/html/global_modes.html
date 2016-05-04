@@ -33,7 +33,7 @@
 	<th>Current setting</th>
 	<th>Change</th>
       </tr>
-      {% for key in sorted([k for k in global_modes if not k.startswith('_')]) %}
+      {% for key in sorted([k for k in global_modes if k.startswith('allow')]) %}
       {% set value = global_modes[key] %}
       <tr>
 	<td>{{ key }}</td>
