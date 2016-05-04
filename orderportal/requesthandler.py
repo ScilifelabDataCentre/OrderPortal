@@ -34,6 +34,7 @@ class RequestHandler(tornado.web.RequestHandler):
         result['constants'] = constants
         result['global_modes'] = self.global_modes
         result['absolute_reverse_url'] = self.absolute_reverse_url
+        result['order_reverse_url'] = self.order_reverse_url
         result['is_staff'] = self.is_staff()
         result['is_admin'] = self.is_admin()
         result['error'] = self.get_argument('error', None)
@@ -64,6 +65,13 @@ class RequestHandler(tornado.web.RequestHandler):
             query = dict([(k, utils.to_utf8(v)) for k,v in query.items()])
             url += '?' + urllib.urlencode(query)
         return url
+
+    def order_reverse_url(self, order, **query):
+        "URL for order; use identifier variant if available."
+        try:
+            return self.reverse_url('order_id', order['identifier'], **query)
+        except KeyError:
+            return self.reverse_url('order', order['_id'], **query)
 
     def get_current_user(self):
         """Get the currently logged-in user account, if any.

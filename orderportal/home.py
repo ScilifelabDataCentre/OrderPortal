@@ -147,7 +147,7 @@ class Entity(RequestHandler):
         "Login and privileges are checked by the entity redirected to."
         doc = self.get_entity(iuid)
         if doc[constants.DOCTYPE] == constants.ORDER:
-            self.see_other('order', doc['_id'])
+            self.redirect(self.order_reverse_url(doc))
         elif doc[constants.DOCTYPE] == constants.FORM:
             self.see_other('form', doc['_id'])
         elif doc[constants.DOCTYPE] == constants.ACCOUNT:
