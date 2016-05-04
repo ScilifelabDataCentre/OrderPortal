@@ -45,23 +45,28 @@ class OrderSaver(saver.Saver):
         # except for checkbox, in which case missing value means False.
         docfields = self.doc['fields']
         for field in fields:
-            if field['type'] == constants.GROUP: continue
-
-            identifier = field['identifier']
             try:
-                value = self.rqh.get_argument(identifier)
-                if value == '': value = None
-            except tornado.web.MissingArgumentError:
-                # Missing arg means no change, which is not same as value None!
-                # Except for boolean checkbox:
-                if field['type'] == constants.BOOLEAN and field.get('checkbox'):
-                    value = False
-                else:
-                    continue
-            if value != docfields.get(identifier):
-                changed = self.changed.setdefault('fields', dict())
-                changed[identifier] = value
-                docfields[identifier] = value
+                if field['type'] == constants.GROUP: continue
+
+                identifier = field['identifier']
+                try:
+                    value = self.rqh.get_argument(identifier)
+                    if value == '': value = None
+                except tornado.web.MissingArgumentError:
+                    # Missing arg means no change,
+                    # which is not same as value None!
+                    # Except for boolean checkbox:
+                    if field['type'] == constants.BOOLEAN and field.get('checkbox'):
+                        value = False
+                    else:
+                        continue
+                if value != docfields.get(identifier):
+                    changed = self.changed.setdefault('fields', dict())
+                    changed[identifier] = value
+                    docfields[identifier] = value
+            except ValueError, msg:
+                raise ValueError(u"{0} field {1}".
+                                 format(msg, field['identifier']))
         self.check_fields_validity(fields)
 
     def check_fields_validity(self, fields):
@@ -529,8 +534,8 @@ class OrderEdit(OrderMixin, RequestHandler):
                                 error='Order could not be submitted due to'
                                 ' invalid or missing values.'))
             else:
-                self.redirect(self.order_reverse_url(order,
-                                                     message='Order saved.'))
+                self.redirect(
+                    self.order_reverse_url(order, message='Order saved.'))
         except ValueError, msg:
             self.redirect(self.order_reverse_url(order, error=str(msg)))
 
