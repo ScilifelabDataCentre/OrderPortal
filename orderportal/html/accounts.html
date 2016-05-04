@@ -94,14 +94,14 @@ Accounts
 {% import json %}
 <script src="{{ settings['DATATABLES_JS_URL'] }}"></script>
 <script src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
-<script type="text/javascript" >
+<script
 $(document).ready(function() {
   $(".refresh").change(function () {
     $("#refresh").submit();
   });
   $("#accounts").DataTable( {
     pagingType: "full_numbers",
-    order: [[0, "asc"]],
+    order: [[7, "desc"]],
     ajax: {
       url: "/api/v1/accounts",
       dataSrc: "data",
