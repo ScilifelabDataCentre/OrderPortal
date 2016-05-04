@@ -146,6 +146,15 @@
 		</li>
 	      </ul>
 	    </li>
+	    {% if not reduce(lambda i,j: i and j, [global_modes[k] for k in global_modes.keys() if k.startswith('allow')]) %}
+	    <li>
+	      <a href="{{ reverse_url('global_modes') }}"
+		 class="btn btn-danger">
+		<span class="glyphicon glyphicon-exclamation-sign"></span>
+		Global modes
+	      </a>
+	    </li>
+	    {% end %}
 	    {% end %} {# if is_admin #}
 
 	    <li>
