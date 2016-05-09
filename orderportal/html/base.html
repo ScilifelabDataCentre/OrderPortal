@@ -44,8 +44,9 @@
 	<div class="collapse navbar-collapse" id="myNavbar">
 	  <ul class="nav navbar-nav">
 	    <li>
-	      <a class="glyphicon glyphicon-home"
-		 href="{{ reverse_url('home') }}"></a>
+	      <a href="{{ reverse_url('home') }}">
+		<span class="glyphicon glyphicon-home"></span>
+	      </a>
 	    </li>
 	    {% if current_user %}
 	    {% if is_staff %}

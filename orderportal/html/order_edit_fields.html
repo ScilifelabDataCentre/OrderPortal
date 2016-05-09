@@ -34,7 +34,8 @@
       {% end %}
       {% if field['identifier'] in order['invalid'] %}
       <span class="text-danger">
-	<span data-toggle="tooltip" title="Invalid value; order cannot be submitted."
+	<span data-toggle="tooltip"
+	      title="Invalid value; order cannot be submitted."
 	      class="glyphicon glyphicon-remove"></span>
 	{{ order['invalid'][field['identifier']] }}
       </span>
@@ -70,11 +71,13 @@
       <label class="control-label" for="{{ field['identifier'] }}">
 	{{ label }}
 	{% if field['restrict_read'] %}
-	<span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
+	<span class="glyphicon glyphicon-eye-open"
+	      title="Readable by staff only.">
 	</span>
 	{% end %}
 	{% if field['restrict_write'] %}
-	<span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
+	<span class="glyphicon glyphicon-pencil"
+	      title="Writeable by admin only.">
 	</span>
 	{% end %}
 	{% if field['identifier'] in order['invalid'] %}
