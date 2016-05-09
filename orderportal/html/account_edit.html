@@ -3,10 +3,9 @@
 {% extends "base.html" %}
 
 {% block head_title %}Edit {{ account['email'] }}{% end %}
+
 {% block body_title %}
-Edit
-{% module Icon('account') %}
-{{ account['email'] }}
+Edit {% module Icon('account') %} {{ account['email'] }}
 {% end %}
 
 {% block main_content %}
@@ -372,7 +371,7 @@ Edit
 
 {% end %} {# block main_content #}
 
-{% block javascript-autofocus %}
+{% block javascript_autofocus %}
 <script>
   $(document).ready(function(){
     $("#first_name").focus();

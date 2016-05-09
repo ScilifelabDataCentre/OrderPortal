@@ -3,11 +3,7 @@
 {% extends "base.html" %}
 
 {% block head_title %}File {{ title }}{% end %}
-
-{% block body_title %}
-{% module Icon('file', label=True) %}
-{{ title }}
-{% end %}
+{% block body_title %}{% module Icon('file', label=True) %} {{ title }}{% end %}
 
 {% block main_content %}
 

@@ -2,15 +2,8 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}
-Edit order
-'{{ order['title'] }}'
-{% end %}
-
-{% block body_title %}
-Edit order
-'{{ order['title'] }}'
-{% end %}
+{% block head_title %}Edit order '{{ order['title'] }}'{% end %}
+{% block body_title %} Edit order'{{ order['title'] }}'{% end %}
 
 {% block content %}
 <h3>{{ form['title'] }}</h3>
@@ -107,7 +100,7 @@ Edit order
 <script src="{{ static_url('quit_through_submit.js') }}"></script>
 {% end %}
 
-{% block javascript-autofocus %}
+{% block javascript_autofocus %}
 <script>
   $(document).ready(function(){
     $("#__title__").focus();

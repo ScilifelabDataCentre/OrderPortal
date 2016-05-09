@@ -3,7 +3,6 @@
 {% extends "base.html" %}
 
 {% block head_title %}Create field in form '{{ form['title'] }}'{% end %}
-
 {% block body_title %}Create field in form '{{ form['title'] }}'{% end %}
 
 {% block main_content %}
@@ -230,7 +229,7 @@ $(document).ready(function() {
 <script src="{{ static_url('field_visible_if.js') }}"></script>
 {% end %}
 
-{% block javascript-autofocus %}
+{% block javascript_autofocus %}
 <script>
   $(document).ready(function(){
     $("#group").focus();

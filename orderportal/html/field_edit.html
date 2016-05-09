@@ -3,13 +3,11 @@
 {% extends "base.html" %}
 
 {% block head_title %}
-Edit field '{{ field['identifier'] }}' 
-in '{{ form['title'] }}'
+Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 {% end %}
 
 {% block body_title %}
-Edit field '{{ field['identifier'] }}' 
-in '{{ form['title'] }}'
+Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 {% end %}
 
 {% block main_content %}
@@ -294,7 +292,7 @@ in '{{ form['title'] }}'
 </form>
 {% end %} {# block main_content #}
 
-{% block javascript-autofocus %}
+{% block javascript_autofocus %}
 <script>
   $(document).ready(function(){
     $("#parent").focus();
