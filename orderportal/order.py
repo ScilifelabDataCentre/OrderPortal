@@ -272,6 +272,15 @@ class Orders(RequestHandler):
                 result[key] = value
             except (tornado.web.MissingArgumentError, KeyError):
                 pass
+        recent = self.get_argument('recent', None)
+        if recent is None:
+            recent = True
+        else:
+            try:
+                recent = utils.to_bool(recent)
+            except ValueError:
+                recent = True
+        result['recent'] = recent
         return result
 
 
@@ -325,6 +334,9 @@ class ApiV1Orders(Orders):
                                 include_docs=True,
                                 descending=True)
             orders = [r.doc for r in view]
+        if settings['ORDERS_DISPLAY_MOST_RECENT'] > 0:
+            if params.get('recent', True):
+                orders = orders[:settings['ORDERS_DISPLAY_MOST_RECENT']]
         return orders
 
     def filter_by_status(self, status, orders=None):
