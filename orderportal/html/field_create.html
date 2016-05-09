@@ -229,3 +229,11 @@ $(document).ready(function() {
 </script>
 <script src="{{ static_url('field_visible_if.js') }}"></script>
 {% end %}
+
+{% block javascript-autofocus %}
+<script>
+  $(document).ready(function(){
+    $("#group").focus();
+  });
+</script>
+{% end %}

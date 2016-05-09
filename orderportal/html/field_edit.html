@@ -22,7 +22,7 @@ in '{{ form['title'] }}'
     <div class="row">
       <div class="col-md-6">
 	<label for="type">Parent field</label>
-	<select class="form-control" name="parent">
+	<select class="form-control" name="parent" id="parent">
 	  <option value="">[current]</option>
 	  {% for parent in alt_parents %}
 	  {% if parent is None %}
@@ -285,11 +285,19 @@ in '{{ form['title'] }}'
   <div class="form-group">
     <label class="control-label"></label>
     <input type="hidden" name="_http_method" value="delete">
-    <button type="submit"
-	    class="btn btn-danger glyphicon glyphicon-trash"
+    <button type="submit" class="btn btn-danger"
 	    onclick="return confirm('Cannot be undone! Really delete?');">
+      <span class="glyphicon glyphicon-trash"></span>
       Delete
     </button>
   </div>
 </form>
 {% end %} {# block main_content #}
+
+{% block javascript-autofocus %}
+<script>
+  $(document).ready(function(){
+    $("#parent").focus();
+  });
+</script>
+{% end %}

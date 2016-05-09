@@ -75,3 +75,11 @@
 </div>
 
 {% end %} {# block content_left #}
+
+{% block javascript-autofocus %}
+<script>
+  $(document).ready(function(){
+    $("#term").focus();
+  });
+</script>
+{% end %}

@@ -371,3 +371,11 @@ Edit
 </form>
 
 {% end %} {# block main_content #}
+
+{% block javascript-autofocus %}
+<script>
+  $(document).ready(function(){
+    $("#first_name").focus();
+  });
+</script>
+{% end %}
