@@ -79,3 +79,11 @@ Edit
 </form>
 
 {% end %} {# block main_content #}
+
+{% block javascript-autofocus %}
+<script>
+  $(document).ready(function(){
+    $("#name").focus();
+  });
+</script>
+{% end %}

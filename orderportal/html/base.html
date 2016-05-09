@@ -191,7 +191,7 @@
 		      class="navbar-form form-inline"
 		      method="GET">
 		  <div class="form-group has-feedback">
-		    <input type="search" id="term" name="term" autofocus
+		    <input type="search" id="term" name="term"
 			   class="form-control"
 			   placeholder="Search">
 		    <span class="glyphicon glyphicon-search form-control-feedback"></span>
@@ -267,7 +267,7 @@
 
     </div>
 
-    {% block javascript_standard %}
+    {% block javascript-standard %}
     {# NOTE: jQuery has to be loaded before bootstrap! #}
     <script src="{{ settings['JQUERY_URL'] }}"></script>
     <script src="{{ settings['JQUERY_UI_URL'] }}"></script>
@@ -288,7 +288,15 @@
         $(".datepicker").datepicker();
       });
     </script>
-    {% end %} {# block javascript_standard #}
+    {% end %} {# block javascript-standard #}
+
+    {% block javascript-autofocus %}
+    <script>
+      $(document).ready(function(){
+        $("#term").focus();
+      });
+    </script>
+    {% end %}
 
     {% block javascript_code %}
     {% end %}

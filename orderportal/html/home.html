@@ -60,7 +60,7 @@
 	  {% module xsrf_form_html() %}
 	  <div class="form-group">
 	    <label for="email">Email</label>
-	    <input type="text" class="form-control" name="email"
+	    <input type="text" class="form-control" name="email" id="email"
 		   placeholder="Email address of account">
 	  </div>
 	  <div class="form-group">
@@ -596,3 +596,11 @@
 {% end %} {# block content-footer #}
 
 {% end %} {# block content #}
+
+{% block javascript-autofocus %}
+<script>
+  $(document).ready(function(){
+    $("#email").focus();
+  });
+</script>
+{% end %}
