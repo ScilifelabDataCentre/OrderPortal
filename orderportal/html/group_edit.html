@@ -5,9 +5,7 @@
 {% block head_title %}Edit group {{ group['name'] }}{% end %}
 
 {% block body_title %}
-Edit
-{% module Icon('group') %}
-{{ group['name'] }}
+Edit {% module Icon('group') %} {{ group['name'] }}
 {% end %}
 
 {% block main_content %}
@@ -97,7 +95,7 @@ Edit
 
 {% end %} {# block main_content #}
 
-{% block javascript-autofocus %}
+{% block javascript_autofocus %}
 <script>
   $(document).ready(function(){
     $("#owner").focus();

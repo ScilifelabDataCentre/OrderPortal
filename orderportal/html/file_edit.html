@@ -3,12 +3,7 @@
 {% extends "base.html" %}
 
 {% block head_title %}Edit {{ file['name'] }}{% end %}
-
-{% block body_title %}
-Edit
-{% module Icon('file') %}
-{{ file['name'] }}
-{% end %}
+{% block body_title %}Edit {% module Icon('file') %} {{ file['name'] }}{% end %}
 
 {% block main_content %}
 
@@ -80,7 +75,7 @@ Edit
 
 {% end %} {# block main_content #}
 
-{% block javascript-autofocus %}
+{% block javascript_autofocus %}
 <script>
   $(document).ready(function(){
     $("#name").focus();

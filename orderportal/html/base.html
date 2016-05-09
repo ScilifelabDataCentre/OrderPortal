@@ -268,7 +268,7 @@
 
     </div>
 
-    {% block javascript-standard %}
+    {% block javascript_standard %}
     {# NOTE: jQuery has to be loaded before bootstrap! #}
     <script src="{{ settings['JQUERY_URL'] }}"></script>
     <script src="{{ settings['JQUERY_UI_URL'] }}"></script>
@@ -289,9 +289,9 @@
         $(".datepicker").datepicker();
       });
     </script>
-    {% end %} {# block javascript-standard #}
+    {% end %} {# block javascript_standard #}
 
-    {% block javascript-autofocus %}
+    {% block javascript_autofocus %}
     <script>
       $(document).ready(function(){
         $("#term").focus();

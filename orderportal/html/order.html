@@ -3,8 +3,7 @@
 {% block head_title %}Order: {{ order['title'] }}{% end %}
 
 {% block body_title %}
-{% module Icon('order', label=True) %}:
-{{ order['title'] }}
+{% module Icon('order', label=True) %}: {{ order['title'] }}
 {% end %}
 
 {% extends "base.html" %}

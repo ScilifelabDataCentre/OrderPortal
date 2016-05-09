@@ -5,9 +5,7 @@
 {% block head_title %}Edit form '{{ form['title'] }}'{% end %}
 
 {% block body_title %}
-Edit
-{% module Icon('form', label=True) %}
-{{ form['title'] }}
+Edit {% module Icon('form', label=True) %} {{ form['title'] }}
 {% end %}
 
 {% block main_content %}
@@ -85,7 +83,7 @@ Edit
 </form>
 {% end %} {# block main_content #}
 
-{% block javascript-autofocus %}
+{% block javascript_autofocus %}
 <script>
   $(document).ready(function(){
     $("#title").focus();

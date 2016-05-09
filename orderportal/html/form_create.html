@@ -3,11 +3,7 @@
 {% extends "base.html" %}
 
 {% block head_title %}Create Form{% end %}
-
-{% block body_title %}
-Create
-{% module Icon('form', label=True) %}
-{% end %}
+{% block body_title %} Create {% module Icon('form', label=True) %}{% end %}
 
 {% block main_content %}
 <form action="{{ reverse_url('form_create') }}"
@@ -85,7 +81,7 @@ Create
 </form>
 {% end %} {# block main_content #}
 
-{% block javascript-autofocus %}
+{% block javascript_autofocus %}
 <script>
   $(document).ready(function(){
     $("#title").focus();
