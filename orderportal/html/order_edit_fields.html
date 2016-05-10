@@ -12,201 +12,225 @@
 {# Is there a visibility condition? #}
 {% set visible_if_field = field.get('visible_if_field') %}
 
+{% if visible_if_field %}
+<div class="row visible-if"
+     data-if-id="{{ visible_if_field }}"
+     data-if-val="{{ field.get('visible_if_value') or '' }}">
+{% else %}
+<div class="row">
+{% end %} {# if visible_if_field #}
+
 {% if field['type'] == constants.GROUP %}
 
-{% if visible_if_field %}
-<div class="panel panel-default visible-if"
-     data-if-id="{{ visible_if_field }}"
-     data-if-val="{{ field.get('visible_if_value') or '' }}">
-{% else %}
-<div class="panel panel-default">
-{% end %}
-  <div class="panel-heading">
-    <h4>
-      {{ label }}
-      {% if field['restrict_read'] %}
-      <span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
-      </span>
-      {% end %}
-      {% if field['restrict_write'] %}
-      <span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
-      </span>
-      {% end %}
-      {% if field['identifier'] in order['invalid'] %}
-      <span class="text-danger">
-	<span data-toggle="tooltip"
-	      title="Invalid value; order cannot be submitted."
-	      class="glyphicon glyphicon-remove"></span>
-	{{ order['invalid'][field['identifier']] }}
-      </span>
-      {% else %}
-      <span class="text-success">
-	<span data-toggle="tooltip" title="Valid value."
-	      class="glyphicon glyphicon-ok"></span>
-      </span>
-      {% end %}
-    </h4>
-    <div>
-      {% module Markdown(field.get('description')) %}
-    </div>
-  </div>
-  <div class="panel-body">
-    {# Recursion: 'include' cannot be used! #}
-    {% module Template('order_edit_fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
-  </div>
-</div>
-
-{% else %}
-
-{% if visible_if_field %}
-<div class="form-group has-feedback visible-if"
-     data-if-id="{{ visible_if_field }}"
-     data-if-val="{{ field.get('visible_if_value') or '' }}">
-{% else %}
-<div class="form-group has-feedback">
-{% end %}
-{% set value = order['fields'][field['identifier']] %}
-  <div class="row">
-    <div class="col-md-8">
-      <label class="control-label" for="{{ field['identifier'] }}">
+<div class="col-md-12">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h4>
 	{{ label }}
-	{% if field['restrict_read'] %}
-	<span class="glyphicon glyphicon-eye-open"
-	      title="Readable by staff only.">
-	</span>
-	{% end %}
-	{% if field['restrict_write'] %}
-	<span class="glyphicon glyphicon-pencil"
-	      title="Writeable by admin only.">
-	</span>
-	{% end %}
-	{% if field['identifier'] in order['invalid'] %}
-	<span class="text-danger">
-	  <span data-toggle="tooltip"
-		title="Invalid value; order cannot be submitted."
-		class="glyphicon glyphicon-remove"></span>
-	  {{ order['invalid'][field['identifier']] }}
-	</span>
-	{% elif value in (None, '') %}
-	<span class="text-danger">
-	  <span data-toggle="tooltip" title="Field does not require a value."
-		class="glyphicon glyphicon-question-sign"></span>
-	</span>
-	{% else %}
-	<span class="text-success">
-	  <span data-toggle="tooltip" title="Valid value."
-		class="glyphicon glyphicon-ok"></span>
-	</span>
-	{% end %}
-      </label>
-
-      {% if field['type'] == constants.BOOLEAN %}
-        {% if field.get('checkbox') %}
-        <div class="checkbox">
-          <label>
-            <input type="checkbox"
-		   class="visible-if-source"
-		   id="{{ field['identifier'] }}"
-		   name="{{ field['identifier'] }}"
-		   {{ value == True and 'checked' or '' }}
-		   value="true">
-	    Check box if "true".
-	  </label>
+	<div class="pull-right">
+	  {% if field['restrict_read'] %}
+	  <span class="glyphicon glyphicon-eye-open"
+		title="Readable by staff only.">
+	  </span>
+	  {% end %}
+	  {% if field['restrict_write'] %}
+	  <span class="glyphicon glyphicon-pencil"
+		title="Writeable by admin only.">
+	  </span>
+	  {% end %}
+	  {% if field['identifier'] in order['invalid'] %}
+	  <span class="text-danger">
+	    <span data-toggle="tooltip"
+		  title="Invalid value; order cannot be submitted."
+		  class="glyphicon glyphicon-remove">
+	    </span>
+	    {{ order['invalid'][field['identifier']] }}
+	  </span>
+	  {% else %}
+	  <span class="text-success">
+	    <span data-toggle="tooltip" title="Valid value."
+		  class="glyphicon glyphicon-ok">
+	    </span>
+	    OK
+	  </span>
+	  {% end %}
 	</div>
-        {% else %}
-        {# Simplifies a lot to use a Select element rather than Radio. #}
-        <select class="form-control visible-if-source"
-		id="{{ field['identifier'] }}"
-		name="{{ field['identifier'] }}">
-	  <option value="false"
-		  {{ bool(value) and 'selected' or '' }}>False</option>
-	  <option value="true"
-		  {{ bool(value) and 'selected' or '' }}>True</option>
-	</select>
-	{% end %}
-
-      {% elif field['type'] == constants.SELECT %}
-        {% if field.get('display') == 'radio' %}
-          <div>
-	    {% for v in field['select'] %}
-	    {% set checked = v == value and 'checked' or '' %}
-	    <label class="radio-inline visible-if-source">
-	      <input type="radio"
-		     name="{{ field['identifier'] }}"
-		     {# XXX This is not proper HTML. But it works... #}
-		     id="{{ field['identifier'] }}"
-		     value="{{ v }}"
-		     {{ checked }}>{{ v }}
-	    </label>
-	    {% end %}
-	  </div>
-        
-        {% else %} {# default 'menu' #}
-          <select class="form-control visible-if-source"
-		  name="{{ field['identifier'] }}"
-		  id="{{ field['identifier'] }}">
-	    {% if value is None %}
-	    <option selected value="">[none]</option>
-	    {% else %}
-	    <option value="">[none]</option>
-	    {% end %}
-	    {% for v in field['select'] %}
-	      {% if v == value %}
-	      <option selected>{{ v }}</option>
-	      {% else %}
-	      <option>{{ v }}</option>
-	      {% end %}
-	    {% end %}
-	  </select>
-	{% end %} {# if field.get('display') == 'radio' #}
-
-      {% elif field['type'] == constants.TEXT %}
-      <textarea class="form-control"
-		name="{{ field['identifier'] }}"
-		id="{{ field['identifier'] }}"
-		>{{ value or '' }}</textarea>
-
-      {% elif field['type'] == constants.DATE %}
-      {# This requires jQuery datepicker! Loaded in calling HTML template. #}
-      <input type="text"
-	     class="datepicker form-control visible-if-source"
-	     name="{{ field['identifier'] }}"
-	     id="{{ field['identifier'] }}"
-	     value="{{ value }}">
-
-      {% else %} {# All other field types: string, integer, float, url #}
-      {% if value is None %}
-      {% set value = '' %}
-      {% end %}
-      <input type="{{ constants.TYPE_HTML.get(field['type'], 'text') }}"
-	     class="form-control visible-if-source"
-	     name="{{ field['identifier'] }}"
-	     id="{{ field['identifier'] }}"
-	     value="{{ value }}">
-      {% end %} {# elif field['type'] == #}
-
-      {% if field['required'] %}
-      {% if field.get('display') == 'menu' %} {# field type SELECT #}
-      <span style="color:red; margin-right: 2em;"
-	    class="glyphicon glyphicon-star form-control-feedback"
-	    aria-hidden="true">
-      </span>
-      {% else %}
-      <span style="color:red; margin-right: 1em;"
-	    class="glyphicon glyphicon-star form-control-feedback"
-	    aria-hidden="true">
-      </span>
-      {% end %}
-      {% end %}
+      </h4>
+      <div>
+	{% module Markdown(field.get('description')) %}
+      </div>
+    </div>
+    <div class="panel-body">
+      {# Recursion: 'include' cannot be used! #}
+      {% module Template('order_edit_fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
     </div>
   </div>
-  <span class="help-block">
-    {% module Markdown(field.get('description')) %}
-    {% if field['type'] == constants.TEXT %}
-    Use <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
-    if you want fancy display of this text data.
-    {% end %}
-  </span>
 </div>
+
+{% else %} {# if field['type'] == constants.GROUP #}
+
+<div class="col-md-10">
+  <div class="form-group has-feedback">
+
+    {% set value = order['fields'][field['identifier']] %}
+    <label class="control-label" for="{{ field['identifier'] }}">
+      {{ label }}
+    </label>
+
+    {% if field['type'] == constants.BOOLEAN %}
+    {% if field.get('checkbox') %}
+    <div class="checkbox">
+      <label>
+        <input type="checkbox"
+	       class="visible-if-source"
+	       id="{{ field['identifier'] }}"
+	       name="{{ field['identifier'] }}"
+	       {{ value == True and 'checked' or '' }}
+	       value="true">
+	Check box if "true".
+      </label>
+    </div>
+    {% else %}
+    {# Simplifies a lot to use a Select element rather than Radio. #}
+    <select class="form-control visible-if-source"
+	    id="{{ field['identifier'] }}"
+	    name="{{ field['identifier'] }}">
+      <option value="false"
+	      {{ bool(value) and 'selected' or '' }}>False</option>
+      <option value="true"
+	      {{ bool(value) and 'selected' or '' }}>True</option>
+    </select>
+    {% end %} {# if field.get('checkbox') #}
+
+    {% elif field['type'] == constants.SELECT %}
+    {% if field.get('display') == 'radio' %}
+    <div>
+      {% for v in field['select'] %}
+      {% set checked = v == value and 'checked' or '' %}
+      <label class="radio-inline visible-if-source">
+	<input type="radio"
+	       name="{{ field['identifier'] }}"
+	       {# XXX This is not proper HTML. But it works... #}
+	       id="{{ field['identifier'] }}"
+	       value="{{ v }}"
+	       {{ checked }}>{{ v }}
+      </label>
+      {% end %}
+    </div>
+        
+    {% else %} {# default 'menu' #}
+    <select class="form-control visible-if-source"
+	    name="{{ field['identifier'] }}"
+	    id="{{ field['identifier'] }}">
+      {% if value is None %}
+      <option selected value="">[none]</option>
+      {% else %}
+      <option value="">[none]</option>
+      {% end %}
+      {% for v in field['select'] %}
+      {% if v == value %}
+      <option selected>{{ v }}</option>
+      {% else %}
+      <option>{{ v }}</option>
+      {% end %}
+      {% end %}
+    </select>
+    {% end %} {# if field.get('display') == 'radio' #}
+
+    {% elif field['type'] == constants.TEXT %}
+    <textarea class="form-control"
+	      name="{{ field['identifier'] }}"
+	      id="{{ field['identifier'] }}"
+	      >{{ value or '' }}</textarea>
+
+    {% elif field['type'] == constants.DATE %}
+    {# This requires jQuery datepicker! Loaded in calling HTML template. #}
+    <input type="text"
+	   class="datepicker form-control visible-if-source"
+	   name="{{ field['identifier'] }}"
+	   id="{{ field['identifier'] }}"
+	   value="{{ value }}">
+
+    {% else %} {# All other field types: string, integer, float, url #}
+    {% if value is None %}
+    {% set value = '' %}
+    {% end %}
+    <input type="{{ constants.TYPE_HTML.get(field['type'], 'text') }}"
+	   class="form-control visible-if-source"
+	   name="{{ field['identifier'] }}"
+	   id="{{ field['identifier'] }}"
+	   value="{{ value }}">
+    {% end %} {# elif field['type'] == #}
+    
+    {% if field['required'] %}
+    {% if field.get('display') == 'menu' %} {# field type SELECT #}
+    <span style="color:red; margin-right: 2em;"
+	  class="glyphicon glyphicon-star form-control-feedback"
+	  title="Required"
+	  aria-hidden="true">
+    </span>
+    {% else %}
+    <span style="color:red; margin-right: 1em;"
+	  class="glyphicon glyphicon-star form-control-feedback"
+	  title="Required"
+	  aria-hidden="true">
+    </span>
+    {% end %}
+    {% end %}
+
+    <span class="help-block">
+      {% module Markdown(field.get('description')) %}
+      {% if field['type'] == constants.TEXT %}
+      (Use <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+      if you want fancy display of this text data.)
+      {% end %}
+    </span>
+  </div>
+</div>
+
+<div class="col-md-2">
+  <div class=" pull-right">
+
+    {% if field['restrict_read'] %}
+    <span class="glyphicon glyphicon-eye-open"
+	  title="Readable by staff only.">
+    </span>
+    {% end %}
+
+    {% if field['restrict_write'] %}
+    <span class="glyphicon glyphicon-pencil"
+	  title="Writeable by admin only.">
+    </span>
+    {% end %}
+
+    {% if field['identifier'] in order['invalid'] %}
+    <span class="text-danger">
+      <span data-toggle="tooltip"
+	    title="Invalid value; order cannot be submitted."
+	    class="glyphicon glyphicon-remove">
+      </span>
+      {{ order['invalid'][field['identifier']] }}
+    </span>
+    {% elif value in (None, '') %}
+    <span class="text-danger">
+      <span data-toggle="tooltip" title="Field does not require a value."
+	    class="glyphicon glyphicon-question-sign">
+      </span>
+    </span>
+    {% else %}
+    <span class="text-success">
+      <span data-toggle="tooltip" title="Valid value."
+	    class="glyphicon glyphicon-ok">
+      </span>
+      OK
+    </span>
+    {% end %}
+
+  </div>
+</div>
+
 {% end %} {# if field['type'] == constants.GROUP #}
+
+</div> {# if visible_if_field #}
+
 {% end %} {# for field in fields #}
