@@ -3,7 +3,7 @@
 {% extends "base.html" %}
 
 {% block head_title %}Edit order '{{ order['title'] }}'{% end %}
-{% block body_title %} Edit order'{{ order['title'] }}'{% end %}
+{% block body_title %} Edit order '{{ order['title'] }}'{% end %}
 
 {% block content %}
 <h3>{{ form['title'] }}</h3>
@@ -31,7 +31,7 @@
 
   <div class="form-group">
     <div class="row">
-      <div class="col-md-8">
+      <div class="col-md-9">
 	<label class="control-label" for="__title__">Title</label>
 	<input type="text" class="form-control"
 	       name="__title__" id="__title__"
@@ -46,7 +46,7 @@
 
   <div class="form-group">
     <div class="row">
-      <div class="col-md-8">
+      <div class="col-md-9">
 	<label class="control-label" for="__owner__">Owner</label>
 	{% if is_admin %}
 	<input type="text" class="form-control"

@@ -29,7 +29,7 @@ class AccountSaver(saver.Saver):
             raise ValueError('Malformed email value.')
         if len(list(self.db.view('account/email', key=email))) > 0:
             raise ValueError('Email is already in use.'
-                             ' Do reset password if it has been lost.')
+                             " Use 'Reset password' if you have lost it.")
         self['email'] = email
 
     def erase_password(self):
@@ -761,54 +761,55 @@ class Register(RequestHandler):
         if not self.global_modes['allow_registration']:
             self.see_other('home', error='Registration is currently disabled.')
             return
-        with AccountSaver(rqh=self) as saver:
-            try:
-                email = self.get_argument('email', '')
-                saver.set_email(email)
-            except ValueError, msg:
-                self.see_other('register', error=str(msg))
-                return
-            try:
-                saver['first_name'] = self.get_argument('first_name')
-                saver['last_name'] = self.get_argument('last_name')
-                university = self.get_argument('university_other', default=None)
-                if not university:
-                    university = self.get_argument('university', default=None)
-                saver['university'] = university or None
-            except (tornado.web.MissingArgumentError, ValueError):
-                raise tornado.web.HTTPError(
-                    400, reason=u"invalid '{0}' value provided".format(key))
-            saver['department'] = self.get_argument('department', default=None)
-            saver['pi'] = utils.to_bool(self.get_argument('pi', default=False))
-            try:
-                saver['gender'] = self.get_argument('gender').lower()
-            except tornado.web.MissingArgumentError:
+        try:
+            with AccountSaver(rqh=self) as saver:
                 try:
-                    del saver['gender']
-                except KeyError:
-                    pass
-            try:
-                saver['subject'] = int(self.get_argument('subject'))
-            except (tornado.web.MissingArgumentError, ValueError, TypeError):
-                saver['subject'] = None
-            saver['address'] = dict(
-                address=self.get_argument('address', default=None),
-                zip=self.get_argument('zip', default=None),
-                city=self.get_argument('city', default=None),
-                country=self.get_argument('country', default=None))
-            saver['invoice_ref'] = self.get_argument('invoice_ref',default=None)
-            saver['invoice_address'] = dict(
-                address=self.get_argument('invoice_address', default=None),
-                zip=self.get_argument('invoice_zip', default=None),
-                city=self.get_argument('invoice_city', default=None),
-                country=self.get_argument('invoice_country', default=None))
-            if not saver['invoice_address'].get('address'):
-                saver['invoice_address'] = saver['address'].copy()
-            saver['phone'] = self.get_argument('phone', default=None)
-            saver['owner'] = email
-            saver['role'] = constants.USER
-            saver['status'] = constants.PENDING
-            saver.erase_password()
+                    email = self.get_argument('email')
+                    saver.set_email(email)
+                    saver['first_name'] = self.get_argument('first_name')
+                    saver['last_name'] = self.get_argument('last_name')
+                    university = self.get_argument('university_other',
+                                                   default=None)
+                    if not university:
+                        university = self.get_argument('university',
+                                                       default=None)
+                        saver['university'] = university or None
+                except tornado.web.MissingArgumentError, msg:
+                    raise ValueError(msg)
+                saver['department'] = self.get_argument('department', None)
+                saver['pi'] = utils.to_bool(self.get_argument('pi', False))
+                try:
+                    saver['gender'] = self.get_argument('gender').lower()
+                except tornado.web.MissingArgumentError:
+                    try:
+                        del saver['gender']
+                    except KeyError:
+                        pass
+                try:
+                    saver['subject'] = int(self.get_argument('subject'))
+                except (tornado.web.MissingArgumentError,ValueError,TypeError):
+                    saver['subject'] = None
+                saver['address'] = dict(
+                    address=self.get_argument('address', default=None),
+                    zip=self.get_argument('zip', default=None),
+                    city=self.get_argument('city', default=None),
+                    country=self.get_argument('country', default=None))
+                saver['invoice_ref'] = self.get_argument('invoice_ref',default=None)
+                saver['invoice_address'] = dict(
+                    address=self.get_argument('invoice_address', default=None),
+                    zip=self.get_argument('invoice_zip', default=None),
+                    city=self.get_argument('invoice_city', default=None),
+                    country=self.get_argument('invoice_country', default=None))
+                if not saver['invoice_address'].get('address'):
+                    saver['invoice_address'] = saver['address'].copy()
+                saver['phone'] = self.get_argument('phone', default=None)
+                saver['owner'] = email
+                saver['role'] = constants.USER
+                saver['status'] = constants.PENDING
+                saver.erase_password()
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         # Prepare message to send later
         try:
             template = settings['ACCOUNT_MESSAGES']['pending']
