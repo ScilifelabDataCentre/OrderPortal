@@ -31,8 +31,8 @@ class MessageSaver(saver.Saver):
         self.params.update(kwargs)
 
     def set_template(self, template):
-        self['subject'] = template['subject'].format(**self.params)
-        self['text'] = template['text'].format(**self.params)
+        self['subject'] = unicode(template['subject']).format(**self.params)
+        self['text'] = unicode(template['text']).format(**self.params)
 
     def log(self):
         "Do not create any log entry; the message is its own log."
