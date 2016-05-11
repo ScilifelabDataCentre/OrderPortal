@@ -207,9 +207,8 @@
 	<th width="15%">Label</th>
 	<th width="15%">Type</th>
 	<th width="5%">Visible</th>
-	<th width="5%">Required</th>
 	<th width="5%">Restrictions</th>
-	<th width="40%">Description</th>
+	<th width="45%">Description</th>
       </tr>
       {% for field in fields %}
       <tr>
@@ -234,17 +233,20 @@
 	</td>
 	<td>
 	  {% if field['required'] %}
-	  <span class="glyphicon glyphicon-star" style="color: red;"></span>
-	  {% elif field['type'] == constants.GROUP %}
-	  -
+	  <span class="glyphicon glyphicon-star"
+		title="A value is required." style="color: red;"></span>
 	  {% end %}
-	</td>
-	<td>
 	  {% if field['restrict_read'] %}
-	  <span class="glyphicon glyphicon-eye-open" title="Readable by staff only."></span>
+	  <span class="glyphicon glyphicon-eye-open"
+		title="Readable by staff only."></span>
 	  {% end %}
 	  {% if field['restrict_write'] %}
-	  <span class="glyphicon glyphicon-pencil" title="Writeable by admin only."></span>
+	  <span class="glyphicon glyphicon-pencil"
+		title="Writeable by admin only."></span>
+	  {% end %}
+	  {% if field.get('erase_on_clone') %}
+	  <span class="glyphicon glyphicon-ban-circle"
+		title="Value erased on clone."></span>
 	  {% end %}
 	</td>
 	<td>{% module Markdown(field.get('description')) %}</td>
@@ -259,7 +261,7 @@
 	    </button>
 	  </form>
 	{% else %}
-	{# Allow edit of label and description even when not really editable. #}
+	{# Allow edit of label, clone erase, description when not editable. #}
 	  <button type="button" class="btn btn-primary btn-xs"
 		  data-toggle="modal" data-target="#{{ field['identifier'] }}">
 	    <span class="glyphicon glyphicon-edit"></span>
@@ -273,7 +275,7 @@
   </div>
 </div>
 
-{# Allow edit of label and description even when not really editable. #}
+{# Allow edit of label, clone erase, description when not really editable. #}
 {% if not are_fields_editable %}
 {% for field in fields %}
 <div id="{{ field['identifier'] }}" class="modal fade" role="dialog">
@@ -300,10 +302,28 @@
 	    <input class="form-control"
 		   name="{{ field['identifier'] }}/label"
 		   id="{{ field['identifier'] }}/label"
-		   value="{{ field.get('label') or '' }}"</input>
+		   value="{{ field.get('label') or '' }}">
 	    <span class="help-block">
 	      Label to display for the field in the order form. The
 	      identifier will be used if this is not provided.
+	    </span>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label" for="{{ field['identifier'] }}/erase_on_clone">
+	      Erase on clone
+	    </label>
+	    <div class="checkbox">
+	      <label>
+		<input type="checkbox"
+		       name="{{ field['identifier'] }}/erase_on_clone"
+		       id="{{ field['identifier'] }}/erase_on_clone"
+		       value="true"
+		       {{ field.get('erase_on_clone') and 'checked' or ''}}>
+		Yes
+	      </label>
+	    </div>
+	    <span class="help-block">
+	      Erase the value of the field in a new order when cloning.
 	    </span>
 	  </div>
 	  <div class="form-group">
