@@ -19,6 +19,8 @@ class BaseFixer(object):
         self.verbose = options.verbose
         self.dry_run = options.dry_run
         self.db = utils.get_db()
+        self.args = args
+        self.prepare()
 
     def get_args(self):
         parser = utils.get_command_line_parser(description=
@@ -28,6 +30,9 @@ class BaseFixer(object):
                           help='do not perform save; for debug')
         return parser.parse_args()
         
+    def prepare(self):
+        pass
+
     def fix_documents(self):
         """Go through all documents in the database and
         execute the callable for each.
