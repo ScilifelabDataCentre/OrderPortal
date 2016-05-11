@@ -26,7 +26,6 @@ CEILING = 'ZZZZZZZZ'
 DOCTYPE = 'orderportal_doctype'
 ACCOUNT = 'account'
 GROUP   = 'group'
-FIELD   = 'field'
 FORM    = 'form'
 ORDER   = 'order'
 NEWS    = 'news'
@@ -34,10 +33,10 @@ EVENT   = 'event'
 TEXT    = 'text'
 INFO    = 'info'
 FILE    = 'file'
-LOG     = 'log'
 MESSAGE = 'message'
+LOG     = 'log'
 META    = 'meta'
-ENTITIES = frozenset([ACCOUNT, GROUP, FIELD, FORM, ORDER, INFO, FILE, MESSAGE])
+ENTITIES = frozenset([ACCOUNT, GROUP, FORM, ORDER, INFO, FILE, MESSAGE])
 
 # Field types
 STRING  = 'string'
