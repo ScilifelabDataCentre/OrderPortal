@@ -299,7 +299,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
 
 
 class FormFieldEditDescr(FormMixin, RequestHandler):
-    """Edit the label and description of a form field.
+    """Edit the label, clone erase, description of a form field.
     This is allowed also for enabled forms."""
 
     @tornado.web.authenticated
@@ -309,6 +309,10 @@ class FormFieldEditDescr(FormMixin, RequestHandler):
         with FormSaver(doc=form, rqh=self) as saver:
             saver.fields[identifier]['label'] = \
                 self.get_argument("{0}/label".format(identifier), '')
+            saver.fields[identifier]['erase_on_clone'] = \
+                utils.to_bool(
+                    self.get_argument("{0}/erase_on_clone".format(identifier),
+                                      False))
             saver.fields[identifier]['description'] = \
                 self.get_argument("{0}/descr".format(identifier), '')
         self.see_other('form', form['_id'])

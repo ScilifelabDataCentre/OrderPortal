@@ -91,6 +91,8 @@ class Fields(object):
                        rqh.get_argument('restrict_read', False)),
                    restrict_write=utils.to_bool(
                        rqh.get_argument('restrict_write', False)),
+                   erase_on_clone=utils.to_bool(
+                       rqh.get_argument('erase_on_clone', False)),
                    description=rqh.get_argument('description', None))
         if type == constants.GROUP:
             new['fields'] = []
@@ -129,6 +131,8 @@ class Fields(object):
                        rqh.get_argument('restrict_read', False)),
                    restrict_write=utils.to_bool(
                        rqh.get_argument('restrict_write', False)),
+                   erase_on_clone=utils.to_bool(
+                       rqh.get_argument('erase_on_clone', False)),
                    description=rqh.get_argument('description', None))
         field = self._lookup[identifier]
         if field['type'] == constants.SELECT:

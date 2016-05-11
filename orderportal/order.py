@@ -562,13 +562,20 @@ class OrderClone(OrderMixin, RequestHandler):
         if not self.is_clonable(order):
             raise ValueError('This order is outdated; its form has been disabled.')
         form = self.get_entity(order['form'], doctype=constants.FORM)
+        fields = Fields(form)
         with OrderSaver(rqh=self) as saver:
             saver['form'] = form['_id']
             saver['title'] = u"Clone of {0}".format(order['title'])
-            saver['fields'] = order['fields'].copy()
+            saver['fields'] = dict()
+            for field in fields:
+                id = field['identifier']
+                if field.get('erase_on_clone'):
+                    saver['fields'][id] = None
+                else:
+                    saver['fields'][id] = order['fields'][id]
             saver['history'] = {}
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
-            saver.check_fields_validity(Fields(form))
+            saver.check_fields_validity(fields)
             saver.set_identifier(form)
         self.redirect(self.order_reverse_url(saver.doc))
 

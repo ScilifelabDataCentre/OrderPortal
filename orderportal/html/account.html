@@ -265,7 +265,7 @@
       {% try %}
       {{ account['gender'].capitalize() }}
       {% except KeyError %}
-      <span class="text-danger glyphicon glyphicon-question-sign"></span>
+      <span class="text-warning glyphicon glyphicon-question-sign"></span>
       {% end %}
     </td>
   </tr>
@@ -276,7 +276,7 @@
       {% try %}
       {{ settings['subjects_lookup'].get(account['subject']) or '-' }}
       {% except KeyError %}
-      <span class="text-danger glyphicon glyphicon-question-sign"></span>
+      <span class="text-warning glyphicon glyphicon-question-sign"></span>
       {% end %}
     </td>
   </tr>
