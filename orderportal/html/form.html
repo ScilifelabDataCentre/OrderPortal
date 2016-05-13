@@ -267,7 +267,7 @@
 	    <span class="glyphicon glyphicon-edit"></span>
 	    Edit
 	  </button>
-	{% end %}{# if are_fields_editable #}
+	{% end %} {# if are_fields_editable #}
 	</td>
       </tr>
       {% end %}
@@ -319,12 +319,9 @@
 		       id="{{ field['identifier'] }}/erase_on_clone"
 		       value="true"
 		       {{ field.get('erase_on_clone') and 'checked' or ''}}>
-		Yes
+		Erase the value of the field in a new order when cloning.
 	      </label>
 	    </div>
-	    <span class="help-block">
-	      Erase the value of the field in a new order when cloning.
-	    </span>
 	  </div>
 	  <div class="form-group">
 	    <label class="control-label" for="{{ field['identifier'] }}/descr">
