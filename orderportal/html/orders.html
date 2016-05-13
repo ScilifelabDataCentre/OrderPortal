@@ -43,6 +43,8 @@
 	  {% set sel = v == params.get(f['identifier']) and 'selected' or '' %}
 	  <option {{ sel }} value="{{ v }}">{{ v }}</option>
 	  {% end %}
+	  {% set sel = '__none__' == params.get(f['identifier']) and 'selected' or '' %}
+	  <option {{ sel }} value="__none__">[none]</option>
 	</select>
       </div>
       {% end %} {# for f in settings['ORDERS_LIST_FIELDS'] #}

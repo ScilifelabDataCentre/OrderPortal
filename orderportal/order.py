@@ -377,6 +377,7 @@ class ApiV1Orders(Orders):
                                     include_docs=True,
                                     descending=True)
                 orders = [r.doc for r in view]
+            if value == '__none__': value = None
             orders = [o for o in orders if o['fields'].get(identifier) == value]
         return orders
 
