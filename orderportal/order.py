@@ -161,7 +161,7 @@ class OrderMixin(object):
     def check_readable(self, order):
         "Check if current user may read the order."
         if self.is_readable(order): return
-        raise tornado.web.HTTPError(403, reason='you may not read the order')
+        raise ValueError('You may not read the order.')
 
     def is_editable(self, order):
         "Is the order editable by the current user?"
@@ -176,7 +176,7 @@ class OrderMixin(object):
     def check_editable(self, order):
         "Check if current user may edit the order."
         if self.is_editable(order): return
-        raise tornado.web.HTTPError(403, reason='you may not edit the order')
+        raise ValueError('You may not edit the order.')
 
     def is_attachable(self, order):
         "Check if the current user may attach a file to the order."
@@ -394,7 +394,11 @@ class Order(OrderMixin, RequestHandler):
             order = self.get_entity(iuid, doctype=constants.ORDER)
         else:
             order = self.get_entity_view('order/identifier', match.group())
-        self.check_readable(order)
+        try:
+            self.check_readable(order)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         form = self.get_entity(order['form'], doctype=constants.FORM)
         files = []
         if self.is_attachable(order):
@@ -429,7 +433,11 @@ class Order(OrderMixin, RequestHandler):
     @tornado.web.authenticated
     def delete(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_editable(order)
+        try:
+            self.check_editable(order)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         self.delete_logs(order['_id'])
         self.db.delete(order)
         self.see_other('orders')
@@ -441,7 +449,11 @@ class OrderLogs(OrderMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_readable(order)
+        try:
+            self.check_readable(order)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         self.render('logs.html',
                     title=u"Logs for order '{0}'".format(order['title']),
                     entity=order,
@@ -496,7 +508,11 @@ class OrderEdit(OrderMixin, RequestHandler):
             self.see_other('home', error='Order editing is currently disabled.')
             return
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_editable(order)
+        try:
+            self.check_editable(order)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         colleagues = sorted(self.get_account_colleagues(self.current_user['email']))
         form = self.get_entity(order['form'], doctype=constants.FORM)
         self.render('order_edit.html',
@@ -509,7 +525,11 @@ class OrderEdit(OrderMixin, RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_editable(order)
+        try:
+            self.check_editable(order)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         form = self.get_entity(order['form'], doctype=constants.FORM)
         try:
             with OrderSaver(doc=order, rqh=self) as saver:
@@ -559,7 +579,11 @@ class OrderClone(OrderMixin, RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_readable(order)
+        try:
+            self.check_readable(order)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         if not self.is_clonable(order):
             raise ValueError('This order is outdated; its form has been disabled.')
         form = self.get_entity(order['form'], doctype=constants.FORM)
@@ -587,7 +611,11 @@ class OrderTransition(OrderMixin, RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid, targetid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_editable(order)
+        try:
+            self.check_editable(order)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         for target in self.get_targets(order):
             if target['identifier'] == targetid: break
         else:
@@ -605,7 +633,11 @@ class OrderFile(OrderMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid, filename):
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_readable(order)
+        try:
+            self.check_readable(order)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         outfile = self.db.get_attachment(order, filename)
         if outfile is None:
             self.write('')
