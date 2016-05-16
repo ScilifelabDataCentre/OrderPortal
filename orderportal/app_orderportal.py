@@ -58,7 +58,6 @@ def get_handlers():
         url(r'/accounts', Accounts, name='accounts'),
         url(r'/api/v1/accounts', AccountsApiV1, name='accounts_api'),
         url(r'/accounts.csv', AccountsCsv, name='accounts_csv'),
-        url(r'/account', AccountCurrent, name='account_current'),
         url(r'/account/([^/]+)', Account, name='account'),
         url(r'/account/([^/]+)/orders', AccountOrders, name='account_orders'),
         url(r'/api/v1/account/([^/]+)/orders',

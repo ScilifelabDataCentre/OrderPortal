@@ -81,10 +81,11 @@ class _AccountsFilter(Accounts):
 
     def get_accounts(self):
         "Get the accounts."
-        params = self.get_filter_params()
-        accounts = self.filter_by_university(params.get('university'))
-        accounts = self.filter_by_role(params.get('role'), accounts=accounts)
-        accounts = self.filter_by_status(params.get('status'),accounts=accounts)
+        accounts = self.filter_by_university(self.params.get('university'))
+        accounts = self.filter_by_role(self.params.get('role'),
+                                       accounts=accounts)
+        accounts = self.filter_by_status(self.params.get('status'),
+                                         accounts=accounts)
         # No filter; all accounts
         if accounts is None:
             view = self.db.view('account/email', include_docs=True)
@@ -151,6 +152,7 @@ class AccountsApiV1(_AccountsFilter):
     def get(self):
         "JSON output."
         self.check_staff()
+        self.params = self.get_filter_params()
         accounts = self.get_accounts()
         data = []
         for account in accounts:
@@ -178,7 +180,15 @@ class AccountsApiV1(_AccountsFilter):
                         href=self.static_url(account['status']+'.png')),
                      login=account.get('login', '-'),
                      modified=account['modified']))
-        self.write(dict(data=data))
+        self.write(dict(items=data,
+                        doctype='accounts',
+                        base=self.absolute_reverse_url('home'),
+                        links=dict(
+                    self=dict(
+                        href=self.reverse_url('accounts_api', **self.params)),
+                    display=dict(
+                        href=self.reverse_url('accounts', **self.params))
+                        )))
 
 
 class AccountsCsv(_AccountsFilter):
@@ -353,14 +363,6 @@ class Account(AccountMixin, RequestHandler):
         return False
 
 
-class AccountCurrent(RequestHandler):
-    "Redirect to the account page for the current user."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.see_other('account', self.current_user['email'])
-
-
 class AccountOrdersMixin(object):
     "Mixin containing access tests."
 
@@ -414,7 +416,7 @@ class AccountOrdersApiV1(AccountOrdersMixin, RequestHandler):
         names = self.get_account_names(None)
         # Forms lookup on iuid
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
-        data = []
+        items = []
         for order in orders:
             item = dict(title=order.get('title') or '[no title]',
                         form_title=forms[order['form']],
@@ -422,7 +424,7 @@ class AccountOrdersApiV1(AccountOrdersMixin, RequestHandler):
                         owner_name=names[order['owner']],
                         owner_href=self.reverse_url('account', order['owner']),
                         fields={},
-                        status=order['status'].capitalize(),
+                        status=order['status'],
                         status_href=self.reverse_url('site', order['status'] + '.png'),
                         history={},
                         modified=order['modified'])
@@ -435,8 +437,17 @@ class AccountOrdersApiV1(AccountOrdersMixin, RequestHandler):
                 item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
             for s in settings['ORDERS_LIST_STATUSES']:
                 item['history'][s] = order['history'].get(s)
-            data.append(item)
-        self.write(dict(data=data))
+            items.append(item)
+        self.write(dict(items=items,
+                        doctype='account orders',
+                        base=self.absolute_reverse_url('home'),
+                        links=dict(
+                    self=dict(
+                        href=self.reverse_url('account_orders_api',
+                                              account['email'])),
+                    display=dict(
+                        href=self.reverse_url('account_orders',
+                                              account['email'])))))
 
 
 class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
@@ -478,7 +489,7 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, RequestHandler):
         names = self.get_account_names(None)
         # Forms lookup on iuid
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
-        data = []
+        items = []
         for order in orders:
             item = dict(title=order.get('title') or '[no title]',
                         form_title=forms[order['form']],
@@ -486,7 +497,7 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, RequestHandler):
                         owner_name=names[order['owner']],
                         owner_href=self.reverse_url('account', order['owner']),
                         fields={},
-                        status=order['status'].capitalize(),
+                        status=order['status'],
                         status_href=self.reverse_url('site', order['status'] + '.png'),
                         history={},
                         modified=order['modified'])
@@ -499,8 +510,17 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, RequestHandler):
                 item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
             for s in settings['ORDERS_LIST_STATUSES']:
                 item['history'][s] = order['history'].get(s)
-            data.append(item)
-        self.write(dict(data=data))
+            items.append(item)
+        self.write(dict(items=items,
+                        doctype='account groups orders',
+                        base=self.absolute_reverse_url('home'),
+                        links=dict(
+                    self=dict(
+                        href=self.reverse_url('account_groups_orders_api',
+                                              account['email'])),
+                    display=dict(
+                        href=self.reverse_url('account_groups_orders',
+                                              account['email'])))))
 
 
 class AccountLogs(AccountMixin, RequestHandler):

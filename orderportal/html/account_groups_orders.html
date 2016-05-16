@@ -22,10 +22,15 @@
 {% block content %}
 
 <div class="row">
-  <div class="col-md-4 col-md-offset-8">
+  <div class="col-md-4 col-md-offset-6">
     <a href="{{ reverse_url('account_orders', account['email']) }}">
       {% module Icon('account') %}
       Only account's orders
+    </a>
+  </div>
+  <div class="col-md-2">
+    <a href="{{ reverse_url('account_groups_orders_api', account['email']) }}">
+      {% module Icon('json', title='JSON', label=True) %}
     </a>
   </div>
 </div>
@@ -87,7 +92,7 @@ $(document).ready(function() {
     order: [[{{ order_column }}, "desc"]],
     ajax: {
       url: "/api/v1/account/{{ account['email']}}/groups/orders",
-      dataSrc: "data"
+      dataSrc: "items"
     },
     columns: [
       {data: "identifier",
