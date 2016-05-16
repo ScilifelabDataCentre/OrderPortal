@@ -9,6 +9,11 @@
 {% extends "base.html" %}
 
 {% block meta_content %}
+<p>
+  <a href="{{ reverse_url('order_api', order['_id']) }}">
+    {% module Icon('json', title='JSON', label=True) %}
+  </a>
+</p>
 
 {% if is_editable %}
 <p>
@@ -98,7 +103,6 @@
   {% end %}
   {% end %} {# if targets #}
 </p>
-
 {% end %} {# block meta_content #}
 
 {% block main_content %}

@@ -144,7 +144,7 @@ class _AccountsFilter(Accounts):
         return accounts
 
 
-class ApiV1Accounts(_AccountsFilter):
+class AccountsApiV1(_AccountsFilter):
     "Accounts API; JSON output."
 
     @tornado.web.authenticated
@@ -164,17 +164,18 @@ class ApiV1Accounts(_AccountsFilter):
             data.append(
                 dict(email=account['email'],
                      href=self.reverse_url('account', account['email']),
-                     name=utils.to_utf8(name),
+                     name=name,
                      pi=bool(account.get('pi')),
                      gender=account.get('gender'),
-                     order_count=account['order_count'],
-                     orders_href=
-                         self.reverse_url('account_orders', account['email']),
+                     orders=dict(
+                        count=account['order_count'],
+                        href=self.reverse_url('account_orders',
+                                              account['email'])),
                      university=utils.to_utf8(account['university']),
                      role=account['role'],
-                     status=account['status'].capitalize(),
-                     status_href=
-                         self.static_url(account['status'] + '.png'),
+                     status=dict(
+                        name=account['status'],
+                        href=self.static_url(account['status']+'.png')),
                      login=account.get('login', '-'),
                      modified=account['modified']))
         self.write(dict(data=data))
@@ -395,7 +396,7 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
                     account=account)
 
 
-class ApiV1AccountOrders(AccountOrdersMixin, RequestHandler):
+class AccountOrdersApiV1(AccountOrdersMixin, RequestHandler):
     "Account orders API; JSON output."
 
     @tornado.web.authenticated
@@ -457,7 +458,7 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
                     account=account)
 
 
-class ApiV1AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
+class AccountGroupsOrdersApiV1(AccountOrdersMixin, RequestHandler):
     "Account group orders API; JSON output."
 
     @tornado.web.authenticated

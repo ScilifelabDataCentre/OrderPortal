@@ -15,7 +15,7 @@ from orderportal import settings
 from orderportal import utils
 from orderportal.fields import Fields
 from orderportal.message import MessageSaver
-from orderportal.requesthandler import RequestHandler
+from orderportal.requesthandler import RequestHandler, ApiV1Mixin
 
 
 class OrderSaver(saver.Saver):
@@ -284,7 +284,7 @@ class Orders(RequestHandler):
         return result
 
 
-class ApiV1Orders(Orders):
+class OrdersApiV1(Orders):
     "Orders API; JSON output."
 
     @tornado.web.authenticated
@@ -441,6 +441,20 @@ class Order(OrderMixin, RequestHandler):
         self.delete_logs(order['_id'])
         self.db.delete(order)
         self.see_other('orders')
+
+
+class OrderApiV1(ApiV1Mixin, Order):
+    "Order API; JSON."
+
+    def render(self, templatefilename, **kwargs):
+        order = kwargs['order']
+        url = self.absolute_reverse_url
+        # XXX Add API link for account when implemented
+        order['links'] = dict(
+            self=dict(href=url('order_api', order['_id'])),
+            form=dict(href=url('form_api', order['form'])))
+        self.cleanup(order)
+        self.write(order)
 
 
 class OrderLogs(OrderMixin, RequestHandler):

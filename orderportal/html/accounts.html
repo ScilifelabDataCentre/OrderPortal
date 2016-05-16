@@ -56,9 +56,15 @@
       </div>
     </div>
     <div class="col-md-2">
-      <a href="{{ reverse_url('accounts_csv', **params) }}">
-	{% module Icon('csv', title='CSV file', label=True) %}
-      </a>
+      <p>
+	<a href="{{ reverse_url('accounts_api', **params) }}">
+	  {% module Icon('json', title='JSON', label=True) %}
+	</a>
+	&nbsp;
+	<a href="{{ reverse_url('accounts_csv', **params) }}">
+	  {% module Icon('csv', title='CSV file', label=True) %}
+	</a>
+      </p>
     </div>
   </div>
 </form>
@@ -110,16 +116,16 @@ $(document).ready(function() {
        }
       },
       {data: "name"},
-      {data: "order_count",
+      {data: "orders",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a class='badge' href='"+oData.orders_href+"'>"+oData.order_count+"</a>");
+         $(nTd).html("<a class='badge' href='"+oData.orders.href+"'>"+oData.orders.count+"</a>");
        }
       },
       {data: "university"},
       {data: "role"},
       {data: "status",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<img src='"+oData.status_href+"'> "+sData);
+         $(nTd).html("<img src='"+oData.status.href+"'> "+oData.status.name);
        }
       },
       {data: "login",
