@@ -8,12 +8,13 @@
 
 {% extends "base.html" %}
 
+{% block body_header_meta %}
+<a href="{{ reverse_url('order_api', order['_id']) }}">
+  {% module Icon('json') %} JSON
+</a>
+{% end %}
+
 {% block meta_content %}
-<p>
-  <a href="{{ reverse_url('order_api', order['_id']) }}">
-    {% module Icon('json', title='JSON', label=True) %}
-  </a>
-</p>
 
 {% if is_editable %}
 <p>

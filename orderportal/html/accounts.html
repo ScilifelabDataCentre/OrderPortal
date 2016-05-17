@@ -14,6 +14,16 @@
 <div class="container-fluid">
 {% end %}
 
+{% block body_header_meta %}
+<a href="{{ reverse_url('accounts_api', **params) }}">
+  {% module Icon('json') %} JSON
+</a>
+&nbsp;
+<a href="{{ reverse_url('accounts_csv', **params) }}">
+  {% module Icon('csv') %} CSV
+</a>
+{% end %}
+
 {% block content %}
 <form action="{{ reverse_url('accounts', **params) }}"
       id="refresh"
@@ -21,7 +31,7 @@
       method="GET">
 
   <div class="row">
-    <div class="col-md-8 col-md-offset-2">
+    <div class="col-md-10 col-md-offset-2">
       <span class="glyphicon glyphicon-filter"></span>
       <div class="form-group">
 	<label for="university">Filter by</label>
@@ -54,17 +64,6 @@
 	  {% end %}
 	</select>
       </div>
-    </div>
-    <div class="col-md-2">
-      <p>
-	<a href="{{ reverse_url('accounts_api', **params) }}">
-	  {% module Icon('json', title='JSON', label=True) %}
-	</a>
-	&nbsp;
-	<a href="{{ reverse_url('accounts_csv', **params) }}">
-	  {% module Icon('csv', title='CSV file', label=True) %}
-	</a>
-      </p>
     </div>
   </div>
 </form>
@@ -112,7 +111,7 @@ $(document).ready(function() {
     columns: [
       {data: "email",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a href='"+oData.href+"'>"+oData.email+"</a>");
+         $(nTd).html("<a href='"+oData.links.display.href+"'>"+oData.email+"</a>");
        }
       },
       {data: "name"},
@@ -125,7 +124,7 @@ $(document).ready(function() {
       {data: "role"},
       {data: "status",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<img src='"+oData.status.href+"'> "+oData.status.name);
+         $(nTd).html("<img src='"+oData.status.image.href+"'> "+oData.status.name);
        }
       },
       {data: "login",

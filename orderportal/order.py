@@ -298,19 +298,20 @@ class OrdersApiV1(Orders):
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
         items = []
         for order in orders:
-            item = dict(title=order['title'],
-                        form=dict(
+            item = dict(
+                title=order['title'],
+                form=dict(
                     title=forms[order['form']],
-                    href=self.reverse_url('form', order['form'])),
-                        owner=dict(
+                    display=dict(href=self.reverse_url('form', order['form']))),
+                owner=dict(
                     name=names[order['owner']],
-                    href=self.reverse_url('account', order['owner'])),
-                        fields={},
-                        status=dict(
+                    display=dict(href=self.reverse_url('account', order['owner']))),
+                fields={},
+                status=dict(
                     name=order['status'],
-                    href=self.reverse_url('site', order['status'] + '.png')),
-                        history={},
-                        modified=order['modified'])
+                    display=dict(href=self.reverse_url('site', order['status'] + '.png'))),
+                history={},
+                modified=order['modified'])
             item['href'] = self.order_reverse_url(order)
             identifier = order.get('identifier')
             if not identifier:
@@ -321,15 +322,16 @@ class OrdersApiV1(Orders):
             for s in settings['ORDERS_LIST_STATUSES']:
                 item['history'][s] = order['history'].get(s)
             items.append(item)
-        self.write(dict(items=items,
-                        doctype='orders',
-                        base=self.absolute_reverse_url('home'),
-                        links=dict(
+        self.write(dict(
+                items=items,
+                type='orders',
+                base=self.absolute_reverse_url('home'),
+                links=dict(
                     self=dict(
                         href=self.reverse_url('orders_api', **self.params)),
                     display=dict(
                         href=self.reverse_url('orders', **self.params))
-                        )))
+                    )))
 
     def get_orders(self):
         orders = self.filter_by_status(self.params.get('status'))
@@ -459,12 +461,20 @@ class OrderApiV1(ApiV1Mixin, Order):
     def render(self, templatefilename, **kwargs):
         order = kwargs['order']
         # XXX Add API link for account when implemented
-        order['doctype'] = order.pop(constants.DOCTYPE)
+        order['type'] = order.pop(constants.DOCTYPE)
         order['base'] = self.absolute_reverse_url('home')
         order['links'] = dict(
             self=dict(href=self.reverse_url('order_api', order['_id'])),
-            display=dict(href=self.reverse_url('order', order['_id'])),
-            form=dict(href=self.reverse_url('form_api', order['form'])))
+            display=dict(href=self.reverse_url('order', order['_id']))),
+        owner = order.pop('owner')
+        order['owner'] = dict(
+            email=owner,
+            links=dict(display=dict(href=self.reverse_url('account', owner)),
+                       api=dict(href=self.reverse_url('account_api', owner))))
+        form = order.pop('form')
+        order['form'] = dict(
+            iuid=form,
+            links=dict(display=dict(href=self.reverse_url('form', form))))
         self.cleanup(order)
         self.write(order)
 

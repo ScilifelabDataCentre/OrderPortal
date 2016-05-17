@@ -154,33 +154,38 @@ class AccountsApiV1(_AccountsFilter):
         self.check_staff()
         self.params = self.get_filter_params()
         accounts = self.get_accounts()
-        data = []
+        items = []
         for account in accounts:
-            name = account.get('last_name')
+            name = last_name = account.get('last_name')
             first_name = account.get('first_name')
             if name:
                 if first_name:
                     name += ', ' + first_name
             else:
                 name = first_name
-            data.append(
+            items.append(
                 dict(email=account['email'],
-                     href=self.reverse_url('account', account['email']),
                      name=name,
+                     first_name=first_name,
+                     last_name=last_name,
                      pi=bool(account.get('pi')),
                      gender=account.get('gender'),
+                     university=account['university'],
+                     role=account['role'],
+                     status=dict(
+                        name=account['status'],
+                        image=dict(href=self.static_url(account['status']+'.png'))),
+                     login=account.get('login', '-'),
+                     modified=account['modified'],
                      orders=dict(
                         count=account['order_count'],
                         href=self.reverse_url('account_orders',
                                               account['email'])),
-                     university=utils.to_utf8(account['university']),
-                     role=account['role'],
-                     status=dict(
-                        name=account['status'],
-                        href=self.static_url(account['status']+'.png')),
-                     login=account.get('login', '-'),
-                     modified=account['modified']))
-        self.write(dict(items=data,
+                     links=dict(
+                        api=dict(href=self.reverse_url('account_api', account['email'])),
+                        display=dict(href=self.reverse_url('account', account['email'])))
+                     ))
+        self.write(dict(items=items,
                         doctype='accounts',
                         base=self.absolute_reverse_url('home'),
                         links=dict(
@@ -198,6 +203,7 @@ class AccountsCsv(_AccountsFilter):
     def get(self):
         "CSV file output."
         self.check_staff()
+        self.params = self.get_filter_params()
         accounts = self.get_accounts()
         csvfile = StringIO()
         writer = csv.writer(csvfile)
@@ -361,6 +367,58 @@ class Account(AccountMixin, RequestHandler):
         if account['status'] == constants.ENABLED: return False
         if self.get_account_order_count(account['email']) == 0: return True
         return False
+
+
+class AccountApiV1(AccountMixin, RequestHandler):
+    "Account API; JSON output."
+
+    @tornado.web.authenticated
+    def get(self, email):
+        email = email.lower().strip()
+        account = self.get_account(email)
+        self.check_readable(account)
+        name = last_name = account.get('last_name')
+        first_name = account.get('first_name')
+        if name:
+            if first_name:
+                name += ', ' + first_name
+        else:
+            name = first_name
+        order_count = self.get_account_order_count(email)
+        view = self.db.view('log/account',
+                            startkey=[email, constants.CEILING],
+                            lastkey=[email],
+                            descending=True,
+                            limit=1)
+        try:
+            latest_activity = list(view)[0].key[1]
+        except IndexError:
+            latest_activity = None
+        self.write(dict(
+                base=self.absolute_reverse_url('home'),
+                email=account['email'],
+                name=name,
+                first_name=account['first_name'],
+                last_name=account['last_name'],
+                pi=bool(account.get('pi')),
+                university=account['university'],
+                role=account['role'],
+                gender=account.get('gender'),
+                status=account['status'],
+                login=account.get('login', '-'),
+                modified=account['modified'],
+                orders=dict(
+                    count=order_count,
+                    display=dict(href=self.reverse_url('account_orders',
+                                                       account['email'])),
+                    api=dict(href=self.reverse_url('account_orders_api',
+                                                   account['email']))),
+                links=dict(
+                    self=dict(href=self.reverse_url('account_api',
+                                                    account['email'])),
+                    display=dict(href=self.reverse_url('account',
+                                                       account['email'])))
+                ))
 
 
 class AccountOrdersMixin(object):
