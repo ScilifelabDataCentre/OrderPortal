@@ -308,11 +308,13 @@ class OrdersApiV1(Orders):
                     display=dict(href=self.reverse_url('form', order['form']))),
                 owner=dict(
                     name=names[order['owner']],
-                    display=dict(href=self.reverse_url('account', order['owner']))),
+                    display=dict(href=self.reverse_url('account',
+                                                       order['owner']))),
                 fields={},
                 status=dict(
                     name=order['status'],
-                    display=dict(href=self.reverse_url('site', order['status'] + '.png'))),
+                    display=dict(
+                        href=self.reverse_url('site', order['status']+'.png'))),
                 history={},
                 modified=order['modified'])
             identifier = order.get('identifier')
@@ -324,6 +326,7 @@ class OrdersApiV1(Orders):
             for s in settings['ORDERS_LIST_STATUSES']:
                 item['history'][s] = order['history'].get(s)
             items.append(item)
+        # XXX OrderedDict
         self.write(dict(
                 items=items,
                 type='orders',
@@ -461,6 +464,7 @@ class OrderApiV1(ApiV1Mixin, Order):
     "Order API; JSON."
 
     def render(self, templatefilename, **kwargs):
+        # XXX OrderedDict
         order = kwargs['order']
         # XXX Add API link for account when implemented
         order['type'] = order.pop(constants.DOCTYPE)

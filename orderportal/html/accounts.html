@@ -117,7 +117,7 @@ $(document).ready(function() {
       {data: "name"},
       {data: "orders",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a class='badge' href='"+oData.orders.href+"'>"+oData.orders.count+"</a>");
+         $(nTd).html("<a class='badge' href='"+oData.orders.links.display.href+"'>"+oData.orders.count+"</a>");
        }
       },
       {data: "university"},
