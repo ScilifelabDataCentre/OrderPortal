@@ -15,6 +15,12 @@
       href="{{ settings['DATATABLES_CSS_URL'] }}">
 {% end %}
 
+{% block body_header_meta %}
+<a href="{{ reverse_url('account_groups_orders_api', account['email']) }}">
+  {% module Icon('json') %} JSON
+</a>
+{% end %}
+
 {% block container %}
 <div class="container-fluid">
 {% end %}
@@ -26,11 +32,6 @@
     <a href="{{ reverse_url('account_orders', account['email']) }}">
       {% module Icon('account') %}
       Only account's orders
-    </a>
-  </div>
-  <div class="col-md-2">
-    <a href="{{ reverse_url('account_groups_orders_api', account['email']) }}">
-      {% module Icon('json', title='JSON', label=True) %}
     </a>
   </div>
 </div>

@@ -2,6 +2,7 @@
 
 from __future__ import print_function, absolute_import
 
+import collections
 import csv
 import logging
 from cStringIO import StringIO
@@ -163,6 +164,7 @@ class AccountsApiV1(_AccountsFilter):
                     name += ', ' + first_name
             else:
                 name = first_name
+            # XXX OrderedDict
             items.append(
                 dict(email=account['email'],
                      name=name,
@@ -179,12 +181,18 @@ class AccountsApiV1(_AccountsFilter):
                      modified=account['modified'],
                      orders=dict(
                         count=account['order_count'],
-                        href=self.reverse_url('account_orders',
-                                              account['email'])),
+                        links=dict(
+                            display=dict(
+                                href=self.reverse_url('account_orders',
+                                                      account['email'])),
+                            api=dict(
+                                href=self.reverse_url('account_orders_api',
+                                                      account['email'])))),
                      links=dict(
                         api=dict(href=self.reverse_url('account_api', account['email'])),
                         display=dict(href=self.reverse_url('account', account['email'])))
                      ))
+        # XXX OrderedDict
         self.write(dict(items=items,
                         doctype='accounts',
                         base=self.absolute_reverse_url('home'),
@@ -394,6 +402,7 @@ class AccountApiV1(AccountMixin, RequestHandler):
             latest_activity = list(view)[0].key[1]
         except IndexError:
             latest_activity = None
+        # XXX OrderedDict
         self.write(dict(
                 base=self.absolute_reverse_url('home'),
                 email=account['email'],
@@ -476,28 +485,37 @@ class AccountOrdersApiV1(AccountOrdersMixin, RequestHandler):
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
         items = []
         for order in orders:
-            item = dict(title=order.get('title') or '[no title]',
-                        form_title=forms[order['form']],
-                        form_href=self.reverse_url('form', order['form']),
-                        owner_name=names[order['owner']],
-                        owner_href=self.reverse_url('account', order['owner']),
-                        fields={},
-                        status=order['status'],
-                        status_href=self.reverse_url('site', order['status'] + '.png'),
-                        history={},
-                        modified=order['modified'])
-            item['href'] = self.order_reverse_url(order)
             identifier = order.get('identifier')
             if not identifier:
                 identifier = order['_id'][:6] + '...'
+            item = collections.OrderedDict()
+            item['iuid'] = order['_id']
             item['identifier'] = identifier
+            item['title'] = order.get('title') or '[no title]'
+            item['links'] = dict(
+                self=dict(href=self.reverse_url('order_api', order['_id'])),
+                display=dict(href=self.order_reverse_url(order)))
+            item['form'] = dict(
+                title=forms[order['form']],
+                display=dict(href=self.reverse_url('form', order['form'])))
+            item['owner'] = dict(
+                name=names[order['owner']],
+                display=dict(href=self.reverse_url('account', order['owner'])))
+            item['fields'] = {}
+            item['status'] = dict(
+                name=order['status'],
+                display=dict(
+                    href=self.reverse_url('site', order['status']+'.png')))
+            item['history'] = {}
+            item['modified'] = order['modified']
             for f in settings['ORDERS_LIST_FIELDS']:
                 item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
             for s in settings['ORDERS_LIST_STATUSES']:
                 item['history'][s] = order['history'].get(s)
             items.append(item)
+        # XXX OrderedDict
         self.write(dict(items=items,
-                        doctype='account orders',
+                        type='account orders',
                         base=self.absolute_reverse_url('home'),
                         links=dict(
                     self=dict(
@@ -549,6 +567,7 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, RequestHandler):
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
         items = []
         for order in orders:
+            # XXX OrderedDict
             item = dict(title=order.get('title') or '[no title]',
                         form_title=forms[order['form']],
                         form_href=self.reverse_url('form', order['form']),
@@ -569,6 +588,7 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, RequestHandler):
             for s in settings['ORDERS_LIST_STATUSES']:
                 item['history'][s] = order['history'].get(s)
             items.append(item)
+        # XXX OrderedDict
         self.write(dict(items=items,
                         doctype='account groups orders',
                         base=self.absolute_reverse_url('home'),
