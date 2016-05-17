@@ -300,6 +300,9 @@ class OrdersApiV1(Orders):
         for order in orders:
             item = dict(
                 title=order['title'],
+                links=dict(
+                    self=dict(href=self.reverse_url('order_api', order['_id'])),
+                    display=dict(href=self.order_reverse_url(order))),
                 form=dict(
                     title=forms[order['form']],
                     display=dict(href=self.reverse_url('form', order['form']))),
@@ -312,7 +315,6 @@ class OrdersApiV1(Orders):
                     display=dict(href=self.reverse_url('site', order['status'] + '.png'))),
                 history={},
                 modified=order['modified'])
-            item['href'] = self.order_reverse_url(order)
             identifier = order.get('identifier')
             if not identifier:
                 identifier = order['_id'][:6] + '...'
@@ -594,19 +596,25 @@ class OrderEdit(OrderMixin, RequestHandler):
                         self.prepare_message(order)
                         self.redirect(self.order_reverse_url(
                                 order,
+                                absolute=True,
                                 message='Order saved and submitted.'))
                         break
                 else:
                         self.redirect(self.order_reverse_url(
                                 order,
+                                absolute=True,
                                 message='Order saved.',
                                 error='Order could not be submitted due to'
                                 ' invalid or missing values.'))
             else:
                 self.redirect(
-                    self.order_reverse_url(order, message='Order saved.'))
+                    self.order_reverse_url(order,
+                                           absolute=True,
+                                           message='Order saved.'))
         except ValueError, msg:
-            self.redirect(self.order_reverse_url(order, error=str(msg)))
+            self.redirect(self.order_reverse_url(order,
+                                                 absolute=True,
+                                                 error=str(msg)))
 
 
 class OrderClone(OrderMixin, RequestHandler):
@@ -638,7 +646,7 @@ class OrderClone(OrderMixin, RequestHandler):
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
             saver.check_fields_validity(fields)
             saver.set_identifier(form)
-        self.redirect(self.order_reverse_url(saver.doc))
+        self.redirect(self.order_reverse_url(saver.doc, absolute=True))
 
 
 class OrderTransition(OrderMixin, RequestHandler):
@@ -660,7 +668,7 @@ class OrderTransition(OrderMixin, RequestHandler):
         with OrderSaver(doc=order, rqh=self) as saver:
             saver.set_status(targetid)
         self.prepare_message(order)
-        self.redirect(self.order_reverse_url(order))
+        self.redirect(self.order_reverse_url(order, absolute=True))
 
 
 class OrderFile(OrderMixin, RequestHandler):
@@ -699,7 +707,7 @@ class OrderFile(OrderMixin, RequestHandler):
         self.check_attachable(order)
         with OrderSaver(doc=order, rqh=self) as saver:
             saver.delete_filename = filename
-        self.redirect(self.order_reverse_url(order))
+        self.redirect(self.order_reverse_url(order, absolute=True))
 
 
 class OrderAttach(OrderMixin, RequestHandler):
@@ -719,4 +727,4 @@ class OrderAttach(OrderMixin, RequestHandler):
                 saver['filename'] = infile.filename
                 saver['size'] = len(infile.body)
                 saver['content_type'] = infile.content_type or 'application/octet-stream'
-        self.redirect(self.order_reverse_url(order))
+        self.redirect(self.order_reverse_url(order, absolute=True))

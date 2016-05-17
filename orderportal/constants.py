@@ -65,6 +65,7 @@ DEFAULT_GLOBAL_MODES = dict(allow_registration=True,
 
 # User login account
 USER_COOKIE = 'orderportal_user'
+API_KEY_HEADER = 'X-OrderPortal-API-key'
 
 # Account status; hard-wired!
 PENDING  = 'pending'
