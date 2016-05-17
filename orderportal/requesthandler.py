@@ -66,34 +66,50 @@ class RequestHandler(tornado.web.RequestHandler):
             url += '?' + urllib.urlencode(query)
         return url
 
-    def order_reverse_url(self, order, **query):
+    def order_reverse_url(self, order, absolute=False, **query):
         "URL for order; use identifier variant if available."
         try:
-            return self.absolute_reverse_url('order_id',
-                                             order['identifier'],
-                                             **query)
+            identifier = order['identifier']
         except KeyError:
-            return self.absolute_reverse_url('order', order['_id'], **query)
+            if absolute:
+                return self.absolute_reverse_url('order', order['_id'], **query)
+            else:
+                return self.reverse_url('order', order['_id'], **query)
+        else:
+            if absolute: 
+                return self.absolute_reverse_url('order_id', identifier,**query)
+            else:
+                return self.reverse_url('order_id', identifier, **query)
 
     def get_current_user(self):
         """Get the currently logged-in user account, if any.
         This overrides a tornado function, otherwise it should have
-        been called get_current_account, since terminology 'account'
+        been called 'get_current_account', since terminology 'account'
         is used in this code rather than 'user'."""
         email = self.get_secure_cookie(
             constants.USER_COOKIE,
             max_age_days=settings['LOGIN_MAX_AGE_DAYS'])
-        if not email:
-            return None
-        try:
-            account = self.get_account(email)
-        except tornado.web.HTTPError:
-            return None
+        if email:
+            try:
+                account = self.get_account(email)
+            except tornado.web.HTTPError:
+                return None
+            # Check if login session is invalidated.
+            if account.get('login') is None:
+                return None
+        else:
+            try:
+                api_key = self.request.headers[constants.API_KEY_HEADER]
+            except KeyError:
+                return None
+            else:
+                try:
+                    account = self.get_entity_view('account/api_key', api_key)
+                except tornado.web.HTTPError:
+                    raise tornado.web.HTTPError(401)
+                logging.debug("API login account %s", account['email'])
         # Check that account is enabled.
         if account.get('status') != constants.ENABLED:
-            return None
-        # Check if login session is invalidated.
-        if account.get('login') is None:
             return None
         return account
 

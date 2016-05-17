@@ -676,6 +676,8 @@ class AccountEdit(AccountMixin, RequestHandler):
                 country=self.get_argument('invoice_country', default=None))
             saver['phone'] = self.get_argument('phone', default=None)
             saver['other_data'] = self.get_argument('other_data', default=None)
+            if utils.to_bool(self.get_argument('api_key', default=False)):
+                saver['api_key'] = utils.get_iuid()
             saver['update_info'] = False
         self.see_other('account', email)
 

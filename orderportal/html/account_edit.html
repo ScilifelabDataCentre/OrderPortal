@@ -346,6 +346,20 @@ Edit {% module Icon('account') %} {{ account['email'] }}
     </span>
   </div>
 
+  {% if account['role'] == constants.ADMIN %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="api_key">API key</label>
+	<div  class="form-control">
+	  <input type="checkbox" name="api_key" id="api_key" value="true">
+	  Set new API key
+	</div>
+      </div>
+    </div>
+  </div>
+  {% end %}
+
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit" class="btn btn-success">
