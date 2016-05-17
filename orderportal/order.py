@@ -15,7 +15,7 @@ from orderportal import settings
 from orderportal import utils
 from orderportal.fields import Fields
 from orderportal.message import MessageSaver
-from orderportal.requesthandler import RequestHandler
+from orderportal.requesthandler import RequestHandler, ApiV1Mixin
 
 
 class OrderSaver(saver.Saver):
@@ -262,7 +262,7 @@ class Orders(RequestHandler):
                     params=self.get_filter_params())
 
     def get_filter_params(self):
-        "Return a dictionary with the given filter parameters."
+        "Return a dictionary with the filter parameters."
         result = dict()
         for key in ['status', 'form'] + \
                    [f['identifier'] for f in settings['ORDERS_LIST_FIELDS']]:
@@ -284,30 +284,34 @@ class Orders(RequestHandler):
         return result
 
 
-class ApiV1Orders(Orders):
+class OrdersApiV1(Orders):
     "Orders API; JSON output."
 
     @tornado.web.authenticated
     def get(self):
         "JSON output."
         self.check_staff()
+        self.params = self.get_filter_params()
         orders = self.get_orders()
         names = self.get_account_names(None)
         # Forms lookup on iuid
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
-        data = []
+        items = []
         for order in orders:
-            item = dict(title=order['title'],
-                        form_title=forms[order['form']],
-                        form_href=self.reverse_url('form', order['form']),
-                        owner_name=names[order['owner']],
-                        owner_href=self.reverse_url('account', order['owner']),
-                        fields={},
-                        status=order['status'].capitalize(),
-                        status_href=
-                            self.reverse_url('site', order['status'] + '.png'),
-                        history={},
-                        modified=order['modified'])
+            item = dict(
+                title=order['title'],
+                form=dict(
+                    title=forms[order['form']],
+                    display=dict(href=self.reverse_url('form', order['form']))),
+                owner=dict(
+                    name=names[order['owner']],
+                    display=dict(href=self.reverse_url('account', order['owner']))),
+                fields={},
+                status=dict(
+                    name=order['status'],
+                    display=dict(href=self.reverse_url('site', order['status'] + '.png'))),
+                history={},
+                modified=order['modified'])
             item['href'] = self.order_reverse_url(order)
             identifier = order.get('identifier')
             if not identifier:
@@ -317,16 +321,24 @@ class ApiV1Orders(Orders):
                 item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
             for s in settings['ORDERS_LIST_STATUSES']:
                 item['history'][s] = order['history'].get(s)
-            data.append(item)
-        self.write(dict(data=data))
+            items.append(item)
+        self.write(dict(
+                items=items,
+                type='orders',
+                base=self.absolute_reverse_url('home'),
+                links=dict(
+                    self=dict(
+                        href=self.reverse_url('orders_api', **self.params)),
+                    display=dict(
+                        href=self.reverse_url('orders', **self.params))
+                    )))
 
     def get_orders(self):
-        params = self.get_filter_params()
-        orders = self.filter_by_status(params.get('status'))
-        orders = self.filter_by_form(params.get('form'), orders=orders)
+        orders = self.filter_by_status(self.params.get('status'))
+        orders = self.filter_by_form(self.params.get('form'), orders=orders)
         for f in settings['ORDERS_LIST_FIELDS']:
             orders = self.filter_by_field(f['identifier'],
-                                          params.get(f['identifier']),
+                                          self.params.get(f['identifier']),
                                           orders=orders)
         # No filter; all orders
         if orders is None:
@@ -335,7 +347,7 @@ class ApiV1Orders(Orders):
                                 descending=True)
             orders = [r.doc for r in view]
         if settings['ORDERS_DISPLAY_MOST_RECENT'] > 0:
-            if params.get('recent', True):
+            if self.params.get('recent', True):
                 orders = orders[:settings['ORDERS_DISPLAY_MOST_RECENT']]
         return orders
 
@@ -441,6 +453,30 @@ class Order(OrderMixin, RequestHandler):
         self.delete_logs(order['_id'])
         self.db.delete(order)
         self.see_other('orders')
+
+
+class OrderApiV1(ApiV1Mixin, Order):
+    "Order API; JSON."
+
+    def render(self, templatefilename, **kwargs):
+        order = kwargs['order']
+        # XXX Add API link for account when implemented
+        order['type'] = order.pop(constants.DOCTYPE)
+        order['base'] = self.absolute_reverse_url('home')
+        order['links'] = dict(
+            self=dict(href=self.reverse_url('order_api', order['_id'])),
+            display=dict(href=self.reverse_url('order', order['_id']))),
+        owner = order.pop('owner')
+        order['owner'] = dict(
+            email=owner,
+            links=dict(display=dict(href=self.reverse_url('account', owner)),
+                       api=dict(href=self.reverse_url('account_api', owner))))
+        form = order.pop('form')
+        order['form'] = dict(
+            iuid=form,
+            links=dict(display=dict(href=self.reverse_url('form', form))))
+        self.cleanup(order)
+        self.write(order)
 
 
 class OrderLogs(OrderMixin, RequestHandler):

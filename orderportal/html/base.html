@@ -218,8 +218,12 @@
 
       {% block body_header %}
       <div class="row">
-	<div class="col-md-12">
+	<div class="col-md-10">
 	  <h1>{% block body_title %}OrderPortal{% end %}</h1>
+	</div>
+	<div class="col-md-2">
+	  {% block body_header_meta %}
+	  {% end %}
 	</div>
       </div>
       {% end %} {# block body_header #}

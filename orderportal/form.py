@@ -138,11 +138,11 @@ class Form(FormMixin, RequestHandler):
         return False
 
 
-class ApiV1Form(ApiV1Mixin, Form):
+class FormApiV1(ApiV1Mixin, Form):
     "Form API; JSON."
 
-    def render(self, filename, form, order_count, fields,
-               is_deletable, are_fields_editable, logs):
+    def render(self, templatefilename, **kwargs):
+        form = kwargs['form']
         self.cleanup(form)
         self.write(form)
 
@@ -161,7 +161,7 @@ class FormLogs(RequestHandler):
 
 
 class FormCreate(RequestHandler):
-    "Page for creating an form."
+    "Page for creating an form. Allows for importing fields from form JSON."
 
     @tornado.web.authenticated
     def get(self):
@@ -188,7 +188,8 @@ class FormCreate(RequestHandler):
                     saver['version'] = data.get('version')
                 saver['fields'] = data['fields']
             except Exception, msg:
-                logging.error("Error importing form: %s", msg)
+                self.see_other('home', error="Error importing form: %s" % msg)
+                return
         self.see_other('form', saver.doc['_id'])
 
 

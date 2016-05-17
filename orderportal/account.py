@@ -81,10 +81,11 @@ class _AccountsFilter(Accounts):
 
     def get_accounts(self):
         "Get the accounts."
-        params = self.get_filter_params()
-        accounts = self.filter_by_university(params.get('university'))
-        accounts = self.filter_by_role(params.get('role'), accounts=accounts)
-        accounts = self.filter_by_status(params.get('status'),accounts=accounts)
+        accounts = self.filter_by_university(self.params.get('university'))
+        accounts = self.filter_by_role(self.params.get('role'),
+                                       accounts=accounts)
+        accounts = self.filter_by_status(self.params.get('status'),
+                                         accounts=accounts)
         # No filter; all accounts
         if accounts is None:
             view = self.db.view('account/email', include_docs=True)
@@ -144,40 +145,55 @@ class _AccountsFilter(Accounts):
         return accounts
 
 
-class ApiV1Accounts(_AccountsFilter):
+class AccountsApiV1(_AccountsFilter):
     "Accounts API; JSON output."
 
     @tornado.web.authenticated
     def get(self):
         "JSON output."
         self.check_staff()
+        self.params = self.get_filter_params()
         accounts = self.get_accounts()
-        data = []
+        items = []
         for account in accounts:
-            name = account.get('last_name')
+            name = last_name = account.get('last_name')
             first_name = account.get('first_name')
             if name:
                 if first_name:
                     name += ', ' + first_name
             else:
                 name = first_name
-            data.append(
+            items.append(
                 dict(email=account['email'],
-                     href=self.reverse_url('account', account['email']),
-                     name=utils.to_utf8(name),
+                     name=name,
+                     first_name=first_name,
+                     last_name=last_name,
                      pi=bool(account.get('pi')),
                      gender=account.get('gender'),
-                     order_count=account['order_count'],
-                     orders_href=
-                         self.reverse_url('account_orders', account['email']),
-                     university=utils.to_utf8(account['university']),
+                     university=account['university'],
                      role=account['role'],
-                     status=account['status'].capitalize(),
-                     status_href=
-                         self.static_url(account['status'] + '.png'),
+                     status=dict(
+                        name=account['status'],
+                        image=dict(href=self.static_url(account['status']+'.png'))),
                      login=account.get('login', '-'),
-                     modified=account['modified']))
-        self.write(dict(data=data))
+                     modified=account['modified'],
+                     orders=dict(
+                        count=account['order_count'],
+                        href=self.reverse_url('account_orders',
+                                              account['email'])),
+                     links=dict(
+                        api=dict(href=self.reverse_url('account_api', account['email'])),
+                        display=dict(href=self.reverse_url('account', account['email'])))
+                     ))
+        self.write(dict(items=items,
+                        doctype='accounts',
+                        base=self.absolute_reverse_url('home'),
+                        links=dict(
+                    self=dict(
+                        href=self.reverse_url('accounts_api', **self.params)),
+                    display=dict(
+                        href=self.reverse_url('accounts', **self.params))
+                        )))
 
 
 class AccountsCsv(_AccountsFilter):
@@ -187,6 +203,7 @@ class AccountsCsv(_AccountsFilter):
     def get(self):
         "CSV file output."
         self.check_staff()
+        self.params = self.get_filter_params()
         accounts = self.get_accounts()
         csvfile = StringIO()
         writer = csv.writer(csvfile)
@@ -352,12 +369,56 @@ class Account(AccountMixin, RequestHandler):
         return False
 
 
-class AccountCurrent(RequestHandler):
-    "Redirect to the account page for the current user."
+class AccountApiV1(AccountMixin, RequestHandler):
+    "Account API; JSON output."
 
     @tornado.web.authenticated
-    def get(self):
-        self.see_other('account', self.current_user['email'])
+    def get(self, email):
+        email = email.lower().strip()
+        account = self.get_account(email)
+        self.check_readable(account)
+        name = last_name = account.get('last_name')
+        first_name = account.get('first_name')
+        if name:
+            if first_name:
+                name += ', ' + first_name
+        else:
+            name = first_name
+        order_count = self.get_account_order_count(email)
+        view = self.db.view('log/account',
+                            startkey=[email, constants.CEILING],
+                            lastkey=[email],
+                            descending=True,
+                            limit=1)
+        try:
+            latest_activity = list(view)[0].key[1]
+        except IndexError:
+            latest_activity = None
+        self.write(dict(
+                base=self.absolute_reverse_url('home'),
+                email=account['email'],
+                name=name,
+                first_name=account['first_name'],
+                last_name=account['last_name'],
+                pi=bool(account.get('pi')),
+                university=account['university'],
+                role=account['role'],
+                gender=account.get('gender'),
+                status=account['status'],
+                login=account.get('login', '-'),
+                modified=account['modified'],
+                orders=dict(
+                    count=order_count,
+                    display=dict(href=self.reverse_url('account_orders',
+                                                       account['email'])),
+                    api=dict(href=self.reverse_url('account_orders_api',
+                                                   account['email']))),
+                links=dict(
+                    self=dict(href=self.reverse_url('account_api',
+                                                    account['email'])),
+                    display=dict(href=self.reverse_url('account',
+                                                       account['email'])))
+                ))
 
 
 class AccountOrdersMixin(object):
@@ -395,7 +456,7 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
                     account=account)
 
 
-class ApiV1AccountOrders(AccountOrdersMixin, RequestHandler):
+class AccountOrdersApiV1(AccountOrdersMixin, RequestHandler):
     "Account orders API; JSON output."
 
     @tornado.web.authenticated
@@ -413,7 +474,7 @@ class ApiV1AccountOrders(AccountOrdersMixin, RequestHandler):
         names = self.get_account_names(None)
         # Forms lookup on iuid
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
-        data = []
+        items = []
         for order in orders:
             item = dict(title=order.get('title') or '[no title]',
                         form_title=forms[order['form']],
@@ -421,7 +482,7 @@ class ApiV1AccountOrders(AccountOrdersMixin, RequestHandler):
                         owner_name=names[order['owner']],
                         owner_href=self.reverse_url('account', order['owner']),
                         fields={},
-                        status=order['status'].capitalize(),
+                        status=order['status'],
                         status_href=self.reverse_url('site', order['status'] + '.png'),
                         history={},
                         modified=order['modified'])
@@ -434,8 +495,17 @@ class ApiV1AccountOrders(AccountOrdersMixin, RequestHandler):
                 item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
             for s in settings['ORDERS_LIST_STATUSES']:
                 item['history'][s] = order['history'].get(s)
-            data.append(item)
-        self.write(dict(data=data))
+            items.append(item)
+        self.write(dict(items=items,
+                        doctype='account orders',
+                        base=self.absolute_reverse_url('home'),
+                        links=dict(
+                    self=dict(
+                        href=self.reverse_url('account_orders_api',
+                                              account['email'])),
+                    display=dict(
+                        href=self.reverse_url('account_orders',
+                                              account['email'])))))
 
 
 class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
@@ -457,7 +527,7 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
                     account=account)
 
 
-class ApiV1AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
+class AccountGroupsOrdersApiV1(AccountOrdersMixin, RequestHandler):
     "Account group orders API; JSON output."
 
     @tornado.web.authenticated
@@ -477,7 +547,7 @@ class ApiV1AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
         names = self.get_account_names(None)
         # Forms lookup on iuid
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
-        data = []
+        items = []
         for order in orders:
             item = dict(title=order.get('title') or '[no title]',
                         form_title=forms[order['form']],
@@ -485,7 +555,7 @@ class ApiV1AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
                         owner_name=names[order['owner']],
                         owner_href=self.reverse_url('account', order['owner']),
                         fields={},
-                        status=order['status'].capitalize(),
+                        status=order['status'],
                         status_href=self.reverse_url('site', order['status'] + '.png'),
                         history={},
                         modified=order['modified'])
@@ -498,8 +568,17 @@ class ApiV1AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
                 item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
             for s in settings['ORDERS_LIST_STATUSES']:
                 item['history'][s] = order['history'].get(s)
-            data.append(item)
-        self.write(dict(data=data))
+            items.append(item)
+        self.write(dict(items=items,
+                        doctype='account groups orders',
+                        base=self.absolute_reverse_url('home'),
+                        links=dict(
+                    self=dict(
+                        href=self.reverse_url('account_groups_orders_api',
+                                              account['email'])),
+                    display=dict(
+                        href=self.reverse_url('account_groups_orders',
+                                              account['email'])))))
 
 
 class AccountLogs(AccountMixin, RequestHandler):

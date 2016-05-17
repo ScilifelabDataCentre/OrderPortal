@@ -12,6 +12,12 @@
       href="{{ settings['DATATABLES_CSS_URL'] }}">
 {% end %}
 
+{% block body_header_meta %}
+<a href="{{ reverse_url('orders_api', **params) }}">
+  {% module Icon('json') %} JSON
+</a>
+{% end %}
+
 {% block container %}
 <div class="container-fluid">
 {% end %}
@@ -77,7 +83,6 @@
       {% end %} {# if settings['ORDERS_DISPLAY_MOST_RECENT'] > 0 #}
     </form>
   </div>
-  <div class="col-md-2"></div>
 </div>
 
 <div class="row">
@@ -122,7 +127,7 @@ $(document).ready(function() {
     order: [[{{ order_column }}, "desc"]],
     ajax: {
       url: "/api/v1/orders",
-      dataSrc: "data",
+      dataSrc: "items",
       data: {% raw json.dumps(params) %}
     },
     columns: [
@@ -132,14 +137,14 @@ $(document).ready(function() {
        }
       },
       {data: "title"},
-      {data: "form_title",
+      {data: "form",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a href='"+oData.form_href+"'>"+oData.form_title+"</a>");
+         $(nTd).html("<a href='"+oData.form.display.href+"'>"+oData.form.title+"</a>");
        }
       },
-      {data: "owner_name",
+      {data: "owner",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a href='"+oData.owner_href+"'>"+oData.owner_name+"</a>");
+         $(nTd).html("<a href='"+oData.owner.display.href+"'>"+oData.owner.name+"</a>");
        }
       },
       {% for f in settings['ORDERS_LIST_FIELDS'] %}
@@ -147,7 +152,7 @@ $(document).ready(function() {
       {% end %}
       {data: "status",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<img src='"+oData.status_href+"'> "+sData);
+         $(nTd).html("<img src='"+oData.status.display.href+"'> "+oData.status.name);
        }
       },
       {% for s in settings['ORDERS_LIST_STATUSES'] %}
