@@ -119,10 +119,11 @@ class TechInfo(RequestHandler):
                                 ('markdown', markdown.version)],
                         other=[('<a href="http://couchdb.apache.org/">Apache CouchDB</a>',
                                 utils.get_dbserver().version()),
-                               ('<a href="http://getbootstrap.com/">bootstrap</a>', '3.3.4'),
-                               ('<a href="https://jquery.com/">jQuery</a>', '1.11.13'),
+                               ('<a href="http://getbootstrap.com/">bootstrap</a>', '3.3.6'),
+                               ('<a href="https://jquery.com/">jQuery</a>', '1.12.3'),
+                               ('<a href="https://jqueryui.com/">jQuery UI</a>', '1.11.4'),
                                ('<a href="https://github.com/GregDThomas/jquery-localtime">jQuery localtime</a>', '0.9.1'),
-                               ('<a href="https://www.datatables.net/">jQuery DataTables</a>', '1.10.10')])
+                               ('<a href="https://www.datatables.net/">jQuery DataTables</a>', '1.10.11')])
         self.render('techinfo.html',
                     version=orderportal.__version__,
                     versions=versions)
