@@ -94,9 +94,9 @@ $(document).ready(function() {
       dataSrc: "items"
     },
     columns: [
-      {data: "identifier",
+      {data: "name",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a href='"+oData.links.display.href+"'>"+oData.identifier+"</a>");
+         $(nTd).html("<a href='"+oData.links.display.href+"'>"+oData.name+"</a>");
        }
       },
       {data: "title"},

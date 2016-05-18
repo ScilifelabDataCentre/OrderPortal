@@ -2,10 +2,11 @@
 
 from __future__ import print_function, absolute_import
 
-import cStringIO
 import logging
 import re
 import urlparse
+from collections import OrderedDict as OD
+from cStringIO import StringIO
 
 import tornado.web
 
@@ -144,7 +145,7 @@ class OrderSaver(saver.Saver):
         # The problem appeared on a Python 2.6 system, and involved Unicode.
         # But I was unable to isolate it. I tested this in desperation...
         self.db.put_attachment(self.doc,
-                               cStringIO.StringIO(self.file.body),
+                               StringIO(self.file.body),
                                filename=self.file.filename,
                                content_type=self.file.content_type)
 
@@ -284,7 +285,47 @@ class Orders(RequestHandler):
         return result
 
 
-class OrdersApiV1(Orders):
+class OrderApiV1Mixin:
+    "Generate JSON for an order."
+
+    def get_json(self, order, names={}, forms={}, item=None):
+        if not item:
+            item = OD()
+        item['iuid'] = order['_id']
+        item['identifier'] = order.get('identifier')
+        item['name'] = order.get('identifier') or order['_id'][:6] + '...'
+        item['title'] = order.get('title') or '[no title]'
+        item['form'] = dict(
+            iuid=order['form'],
+            title=forms.get(order['form']),
+            links=dict(
+                api=dict(href=self.reverse_url('form_api', order['form'])),
+                display=dict(href=self.reverse_url('form', order['form'])))),
+        item['owner'] = dict(
+            email=order['owner'],
+            name=names.get(order['owner']),
+            links=dict(api=dict(
+                    href=self.reverse_url('account_api', order['owner'])),
+                       display=dict(
+                    href=self.reverse_url('account', order['owner']))))
+        item['fields'] = {}
+        item['status'] = dict(
+            name=order['status'],
+            display=dict(
+                href=self.reverse_url('site', order['status']+'.png')))
+        item['history'] = {}
+        item['modified'] = order['modified']
+        for f in settings['ORDERS_LIST_FIELDS']:
+            item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
+        for s in settings['ORDERS_LIST_STATUSES']:
+            item['history'][s] = order['history'].get(s)
+        item['links'] = dict(
+            self=dict(href=self.reverse_url('order_api', order['_id'])),
+            display=dict(href=self.order_reverse_url(order)))
+        return item
+
+
+class OrdersApiV1(OrderApiV1Mixin, Orders):
     "Orders API; JSON output."
 
     @tornado.web.authenticated
@@ -292,51 +333,17 @@ class OrdersApiV1(Orders):
         "JSON output."
         self.check_staff()
         self.params = self.get_filter_params()
-        orders = self.get_orders()
-        names = self.get_account_names(None)
-        # Forms lookup on iuid
+        # Get names and forms lookups
+        names = self.get_account_names()
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
-        items = []
-        for order in orders:
-            item = dict(
-                title=order['title'],
-                links=dict(
-                    self=dict(href=self.reverse_url('order_api', order['_id'])),
-                    display=dict(href=self.order_reverse_url(order))),
-                form=dict(
-                    title=forms[order['form']],
-                    display=dict(href=self.reverse_url('form', order['form']))),
-                owner=dict(
-                    name=names[order['owner']],
-                    display=dict(href=self.reverse_url('account',
-                                                       order['owner']))),
-                fields={},
-                status=dict(
-                    name=order['status'],
-                    display=dict(
-                        href=self.reverse_url('site', order['status']+'.png'))),
-                history={},
-                modified=order['modified'])
-            identifier = order.get('identifier')
-            if not identifier:
-                identifier = order['_id'][:6] + '...'
-            item['identifier'] = identifier
-            for f in settings['ORDERS_LIST_FIELDS']:
-                item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
-            for s in settings['ORDERS_LIST_STATUSES']:
-                item['history'][s] = order['history'].get(s)
-            items.append(item)
-        # XXX OrderedDict
-        self.write(dict(
-                items=items,
-                type='orders',
-                base=self.absolute_reverse_url('home'),
-                links=dict(
-                    self=dict(
-                        href=self.reverse_url('orders_api', **self.params)),
-                    display=dict(
-                        href=self.reverse_url('orders', **self.params))
-                    )))
+        data = OD()
+        data['base'] = self.absolute_reverse_url('home')
+        data['type'] = 'orders'
+        data['links'] = dict(self=dict(href=self.reverse_url('orders')),
+                             display=dict(href=self.reverse_url('orders')))
+        data['items'] = [self.get_json_brief(o, names, forms)
+                         for o in self.get_orders()]
+        self.write(data)
 
     def get_orders(self):
         orders = self.filter_by_status(self.params.get('status'))
@@ -460,29 +467,20 @@ class Order(OrderMixin, RequestHandler):
         self.see_other('orders')
 
 
-class OrderApiV1(ApiV1Mixin, Order):
+class OrderApiV1(ApiV1Mixin, OrderApiV1Mixin, Order):
     "Order API; JSON."
 
     def render(self, templatefilename, **kwargs):
-        # XXX OrderedDict
         order = kwargs['order']
-        # XXX Add API link for account when implemented
-        order['type'] = order.pop(constants.DOCTYPE)
-        order['base'] = self.absolute_reverse_url('home')
-        order['links'] = dict(
-            self=dict(href=self.reverse_url('order_api', order['_id'])),
-            display=dict(href=self.reverse_url('order', order['_id']))),
-        owner = order.pop('owner')
-        order['owner'] = dict(
-            email=owner,
-            links=dict(display=dict(href=self.reverse_url('account', owner)),
-                       api=dict(href=self.reverse_url('account_api', owner))))
-        form = order.pop('form')
-        order['form'] = dict(
-            iuid=form,
-            links=dict(display=dict(href=self.reverse_url('form', form))))
-        self.cleanup(order)
-        self.write(order)
+        data = OD()
+        data['base'] = self.absolute_reverse_url('home')
+        data['type'] = 'order'
+        data = self.get_json(order,
+                             names=self.get_account_names([order['owner']]),
+                             item=data)
+        data['fields'] = order['fields']
+        data['invalid'] = order['invalid']
+        self.write(data)
 
 
 class OrderLogs(OrderMixin, RequestHandler):

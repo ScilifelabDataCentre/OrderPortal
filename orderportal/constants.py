@@ -13,6 +13,7 @@ DATE_RX  = re.compile(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$') # Safe until 9999 CE...
 EMAIL_RX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
 
 # Content types (MIME types)
+HTML_MIME = 'text/html'
 JSON_MIME = 'application/json'
 CSV_MIME  = 'text/csv'
 
