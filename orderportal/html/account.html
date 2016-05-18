@@ -255,11 +255,11 @@
   </tr>
   <tr>
     <th>University</th>
-    <td>{{ account['university'] or '-' }}</td>
+    <td>{{ account.get('university') or '-' }}</td>
   </tr>
   <tr>
     <th>Department</th>
-    <td>{{ account['department'] or '-' }}</td>
+    <td>{{ account.get('department') or '-' }}</td>
   </tr>
   <tr>
     <th>Principal Investigator</th>
