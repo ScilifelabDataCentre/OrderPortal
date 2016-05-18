@@ -2,9 +2,9 @@
 
 from __future__ import print_function, absolute_import
 
-import collections
 import csv
 import logging
+from collections import OrderedDict as OD
 from cStringIO import StringIO
 
 import tornado.web
@@ -14,6 +14,7 @@ from orderportal import constants
 from orderportal import saver
 from orderportal import settings
 from orderportal import utils
+from orderportal.order import OrderApiV1Mixin
 from orderportal.group import GroupSaver
 from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler
@@ -157,6 +158,11 @@ class AccountsApiV1(_AccountsFilter):
         accounts = self.get_accounts()
         items = []
         for account in accounts:
+            item = OD()
+            item['email'] = account['email']
+            item['links'] = dict(
+                api=dict(href=self.reverse_url('account_api',account['email'])),
+                display=dict(href=self.reverse_url('account',account['email'])))
             name = last_name = account.get('last_name')
             first_name = account.get('first_name')
             if name:
@@ -164,44 +170,38 @@ class AccountsApiV1(_AccountsFilter):
                     name += ', ' + first_name
             else:
                 name = first_name
-            # XXX OrderedDict
-            items.append(
-                dict(email=account['email'],
-                     name=name,
-                     first_name=first_name,
-                     last_name=last_name,
-                     pi=bool(account.get('pi')),
-                     gender=account.get('gender'),
-                     university=account['university'],
-                     role=account['role'],
-                     status=dict(
-                        name=account['status'],
-                        image=dict(href=self.static_url(account['status']+'.png'))),
-                     login=account.get('login', '-'),
-                     modified=account['modified'],
-                     orders=dict(
-                        count=account['order_count'],
-                        links=dict(
-                            display=dict(
-                                href=self.reverse_url('account_orders',
-                                                      account['email'])),
-                            api=dict(
-                                href=self.reverse_url('account_orders_api',
-                                                      account['email'])))),
-                     links=dict(
-                        api=dict(href=self.reverse_url('account_api', account['email'])),
-                        display=dict(href=self.reverse_url('account', account['email'])))
-                     ))
-        # XXX OrderedDict
-        self.write(dict(items=items,
-                        doctype='accounts',
-                        base=self.absolute_reverse_url('home'),
-                        links=dict(
-                    self=dict(
-                        href=self.reverse_url('accounts_api', **self.params)),
+            item['name'] = name
+            item['first_name'] = first_name
+            item['last_name'] = last_name
+            item['pi'] = bool(account.get('pi'))
+            item['gender'] = account.get('gender')
+            item['university'] = account.get('university')
+            item['role'] = account['role']
+            item['status'] = dict(
+                name=account['status'],
+                image=dict(href=self.static_url(account['status']+'.png')))
+            item['login'] = account.get('login', '-')
+            item['modified'] = account['modified']
+            item['orders'] = dict(
+                count=account['order_count'],
+                links=dict(
                     display=dict(
-                        href=self.reverse_url('accounts', **self.params))
-                        )))
+                        href=self.reverse_url('account_orders',
+                                              account['email'])),
+                    api=dict(
+                        href=self.reverse_url('account_orders_api',
+                                              account['email']))))
+            items.append(item)
+        data = OD()
+        data['base'] = self.absolute_reverse_url('home')
+        data['type'] = 'accounts'
+        data['links'] = links = OD()
+        links['self'] = dict(
+            href=self.absolute_reverse_url('accounts_api', **self.params))
+        links['display'] = dict(
+            href=self.absolute_reverse_url('accounts', **self.params))
+        data['items'] = items
+        self.write(data)
 
 
 class AccountsCsv(_AccountsFilter):
@@ -385,6 +385,10 @@ class AccountApiV1(AccountMixin, RequestHandler):
         email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
+        data = OD()
+        data['base'] = self.absolute_reverse_url('home')
+        data['type'] = 'account'
+        data['email'] = email
         name = last_name = account.get('last_name')
         first_name = account.get('first_name')
         if name:
@@ -392,42 +396,35 @@ class AccountApiV1(AccountMixin, RequestHandler):
                 name += ', ' + first_name
         else:
             name = first_name
-        order_count = self.get_account_order_count(email)
+        data['links'] = dict(
+            self=dict(href=self.reverse_url('account_api', account['email'])),
+            display=dict(href=self.reverse_url('account', account['email'])))
+        data['name'] = name
+        data['first_name'] = first_name
+        data['last_name'] = last_name
+        data['pi'] = bool(account.get('pi'))
+        data['university'] = account['university']
+        data['role'] = account['role']
+        data['gender'] = account.get('gender')
+        data['status'] = account['status']
+        data['login'] = account.get('login', '-')
+        data['modified'] = account['modified']
         view = self.db.view('log/account',
                             startkey=[email, constants.CEILING],
                             lastkey=[email],
                             descending=True,
                             limit=1)
         try:
-            latest_activity = list(view)[0].key[1]
+            data['latest_activity'] = list(view)[0].key[1]
         except IndexError:
-            latest_activity = None
-        # XXX OrderedDict
-        self.write(dict(
-                base=self.absolute_reverse_url('home'),
-                email=account['email'],
-                name=name,
-                first_name=account['first_name'],
-                last_name=account['last_name'],
-                pi=bool(account.get('pi')),
-                university=account['university'],
-                role=account['role'],
-                gender=account.get('gender'),
-                status=account['status'],
-                login=account.get('login', '-'),
-                modified=account['modified'],
-                orders=dict(
-                    count=order_count,
-                    display=dict(href=self.reverse_url('account_orders',
-                                                       account['email'])),
-                    api=dict(href=self.reverse_url('account_orders_api',
-                                                   account['email']))),
-                links=dict(
-                    self=dict(href=self.reverse_url('account_api',
-                                                    account['email'])),
-                    display=dict(href=self.reverse_url('account',
-                                                       account['email'])))
-                ))
+            data['latest_activity'] = None
+        data['orders'] = dict(
+            count=self.get_account_order_count(email),
+            display=dict(
+                href=self.reverse_url('account_orders', account['email'])),
+            api=dict(
+                href=self.reverse_url('account_orders_api', account['email'])))
+        self.write(data)
 
 
 class AccountOrdersMixin(object):
@@ -465,7 +462,9 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
                     account=account)
 
 
-class AccountOrdersApiV1(AccountOrdersMixin, RequestHandler):
+class AccountOrdersApiV1(AccountOrdersMixin,
+                         OrderApiV1Mixin,
+                         RequestHandler):
     "Account orders API; JSON output."
 
     @tornado.web.authenticated
@@ -474,56 +473,25 @@ class AccountOrdersApiV1(AccountOrdersMixin, RequestHandler):
         email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
+        # Get names and forms lookups
+        names = self.get_account_names()
+        forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
+        data = OD()
+        data['base'] = self.absolute_reverse_url('home')
+        data['type'] = 'account orders'
+        data['links'] = dict(
+            self=dict(
+                href=self.reverse_url('account_orders_api', account['email'])),
+            display=dict(
+                href=self.reverse_url('account_orders', account['email'])))
         view = self.db.view('order/owner',
                             reduce=False,
                             include_docs=True,
                             startkey=[email],
                             endkey=[email, constants.CEILING])
-        orders = [r.doc for r in view]
-        names = self.get_account_names(None)
-        # Forms lookup on iuid
-        forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
-        items = []
-        for order in orders:
-            identifier = order.get('identifier')
-            if not identifier:
-                identifier = order['_id'][:6] + '...'
-            item = collections.OrderedDict()
-            item['iuid'] = order['_id']
-            item['identifier'] = identifier
-            item['title'] = order.get('title') or '[no title]'
-            item['links'] = dict(
-                self=dict(href=self.reverse_url('order_api', order['_id'])),
-                display=dict(href=self.order_reverse_url(order)))
-            item['form'] = dict(
-                title=forms[order['form']],
-                display=dict(href=self.reverse_url('form', order['form'])))
-            item['owner'] = dict(
-                name=names[order['owner']],
-                display=dict(href=self.reverse_url('account', order['owner'])))
-            item['fields'] = {}
-            item['status'] = dict(
-                name=order['status'],
-                display=dict(
-                    href=self.reverse_url('site', order['status']+'.png')))
-            item['history'] = {}
-            item['modified'] = order['modified']
-            for f in settings['ORDERS_LIST_FIELDS']:
-                item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
-            for s in settings['ORDERS_LIST_STATUSES']:
-                item['history'][s] = order['history'].get(s)
-            items.append(item)
-        # XXX OrderedDict
-        self.write(dict(items=items,
-                        type='account orders',
-                        base=self.absolute_reverse_url('home'),
-                        links=dict(
-                    self=dict(
-                        href=self.reverse_url('account_orders_api',
-                                              account['email'])),
-                    display=dict(
-                        href=self.reverse_url('account_orders',
-                                              account['email'])))))
+        data['items'] = [self.get_json(r.doc, names=names, forms=forms)
+                         for r in view]
+        self.write(data)
 
 
 class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
@@ -545,7 +513,9 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
                     account=account)
 
 
-class AccountGroupsOrdersApiV1(AccountOrdersMixin, RequestHandler):
+class AccountGroupsOrdersApiV1(AccountOrdersMixin, 
+                               OrderApiV1Mixin,
+                               RequestHandler):
     "Account group orders API; JSON output."
 
     @tornado.web.authenticated
@@ -562,43 +532,20 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, RequestHandler):
                                 startkey=[colleague],
                                 endkey=[colleague, constants.CEILING])
             orders.extend([r.doc for r in view])
-        names = self.get_account_names(None)
-        # Forms lookup on iuid
+        # Get names and forms lookups
+        names = self.get_account_names()
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
-        items = []
-        for order in orders:
-            # XXX OrderedDict
-            item = dict(title=order.get('title') or '[no title]',
-                        form_title=forms[order['form']],
-                        form_href=self.reverse_url('form', order['form']),
-                        owner_name=names[order['owner']],
-                        owner_href=self.reverse_url('account', order['owner']),
-                        fields={},
-                        status=order['status'],
-                        status_href=self.reverse_url('site', order['status'] + '.png'),
-                        history={},
-                        modified=order['modified'])
-            item['href'] = self.order_reverse_url(order)
-            identifier = order.get('identifier')
-            if not identifier:
-                identifier = order['_id'][:6] + '...'
-            item['identifier'] = identifier
-            for f in settings['ORDERS_LIST_FIELDS']:
-                item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
-            for s in settings['ORDERS_LIST_STATUSES']:
-                item['history'][s] = order['history'].get(s)
-            items.append(item)
-        # XXX OrderedDict
-        self.write(dict(items=items,
-                        doctype='account groups orders',
-                        base=self.absolute_reverse_url('home'),
-                        links=dict(
-                    self=dict(
-                        href=self.reverse_url('account_groups_orders_api',
-                                              account['email'])),
-                    display=dict(
-                        href=self.reverse_url('account_groups_orders',
-                                              account['email'])))))
+        data = OD()
+        data['base'] = self.absolute_reverse_url('home')
+        data['type'] = 'account groups orders'
+        data['links'] = dict(
+            self=dict(
+                href=self.reverse_url('account_orders_api', account['email'])),
+            display=dict(
+                href=self.reverse_url('account_orders', account['email'])))
+        data['items'] = [self.get_json(o, names=names, forms=forms)
+                         for o in orders]
+        self.write(data)
 
 
 class AccountLogs(AccountMixin, RequestHandler):
@@ -874,7 +821,7 @@ class Register(RequestHandler):
                     if not university:
                         university = self.get_argument('university',
                                                        default=None)
-                        saver['university'] = university or None
+                    saver['university'] = university or None
                 except tornado.web.MissingArgumentError, msg:
                     raise ValueError(msg)
                 saver['department'] = self.get_argument('department', None)

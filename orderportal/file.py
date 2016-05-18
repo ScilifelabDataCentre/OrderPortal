@@ -2,8 +2,8 @@
 
 from __future__ import print_function, absolute_import
 
-import cStringIO
 import logging
+from cStringIO import StringIO
 
 import tornado.web
 
@@ -46,7 +46,7 @@ class FileSaver(saver.Saver):
         # The problem appeared on a Python 2.6 system, and involved Unicode.
         # But I was unable to isolate it. I tested this in desperation...
         self.db.put_attachment(self.doc,
-                               cStringIO.StringIO(self.file.body),
+                               StringIO(self.file.body),
                                filename=self['name'],
                                content_type=self['content_type'])
         

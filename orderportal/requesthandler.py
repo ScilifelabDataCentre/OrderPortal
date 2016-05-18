@@ -326,23 +326,12 @@ class RequestHandler(tornado.web.RequestHandler):
         if not self.current_user: return False
         return self.current_user['email'] in self.get_account_colleagues(email)
 
-    def get_account_names(self, emails):
+    def get_account_names(self, emails=[]):
         """Get dictionary with emails as key and names (last, first) as value.
         If emails is None, then for all accounts."""
         result = {}
         view = self.db.view('account/email')
-        if emails is None:
-            for row in view:
-                first, last = row.value
-                if last:
-                    if first:
-                        name = u"{0}, {1}".format(last, first)
-                    else:
-                        name = last
-                else:
-                    name = first
-                result[row.key] = name
-        else:
+        if emails:
             for email in emails:
                 try:
                     first, last = list(view[email])[0].value
@@ -357,6 +346,17 @@ class RequestHandler(tornado.web.RequestHandler):
                     else:
                         name = first
                     result[email] = name
+        else:
+            for row in view:
+                first, last = row.value
+                if last:
+                    if first:
+                        name = u"{0}, {1}".format(last, first)
+                    else:
+                        name = last
+                else:
+                    name = first
+                result[row.key] = name
         return result
 
     def get_forms(self, enabled=True):

@@ -13,6 +13,12 @@
 {{ form['title'] }}
 {% end %}
 
+{% block body_header_meta %}
+<a href="{{ reverse_url('form_api', form['_id']) }}">
+  {% module Icon('json') %} JSON
+</a>
+{% end %}
+
 {% block meta_content %}
 {% if form['status'] == constants.PENDING %}
 <p>
@@ -116,11 +122,6 @@
       Clone
     </button>
   </form>
-</p>
-<p>
-  <a href="{{ reverse_url('form_api', form['_id']) }}">
-    {% module Icon('json', label=True) %}
-  </a>
 </p>
 {% end %} {# block meta_content #}
 

@@ -96,22 +96,22 @@ $(document).ready(function() {
       dataSrc: "items"
     },
     columns: [
-      {data: "identifier",
+      {data: "name",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a href='"+oData.href+"'>"+oData.identifier+"</a>");
+         $(nTd).html("<a href='"+oData.links.display.href+"'>"+oData.name+"</a>");
        }
       },
       {data: "title"},
 {% if is_staff %}
-      {data: "form_title",
+      {data: "form",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a href='"+oData.form_href+"'>"+oData.form_title+"</a>");
+         $(nTd).html("<a href='"+oData.form.display.href+"'>"+oData.form.title+"</a>");
        }
       },
 {% end %} {# if is_staff #}
-      {data: "owner_name",
+      {data: "owner",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a href='"+oData.owner_href+"'>"+oData.owner_name+"</a>");
+         $(nTd).html("<a href='"+oData.owner.display.href+"'>"+oData.owner.name+"</a>");
        }
       },
       {% for f in settings['ORDERS_LIST_FIELDS'] %}
@@ -119,7 +119,7 @@ $(document).ready(function() {
       {% end %}
       {data: "status",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<img src='"+oData.status_href+"'> "+sData);
+         $(nTd).html("<img src='"+oData.status.display.href+"'> "+oData.status.name);
        }
       },
       {% for s in settings['ORDERS_LIST_STATUSES'] %}
