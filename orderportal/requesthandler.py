@@ -173,7 +173,9 @@ class RequestHandler(tornado.web.RequestHandler):
     def get_colleagues(self, email):
         "Get list of accounts in same groups as the account given by email."
         colleagues = dict()
-        for row in self.db.view('group/member', include_docs=True, key=email):
+        for row in self.db.view('group/member',
+                                include_docs=True,
+                                key=email.strip().lower()):
             for member in row.doc['members']:
                 account = self.get_account(member)
                 if account['status'] == constants.ENABLED:
@@ -288,12 +290,12 @@ class RequestHandler(tornado.web.RequestHandler):
         Raise HTTP 404 if no such account.
         """
         return self.get_entity_view('account/email',
-                                    email.lower(),
+                                    email.strip().lower(),
                                     reason='no such account')
 
     def get_account_order_count(self, email):
         "Get the number of orders for the account."
-        email = email.lower()
+        email = email.strip().lower()
         view = self.db.view('order/owner',
                             startkey=[email],
                             endkey=[email, constants.CEILING])
@@ -304,6 +306,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_account_groups(self, email):
         "Get sorted list of all groups which the account is a member of."
+        email = email.strip().lower()
         view = self.db.view('group/member', include_docs=True)
         return sorted([r.doc for r in view[email]],
                       cmp=lambda i,j: cmp(i['name'], j['name']))
@@ -319,6 +322,7 @@ class RequestHandler(tornado.web.RequestHandler):
     def get_invitations(self, email):
         "Get the groups the account with the given email has been invited to."
         view = self.db.view('group/invited', include_docs=True)
+        email = email.strip().lower()
         return [r.doc for r in view[email]]
 
     def is_colleague(self, email):
@@ -335,7 +339,7 @@ class RequestHandler(tornado.web.RequestHandler):
         if emails:
             for email in emails:
                 try:
-                    first, last = list(view[email])[0].value
+                    first, last = list(view[email.strip().lower()])[0].value
                 except IndexError:
                     name = '[unknown]'
                 else:

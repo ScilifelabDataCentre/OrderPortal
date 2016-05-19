@@ -48,6 +48,7 @@ class Search(RequestHandler):
         view = self.db.view('account/email')
         id_sets = []
         for part in parts:
+            part = part.lower()
             id_sets.append(set([r.id for r in
                                 view[part : part+constants.CEILING]]))
         # Only require one hit in email

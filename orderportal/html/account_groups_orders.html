@@ -105,13 +105,13 @@ $(document).ready(function() {
 {% if is_staff %}
       {data: "form",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a href='"+oData.form.display.href+"'>"+oData.form.title+"</a>");
+         $(nTd).html("<a href='"+oData.form.links.display.href+"'>"+oData.form.title+"</a>");
        }
       },
 {% end %} {# if is_staff #}
       {data: "owner",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a href='"+oData.owner.display.href+"'>"+oData.owner.name+"</a>");
+         $(nTd).html("<a href='"+oData.owner.links.display.href+"'>"+oData.owner.name+"</a>");
        }
       },
       {% for f in settings['ORDERS_LIST_FIELDS'] %}
