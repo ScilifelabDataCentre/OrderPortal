@@ -28,7 +28,7 @@
 
 <div class="row">
   <div class="col-md-4 col-md-offset-6">
-    {% if is_staff or account['email'] == current_user['email'] %}
+    {% if any_groups and is_staff or account['email'] == current_user['email'] %}
     <a href="{{ reverse_url('account_groups_orders', account['email']) }}">
       {% module Icon('group') %}
       All orders in account's groups

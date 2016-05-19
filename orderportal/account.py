@@ -455,7 +455,8 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
             len(settings['ORDERS_LIST_FIELDS'])
         self.render('account_orders.html',
                     order_column=order_column,
-                    account=account)
+                    account=account,
+                    any_groups=bool(self.get_account_groups(account['email'])))
 
 
 class AccountOrdersApiV1(AccountOrdersMixin,
