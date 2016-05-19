@@ -288,11 +288,12 @@ class RequestHandler(tornado.web.RequestHandler):
         Raise HTTP 404 if no such account.
         """
         return self.get_entity_view('account/email',
-                                    email,
+                                    email.lower(),
                                     reason='no such account')
 
     def get_account_order_count(self, email):
         "Get the number of orders for the account."
+        email = email.lower()
         view = self.db.view('order/owner',
                             startkey=[email],
                             endkey=[email, constants.CEILING])
