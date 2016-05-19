@@ -300,7 +300,7 @@ class OrderApiV1Mixin:
             title=forms.get(order['form']),
             links=dict(
                 api=dict(href=self.reverse_url('form_api', order['form'])),
-                display=dict(href=self.reverse_url('form', order['form'])))),
+                display=dict(href=self.reverse_url('form', order['form']))))
         item['owner'] = dict(
             email=order['owner'],
             name=names.get(order['owner']),
@@ -341,7 +341,7 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
         data['type'] = 'orders'
         data['links'] = dict(self=dict(href=self.reverse_url('orders')),
                              display=dict(href=self.reverse_url('orders')))
-        data['items'] = [self.get_json_brief(o, names, forms)
+        data['items'] = [self.get_json(o, names, forms)
                          for o in self.get_orders()]
         self.write(data)
 
