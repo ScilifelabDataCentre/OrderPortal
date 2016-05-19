@@ -4,6 +4,7 @@ from __future__ import print_function, absolute_import
 
 import json
 import logging
+from collections import OrderedDict as OD
 
 import tornado.web
 
@@ -143,8 +144,31 @@ class FormApiV1(ApiV1Mixin, Form):
 
     def render(self, templatefilename, **kwargs):
         form = kwargs['form']
-        self.cleanup(form)
-        self.write(form)
+        data = OD()
+        data['base'] = self.absolute_reverse_url('home')
+        data['type'] = 'form'
+        data['iuid'] = form['_id']
+        data['title'] = form.get('title')
+        data['version'] = form.get('version')
+        data['description'] = form.get('description')
+        data['owner'] = dict(
+            email=form['owner'],
+            links=dict(api=dict(
+                    href=self.reverse_url('account_api', form['owner'])),
+                       display=dict(
+                    href=self.reverse_url('account', form['owner']))))
+        data['status'] = form['status']
+        data['modified'] = form['modified']
+        data['created'] = form['created']
+        data['links'] = dict(
+            self=dict(href=self.reverse_url('form_api', form['_id'])),
+            display=dict(href=self.reverse_url('form', form['_id'])))
+        data['orders'] = dict(
+            count=self.get_order_count(form),
+            # XXX Added API href when available.
+            display=dict(href=self.reverse_url('form_orders', form['_id'])))
+        data['fields'] = form['fields']
+        self.write(data)
 
 
 class FormLogs(RequestHandler):
@@ -180,8 +204,11 @@ class FormCreate(RequestHandler):
             saver['status'] = constants.PENDING
             try:
                 infile = self.request.files['import'][0]
+                # This throws exceptions if not JSON
                 data = json.loads(infile.body)
-                assert data[constants.DOCTYPE] == constants.FORM, 'doc must be form'
+                if data.get(constants.DOCTYPE) != constants.FORM and \
+                   data.get('type') != 'form':
+                    raise ValueError('imported JSON is not a form')
                 if not saver['description']:
                     saver['description'] = data.get('description')
                 if not saver['version']:
