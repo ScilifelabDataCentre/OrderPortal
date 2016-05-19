@@ -102,13 +102,12 @@ class GroupCreate(RequestHandler):
             invited = set()
             value = self.get_argument('invited', '').replace(',', ' ').strip()
             for email in value.split():
-                email = email.lower()
                 try:
-                    self.get_account(email)
+                    account = self.get_account(email)
                 except tornado.web.HTTPError:
                     pass
                 else:
-                    invited.add(email)
+                    invited.add(account['email'])
             saver['invited'] = sorted(invited)
             saver['members'] = [self.current_user['email']]
         self.see_other('group', saver.doc['_id'])
@@ -139,17 +138,17 @@ class GroupEdit(GroupMixin, RequestHandler):
             invited = set()
             value = self.get_argument('members', '').replace(',', ' ').strip()
             for email in value.split():
-                email = email.lower()
                 try:
-                    self.get_account(email)
+                    account = self.get_account(email)
                 except tornado.web.HTTPError:
                     pass
-                if email in old_members:
-                    members.add(email)
                 else:
-                    invited.add(email)
-                if email in old_invited:
-                    invited.add(email)
+                    if account['email'] in old_members:
+                        members.add(account['email'])
+                    else:
+                        invited.add(account['email'])
+                    if account['email'] in old_invited:
+                        invited.add(account['email'])
             members.add(owner['email'])
             saver['members'] = sorted(members)
             saver['invited'] = sorted(invited)

@@ -25,7 +25,7 @@ class AccountSaver(saver.Saver):
 
     def set_email(self, email):
         assert self.get('email') is None # Email must not have been set.
-        email = email.lower().strip()
+        email = email.strip().lower()
         if not email: raise ValueError('No email given.')
         if not constants.EMAIL_RX.match(email):
             raise ValueError('Malformed email value.')
@@ -295,13 +295,12 @@ class Account(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
-        account['order_count'] = self.get_account_order_count(email)
+        account['order_count'] = self.get_account_order_count(account['email'])
         view = self.db.view('log/account',
-                            startkey=[email, constants.CEILING],
-                            lastkey=[email],
+                            startkey=[account['email'], constants.CEILING],
+                            lastkey=[account['email']],
                             descending=True,
                             limit=1)
         try:
@@ -314,7 +313,7 @@ class Account(AccountMixin, RequestHandler):
             invitations = []
         self.render('account.html',
                     account=account,
-                    groups=self.get_account_groups(email),
+                    groups=self.get_account_groups(account['email']),
                     latest_activity=latest_activity,
                     invitations=invitations,
                     is_deletable=self.is_deletable(account))
@@ -330,7 +329,6 @@ class Account(AccountMixin, RequestHandler):
     @tornado.web.authenticated
     def delete(self, email):
         "Delete a account that is pending; to get rid of spam application."
-        email = email.lower().strip()
         account = self.get_account(email)
         self.check_admin()
         if not self.is_deletable(account):
@@ -338,7 +336,7 @@ class Account(AccountMixin, RequestHandler):
         # Delete the groups this account owns.
         view = self.db.view('group/owner',
                             include_docs=True,
-                            key=email)
+                            key=account['email'])
         for row in view:
             group = row.doc
             self.delete_logs(group['_id'])
@@ -346,19 +344,19 @@ class Account(AccountMixin, RequestHandler):
         # Remove this account from groups it is a member of.
         view = self.db.view('group/owner',
                             include_docs=True,
-                            key=email)
+                            key=account['email'])
         for row in view:
             group = row.doc
             with GroupSaver(doc=row, rqh=self) as saver:
                 members = set(group['members'])
-                members.discard(email)
+                members.discard(account['email'])
                 saver['members'] = sorted(members)
         # Delete the messages of the account.
         view = self.db.view('message/recipient',
                             reduce=False,
                             include_docs=True,
-                            startkey=[email],
-                            endkey=[email, constants.CEILING])
+                            startkey=[account['email']],
+                            endkey=[account['email'], constants.CEILING])
         for row in view:
             message = row.doc
             self.delete_logs(message['_id'])
@@ -382,13 +380,12 @@ class AccountApiV1(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         data = OD()
         data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'account'
-        data['email'] = email
+        data['email'] = account['email']
         name = last_name = account.get('last_name')
         first_name = account.get('first_name')
         if name:
@@ -410,8 +407,8 @@ class AccountApiV1(AccountMixin, RequestHandler):
         data['login'] = account.get('login', '-')
         data['modified'] = account['modified']
         view = self.db.view('log/account',
-                            startkey=[email, constants.CEILING],
-                            lastkey=[email],
+                            startkey=[account['email'], constants.CEILING],
+                            lastkey=[account['email']],
                             descending=True,
                             limit=1)
         try:
@@ -419,7 +416,7 @@ class AccountApiV1(AccountMixin, RequestHandler):
         except IndexError:
             data['latest_activity'] = None
         data['orders'] = dict(
-            count=self.get_account_order_count(email),
+            count=self.get_account_order_count(account['email']),
             display=dict(
                 href=self.reverse_url('account_orders', account['email'])),
             api=dict(
@@ -448,7 +445,6 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         if self.is_staff():
@@ -470,7 +466,6 @@ class AccountOrdersApiV1(AccountOrdersMixin,
     @tornado.web.authenticated
     def get(self, email):
         "JSON output."
-        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         # Get names and forms lookups
@@ -487,8 +482,8 @@ class AccountOrdersApiV1(AccountOrdersMixin,
         view = self.db.view('order/owner',
                             reduce=False,
                             include_docs=True,
-                            startkey=[email],
-                            endkey=[email, constants.CEILING])
+                            startkey=[account['email']],
+                            endkey=[account['email'], constants.CEILING])
         data['items'] = [self.get_json(r.doc, names=names, forms=forms)
                          for r in view]
         self.write(data)
@@ -499,7 +494,6 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         if self.is_staff():
@@ -521,11 +515,10 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
     @tornado.web.authenticated
     def get(self, email):
         "JSON output."
-        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         orders = []
-        for colleague in self.get_account_colleagues(email):
+        for colleague in self.get_account_colleagues(account['email']):
             view = self.db.view('order/owner',
                                 reduce=False,
                                 include_docs=True,
@@ -553,7 +546,6 @@ class AccountLogs(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         self.render('logs.html',
@@ -567,7 +559,6 @@ class AccountMessages(AccountMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, email):
         "Show list of messages sent to the account given by email address."
-        email = email.lower().strip()
         account = self.get_account(email)
         self.check_readable(account)
         view = self.db.view('message/recipient',
@@ -594,14 +585,12 @@ class AccountEdit(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        email = email.lower().strip()
         account = self.get_account(email)
         self.check_editable(account)
         self.render('account_edit.html', account=account)
 
     @tornado.web.authenticated
     def post(self, email):
-        email = email.lower().strip()
         account = self.get_account(email)
         self.check_editable(account)
         with AccountSaver(doc=account, rqh=self) as saver:
@@ -646,7 +635,7 @@ class AccountEdit(AccountMixin, RequestHandler):
             if utils.to_bool(self.get_argument('api_key', default=False)):
                 saver['api_key'] = utils.get_iuid()
             saver['update_info'] = False
-        self.see_other('account', email)
+        self.see_other('account', account['email'])
 
 
 class Login(RequestHandler):
@@ -851,7 +840,7 @@ class Register(RequestHandler):
                 if not saver['invoice_address'].get('address'):
                     saver['invoice_address'] = saver['address'].copy()
                 saver['phone'] = self.get_argument('phone', default=None)
-                saver['owner'] = email
+                saver['owner'] = saver['email']
                 saver['role'] = constants.USER
                 saver['status'] = constants.PENDING
                 saver.erase_password()
@@ -908,7 +897,7 @@ class AccountEnable(RequestHandler):
                     code=account['code'])
                 saver.set_template(template)
                 saver['recipients'] = [account['email']]
-        self.see_other('account', email)
+        self.see_other('account', account['email'])
 
 
 class AccountDisable(RequestHandler):
@@ -921,7 +910,7 @@ class AccountDisable(RequestHandler):
         with AccountSaver(account, rqh=self) as saver:
             saver['status'] = constants.DISABLED
             saver.erase_password()
-        self.see_other('account', email)
+        self.see_other('account', account['email'])
 
 
 class AccountUpdateInfo(RequestHandler):
@@ -934,4 +923,4 @@ class AccountUpdateInfo(RequestHandler):
         if not account.get('update_info'):
             with AccountSaver(account, rqh=self) as saver:
                 saver['update_info'] = True
-        self.see_other('account', email)
+        self.see_other('account', account['email'])
