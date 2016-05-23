@@ -528,10 +528,12 @@ class OrderCreate(RequestHandler):
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
             for target, source in settings['ORDER_AUTOPOPULATE'].iteritems():
                 if target not in fields: continue
-                value = self.current_user
-                for key in source.split(':'):
-                    value = value.get(key)
-                    if value is None: break
+                try:
+                    key1, key2 = source.split('.')
+                except ValueError:
+                    value = self.current_user.get(source)
+                else:
+                    value = self.current_user.get(key1, {}).get(key2)
                 saver['fields'][target] = value
             saver.check_fields_validity(fields)
             saver.set_identifier(form)

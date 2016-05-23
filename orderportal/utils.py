@@ -132,15 +132,6 @@ def load_settings(filepath=None, verbose=False):
     else:
         with open(filepath) as infile:
             settings['ORDER_MESSAGES'] = yaml.safe_load(infile)
-    # Read order autopopulate mapping
-    try:
-        filepath = settings['ORDER_AUTOPOPULATE_FILEPATH']
-        if not filepath: raise KeyError
-    except KeyError:
-        settings['ORDER_AUTOPOPULATE'] = dict()
-    else:
-        with open(filepath) as infile:
-            settings['ORDER_AUTOPOPULATE'] = yaml.safe_load(infile)
     # Read universities lookup
     try:
         filepath = settings['UNIVERSITIES_FILEPATH']
