@@ -180,6 +180,9 @@ class AccountsApiV1(_AccountsFilter):
             item['status'] = dict(
                 name=account['status'],
                 image=dict(href=self.static_url(account['status']+'.png')))
+            item['address'] = account.get('address') or {}
+            item['invoice_ref'] = account.get('invoice_ref')
+            item['invoice_address'] = account.get('invoice_address') or {}
             item['login'] = account.get('login', '-')
             item['modified'] = account['modified']
             item['orders'] = dict(
@@ -404,6 +407,9 @@ class AccountApiV1(AccountMixin, RequestHandler):
         data['role'] = account['role']
         data['gender'] = account.get('gender')
         data['status'] = account['status']
+        data['address'] = account.get('address') or {}
+        data['invoice_ref'] = account.get('invoice_ref')
+        data['invoice_address'] = account.get('invoice_address') or {}
         data['login'] = account.get('login', '-')
         data['modified'] = account['modified']
         view = self.db.view('log/account',
