@@ -132,7 +132,7 @@ def get_handlers():
         url(r'/admin/search_fields', SearchFields, name='search_fields'),
         url(r'/admin/global_modes', GlobalModes, name='global_modes'),
         url(r'/admin/statuses', Statuses, name='statuses'),
-        url(r'/admin/config', Config, name='config'),
+        url(r'/admin/settings', Settings, name='settings'),
         url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
             {'path': settings['SITE_DIR']}, name='site'),
         ])

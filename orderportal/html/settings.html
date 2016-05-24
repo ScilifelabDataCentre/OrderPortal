@@ -1,24 +1,25 @@
-{# Configuration display page. #}
+{# Settings display page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}Configuration{% end %}
-{% block body_title %}Configuration{% end %}
+{% block head_title %}Settings{% end %}
+{% block body_title %}Settings{% end %}
 
 {% block main_content %}
 
 <div class="row">
   <div class="col-md-8 well">
     <p>
-      The values of various configuration settings. Mainly for
-      debugging purposes when setting up a portal. The default values
-      are set in the <code>__init__.py</code> file, and then changed
-      by the site-dependent YAML configuration file.
+      The values of various system settings. This helps keeping track
+      of which files are actually used during server startup. The
+      default values are set in the <code>__init__.py</code> file which
+      should not be changed.
     </p>
     <p>
-      To change any value here, one needs to modify the configuration
-      and restart the OrderPortal server. Only the IT responsible for
-      the system is allowed to do this.
+      The proper way of changing the settings is by specifying the new
+      values in the site-specific YAML settings file. The OrderPortal
+      server must be restarted for the changes to take effect.  Only
+      the IT responsible for the server system is allowed to do this.
     </p>
   </div>
 </div>

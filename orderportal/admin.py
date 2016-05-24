@@ -53,8 +53,8 @@ class Statuses(RequestHandler):
         self.render('statuses.html')
 
 
-class Config(RequestHandler):
-    "Page displaying configuration info."
+class Settings(RequestHandler):
+    "Page displaying settings info."
 
     @tornado.web.authenticated
     def get(self):
@@ -74,7 +74,7 @@ class Config(RequestHandler):
                   ('country codes', settings.get('COUNTRY_CODES_FILEPATH')),
                   ('subject terms', settings.get('SUBJECT_TERMS_FILEPATH')),
                   ]
-        self.render('config.html', params=params)
+        self.render('settings.html', params=params)
 
 
 class GlobalModes(RequestHandler):
