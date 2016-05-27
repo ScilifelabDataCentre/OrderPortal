@@ -665,6 +665,7 @@ class Login(RequestHandler):
             if not utils.hashed_password(password) == account.get('password'):
                 raise ValueError
         except (tornado.web.HTTPError, ValueError):
+            logging.info("failed login for '%s'", email)
             self.see_other('home', error='No such account or invalid password.')
             return
         try:

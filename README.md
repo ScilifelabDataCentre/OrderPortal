@@ -11,7 +11,10 @@ samples provided by external researchers. The facility processes
 the samples according to the order from the scientist.
 
 The OrderPortal system has been designed to work for other types of
-facilities. There is nothing in the system hard-wired for sequencing.
+facilities. The system is not hard-wired for DNA sequencing. On the
+contrary, considerable effort has gone into making sure the design is
+as general as possible. This means that configuration of a number of
+aspects of the system is required for a new installation.
 
 Features
 --------
