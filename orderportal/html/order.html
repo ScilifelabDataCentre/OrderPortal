@@ -114,15 +114,7 @@
       {% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
       <tr>
 	<th>Identifier</th>
-	<td colspan="2">
-	  {% if order.get('identifier') %}
-	  <a href="{{ reverse_url('order_id', order['identifier']) }}">
-	    {{ order['identifier'] }}
-	  </a>
-	  {% else %}
-	  -
-	  {% end %}
-	</td>
+	<td colspan="2">{{ order.get('identifier') or '-' }}</td>
       </tr>
       {% end %} {# if settings.get('ORDER_IDENTIFIER_FORMAT') #}
 

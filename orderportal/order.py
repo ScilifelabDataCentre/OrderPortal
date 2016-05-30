@@ -416,6 +416,9 @@ class Order(OrderMixin, RequestHandler):
             if not match: raise KeyError
         except KeyError:
             order = self.get_entity(iuid, doctype=constants.ORDER)
+            if order.get('identifier'):
+                self.see_other('order', order.get('identifier'))
+                return
         else:
             order = self.get_entity_view('order/identifier', match.group())
         try:
