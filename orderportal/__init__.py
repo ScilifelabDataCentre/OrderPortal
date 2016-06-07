@@ -4,7 +4,7 @@ to a facility from its users.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '2.3'
+__version__ = '2.4'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -24,6 +24,7 @@ settings = dict(
     DATATABLES_JS_URL='https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js',
     DATATABLES_BOOTSTRAP_JS_URL='https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js',
     LOGIN_MAX_AGE_DAYS=14,
+    LOGIN_MAX_FAILURES=6,
     ORDERS_DISPLAY_MOST_RECENT=800,
     INITIAL_TEXTS_FILEPATH='{SITE_DIR}/initial_texts.yaml',
     ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',

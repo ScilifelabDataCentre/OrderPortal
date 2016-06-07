@@ -653,20 +653,44 @@ class Login(RequestHandler):
 
     def post(self):
         """Login to a account account. Set a secure cookie.
-        Forward to account edit page if first login."""
+        Forward to account edit page if first login.
+        Log failed login attempt. Disable account if too many recent.
+        """
         try:
             email = self.get_argument('email')
             password = self.get_argument('password')
         except tornado.web.MissingArgumentError:
             self.see_other('home', error='Missing email or password argument.')
             return
+        msg = 'No such account or invalid password.'
         try:
             account = self.get_account(email)
-            if not utils.hashed_password(password) == account.get('password'):
-                raise ValueError
-        except (tornado.web.HTTPError, ValueError):
-            logging.info("failed login for '%s'", email)
-            self.see_other('home', error='No such account or invalid password.')
+        except tornado.web.HTTPError:
+            self.see_other('home', error=msg)
+            return
+        if not utils.hashed_password(password) == account.get('password'):
+            utils.log(self.db, self, account,
+                      changed=dict(login_failure=account['email']))
+            view = self.db.view('log/login_failure',
+                                startkey=[account['_id'], utils.timestamp(-1)],
+                                endkey=[account['_id'], utils.timestamp()])
+            if len(list(view)) > settings['LOGIN_MAX_FAILURES']:
+                with AccountSaver(doc=account, rqh=self) as saver:
+                    saver['status'] = constants.DISABLED
+                    saver.erase_password()
+                msg = 'Too many failed login attempts: Your account has been' \
+                      ' disabled. You must contact the site administrators.'
+                # Prepare message sent by cron job script 'script/messenger.py'
+                try:
+                    template = settings['ACCOUNT_MESSAGES']['disabled']
+                except KeyError:
+                    pass
+                else:
+                    with MessageSaver(rqh=self) as saver:
+                        saver.set_params()
+                        saver.set_template(template)
+                        saver['recipients'] = [account['email']]
+            self.see_other('home', error=msg)
             return
         try:
             if not account.get('status') == constants.ENABLED:
@@ -728,7 +752,7 @@ class Reset(RequestHandler):
                 return
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver.reset_password()
-            # Prepare message to send later
+            # Prepare message sent by cron job script 'script/messenger.py'
             try:
                 template = settings['ACCOUNT_MESSAGES']['reset']
             except KeyError:
@@ -772,7 +796,7 @@ class Password(RequestHandler):
             return
         password = self.get_argument('password')
         if len(password) < constants.MIN_PASSWORD_LENGTH:
-            mgs = "password shorter than {0} characters".format(
+            msg = "password shorter than {0} characters".format(
                 constants.MIN_PASSWORD_LENGTH)
             raise tornado.web.HTTPError(400, reason=msg)
         if password != self.get_argument('confirm_password'):
@@ -855,7 +879,7 @@ class Register(RequestHandler):
         except ValueError, msg:
             self.see_other('home', error=str(msg))
             return
-        # Prepare message to send later
+        # Prepare message sent by cron job script 'script/messenger.py'
         try:
             template = settings['ACCOUNT_MESSAGES']['pending']
         except KeyError:
@@ -888,7 +912,7 @@ class AccountEnable(RequestHandler):
         with AccountSaver(account, rqh=self) as saver:
             saver['status'] = constants.ENABLED
             saver.reset_password()
-        # Prepare message to send later
+        # Prepare message sent by cron job script 'script/messenger.py'
         try:
             template = settings['ACCOUNT_MESSAGES']['enabled']
         except KeyError:

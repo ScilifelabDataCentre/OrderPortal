@@ -309,7 +309,7 @@
 	    <label for="news_text_edit_{{ pos }}">Text</label>
 	    <textarea class="form-control" rows="4"
 		      name="text" id="news_text_edit_{{ pos }}"
-		      >{% raw news.get('text') or '' %}</textarea>
+		      >{{ news.get('text') or '' }}</textarea>
 	    <span class="help-block">
 	      Text for the news item, which will be formatted using
 	      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>.
@@ -406,7 +406,7 @@
 		       for="event_text_edit_{{ pos }}">Text</label>
 		<textarea class="form-control" rows="4"
 			  name="text" id="event_text_edit_{{ pos }}"
-			  >{% raw event.get('text') or '' %}</textarea>
+			  >{{ event.get('text') or '' }}</textarea>
 	      </div>
 	    </div>
 	    <span class="help-block">

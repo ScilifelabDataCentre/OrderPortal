@@ -4,6 +4,7 @@ from __future__ import print_function, absolute_import
 
 import markdown
 import tornado.web
+from tornado.escape import xhtml_escape as escape
 
 from . import constants
 from . import settings
@@ -96,7 +97,9 @@ class Address(tornado.web.UIModule):
 class Markdown(tornado.web.UIModule):
     "Process the text as Markdown."
 
-    def render(self, text):
+    def render(self, text, safe=False):
+        if not safe:
+            text = escape(text or '')
         return markdown.markdown(text or '', output_format='html5')
 
 
