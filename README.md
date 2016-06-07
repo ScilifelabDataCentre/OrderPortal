@@ -16,6 +16,9 @@ contrary, considerable effort has gone into making sure the design is
 as general as possible. This means that configuration of a number of
 aspects of the system is required for a new installation.
 
+__Note__: A few of the features described in this document have not
+yet been implemented.
+
 Features
 --------
 
@@ -48,7 +51,7 @@ small-ish number of order input forms. Each form contains data fields
 that can be hierarchically organized.
 
 The system can be used for several facilities within the same
-organisation by running several completely separate instances of it.
+organisation by running several independent instances of it.
 
 A user account is defined within each OrderPortal instance separately.
 We decided against a design based on a single central user account
@@ -85,7 +88,7 @@ Simple info page facility
 -------------------------
 
 There is a very simple information page facility in the system. This
-is not nearly a general wiki, so it can be used only for basic needs.
+is not by far a full-fledged wiki, so it can be used only for basic needs.
 All admins in the system can edit these pages via the web interface.
 
 Facility
@@ -255,9 +258,11 @@ systems to access and/or modify various data entities in the portal.
 Publications
 ------------
 
-There is a plan to include a feature to allow facility coordinators
-and/or users to curate a list of publication references associated
-with the user, and possibly the order.
+_Future feature_
+
+Facility coordinators and/or users should be allowed to to curate a
+list of publication references associated with the user, and possibly
+with the order.
 
 This will be of help when preparing reports for the grant review of a
 facility.
@@ -275,11 +280,12 @@ Attached files
 --------------
 
 Files such as agreements, specifications, images, etc, can be attached
-to an order or to a sample. Both users and facility staff should be
-allowed to do this.
+to an order or to a sample.
 
 Links
 -----
+
+_Future feature_
 
 Links to other web pages can be set for orders and samples, allowing
 users to navigate to other relevant information systems. Both facility
@@ -287,6 +293,8 @@ staff and users should be able to set this.
 
 Status
 ------
+
+_Future feature_
 
 The system should allow display of a status page, in which the current
 status of the project corresponding to the order is provided to the
