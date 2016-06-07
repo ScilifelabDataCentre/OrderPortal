@@ -331,7 +331,7 @@
 	    <textarea class="form-control"
 		      name="{{ field['identifier'] }}/descr"
 		      id="{{ field['identifier'] }}/descr"
-		      >{% raw field.get('description') or '' %}</textarea>
+		      >{{ field.get('description') or '' }}</textarea>
 	    <span class="help-block">
 	      Description to display in the order to help the user
 	      fill in the field correctly, using

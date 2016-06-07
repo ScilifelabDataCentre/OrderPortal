@@ -220,7 +220,9 @@ class OrderMixin(object):
         return form['status'] in (constants.ENABLED, constants.TESTING)
 
     def prepare_message(self, order):
-        "Prepare a message to send after status change."
+        """Prepare a message to send after status change.
+        It is sent later by cron job script 'script/messenger.py'
+        """
         try:
             template = settings['ORDER_MESSAGES'][order['status']]
         except KeyError:

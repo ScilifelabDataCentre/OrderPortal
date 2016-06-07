@@ -53,3 +53,14 @@ reset:
 
     Yours sincerely,
     The {site} administrators.
+
+disabled:
+  subject: "Your account in the {site} has been disabled."
+  text: |
+    Your account has been disabled by the administrator.
+    This may be due to too many recent failed login attempts.
+
+    To resolve this, please use {support}
+
+    Yours sincerely,
+    The {site} administrators.
