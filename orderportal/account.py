@@ -726,7 +726,7 @@ class Logout(RequestHandler):
     @tornado.web.authenticated
     def post(self):
         self.set_secure_cookie(constants.USER_COOKIE, '')
-        self.redirect(self.reverse_url('home'))
+        self.see_other('home')
 
 
 class Reset(RequestHandler):
@@ -770,11 +770,14 @@ class Reset(RequestHandler):
                         code=account['code'])
                     saver.set_template(template)
                     saver['recipients'] = [account['email']]
-            if self.current_user and \
-               self.current_user['email'] == account['email']:
-                self.see_other('password', email=account['email'])
-            else:
-                self.see_other('home')
+            if self.current_user:
+                if not self.is_admin():
+                    # Log out the user
+                    self.set_secure_cookie(constants.USER_COOKIE, '')
+            self.see_other('home',
+                           message="An email has been sent containing"
+                           " a reset code. Please wait a couple of"
+                           " minutes for it and use the link in it.")
 
 
 class Password(RequestHandler):
