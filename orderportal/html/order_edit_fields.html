@@ -127,11 +127,20 @@
       {% else %}
       <option value="">[none]</option>
       {% end %}
+      {% set in_optgroup = False %}
       {% for v in field['select'] %}
       {% if v == value %}
       <option selected>{{ v }}</option>
+      {% elif v.startswith('-') %}
+      {% if in_optgroup %}
+      </optgroup>
+      {% end %}
+      <optgroup label="{{ v.lstrip('-').lstrip() }}">
       {% else %}
       <option>{{ v }}</option>
+      {% end %}
+      {% if in_optgroup %}
+      </optgroup>
       {% end %}
       {% end %}
     </select>
