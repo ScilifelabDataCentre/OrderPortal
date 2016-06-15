@@ -45,7 +45,7 @@ class GroupMixin(object):
         if self.is_owner(group): return
         if self.current_user['email'] in group['members']: return
         if self.is_staff(): return
-        raise tornado.web.HTTPError(403, reason='you may not read the group')
+        raise ValueError('you may not read the group')
 
     def is_editable(self, group):
         "Is the group editable by the current user?"
@@ -56,7 +56,7 @@ class GroupMixin(object):
     def check_editable(self, group):
         "Check if current user may edit the group."
         if not self.is_editable(group):
-            raise tornado.web.HTTPError(403,reason='you may not edit the group')
+            raise ValueError('you may not edit the group')
 
 
 class Group(GroupMixin, RequestHandler):
@@ -65,7 +65,11 @@ class Group(GroupMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         group = self.get_entity(iuid, doctype=constants.GROUP)
-        self.check_readable(group)
+        try:
+            self.check_readable(group)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         self.render('group.html',
                     group=group,
                     is_editable=self.is_editable(group))
@@ -104,7 +108,7 @@ class GroupCreate(RequestHandler):
             for email in value.split():
                 try:
                     account = self.get_account(email)
-                except tornado.web.HTTPError:
+                except ValueError:
                     pass
                 else:
                     invited.add(account['email'])
@@ -140,7 +144,7 @@ class GroupEdit(GroupMixin, RequestHandler):
             for email in value.split():
                 try:
                     account = self.get_account(email)
-                except tornado.web.HTTPError:
+                except ValueError:
                     pass
                 else:
                     if account['email'] in old_members:
@@ -161,7 +165,11 @@ class GroupLogs(GroupMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         group = self.get_entity(iuid, doctype=constants.GROUP)
-        self.check_readable(group)
+        try:
+            self.check_readable(group)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         self.render('logs.html',
                     title="Logs for group '{0}'".format(group['name']),
                     entity=group,
@@ -179,7 +187,8 @@ class GroupAccept(RequestHandler):
             try:
                 invited.remove(self.current_user['email'])
             except KeyError:
-                raise tornado.web.HTTPError(403, reason='you are not invited')
+                self.see_other('account', self.current_user['email'],
+                               error='You are not invited.')
             members = set(group['members'])
             members.add(self.current_user['email'])
             saver['invited'] = sorted(invited)

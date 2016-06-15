@@ -234,13 +234,15 @@ class OrderMixin(object):
             template = settings['ORDER_MESSAGES'][order['status']]
         except KeyError:
             return
-        owner = self.get_account(order['owner'])
-        # Owner account may have disappeared; not very likely...
+        try:
+            owner = self.get_account(order['owner'])
+        except ValueError:
+            # Owner account may have been deleted.
+            owner = None
+            recipients = set()
         if owner and 'owner' in template['recipients']:
             recipients = set([owner['email']])
-        else:
-            recipients = set()
-        if 'group' in template['recipients']:
+        if owner and 'group' in template['recipients']:
             recipients.update([a['email']
                                for a in self.get_colleagues(owner['email'])])
         if 'admin' in template['recipients']:
@@ -602,7 +604,9 @@ class OrderEdit(OrderMixin, RequestHandler):
                 saver.update_fields(Fields(form))
             flag = self.get_argument('__save__', None)
             if flag == 'continue':
-                self.see_other('order_edit', order['_id'])
+                self.see_other('order_edit',
+                               order['_id'],
+                               message='Order saved.')
             elif flag == 'submit': # XXX Hard-wired, currently
                 targets = self.get_targets(order)
                 for target in targets:

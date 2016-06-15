@@ -26,7 +26,6 @@
 
 - identifier: rejected
   description: The order has been rejected by the facility.
-  edit: [user, admin]
   action: reject
 
 - identifier: processing

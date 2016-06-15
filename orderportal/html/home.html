@@ -68,7 +68,7 @@
 	    <input type="password" class="form-control" name="password">
 	  </div>
 	  <div class="form-group"> 
-	    <button type="submit" class="btn btn-default">
+	    <button type="submit" class="btn btn-info btn-block">
 	      <span class="glyphicon glyphicon-log-in"></span>
 	      Login
 	    </button>
@@ -80,8 +80,8 @@
       <div class="panel-body">
 	<div>
 	  {% if global_modes['allow_registration'] %}
-	  <a href="{{ reverse_url('register') }}"
-	     class="btn btn-success" role="button">
+	  <a href="{{ reverse_url('register') }}" role="button"
+	     class="btn btn-success btn-block">
 	    <span class="glyphicon glyphicon-user"></span>
 	    Register account
 	  </a>
@@ -94,14 +94,16 @@
 	</div>
 	<br>
 	<div>
-	  <a href="{{ reverse_url('reset') }}" role="button" class="btn btn-warning">
+	  <a href="{{ reverse_url('reset') }}" ole="button"
+	     class="btn btn-warning btn-block">
 	    <span class="glyphicon glyphicon-step-backward"></span>
 	    Reset password
 	  </a>
 	</div>
 	<br>
 	<div>
-	  <a href="{{ reverse_url('password') }}" role="button" class="btn btn-danger">
+	  <a href="{{ reverse_url('password') }}" role="button"
+	     class="btn btn-danger btn-block">
 	    <span class="glyphicon glyphicon-lock"></span>
 	    Set password
 	  </a>

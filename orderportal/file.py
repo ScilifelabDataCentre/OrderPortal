@@ -28,12 +28,13 @@ class FileSaver(saver.Saver):
         else:
             # Error if same name as file of another doc
             if doc['_id'] != self.doc.get('_id'):
-                raise tornado.web.HTTPError(400,
-                                            reason='file name already exists')
+                raise ValueError('file name already exists')
 
     def set_file(self, infile, name=None):
         self.file = infile
-        self['name'] = name or infile.filename
+        name = name or infile.filename
+        self.check_name(name)
+        self['name'] = name
         self['size'] = len(infile.body)
         self['content_type'] = infile.content_type or 'application/octet-stream'
 
@@ -136,13 +137,17 @@ class FileCreate(RequestHandler):
     @tornado.web.authenticated
     def post(self):
         self.check_admin()
-        with FileSaver(rqh=self) as saver:
-            try:
-                infile = self.request.files['file'][0]
-            except (KeyError, IndexError):
-                raise tornado.web.HTTPError(400, reason='no file uploaded')
-            saver.set_file(infile, self.get_argument('name', None))
-            saver['description'] = self.get_argument('description', None)
+        try:
+            with FileSaver(rqh=self) as saver:
+                try:
+                    infile = self.request.files['file'][0]
+                except (KeyError, IndexError):
+                    self.see_other('files', error='No file uploaded.')
+                    return
+                saver.set_file(infile, self.get_argument('name', None))
+                saver['description'] = self.get_argument('description', None)
+        except ValueError, msg:
+            self.see_other('files', error=str(msg))
         self.see_other('file_meta', saver['name'])
 
 

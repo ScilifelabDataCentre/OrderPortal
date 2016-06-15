@@ -81,13 +81,15 @@ class InfoCreate(RequestHandler):
         self.check_admin()
         name = self.get_argument('name')
         if not constants.NAME_RX.match(name):
-            raise tornado.web.HTTPError(400, reason='invalid info name')
+            self.see_other('info_create', error='invalid info name')
+            return
         try:
             self.get_entity_view('info/name', name)
         except tornado.web.HTTPError:
             pass
         else:
-            raise tornado.web.HTTPError(400, reason='named info already exists')
+            self.see_other('info_create', error='named info already exists')
+            return
         with InfoSaver(rqh=self) as saver:
             saver['name'] = name
             saver['title'] = self.get_argument('title', None)

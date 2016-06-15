@@ -27,7 +27,8 @@ class News(RequestHandler):
             return
         news = self.get_entity(iuid, constants.NEWS)
         if news is None:
-            raise tornado.web.HTTPError(404)
+            self.see_other('home', error='No such news item.')
+            return
         with NewsSaver(doc=news, rqh=self) as saver:
             saver['date'] = self.get_argument('date', None)
             saver['title'] = self.get_argument('title')
@@ -39,7 +40,8 @@ class News(RequestHandler):
         self.check_admin()
         news = self.get_entity(iuid, constants.NEWS)
         if news is None:
-            raise tornado.web.HTTPError(404)
+            self.see_other('home', error='No such news item.')
+            return
         self.db.delete(news)
         self.see_other('home')
 

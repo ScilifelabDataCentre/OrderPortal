@@ -26,7 +26,7 @@
     {% module xsrf_form_html() %}
     <button type="submit"
 	    title="Logout"
-	    class="btn btn-default">
+	    class="btn btn-default btn-block">
       <span class="glyphicon glyphicon-log-out"></span>
       Logout
     </button>
@@ -39,7 +39,7 @@
   <div>
     <a href="{{ reverse_url('account_edit', account['email']) }}"
        role="button"
-       class="btn btn-primary">
+       class="btn btn-primary btn-block">
       <span class="glyphicon glyphicon-edit"></span>
       Edit
     </a>
@@ -52,7 +52,7 @@
   <div>
     <a href="{{ reverse_url('group_create') }}"
        role="button"
-       class="btn btn-success">
+       class="btn btn-success btn-block">
       <span class="glyphicon glyphicon-plus"></span>
       Create group
     </a>
@@ -65,7 +65,7 @@
   <div>
     <a href="{{ reverse_url('reset', account=account['email']) }}"
        role="button"
-       class="btn btn-warning">
+       class="btn btn-warning btn-block">
       <span class="glyphicon glyphicon-step-backward"></span>
       Reset password
     </a>
@@ -81,7 +81,9 @@
 	method="POST">
     {% module xsrf_form_html() %}
     <div class="form-group">
-      <button type="submit" class="btn btn-warning" {{ account.get('update_info') and 'disabled' or ''}}>
+      <button type="submit"
+	      class="btn btn-warning btn-block"
+	      {{ account.get('update_info') and 'disabled' or ''}}>
 	<span class="glyphicon glyphicon-exclamation-sign"></span>
 	Request update
       </button>
@@ -96,7 +98,7 @@
 	method="POST">
     {% module xsrf_form_html() %}
     <div class="form-group">
-      <button type="submit" class="btn btn-success">
+      <button type="submit" class="btn btn-success btn-block">
 	<span class="glyphicon glyphicon-ok"></span>
 	Enable
       </button>
@@ -112,7 +114,7 @@
 	method="POST">
     {% module xsrf_form_html() %}
     <div class="form-group">
-      <button type="submit" class="btn btn-danger"
+      <button type="submit" class="btn btn-danger btn-block"
 	      onclick="return confirm('Really disable?');">
 	<span class="glyphicon glyphicon-ban-circle"></span>
 	Disable
@@ -130,7 +132,7 @@
     {% module xsrf_form_html() %}
     <div class="form-group">
       <input type="hidden" name="_http_method" value="delete">
-      <button type="submit" class="btn btn-danger"
+      <button type="submit" class="btn btn-danger btn-block"
 	      onclick="return confirm('Cannot be undone! Really delete?');">
 	<span class="glyphicon glyphicon-trash"></span>
 	Delete
