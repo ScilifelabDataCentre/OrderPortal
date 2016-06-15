@@ -24,8 +24,8 @@ class OrderSaver(saver.Saver):
 
     def set_identifier(self, form):
         """Set the order identifier if format defined.
-        Only if form is enabled; not when testing."""
-        if form['status'] != constants.ENABLED: return
+        Allow also for disabled, since admin may clone such orders."""
+        if form['status'] not in (constants.ENABLED, constants.DISABLED): return
         try:
             fmt = settings['ORDER_IDENTIFIER_FORMAT']
         except KeyError:    # No identifier; sequential counter not used
