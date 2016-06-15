@@ -827,7 +827,6 @@ class Password(RequestHandler):
     def post(self):
         try:
             account = self.get_account(self.get_argument('email', ''))
-            self.check_readable(account)
         except ValueError, msg:
             self.see_other('home', error=str(msg))
             return
