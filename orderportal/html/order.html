@@ -21,7 +21,7 @@
   <form action="{{ reverse_url('order_edit', order['_id']) }}"
 	role="form"
 	method="GET">
-    <button type="submit" class="btn btn-lg btn-primary">
+    <button type="submit" class="btn btn-lg btn-primary btn-block">
       <span class="glyphicon glyphicon-edit"></span>
       Edit
     </button>
@@ -33,7 +33,7 @@
 	method="POST">
     {% module xsrf_form_html() %}
     <input type="hidden" name="_http_method" value="delete">
-    <button type="submit" class="btn btn-danger"
+    <button type="submit" class="btn btn-danger btn-block"
 	    onclick="return confirm('Cannot be undone! Really delete?');">
       <span class="glyphicon glyphicon-trash"></span>
       Delete
@@ -54,7 +54,7 @@
 	role="form"
 	method="POST">
     {% module xsrf_form_html() %}
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-primary btn-block">
       <span class="glyphicon glyphicon-plus-sign"></span>
       Clone
     </button>
@@ -85,7 +85,7 @@
 	method="POST">
     {% module xsrf_form_html() %}
     <p>
-      <button type="submit" class="btn btn-lg btn-success"
+      <button type="submit" class="btn btn-lg btn-success btn-block"
 	      {% if not is_admin %}
 	      onclick="return confirm('Cannot be undone! Really change status?');"
 	      {% end %}

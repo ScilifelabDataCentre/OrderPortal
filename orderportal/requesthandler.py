@@ -92,7 +92,7 @@ class RequestHandler(tornado.web.RequestHandler):
         if email:
             try:
                 account = self.get_account(email)
-            except tornado.web.HTTPError:
+            except ValueError:
                 return None
             # Check if login session is invalidated.
             if account.get('login') is None:
@@ -177,9 +177,13 @@ class RequestHandler(tornado.web.RequestHandler):
                                 include_docs=True,
                                 key=email.strip().lower()):
             for member in row.doc['members']:
-                account = self.get_account(member)
-                if account['status'] == constants.ENABLED:
-                    colleagues[account['email']] = account
+                try:
+                    account = self.get_account(member)
+                except ValueError:
+                    pass
+                else:
+                    if account['status'] == constants.ENABLED:
+                        colleagues[account['email']] = account
         return colleagues.values()
 
     def get_next_counter(self, doctype):
@@ -287,11 +291,12 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_account(self, email):
         """Get the account identified by the email address.
-        Raise HTTP 404 if no such account.
+        Raise ValueError if no such account.
         """
-        return self.get_entity_view('account/email',
-                                    email.strip().lower(),
-                                    reason='no such account')
+        try:
+            return self.get_entity_view('account/email', email.strip().lower())
+        except tornado.web.HTTPError:
+            raise ValueError('no such account')
 
     def get_account_order_count(self, email):
         "Get the number of orders for the account."

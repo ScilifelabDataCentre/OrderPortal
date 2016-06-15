@@ -38,20 +38,25 @@ class Event(RequestHandler):
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid)
             return
-        event = self.get_entity(iuid, constants.EVENT)
-        if event is None:
-            raise tornado.web.HTTPError(404)
+        try:
+            event = self.get_entity(iuid, constants.EVENT)
+        except tornado.web.HTTPError:
+            self.see_other('home', error='No such event.')
+            return
         with EventSaver(doc=event, rqh=self) as saver:
             saver['date'] = self.get_argument('date')
             saver['title'] = self.get_argument('title')
             saver['text'] = self.get_argument('text', None) or ''
-        self.see_other('home')
+            self.see_other('home')
 
     @tornado.web.authenticated
     def delete(self, iuid):
         self.check_admin()
         event = self.get_entity(iuid, constants.EVENT)
-        if event is None:
-            raise tornado.web.HTTPError(404)
+        try:
+            event = self.get_entity(iuid, constants.EVENT)
+        except tornado.web.HTTPError:
+            self.see_other('home', error='No such event.')
+            return
         self.db.delete(event)
         self.see_other('home')

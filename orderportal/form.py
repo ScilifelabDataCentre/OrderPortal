@@ -30,16 +30,16 @@ class FormSaver(saver.Saver):
     def add_field(self):
         identifier = self.rqh.get_argument('identifier')
         if not constants.ID_RX.match(identifier):
-            raise tornado.web.HTTPError(400, reason='invalid identifier')
+            raise ValueError('Invalid identifier.')
         if self.rqh.get_argument('type') not in constants.TYPES:
-            raise tornado.web.HTTPError(400, reason='invalid type')
+            raise ValueError('Invalid type.')
         if identifier in self.fields:
-            raise tornado.web.HTTPError(409, reason='identifier already exists')
+            raise ValueError('Identifier already exists.')
         self.changed['fields'] = self.fields.add(identifier, self.rqh)
 
     def update_field(self, identifier):
         if identifier not in self.fields:
-            raise tornado.web.HTTPError(404, reason='no such field')
+            raise ValueError('No such field.')
         self.changed['fields'] = self.fields.update(identifier, self.rqh)
 
     def clone_fields(self, form):
@@ -50,7 +50,7 @@ class FormSaver(saver.Saver):
 
     def delete_field(self, identifier):
         if identifier not in self.fields:
-            raise tornado.web.HTTPError(404, reason='no such field')
+            raise ValueError('No such field.')
         self.fields.delete(identifier)
         self.changed['fields'] = dict(identifier=identifier, action='deleted')
 
@@ -65,7 +65,7 @@ class FormMixin(object):
     def check_fields_editable(self, form):
         "Check if the form fields can be edited. Checks status only."
         if not self.are_fields_editable(form):
-            raise tornado.web.HTTPError(409, reason='form is not editable')
+            raise ValueError('Form is not editable.')
 
     def get_order_count(self, form):
         "Return number of orders for the form."
@@ -126,7 +126,9 @@ class Form(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         if not self.is_deletable(form):
-            raise tornado.web.HTTPError(400, reason='form cannot be deleted')
+            self.see_other('form', form['_id'],
+                           error='Form cannot be deleted.')
+            return
         self.delete_logs(form['_id'])
         self.db.delete(form)
         self.see_other('forms')
@@ -198,7 +200,8 @@ class FormCreate(RequestHandler):
         with FormSaver(rqh=self) as saver:
             saver['title'] = self.get_argument('title')
             if not saver['title']:
-                raise tornado.web.HTTPError(400, reason='no title given')
+                self.see_other('forms', error='No title given.')
+                return
             saver['description'] = self.get_argument('description', None)
             saver['version'] = self.get_argument('version', None)
             saver['status'] = constants.PENDING
@@ -253,7 +256,11 @@ class FormFieldCreate(FormMixin, RequestHandler):
     def get(self, iuid):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_fields_editable(form)
+        try:
+            self.check_fields_editable(form)
+        except ValueError, msg:
+            self.see_other('form', form['_id'], error=str(msg))
+            return
         # Get existing field identifiers
         identifiers = set()
         for row in self.db.view('form/enabled', include_docs=True):
@@ -279,10 +286,18 @@ class FormFieldCreate(FormMixin, RequestHandler):
     def post(self, iuid):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_fields_editable(form)
-        with FormSaver(doc=form, rqh=self) as saver:
-            saver.add_field()
-        self.see_other('form', form['_id'])
+        try:
+            self.check_fields_editable(form)
+        except ValueError, msg:
+            self.see_other('form', form['_id'], error=str(msg))
+            return
+        try:
+            with FormSaver(doc=form, rqh=self) as saver:
+                saver.add_field()
+        except ValueError, msg:
+            self.see_other('form', form['_id'], error=str(msg))
+        else:
+            self.see_other('form', form['_id'])
 
 
 class FormFieldEdit(FormMixin, RequestHandler):
@@ -292,12 +307,17 @@ class FormFieldEdit(FormMixin, RequestHandler):
     def get(self, iuid, identifier):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_fields_editable(form)
+        try:
+            self.check_fields_editable(form)
+        except ValueError, msg:
+            self.see_other('form', form['_id'], error=str(msg))
+            return
         fields = Fields(form)
         try:
             field = fields[identifier]
         except KeyError:
-            raise tornado.web.HTTPError(404, reason='no such field')
+            self.see_other('form', form['_id'], error='No such field.')
+            return
         self.render('field_edit.html',
                     form=form,
                     field=field,
@@ -311,19 +331,35 @@ class FormFieldEdit(FormMixin, RequestHandler):
             return
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_fields_editable(form)
-        with FormSaver(doc=form, rqh=self) as saver:
-            saver.update_field(identifier)
-        self.see_other('form', form['_id'])
+        try:
+            self.check_fields_editable(form)
+        except ValueError, msg:
+            self.see_other('form', form['_id'], error=str(msg))
+            return
+        try:
+            with FormSaver(doc=form, rqh=self) as saver:
+                saver.update_field(identifier)
+        except ValueError, msg:
+            self.see_other('form', form['_id'], error=str(msg))
+        else:
+            self.see_other('form', form['_id'])
 
     @tornado.web.authenticated
     def delete(self, iuid, identifier):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        self.check_fields_editable(form)
-        with FormSaver(doc=form, rqh=self) as saver:
-            saver.delete_field(identifier)
-        self.see_other('form', form['_id'])
+        try:
+            self.check_fields_editable(form)
+        except ValueError, msg:
+            self.see_other('form', form['_id'], error=str(msg))
+            return
+        try:
+            with FormSaver(doc=form, rqh=self) as saver:
+                saver.delete_field(identifier)
+        except ValueError, msg:
+            self.see_other('form', form['_id'], error=str(msg))
+        else:
+            self.see_other('form', form['_id'])
 
 
 class FormFieldEditDescr(FormMixin, RequestHandler):

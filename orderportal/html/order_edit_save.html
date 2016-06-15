@@ -1,37 +1,35 @@
 {# Order edit save buttons row. #}
 
 <div class="row">
-  <div class="col-md-2">
+  <div class="col-md-3">
     <div class="form-group">
       <label class="control-label"></label>
-      <button type="submit" class="btn btn-success"
+      <button type="submit" class="btn btn-success btn-block"
 	      name="__save__" value="continue">
 	<span class="glyphicon glyphicon-floppy-disk"></span>
 	Save
       </button>
     </div>
   </div>
-  <div class="col-md-2">
+  <div class="col-md-3">
     <div class="form-group">
       <label class="control-label"></label>
-      <button type="submit" class="btn btn-success">
+      <button type="submit" class="btn btn-success btn-block">
 	<span class="glyphicon glyphicon-floppy-save"></span>
 	Save and view
       </button>
     </div>
   </div>
-  <div class="col-md-2">
+  {% if 'submitted' in [s['identifier'] for s in settings['ORDER_STATUSES']] %}
+  <div class="col-md-3">
     <div class="form-group">
       <label class="control-label"></label>
-      <button type="submit" class="btn btn-success"
+      <button type="submit" class="btn btn-success btn-block"
 	      name="__save__" value="submit">
 	{% module Icon('submitted') %}
 	Save and submit
       </button>
     </div>
   </div>
-  <div class="col-md-6">
-    You may save incomplete orders. However, partially filled-in
-    orders cannot be submitted.
-  </div>
+  {% end %}
 </div>

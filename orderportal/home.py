@@ -154,11 +154,11 @@ class Entity(RequestHandler):
         elif doc[constants.DOCTYPE] == constants.ACCOUNT:
             self.see_other('account', doc['email'])
         else:
-            raise tornado.web.HTTPError(404)
+            self.see_other('home', error='No such entity found.')
 
 
 class NoSuchEntity(RequestHandler):
-    "Error message on home page, if in non-debug mode."
+    "Error message on home page."
 
     def get(self):
-        raise tornado.web.HTTPError(404)
+        self.see_other('home', error='No such entity found.')

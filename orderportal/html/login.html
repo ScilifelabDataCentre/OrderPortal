@@ -9,7 +9,7 @@
 
 {% if next %}
 <div class="row">
-  <div class="well well-sm col-md-5">
+  <div class="col-md-6 lead alert alert-danger">
     You need to login to access the requested page.
   </div>
   <div class="col-md-6">
@@ -42,7 +42,7 @@
       <input type="hidden" name="next" value="{{ next }}">
       {% end %} {# if next #}
       <div class="form-group"> 
-	<button type="submit" class="btn btn-primary">
+	<button type="submit" class="btn btn-info btn-block">
 	  <span class="glyphicon glyphicon-log-in"></span>
 	  Login
 	</button>

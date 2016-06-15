@@ -287,6 +287,13 @@ def absolute_path(filename):
     "Return the absolute path given the current directory."
     return os.path.join(constants.ROOT, filename)
 
+def check_password(password):
+    """Check that the password is long and complex enough.
+    Raise ValueError otherwise."""
+    if len(password) < constants.MIN_PASSWORD_LENGTH:
+        raise ValueError("password must be at least {0} characters long".
+                         format(constants.MIN_PASSWORD_LENGTH))
+
 def hashed_password(password):
     "Return the password in hashed form."
     sha256 = hashlib.sha256(settings['PASSWORD_SALT'])

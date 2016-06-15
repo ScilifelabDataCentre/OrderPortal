@@ -38,16 +38,11 @@ class AccountSaver(saver.Saver):
         self['password'] = None
 
     def set_password(self, new):
-        self.check_password(new)
+        utils.check_password(new)
         self['code'] = None
         # Bypass ordinary 'set'; avoid logging password, even if hashed.
         self.doc['password'] = utils.hashed_password(new)
         self.changed['password'] = '******'
-
-    def check_password(self, password):
-        if password is None: return
-        if len(password) < constants.MIN_PASSWORD_LENGTH:
-            raise tornado.web.HTTPError(400, reason='invalid password')
 
     def reset_password(self):
         "Invalidate any previous password and set activation code."
@@ -279,7 +274,7 @@ class AccountMixin(object):
     def check_readable(self, account):
         "Check that the account is readable by the current user."
         if self.is_readable(account): return
-        raise tornado.web.HTTPError(403, reason='you may not read the account')
+        raise ValueError('you may not read the account')
 
     def is_editable(self, account):
         "Is the account editable by the current user?"
@@ -290,7 +285,7 @@ class AccountMixin(object):
     def check_editable(self, account):
         "Check that the account is editable by the current user."
         if self.is_readable(account): return
-        raise tornado.web.HTTPError(403, reason='you may not edit the account')
+        raise ValueError('you may not edit the account')
 
 
 class Account(AccountMixin, RequestHandler):
@@ -298,8 +293,12 @@ class Account(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        account = self.get_account(email)
-        self.check_readable(account)
+        try:
+            account = self.get_account(email)
+            self.check_readable(account)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         account['order_count'] = self.get_account_order_count(account['email'])
         view = self.db.view('log/account',
                             startkey=[account['email'], constants.CEILING],
@@ -335,7 +334,9 @@ class Account(AccountMixin, RequestHandler):
         account = self.get_account(email)
         self.check_admin()
         if not self.is_deletable(account):
-            raise tornado.web.HTTPError(403, reason='account cannot be deleted')
+            self.see_other('account', account['email'],
+                           error='account cannot be deleted')
+            return
         # Delete the groups this account owns.
         view = self.db.view('group/owner',
                             include_docs=True,
@@ -383,8 +384,11 @@ class AccountApiV1(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        account = self.get_account(email)
-        self.check_readable(account)
+        try:
+            account = self.get_account(email)
+            self.check_readable(account)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
         data = OD()
         data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'account'
@@ -443,7 +447,7 @@ class AccountOrdersMixin(object):
     def check_readable(self, account):
         "Check that the account is readable by the current user."
         if self.is_readable(account): return
-        raise tornado.web.HTTPError(403, reason='you may not view these orders')
+        raise ValueError('you may not view these orders')
 
 
 class AccountOrders(AccountOrdersMixin, RequestHandler):
@@ -451,8 +455,12 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        account = self.get_account(email)
-        self.check_readable(account)
+        try:
+            account = self.get_account(email)
+            self.check_readable(account)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         if self.is_staff():
             order_column = 4
         else:
@@ -473,8 +481,11 @@ class AccountOrdersApiV1(AccountOrdersMixin,
     @tornado.web.authenticated
     def get(self, email):
         "JSON output."
-        account = self.get_account(email)
-        self.check_readable(account)
+        try:
+            account = self.get_account(email)
+            self.check_readable(account)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
         # Get names and forms lookups
         names = self.get_account_names()
         forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
@@ -501,8 +512,12 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        account = self.get_account(email)
-        self.check_readable(account)
+        try:
+            account = self.get_account(email)
+            self.check_readable(account)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         if self.is_staff():
             order_column = 5
         else:
@@ -522,8 +537,11 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
     @tornado.web.authenticated
     def get(self, email):
         "JSON output."
-        account = self.get_account(email)
-        self.check_readable(account)
+        try:
+            account = self.get_account(email)
+            self.check_readable(account)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
         orders = []
         for colleague in self.get_account_colleagues(account['email']):
             view = self.db.view('order/owner',
@@ -553,8 +571,12 @@ class AccountLogs(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        account = self.get_account(email)
-        self.check_readable(account)
+        try:
+            account = self.get_account(email)
+            self.check_readable(account)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         self.render('logs.html',
                     entity=account,
                     logs=self.get_logs(account['_id']))
@@ -566,8 +588,12 @@ class AccountMessages(AccountMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, email):
         "Show list of messages sent to the account given by email address."
-        account = self.get_account(email)
-        self.check_readable(account)
+        try:
+            account = self.get_account(email)
+            self.check_readable(account)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         view = self.db.view('message/recipient',
                             startkey=[account['email']],
                             endkey=[account['email'], constants.CEILING])
@@ -592,20 +618,30 @@ class AccountEdit(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
-        account = self.get_account(email)
-        self.check_editable(account)
+        try:
+            account = self.get_account(email)
+            self.check_editable(account)
+        except ValueError, msg:
+            self.see_other('account', account['email'], error=str(msg))
+            return
         self.render('account_edit.html', account=account)
 
     @tornado.web.authenticated
     def post(self, email):
-        account = self.get_account(email)
-        self.check_editable(account)
+        try:
+            account = self.get_account(email)
+            self.check_editable(account)
+        except ValueError, msg:
+            self.see_other('account', account['email'], error=str(msg))
+            return
         with AccountSaver(doc=account, rqh=self) as saver:
             # Only admin may change role of an account.
             if self.is_admin():
                 role = self.get_argument('role')
                 if role not in constants.ACCOUNT_ROLES:
-                    raise tornado.web.HTTPError(404, reason='invalid role')
+                    self.see_other('account_edit', account['email'],
+                                   error='invalid role')
+                    return
                 saver['role'] = role
             saver['first_name'] = self.get_argument('first_name')
             saver['last_name'] = self.get_argument('last_name')
@@ -665,8 +701,8 @@ class Login(RequestHandler):
         msg = 'No such account or invalid password.'
         try:
             account = self.get_account(email)
-        except tornado.web.HTTPError:
-            self.see_other('home', error=msg)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
             return
         if not utils.hashed_password(password) == account.get('password'):
             utils.log(self.db, self, account,
@@ -738,9 +774,8 @@ class Reset(RequestHandler):
     def post(self):
         try:
             account = self.get_account(self.get_argument('email'))
-        except (tornado.web.MissingArgumentError,
-                tornado.web.HTTPError):
-            self.see_other('home')
+        except (tornado.web.MissingArgumentError, ValueError):
+            self.see_other('home') # Silent error! Should not show existence.
         else:
             if account.get('status') == constants.PENDING:
                 self.see_other('home', error='Cannot reset password.'
@@ -790,18 +825,26 @@ class Password(RequestHandler):
                     code=self.get_argument('code', default=''))
 
     def post(self):
-        account = self.get_account(self.get_argument('email'))
+        try:
+            account = self.get_account(self.get_argument('email', ''))
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         if account.get('code') != self.get_argument('code'):
             self.see_other('home',
                            error=
 """Either the email address or the code for setting password was wrong.
  You should probably request a new code using the 'Reset password' button.""")
             return
-        password = self.get_argument('password')
-        if len(password) < constants.MIN_PASSWORD_LENGTH:
-            msg = "password shorter than {0} characters".format(
-                constants.MIN_PASSWORD_LENGTH)
-            raise tornado.web.HTTPError(400, reason=msg)
+        password = self.get_argument('password', '')
+        try:
+            utils.check_password(password)
+        except ValueError, msg:
+            self.see_other('password',
+                           email=self.get_argument('email') or '',
+                           code=self.get_argument('code') or '',
+                           error=str(msg))
+            return 
         if password != self.get_argument('confirm_password'):
             self.see_other('password',
                            email=self.get_argument('email') or '',
@@ -910,7 +953,11 @@ class AccountEnable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        account = self.get_account(email)
+        try:
+            account = self.get_account(email)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         self.check_admin()
         with AccountSaver(account, rqh=self) as saver:
             saver['status'] = constants.ENABLED
@@ -940,7 +987,11 @@ class AccountDisable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        account = self.get_account(email)
+        try:
+            account = self.get_account(email)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         self.check_admin()
         with AccountSaver(account, rqh=self) as saver:
             saver['status'] = constants.DISABLED
@@ -953,7 +1004,11 @@ class AccountUpdateInfo(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        account = self.get_account(email)
+        try:
+            account = self.get_account(email)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         self.check_admin()
         if not account.get('update_info'):
             with AccountSaver(account, rqh=self) as saver:
