@@ -214,10 +214,17 @@ class OrderMixin(object):
         return [settings['ORDER_STATUSES_LOOKUP'][t] for t in result]
 
     def is_clonable(self, order):
-        "Can the given order be cloned? Its form must be enabled."
+        """Can the given order be cloned? Its form must be enabled.
+        Special case: Admin can clone an order even if its form is disabled.
+        """
         if not self.global_modes['allow_order_creation']: return False
         form = self.get_entity(order['form'], doctype=constants.FORM)
-        return form['status'] in (constants.ENABLED, constants.TESTING)
+        if self.is_admin():
+            return form['status'] in (constants.ENABLED,
+                                      constants.TESTING,
+                                      constants.DISABLED)
+        else:
+            return form['status'] in (constants.ENABLED, constants.TESTING)
 
     def prepare_message(self, order):
         """Prepare a message to send after status change.

@@ -136,7 +136,11 @@ $(document).ready(function() {
          $(nTd).html("<a href='"+oData.links.display.href+"'>"+oData.name+"</a>");
        }
       },
-      {data: "title"},
+      {data: "title",
+       fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+         $(nTd).text(oData.title); // escapes dangerous chars
+       }
+      },
       {data: "form",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html("<a href='"+oData.form.links.display.href+"'>"+oData.form.title+"</a>");
