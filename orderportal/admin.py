@@ -3,6 +3,7 @@
 from __future__ import print_function, absolute_import
 
 import logging
+import re
 
 import tornado.web
 
@@ -59,8 +60,15 @@ class Settings(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
+        # Don't show the password
+        url = settings['DB_SERVER']
+        match = re.search(r':([^/].+)@', url)
+        if match:
+            url = list(url)
+            url[match.start[1]:match.end[1]] = '***'
+            url = ''.join(url)
         params = [('Settings', settings['SETTINGS_FILEPATH']),
-                  ('Database server', settings['DB_SERVER']),
+                  ('Database server', url),
                   ('Database', settings['DATABASE']),
                   ('Site name', settings['SITE_NAME']),
                   ('Site directory', settings['SITE_DIR']),
