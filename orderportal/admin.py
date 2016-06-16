@@ -65,7 +65,7 @@ class Settings(RequestHandler):
         match = re.search(r':([^/].+)@', url)
         if match:
             url = list(url)
-            url[match.start[1]:match.end[1]] = '***'
+            url[match.start(1):match.end(1)] = '***'
             url = ''.join(url)
         params = [('Settings', settings['SETTINGS_FILEPATH']),
                   ('Database server', url),
