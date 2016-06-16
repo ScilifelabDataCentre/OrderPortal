@@ -540,7 +540,7 @@ class OrderCreate(RequestHandler):
             saver['fields'] = dict([(f['identifier'], None) for f in fields])
             saver['history'] = {}
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
-            for target, source in settings['ORDER_AUTOPOPULATE'].iteritems():
+            for target, source in settings.get('ORDER_AUTOPOPULATE', {}).iteritems():
                 if target not in fields: continue
                 try:
                     key1, key2 = source.split('.')
