@@ -3,7 +3,11 @@
 from __future__ import print_function, absolute_import
 
 import re
-import os.path
+import os
+
+# Source code directory
+ROOT = os.path.dirname(__file__)
+os.chdir(ROOT)
 
 # Patterns
 ID_RX    = re.compile(r'^[a-z][_a-z0-9]*$', re.IGNORECASE)
@@ -114,6 +118,3 @@ CONTENT_TYPE_ICONS = {
     'text/plain': 'text.png',
     }
 DEFAULT_CONTENT_TYPE_ICON = 'binary.png'
-
-# Source code directory
-ROOT = os.path.dirname(__file__)
