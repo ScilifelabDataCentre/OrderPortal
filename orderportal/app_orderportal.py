@@ -1,3 +1,4 @@
+#!/usr/bin/python2
 "OrderPortal: Web application root."
 
 from __future__ import print_function, absolute_import

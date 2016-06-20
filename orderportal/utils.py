@@ -68,6 +68,12 @@ def load_settings(filepath=None, verbose=False):
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
     settings['SETTINGS_FILEPATH'] = filepath
+    # Set ROOT if defined
+    try:
+        constants.ROOT = settings['ROOT']
+        os.chdir(constants.ROOT)
+    except KeyError:
+        pass
     # Expand environment variables, ROOT and SITE_DIR, once and for all
     for key, value in settings.items():
         if isinstance(value, (str, unicode)):

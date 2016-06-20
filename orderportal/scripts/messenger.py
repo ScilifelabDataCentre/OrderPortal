@@ -1,3 +1,4 @@
+#!/usr/bin/python2
 """OrderPortal: Send unsent messages to users.
 
 The messages have been prepared previously. This script just sends

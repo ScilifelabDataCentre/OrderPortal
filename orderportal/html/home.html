@@ -118,10 +118,7 @@
 
     {% if global_modes['allow_order_creation'] %}
     <div class="panel-group">
-{#
-      {% set last = (len(forms) + 1) / 2 %}
-      {% for form in forms[:last] %}
-#}
+      {% if forms %}
       {% for form in forms %}
       <div class="panel panel-primary">
 	<div class="panel-heading">
@@ -143,6 +140,9 @@
 	</div>
       </div>
       {% end %} {# for form in forms[0::2] #}
+      {% else %}
+      <i>No order forms have been defined.</i>
+      {% end %}
     </div>
     {% else %}
     <div class="alert alert-danger">
