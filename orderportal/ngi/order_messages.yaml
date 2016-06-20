@@ -9,7 +9,7 @@
 # {url}        The URL for the order.
 
 submitted:
-  recipients: [admin, owner, group]
+  recipients: [owner, group]
   subject: "The order '{title}' ({identifier}) has been submitted by {owner} to {site}."
   text: |
     This is to confirm that the  order '{title}' ({identifier}) has been
