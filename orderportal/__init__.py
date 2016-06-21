@@ -4,7 +4,7 @@ to a facility from its users.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '2.4.3'
+__version__ = '2.4.4'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(

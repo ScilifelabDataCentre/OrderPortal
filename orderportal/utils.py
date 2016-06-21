@@ -34,6 +34,9 @@ def get_command_line_parser(usage='usage: %prog [options]', description=None):
     parser.add_option('-s', '--settings',
                       action='store', dest='settings', default=None,
                       metavar="FILE", help="filename of settings YAML file")
+    parser.add_option('-p', '--pidfile',
+                      action='store', dest='pidfile', default=None,
+                      metavar="FILE", help="filename of file containing PID")
     parser.add_option('-v', '--verbose',
                       action="store_true", dest="verbose", default=False,
                       help='verbose output of actions taken')
@@ -42,7 +45,7 @@ def get_command_line_parser(usage='usage: %prog [options]', description=None):
                       help='force action, rather than ask for confirmation')
     return parser
 
-def load_settings(filepath=None, verbose=False):
+def load_settings(filepath=None, verbose=False, pidfile=None):
     """Load and return the settings from the file path given by
     1) the argument to this procedure,
     2) the environment variable ORDERPORTAL_SETTINGS,
