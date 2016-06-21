@@ -5,11 +5,23 @@ from __future__ import print_function, absolute_import
 
 import logging
 import os
+import sys
 
 import tornado.web
 import tornado.ioloop
 
-import orderportal
+# Assist setup debugging
+try:
+    import orderportal
+except ImportError:
+    print('executable', sys.executable)
+    print('version', sys.version)
+    print('PYTHONPATH', os.getenv('PYTHONPATH'))
+    print('path:')
+    for p in sys.path:
+        print('  ', p)
+    raise
+
 from orderportal import constants
 from orderportal import settings
 from orderportal import utils
