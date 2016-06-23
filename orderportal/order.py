@@ -363,15 +363,25 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
             orders = self.filter_by_field(f['identifier'],
                                           self.params.get(f['identifier']),
                                           orders=orders)
+        try:
+            limit = settings['ORDERS_DISPLAY_MOST_RECENT']
+            if not isinstance(limit, int): raise ValueError
+        except (ValueError, KeyError):
+            limit = 0
         # No filter; all orders
         if orders is None:
-            view = self.db.view('order/modified',
-                                include_docs=True,
-                                descending=True)
+            if limit > 0 and self.params.get('recent', True):
+                view = self.db.view('order/modified',
+                                    include_docs=True,
+                                    descending=True,
+                                    limit=limit)
+            else:
+                view = self.db.view('order/modified',
+                                    include_docs=True,
+                                    descending=True)
             orders = [r.doc for r in view]
-        if settings['ORDERS_DISPLAY_MOST_RECENT'] > 0:
-            if self.params.get('recent', True):
-                orders = orders[:settings['ORDERS_DISPLAY_MOST_RECENT']]
+        elif limit > 0 and self.params.get('recent', True):
+            orders = orders[:limit]
         return orders
 
     def filter_by_status(self, status, orders=None):
