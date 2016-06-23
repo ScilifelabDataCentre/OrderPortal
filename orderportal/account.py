@@ -711,6 +711,8 @@ class Login(RequestHandler):
                                 startkey=[account['_id'], utils.timestamp(-1)],
                                 endkey=[account['_id'], utils.timestamp()])
             if len(list(view)) > settings['LOGIN_MAX_FAILURES']:
+                logging.warning("account %s has been disabled due to"
+                                " too many login failures", account['email'])
                 with AccountSaver(doc=account, rqh=self) as saver:
                     saver['status'] = constants.DISABLED
                     saver.erase_password()

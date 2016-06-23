@@ -10,20 +10,13 @@
 DIR=/home/genomics.www/OrderPortal
 EXE=${DIR}/orderportal/app_orderportal.py
 lockfile=/var/lock/subsys/orderportal_ngi
-
-# For SELinux we need to use 'runuser' not 'su'
-if [ -x /sbin/runuser ]
-then
-    SU=runuser
-else
-    SU=su
-fi
+pidfile=/var/run/orderportal_ngi.pid
 
 # Start the service OrderPortal NGI Sweden
 start() {
         echo -n $"Starting OrderPortal NGI Sweden server: "
-        export PYTHONPATH=${DIR}
-        $SU -l genomics.www -c "$EXE & > /dev/null 2>&1"
+	export PYTHONPATH="${DIR}:${PYTHONPATH}"
+        ${EXE} --pidfile ${pidfile} & > /dev/null 2>&1
         RETVAL=$?
         echo
         [ $RETVAL = 0 ] && touch ${lockfile}
@@ -33,10 +26,10 @@ start() {
 # Stop the service OrderPortal NGI Sweden
 stop() {
         echo -n $"Stopping OrderPortal NGI Sweden server: "
-        killproc $EXE
+        killproc -p ${pidfile} ${EXE}
         RETVAL=$?
         echo
-        [ $RETVAL = 0 ] && rm -f ${lockfile}
+        [ $RETVAL = 0 ] && rm -f ${lockfile} ${pidfile}
         return $RETVAL
 }
 ### main logic ###
@@ -48,7 +41,7 @@ case "$1" in
         stop
         ;;
   status)
-        status $EXE
+        status -p ${pidfile} $EXE
         ;;
   restart|reload|condrestart)
         stop
