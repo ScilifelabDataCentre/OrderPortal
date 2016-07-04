@@ -18,17 +18,27 @@ from .requesthandler import RequestHandler
 
 
 class Search(RequestHandler):
-    "Search. Currently only orders and staff."
+    "Search. Currently orders and users."
 
     # Keep this in sync with JS script 'designs/order/views/keyword.js'
     LINT = set(['an', 'to', 'in', 'on', 'of', 'and', 'the', 'was', 'not'])
 
     @tornado.web.authenticated
     def get(self):
-        self.check_admin()
         orig = self.get_argument('term', '')
         params = dict(term=orig)
         items = []
+        # Seach order tags; exact match
+        term = ''.join([c in ",;'" and ' ' or c for c in orig]).strip().lower()
+        parts = term.split()
+        view = self.db.view('order/tag')
+        id_sets = []
+        for part in parts:
+            id_sets.append(set([r.id for r in view[part]]))
+        if id_sets:
+            id_set = reduce(lambda i,j: i.union(j), id_sets)
+            items.extend([self.get_entity(id, doctype=constants.ORDER)
+                          for id in id_set])
         # Keep this in sync with JS script 'designs/order/views/keyword.js'
         term = ''.join([c in ":,;'" and ' ' or c for c in orig]).strip().lower()
         parts = [part for part in term.split()
@@ -43,40 +53,6 @@ class Search(RequestHandler):
             # All words must exist in title
             id_set = reduce(lambda i,j: i.intersection(j), id_sets)
             items.extend([self.get_entity(id, doctype=constants.ORDER)
-                          for id in id_set])
-        # Search account email
-        view = self.db.view('account/email')
-        id_sets = []
-        for part in parts:
-            part = part.lower()
-            id_sets.append(set([r.id for r in
-                                view[part : part+constants.CEILING]]))
-        # Only require one hit in email
-        if id_sets:
-            id_set = reduce(lambda i,j: i.union(j), id_sets)
-            items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
-                          for id in id_set])
-        # Search account last names
-        view = self.db.view('account/last_name')
-        id_sets = []
-        for part in parts:
-            id_sets.append(set([r.id for r in
-                                view[part : part+constants.CEILING]]))
-        # Only require one hit in last name
-        if id_sets:
-            id_set = reduce(lambda i,j: i.union(j), id_sets)
-            items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
-                          for id in id_set])
-        # Search account first names
-        view = self.db.view('account/first_name')
-        id_sets = []
-        for part in parts:
-            id_sets.append(set([r.id for r in
-                                view[part : part+constants.CEILING]]))
-        # Only require one hit in first name
-        if id_sets:
-            id_set = reduce(lambda i,j: i.union(j), id_sets)
-            items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
                           for id in id_set])
         # Search dynamically defined indexes for order fields
         try:
@@ -93,6 +69,46 @@ class Search(RequestHandler):
                 id_set = reduce(lambda i,j: i.intersection(j), id_sets)
                 items.extend([self.get_entity(id, doctype=constants.ORDER)
                               for id in id_set])
+        # Only staff may search account (as yet).
+        if self.is_staff():
+            # Search account email
+            view = self.db.view('account/email')
+            id_sets = []
+            for part in parts:
+                part = part.lower()
+                id_sets.append(set([r.id for r in
+                                    view[part : part+constants.CEILING]]))
+            # Only require one hit in email
+            if id_sets:
+                id_set = reduce(lambda i,j: i.union(j), id_sets)
+                items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
+                              for id in id_set])
+            # Search account last names
+            view = self.db.view('account/last_name')
+            id_sets = []
+            for part in parts:
+                id_sets.append(set([r.id for r in
+                                    view[part : part+constants.CEILING]]))
+            # Only require one hit in last name
+            if id_sets:
+                id_set = reduce(lambda i,j: i.union(j), id_sets)
+                items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
+                              for id in id_set])
+            # Search account first names
+            view = self.db.view('account/first_name')
+            id_sets = []
+            for part in parts:
+                id_sets.append(set([r.id for r in
+                                    view[part : part+constants.CEILING]]))
+            # Only require one hit in first name
+            if id_sets:
+                id_set = reduce(lambda i,j: i.union(j), id_sets)
+                items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
+                              for id in id_set])
+        # Remove all orders not readable by the user
+        else:
+            items = [i for i in items
+                     if self.is_owner(i) or self.is_colleague(i['owner'])]
         # All items contain 'modified'
         items.sort(lambda i,j: cmp(i['modified'], j['modified']), reverse=True)
         # Paging

@@ -56,6 +56,31 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
+	<label class="control-label" for="__tags__">Tags</label>
+	{% if is_staff %}
+	{% set tags = order.get('tags', []) %}
+	{% else %}
+	{% set tags = [t for t in order.get('tags', []) if not ':' in t] %}
+	{% end %}
+	<textarea class="form-control"
+		  name="__tags__" id="__tags__" rows="2"
+		  >{{ ', '.join(tags) }}</textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      Tags characterizing the order. Must be formatted as identifiers,
+      i.e. start with a letter, continue with letters, digits and/or
+      underscore; no blanks allowed.
+      {% if is_staff %}
+      Staff may use namespace prefixes, e.g. "project_id:P12345".
+      {% end %}
+      More than one tag is allowed using comma ',' as delimiter.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-9">
 	<label class="control-label" for="__owner__">Owner</label>
 	{% if is_admin %}
 	<input type="text" class="form-control"

@@ -145,7 +145,15 @@
 	  ({{ status['description'] }})
 	</td>
       </tr>
-
+      <tr>
+	<th>Tags</th>
+	<td>
+	  {% set tags = order.get('tags', []) %}
+	  {% for tag in tags %}
+	  <a href="{{ reverse_url('search', term=tag) }}">{{ tag }}</a>{{ tag != tags[-1] and ',' or '' }}
+	  {% end %}
+	</td>
+      </tr>
       <tr>
 	<th>History</th>
 	<td>
@@ -159,7 +167,6 @@
 	  </table>
 	</td>
       </tr>
-
       <tr>
 	<th>Modified</th>
 	<td>
@@ -169,7 +176,6 @@
 	  </a>
 	</td>
       </tr>
-
       <tr>
 	<th>Created</th>
 	<td class="localtime">{{ order['created'] }}</td>
@@ -178,7 +184,6 @@
 	<th>IUID</th>
 	<td>{{ order['_id'] }}</td>
       </tr>
-
       <tr>
 	<th>Files</th>
 	<td colspan="2">
