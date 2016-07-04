@@ -28,6 +28,17 @@ class Search(RequestHandler):
         orig = self.get_argument('term', '')
         params = dict(term=orig)
         items = []
+        # Search order identifier; exact match
+        term = orig.strip().upper()
+        parts = term.split()
+        view = self.db.view('order/identifier')
+        id_sets = []
+        for part in parts:
+            id_sets.append(set([r.id for r in view[part]]))
+        if id_sets:
+            id_set = reduce(lambda i,j: i.union(j), id_sets)
+            items.extend([self.get_entity(id, doctype=constants.ORDER)
+                          for id in id_set])
         # Seach order tags; exact match
         term = ''.join([c in ",;'" and ' ' or c for c in orig]).strip().lower()
         parts = term.split()
