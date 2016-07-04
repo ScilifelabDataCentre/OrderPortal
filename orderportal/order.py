@@ -600,6 +600,25 @@ class OrderEdit(OrderMixin, RequestHandler):
         try:
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver['title'] = self.get_argument('__title__', None) or '[no title]'
+                tags = []
+                for tag in self.get_argument('__tags__', '').split(','):
+                    tag = tag.strip()
+                    if tag: tags.append(tag)
+                # Allow staff to add prefixed tags
+                if self.is_staff():
+                    for pos, tag in enumerate(tags):
+                        parts = tag.split(':', 1)
+                        for part in parts:
+                            if not constants.ID_RX.match(part):
+                                tags[pos] = None
+                    tags = [t for t in tags if t]
+                # User may not use prefixes
+                else:
+                    tags = [t for t in tags if constants.ID_RX.match(t)]
+                    # Add back the previously defined prefixed tags
+                    tags.extend([t for t in order.get('tags', [])
+                                 if ':' in t])
+                saver['tags'] = sorted(set(tags))
                 try:
                     owner = self.get_argument('__owner__')
                     account = self.get_account(owner)
