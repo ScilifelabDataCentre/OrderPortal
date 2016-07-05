@@ -152,7 +152,6 @@ def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
             project['fields']['lims_id'] = cp['lims_id']
             changed = True
         # Map Clarity dates to history as best as possible.
-        # XXX This must be reviewed!
         submitted = cp.get('order received')
         if submitted and submitted != project['history'].get('submitted'):
             project['history']['submitted'] = submitted

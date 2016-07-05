@@ -37,6 +37,7 @@
 	    </tr>
 	    <tr>
 	      <td>From
+		{% set none = '[none]' %}
 		{% set first = True %}
 		{% for trans in settings['ORDER_TRANSITIONS'] %}
 		{% if status['identifier'] in trans['targets'] %}
@@ -45,15 +46,17 @@
 		{% else %}
 		,
 		{% end %}
+		{% set none = '' %}
 		<strong>{{ trans['source'] }}</strong>
 		(by {{', '.join(trans['permission']) }})
 		{% end %}
 		{% end %}
+		{{ none }}
 	      </td>
 	    </tr>
 	    <tr>
 	      <td>To
-		{% set none = 'none' %}
+		{% set none = '[none]' %}
 		{% set first = True %}
 		{% for trans in settings['ORDER_TRANSITIONS'] %}
 		{% if status['identifier'] == trans['source'] %}

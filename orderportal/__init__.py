@@ -4,7 +4,7 @@ to a facility from its users.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '2.4.5'
+__version__ = '2.4.6'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -30,6 +30,7 @@ settings = dict(
     ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',
     ORDER_STATUSES_FILEPATH='{SITE_DIR}/order_statuses.yaml',
     ORDER_TRANSITIONS_FILEPATH='{SITE_DIR}/order_transitions.yaml',
+    ORDERS_LIST_TAGS=True,
     ORDERS_LIST_FIELDS=[],
     ORDERS_LIST_STATUSES=[],
     ORDER_MESSAGES_FILEPATH='{SITE_DIR}/order_messages.yaml',

@@ -52,6 +52,9 @@
 	  <th>{% module Icon('form', label=True) %}</th>
 	  {% end %} {# if is_staff #}
 	  <th>{% module Icon('account', label=True, title='Owner') %}</th>
+	  {% if settings['ORDERS_LIST_TAGS'] %}
+	  <th width="5%">Tags</th>
+	  {% end %} {# if settings['ORDERS_LIST_TAGS'] #}
 	  {% for f in settings['ORDERS_LIST_FIELDS'] %}
 	  <th>{{ f['identifier'].capitalize().replace('_', ' ') }}</th>
 	  {% end %}
@@ -106,18 +109,25 @@ $(document).ready(function() {
          $(nTd).text(oData.title); // escapes dangerous chars
        }
       },
-{% if is_staff %}
+      {% if is_staff %}
       {data: "form",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html("<a href='"+oData.form.links.display.href+"'>"+oData.form.title+"</a>");
        }
       },
-{% end %} {# if is_staff #}
+      {% end %} {# if is_staff #}
       {data: "owner",
        fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
          $(nTd).html("<a href='"+oData.owner.links.display.href+"'>"+oData.owner.name+"</a>");
        }
       },
+      {% if settings['ORDERS_LIST_TAGS'] %}
+      {data: "tags",
+       fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+         $(nTd).text(oData.tags.join(", "));
+       }
+      },
+      {% end %} {# if settings['ORDERS_LIST_TAGS'] #}
       {% for f in settings['ORDERS_LIST_FIELDS'] %}
         { data: "fields.{{ f['identifier'] }}"},
       {% end %}

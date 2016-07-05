@@ -320,6 +320,7 @@ class OrderApiV1Mixin:
                        display=dict(
                     href=self.reverse_url('account', order['owner']))))
         item['fields'] = {}
+        item['tags'] = order.get('tags', [])
         item['status'] = dict(
             name=order['status'],
             display=dict(
