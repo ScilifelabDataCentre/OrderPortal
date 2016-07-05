@@ -277,4 +277,5 @@ if __name__ == '__main__':
         process_project(db, project, orders_lookup,
                         verbose=options.verbose,
                         dryrun=options.dryrun)
+    regenerate_view(db, 'order/status')
     regenerate_view(db, 'order/tag')
