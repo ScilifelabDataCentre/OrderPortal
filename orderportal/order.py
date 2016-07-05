@@ -252,7 +252,8 @@ class OrderMixin(object):
                 owner=order['owner'],
                 title=order['title'],
                 identifier=order.get('identifier') or order['_id'],
-                url=self.order_reverse_url(order))
+                url=self.order_reverse_url(order),
+                tags=', '.join(order.get('tags', [])))
             saver.set_template(template)
             saver['recipients'] = list(recipients)
 
