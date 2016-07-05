@@ -7,6 +7,7 @@
 # {identifier} Order identifier.
 # {owner}      The email of the order owner (=author).
 # {url}        The URL for the order.
+# {tags}       The tags for the order; Project_name, Project_ID, and similar.
 
 submitted:
   recipients: [admin, owner, group]
