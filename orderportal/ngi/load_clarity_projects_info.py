@@ -1,5 +1,6 @@
-"""Load status, Project_ID and Project_name to orders from
-the corresponding projects in Clarity LIMS.
+"""Load information from projects in Clarity LIMS to their corresponding orders.
+Relies on the order id being present in the LIMS as a UDF called "Portal ID".
+Sets Project_ID (as tag), Project_name (as tag), status, status history.
 
 This is specific to the Clarity LIMS configuration for NGI Stockholm,
 so it will at the very least have to be modified for your setup.
@@ -8,10 +9,12 @@ However, it might prove useful as a starting point.
 
 from __future__ import print_function, absolute_import
 
+import copy
 import sys
 import urlparse
 from xml.etree import ElementTree
 
+# Requires these third-party Python packages
 import requests
 import yaml
 
@@ -50,7 +53,8 @@ class Clarity(object):
 
     def __init__(self, verbose=False):
         self.verbose = verbose
-        clarity_settings = settings.get('CLARITY_LIMS')
+        # Will crash if not set; that is appropriate.
+        clarity_settings = settings['CLARITY_LIMS']
         self.session = requests.Session()
         self.session.auth = (clarity_settings['USERNAME'],
                              clarity_settings['PASSWORD'])
@@ -93,7 +97,9 @@ class Clarity(object):
         return result
 
     def fetch_project_info(self, record):
-        "Get information for the project and add to the record."
+        """Get information for the project and add to the record.
+        Most of this information depends on the specific configuration
+        of the LIMS instance."""
         if self.verbose:
             print('getting', record['uri'])
         response = self.session.get(record['uri'])
@@ -150,12 +156,13 @@ def get_orders(db, statuses=[]):
         result[identifier] = doc
     return result
 
-def process_project(db, project, orders_lookup, verbose=False):
+def process_project(db, project, orders_lookup, verbose=False, dryrun=False):
     """Process the Clarity project:
     1) Find corresponding order.
     2) Set the tags, if not done.
-    3) Set the status.
-    4) Set the history.
+    3) Set the status history.
+    4) Set the current status.
+    XXX Avoid status 'aborted' until sorted out issue with its logic.
     """
     try:
         portal_id = project['portal_id']
@@ -164,17 +171,82 @@ def process_project(db, project, orders_lookup, verbose=False):
     try:
         order = orders_lookup[portal_id]
     except KeyError:
-        print('Warning: could not find order', portal_id)
+        if verbose: print('Warning: could not find order', portal_id)
         return
-    if verbose:
-        print(portal_id, project['lims_id'], project['project_name'])
+    changed = False
+
     old_tags = set(order.get('tags', []))
-    new_tags = old_tags.union(["Project_ID:%s" % project['lims_id'],
-                               "Project_name:%s" % project['project_name']])
-    if old_tags != new_tags:
-        with OrderSaver(doc=order, db=db) as saver:
-            saver['tags'] = sorted(new_tags)
-        print('Updated tags for', portal_id)
+    tags = old_tags.union(["Project_ID:%s" % project['lims_id'],
+                           "Project_name:%s" % project['project_name']])
+    changed = old_tags != tags
+    if changed and verbose:
+        print('tags', tags, old_tags)
+
+    current = None
+    processing = [project.get('samples received'),
+                  project.get('sample information received'),
+                  project.get('queued')]
+    processing = [p for p in processing if p is not None]
+    if processing:
+        processing = reduce(min, processing)
+        if processing:
+            current = 'processing'
+            if processing != order['history'].get('processing'):
+                changed = True
+                if verbose: print('processing', processing)
+            else:
+                processing = False
+
+    closed = [project.get('close-date'),
+              project.get('all raw data delivered'),
+              project.get('best practice analysis completed')]
+    closed = [c for c in closed if c is not None]
+    if closed:
+        closed = reduce(min, closed)
+        if closed:
+            current = 'closed'
+            if closed != order['history'].get('closed'):
+                changed = True
+                if verbose: print('closed', closed)
+            else:
+                closed = False
+
+    # XXX Avoid status 'aborted' until sorted out issue with its logic.
+    # aborted = project.get('aborted')
+    # if aborted:
+    #     current = 'aborted'
+    #     if aborted != order['history'].get('aborted'):
+    #         changed = True
+    #         if verbose: print('aborted', aborted)
+    #     else:
+    #         aborted = False
+
+    if current and current != order.get('status'):
+        changed = True
+        if verbose: print('current', current, order.get('status'))
+    else:
+        current = False
+    
+    if changed:
+        if dryrun:
+            print('Would have updated information for', portal_id)
+        else:
+            old_order = copy.deepcopy(order)
+            with OrderSaver(doc=order, db=db) as saver:
+                saver['tags'] = sorted(tags)
+                if processing:
+                    saver['history']['processing'] = processing
+                if closed:
+                    saver['history']['closed'] = closed
+                # XXX Avoid status 'aborted' until sorted out issue with its logic.
+                # if aborted:
+                #     saver['history']['aborted'] = aborted
+                # Required to record the change in the log.
+                if saver['history'] != old_order['history']:
+                    saver.changed['history'] = saver['history']
+                if current:
+                    saver['status'] = current
+            print('Updated information for', portal_id)
 
 def regenerate_view(db, viewname):
     "Trigger CouchDB to regenerate the view by accessing it."
@@ -185,6 +257,9 @@ def regenerate_view(db, viewname):
 if __name__ == '__main__':
     parser = utils.get_command_line_parser(description=
         'Load project info from Clarity LIMS into OrderPortal.')
+    parser.add_option('-d', '--dryrun',
+                      action="store_true", dest="dryrun", default=False,
+                      help='dry run: no changes stored')
     (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings,
                         verbose=options.verbose)
@@ -199,5 +274,7 @@ if __name__ == '__main__':
 
     for project in clarity_projects:
         clarity.fetch_project_info(project)
-        process_project(db, project, orders_lookup, verbose=options.verbose)
+        process_project(db, project, orders_lookup,
+                        verbose=options.verbose,
+                        dryrun=options.dryrun)
     regenerate_view(db, 'order/tag')

@@ -93,9 +93,12 @@
       <thead>
 	<tr>
 	  <th>{% module Icon('order', label=True) %}</th>
-	  <th width="25%">Title</th>
+	  <th width="20%">Title</th>
 	  <th>{% module Icon('form', label=True) %}</th>
 	  <th>{% module Icon('account', label=True, title='Owner') %}</th>
+	  {% if settings['ORDERS_LIST_TAGS'] %}
+	  <th width="5%">Tags</th>
+	  {% end %} {# if settings['ORDERS_LIST_TAGS'] #}
 	  {% for f in settings['ORDERS_LIST_FIELDS'] %}
 	  <th>{{ f['identifier'].capitalize().replace('_', ' ') }}</th>
 	  {% end %}
@@ -151,6 +154,13 @@ $(document).ready(function() {
          $(nTd).html("<a href='"+oData.owner.links.display.href+"'>"+oData.owner.name+"</a>");
        }
       },
+      {% if settings['ORDERS_LIST_TAGS'] %}
+      {data: "tags",
+       fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
+         $(nTd).text(oData.tags.join(", "));
+       }
+      },
+      {% end %} {# if settings['ORDERS_LIST_TAGS'] #}
       {% for f in settings['ORDERS_LIST_FIELDS'] %}
         { data: "fields.{{ f['identifier'] }}" },
       {% end %}
