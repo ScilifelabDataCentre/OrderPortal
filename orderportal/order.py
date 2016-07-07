@@ -149,6 +149,7 @@ class OrderSaver(saver.Saver):
                                filename=self.file.filename,
                                content_type=self.file.content_type)
 
+
 class OrderMixin(object):
     "Mixin for various useful methods."
 
@@ -252,7 +253,7 @@ class OrderMixin(object):
                 owner=order['owner'],
                 title=order['title'],
                 identifier=order.get('identifier') or order['_id'],
-                url=self.order_reverse_url(order, absolute=True),
+                url=self.order_reverse_url(order),
                 tags=', '.join(order.get('tags', [])))
             saver.set_template(template)
             saver['recipients'] = list(recipients)
@@ -653,19 +654,14 @@ class OrderEdit(OrderMixin, RequestHandler):
                 else:
                         self.redirect(self.order_reverse_url(
                                 order,
-                                absolute=True,
                                 message='Order saved.',
                                 error='Order could not be submitted due to'
                                 ' invalid or missing values.'))
             else:
                 self.redirect(
-                    self.order_reverse_url(order,
-                                           absolute=True,
-                                           message='Order saved.'))
+                    self.order_reverse_url(order, message='Order saved.'))
         except ValueError, msg:
-            self.redirect(self.order_reverse_url(order,
-                                                 absolute=True,
-                                                 error=str(msg)))
+            self.redirect(self.order_reverse_url(order, error=str(msg)))
 
 
 class OrderClone(OrderMixin, RequestHandler):
@@ -697,7 +693,7 @@ class OrderClone(OrderMixin, RequestHandler):
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
             saver.check_fields_validity(fields)
             saver.set_identifier(form)
-        self.redirect(self.order_reverse_url(saver.doc, absolute=True))
+        self.redirect(self.order_reverse_url(saver.doc))
 
 
 class OrderTransition(OrderMixin, RequestHandler):
@@ -719,7 +715,7 @@ class OrderTransition(OrderMixin, RequestHandler):
         with OrderSaver(doc=order, rqh=self) as saver:
             saver.set_status(targetid)
         self.prepare_message(order)
-        self.redirect(self.order_reverse_url(order, absolute=True))
+        self.redirect(self.order_reverse_url(order))
 
 
 class OrderFile(OrderMixin, RequestHandler):
@@ -758,7 +754,7 @@ class OrderFile(OrderMixin, RequestHandler):
         self.check_attachable(order)
         with OrderSaver(doc=order, rqh=self) as saver:
             saver.delete_filename = filename
-        self.redirect(self.order_reverse_url(order, absolute=True))
+        self.redirect(self.order_reverse_url(order))
 
 
 class OrderAttach(OrderMixin, RequestHandler):
@@ -778,4 +774,4 @@ class OrderAttach(OrderMixin, RequestHandler):
                 saver['filename'] = infile.filename
                 saver['size'] = len(infile.body)
                 saver['content_type'] = infile.content_type or 'application/octet-stream'
-        self.redirect(self.order_reverse_url(order, absolute=True))
+        self.redirect(self.order_reverse_url(order))

@@ -66,20 +66,14 @@ class RequestHandler(tornado.web.RequestHandler):
             url += '?' + urllib.urlencode(query)
         return url
 
-    def order_reverse_url(self, order, absolute=False, **query):
-        "URL for order; use identifier variant if available."
+    def order_reverse_url(self, order, **query):
+        "URL for order; use identifier variant if available. Always absolute"
         try:
             identifier = order['identifier']
         except KeyError:
-            if absolute:
-                return self.absolute_reverse_url('order', order['_id'], **query)
-            else:
-                return self.reverse_url('order', order['_id'], **query)
+            return self.absolute_reverse_url('order', order['_id'], **query)
         else:
-            if absolute: 
-                return self.absolute_reverse_url('order_id', identifier,**query)
-            else:
-                return self.reverse_url('order_id', identifier, **query)
+            return self.absolute_reverse_url('order_id', identifier,**query)
 
     def get_current_user(self):
         """Get the currently logged-in user account, if any.

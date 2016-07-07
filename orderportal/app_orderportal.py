@@ -10,18 +10,6 @@ import sys
 import tornado.web
 import tornado.ioloop
 
-# Assist setup debugging
-try:
-    import orderportal
-except ImportError:
-    print('executable', sys.executable)
-    print('version', sys.version)
-    print('PYTHONPATH', os.getenv('PYTHONPATH'))
-    print('path:')
-    for p in sys.path:
-        print('  ', p)
-    raise
-
 from orderportal import constants
 from orderportal import settings
 from orderportal import utils
@@ -39,11 +27,6 @@ from orderportal.info import *
 from orderportal.file import *
 from orderportal.event import *
 from orderportal.search import *
-
-
-class Dummy(RequestHandler):
-    def get(self, *args, **kwargs):
-        self.redirect(self.reverse_url('home'))
 
 
 def get_handlers():
