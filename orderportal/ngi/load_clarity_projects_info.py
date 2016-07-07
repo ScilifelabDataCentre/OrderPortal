@@ -141,7 +141,7 @@ class Clarity(object):
             else:
                 record['portal_id'] = 'NGI{0:=05d}'.format(value)
 
-def get_orders(db, statuses=[]):
+def get_orders(db, statuses=[], verbose=False):
     """Get all orders in CouchDB having a 'identifier' field.
     Return a lookup with 'identifier' as key.
     If 'statuses' is given, then only return orders with one of those.
@@ -154,6 +154,8 @@ def get_orders(db, statuses=[]):
         identifier = doc.get('identifier')
         if not identifier: continue
         result[identifier] = doc
+    if verbose:
+        print(len(result), 'orders in OrderPortal')
     return result
 
 def process_project(db, project, orders_lookup, verbose=False, dryrun=False):
@@ -171,7 +173,7 @@ def process_project(db, project, orders_lookup, verbose=False, dryrun=False):
     try:
         order = orders_lookup[portal_id]
     except KeyError:
-        if verbose: print('Warning: could not find order', portal_id)
+        print('Warning: could not find order', portal_id)
         return
     changed = False
 
@@ -191,7 +193,7 @@ def process_project(db, project, orders_lookup, verbose=False, dryrun=False):
         processing = reduce(min, processing)
         if processing:
             current = 'processing'
-            if processing != order['history'].get('processing'):
+            if processing > order['history'].get('processing'):
                 changed = True
                 if verbose: print('processing', processing)
             else:
@@ -205,7 +207,7 @@ def process_project(db, project, orders_lookup, verbose=False, dryrun=False):
         closed = reduce(min, closed)
         if closed:
             current = 'closed'
-            if closed != order['history'].get('closed'):
+            if closed > order['history'].get('closed'):
                 changed = True
                 if verbose: print('closed', closed)
             else:
@@ -223,7 +225,7 @@ def process_project(db, project, orders_lookup, verbose=False, dryrun=False):
 
     if current and current != order.get('status'):
         changed = True
-        if verbose: print('current', current, order.get('status'))
+        if verbose: print('current', current)
     else:
         current = False
     
@@ -265,9 +267,7 @@ if __name__ == '__main__':
                         verbose=options.verbose)
 
     db = utils.get_db()
-    orders_lookup = get_orders(db)
-    if options.verbose:
-        print(len(orders_lookup), 'orders in OrderPortal')
+    orders_lookup = get_orders(db, verbose=options.verbose)
 
     clarity = Clarity(verbose=options.verbose)
     clarity_projects = clarity.get_all_projects()
