@@ -164,7 +164,6 @@ def process_project(db, project, orders_lookup, verbose=False, dryrun=False):
     2) Set the tags, if not done.
     3) Set the status history.
     4) Set the current status.
-    XXX Avoid status 'aborted' until sorted out issue with its logic.
     """
     try:
         portal_id = project['portal_id']
@@ -213,15 +212,14 @@ def process_project(db, project, orders_lookup, verbose=False, dryrun=False):
             else:
                 closed = False
 
-    # XXX Avoid status 'aborted' until sorted out issue with its logic.
-    # aborted = project.get('aborted')
-    # if aborted:
-    #     current = 'aborted'
-    #     if aborted != order['history'].get('aborted'):
-    #         changed = True
-    #         if verbose: print('aborted', aborted)
-    #     else:
-    #         aborted = False
+    aborted = project.get('aborted')
+    if aborted:
+        current = 'aborted'
+        if aborted > order['history'].get('aborted'):
+            changed = True
+            if verbose: print('aborted', aborted)
+        else:
+            aborted = False
 
     if current and current != order.get('status'):
         changed = True
@@ -240,9 +238,8 @@ def process_project(db, project, orders_lookup, verbose=False, dryrun=False):
                     saver['history']['processing'] = processing
                 if closed:
                     saver['history']['closed'] = closed
-                # XXX Avoid status 'aborted' until sorted out issue with its logic.
-                # if aborted:
-                #     saver['history']['aborted'] = aborted
+                if aborted:
+                    saver['history']['aborted'] = aborted
                 # Required to record the change in the log.
                 if saver['history'] != old_order['history']:
                     saver.changed['history'] = saver['history']
