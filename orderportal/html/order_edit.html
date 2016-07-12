@@ -56,7 +56,8 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
-	<label class="control-label" for="__tags__">Tags</label>
+	<label class="control-label" for="__tags__">Keywords</label>
+	{# A user was confused by terminology. No change in code. #}
 	{% if is_staff %}
 	{% set tags = order.get('tags', []) %}
 	{% else %}
@@ -68,13 +69,15 @@
       </div>
     </div>
     <span class="help-block">
-      Tags characterizing the order. Must be formatted as identifiers,
-      i.e. start with a letter, continue with letters, digits and/or
-      underscore; no blanks allowed.
+      Keywords (tags) characterizing the order. Must be formatted as
+      identifiers, i.e. start with a letter, continue with letters,
+      digits and/or underscore; no blanks allowed.
+      <br>
+      More than one tag is allowed using comma ',' as delimiter.
       {% if is_staff %}
+      <br>
       Staff may use namespace prefixes, e.g. "project_id:P12345".
       {% end %}
-      More than one tag is allowed using comma ',' as delimiter.
     </span>
   </div>
 
