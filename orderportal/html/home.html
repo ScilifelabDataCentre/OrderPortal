@@ -197,9 +197,9 @@
 	      </form>
 	    </td>
 	    {% end %}{# if is_admin #}
-	    <th class="nobr">{{ news['date'] }}</th>
 	    <td>
 	      <strong>{{ news.get('title') or '[no title]' }}</strong>
+	      ({{ news['date'] }})
 	      {% module Markdown(news.get('text')) %}
 	    </td>
 	  </tr>
