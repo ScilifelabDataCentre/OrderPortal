@@ -116,8 +116,13 @@ $(document).ready(function() {
       },
       {data: "name"},
       {data: "orders",
-       fnCreatedCell: function (nTd, sData, oData, iRow, iCol) {
-         $(nTd).html("<a class='badge' href='"+oData.orders.links.display.href+"'>"+oData.orders.count+"</a>");
+       render: function (data, type, full, meta) {
+         if (type === 'display') {
+           return "<a class='badge' href='"+data.links.display.href+"'>"+
+                  data.count+"</a>";
+         } else {
+           return data.count;
+	 }
        }
       },
       {data: "university"},
