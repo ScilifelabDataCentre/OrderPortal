@@ -66,15 +66,15 @@ class File(RequestHandler):
     "Send the file data."
 
     def get(self, name):
-        file = self.get_entity_view('file/name', name)
-        filename = file['_attachments'].keys()[0]
-        infile = self.db.get_attachment(file, filename)
+        self.file = self.get_entity_view('file/name', name)
+        filename = self.file['_attachments'].keys()[0]
+        infile = self.db.get_attachment(self.file, filename)
         if infile is None:
             self.write('')
         else:
             self.write(infile.read())
             infile.close()
-        self.set_header('Content-Type', file['content_type'])
+        self.set_header('Content-Type', self.file['content_type'])
 
 
 class FileDownload(File):
@@ -82,6 +82,9 @@ class FileDownload(File):
 
     def get(self, name):
         super(FileDownload, self).get(name)
+        ext = utils.get_filename_extension(self.file['content_type'])
+        if ext:
+            name += ext 
         self.set_header('Content-Disposition',
                         'attachment; filename="{0}"'.format(name))
 

@@ -330,3 +330,11 @@ def log(db, rqh, entity, changed=dict()):
     except (AttributeError, TypeError, KeyError):
         pass
     db.save(entry)
+
+def get_filename_extension(content_type):
+    "Return filename extension, correcting for silliness in 'mimetypes'."
+    if content_type == 'text/plain':
+        return '.txt'
+    if content_type == 'image/jpeg':
+        return '.jpg'
+    return mimetypes.guess_extension(content_type)
