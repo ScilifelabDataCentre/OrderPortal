@@ -358,13 +358,22 @@
   <tr>
     <th>Latest activity</th>
     <td>
+      {% if latest_activity %}
+      <span class="localtime">{{ latest_activity }}</span>
+      {% else %}
+      -
+      {% end %}
       <span class="localtime">{{ latest_activity }}</span>
     </td>
   </tr>
   <tr>
     <th>Latest login</th>
     <td>
-      <span class="localtime">{{ account.get('login') or '-' }}</span>
+      {% if account.get('login') %}
+      <span class="localtime">{{ account['login'] }}</span>
+      {% else %}
+      -
+      {% end %}
     </td>
   </tr>
   <tr>
