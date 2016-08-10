@@ -19,7 +19,7 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label for="type">Parent field</label>
+	<label for="type">Group parent field</label>
 	<select class="form-control" name="parent" id="parent">
 	  <option value="">[current]</option>
 	  {% for parent in alt_parents %}
@@ -33,7 +33,42 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
       </div>
     </div>
     <span class="help-block">
-      Change parent group for the field to modify the hierarchy of the fields.
+      Change group parent field for this field. If this field is a
+      group, all its fields will follow along.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label for="type">Position within group</label>
+	<select class="form-control" name="position" id="position">
+	  {% if siblings and field['identifier'] == siblings[0]['identifier'] %}
+	    <option selected value="__first__">[first]</option>
+	    {% set selected = True %}
+	  {% else %}
+	    <option value="__first__">[first]</option>
+	    {% set selected = False %}
+	  {% end %}
+	  {% for pos, sib in enumerate(siblings) %}
+	  {% if field['identifier'] != sib['identifier'] %}
+	    {% if selected %}
+	      <option>{{ sib['identifier'] }}</option>
+	    {% elif field['identifier'] == siblings[pos+1]['identifier'] %}
+	      <option selected>{{ sib['identifier'] }}</option>
+	      {% set selected = True %}
+	    {% else  %}
+	      <option>{{ sib['identifier'] }}</option>
+	    {% end %} {# if selected #}
+	  {% end %} {# if field['identifier'] != sib['identifier'] #}
+	  {% end %} {# for sib in siblings #}
+	</select>
+      </div>
+    </div>
+    <span class="help-block">
+      Specify the position of this field within its group. Select the
+      field immediately before this field. If the group is changed
+      (option above) this option will be overridden.
     </span>
   </div>
 
@@ -244,29 +279,6 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
     </div>
   </div>
   {% end %} {# if field['type'] != constants.GROUP #}
-
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-10">
-	<label class="control-label" for="move">Change position</label>
-	<div>
-	  <label class="radio-inline">
-	    <input type="radio" name="move" value="" checked>No change</label>
-	  <label class="radio-inline">
-	    <input type="radio" name="move" value="first">First</label>
-	  <label class="radio-inline">
-	    <input type="radio" name="move" value="previous">Previous</label>
-	  <label class="radio-inline">
-	    <input type="radio" name="move" value="next">Next</label>
-	  <label class="radio-inline">
-	    <input type="radio" name="move" value="last">Last</label>
-	</div>
-      </div>
-    </div>
-    <span class="help-block">
-      Move the field relative to its current position.
-    </span>
-  </div>
 
   <div class="form-group">
     <div class="row">

@@ -4,6 +4,8 @@ from __future__ import print_function, absolute_import
 
 import logging
 
+import tornado.web
+
 from . import constants
 from . import settings
 from . import utils
@@ -186,33 +188,28 @@ class Fields(object):
                 diff['parent'] = new_parent['identifier']
             # This is required to refresh the parent and depth entries
             self.flatten()
-        # Moving a field is relevant only if parent stays the same.
+        # Repositioning a field is relevant only if parent stays the same.
         else:
-            move = rqh.get_argument('move', '').lower()
-            if move:
+            try:
+                position = rqh.get_argument('position')
+                if not position: raise ValueError
+            except (tornado.web.MissingArgumentError, ValueError):
+                pass
+            else:
                 siblings = self.get_siblings(field, self.form['fields'])
-                if move == 'first':
-                    siblings.remove(field)
+                siblings.remove(field)
+                position = position.lower()
+                if position == '__first__':
                     siblings.insert(0, field)
-                elif move == 'previous':
-                    pos = siblings.index(field)
-                    if pos > 0:
-                        siblings.remove(field)
-                        pos -= 1
-                        siblings.insert(pos, field)
-                elif move == 'next':
-                    pos = siblings.index(field)
-                    if pos < len(siblings) - 1:
-                        siblings.remove(field)
-                        pos += 1
-                        siblings.insert(pos, field)
-                elif move == 'last':
-                    siblings.remove(field)
-                    siblings.append(field)
                 else:
-                    move = None
-                if move:
-                    diff['move'] = move
+                    for pos, sib in enumerate(siblings):
+                        if sib['identifier'] == position:
+                            siblings.insert(pos+1, field)
+                            break
+                    else:
+                        siblings.append(field)
+                        position = '__last__'
+                diff['position'] = position
         return diff
 
     def delete(self, identifier):
