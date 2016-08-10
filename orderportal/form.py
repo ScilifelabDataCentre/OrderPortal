@@ -322,6 +322,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
                     form=form,
                     field=field,
                     fields=fields,
+                    siblings=fields.get_siblings(field, form['fields']),
                     alt_parents=fields.get_alt_parents(field))
 
     @tornado.web.authenticated
