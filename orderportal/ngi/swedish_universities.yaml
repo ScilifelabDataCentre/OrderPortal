@@ -1,93 +1,300 @@
 KI:
-  name: Karolinska institutet
+  name: Karolinska Institutet
   rank: 1
+  fields:
+    address_invoice_address: |
+      Karolinska Institutet
+      Fakturor
+      Box 23109
+    address_invoice_zip: 104 35
+    address_invoice_city: Stockholm
+    address_invoice_country: Sweden
 SU:
-  name: Stockholms universitet
+  name: Stockholms Universitet
   rank: 1
+  fields:
+    address_invoice_address: |
+      Stockholms Universitet
+      Box 50741
+    address_invoice_zip: 202 70
+    address_invoice_city: Malmö
+    address_invoice_country: Sweden
 KTH:
-  name: Kungl. Tekniska högskolan
+  name: Kungl. Tekniska Högskolan
   rank: 1
+  fields:
+    address_invoice_address: |
+      Kungliga Tekniska Högskolan
+      Fakturaservice
+      Box 24075
+    address_invoice_zip: 104 50
+    address_invoice_city: Stockholm
+    address_invoice_country: Sweden
 UU:
-  name: Uppsala universitet
+  name: Uppsala Universitet
   rank: 1
+  fields:
+    address_invoice_address: |
+      Uppsala Universitet
+      FE 112
+    address_invoice_zip: 838 80
+    address_invoice_city: Hackås
+    address_invoice_country: Sweden
 BTH:
-  name: Blekinge tekniska högskola
+  name: Blekinge Tekniska Högskola
   rank: 2
+  fields:
+    address_invoice_address: |
+      Blekinge Tekniska Högskola
+      Fakturaenheten
+    address_invoice_zip: 371 79
+    address_invoice_city: Karlskrona
+    address_invoice_country: Sweden
 CTH:
-  name: Chalmers tekniska högskola
+  name: Chalmers Tekniska Högskola
   rank: 2
+  fields:
+    address_invoice_address: |
+      Chalmers Tekniska Universitet
+      Fakturaservice
+    address_invoice_zip: 412 96
+    address_invoice_city: Göteborg
+    address_invoice_country: Sweden
 FHS:
   name: Försvarshögskolan
   rank: 3
+  fields:
+    address_invoice_address: |
+      Försvarshögskolan
+      FE 1026
+    address_invoice_zip: 838 83
+    address_invoice_city: Frösön
+    address_invoice_country: Sweden
 GIH:
   name: Gymnastik och -idrottshögskolan
   rank: 3
+  fields:
+    address_invoice_address: |
+      Gymnastik- och Idrottshögskolan
+      FE 22
+    address_invoice_zip: 838 73
+    address_invoice_city: Frösön
+    address_invoice_country: Sweden
 GU:
-  name: Göteborgs universitet
+  name: Göteborgs Universitet
   rank: 2
+  fields:
+    address_invoice_address: |
+      Göteborgs Universitet
+      Box 1023
+    address_invoice_zip: 831 29
+    address_invoice_city: Östersund
+    address_invoice_country: Sweden
 HB:
   name: Högskolan i Borås
   rank: 3
+  fields:
+    address_invoice_address: |
+      Högskolan i Borås
+    address_invoice_zip: 501 30
+    address_invoice_city: Borås
+    address_invoice_country: Sweden
 HDA:
   name: Högskolan Dalarna
   rank: 3
+  fields:
+    address_invoice_address: |
+      Högskolan Dalarna
+      Box 77
+    address_invoice_zip: 791 22
+    address_invoice_city: Falun
+    address_invoice_country: Sweden
 HH:
   name: Högskolan i Halmstad
   rank: 3
+  fields:
+    address_invoice_address: |
+      Högskolan i Halmstad
+      FE 13
+    address_invoice_zip: 838 73
+    address_invoice_city: Frösön
+    address_invoice_country: Sweden
 HHS:
   name: Handelshögskolan i Stockholm
   rank: 3
 HIG:
   name: Högskolan i Gävle
   rank: 3
+  fields:
+    address_invoice_address: |
+      Högskolan i Gävle
+      FE 70
+    address_invoice_zip: 838 73
+    address_invoice_city: Frösön
+    address_invoice_country: Sweden
 HJ:
   name: Högskolan i Jönköping
   rank: 3
 HKR:
   name: Högskolan Kristianstad
   rank: 3
+  fields:
+    address_invoice_address: |
+      Högskolan i Kristianstad
+      FE 235
+    address_invoice_zip: 838 80
+    address_invoice_city: Frösön
+    address_invoice_country: Sweden
 HS:
   name: Högskolan i Skövde
   rank: 2
+  fields:
+    address_invoice_address: |
+      Högskolan i Skövde
+      FE 336
+    address_invoice_zip: 838 73
+    address_invoice_city: Frösön
+    address_invoice_country: Sweden
 HV:
   name: Högskolan Väst
   rank: 3
+  fields:
+    address_invoice_address: |
+      Högskolan Väst
+      Danske Bank
+      Box 7523
+    address_invoice_zip: 103 92
+    address_invoice_city: Stockholm
+    address_invoice_country: Sweden
 KAU:
-  name: Karlstads universitet
+  name: Karlstads Universitet
   rank: 2
+  fields:
+    address_invoice_address: |
+      Karlstads Universitet
+      FE 510
+    address_invoice_zip: 838 81
+    address_invoice_city: Frösön
+    address_invoice_country: Sweden
 LIU:
-  name: Linköpings universitet
+  name: Linköpings Universitet
   rank: 2
+  fields:
+    address_invoice_address: |
+      Linköpings Universitet
+      Fakturasupport
+    address_invoice_zip: 581 83
+    address_invoice_city: Linköping
+    address_invoice_country: Sweden
 LNU:
   name: Linnéuniversitetet
   rank: 2
+  fields:
+    address_invoice_address: |
+      Linnaeus University
+      Box 451
+    address_invoice_zip: 351 06
+    address_invoice_city: Växsjö
+    address_invoice_country: Sweden
 LTU:
   name: Luleå tekniska universitet
   rank: 3
+  fields:
+    address_invoice_address: |
+      Luleå Tekniska Universitet
+      Fakturaservice
+      FE 227
+    address_invoice_zip: 838 73
+    address_invoice_city: Frösön
+    address_invoice_country: Sweden
 LU:
-  name: Lunds universitet
+  name: Lunds Universitet
   rank: 2
+  fields:
+    address_invoice_address: |
+      Lunds Universitet
+      Box 1088
+    address_invoice_zip: 221 00
+    address_invoice_city: Lund
+    address_invoice_country: Sweden
 MAH:
-  name: Malmö högskola
+  name: Malmö Högskola
   rank: 2
+  fields:
+    address_invoice_address: |
+      Malmö Högskola
+      Box 50500
+    address_invoice_zip: 202 50
+    address_invoice_city: Malmö
+    address_invoice_country: Sweden
 MDH:
-  name: Mälardalens högskola
+  name: Mälardalens Högskola
   rank: 2
+  fields:
+    address_invoice_address: |
+      Mälardalens Högskola
+      Box 1020
+    address_invoice_zip: 721 26
+    address_invoice_city: Västerås
+    address_invoice_country: Sweden
 MIU:
   name: Mittuniversitetet
   rank: 2
+  fields:
+    address_invoice_address: |
+      Mittuniversitetet
+      FE 69
+    address_invoice_zip: 838 73
+    address_invoice_city: Frösön
+    address_invoice_country: Sweden
 NRM:
-  name: Naturhistoriska riksmuseet
+  name: Naturhistoriska Riksmuseet
   rank: 2
+  fields:
+    address_invoice_address: |
+      Naturhistoriska Riksmuseet
+      FE 7
+    address_invoice_zip: 838 73
+    address_invoice_city: Frösön
+    address_invoice_country: Sweden
 ORU:
-  name: Örebro universitet
+  name: Örebro Universitet
   rank: 2
+  fields:
+    address_invoice_address: |
+      Örebro Universitet
+      Box 1252
+    address_invoice_zip: 701 12
+    address_invoice_city: Örebro
+    address_invoice_country: Sweden
 SH:
-  name: Södertörns högskola
+  name: Södertörns Högskola
   rank: 2
+  fields:
+    address_invoice_address: |
+      Södertörns Högskola
+      Box 4002
+    address_invoice_zip: 141 04
+    address_invoice_city: Huddinge
+    address_invoice_country: Sweden
 SLU:
-  name: Sveriges lantbruksuniversitet
+  name: Sveriges Lantbruksuniversitet
   rank: 2
+  fields:
+    address_invoice_address: |
+      Sveriges Lantbruksuniversitet
+      Fakturamottagning
+      Box 7090
+    address_invoice_zip: 750 07
+    address_invoice_city: Uppsala
+    address_invoice_country: Sweden
 UMU:
-  name: Umeå universitet
+  name: Umeå Universitet
   rank: 2
+  fields:
+    address_invoice_address: |
+      Umeå Universitet
+      PG1099
+    address_invoice_zip: 737 84
+    address_invoice_city: Fagersta
+    address_invoice_country: Sweden

@@ -553,14 +553,45 @@ class OrderCreate(RequestHandler):
             saver['fields'] = dict([(f['identifier'], None) for f in fields])
             saver['history'] = {}
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
-            for target, source in settings.get('ORDER_AUTOPOPULATE', {}).iteritems():
+            # First try to set the value of a field from the corresponding
+            # value defined for the account's university.
+            autopopulate = settings.get('ORDER_AUTOPOPULATE', {})
+            uni_fields = settings['UNIVERSITIES'].\
+                get(self.current_user.get('university', {})).get('fields', {})
+            for target in autopopulate:
                 if target not in fields: continue
+                value = uni_fields.get(target)
+                # Terrible kludge! If it looks like a country field,
+                # then translate from country code to name.
+                if 'country' in target:
+                    try:
+                        value = settings['COUNTRIES_LOOKUP'][value]
+                    except KeyError:
+                        pass
+                saver['fields'][target] = value
+            # Next try to set the value of a field from the corresponding
+            # value defined for the account. For use with e.g. invoice address.
+            # Do this only if not done already from university data.
+            for target, source in autopopulate.iteritems():
+                if target not in fields: continue
+                value = saver['fields'].get(target)
+                if isinstance(value, basestring):
+                    if value: continue
+                elif value is not None: # Value 0 (zero) must be possible to set
+                    continue
                 try:
                     key1, key2 = source.split('.')
                 except ValueError:
                     value = self.current_user.get(source)
                 else:
                     value = self.current_user.get(key1, {}).get(key2)
+                # Terrible kludge! If it looks like a country field,
+                # then translate from country code to name.
+                if 'country' in target:
+                    try:
+                        value = settings['COUNTRIES_LOOKUP'][value]
+                    except KeyError:
+                        pass
                 saver['fields'][target] = value
             saver.check_fields_validity(fields)
             saver.set_identifier(form)

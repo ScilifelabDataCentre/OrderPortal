@@ -228,7 +228,7 @@
 	  <div class="col-md-8">
 	    <label class="control-label" for="country">Country</label>
 	    <select class="form-control" name="country" id="country">
-	      {% for c in settings['countries'] %}
+	      {% for c in settings['COUNTRIES'] %}
 	      <option value="{{ c['code'] }}">{{ c['name'] }}</option>
 	      {% end %}
 	    </select>
@@ -254,7 +254,7 @@
 
   <div class="panel panel-default">
     <div class="panel-heading">
-      Invoice address. If none given, copies the address above.
+      Invoice address.
     </div>
     <div class="panel-body">
       <div class="form-group">
@@ -296,7 +296,7 @@
 	    <label class="control-label" for="invoice_country">Country</label>
 	    <select class="form-control"
 		    name="invoice_country" id="invoice_country">
-	      {% for c in settings['countries'] %}
+	      {% for c in settings['COUNTRIES'] %}
 	      <option value="{{ c['code'] }}">{{ c['name'] }}</option>
 	      {% end %}
 	    </select>
