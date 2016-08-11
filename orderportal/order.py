@@ -553,8 +553,24 @@ class OrderCreate(RequestHandler):
             saver['fields'] = dict([(f['identifier'], None) for f in fields])
             saver['history'] = {}
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
-            for target, source in settings.get('ORDER_AUTOPOPULATE', {}).iteritems():
+            # First try to set the value of a field from the corresponding
+            # value defined for the account's university.
+            autopopulate = settings.get('ORDER_AUTOPOPULATE', {})
+            uni_fields = settings['UNIVERSITIES'].\
+                get(self.current_user.get('university', {})).get('fields', {})
+            for target in autopopulate:
                 if target not in fields: continue
+                saver['fields'][target] = uni_fields.get(target)
+            # Next try to set the value of a field from the corresponding
+            # value defined for the account. For use with e.g. invoice address.
+            # Do this only if not done already from university data.
+            for target, source in autopopulate.iteritems():
+                if target not in fields: continue
+                value = saver['fields'].get(target)
+                if isinstance(value, basestring):
+                    if value: continue
+                elif value is not None: # Value 0 (zero) must be possible to set
+                    continue
                 try:
                     key1, key2 = source.split('.')
                 except ValueError:

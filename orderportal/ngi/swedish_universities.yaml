@@ -1,20 +1,27 @@
 KI:
-  name: Karolinska institutet
+  name: Karolinska Institutet
   rank: 1
+  fields:
+    address_invoice_address: |
+      Stockholms Universitet
+      Box 50741
+    address_invoice_zip: 202 70
+    address_invoice_city: Malmö
+    address_invoice_country: Sweden
 SU:
-  name: Stockholms universitet
+  name: Stockholms Universitet
   rank: 1
 KTH:
-  name: Kungl. Tekniska högskolan
+  name: Kungl. Tekniska Högskolan
   rank: 1
 UU:
-  name: Uppsala universitet
+  name: Uppsala Universitet
   rank: 1
 BTH:
-  name: Blekinge tekniska högskola
+  name: Blekinge Tekniska Högskola
   rank: 2
 CTH:
-  name: Chalmers tekniska högskola
+  name: Chalmers Tekniska Högskola
   rank: 2
 FHS:
   name: Försvarshögskolan
@@ -23,7 +30,7 @@ GIH:
   name: Gymnastik och -idrottshögskolan
   rank: 3
 GU:
-  name: Göteborgs universitet
+  name: Göteborgs Universitet
   rank: 2
 HB:
   name: Högskolan i Borås
@@ -53,10 +60,10 @@ HV:
   name: Högskolan Väst
   rank: 3
 KAU:
-  name: Karlstads universitet
+  name: Karlstads Universitet
   rank: 2
 LIU:
-  name: Linköpings universitet
+  name: Linköpings Universitet
   rank: 2
 LNU:
   name: Linnéuniversitetet
@@ -65,29 +72,29 @@ LTU:
   name: Luleå tekniska universitet
   rank: 3
 LU:
-  name: Lunds universitet
+  name: Lunds Universitet
   rank: 2
 MAH:
-  name: Malmö högskola
+  name: Malmö Högskola
   rank: 2
 MDH:
-  name: Mälardalens högskola
+  name: Mälardalens Högskola
   rank: 2
 MIU:
   name: Mittuniversitetet
   rank: 2
 NRM:
-  name: Naturhistoriska riksmuseet
+  name: Naturhistoriska Riksmuseet
   rank: 2
 ORU:
-  name: Örebro universitet
+  name: Örebro Universitet
   rank: 2
 SH:
-  name: Södertörns högskola
+  name: Södertörns Högskola
   rank: 2
 SLU:
-  name: Sveriges lantbruksuniversitet
+  name: Sveriges Lantbruksuniversitet
   rank: 2
 UMU:
-  name: Umeå universitet
+  name: Umeå Universitet
   rank: 2
