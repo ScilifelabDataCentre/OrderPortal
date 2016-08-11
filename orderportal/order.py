@@ -560,7 +560,15 @@ class OrderCreate(RequestHandler):
                 get(self.current_user.get('university', {})).get('fields', {})
             for target in autopopulate:
                 if target not in fields: continue
-                saver['fields'][target] = uni_fields.get(target)
+                value = uni_fields.get(target)
+                # Terrible kludge! If it looks like a country field,
+                # then translate from country code to name.
+                if 'country' in target:
+                    try:
+                        value = settings['COUNTRIES_LOOKUP'][value]
+                    except KeyError:
+                        pass
+                saver['fields'][target] = value
             # Next try to set the value of a field from the corresponding
             # value defined for the account. For use with e.g. invoice address.
             # Do this only if not done already from university data.
@@ -577,6 +585,13 @@ class OrderCreate(RequestHandler):
                     value = self.current_user.get(source)
                 else:
                     value = self.current_user.get(key1, {}).get(key2)
+                # Terrible kludge! If it looks like a country field,
+                # then translate from country code to name.
+                if 'country' in target:
+                    try:
+                        value = settings['COUNTRIES_LOOKUP'][value]
+                    except KeyError:
+                        pass
                 saver['fields'][target] = value
             saver.check_fields_validity(fields)
             saver.set_identifier(form)

@@ -235,7 +235,7 @@ Edit {% module Icon('account') %} {{ account['email'] }}
 	    <label class="control-label" for="country">Country</label>
 	    <select class="form-control" name="country" id="country">
 	      <option value="">[none]</option>
-	      {% for c in settings['countries'] %}
+	      {% for c in settings['COUNTRIES'] %}
 	      {% set sel = account['address'].get('country') == c['code'] and 'selected' or '' %}
 	      <option {{ sel }} value="{{ c['code'] }}">{{ c['name'] }}</option>
 	      {% end %}
@@ -309,7 +309,7 @@ Edit {% module Icon('account') %} {{ account['email'] }}
 	    <select class="form-control"
 		    name="invoice_country" id="invoice_country">
 	      <option value="">[none]</option>
-	      {% for c in settings['countries'] %}
+	      {% for c in settings['COUNTRIES'] %}
 	      {% set sel = account['invoice_address'].get('country') == c['code'] and 'selected' or '' %}
 	      <option {{ sel }} value="{{ c['code'] }}">{{ c['name'] }}</option>
 	      {% end %}

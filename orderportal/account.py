@@ -911,14 +911,13 @@ class Register(RequestHandler):
                     zip=self.get_argument('zip', default=None),
                     city=self.get_argument('city', default=None),
                     country=self.get_argument('country', default=None))
-                saver['invoice_ref'] = self.get_argument('invoice_ref',default=None)
+                saver['invoice_ref'] = self.get_argument('invoice_ref',
+                                                         default=None)
                 saver['invoice_address'] = dict(
                     address=self.get_argument('invoice_address', default=None),
                     zip=self.get_argument('invoice_zip', default=None),
                     city=self.get_argument('invoice_city', default=None),
                     country=self.get_argument('invoice_country', default=None))
-                if not saver['invoice_address'].get('address'):
-                    saver['invoice_address'] = saver['address'].copy()
                 saver['phone'] = self.get_argument('phone', default=None)
                 saver['owner'] = saver['email']
                 saver['role'] = constants.USER

@@ -159,12 +159,12 @@ def load_settings(filepath=None, verbose=False, pidfile=None):
         filepath = settings['COUNTRY_CODES_FILEPATH']
         if not filepath: raise KeyError
     except KeyError:
-        settings['countries'] = []
+        settings['COUNTRIES'] = []
     else:
         with open(filepath) as infile:
-            settings['countries'] = yaml.safe_load(infile)
-        settings['countries_lookup'] = dict([(c['code'], c['name'])
-                                             for c in settings['countries']])
+            settings['COUNTRIES'] = yaml.safe_load(infile)
+        settings['COUNTRIES_LOOKUP'] = dict([(c['code'], c['name'])
+                                             for c in settings['COUNTRIES']])
     # Read subject terms
     try:
         filepath = settings['SUBJECT_TERMS_FILEPATH']
