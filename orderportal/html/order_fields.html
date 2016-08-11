@@ -110,19 +110,16 @@
     {% end %}
     {% if field['identifier'] in order['invalid'] %}
     <span class="text-danger">
-      <span data-toggle="tooltip"
-	    title="Invalid value; order cannot be submitted."
-	    class="glyphicon glyphicon-remove"></span>
+      <span class="glyphicon glyphicon-remove"></span>
       {{ order['invalid'][field['identifier']] }}
     </span>
     {% elif value in (None, '') %}
     <span class="text-warning">
-      <span data-toggle="tooltip" title="Field does not require a value."
-	    class="glyphicon glyphicon-question-sign"></span>
+      <span class="glyphicon glyphicon-question-sign"></span>
+      no value OK
     </span>
     {% else %}
-    <span data-toggle="tooltip" title="Valid value."
-	  class="text-success">
+    <span class="text-success">
       <span class="glyphicon glyphicon-ok"></span>
       OK
     </span>

@@ -27,30 +27,27 @@
     <div class="panel-heading">
       <h4>
 	{{ label }}
+	{% if field['restrict_read'] %}
+	&nbsp;
+	<span class="glyphicon glyphicon-eye-open"
+	      title="Readable by staff only.">
+	</span>
+	{% end %}
+	{% if field['restrict_write'] %}
+	&nbsp;
+	<span class="glyphicon glyphicon-pencil"
+	      title="Writeable by admin only.">
+	</span>
+	{% end %}
 	<div class="pull-right">
-	  {% if field['restrict_read'] %}
-	  <span class="glyphicon glyphicon-eye-open"
-		title="Readable by staff only.">
-	  </span>
-	  {% end %}
-	  {% if field['restrict_write'] %}
-	  <span class="glyphicon glyphicon-pencil"
-		title="Writeable by admin only.">
-	  </span>
-	  {% end %}
 	  {% if field['identifier'] in order['invalid'] %}
 	  <span class="text-danger">
-	    <span data-toggle="tooltip"
-		  title="Invalid value; order cannot be submitted."
-		  class="glyphicon glyphicon-remove">
-	    </span>
+	    <span class="glyphicon glyphicon-remove"></span>
 	    {{ order['invalid'][field['identifier']] }}
 	  </span>
 	  {% else %}
 	  <span class="text-success">
-	    <span data-toggle="tooltip" title="Valid value."
-		  class="glyphicon glyphicon-ok">
-	    </span>
+	    <span class="glyphicon glyphicon-ok"></span>
 	    OK
 	  </span>
 	  {% end %}
@@ -75,6 +72,18 @@
     {% set value = order['fields'][field['identifier']] %}
     <label class="control-label" for="{{ field['identifier'] }}">
       {{ label }}
+      {% if field['restrict_read'] %}
+      &nbsp;
+      <span class="glyphicon glyphicon-eye-open"
+	    title="Readable by staff only.">
+      </span>
+      {% end %}
+      {% if field['restrict_write'] %}
+      &nbsp;
+      <span class="glyphicon glyphicon-pencil"
+	    title="Writeable by admin only.">
+      </span>
+      {% end %}
     </label>
 
     {% if field['type'] == constants.BOOLEAN %}
@@ -185,56 +194,35 @@
 	  aria-hidden="true">
     </span>
     {% end %}
-    {% end %}
+    {% end %} {# if field['required'] #}
+
+    <span style="margin-right: -3em;"
+	  class="form-control-feedback nobr">
+      {% if field['identifier'] in order['invalid'] %}
+      <span class="text-danger">
+	<span class="glyphicon glyphicon-remove"></span>
+	{{ order['invalid'][field['identifier']] }}
+      </span>
+      {% elif value in (None, '') %}
+      <span class="text-warning">
+	<span class="glyphicon glyphicon-question-sign"></span>
+	no value OK
+      </span>
+      {% else %}
+      <span class="text-success">
+	<span class="glyphicon glyphicon-ok"></span>
+	OK
+      </span>
+      {% end %}
+    </span>
 
     <span class="help-block">
       {% module Markdown(field.get('description')) %}
       {% if field['type'] == constants.TEXT %}
-      (Use <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
-      if you want fancy display of this text data.)
+      (<a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+      notation may be used for this field.)
       {% end %}
     </span>
-  </div>
-</div>
-
-<div class="col-md-2">
-  <div class=" pull-right">
-
-    {% if field['restrict_read'] %}
-    <span class="glyphicon glyphicon-eye-open"
-	  title="Readable by staff only.">
-    </span>
-    {% end %}
-
-    {% if field['restrict_write'] %}
-    <span class="glyphicon glyphicon-pencil"
-	  title="Writeable by admin only.">
-    </span>
-    {% end %}
-
-    {% if field['identifier'] in order['invalid'] %}
-    <span class="text-danger">
-      <span data-toggle="tooltip"
-	    title="Invalid value; order cannot be submitted."
-	    class="glyphicon glyphicon-remove">
-      </span>
-      {{ order['invalid'][field['identifier']] }}
-    </span>
-    {% elif value in (None, '') %}
-    <span class="text-warning">
-      <span data-toggle="tooltip" title="Field does not require a value."
-	    class="glyphicon glyphicon-question-sign">
-      </span>
-    </span>
-    {% else %}
-    <span class="text-success">
-      <span data-toggle="tooltip" title="Valid value."
-	    class="glyphicon glyphicon-ok">
-      </span>
-      OK
-    </span>
-    {% end %}
-
   </div>
 </div>
 
