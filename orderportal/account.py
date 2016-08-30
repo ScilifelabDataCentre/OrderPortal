@@ -895,9 +895,9 @@ class Register(RequestHandler):
                 email = self.get_argument('email', None)
                 saver['first_name'] = self.get_argument('first_name', None)
                 saver['last_name'] = self.get_argument('last_name', None)
-                university = self.get_argument('university_other', None)
+                university = self.get_argument('university', None)
                 if not university:
-                    university = self.get_argument('university', None)
+                    university = self.get_argument('university_other', None)
                 saver['university'] = university
                 saver['department'] = self.get_argument('department', None)
                 saver['pi'] = utils.to_bool(self.get_argument('pi', False))
