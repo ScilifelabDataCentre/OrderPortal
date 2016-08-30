@@ -49,6 +49,15 @@ class AccountSaver(saver.Saver):
         self.erase_password()
         self['code'] = utils.get_iuid()
 
+    def check_required(self):
+        "Check that required data is present. Raise ValueError otherwise."
+        if not self['first_name']:
+            raise ValueError('First name is required')
+        if not self['last_name']:
+            raise ValueError('Last name is required')
+        if not self['university']:
+            raise ValueError('University is required')
+
 
 class Accounts(RequestHandler):
     "Accounts list page; just HTML, Datatables obtains data via API call."
@@ -632,53 +641,56 @@ class AccountEdit(AccountMixin, RequestHandler):
             account = self.get_account(email)
             self.check_editable(account)
         except ValueError, msg:
-            self.see_other('account', account['email'], error=str(msg))
+            self.see_other('account_edit', account['email'], error=str(msg))
             return
-        with AccountSaver(doc=account, rqh=self) as saver:
-            # Only admin may change role of an account.
-            if self.is_admin():
-                role = self.get_argument('role')
-                if role not in constants.ACCOUNT_ROLES:
-                    self.see_other('account_edit', account['email'],
-                                   error='invalid role')
-                    return
-                saver['role'] = role
-            saver['first_name'] = self.get_argument('first_name')
-            saver['last_name'] = self.get_argument('last_name')
-            university = self.get_argument('university_other', default=None)
-            if not university or 'unknown' in university:
-                university = self.get_argument('university', default=None)
-            saver['university'] = university or None
-            saver['department'] = self.get_argument('department', default=None)
-            saver['pi'] = utils.to_bool(self.get_argument('pi', default=False))
-            try:
-                saver['gender'] = self.get_argument('gender').lower()
-            except tornado.web.MissingArgumentError:
+        try:
+            with AccountSaver(doc=account, rqh=self) as saver:
+                # Only admin may change role of an account.
+                if self.is_admin():
+                    role = self.get_argument('role')
+                    if role not in constants.ACCOUNT_ROLES:
+                        raise ValueError('invalid role')
+                    saver['role'] = role
+                saver['first_name'] = self.get_argument('first_name')
+                saver['last_name'] = self.get_argument('last_name')
+                university = self.get_argument('university', None)
+                if not university:
+                    university = self.get_argument('university_other', None)
+                saver['university'] = university
+                saver['department'] = self.get_argument('department', None)
+                saver['pi'] = utils.to_bool(self.get_argument('pi', False))
                 try:
-                    del saver['gender']
-                except KeyError:
-                    pass
-            try:
-                saver['subject'] = int(self.get_argument('subject'))
-            except (tornado.web.MissingArgumentError, ValueError, TypeError):
-                saver['subject'] = None
-            saver['address'] = dict(
-                address=self.get_argument('address', default=None),
-                zip=self.get_argument('zip', default=None),
-                city=self.get_argument('city', default=None),
-                country=self.get_argument('country', default=None))
-            saver['invoice_ref'] = self.get_argument('invoice_ref',default=None)
-            saver['invoice_address'] = dict(
-                address=self.get_argument('invoice_address', default=None),
-                zip=self.get_argument('invoice_zip', default=None),
-                city=self.get_argument('invoice_city', default=None),
-                country=self.get_argument('invoice_country', default=None))
-            saver['phone'] = self.get_argument('phone', default=None)
-            saver['other_data'] = self.get_argument('other_data', default=None)
-            if utils.to_bool(self.get_argument('api_key', default=False)):
-                saver['api_key'] = utils.get_iuid()
-            saver['update_info'] = False
-        self.see_other('account', account['email'])
+                    saver['gender'] = self.get_argument('gender').lower()
+                except tornado.web.MissingArgumentError:
+                    try:
+                        del saver['gender']
+                    except KeyError:
+                        pass
+                try:
+                    saver['subject'] = int(self.get_argument('subject'))
+                except (tornado.web.MissingArgumentError, ValueError,TypeError):
+                    saver['subject'] = None
+                saver['address'] = dict(
+                    address=self.get_argument('address', None),
+                    zip=self.get_argument('zip', None),
+                    city=self.get_argument('city', None),
+                    country=self.get_argument('country', None))
+                saver['invoice_ref'] = self.get_argument('invoice_ref', None)
+                saver['invoice_address'] = dict(
+                    address=self.get_argument('invoice_address', None),
+                    zip=self.get_argument('invoice_zip', None),
+                    city=self.get_argument('invoice_city', None),
+                    country=self.get_argument('invoice_country', None))
+                saver['phone'] = self.get_argument('phone', None)
+                saver['other_data'] = self.get_argument('other_data', None)
+                if utils.to_bool(self.get_argument('api_key', False)):
+                    saver['api_key'] = utils.get_iuid()
+                saver['update_info'] = False
+                saver.check_required()
+        except ValueError, msg:
+            self.see_other('account_edit', account['email'], error=str(msg))
+        else:
+            self.see_other('account', account['email'])
 
 
 class Login(RequestHandler):
@@ -895,9 +907,9 @@ class Register(RequestHandler):
                 email = self.get_argument('email', None)
                 saver['first_name'] = self.get_argument('first_name', None)
                 saver['last_name'] = self.get_argument('last_name', None)
-                university = self.get_argument('university_other', None)
+                university = self.get_argument('university', None)
                 if not university:
-                    university = self.get_argument('university', None)
+                    university = self.get_argument('university_other', None)
                 saver['university'] = university
                 saver['department'] = self.get_argument('department', None)
                 saver['pi'] = utils.to_bool(self.get_argument('pi', False))
@@ -923,15 +935,10 @@ class Register(RequestHandler):
                 if not email:
                     raise ValueError('Email is required')
                 saver.set_email(email)
-                if not saver['first_name']:
-                    raise ValueError('First name is required')
-                if not saver['last_name']:
-                    raise ValueError('Last name is required')
-                if not university:
-                    raise ValueError('University is required')
                 saver['owner'] = saver['email']
                 saver['role'] = constants.USER
                 saver['status'] = constants.PENDING
+                saver.check_required()
                 saver.erase_password()
         except ValueError, msg:
             kwargs = OD()
