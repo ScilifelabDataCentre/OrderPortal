@@ -557,7 +557,7 @@ class OrderCreate(RequestHandler):
             # value defined for the account's university.
             autopopulate = settings.get('ORDER_AUTOPOPULATE', {})
             uni_fields = settings['UNIVERSITIES'].\
-                get(self.current_user.get('university', {})).get('fields', {})
+                get(self.current_user.get('university'), {}).get('fields', {})
             for target in autopopulate:
                 if target not in fields: continue
                 value = uni_fields.get(target)
