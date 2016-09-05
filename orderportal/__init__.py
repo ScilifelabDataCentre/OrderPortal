@@ -30,6 +30,7 @@ settings = dict(
     ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',
     ORDER_STATUSES_FILEPATH='{SITE_DIR}/order_statuses.yaml',
     ORDER_TRANSITIONS_FILEPATH='{SITE_DIR}/order_transitions.yaml',
+    ORDER_USER_TAGS=True,
     ORDERS_LIST_TAGS=True,
     ORDERS_LIST_FIELDS=[],
     ORDERS_LIST_STATUSES=[],

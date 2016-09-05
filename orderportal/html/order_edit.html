@@ -53,6 +53,7 @@
     </span>
   </div>
 
+  {% if is_staff or settings.get('ORDER_USER_TAGS') %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
@@ -69,7 +70,7 @@
       </div>
     </div>
     <span class="help-block">
-      Keywords (tags) characterizing the order. Must be formatted as
+      Optional keywords (tags) characterizing the order. Format as
       identifiers, i.e. start with a letter, continue with letters,
       digits and/or underscore; no blanks allowed.
       <br>
@@ -80,6 +81,7 @@
       {% end %}
     </span>
   </div>
+  {% end %} {#if is_staff or settings.get('ORDER_USER_TAGS') #}
 
   <div class="form-group">
     <div class="row">
