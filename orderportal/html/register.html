@@ -159,12 +159,14 @@
     </div>
   </div>
 
+  {% if settings.get('ACCOUNT_FUNDER_INFO') %}
   <div class="panel panel-default">
     <div class="panel-heading">
       Information required by our funders for reporting purposes.
     </div>
     <div class="panel-body">
 
+      {% if settings.get('ACCOUNT_FUNDER_INFO_GENDER') %}
       <div class="form-group has-feedback">
 	<div class="row">
 	  <div class="col-md-3">
@@ -179,11 +181,35 @@
 	      </label>
 	      {% end %}
 	    </div>
+	    <span style="color:red; margin-right: -1em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true"></span>
 	  </div>
 	</div>
       </div>
+      {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GENDER') #}
 
-      {% if settings['subjects'] %}
+      {% if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') %}
+      <div class="form-group has-feedback">
+	<div class="row">
+	  <div class="col-md-3">
+	    <label class="control-label" for="gender">Group size</label>
+	    <input type="number" class="form-control"
+		   name="group_size", id="group_size"
+		   value="{{ values.get('group_size') or '0' }}">
+	    <span style="color:red; margin-right: 1em;"
+		  class="glyphicon glyphicon-star form-control-feedback"
+		  aria-hidden="true"></span>
+	  </div>
+	</div>
+	<span class="help-block">
+	  If you are a Principal Investigator (PI), specify the
+	  approximate number of members in your group.
+	</span>
+      </div>
+      {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') #}
+
+      {% if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['subjects'] %}
       <div class="form-group has-feedback">
 	<div class="row">
 	  <div class="col-md-6">
@@ -205,10 +231,11 @@
 	  Select the subject term that best characterizes your field.
 	</span>
       </div>
-      {% end %}
+      {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['subjects'] #}
 
     </div>
   </div>
+  {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO') #}
 
   <div class="panel panel-default">
     <div class="panel-heading">

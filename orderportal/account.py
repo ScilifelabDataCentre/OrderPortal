@@ -224,8 +224,8 @@ class AccountsCsv(_AccountsFilter):
         writer = csv.writer(csvfile)
         writer.writerow(('Email', 'Last name', 'First name', 'Role', 'Status',
                          'Order count', 'University', 'Department', 'PI',
-                         'Gender', 'Subject', 'Address', 'Zip', 'City',
-                         'Country', 'Invoice ref', 'Invoice address',
+                         'Gender', 'Group size', 'Subject', 'Address', 'Zip',
+                         'City', 'Country', 'Invoice ref', 'Invoice address',
                          'Invoice zip', 'Invoice city', 'Invoice country',
                          'Phone', 'Other data', 'Latest login',
                          'Modified', 'Created'))
@@ -247,7 +247,8 @@ class AccountsCsv(_AccountsFilter):
                              utils.to_utf8(account.get('university') or ''),
                              utils.to_utf8(account.get('department') or ''),
                              account.get('pi') and 'yes' or 'no',
-                             account.get('gender') or '-',
+                             account.get('gender') or '',
+                             account.get('group_size') or '',
                              subject,
                              utils.to_utf8(addr.get('address') or ''),
                              utils.to_utf8(addr.get('zip') or ''),
@@ -421,6 +422,7 @@ class AccountApiV1(AccountMixin, RequestHandler):
         data['university'] = account['university']
         data['role'] = account['role']
         data['gender'] = account.get('gender')
+        data['group_size'] = account.get('group_size')
         data['status'] = account['status']
         data['address'] = account.get('address') or {}
         data['invoice_ref'] = account.get('invoice_ref')
@@ -669,6 +671,13 @@ class AccountEdit(AccountMixin, RequestHandler):
                     except KeyError:
                         pass
                 try:
+                    saver['group_size'] = self.get_argument('group_size')
+                except tornado.web.MissingArgumentError:
+                    try:
+                        del saver['group_size']
+                    except KeyError:
+                        pass
+                try:
                     saver['subject'] = int(self.get_argument('subject'))
                 except (tornado.web.MissingArgumentError, ValueError,TypeError):
                     saver['subject'] = None
@@ -884,7 +893,8 @@ class Register(RequestHandler):
 
     KEYS = ['email', 'first_name', 'last_name',
             'university', 'department', 'pi',
-            'gender', 'subject', 'invoice_ref', 'phone']
+            'gender', 'group_size', 'subject',
+            'invoice_ref', 'phone']
     ADDRESS_KEYS = ['address', 'zip', 'city', 'country']
 
     def get(self):
@@ -918,6 +928,9 @@ class Register(RequestHandler):
                 gender = self.get_argument('gender', None)
                 if gender:
                     saver['gender'] = gender.lower()
+                group_size = self.get_argument('group_size', None)
+                if group_size:
+                    saver['group_size'] = group_size
                 try:
                     saver['subject'] = int(self.get_argument('subject'))
                 except (tornado.web.MissingArgumentError,ValueError,TypeError):

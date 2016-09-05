@@ -267,6 +267,8 @@
     <th>Principal Investigator</th>
     <td>{{ account.get('pi') and 'Yes' or 'No' }}</td>
   </tr>
+  {% if settings.get('ACCOUNT_FUNDER_INFO') %}
+  {% if settings.get('ACCOUNT_FUNDER_INFO_GENDER') %}
   <tr>
     <th>Gender</th>
     <td>
@@ -277,7 +279,20 @@
       {% end %}
     </td>
   </tr>
-  {% if settings['subjects_lookup'] %}
+  {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GENDER') #}
+  {% if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') %}
+  <tr>
+    <th>Group size</th>
+    <td>
+      {% try %}
+      {{ account['group_size'] }}
+      {% except KeyError %}
+      <span class="text-warning glyphicon glyphicon-question-sign"></span>
+      {% end %}
+    </td>
+  </tr>
+  {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') #}
+  {% if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['subjects'] %}
   <tr>
     <th>Subject</th>
     <td>
@@ -288,7 +303,8 @@
       {% end %}
     </td>
   </tr>
-  {% end %}
+  {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['subjects'] #}
+  {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO') #}
   <tr>
     <th>Postal address</th>
     <td>
