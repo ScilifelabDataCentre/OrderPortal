@@ -212,14 +212,17 @@ class FormCreate(RequestHandler):
                 if data.get(constants.DOCTYPE) != constants.FORM and \
                    data.get('type') != 'form':
                     raise ValueError('imported JSON is not a form')
+            except (KeyError, IndexError):
+                pass
+            except Exception, msg:
+                self.see_other('home', error="Error importing form: %s" % msg)
+                return
+            else:
                 if not saver['description']:
                     saver['description'] = data.get('description')
                 if not saver['version']:
                     saver['version'] = data.get('version')
                 saver['fields'] = data['fields']
-            except Exception, msg:
-                self.see_other('home', error="Error importing form: %s" % msg)
-                return
         self.see_other('form', saver.doc['_id'])
 
 

@@ -315,7 +315,9 @@ class Account(AccountMixin, RequestHandler):
                             descending=True,
                             limit=1)
         try:
-            latest_activity = list(view)[0].key[1]
+            key = list(view)[0].key
+            if key[0] != account['email']: raise IndexError
+            latest_activity = key[1]
         except IndexError:
             latest_activity = None
         if self.is_staff() or self.current_user['email'] == account['email']:

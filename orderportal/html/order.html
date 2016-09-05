@@ -145,6 +145,7 @@
 	  ({{ status['description'] }})
 	</td>
       </tr>
+      {% if is_staff or settings.get('ORDER_USER_TAGS') %}
       <tr>
 	<th>Keywords</th>
 	{# A user was confused by terminology. No change in code. #}
@@ -155,6 +156,7 @@
 	  {% end %}
 	</td>
       </tr>
+      {% end %} {#if is_staff or settings.get('ORDER_USER_TAGS') #}
       <tr>
 	<th>History</th>
 	<td>
