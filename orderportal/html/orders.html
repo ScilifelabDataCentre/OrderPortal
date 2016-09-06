@@ -32,12 +32,12 @@
 	  method="GET">
       <span class="glyphicon glyphicon-filter"></span>
       <div class="form-group">
-	<label for="form">Filter by</label>
-	<select name="form" id="form" class="form-control refresh">
+	<label for="form_title">Filter by</label>
+	<select name="form_title" id="form_title" class="form-control refresh">
 	  <option value="">[any form]</option>
-	  {% for ftitle, fid in forms %}
-	  {% set sel = fid == params.get('form') and 'selected' or '' %}
-	  <option {{ sel }} value="{{ fid }}">{{ ftitle }}</option>
+	  {% for title in form_titles %}
+	  {% set sel = title == params.get('form') and 'selected' or '' %}
+	  <option {{ sel }}>{{ title }}</option>
 	  {% end %}
 	</select>
       </div>

@@ -270,15 +270,16 @@ class Orders(RequestHandler):
             return
         order_column = 5 + len(settings['ORDERS_LIST_STATUSES']) + \
             len(settings['ORDERS_LIST_FIELDS'])
+        form_titles = sorted(set([f[0] for f in self.get_forms()]))
         self.render('orders.html',
-                    forms=self.get_forms(),
+                    form_titles=form_titles,
                     order_column=order_column,
                     params=self.get_filter_params())
 
     def get_filter_params(self):
         "Return a dictionary with the filter parameters."
         result = dict()
-        for key in ['status', 'form'] + \
+        for key in ['status', 'form_title'] + \
                    [f['identifier'] for f in settings['ORDERS_LIST_FIELDS']]:
             try:
                 value = self.get_argument(key)
@@ -349,19 +350,21 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
         self.params = self.get_filter_params()
         # Get names and forms lookups
         names = self.get_account_names()
-        forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
+        forms = dict([(f[1], f[0]) for f in self.get_forms(all=True)])
         data = OD()
         data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'orders'
         data['links'] = dict(self=dict(href=self.reverse_url('orders')),
                              display=dict(href=self.reverse_url('orders')))
         data['items'] = [self.get_json(o, names, forms)
-                         for o in self.get_orders()]
+                         for o in self.get_orders(forms)]
         self.write(data)
 
-    def get_orders(self):
+    def get_orders(self, forms):
         orders = self.filter_by_status(self.params.get('status'))
-        orders = self.filter_by_form(self.params.get('form'), orders=orders)
+        orders = self.filter_by_forms(self.params.get('form_title'),
+                                      forms=forms,
+                                      orders=orders)
         for f in settings['ORDERS_LIST_FIELDS']:
             orders = self.filter_by_field(f['identifier'],
                                           self.params.get(f['identifier']),
@@ -402,19 +405,21 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
                 orders = [o for o in orders if o['status'] == status]
         return orders
 
-    def filter_by_form(self, form, orders=None):
+    def filter_by_forms(self, form_title, forms, orders=None):
         "Return orders list if any form filter, or None if none."
-        if form:
+        if form_title:
+            forms = set([f[0] for f in forms.items() if f[1] == form_title])
             if orders is None:
-                view = self.db.view('order/form',
-                                    descending=True,
-                                    startkey=[form, constants.CEILING],
-                                    endkey=[form],
-                                    reduce=False,
-                                    include_docs=True)
-                orders = [r.doc for r in view]
+                orders = []
+                for form in forms:
+                    view = self.db.view('order/form',
+                                        descending=True,
+                                        reduce=False,
+                                        include_docs=True)
+                    orders.extend([r.doc for r in
+                                   view[[form, constants.CEILING]:[form]]])
             else:
-                orders = [o for o in orders if o['form'] == form]
+                orders = [o for o in orders if o['form'] in forms]
         return orders
 
     def filter_by_field(self, identifier, value, orders=None):
