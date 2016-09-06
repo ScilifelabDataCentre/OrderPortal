@@ -501,7 +501,7 @@ class AccountOrdersApiV1(AccountOrdersMixin,
             raise tornado.web.HTTPError(403, reason=str(msg))
         # Get names and forms lookups
         names = self.get_account_names()
-        forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
+        forms = dict([(f[1], f[0]) for f in self.get_forms(all=True)])
         data = OD()
         data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'account orders'
@@ -565,7 +565,7 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
             orders.extend([r.doc for r in view])
         # Get names and forms lookups
         names = self.get_account_names()
-        forms = dict([(f[1], f[0]) for f in self.get_forms(enabled=False)])
+        forms = dict([(f[1], f[0]) for f in self.get_forms(all=True)])
         data = OD()
         data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'account groups orders'

@@ -363,14 +363,15 @@ class RequestHandler(tornado.web.RequestHandler):
                 result[row.key] = name
         return result
 
-    def get_forms(self, enabled=True):
-        """Get forms, enabled or all.
+    def get_forms(self, all=False):
+        """Get forms, all or only the enabled+disabled.
         Return list of tuple (title, iuid) sorted by title."""
-        if enabled:
-            view = self.db.view('form/enabled')
+        view = self.db.view('form/modified', include_docs=True)
+        if all:
+            forms = [(r.value, r.id) for r in view]
         else:
-            view = self.db.view('form/modified')
-        forms = [(r.value, r.id) for r in view]
+            forms = [(r.value, r.id) for r in view
+                     if r.doc['status'] in (constants.ENABLED, constants.DISABLED)]
         forms.sort()
         return forms
 
