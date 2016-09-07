@@ -36,7 +36,7 @@
 	<select name="form_title" id="form_title" class="form-control refresh">
 	  <option value="">[any form]</option>
 	  {% for title in form_titles %}
-	  {% set sel = title == params.get('form') and 'selected' or '' %}
+	  {% set sel = title == params.get('form_title') and 'selected' or '' %}
 	  <option {{ sel }}>{{ title }}</option>
 	  {% end %}
 	</select>
