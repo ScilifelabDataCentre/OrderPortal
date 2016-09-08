@@ -31,7 +31,7 @@ class Icon(tornado.web.UIModule):
         title = title or alt
         value = ICON_TEMPLATE.format(url=url, alt=alt, title=title)
         if label:
-            value += ' ' + title
+            value = '<span class="nobr">{} {}</span>'.format(value, title)
         return value
 
 class ContentType(tornado.web.UIModule):
@@ -65,8 +65,8 @@ class Entity(tornado.web.UIModule):
         elif doctype == constants.FILE:
             icon_url = self.handler.static_url('file.png')
             title = entity['name']
-            alt = title
-            url = self.handler.reverse_url('file_meta', entity['name'])
+            alt = doctype
+            url = self.handler.reverse_url('files')
         else:
             icon_url = self.handler.static_url(doctype + '.png')
             iuid = entity['_id']
