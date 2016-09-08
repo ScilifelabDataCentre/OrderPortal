@@ -727,7 +727,7 @@ class Login(RequestHandler):
         except ValueError, msg:
             self.see_other('home', error=str(msg))
             return
-        if not utils.hashed_password(password) == account.get('password'):
+        if utils.hashed_password(password) != account.get('password'):
             utils.log(self.db, self, account,
                       changed=dict(login_failure=account['email']))
             view = self.db.view('log/login_failure',

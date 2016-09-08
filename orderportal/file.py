@@ -63,18 +63,18 @@ class Files(RequestHandler):
 
 
 class File(RequestHandler):
-    "Send the file data."
+    "Return the file data."
 
     def get(self, name):
-        self.file = self.get_entity_view('file/name', name)
-        filename = self.file['_attachments'].keys()[0]
-        infile = self.db.get_attachment(self.file, filename)
-        if infile is None:
+        self.doc = self.get_entity_view('file/name', name)
+        filename = self.doc['_attachments'].keys()[0]
+        outfile = self.db.get_attachment(self.doc, filename)
+        if outfile is None:
             self.write('')
         else:
-            self.write(infile.read())
-            infile.close()
-        self.set_header('Content-Type', self.file['content_type'])
+            self.write(outfile.read())
+            outfile.close()
+        self.set_header('Content-Type', self.doc['content_type'])
 
 
 class FileDownload(File):
@@ -82,7 +82,7 @@ class FileDownload(File):
 
     def get(self, name):
         super(FileDownload, self).get(name)
-        ext = utils.get_filename_extension(self.file['content_type'])
+        ext = utils.get_filename_extension(self.doc['content_type'])
         if ext:
             name += ext 
         self.set_header('Content-Disposition',
@@ -95,9 +95,9 @@ class FileMeta(RequestHandler):
     @tornado.web.authenticated
     def get(self, name):
         self.check_admin()
-        file = self.get_entity_view('file/name', name)
-        title = file.get('title') or file['name']
-        self.render('file_meta.html', file=file, title=title)
+        doc = self.get_entity_view('file/name', name)
+        title = doc.get('title') or doc['name']
+        self.render('file_meta.html', file=doc, title=title)
 
     @tornado.web.authenticated
     def post(self, name):
@@ -178,3 +178,7 @@ class FileEdit(RequestHandler):
                 saver.set_file(infile, self.get_argument('name', None))
             saver['description'] = self.get_argument('description', None)
         self.see_other('file_meta', saver['name'])
+
+    def check_xsrf_cookie(self):
+        "Do not check for XSRF cookie here."
+        pass

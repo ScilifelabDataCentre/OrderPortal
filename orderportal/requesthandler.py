@@ -2,6 +2,7 @@
 
 from __future__ import print_function, absolute_import
 
+import base64
 import logging
 import traceback
 import urllib
@@ -80,32 +81,65 @@ class RequestHandler(tornado.web.RequestHandler):
         This overrides a tornado function, otherwise it should have
         been called 'get_current_account', since terminology 'account'
         is used in this code rather than 'user'."""
+        account = self.get_current_user_session()
+        if not account:
+            account = self.get_current_user_basic()
+        if not account:
+            account = self.get_current_user_api_key()
+        return account
+
+    def get_current_user_session(self):
+        """Get the current user from a secure login session cookie.
+        Return None if no attempt at authentication.
+        Raise ValueError if incorrect authentication."""
         email = self.get_secure_cookie(
             constants.USER_COOKIE,
             max_age_days=settings['LOGIN_MAX_AGE_DAYS'])
-        if email:
-            try:
-                account = self.get_account(email)
-            except ValueError:
-                return None
-            # Check if login session is invalidated.
-            if account.get('login') is None:
-                return None
+        if not email: return None
+        account = self.get_account(email)
+        # Check if login session is invalidated.
+        if account.get('login') is None: raise ValueError
+        logging.debug("Session login account %s", account['email'])
+        return account
+
+    def get_current_user_basic(self):
+        """Get the current user by HTTP Basic authentication.
+        This should be used only if the site is using TLS (SSL, https).
+        Return None if no attempt at authentication.
+        Raise ValueError if incorrect authentication."""
+        try:
+            auth = self.request.headers['Authorization']
+        except KeyError:
+            return None
+        try:
+            auth = auth.split()
+            if auth[0].lower() != 'basic': raise ValueError
+            auth = base64.b64decode(auth[1])
+            email, password = auth.split(':', 1)
+            account = self.get_account(email)
+            if utils.hashed_password(password) != account.get('password'):
+                raise ValueError
+        except (IndexError, ValueError, TypeError):
+            raise
+            # raise ValueError
+        logging.debug("Basic auth login account %s", account['email'])
+        return account
+
+    def get_current_user_api_key(self):
+        """Get the current user by API key authentication.
+        Return None if no attempt at authentication.
+        Raise ValueError if incorrect authentication."""
+        try:
+            api_key = self.request.headers[constants.API_KEY_HEADER]
+        except KeyError:
+            return None
         else:
             try:
-                api_key = self.request.headers[constants.API_KEY_HEADER]
-            except KeyError:
-                return None
-            else:
-                try:
-                    account = self.get_entity_view('account/api_key', api_key)
-                except tornado.web.HTTPError:
-                    raise tornado.web.HTTPError(401)
-                logging.debug("API login account %s", account['email'])
-        # Check that account is enabled.
-        if account.get('status') != constants.ENABLED:
-            return None
-        return account
+                account = self.get_entity_view('account/api_key', api_key)
+            except tornado.web.HTTPError:
+                raise ValueError
+            logging.debug("API key login account %s", account['email'])
+            return account
 
     def write_error(self, status_code, **kwargs):
         """Override to implement custom error pages.
