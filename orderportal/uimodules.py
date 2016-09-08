@@ -31,7 +31,7 @@ class Icon(tornado.web.UIModule):
         title = title or alt
         value = ICON_TEMPLATE.format(url=url, alt=alt, title=title)
         if label:
-            value = '<span class="nobr">{} {}</span>'.format(value, title)
+            value = '<span class="nobr">{0} {1}</span>'.format(value, title)
         return value
 
 class ContentType(tornado.web.UIModule):
