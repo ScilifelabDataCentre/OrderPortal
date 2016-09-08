@@ -17,8 +17,7 @@
     <td>
       <h4>
 	<a href="{{ reverse_url('file_download', file['name']) }}">
-	  {{ file['name'] }}
-	  {% module ContentType(file['content_type']) %}
+	  {{ file.get('title') or file['name'] }}
 	</a>
 	{% if is_admin and file.get('hidden') %}
 	(hidden)
@@ -26,12 +25,17 @@
       </h4>
       {% module Markdown(file.get('description')) %}
     </td>
-    <td class="nobr">
+    <td class="nobr number">
       {% if file['size'] < 2000 %}
         {{ file['size'] }} B
       {% else %}
         {{ int(0.5 + file['size'] / 1000.0) }} kB
       {% end %}
+    </td>
+    <td>
+      <a href="{{ reverse_url('file', file['name']) }}">
+	{% module ContentType(file['content_type']) %}
+      </a>
     </td>
     <td>
       <span class="nobr localtime">{{ file['modified'] }}</span>

@@ -3,6 +3,7 @@
 from __future__ import print_function, absolute_import
 
 import logging
+import os.path
 from cStringIO import StringIO
 
 import tornado.web
@@ -32,9 +33,8 @@ class FileSaver(saver.Saver):
 
     def set_file(self, infile, name=None):
         self.file = infile
-        name = name or infile.filename
-        self.check_name(name)
-        self['name'] = name
+        if name:
+            self['name'] = name
         self['size'] = len(infile.body)
         self['content_type'] = infile.content_type or 'application/octet-stream'
 
@@ -97,7 +97,11 @@ class FileCreate(RequestHandler):
                     infile = self.request.files['file'][0]
                 except (KeyError, IndexError):
                     raise ValueError('No file uploaded.')
-                saver.set_file(infile, self.get_argument('name', None))
+                name = self.get_argument('name', None) or \
+                       os.path.splitext(infile.filename)[0]
+                saver.check_name(name)
+                saver.set_file(infile, name)
+                saver['title'] = self.get_argument('title', None)
                 saver['hidden'] = utils.to_bool(self.get_argument('hidden',
                                                                   False))
                 saver['description'] = self.get_argument('description', None)
@@ -132,14 +136,14 @@ class FileEdit(RequestHandler):
             return
         file = self.get_entity_view('file/name', name)
         with FileSaver(doc=file, rqh=self) as saver:
-            saver['title'] = self.get_argument('title', None)
             try:
                 infile = self.request.files['file'][0]
             except (KeyError, IndexError):
                 # No new file upload, just leave it alone.
                 saver.file = None
             else:
-                saver.set_file(infile, self.get_argument('name', None))
+                saver.set_file(infile)
+            saver['title'] = self.get_argument('title', None)
             saver['hidden'] = utils.to_bool(self.get_argument('hidden', False))
             saver['description'] = self.get_argument('description', None)
         self.see_other('files')
