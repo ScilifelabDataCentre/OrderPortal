@@ -105,6 +105,7 @@ DEFAULT_MAX_DISPLAY_LOG = 20
 CONTENT_TYPE_ICONS = {
     JSON_MIME: 'json.png',
     CSV_MIME: 'csv.png',
+    HTML_MIME: 'html.png',
     'application/pdf': 'pdf.png',
     'image/png': 'image.png',
     'image/jpeg': 'image.png',
