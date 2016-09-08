@@ -57,7 +57,10 @@ class Files(RequestHandler):
 
     def get(self):
         view = self.db.view('file/name', include_docs=True)
-        files = [r.doc for r in view]
+        if self.is_admin():
+            files = [r.doc for r in view]
+        else:
+            files = [r.doc for r in view if not r.doc.get('hidden')]
         files.sort(lambda i,j: cmp(i['modified'], j['modified']), reverse=True)
         self.render('files.html', all_files=files)
 
@@ -95,11 +98,21 @@ class FileCreate(RequestHandler):
                 except (KeyError, IndexError):
                     raise ValueError('No file uploaded.')
                 saver.set_file(infile, self.get_argument('name', None))
+                saver['hidden'] = utils.to_bool(self.get_argument('hidden',
+                                                                  False))
                 saver['description'] = self.get_argument('description', None)
         except ValueError, msg:
             self.see_other('files', error=str(msg))
         else:
             self.see_other('files')
+
+
+class FileCreateApiV1(FileCreate):
+    "Create a new file via a script."
+
+    def check_xsrf_cookie(self):
+        "Do not check for XSRF cookie when script is calling."
+        pass
 
 
 class FileEdit(RequestHandler):
@@ -127,6 +140,7 @@ class FileEdit(RequestHandler):
                 saver.file = None
             else:
                 saver.set_file(infile, self.get_argument('name', None))
+            saver['hidden'] = utils.to_bool(self.get_argument('hidden', False))
             saver['description'] = self.get_argument('description', None)
         self.see_other('files')
 

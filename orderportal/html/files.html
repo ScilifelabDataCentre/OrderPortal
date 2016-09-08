@@ -20,6 +20,9 @@
 	  {{ file['name'] }}
 	  {% module ContentType(file['content_type']) %}
 	</a>
+	{% if is_admin and file.get('hidden') %}
+	(hidden)
+	{% end %}
       </h4>
       {% module Markdown(file.get('description')) %}
     </td>
