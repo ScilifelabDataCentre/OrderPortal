@@ -11,15 +11,17 @@ Per Kraulis 2016-09-09
 
 from __future__ import print_function, absolute_import
 
+import sys
+
 import requests
 import yaml
 
 API_KEY_HEADER = 'X-OrderPortal-API-key'
 
-SETTINGS_FILEPATH = '/home/genomics.www/OrderPortal/orderportal/stockholm_dashboard.yaml'
-###SETTINGS_FILEPATH = '/home/pjk/projects/orderportal/orderportal/stockholm_dashboard.yaml'
+if len(sys.argv) != 2:
+    raise ValueError('settings filepath argument is required')
 
-with open(SETTINGS_FILEPATH) as infile:
+with open(sys.argv[1]) as infile:
     settings = yaml.safe_load(infile)
 
 headers = {API_KEY_HEADER: settings['API_KEY']}
