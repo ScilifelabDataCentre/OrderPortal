@@ -81,12 +81,15 @@ class RequestHandler(tornado.web.RequestHandler):
         This overrides a tornado function, otherwise it should have
         been called 'get_current_account', since terminology 'account'
         is used in this code rather than 'user'."""
-        account = self.get_current_user_session()
-        if not account:
-            account = self.get_current_user_basic()
-        if not account:
-            account = self.get_current_user_api_key()
-        return account
+        try:
+            account = self.get_current_user_session()
+            if not account:
+                account = self.get_current_user_basic()
+            if not account:
+                account = self.get_current_user_api_key()
+            return account
+        except ValueError:
+            raise tornado.web.HTTPError(403)
 
     def get_current_user_session(self):
         """Get the current user from a secure login session cookie.
@@ -120,8 +123,7 @@ class RequestHandler(tornado.web.RequestHandler):
             if utils.hashed_password(password) != account.get('password'):
                 raise ValueError
         except (IndexError, ValueError, TypeError):
-            raise
-            # raise ValueError
+            raise ValueError
         logging.debug("Basic auth login account %s", account['email'])
         return account
 
