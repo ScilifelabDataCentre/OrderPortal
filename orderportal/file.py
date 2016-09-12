@@ -56,13 +56,15 @@ class Files(RequestHandler):
     "List of files page."
 
     def get(self):
-        view = self.db.view('file/name', include_docs=True)
+        docs = [r.doc for r in self.db.view('file/name', include_docs=True)]
+        files = [d for d in docs if not d.get('hidden')]
         if self.is_admin():
-            files = [r.doc for r in view]
+            hidden = [d for d in docs if d.get('hidden')]
         else:
-            files = [r.doc for r in view if not r.doc.get('hidden')]
+            hidden = []
         files.sort(lambda i,j: cmp(i['modified'], j['modified']), reverse=True)
-        self.render('files.html', all_files=files)
+        hidden.sort(lambda i,j: cmp(i['modified'], j['modified']), reverse=True)
+        self.render('files.html', files=files, hidden=hidden)
 
 
 class File(RequestHandler):
