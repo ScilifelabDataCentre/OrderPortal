@@ -54,7 +54,8 @@ TEXT    = 'text'
 DATE    = 'date'
 ### This constant already defined above.
 ### GROUP   = 'group'
-TYPES   = [STRING, INT, FLOAT, BOOLEAN, URL, SELECT, TEXT, DATE, GROUP]
+### FILE    = 'file'
+TYPES = [STRING, INT, FLOAT, BOOLEAN, URL, SELECT, TEXT, DATE, FILE, GROUP]
 TYPE_LABELS = {INT: 'integer'}
 TYPE_HTML = {STRING: 'text', INT: 'number'}
 

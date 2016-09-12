@@ -3,7 +3,7 @@
 {% extends "base.html" %}
 
 {% block head_title %}Edit order '{{ order['title'] }}'{% end %}
-{% block body_title %} Edit order '{{ order['title'] }}'{% end %}
+{% block body_title %}Edit order '{{ order['title'] }}'{% end %}
 
 {% block content %}
 <h3>{{ form['title'] }}</h3>
@@ -33,6 +33,7 @@
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
       class="myForm"
       role="form"
+      enctype="multipart/form-data"
       method="POST">
   {% module xsrf_form_html() %}
 
@@ -58,7 +59,7 @@
     <div class="row">
       <div class="col-md-9">
 	<label class="control-label" for="__tags__">Keywords</label>
-	{# A user was confused by terminology. No change in code. #}
+	{# A user was confused by terminology. No change in the code. #}
 	{% if is_staff %}
 	{% set tags = order.get('tags', []) %}
 	{% else %}
@@ -103,8 +104,8 @@
     </div>
     <span class="help-block">
       {% if is_admin %}
-      The order's owner specified by email address. May be changed to
-      another account.
+      The order's owner specified by email address.
+      May be changed to another account.
       {% else %}
       The order's owner may be changed to an account in your groups.
       <strong>NOTE:</strong>
