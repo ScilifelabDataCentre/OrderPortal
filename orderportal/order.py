@@ -129,7 +129,7 @@ class OrderSaver(saver.Saver):
 
     def post_process(self):
         "Save or delete the file as an attachment to the document."
-        # Try deleting file.
+        # First try deleting a named file.
         try:
             filename = self.delete_filename
         except AttributeError:

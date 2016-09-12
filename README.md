@@ -1,6 +1,9 @@
 OrderPortal
 ===========
 
+The [GitHub wiki](https://github.com/pekrau/OrderPortal/wiki) contains
+technical instructions and information.
+
 Background
 ----------
 
@@ -10,11 +13,12 @@ which is a service facility for DNA sequencing and genotyping on
 samples provided by external researchers. The facility processes
 the samples according to the order from the scientist.
 
-The OrderPortal system has been designed to work for other types of
-facilities. The system is not hard-wired for DNA sequencing. On the
-contrary, considerable effort has gone into making sure the design is
-as general as possible. This means that configuration of a number of
-aspects of the system is required for a new installation.
+The OrderPortal system has been designed to work for different types
+of service facilities. The system is not hardcoded for DNA
+sequencing. On the contrary, considerable effort has gone into making
+sure the design is as general as possible. This means that
+installation of the system requires configuration of a number of
+aspects.
 
 __Note__: A few of the features described in this document have not
 yet been implemented.
@@ -26,7 +30,7 @@ We needed a portal where users (researchers) can place orders for a
 project to be executed by a research service facility. The portal had
 to have the following features:
 
-* Allow users to register an account, which is approved by the facility.
+* Allow users to register an account, which is approved by the facility staff.
 * Allow the user to specify an order.
 * Allow the user to submit the order to the facility.
 * Let the facility staff keep track of review and agreements.
@@ -41,37 +45,41 @@ to have the following features:
 Design outline
 --------------
 
-The system is a portal for orders (_a.k.a._ requests, project
+The system is a portal for orders (_a.k.a._ requests or project
 applications) to one single facility from its users. A user is a
 researcher external to the service facility, and may or may not be the
 Principal Investigator (PI) for one or more projects.
 
-The OrderPortal system is designed for only one facility, having a
-small-ish number of order input forms. Each form contains data fields
-that can be hierarchically organized.
+An order is created from a template which is called a form in this
+system. The facility administrators must set up and publish the order
+forms for a researcher to be able to create and order. Each form
+contains data fields that can be hierarchically organized.
 
-The system can be used for several facilities within the same
-organisation by running several independent instances of it.
+The OrderPortal system is designed for only one facility, displaying
+maybe 3-8 different order forms. The system can be used for several
+facilities within the same organisation by running several independent
+OrderPortal instances. Each instance must use its own database.
 
 A user account is defined within each OrderPortal instance separately.
 We decided against a design based on a single central user account
 database for all facilities. The email address of the user is used as
 the user account identifier.
 
-The design of an order form setup is fairly general; there is nothing
-that is hardcoded for specific domains of science. The content of the
-order forms is defined by the facility admins. An order form can be
-used when it has been enabled. An outdated order form can be disabled;
-its orders will still be accessible.
+The design of an order form is fairly general; there is nothing that
+is hardcoded for specific domains of science. The content of the order
+forms consists of a different fields for different types of input
+data. The order forms are defined by the facility administrators. An
+order form can be used only when it has been enabled. An outdated
+order form can be disabled; its orders will still be accessible.
 
 The design of the system is kept as flexible and general as
 possible. Customisation of site logo and title is possible, and the
-information pages are under control of the site administrators.
+information pages are under control of the facility administrators.
 
 The order form
 --------------
 
-The order form fields are fully configurable by the facility admins
+The order form fields are fully configurable by the facility administrators
 via the web interface. The field definitions are generic, and allow
 order forms to be designed for a wide variety of input data.
 
@@ -89,7 +97,7 @@ Simple info page facility
 
 There is a very simple information page facility in the system. This
 is not by far a full-fledged wiki, so it can be used only for basic needs.
-All admins in the system can edit these pages via the web interface.
+All administrators in the system can edit these pages via the web interface.
 
 Facility
 --------
@@ -103,7 +111,7 @@ There are three reasons for this design choice:
 
 1. Security between facilities. The existence and contents of a
    particular project in one facility must not be visible to the
-   admins or staff of another facility. This is a strict requirement
+   administrators or staff of another facility. This is a strict requirement
    for some facilities, and it is easier to implement if the databases
    for each facility is separate from one another.
 
@@ -145,7 +153,7 @@ orders. An account can always be enabled again.
 
 An external scientist applies for a user account by providing the
 relevant information. Such an account is created with a status of
-"pending".  The admin reviews the pending user account and enables it
+"pending". The administrator reviews the pending user account and enables it
 if it appears legitimate. The user gets an email about the account
 having been enabled and with instructions on how to set the password
 for it.
@@ -164,8 +172,8 @@ individual order.
 Order: form and fields
 ----------------------
 
-The admin designs the forms and their set of fields which determine
-what the user must fill in for an order. The admin can clone a form in
+The administrator designs the forms and their set of fields which determine
+what the user must fill in for an order. The administrator can clone a form in
 order to make a new variant. Old forms can be disabled, and new forms
 enabled, as needed.
 
@@ -243,9 +251,9 @@ highlighted to help the user prepare a valid order.
 This is for normal facility staff usage. Display of orders according
 to status and other parameters.
 
-### Admin web interface
+### Administrator web interface
 
-For admins only, this interface enables editing orders, users and
+For administrators only, this interface enables editing orders, users and
 fields. This includes the ability to move orders along into different
 statuses.
 
