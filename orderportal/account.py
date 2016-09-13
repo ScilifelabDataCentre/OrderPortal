@@ -52,11 +52,11 @@ class AccountSaver(saver.Saver):
     def check_required(self):
         "Check that required data is present. Raise ValueError otherwise."
         if not self['first_name']:
-            raise ValueError('First name is required')
+            raise ValueError('First name is required.')
         if not self['last_name']:
-            raise ValueError('Last name is required')
+            raise ValueError('Last name is required.')
         if not self['university']:
-            raise ValueError('University is required')
+            raise ValueError('University is required.')
 
 
 class Accounts(RequestHandler):
@@ -284,7 +284,7 @@ class AccountMixin(object):
     def check_readable(self, account):
         "Check that the account is readable by the current user."
         if self.is_readable(account): return
-        raise ValueError('you may not read the account')
+        raise ValueError('You may not read the account.')
 
     def is_editable(self, account):
         "Is the account editable by the current user?"
@@ -295,7 +295,7 @@ class AccountMixin(object):
     def check_editable(self, account):
         "Check that the account is editable by the current user."
         if self.is_readable(account): return
-        raise ValueError('you may not edit the account')
+        raise ValueError('You may not edit the account.')
 
 
 class Account(AccountMixin, RequestHandler):
@@ -338,7 +338,7 @@ class Account(AccountMixin, RequestHandler):
             self.delete(email)
             return
         raise tornado.web.HTTPError(
-            405, reason='internal problem; POST only allowed for DELETE')
+            405, reason='Internal problem; POST only allowed for DELETE.')
 
     @tornado.web.authenticated
     def delete(self, email):
@@ -347,7 +347,7 @@ class Account(AccountMixin, RequestHandler):
         self.check_admin()
         if not self.is_deletable(account):
             self.see_other('account', account['email'],
-                           error='account cannot be deleted')
+                           error='Account cannot be deleted.')
             return
         # Delete the groups this account owns.
         view = self.db.view('group/owner',
@@ -460,7 +460,7 @@ class AccountOrdersMixin(object):
     def check_readable(self, account):
         "Check that the account is readable by the current user."
         if self.is_readable(account): return
-        raise ValueError('you may not view these orders')
+        raise ValueError('You may not view these orders.')
 
 
 class AccountOrders(AccountOrdersMixin, RequestHandler):
@@ -653,7 +653,7 @@ class AccountEdit(AccountMixin, RequestHandler):
                 if self.is_admin():
                     role = self.get_argument('role')
                     if role not in constants.ACCOUNT_ROLES:
-                        raise ValueError('invalid role')
+                        raise ValueError('Invalid role.')
                     saver['role'] = role
                 saver['first_name'] = self.get_argument('first_name')
                 saver['last_name'] = self.get_argument('last_name')
@@ -721,7 +721,7 @@ class Login(RequestHandler):
         except tornado.web.MissingArgumentError:
             self.see_other('home', error='Missing email or password argument.')
             return
-        msg = 'No such account or invalid password.'
+        msg = 'Sorry, no such account or invalid password.'
         try:
             account = self.get_account(email)
         except ValueError, msg:
@@ -948,7 +948,7 @@ class Register(RequestHandler):
                     country=self.get_argument('invoice_country', None))
                 saver['phone'] = self.get_argument('phone', None)
                 if not email:
-                    raise ValueError('Email is required')
+                    raise ValueError('Email is required.')
                 saver.set_email(email)
                 saver['owner'] = saver['email']
                 saver['role'] = constants.USER
