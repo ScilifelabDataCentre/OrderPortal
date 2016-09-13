@@ -171,9 +171,12 @@
 
     {% elif field['type'] == constants.FILE %}
     <input type="file"
+	   class="form-control"
 	   name="{{ field['identifier'] }}"
-	   id="{{ field['identifier'] }}"
-	   class="form-control"> {# No value: existing file not shown. #}
+	   id="{{ field['identifier'] }}">
+      {% if value %}
+      Currently loaded file: {{ value }}
+      {% end %}
 
     {% else %} {# All other field types: string, integer, float, url #}
     {% if value is None %}
