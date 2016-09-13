@@ -186,13 +186,13 @@ class RequestHandler(tornado.web.RequestHandler):
         "Check if current user is admin."
         if not self.is_admin():
             raise tornado.web.HTTPError(
-                403, reason="role 'admin' is required for this")
+                403, reason="Role 'admin' is required for this.")
 
     def check_staff(self):
         "Check if current user is staff or admin."
         if not self.is_staff():
             raise tornado.web.HTTPError(
-                403, reason="role 'staff' is required for this")
+                403, reason="Role 'staff' is required for this.")
 
     def get_admins(self):
         "Get the list of enabled admin accounts."
@@ -242,16 +242,16 @@ class RequestHandler(tornado.web.RequestHandler):
         try:
             entity = self.db[iuid]
         except couchdb.ResourceNotFound:
-            raise tornado.web.HTTPError(404, reason='no such entity')
+            raise tornado.web.HTTPError(404, reason='Sorry, no such entity.')
         try:
             if doctype is not None and entity[constants.DOCTYPE] != doctype:
                 raise KeyError
         except KeyError:
             raise tornado.web.HTTPError(
-                404, reason='internal problem: invalid entity doctype')
+                404, reason='Internal problem: invalid entity doctype.')
         return entity
 
-    def get_entity_view(self, viewname, key, reason='no such entity'):
+    def get_entity_view(self, viewname, key, reason='Sorry, no such entity.'):
         """Get the entity by the view name and the key.
         Raise HTTP 404 if no such entity.
         """
@@ -326,7 +326,7 @@ class RequestHandler(tornado.web.RequestHandler):
         try:
             return self.get_entity_view('account/email', email.strip().lower())
         except tornado.web.HTTPError:
-            raise ValueError('no such account')
+            raise ValueError('Sorry, no such account.')
 
     def get_account_order_count(self, email):
         "Get the number of orders for the account."

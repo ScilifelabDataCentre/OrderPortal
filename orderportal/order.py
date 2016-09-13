@@ -193,7 +193,7 @@ class OrderMixin(object):
         "Check if current user may attach a file to the order."
         if self.is_attachable(order): return
         raise tornado.web.HTTPError(
-            403, reason='you may not attach a file to the order')
+            403, reason='You may not attach a file to the order.')
 
     def get_order_status(self, order):
         "Get the order status lookup item."
@@ -444,7 +444,11 @@ class Order(OrderMixin, RequestHandler):
             match = re.match(settings['ORDER_IDENTIFIER_REGEXP'], iuid)
             if not match: raise KeyError
         except KeyError:
-            order = self.get_entity(iuid, doctype=constants.ORDER)
+            try:
+                order = self.get_entity(iuid, doctype=constants.ORDER)
+            except tornado.web.HTTPError, msg:
+                self.see_other('home', error=str(msg))
+                return
             if order.get('identifier'):
                 self.see_other('order', order.get('identifier'))
                 return
@@ -484,7 +488,7 @@ class Order(OrderMixin, RequestHandler):
             self.delete(iuid)
             return
         raise tornado.web.HTTPError(
-            405, reason='internal problem; POST only allowed for DELETE')
+            405, reason='Internal problem; POST only allowed for DELETE.')
 
     @tornado.web.authenticated
     def delete(self, iuid):
@@ -662,11 +666,11 @@ class OrderEdit(OrderMixin, RequestHandler):
                     owner = self.get_argument('__owner__')
                     account = self.get_account(owner)
                     if account.get('status') != constants.ENABLED:
-                        raise ValueError('owner account is not enabled')
+                        raise ValueError('Owner account is not enabled.')
                 except tornado.web.MissingArgumentError:
                     pass
                 except tornado.web.HTTPError:
-                    raise ValueError('no such owner account')
+                    raise ValueError('Sorry, no such owner account.')
                 else:
                     saver['owner'] = account['email']
                 saver.update_fields(Fields(form))
@@ -747,7 +751,7 @@ class OrderTransition(OrderMixin, RequestHandler):
             if target['identifier'] == targetid: break
         else:
             raise tornado.web.HTTPError(
-                403, reason='invalid order transition target')
+                403, reason='Invalid order transition target.')
         with OrderSaver(doc=order, rqh=self) as saver:
             saver.set_status(targetid)
         self.prepare_message(order)
@@ -782,7 +786,7 @@ class OrderFile(OrderMixin, RequestHandler):
             self.delete(iuid, filename)
             return
         raise tornado.web.HTTPError(
-            405, reason='internal problem; POST only allowed for DELETE')
+            405, reason='Internal problem; POST only allowed for DELETE.')
 
     @tornado.web.authenticated
     def delete(self, iuid, filename):

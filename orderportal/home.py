@@ -154,11 +154,11 @@ class Entity(RequestHandler):
         elif doc[constants.DOCTYPE] == constants.ACCOUNT:
             self.see_other('account', doc['email'])
         else:
-            self.see_other('home', error='No such entity found.')
+            self.see_other('home', error='Sorry, no such entity found.')
 
 
 class NoSuchEntity(RequestHandler):
     "Error message on home page."
 
     def get(self):
-        self.see_other('home', error='No such entity found.')
+        self.see_other('home', error='Sorry, no such entity found.')

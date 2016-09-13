@@ -119,7 +119,7 @@ class Form(FormMixin, RequestHandler):
             self.delete(iuid)
             return
         raise tornado.web.HTTPError(
-            405, reason='internal problem; POST only allowed for DELETE')
+            405, reason='Internal problem; POST only allowed for DELETE.')
 
     @tornado.web.authenticated
     def delete(self, iuid):
@@ -211,7 +211,7 @@ class FormCreate(RequestHandler):
                 data = json.loads(infile.body)
                 if data.get(constants.DOCTYPE) != constants.FORM and \
                    data.get('type') != 'form':
-                    raise ValueError('imported JSON is not a form')
+                    raise ValueError('Imported JSON is not a form.')
             except (KeyError, IndexError):
                 pass
             except Exception, msg:
@@ -412,7 +412,7 @@ class FormPending(RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         if form['status'] != constants.TESTING:
-            raise ValueError('form does not have status testing')
+            raise ValueError('Form does not have status testing.')
         with FormSaver(doc=form, rqh=self) as saver:
             saver['status'] = constants.PENDING
         view = self.db.view('order/form',
@@ -434,7 +434,7 @@ class FormTesting(RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         if form['status'] != constants.PENDING:
-            raise ValueError('form does not have status pending')
+            raise ValueError('Form does not have status pending.')
         with FormSaver(doc=form, rqh=self) as saver:
             saver['status'] = constants.TESTING
         self.see_other('form', iuid)
