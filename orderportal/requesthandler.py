@@ -4,6 +4,7 @@ from __future__ import print_function, absolute_import
 
 import base64
 import logging
+import socket
 import traceback
 import urllib
 
@@ -155,7 +156,12 @@ class RequestHandler(tornado.web.RequestHandler):
         the "current" exception for purposes of methods like
         ``sys.exc_info()`` or ``traceback.format_exc``.
         """
-        if self.settings.get("serve_traceback") and "exc_info" in kwargs:
+        if not hasattr(self, 'db'):
+            self.set_header('Content-Type', 'text/plain')
+            self.write('Site is down due to off-line back-end database.\n')
+            self.write('Try again later...\n')
+            self.finish()
+        elif self.settings.get("serve_traceback") and "exc_info" in kwargs:
             # in debug mode, try to send a traceback
             self.set_header('Content-Type', 'text/plain')
             for line in traceback.format_exception(*kwargs["exc_info"]):

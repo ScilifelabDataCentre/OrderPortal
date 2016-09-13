@@ -47,6 +47,7 @@ help_datatypes: |
   - **select**: A selection of predefined string values. The values are specificed in the field edit page.
   - **text**: A block of text spanning more than one line.
   - **date**: A valid date. Shown as a date selection widget.
+  - **file**: An attached file.
   - **group**: A group of fields. Does not contain any value of its own.
 
 contact: |

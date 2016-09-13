@@ -91,6 +91,12 @@
     {% set value = order['fields'].get(field['identifier']) %}
     {% if field['type'] == constants.TEXT %}
       {% module Markdown(value or '-') %}
+    {% elif field['type'] == constants.FILE %}
+      {% if value is None %}
+      -
+      {% else %}
+      file <a href="{{ reverse_url('order_file', order['_id'], value) }}">{{ value }}</a>
+      {% end %}
     {% else %}
       {% if value is None %}
       -

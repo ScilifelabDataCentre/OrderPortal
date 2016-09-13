@@ -22,6 +22,10 @@ from orderportal.requesthandler import RequestHandler, ApiV1Mixin
 class OrderSaver(saver.Saver):
     doctype = constants.ORDER
 
+    def setup(self):
+        "Additional setup: prepare for attaching files."
+        self.files = []
+
     def set_identifier(self, form):
         """Set the order identifier if format defined.
         Allow also for disabled, since admin may clone such orders."""
@@ -46,10 +50,36 @@ class OrderSaver(saver.Saver):
         # except for checkbox, in which case missing value means False.
         docfields = self.doc['fields']
         for field in fields:
-            try:
-                if field['type'] == constants.GROUP: continue
-
-                identifier = field['identifier']
+            if field['type'] == constants.GROUP: continue
+            identifier = field['identifier']
+            # try:
+            #     try:
+            #         value = self.rqh.get_argument(identifier)
+            #         if value == '': value = None
+            #     except tornado.web.MissingArgumentError:
+            #         # Missing arg means no change,
+            #         # which is not same as value None!
+            #         # Except for boolean checkbox:
+            #         if field['type'] == constants.BOOLEAN and field.get('checkbox'):
+            #             value = False
+            #         else:
+            #             continue
+            #     if value != docfields.get(identifier):
+            #         changed = self.changed.setdefault('fields', dict())
+            #         changed[identifier] = value
+            #         docfields[identifier] = value
+            # except ValueError, msg:
+            #     raise ValueError(u"{0} field {1}".
+            #                      format(msg, field['identifier']))
+            if field['type'] == constants.FILE:
+                try:
+                    infile = self.rqh.request.files[identifier][0]
+                except (KeyError, IndexError):
+                    continue
+                else:
+                    self.files.append(infile)
+                    value = infile.filename
+            else:
                 try:
                     value = self.rqh.get_argument(identifier)
                     if value == '': value = None
@@ -61,13 +91,10 @@ class OrderSaver(saver.Saver):
                         value = False
                     else:
                         continue
-                if value != docfields.get(identifier):
-                    changed = self.changed.setdefault('fields', dict())
-                    changed[identifier] = value
-                    docfields[identifier] = value
-            except ValueError, msg:
-                raise ValueError(u"{0} field {1}".
-                                 format(msg, field['identifier']))
+            if value != docfields.get(identifier):
+                changed = self.changed.setdefault('fields', dict())
+                changed[identifier] = value
+                docfields[identifier] = value
         self.check_fields_validity(fields)
 
     def check_fields_validity(self, fields):
@@ -129,25 +156,30 @@ class OrderSaver(saver.Saver):
 
     def post_process(self):
         "Save or delete the file as an attachment to the document."
-        # First try deleting a named file.
+        # Delete a named file.
         try:
             filename = self.delete_filename
-        except AttributeError:
-            pass
-        else:
+            for key in self.doc['fields']:
+                # XXX Somewhat dangerous: may delete a value that happens to
+                # be identical to the filename. Shouldn't be too commmon...
+                if self.doc['fields'][key] == filename:
+                    self.doc['fields'][key] = None
+                    self.db.save(self.doc)
+                    break
             self.db.delete_attachment(self.doc, filename)
             self.changed['file_deleted'] = filename
-            return
-        # No new file uploaded, just skip out.
-        if not hasattr(self, 'file'): return
-        # Using cStringIO here is a kludge.
-        # Don't ask me why this was required on one machine, but not another.
-        # The problem appeared on a Python 2.6 system, and involved Unicode.
-        # But I was unable to isolate it. I tested this in desperation...
-        self.db.put_attachment(self.doc,
-                               StringIO(self.file.body),
-                               filename=self.file.filename,
-                               content_type=self.file.content_type)
+        except AttributeError:
+            # Else add any new attached files.
+            # Using cStringIO here is a kludge.
+            # Don't ask me why this was required on a specific machine.
+            # The problem appeared on a Python 2.6 system and involved
+            # Unicode, but I was unable to isolate it.
+            # I found this solution by chance...
+            for file in self.files:
+                self.db.put_attachment(self.doc,
+                                       StringIO(file.body),
+                                       filename=file.filename,
+                                       content_type=file.content_type)
 
 
 class OrderMixin(object):
@@ -771,14 +803,14 @@ class OrderFile(OrderMixin, RequestHandler):
             return
         outfile = self.db.get_attachment(order, filename)
         if outfile is None:
-            self.write('')
+            self.see_other('order', iuid, error='No such file.')
         else:
             self.write(outfile.read())
             outfile.close()
-        self.set_header('Content-Type',
-                        order['_attachments'][filename]['content_type'])
-        self.set_header('Content-Disposition',
-                        'attachment; filename="{0}"'.format(filename))
+            self.set_header('Content-Type',
+                            order['_attachments'][filename]['content_type'])
+            self.set_header('Content-Disposition',
+                            'attachment; filename="{0}"'.format(filename))
 
     @tornado.web.authenticated
     def post(self, iuid, filename):
@@ -810,7 +842,7 @@ class OrderAttach(OrderMixin, RequestHandler):
             pass
         else:
             with OrderSaver(doc=order, rqh=self) as saver:
-                saver.file = infile
+                saver.files.append(infile)
                 saver['filename'] = infile.filename
                 saver['size'] = len(infile.body)
                 saver['content_type'] = infile.content_type or 'application/octet-stream'
