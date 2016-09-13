@@ -65,7 +65,7 @@ def load_settings(filepath=None, verbose=False, pidfile=None):
             if os.path.exists(filepath) and os.path.isfile(filepath):
                 break
         else:
-            raise ValueError('no settings file specified')
+            raise ValueError('No settings file specified.')
     if verbose:
         print('settings from', filepath, file=sys.stderr)
     with open(filepath) as infile:
@@ -102,11 +102,11 @@ def load_settings(filepath=None, verbose=False, pidfile=None):
     # Check settings
     for key in ['BASE_URL', 'DB_SERVER', 'COOKIE_SECRET', 'DATABASE']:
         if key not in settings:
-            raise KeyError("no settings['{0}'] item".format(key))
+            raise KeyError("No settings['{0}'] item.".format(key))
         if not settings[key]:
-            raise ValueError("settings['{0}'] has invalid value".format(key))
+            raise ValueError("settings['{0}'] has invalid value.".format(key))
     if len(settings.get('COOKIE_SECRET', '')) < 10:
-        raise ValueError("settings['COOKIE_SECRET'] not set, or too short")
+        raise ValueError("settings['COOKIE_SECRET'] not set, or too short.")
     # Read order state definitions and transitions
     with open(settings['ORDER_STATUSES_FILEPATH']) as infile:
         settings['ORDER_STATUSES'] = yaml.safe_load(infile)
@@ -114,12 +114,12 @@ def load_settings(filepath=None, verbose=False, pidfile=None):
     initial = None
     for status in settings['ORDER_STATUSES']:
         if status['identifier'] in lookup:
-            raise ValueError("order status '%s' multiple definitions" %
+            raise ValueError("Order status '%s' multiple definitions." %
                              status['identifier'])
         lookup[status['identifier']] = status
         if status.get('initial'): initial = status
     if not initial:
-        raise ValueError('no initial order status defined')
+        raise ValueError('No initial order status defined.')
     settings['ORDER_STATUS_INITIAL'] = initial
     with open(settings['ORDER_TRANSITIONS_FILEPATH']) as infile:
         settings['ORDER_TRANSITIONS'] = yaml.safe_load(infile)
@@ -188,7 +188,7 @@ def load_settings(filepath=None, verbose=False, pidfile=None):
         elif parts.scheme == 'https':
             settings['PORT'] =  443
         else:
-            raise ValueError('could not determine port from BASE_URL')
+            raise ValueError('Could not determine port from BASE_URL.')
 
 def expand_filepath(filepath):
     "Expand environment variables, the ROOT and SITE_DIR in filepaths."
@@ -218,7 +218,7 @@ def get_db(create=False):
         if create:
             return server.create(name)
         else:
-            raise KeyError("CouchDB database '%s' does not exist" % name)
+            raise KeyError("CouchDB database '%s' does not exist." % name)
 
 def get_iuid():
     "Return a unique instance identifier."
@@ -300,7 +300,7 @@ def check_password(password):
     """Check that the password is long and complex enough.
     Raise ValueError otherwise."""
     if len(password) < constants.MIN_PASSWORD_LENGTH:
-        raise ValueError("password must be at least {0} characters long".
+        raise ValueError("Password must be at least {0} characters long.".
                          format(constants.MIN_PASSWORD_LENGTH))
 
 def hashed_password(password):
