@@ -52,25 +52,6 @@ class OrderSaver(saver.Saver):
         for field in fields:
             if field['type'] == constants.GROUP: continue
             identifier = field['identifier']
-            # try:
-            #     try:
-            #         value = self.rqh.get_argument(identifier)
-            #         if value == '': value = None
-            #     except tornado.web.MissingArgumentError:
-            #         # Missing arg means no change,
-            #         # which is not same as value None!
-            #         # Except for boolean checkbox:
-            #         if field['type'] == constants.BOOLEAN and field.get('checkbox'):
-            #             value = False
-            #         else:
-            #             continue
-            #     if value != docfields.get(identifier):
-            #         changed = self.changed.setdefault('fields', dict())
-            #         changed[identifier] = value
-            #         docfields[identifier] = value
-            # except ValueError, msg:
-            #     raise ValueError(u"{0} field {1}".
-            #                      format(msg, field['identifier']))
             if field['type'] == constants.FILE:
                 try:
                     infile = self.rqh.request.files[identifier][0]
@@ -750,6 +731,7 @@ class OrderClone(OrderMixin, RequestHandler):
         if not self.is_clonable(order):
             raise ValueError('This order is outdated; its form has been disabled.')
         form = self.get_entity(order['form'], doctype=constants.FORM)
+        erased_files = set()
         fields = Fields(form)
         with OrderSaver(rqh=self) as saver:
             saver['form'] = form['_id']
@@ -758,6 +740,8 @@ class OrderClone(OrderMixin, RequestHandler):
             for field in fields:
                 id = field['identifier']
                 if field.get('erase_on_clone'):
+                    if field['type'] == constants.FILE:
+                        erased_files.add(order['fields'][id])
                     saver['fields'][id] = None
                 else:
                     saver['fields'][id] = order['fields'][id]
@@ -765,6 +749,14 @@ class OrderClone(OrderMixin, RequestHandler):
             saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
             saver.check_fields_validity(fields)
             saver.set_identifier(form)
+        for filename in order.get('_attachments', []):
+            if filename in erased_files: continue
+            stub = order['_attachments'][filename]
+            outfile = self.db.get_attachment(order, filename)
+            self.db.put_attachment(saver.doc,
+                                   outfile,
+                                   filename=filename,
+                                   content_type=stub['content_type'])
         self.redirect(self.order_reverse_url(saver.doc))
 
 
