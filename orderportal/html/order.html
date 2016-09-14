@@ -86,10 +86,7 @@
     {% module xsrf_form_html() %}
     <p>
       <button type="submit" class="btn btn-lg btn-success btn-block"
-	      {% if not is_admin %}
-	      onclick="return confirm('Cannot be undone! Really change status?');"
-	      {% end %}
-	      >
+	      onclick="return confirm('Cannot be undone! Really change status to \'{{ target['identifier'] }}\'?');">
 	{% module Icon(target['identifier']) %}
 	{{ target.get('action', target['identifier']) }}
       </button>
