@@ -3,9 +3,10 @@
 */
 $(document).ready(function() {
     var set_visible_if = function() {
+	var field = $(this);
 	var fieldId = $(this).attr('id');
 	var fieldType = $(this).attr('type');
-	var fieldVal = $(this).val();
+	var fieldValue = $(this).val();
 	var fieldChecked = $(this).is(':checked');
 	$('.visible-if').each(function () {
 	    if (fieldId === $(this).data('if-id')) {
@@ -27,10 +28,20 @@ $(document).ready(function() {
 			};
 		    };
 		} else {
-		    if (theseValues.indexOf(fieldVal) > -1) {
-			$(this).show('slow');
+		    /* Edge case: the initial value is undefined. */
+		    if (field.hasClass('undefined-value')) {
+			$(this).hide(0);
+			field.toggleClass('undefined-value');
 		    } else {
-			$(this).hide('slow');
+			if (theseValues.indexOf(fieldValue) > -1) {
+			    if (fieldChecked) {
+				$(this).show('slow');
+			    };
+			} else {
+			    if (fieldChecked) {
+				$(this).hide('slow');
+			    };
+			};
 		    };
 		};
 	    };
