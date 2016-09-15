@@ -124,7 +124,9 @@ class Fields(object):
         return new
 
     def update(self, identifier, rqh):
-        "Update the field from HTML form data in the RequestHandler instance."
+        """Update the field from HTML form data in the RequestHandler instance.
+        This includes moving the field into a different group,
+        or within a group."""
         assert identifier in self, 'field identifier must be defined in form'
         new = dict(label=rqh.get_argument('label', None),
                    required=utils.to_bool(
@@ -159,6 +161,7 @@ class Fields(object):
             if key == 'fields': continue
             if old.get(key) != value:
                 diff[key] = value
+        # Set a new parent; change the field's group.
         new_parent = rqh.get_argument('parent', '')
         if new_parent:
             if new_parent == '[top level]':
@@ -180,11 +183,9 @@ class Fields(object):
                 old_parent['fields'].remove(field)
             if new_parent == -1:
                 self.form['fields'].append(field)
-                # diff['parent'] = field['parent'] = None
                 diff['parent'] = None
             else:
                 new_parent['fields'].append(field)
-                # diff['parent'] = field['parent'] = new_parent['identifier']
                 diff['parent'] = new_parent['identifier']
             # This is required to refresh the parent and depth entries
             self.flatten()
@@ -198,7 +199,6 @@ class Fields(object):
             else:
                 siblings = self.get_siblings(field, self.form['fields'])
                 siblings.remove(field)
-                position = position.lower()
                 if position == '__first__':
                     siblings.insert(0, field)
                 else:
