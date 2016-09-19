@@ -60,6 +60,8 @@ class OrderSaver(saver.Saver):
                 else:
                     self.files.append(infile)
                     value = infile.filename
+            elif field['type'] == constants.MULTISELECT:
+                value = self.rqh.get_arguments(identifier)
             else:
                 try:
                     value = self.rqh.get_argument(identifier)
@@ -133,6 +135,14 @@ class OrderSaver(saver.Saver):
             elif field['type'] == constants.SELECT:
                 if value not in field['select']:
                     message = 'invalid selection'
+            elif field['type'] == constants.MULTISELECT:
+                if not value and field['required']:
+                    message = 'missing value'
+                else:
+                    for v in value:
+                        if v not in field['multiselect']:
+                            message = 'invalid selection'
+                            break
         if message:
             self.doc['invalid'][field['identifier']] = message
         return message is None

@@ -224,6 +224,8 @@
 	  {% if field['type'] == constants.SELECT %}
 	  ({{ field.get('display') or 'menu' }})
 	  <pre>{{ '\n'.join(field.get('select') or []) }}</pre>
+	  {% elif field['type'] == constants.MULTISELECT %}
+	  <pre>{{ '\n'.join(field.get('multiselect') or []) }}</pre>
 	  {% end %}
 	</td>
 	<td>
