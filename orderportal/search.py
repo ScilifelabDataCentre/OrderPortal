@@ -138,14 +138,24 @@ class SearchFields(RequestHandler):
 
     MAP_TEMPLATE = """function(doc) {{
   if (doc.orderportal_doctype !== 'order') return;
-  if (!doc.fields.{fieldid}) return;
-  var cleaned = doc.fields.{fieldid}.replace(/[:,']/g, " ").toLowerCase();
-  var words = cleaned.split(/\s+/);
-  words.forEach(function(word) {{
-    if (word.length > 2 && !lint[word]) emit(word, null);
-  }});
+  var value = doc.fields.{fieldid};
+  if (!value) return;
+  var type = typeof(value);
+  if (type === 'string') {{
+    var words = value.replace(/[:,']/g, " ").toLowerCase().split(/\s+/);
+  }} else if (type === 'number') {{
+    var words = [value.toString()];
+  }} else {{
+    var words = value;
+  }};
+  if (words.length) {{
+    words.forEach(function(word) {{
+      if (word.length > 2 && !lint[word]) emit(word, null);
+    }});
+  }};
 }};
 var lint = {{'and': 1, 'the': 1, 'was': 1, 'not': 1}};"""
+
 
     @tornado.web.authenticated
     def get(self):

@@ -156,6 +156,30 @@
     </select>
     {% end %} {# if field.get('display') == 'radio' #}
 
+    {% elif field['type'] == constants.MULTISELECT %}
+    <select class="form-control visible-if-source"
+	    multiple size="{{ min(8, len(field['multiselect']) + 1) }}"
+	    name="{{ field['identifier'] }}"
+	    id="{{ field['identifier'] }}">
+      {% set in_optgroup = False %}
+      {% set value = value or [] %}
+      {% for v in field['multiselect'] %}
+      {% if v in value %}
+      <option selected>{{ v }}</option>
+      {% elif v.startswith('-') %}
+      {% if in_optgroup %}
+      </optgroup>
+      {% end %}
+      <optgroup label="{{ v.lstrip('-').lstrip() }}">
+      {% else %}
+      <option>{{ v }}</option>
+      {% end %}
+      {% if in_optgroup %}
+      </optgroup>
+      {% end %}
+      {% end %}
+    </select>
+
     {% elif field['type'] == constants.TEXT %}
     <textarea class="form-control"
 	      name="{{ field['identifier'] }}"

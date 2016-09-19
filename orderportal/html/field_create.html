@@ -93,7 +93,7 @@
     </span>
   </div>
 
-  <div class="form-group visible-if"
+  <div class="form-group visible-if metafield"
        data-if-id="type"
        data-if-val="select">
     <div class="row">
@@ -103,12 +103,13 @@
       </div>
     </div>
     <span class="help-block">
-      Values to select among. One per line. The first value is the
-      default. May be edited later.
+      Values to select among. One per line. A label for a groups of
+      options is denoted by a leading dash '-'; this is just a group
+      label, and not an option in itself.  May be edited later.
     </span>
   </div>
 
-  <div class="form-group visible-if"
+  <div class="form-group visible-if metafield"
        data-if-id="type"
        data-if-val="select">
     <div class="row">
@@ -123,7 +124,23 @@
       </div>
     </div>
     <span class="help-block">
-      Display element to use for the field.
+      Type of display to use for the select field.
+    </span>
+  </div>
+
+  <div class="form-group visible-if metafield"
+       data-if-id="type"
+       data-if-val="multiselect">
+    <div class="row">
+      <div class="col-md-3">
+	<label class="control-label" for="multiselect">Multiselect</label>
+	<textarea class="form-control" name="multiselect" rows="4"></textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      Values to select among. One per line. A label for a groups of
+      options is denoted by a leading dash '-'; this is just a group
+      label, and not an option in itself.  May be edited later.
     </span>
   </div>
 

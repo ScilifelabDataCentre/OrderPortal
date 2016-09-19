@@ -27,6 +27,12 @@ $(document).ready(function() {
 			    $(this).show('slow');
 			};
 		    };
+		} else if ($(this).hasClass('metafield')) {
+		    if (theseValues.indexOf(fieldValue) > -1) {
+			$(this).show(0);
+		    } else {
+			$(this).hide(0);
+		    };
 		} else {
 		    /* Edge case: the initial value is undefined. */
 		    if (field.hasClass('undefined-value')) {

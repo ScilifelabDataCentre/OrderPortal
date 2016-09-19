@@ -91,6 +91,12 @@
     {% set value = order['fields'].get(field['identifier']) %}
     {% if field['type'] == constants.TEXT %}
       {% module Markdown(value or '-') %}
+    {% elif field['type'] == constants.MULTISELECT %}
+      {% if value %}
+      <p class="pre">{{ '\n'.join(value) }}</p>
+      {% else %}
+      -
+      {% end %}
     {% elif field['type'] == constants.FILE %}
       {% if value is None %}
       -
