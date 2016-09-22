@@ -9,7 +9,7 @@
 {% extends "base.html" %}
 
 {% block body_header_meta %}
-<a href="{{ reverse_url('order_api', order['_id']) }}">
+<a href="{{ order_reverse_url(order, api=True) }}">
   {% module Icon('json') %} JSON
 </a>
 {% end %}

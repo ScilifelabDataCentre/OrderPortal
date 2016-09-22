@@ -75,6 +75,14 @@ class OrderSaver(saver.Saver):
                     else:
                         continue
             if value != docfields.get(identifier):
+                try:
+                    name = field['processor']
+                    processor_class = settings['PROCESSORS'][name]
+                except KeyError:
+                    pass
+                else:
+                    processor = processor_class(self.db, self.doc, field)
+                    processor(value=value)
                 changed = self.changed.setdefault('fields', dict())
                 changed[identifier] = value
                 docfields[identifier] = value
@@ -89,9 +97,11 @@ class OrderSaver(saver.Saver):
 
     def check_validity(self, field):
         """Check validity of converted field values.
-        Skip field if not visible.
-        Else check recursively, postorder.
+        Execute the processor, if any.
+        Skip field if not visible, else check recursively in postorder.
+        Return True if valid, False otherwise.
         """
+        # XXX
         message = None
         select_id = field.get('visible_if_field')
         if select_id:
@@ -141,7 +151,7 @@ class OrderSaver(saver.Saver):
                 else:
                     for v in value:
                         if v not in field['multiselect']:
-                            message = 'invalid selection'
+                            message = 'value not among alternatives'
                             break
         if message:
             self.doc['invalid'][field['identifier']] = message
@@ -360,7 +370,7 @@ class OrderApiV1Mixin:
         for s in settings['ORDERS_LIST_STATUSES']:
             item['history'][s] = order['history'].get(s)
         item['links'] = dict(
-            self=dict(href=self.reverse_url('order_api', order['_id'])),
+            self=dict(href=self.order_reverse_url(order, api=True)),
             display=dict(href=self.order_reverse_url(order)))
         return item
 
@@ -474,9 +484,9 @@ class Order(OrderMixin, RequestHandler):
             except tornado.web.HTTPError, msg:
                 self.see_other('home', error=str(msg))
                 return
-            if order.get('identifier'):
-                self.see_other('order', order.get('identifier'))
-                return
+            # if order.get('identifier'):
+            #     self.see_other('order', order.get('identifier'))
+            #     return
         else:
             order = self.get_entity_view('order/identifier', match.group())
         try:

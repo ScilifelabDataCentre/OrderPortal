@@ -80,7 +80,7 @@ class Fields(object):
         return self._lookup[identifier]
 
     def add(self, identifier, rqh):
-        "Add a field from HTML form data in the RequestHandler instance."
+        "Add a form field from data in the RequestHandler instance."
         assert identifier not in self, 'field identifier must be unique in form'
         type = rqh.get_argument('type')
         assert type in constants.TYPES, 'invalid field type'
@@ -98,17 +98,20 @@ class Fields(object):
                    description=rqh.get_argument('description', None))
         if type == constants.GROUP:
             new['fields'] = []
+        # Set the possible values for menu or radiobuttons field.
         elif type == constants.SELECT:
             values = rqh.get_argument('select', '').split('\n')
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new['select'] = values
             new['display'] = rqh.get_argument('display', None) or 'menu'
+        # Set the possible values for a multiselect field.
         elif type == constants.MULTISELECT:
             values = rqh.get_argument('multiselect', '').split('\n')
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new['multiselect'] = values
+        # Set the group which the field is a member of.
         group = rqh.get_argument('group', None)
         if group == '': group = None
         for field in self:
@@ -129,7 +132,7 @@ class Fields(object):
         return new
 
     def update(self, identifier, rqh):
-        """Update the field from HTML form data in the RequestHandler instance.
+        """Update the form field from data in the RequestHandler instance.
         This includes moving the field into a different group,
         or within a group."""
         assert identifier in self, 'field identifier must be defined in form'
@@ -144,19 +147,7 @@ class Fields(object):
                        rqh.get_argument('erase_on_clone', False)),
                    description=rqh.get_argument('description', None))
         field = self._lookup[identifier]
-        if field['type'] == constants.SELECT:
-            values = rqh.get_argument('select', '').split('\n')
-            values = [v.strip() for v in values]
-            values = [v for v in values if v]
-            new['select'] = values
-            new['display'] = rqh.get_argument('display', None) or 'menu'
-        elif field['type'] == constants.MULTISELECT:
-            values = rqh.get_argument('multiselect', '').split('\n')
-            values = [v.strip() for v in values]
-            values = [v for v in values if v]
-            new['multiselect'] = values
-        elif field['type'] == constants.BOOLEAN:
-            new['checkbox'] = utils.to_bool(rqh.get_argument('checkbox', None))
+        # Conditional field setup
         identifier = rqh.get_argument('visible_if_field', None)
         if identifier == '': identifier = None
         new['visible_if_field'] = identifier
@@ -164,6 +155,29 @@ class Fields(object):
         if value:
             value = '|'.join([s.strip() for s in value.split('|') if s.strip()])
         new['visible_if_value'] = value
+        # Set the possible values for menu or radiobuttons field.
+        if field['type'] == constants.SELECT:
+            values = rqh.get_argument('select', '').split('\n')
+            values = [v.strip() for v in values]
+            values = [v for v in values if v]
+            new['select'] = values
+            new['display'] = rqh.get_argument('display', None) or 'menu'
+        # Set the possible values for a multiselect field.
+        elif field['type'] == constants.MULTISELECT:
+            values = rqh.get_argument('multiselect', '').split('\n')
+            values = [v.strip() for v in values]
+            values = [v for v in values if v]
+            new['multiselect'] = values
+        # Represent the boolean by a checkbox or a menu.
+        elif field['type'] == constants.BOOLEAN:
+            new['checkbox'] = utils.to_bool(rqh.get_argument('checkbox', None))
+        # Set the plugin processor a new field value.
+        name = rqh.get_argument('processor', None)
+        if name and name in settings['PROCESSORS']:
+            new['processor'] = name
+        else:
+            new['processor'] = None
+        # Record the changes.
         old = field.copy()
         field.update(new)
         diff = dict(identifier=field['identifier'])
@@ -197,7 +211,7 @@ class Fields(object):
             else:
                 new_parent['fields'].append(field)
                 diff['parent'] = new_parent['identifier']
-            # This is required to refresh the parent and depth entries
+            # This is required to refresh the parent and depth entries.
             self.flatten()
         # Repositioning a field is relevant only if parent stays the same.
         else:
