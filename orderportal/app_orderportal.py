@@ -33,11 +33,13 @@ def get_handlers():
     url = tornado.web.url
     urls = [url(r'/', Home, name='home')]
     try:
-        regexp = r"/order/({0})".format(settings['ORDER_IDENTIFIER_REGEXP'])
+        regexp = settings['ORDER_IDENTIFIER_REGEXP']
     except KeyError:
         pass
     else:
-        urls.append(url(regexp, Order, name='order_id'))
+        urls.append(url(r"/order/({0})".format(regexp), Order, name='order_id'))
+        urls.append(url(r"/api/v1/order/({0})".format(regexp),
+                        OrderApiV1, name='order_id_api'))
     urls.extend([
         url(r'/order/([0-9a-f]{32})', Order, name='order'),
         url(r'/api/v1/order/([0-9a-f]{32})', OrderApiV1, name='order_api'),
@@ -135,13 +137,7 @@ def get_handlers():
     urls.append(url(r'/.*', NoSuchEntity))
     return urls
 
-def main(pidfile=None):
-    logging.info("OrderPortal version %s", orderportal.__version__)
-    logging.info("settings from %s", settings['SETTINGS_FILEPATH'])
-    if settings['TORNADO_DEBUG']:
-        logging.info('tornado debug')
-    if settings['LOGGING_DEBUG']:
-        logging.info('logging debug')
+def main(pidfile=None, verbose=False):
     application = tornado.web.Application(
         handlers=get_handlers(),
         debug=settings.get('TORNADO_DEBUG', False),
@@ -166,6 +162,7 @@ def main(pidfile=None):
 if __name__ == "__main__":
     parser = utils.get_command_line_parser(description='Web app server.')
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
-    main(options.pidfile)
+    if options.verbose:
+        print("OrderPortal version", orderportal.__version__)
+    utils.load_settings(filepath=options.settings)
+    main(options.pidfile, verbose=options.verbose)

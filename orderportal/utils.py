@@ -45,7 +45,7 @@ def get_command_line_parser(usage='usage: %prog [options]', description=None):
                       help='force action, rather than ask for confirmation')
     return parser
 
-def load_settings(filepath=None, verbose=False, pidfile=None):
+def load_settings(filepath=None, pidfile=None):
     """Load and return the settings from the file path given by
     1) the argument to this procedure,
     2) the environment variable ORDERPORTAL_SETTINGS,
@@ -53,7 +53,7 @@ def load_settings(filepath=None, verbose=False, pidfile=None):
     Raise ValueError if no settings file was given.
     Raise IOError if settings file could not be read.
     Raise KeyError if a settings variable is missing.
-    Raise ValueError if the settings variable value is invalid.
+    Raise ValueError if a settings variable value is invalid.
     """
     if not filepath:
         filepath = os.environ.get('ORDERPORTAL_SETTINGS')
@@ -66,8 +66,6 @@ def load_settings(filepath=None, verbose=False, pidfile=None):
                 break
         else:
             raise ValueError('No settings file specified.')
-    if verbose:
-        print('settings from', filepath, file=sys.stderr)
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
     settings['SETTINGS_FILEPATH'] = filepath
@@ -77,7 +75,7 @@ def load_settings(filepath=None, verbose=False, pidfile=None):
         os.chdir(constants.ROOT)
     except KeyError:
         pass
-    # Expand environment variables, ROOT and SITE_DIR, once and for all
+    # Expand environment variables (ROOT, SITE_DIR) once and for all
     for key, value in settings.items():
         if isinstance(value, (str, unicode)):
             settings[key] = expand_filepath(value)
@@ -99,6 +97,12 @@ def load_settings(filepath=None, verbose=False, pidfile=None):
     except KeyError:
         pass
     logging.basicConfig(**kwargs)
+    logging.info("OrderPortal version %s", orderportal.__version__)
+    logging.info("settings from %s", settings['SETTINGS_FILEPATH'])
+    if settings['LOGGING_DEBUG']:
+        logging.info('logging debug')
+    if settings['TORNADO_DEBUG']:
+        logging.info('tornado debug')
     # Check settings
     for key in ['BASE_URL', 'DB_SERVER', 'COOKIE_SECRET', 'DATABASE']:
         if key not in settings:
@@ -107,6 +111,26 @@ def load_settings(filepath=None, verbose=False, pidfile=None):
             raise ValueError("settings['{0}'] has invalid value.".format(key))
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short.")
+    # Load processor classes
+    processors = settings['PROCESSORS']
+    for key, path in processors.items():
+        try:
+            module = __import__(path, fromlist=['test'])
+        except (ImportError, NameError), msg:
+            logging.error("could not import processor module %s", path)
+        else:
+            for name in dir(module):
+                entity = getattr(module, name)
+                if isinstance(entity, type) and \
+                   issubclass(entity, BaseProcessor) and \
+                   entity != BaseProcessor:
+                    processors[key] = entity
+                    logging.info("loaded processor %s (%s from %s)",
+                                 key, entity.__name__, path)
+                    break
+            else:
+                logging.error("invalid processor: %s", name)
+                del processors[key]
     # Read order state definitions and transitions
     with open(settings['ORDER_STATUSES_FILEPATH']) as infile:
         settings['ORDER_STATUSES'] = yaml.safe_load(infile)
@@ -191,7 +215,7 @@ def load_settings(filepath=None, verbose=False, pidfile=None):
             raise ValueError('Could not determine port from BASE_URL.')
 
 def expand_filepath(filepath):
-    "Expand environment variables, the ROOT and SITE_DIR in filepaths."
+    "Expand environment variables (ROOT and SITE_DIR) in filepaths."
     filepath = os.path.expandvars(filepath)
     old = None
     while filepath != old:
@@ -338,3 +362,27 @@ def get_filename_extension(content_type):
     if content_type == 'image/jpeg':
         return '.jpg'
     return mimetypes.guess_extension(content_type)
+
+
+class BaseProcessor(object):
+    "Base class for processor classes."
+
+    def __init__(self, db, order, field):
+        self._db = db
+        self._order = order
+        self._field = field
+
+    @property
+    def db(self):
+        return self._db
+
+    @property
+    def order(self):
+        return self._order
+
+    @property
+    def field(self):
+        return self._field
+
+    def __call__(self, **kwargs):
+        return "BaseProcessor %s" % kwargs.keys()

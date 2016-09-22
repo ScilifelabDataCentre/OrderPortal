@@ -294,6 +294,27 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
       </div>
     </div>
   </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+	<label class="control-label" for="processor">
+	  Field value processor
+	</label>
+	<select class="form-control" name="processor" id="processor">
+	  {% set sel = not field.get('processor') and 'selected' or '' %}
+	  <option value="" {{ sel }}>[none]</option>
+	  {% for processor in sorted(settings['PROCESSORS']) %}
+	  {% set sel = field.get('processor') == processor and 'selected' or '' %}
+	  <option {{ sel }}>{{ processor }}</option>
+	  {% end %}
+	</select>
+      </div>
+    </div>
+    <span class="help-block">
+      The named processor is called when the field value is changed.
+    </span>
+  </div>
   {% end %} {# if field['type'] != constants.GROUP #}
 
   <div class="form-group">

@@ -12,6 +12,7 @@ settings = dict(
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
     LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',
+    PROCESSORS=dict(),
     SITE_DIR='{ROOT}/generic',
     SITE_NAME='OrderPortal',
     DB_SERVER='http://localhost:5984/',
