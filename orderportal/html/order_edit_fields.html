@@ -114,12 +114,10 @@
     {% elif field['type'] == constants.SELECT %}
     {% if field.get('display') == 'radio' %}
     <div>
-      {% set undefined_value = value is None and 'undefined-value' or '' %}
       {% for v in field['select'] %}
       {% set checked = v == value and 'checked' or '' %}
       <label class="radio-inline">
-	<input type="radio"
-	       class="visible-if-source {{ undefined_value }}"
+	<input type="radio" class="visible-if-source"
 	       name="{{ field['identifier'] }}"
 	       {# XXX This is not proper HTML. But it works... #}
 	       id="{{ field['identifier'] }}"

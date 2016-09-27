@@ -95,8 +95,7 @@ def get_args():
 
 if __name__ == '__main__':
     (options, args) = get_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
     messenger = Messenger(utils.get_db(),
                           verbose=options.verbose,
                           dry_run=options.dry_run)

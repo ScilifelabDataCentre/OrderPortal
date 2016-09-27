@@ -34,8 +34,7 @@ if __name__ == '__main__':
     parser = utils.get_command_line_parser(description=
         'Load texts from file into the database.')
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
     if not options.force:
         response = raw_input('about to overwrite all current texts; are really sure? [n] > ')
         if not utils.to_bool(response):

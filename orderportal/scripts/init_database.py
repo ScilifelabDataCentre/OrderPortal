@@ -69,7 +69,6 @@ if __name__ == '__main__':
         response = raw_input('about to delete everything; really sure? [n] > ')
         if not utils.to_bool(response):
             sys.exit('aborted')
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
     init_database(dumpfilepath=options.FILE,
                   verbose=options.verbose)
