@@ -32,8 +32,7 @@ if __name__ == '__main__':
     parser = utils.get_command_line_parser(description=
         'Load a named text from file into the database.')
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
     if len(args) != 2:
         sys.exit('Error: give name and filepath')
     add_text(utils.get_db(),

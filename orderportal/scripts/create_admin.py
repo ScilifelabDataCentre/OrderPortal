@@ -35,8 +35,7 @@ def create_admin(email, password, first_name, last_name, university,
 
 if __name__ == '__main__':
     (options, args) = get_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
     email = raw_input('Email address (=account name) > ')
     if not email:
         sys.exit('no email address provided')

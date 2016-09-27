@@ -115,8 +115,7 @@ def undump(db, filepath, verbose=False):
 if __name__ == '__main__':
     parser = get_command_line_parser()
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
     db = utils.get_db()
     if options.dumpfile:
         filepath = options.dumpfile

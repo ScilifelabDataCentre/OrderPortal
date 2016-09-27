@@ -65,8 +65,7 @@ def get_args():
 
 if __name__ == '__main__':
     (options, args) = get_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
     put_documents(utils.get_db(),
                   filepaths=args,
                   verbose=options.verbose)

@@ -14,8 +14,7 @@ class BaseFixer(object):
 
     def __init__(self):
         (options, args) = self.get_args()
-        utils.load_settings(filepath=options.settings,
-                            verbose=options.verbose)
+        utils.load_settings(filepath=options.settings)
         self.verbose = options.verbose
         self.dry_run = options.dry_run
         self.db = utils.get_db()

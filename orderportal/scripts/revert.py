@@ -25,8 +25,7 @@ def revert(db, docid):
 
 if __name__ == '__main__':
     (options, args) = get_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
     db = utils.get_db()
     for docid in args:
         revert(db, docid)
