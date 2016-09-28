@@ -4,7 +4,7 @@ to a facility from its users.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '2.6.1'
+__version__ = '2.7.0'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -12,7 +12,7 @@ settings = dict(
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
     LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',
-    PROCESSORS=dict(),
+    PROCESSORS=[],
     SITE_DIR='{ROOT}/generic',
     SITE_NAME='OrderPortal',
     DB_SERVER='http://localhost:5984/',

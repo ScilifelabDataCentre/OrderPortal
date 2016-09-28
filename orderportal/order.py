@@ -49,6 +49,7 @@ class OrderSaver(saver.Saver):
         # Do not change values for a field if that argument is missing,
         # except for checkbox, in which case missing value means False.
         docfields = self.doc['fields']
+        self.removed_files = []       # Due to field update
         for field in fields:
             if field['type'] == constants.GROUP: continue
             identifier = field['identifier']
@@ -60,6 +61,7 @@ class OrderSaver(saver.Saver):
                 else:
                     self.files.append(infile)
                     value = infile.filename
+                    self.removed_files.append(docfields.get(identifier))
             elif field['type'] == constants.MULTISELECT:
                 value = self.rqh.get_arguments(identifier)
             else:
@@ -75,14 +77,6 @@ class OrderSaver(saver.Saver):
                     else:
                         continue
             if value != docfields.get(identifier):
-                try:
-                    name = field['processor']
-                    processor_class = settings['PROCESSORS'][name]
-                except KeyError:
-                    pass
-                else:
-                    processor = processor_class(self.db, self.doc, field)
-                    processor(value=value)
                 changed = self.changed.setdefault('fields', dict())
                 changed[identifier] = value
                 docfields[identifier] = value
@@ -101,78 +95,108 @@ class OrderSaver(saver.Saver):
         Skip field if not visible, else check recursively in postorder.
         Return True if valid, False otherwise.
         """
-        # XXX
-        message = None
-        select_id = field.get('visible_if_field')
-        if select_id:
-            select_value = self.doc['fields'].get(select_id)
-            if select_value is not None:
-                select_value = str(select_value).lower()
-            if_value = field.get('visible_if_value')
-            if if_value:
-                if_value = if_value.lower()
-            if select_value != if_value: return True
+        docfields = self.doc['fields']
+        try:
+            select_id = field.get('visible_if_field')
+            if select_id:
+                select_value = docfields.get(select_id)
+                if select_value is not None:
+                    select_value = str(select_value).lower()
+                if_value = field.get('visible_if_value')
+                if if_value:
+                    if_value = if_value.lower()
+                if select_value != if_value: return True
 
-        if field['type'] == constants.GROUP:
-            for subfield in field['fields']:
-                if not self.check_validity(subfield):
-                    message = 'subfield(s) invalid'
+            if field['type'] == constants.GROUP:
+                for subfield in field['fields']:
+                    if not self.check_validity(subfield):
+                        raise ValueError('subfield(s) invalid')
+            else:
+                value = docfields[field['identifier']]
+                if value is None:
+                    if field['required']:
+                        raise ValueError('missing value')
+                elif field['type'] == constants.INT:
+                    try:
+                        docfields[field['identifier']] = int(value)
+                    except (TypeError, ValueError):
+                        raise ValueError('not an integer value')
+                elif field['type'] == constants.FLOAT:
+                    try:
+                        docfields[field['identifier']] = float(value)
+                    except (TypeError, ValueError):
+                        raise ValueError('not a float value')
+                elif field['type'] == constants.BOOLEAN:
+                    try:
+                        if value is None: raise ValueError
+                        docfields[field['identifier']] = utils.to_bool(value)
+                    except (TypeError, ValueError):
+                        raise ValueError('not a boolean value')
+                elif field['type'] == constants.URL:
+                    parsed = urlparse.urlparse(value)
+                    if not (parsed.scheme and parsed.netloc):
+                        raise ValueError('incomplete URL')
+                elif field['type'] == constants.SELECT:
+                    if value not in field['select']:
+                        raise ValueError('invalid selection')
+                elif field['type'] == constants.MULTISELECT:
+                    if not value and field['required']:
+                        raise ValueError('missing value')
+                    else:
+                        for v in value:
+                            if v not in field['multiselect']:
+                                raise ValueError('value not among alternatives')
+                processor = field.get('processor')
+                if processor:
+                    try:
+                        processor = settings['PROCESSORS'][processor]
+                    except KeyError:
+                        raise ValueError("System error: No such processor '%s'"
+                                         % processor)
+                    else:
+                        processor = processor(self.db, self.doc, field)
+                        kwargs = dict()
+                        if field['type'] == constants.FILE:
+                            for file in self.files:
+                                logging.debug("file %s", file.filename)
+                                if file.filename == value:
+                                    kwargs['body'] = file.body
+                                    kwargs['content_type'] = file.content_type
+                                    break
+                        processor.run(value, **kwargs)
+        except ValueError, msg:
+            self.doc['invalid'][field['identifier']] = str(msg)
+            return False
+        except Exception, msg:
+            self.doc['invalid'][field['identifier']] = "System error: %s" % msg
+            return False
         else:
-            value = self.doc['fields'][field['identifier']]
-            if value is None:
-                if field['required']:
-                    message = 'missing value'
-            elif field['type'] == constants.INT:
-                try:
-                    self.doc['fields'][field['identifier']] = int(value)
-                except (TypeError, ValueError):
-                    message = 'not an integer value'
-            elif field['type'] == constants.FLOAT:
-                try:
-                    self.doc['fields'][field['identifier']] = float(value)
-                except (TypeError, ValueError):
-                    message = 'not a float value'
-            elif field['type'] == constants.BOOLEAN:
-                try:
-                    if value is None: raise ValueError
-                    self.doc['fields'][field['identifier']] = utils.to_bool(value)
-                except (TypeError, ValueError):
-                    message = 'not a boolean value'
-            elif field['type'] == constants.URL:
-                parsed = urlparse.urlparse(value)
-                if not (parsed.scheme and parsed.netloc):
-                    message = 'incomplete URL'
-            elif field['type'] == constants.SELECT:
-                if value not in field['select']:
-                    message = 'invalid selection'
-            elif field['type'] == constants.MULTISELECT:
-                if not value and field['required']:
-                    message = 'missing value'
-                else:
-                    for v in value:
-                        if v not in field['multiselect']:
-                            message = 'value not among alternatives'
-                            break
-        if message:
-            self.doc['invalid'][field['identifier']] = message
-        return message is None
+            return True
 
     def post_process(self):
         "Save or delete the file as an attachment to the document."
-        # Delete a named file.
-        try:
+        docfields = self.doc['fields']
+        try:                    # Delete a named file.
             filename = self.delete_filename
-            for key in self.doc['fields']:
+            for key in docfields:
+                # Remove the field value if it is the filename.
                 # XXX Somewhat dangerous: may delete a value that happens to
                 # be identical to the filename. Shouldn't be too commmon...
-                if self.doc['fields'][key] == filename:
-                    self.doc['fields'][key] = None
+                if docfields[key] == filename:
+                    docfields[key] = None
                     self.db.save(self.doc)
                     break
             self.db.delete_attachment(self.doc, filename)
             self.changed['file_deleted'] = filename
         except AttributeError:
             # Else add any new attached files.
+            try:
+                # First remove files due to field update
+                for filename in self.removed_files:
+                    if filename:
+                        self.db.delete_attachment(self.doc, filename)
+            except AttributeError:
+                pass
             # Using cStringIO here is a kludge.
             # Don't ask me why this was required on a specific machine.
             # The problem appeared on a Python 2.6 system and involved
@@ -183,7 +207,6 @@ class OrderSaver(saver.Saver):
                                        StringIO(file.body),
                                        filename=file.filename,
                                        content_type=file.content_type)
-
 
 class OrderMixin(object):
     "Mixin for various useful methods."

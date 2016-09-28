@@ -167,7 +167,7 @@ class FormApiV1(ApiV1Mixin, Form):
             display=dict(href=self.reverse_url('form', form['_id'])))
         data['orders'] = dict(
             count=self.get_order_count(form),
-            # XXX Added API href when available.
+            # XXX Add API href when available.
             display=dict(href=self.reverse_url('form_orders', form['_id'])))
         data['fields'] = form['fields']
         self.write(data)
