@@ -304,9 +304,9 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 	<select class="form-control" name="processor" id="processor">
 	  {% set sel = not field.get('processor') and 'selected' or '' %}
 	  <option value="" {{ sel }}>[none]</option>
-	  {% for processor in sorted(settings['PROCESSORS']) %}
-	  {% set sel = field.get('processor') == processor and 'selected' or '' %}
-	  <option {{ sel }}>{{ processor }}</option>
+	  {% for name in sorted(settings['PROCESSORS']) %}
+	  {% set sel = field.get('processor') == name and 'selected' or '' %}
+	  <option {{ sel }}>{{ name }}</option>
 	  {% end %}
 	</select>
       </div>

@@ -196,7 +196,12 @@
 		</a>
 	      </td>
 	      <td>{{ file['content_type'] }}</td>
-	      <td>{{ int(0.5 + file['size'] / 1000.0) }} kB</td>
+	      <td>
+		{% if file['size'] < 1000 %}
+		  {{ file['size'] }} B
+		{% else %}
+		  {{ int(0.5 + file['size'] / 1000.0) }} kB</td>
+		{% end %}
 	      <td>
 		<form action="{{ reverse_url('order_file', order['_id'], file['filename']) }}"
 		      role="form"

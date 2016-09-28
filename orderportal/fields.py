@@ -171,7 +171,7 @@ class Fields(object):
         # Represent the boolean by a checkbox or a menu.
         elif field['type'] == constants.BOOLEAN:
             new['checkbox'] = utils.to_bool(rqh.get_argument('checkbox', None))
-        # Set the plugin processor a new field value.
+        # Set the new processor field value.
         name = rqh.get_argument('processor', None)
         if name and name in settings['PROCESSORS']:
             new['processor'] = name

@@ -111,11 +111,13 @@ def load_settings(filepath=None, pidfile=None):
             raise ValueError("settings['{0}'] has invalid value.".format(key))
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short.")
-    # Load processor classes
-    processors = settings['PROCESSORS']
-    for key, path in processors.items():
+    # Load processor modules and the classes in them
+    paths = settings.get('PROCESSORS', [])
+    settings['PROCESSORS'] = {}
+    for path in paths:
         try:
-            module = __import__(path, fromlist=['test'])
+            fromlist = '.'.join(path.split('.')[:-1])
+            module = __import__(path, fromlist=fromlist)
         except (ImportError, NameError), msg:
             logging.error("could not import processor module %s", path)
         else:
@@ -124,13 +126,9 @@ def load_settings(filepath=None, pidfile=None):
                 if isinstance(entity, type) and \
                    issubclass(entity, BaseProcessor) and \
                    entity != BaseProcessor:
-                    processors[key] = entity
-                    logging.info("loaded processor %s (%s from %s)",
-                                 key, entity.__name__, path)
-                    break
-            else:
-                logging.error("invalid processor: %s", name)
-                del processors[key]
+                    name = entity.__module__ + '.' + entity.__name__
+                    settings['PROCESSORS'][name] = entity
+                    logging.info("loaded processor %s", name)
     # Read order state definitions and transitions
     with open(settings['ORDER_STATUSES_FILEPATH']) as infile:
         settings['ORDER_STATUSES'] = yaml.safe_load(infile)
@@ -365,7 +363,10 @@ def get_filename_extension(content_type):
 
 
 class BaseProcessor(object):
-    "Base class for processor classes."
+    """Abstract vase class for processor classes.
+    Implement the 'run' method, which should raise a ValueError
+    if there is something wrong with the value.
+    """
 
     def __init__(self, db, order, field):
         self._db = db
@@ -384,5 +385,7 @@ class BaseProcessor(object):
     def field(self):
         return self._field
 
-    def __call__(self, **kwargs):
-        return "BaseProcessor %s" % kwargs.keys()
+    def run(self, value, **kwargs):
+        """Implement this method.
+        It must raise ValueError when something is wrong with the value."""
+        raise NotImplementedError
