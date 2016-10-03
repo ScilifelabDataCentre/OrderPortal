@@ -3,6 +3,7 @@
 from __future__ import print_function, absolute_import
 
 import logging
+from collections import OrderedDict as OD
 
 import couchdb
 import markdown
@@ -162,3 +163,34 @@ class NoSuchEntity(RequestHandler):
 
     def get(self):
         self.see_other('home', error='Sorry, no such entity found.')
+
+
+class Statistics(RequestHandler):
+    "Summary statistics for the site."
+
+    def get(self):
+        self.render('statistics.html', orders=self.get_orders())
+
+    def get_orders(self):
+        view = self.db.view('order/status', reduce=True)
+        r = list(view)[0]
+        orders = dict(total=r.value)
+        view = self.db.view('order/status',
+                            group_level=1,
+                            startkey=[''],
+                            endkey=[constants.CEILING])
+        orders['status'] = dict([(r.key[0], r.value) for r in view])
+        return orders
+
+
+class StatisticsApiV1(Statistics):
+
+    def get(self):
+        url = self.absolute_reverse_url
+        data = OD()
+        data['base'] = self.absolute_reverse_url('home')
+        data['type'] = 'statistics'
+        data['links'] = dict(self=dict(href=url('statistics_api')),
+                             display=dict(href=url('statistics')))
+        data['orders'] = self.get_orders()
+        self.write(data)

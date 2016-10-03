@@ -112,6 +112,8 @@ def get_handlers():
         url(r'/contact', Contact, name='contact'),
         url(r'/about', About, name='about'),
         url(r'/techinfo', TechInfo, name='techinfo'),
+        url(r'/statistics', Statistics, name='statistics'),
+        url(r'/api/v1/statistics', StatisticsApiV1, name='statistics_api'),
         url(r'/infos', Infos, name='infos'),
         url(r'/info', InfoCreate, name='info_create'),
         url(r'/info/([^/]+)', Info, name='info'),
