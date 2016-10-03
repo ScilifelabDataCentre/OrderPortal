@@ -412,7 +412,7 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
         data = OD()
         data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'orders'
-        data['links'] = dict(self=dict(href=self.reverse_url('orders')),
+        data['links'] = dict(self=dict(href=self.reverse_url('orders_api')),
                              display=dict(href=self.reverse_url('orders')))
         data['items'] = [self.get_json(o, names, forms)
                          for o in self.get_orders(forms)]
