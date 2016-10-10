@@ -41,11 +41,13 @@
   </td>
   <td>
     {% if field['restrict_read'] %}
-    <span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
+    <span class="glyphicon glyphicon-eye-open"
+	  title="Readable by admin and staff only.">
     </span>
     {% end %}
     {% if field['restrict_write'] %}
-    <span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
+    <span class="glyphicon glyphicon-pencil"
+	  title="Writeable by admin only.">
     </span>
     {% end %}
     {% if field['identifier'] in order['invalid'] %}
@@ -113,11 +115,13 @@
   </td>
   <td>
     {% if field['restrict_read'] %}
-    <span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
+    <span class="glyphicon glyphicon-eye-open"
+	  title="Readable by admin and staff only.">
     </span>
     {% end %}
     {% if field['restrict_write'] %}
-    <span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
+    <span class="glyphicon glyphicon-pencil"
+	  title="Writeable by admin only.">
     </span>
     {% end %}
     {% if field['identifier'] in order['invalid'] %}

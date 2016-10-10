@@ -2,8 +2,8 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}Create a new order based on '{{ form['title'] }}'{% end %}
-{% block body_title %}Create a new order based on '{{ form['title'] }}'{% end %}
+{% block head_title %}Create '{{ form['title'] }}'{% end %}
+{% block body_title %}Create '{{ form['title'] }}'{% end %}
 
 {% block main_content %}
 <form action="{{ reverse_url('order_create') }}"
@@ -21,9 +21,7 @@
       </div>
     </div>
     <span class="help-block">
-      Brief, descriptive title for the order. It is not required to be
-      unique, but it is a good idea to make it so anyway. If none
-      given, then the form's title is used. May be edited later.
+      Brief descriptive title. May be edited later.
     </span>
   </div>
 

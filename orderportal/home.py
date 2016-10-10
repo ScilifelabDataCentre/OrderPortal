@@ -174,7 +174,7 @@ class Statistics(RequestHandler):
     def get_orders(self):
         view = self.db.view('order/status', reduce=True)
         r = list(view)[0]
-        orders = dict(total=r.value)
+        orders = dict(count=r.value)
         view = self.db.view('order/status',
                             group_level=1,
                             startkey=[''],
@@ -186,11 +186,11 @@ class Statistics(RequestHandler):
 class StatisticsApiV1(Statistics):
 
     def get(self):
-        url = self.absolute_reverse_url
+        URL = self.absolute_reverse_url
         data = OD()
-        data['base'] = self.absolute_reverse_url('home')
+        data['base'] = URL('home')
         data['type'] = 'statistics'
-        data['links'] = dict(self=dict(href=url('statistics_api')),
-                             display=dict(href=url('statistics')))
+        data['links'] = dict(self=dict(href=URL('statistics_api')),
+                             display=dict(href=URL('statistics')))
         data['orders'] = self.get_orders()
         self.write(data)
