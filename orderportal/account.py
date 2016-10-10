@@ -157,6 +157,7 @@ class AccountsApiV1(_AccountsFilter):
     @tornado.web.authenticated
     def get(self):
         "JSON output."
+        URL = self.absolute_reverse_url
         self.check_staff()
         self.params = self.get_filter_params()
         accounts = self.get_accounts()
@@ -165,8 +166,8 @@ class AccountsApiV1(_AccountsFilter):
             item = OD()
             item['email'] = account['email']
             item['links'] = dict(
-                api=dict(href=self.reverse_url('account_api',account['email'])),
-                display=dict(href=self.reverse_url('account',account['email'])))
+                api=dict(href=URL('account_api',account['email'])),
+                display=dict(href=URL('account',account['email'])))
             name = last_name = account.get('last_name')
             first_name = account.get('first_name')
             if name:
@@ -192,12 +193,8 @@ class AccountsApiV1(_AccountsFilter):
             item['orders'] = dict(
                 count=account['order_count'],
                 links=dict(
-                    display=dict(
-                        href=self.reverse_url('account_orders',
-                                              account['email'])),
-                    api=dict(
-                        href=self.reverse_url('account_orders_api',
-                                              account['email']))))
+                    display=dict(href=URL('account_orders', account['email'])),
+                    api=dict(href=URL('account_orders_api', account['email']))))
             items.append(item)
         data = OD()
         data['base'] = self.absolute_reverse_url('home')
@@ -396,6 +393,7 @@ class AccountApiV1(AccountMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, email):
+        URL = self.absolute_reverse_url
         try:
             account = self.get_account(email)
             self.check_readable(account)
@@ -413,8 +411,8 @@ class AccountApiV1(AccountMixin, RequestHandler):
         else:
             name = first_name
         data['links'] = dict(
-            self=dict(href=self.reverse_url('account_api', account['email'])),
-            display=dict(href=self.reverse_url('account', account['email'])))
+            self=dict(href=URL('account_api', account['email'])),
+            display=dict(href=URL('account', account['email'])))
         data['name'] = name
         data['first_name'] = first_name
         data['last_name'] = last_name
@@ -440,10 +438,8 @@ class AccountApiV1(AccountMixin, RequestHandler):
             data['latest_activity'] = None
         data['orders'] = dict(
             count=self.get_account_order_count(account['email']),
-            display=dict(
-                href=self.reverse_url('account_orders', account['email'])),
-            api=dict(
-                href=self.reverse_url('account_orders_api', account['email'])))
+            display=dict(href=URL('account_orders', account['email'])),
+            api=dict(href=URL('account_orders_api', account['email'])))
         self.write(data)
 
 
@@ -494,6 +490,7 @@ class AccountOrdersApiV1(AccountOrdersMixin,
     @tornado.web.authenticated
     def get(self, email):
         "JSON output."
+        URL = self.absolute_reverse_url
         try:
             account = self.get_account(email)
             self.check_readable(account)
@@ -506,10 +503,8 @@ class AccountOrdersApiV1(AccountOrdersMixin,
         data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'account orders'
         data['links'] = dict(
-            self=dict(
-                href=self.reverse_url('account_orders_api', account['email'])),
-            display=dict(
-                href=self.reverse_url('account_orders', account['email'])))
+            self=dict(href=URL('account_orders_api', account['email'])),
+            display=dict(href=URL('account_orders', account['email'])))
         view = self.db.view('order/owner',
                             reduce=False,
                             include_docs=True,
@@ -550,6 +545,7 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
     @tornado.web.authenticated
     def get(self, email):
         "JSON output."
+        URL = self.absolute_reverse_url
         try:
             account = self.get_account(email)
             self.check_readable(account)
@@ -570,10 +566,8 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
         data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'account groups orders'
         data['links'] = dict(
-            self=dict(
-                href=self.reverse_url('account_orders_api', account['email'])),
-            display=dict(
-                href=self.reverse_url('account_orders', account['email'])))
+            self=dict(href=URL('account_orders_api', account['email'])),
+            display=dict(href=URL('account_orders', account['email'])))
         data['items'] = [self.get_json(o, names=names, forms=forms)
                          for o in orders]
         self.write(data)
@@ -885,7 +879,7 @@ class Password(RequestHandler):
             self.see_other('account_edit', account['email'],
                            message='Please review and update your account information.')
         else:
-            self.redirect(self.reverse_url('home'))
+            self.see_other('home')
 
 
 class Register(RequestHandler):

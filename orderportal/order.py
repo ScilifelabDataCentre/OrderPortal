@@ -361,6 +361,7 @@ class OrderApiV1Mixin:
     "Generate JSON for an order."
 
     def get_json(self, order, names={}, forms={}, item=None):
+        URL = self.absolute_reverse_url
         if not item:
             item = OD()
         item['iuid'] = order['_id']
@@ -370,22 +371,18 @@ class OrderApiV1Mixin:
         item['form'] = dict(
             iuid=order['form'],
             title=forms.get(order['form']),
-            links=dict(
-                api=dict(href=self.reverse_url('form_api', order['form'])),
-                display=dict(href=self.reverse_url('form', order['form']))))
+            links=dict(api=dict(href=URL('form_api', order['form'])),
+                       display=dict(href=URL('form', order['form']))))
         item['owner'] = dict(
             email=order['owner'],
             name=names.get(order['owner']),
-            links=dict(api=dict(
-                    href=self.reverse_url('account_api', order['owner'])),
-                       display=dict(
-                    href=self.reverse_url('account', order['owner']))))
+            links=dict(api=dict(href=URL('account_api', order['owner'])),
+                       display=dict(href=URL('account', order['owner']))))
         item['fields'] = {}
         item['tags'] = order.get('tags', [])
         item['status'] = dict(
             name=order['status'],
-            display=dict(
-                href=self.reverse_url('site', order['status']+'.png')))
+            display=dict(href=URL('site', order['status']+'.png')))
         item['history'] = {}
         item['modified'] = order['modified']
         for f in settings['ORDERS_LIST_FIELDS']:
@@ -404,16 +401,17 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
     @tornado.web.authenticated
     def get(self):
         "JSON output."
+        URL = self.absolute_reverse_url
         self.check_staff()
         self.params = self.get_filter_params()
         # Get names and forms lookups
         names = self.get_account_names()
         forms = dict([(f[1], f[0]) for f in self.get_forms(all=True)])
         data = OD()
-        data['base'] = self.absolute_reverse_url('home')
+        data['base'] = URL('home')
         data['type'] = 'orders'
-        data['links'] = dict(self=dict(href=self.reverse_url('orders_api')),
-                             display=dict(href=self.reverse_url('orders')))
+        data['links'] = dict(self=dict(href=URL('orders_api')),
+                             display=dict(href=URL('orders')))
         data['items'] = [self.get_json(o, names, forms)
                          for o in self.get_orders(forms)]
         self.write(data)
