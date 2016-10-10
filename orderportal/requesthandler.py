@@ -205,7 +205,7 @@ class RequestHandler(tornado.web.RequestHandler):
         "Check if current user is staff or admin."
         if not self.is_staff():
             raise tornado.web.HTTPError(
-                403, reason="Role 'staff' is required for this.")
+                403, reason="Role 'admin' or 'staff' is required for this.")
 
     def get_admins(self):
         "Get the list of enabled admin accounts."

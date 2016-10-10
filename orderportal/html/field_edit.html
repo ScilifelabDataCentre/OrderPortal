@@ -245,7 +245,8 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 		   name="restrict_read"
 		   value="yes"
 		   {{ checked }}>
-	    The field in the form is visible only to staff, not the user.
+	    The field in the form is visible only to admin and staff,
+	    not the user.
 	  </label>
 	</div>
       </div>
@@ -267,7 +268,8 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 		   name="restrict_write"
 		   value="yes"
 		   {{ checked }}>
-	    The field in the form is editable only by admin, not the user.
+	    The field is visible to all, but can be edited only
+	    by admin and staff.
 	  </label>
 	</div>
       </div>
