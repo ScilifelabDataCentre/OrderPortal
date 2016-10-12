@@ -24,6 +24,7 @@ import yaml
 import orderportal
 from . import constants
 from . import settings
+from .processors.baseprocessor import BaseProcessor
 
 
 def get_command_line_parser(usage='usage: %prog [options]', description=None):
@@ -360,32 +361,3 @@ def get_filename_extension(content_type):
     if content_type == 'image/jpeg':
         return '.jpg'
     return mimetypes.guess_extension(content_type)
-
-
-class BaseProcessor(object):
-    """Abstract vase class for processor classes.
-    Implement the 'run' method, which should raise a ValueError
-    if there is something wrong with the value.
-    """
-
-    def __init__(self, db, order, field):
-        self._db = db
-        self._order = order
-        self._field = field
-
-    @property
-    def db(self):
-        return self._db
-
-    @property
-    def order(self):
-        return self._order
-
-    @property
-    def field(self):
-        return self._field
-
-    def run(self, value, **kwargs):
-        """Implement this method.
-        It must raise ValueError when something is wrong with the value."""
-        raise NotImplementedError

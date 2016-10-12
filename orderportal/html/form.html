@@ -226,6 +226,8 @@
 	  <pre>{{ '\n'.join(field.get('select') or []) }}</pre>
 	  {% elif field['type'] == constants.MULTISELECT %}
 	  <pre>{{ '\n'.join(field.get('multiselect') or []) }}</pre>
+	  {% elif field['type'] == constants.TABLE %}
+	  <pre>{{ '\n'.join(field.get('table') or []) }}</pre>
 	  {% end %}
 	  {% if field.get('processor') %}
 	  <br><em>{{ field.get('processor') }}</em>

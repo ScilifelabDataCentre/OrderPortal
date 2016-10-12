@@ -147,15 +147,15 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
   <div class="form-group">
     <div class="row">
       <div class="col-md-3">
-	<label class="control-label" for="select">Select</label>
+	<label class="control-label" for="select">Select values</label>
 	<textarea class="form-control" name="select" rows="4"
 		  >{{ '\n'.join(field.get('select') or []) }}</textarea>
       </div>
     </div>
     <span class="help-block">
-      Values to select among. One per line. A label for a groups of
-      options is denoted by a leading dash '-'; this is just a group
-      label, and not an option in itself.
+      One value per line. A label for a group of options is denoted
+      by a leading dash '-'; this is just a group label, and not an
+      option in itself.
     </span>
   </div>
   <div class="form-group">
@@ -181,15 +181,15 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
   <div class="form-group">
     <div class="row">
       <div class="col-md-3">
-	<label class="control-label" for="multiselect">Multiselect</label>
+	<label class="control-label" for="multiselect">Multiselect values</label>
 	<textarea class="form-control" name="multiselect" rows="4"
 		  >{{ '\n'.join(field.get('multiselect') or []) }}</textarea>
       </div>
     </div>
     <span class="help-block">
-      Values to select among. One per line. A label for a groups of
-      options is denoted by a leading dash '-'; this is just a group
-      label, and not an option in itself.
+      One value per line. A label for a group of options is denoted
+      by a leading dash '-'; this is just a group label, and not an
+      option in itself.
     </span>
   </div>
 
@@ -209,6 +209,21 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 	</div>
       </div>
     </div>
+  </div>
+
+  {% elif field['type'] == constants.TABLE %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+	<label class="control-label" for="table">Table column headers</label>
+	<textarea class="form-control" name="table" rows="4"
+		  >{{ '\n'.join(field.get('table') or []) }}</textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      One identifier per row to specify one column in the resulting table.
+      May be edited later.
+    </span>
   </div>
   {% end %} {# if field['type'] == ... #}
 

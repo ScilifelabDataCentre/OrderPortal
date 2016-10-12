@@ -148,7 +148,6 @@ class FormApiV1(ApiV1Mixin, Form):
         URL = self.absolute_reverse_url
         form = kwargs['form']
         data = OD()
-        data['base'] = URL('home')
         data['type'] = 'form'
         data['iuid'] = form['_id']
         data['title'] = form.get('title')

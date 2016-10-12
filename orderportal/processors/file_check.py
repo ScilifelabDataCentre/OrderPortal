@@ -1,8 +1,8 @@
-"OrderPortal: File test processors."
+"OrderPortal: File check processors."
 
 from __future__ import print_function, absolute_import
 
-from orderportal.utils import BaseProcessor
+from .baseprocessor import BaseProcessor
 
 
 class TextFile(BaseProcessor):
@@ -13,4 +13,4 @@ class TextFile(BaseProcessor):
             if kwargs['content_type'] != 'text/plain':
                 raise ValueError('value is not a text file')
         except KeyError:
-            raise ValueError('value is not a file')
+            raise ValueError('value is not a text file')

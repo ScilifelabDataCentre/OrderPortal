@@ -99,6 +99,23 @@
       {% else %}
       -
       {% end %}
+    {% elif field['type'] == constants.TABLE %}
+      <table class="table table-bordered table-condensed">
+	<tr>
+	  <th></th>
+	  {% for identifier in field['table'] %}
+	  <th>{{ identifier }}</th>
+	  {% end %}
+	</tr>
+	{% for i, row in enumerate(value) %}
+	<tr>
+	  <td class="number">{{ i + 1 }}</td>
+	  {% for item in row %}
+	  <td>{{ item }}</td>
+	  {% end %}
+	</tr>
+	{% end %}
+      </table>
     {% elif field['type'] == constants.FILE %}
       {% if value is None %}
       -
