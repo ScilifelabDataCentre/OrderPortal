@@ -64,6 +64,21 @@ class OrderSaver(saver.Saver):
                     self.removed_files.append(docfields.get(identifier))
             elif field['type'] == constants.MULTISELECT:
                 value = self.rqh.get_arguments(identifier)
+            elif field['type'] == constants.TABLE:
+                value = docfields.get(identifier) or []
+                for i, row in enumerate(value):
+                    for j, item in enumerate(row):
+                        key = "cell_{0}_{1}".format(i, j)
+                        value[i][j] = self.rqh.get_argument(key, '')
+                offset = len(value)
+                for i in xrange(settings['ORDER_TABLE_NEW_ROWS']):
+                    row = []
+                    for j in xrange(len(field['table'])):
+                        key = "cell_{0}_{1}".format(i+offset, j)
+                        row.append(self.rqh.get_argument(key, ''))
+                    value.append(row)
+                # Remove empty rows
+                value = [r for r in value if reduce(lambda x,y: x or y, r)]
             else:
                 try:
                     value = self.rqh.get_argument(identifier)
@@ -90,7 +105,7 @@ class OrderSaver(saver.Saver):
                 self.check_validity(field)
 
     def check_validity(self, field):
-        """Check validity of converted field values.
+        """Check validity of field value. Convert for some field types.
         Execute the processor, if any.
         Skip field if not visible, else check recursively in postorder.
         Return True if valid, False otherwise.
@@ -116,6 +131,8 @@ class OrderSaver(saver.Saver):
                 if value is None:
                     if field['required']:
                         raise ValueError('missing value')
+                elif field['type'] == constants.STRING:
+                    pass
                 elif field['type'] == constants.INT:
                     try:
                         docfields[field['identifier']] = int(value)
@@ -146,6 +163,14 @@ class OrderSaver(saver.Saver):
                         for v in value:
                             if v not in field['multiselect']:
                                 raise ValueError('value not among alternatives')
+                elif field['type'] == constants.TEXT:
+                    pass
+                elif field['type'] == constants.DATE:
+                    pass
+                elif field['type'] == constants.TABLE:
+                    pass
+                elif field['type'] == constants.FILE:
+                    pass
                 processor = field.get('processor')
                 if processor:
                     try:
@@ -158,7 +183,6 @@ class OrderSaver(saver.Saver):
                         kwargs = dict()
                         if field['type'] == constants.FILE:
                             for file in self.files:
-                                logging.debug("file %s", file.filename)
                                 if file.filename == value:
                                     kwargs['body'] = file.body
                                     kwargs['content_type'] = file.content_type
@@ -408,7 +432,6 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
         names = self.get_account_names()
         forms = dict([(f[1], f[0]) for f in self.get_forms(all=True)])
         data = OD()
-        data['base'] = URL('home')
         data['type'] = 'orders'
         data['links'] = dict(self=dict(href=URL('orders_api')),
                              display=dict(href=URL('orders')))
@@ -565,7 +588,6 @@ class OrderApiV1(ApiV1Mixin, OrderApiV1Mixin, Order):
     def render(self, templatefilename, **kwargs):
         order = kwargs['order']
         data = OD()
-        data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'order'
         data = self.get_json(order,
                              names=self.get_account_names([order['owner']]),

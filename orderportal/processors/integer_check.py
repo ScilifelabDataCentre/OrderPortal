@@ -1,8 +1,8 @@
-"OrderPortal: Integer test processors."
+"OrderPortal: Integer check processors."
 
 from __future__ import print_function, absolute_import
 
-from orderportal.utils import BaseProcessor
+from .baseprocessor import BaseProcessor
 
 
 class PositiveInteger(BaseProcessor):

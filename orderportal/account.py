@@ -197,13 +197,10 @@ class AccountsApiV1(_AccountsFilter):
                     api=dict(href=URL('account_orders_api', account['email']))))
             items.append(item)
         data = OD()
-        data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'accounts'
         data['links'] = links = OD()
-        links['self'] = dict(
-            href=self.absolute_reverse_url('accounts_api', **self.params))
-        links['display'] = dict(
-            href=self.absolute_reverse_url('accounts', **self.params))
+        links['self'] = dict(href=URL('accounts_api', **self.params))
+        links['display'] = dict(href=URL('accounts', **self.params))
         data['items'] = items
         self.write(data)
 
@@ -400,7 +397,6 @@ class AccountApiV1(AccountMixin, RequestHandler):
         except ValueError, msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
         data = OD()
-        data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'account'
         data['email'] = account['email']
         name = last_name = account.get('last_name')
@@ -500,7 +496,6 @@ class AccountOrdersApiV1(AccountOrdersMixin,
         names = self.get_account_names()
         forms = dict([(f[1], f[0]) for f in self.get_forms(all=True)])
         data = OD()
-        data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'account orders'
         data['links'] = dict(
             self=dict(href=URL('account_orders_api', account['email'])),
@@ -563,7 +558,6 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
         names = self.get_account_names()
         forms = dict([(f[1], f[0]) for f in self.get_forms(all=True)])
         data = OD()
-        data['base'] = self.absolute_reverse_url('home')
         data['type'] = 'account groups orders'
         data['links'] = dict(
             self=dict(href=URL('account_orders_api', account['email'])),
@@ -791,6 +785,7 @@ class Reset(RequestHandler):
         self.render('reset.html', email=self.get_argument('account', ''))
 
     def post(self):
+        URL = self.absolute_reverse_url
         try:
             account = self.get_account(self.get_argument('email'))
         except (tornado.web.MissingArgumentError, ValueError):
@@ -815,12 +810,11 @@ class Reset(RequestHandler):
                 with MessageSaver(rqh=self) as saver:
                     saver.set_params(
                         account=account['email'],
-                        url=self.absolute_reverse_url('password'),
-                        password_url=self.absolute_reverse_url('password'),
-                        password_code_url=self.absolute_reverse_url(
-                            'password',
-                            email=account['email'],
-                            code=account['code']),
+                        url=URL('password'),
+                        password_url=URL('password'),
+                        password_code_url=URL('password',
+                                              email=account['email'],
+                                              code=account['code']),
                         code=account['code'])
                     saver.set_template(template)
                     saver['recipients'] = [account['email']]

@@ -148,7 +148,6 @@ class FormApiV1(ApiV1Mixin, Form):
         URL = self.absolute_reverse_url
         form = kwargs['form']
         data = OD()
-        data['base'] = URL('home')
         data['type'] = 'form'
         data['iuid'] = form['_id']
         data['title'] = form.get('title')
@@ -373,14 +372,16 @@ class FormFieldEditDescr(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(doc=form, rqh=self) as saver:
-            saver.fields[identifier]['label'] = \
-                self.get_argument("{0}/label".format(identifier), '')
+            name = "{0}/label".format(identifier)
+            saver.fields[identifier]['label'] = self.get_argument(name, '')
+            name = "{0}/initial_display".format(identifier)
+            saver.fields[identifier]['initial_display'] = \
+                utils.to_bool(self.get_argument(name, False))
+            name = "{0}/erase_on_clone".format(identifier)
             saver.fields[identifier]['erase_on_clone'] = \
-                utils.to_bool(
-                    self.get_argument("{0}/erase_on_clone".format(identifier),
-                                      False))
-            saver.fields[identifier]['description'] = \
-                self.get_argument("{0}/descr".format(identifier), '')
+                utils.to_bool(self.get_argument(name, False))
+            name = "{0}/descr".format(identifier)
+            saver.fields[identifier]['description'] = self.get_argument(name,'')
         self.see_other('form', form['_id'])
 
 

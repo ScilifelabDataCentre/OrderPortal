@@ -2,7 +2,7 @@
 
 {% for field in fields %}
 
-{# Check if field may not be seen. #}
+{# Check if field may not be viewed by the current user. #}
 {% if field['restrict_read'] and not is_staff %}
 {% continue %}
 {% end %}
@@ -18,27 +18,33 @@
 {% if field['type'] == constants.GROUP %}
 <tr>
   <th>
-    {% if field['depth'] == 0 %}
-    <button data-toggle="collapse" data-target="#{{ field['identifier'] }}"
-	    class="btn btn-md">
-      <span class="glyphicon glyphicon-triangle-bottom"></span>
-      {{ label }}
-    </button>
-    {% if field.get('description') %}
-    <href data-toggle="collapse"
-	  data-target="#_collapsible_{{ field['identifier'] }}"
-	  style="padding-left:1em;">
-      <span class="glyphicon glyphicon-info-sign"></span>
-    </href>
-    {% end %}
-    {% else %}
     <div style="padding-left:{{ 1.5*field['depth'] }}em;">
+      {% if field['depth'] == 0 %}
+      <button data-toggle="collapse" data-target="#{{ field['identifier'] }}"
+	      class="btn btn-md">
+	<span class="glyphicon glyphicon-triangle-bottom"></span>
+	{{ label }}
+      </button>
+      {% else %}
       {{ label }}
+      {% end %}
+      {% if field.get('description') %}
+      <href data-toggle="collapse"
+	    data-target="#_collapsible_{{ field['identifier'] }}"
+	    style="padding-left:1em;">
+	<span class="glyphicon glyphicon-info-sign"></span>
+      </href>
+      {% end %}
     </div>
-    {% end %}
   </th>
   <td width="50%" class="left">
+    {% if field.get('description') %}
+    <div id="_collapsible_{{ field['identifier'] }}" class="collapse small">
+      {% module Markdown(field.get('description')) %}
+    </div>
+    {% end %}
   </td>
+
   <td>
     {% if field['restrict_read'] %}
     <span class="glyphicon glyphicon-eye-open"
@@ -64,15 +70,21 @@
   </td>
 </tr>
 
-{# Recursion: 'include' cannot be used! #}
+{# Recursion into fields of this group: 'include' cannot be used! #}
 {% if field['fields'] %}
+{% set default_show = field.get('default_show') %}
+
 {% if field['depth'] == 0 %}
-  <tbody id="{{ field['identifier'] }}" class="collapse">
+<tbody id="{{ field['identifier'] }}"
+       class="collapse {{ field.get('initial_display') and 'in' or '' }}">
 {% end %}
-{% module Template('order_fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
+
+  {% module Template('order_fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
+
 {% if field['depth'] == 0 %}
-  </tbody>
+</tbody>
 {% end %}
+
 {% end %} {# if field['fields'] #}
 
 {% else %} {# if field['type'] == constants.GROUP #}
@@ -99,6 +111,23 @@
       {% else %}
       -
       {% end %}
+    {% elif field['type'] == constants.TABLE %}
+      <table class="table table-bordered table-condensed">
+	<tr>
+	  <th></th>
+	  {% for identifier in field['table'] %}
+	  <th>{{ identifier }}</th>
+	  {% end %}
+	</tr>
+	{% for i, row in enumerate(value) %}
+	<tr>
+	  <td class="number">{{ i + 1 }}</td>
+	  {% for item in row %}
+	  <td>{{ item }}</td>
+	  {% end %}
+	</tr>
+	{% end %}
+      </table>
     {% elif field['type'] == constants.FILE %}
       {% if value is None %}
       -
@@ -142,11 +171,14 @@
     {% end %}
   </td>
 </tr>
-{% end %}
+
 {% if field.get('description') %}
 <tr id="_collapsible_{{ field['identifier'] }}" class="collapse">
   <td></td>
   <td class="left small">{% module Markdown(field.get('description')) %}</td>
 </tr>
 {% end %}
+
+{% end %} {# if field['type'] == constants.GROUP #}
+
 {% end %} {# for field in fields #}

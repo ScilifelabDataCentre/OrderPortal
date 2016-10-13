@@ -3,11 +3,11 @@
 {% extends "base.html" %}
 
 {% block head_title %}
-Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
+Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 {% end %}
 
 {% block body_title %}
-Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
+Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 {% end %}
 
 {% block main_content %}
@@ -19,9 +19,9 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label for="type">Group parent field</label>
+	<label for="type">Parent group field</label>
 	<select class="form-control" name="parent" id="parent">
-	  <option value="">[current]</option>
+	  <option value="">[no change]</option>
 	  {% for parent in alt_parents %}
 	  {% if parent is None %}
 	  <option>[top level]</option>
@@ -33,8 +33,8 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
       </div>
     </div>
     <span class="help-block">
-      Change group parent field for this field. If this field is a
-      group, all its fields will follow along.
+      Change parent group for this field. If this field is a group,
+      all its fields will follow along.
     </span>
   </div>
 
@@ -90,21 +90,6 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label for="type">Type</label>
-	<p class="form-control-static">
-	  <i>{{ constants.TYPE_LABELS.get(field['type'], field['type'])}}</i>
-	</p>
-      </div>
-    </div>
-    <span class="help-block">
-      Data type for the field. Cannot be changed.
-      {% module Help('help_datatypes') %}
-    </span>
-  </div>
-
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-6">
 	<label for="visible_if_field">Visible if: Field identifier</label>
 	<select class="form-control"
 		name="visible_if_field" id="visible_if_field">
@@ -147,15 +132,15 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
   <div class="form-group">
     <div class="row">
       <div class="col-md-3">
-	<label class="control-label" for="select">Select</label>
+	<label class="control-label" for="select">Select values</label>
 	<textarea class="form-control" name="select" rows="4"
 		  >{{ '\n'.join(field.get('select') or []) }}</textarea>
       </div>
     </div>
     <span class="help-block">
-      Values to select among. One per line. A label for a groups of
-      options is denoted by a leading dash '-'; this is just a group
-      label, and not an option in itself.
+      One value per line. A label for a group of options is denoted
+      by a leading dash '-'; this is just a group label, and not an
+      option in itself.
     </span>
   </div>
   <div class="form-group">
@@ -164,11 +149,19 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 	<label class="control-label" for="display">Display</label>
 	<div>
 	  <label class="radio-inline">
-	    {% set checked = field.get('display', 'menu') == 'menu' and 'checked' %}
-	    <input type="radio" name="display" value="menu" {{ checked }}>Menu</label>
+	    <input type="radio"
+		   name="display"
+		   value="menu"
+		   {{ field.get('display', 'menu') == 'menu' and 'checked' }}>
+	    Menu
+	  </label>
 	  <label class="radio-inline">
-	    {% set checked = field.get('display') == 'radio' and 'checked' %}
-	    <input type="radio" name="display" value="radio" {{ checked }}>Radio buttons</label>
+	    <input type="radio"
+		   name="display"
+		   value="radio"
+		   {{ field.get('display') == 'radio' and 'checked' }}>
+	    Radio buttons
+	  </label>
 	</div>
       </div>
     </div>
@@ -181,15 +174,15 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
   <div class="form-group">
     <div class="row">
       <div class="col-md-3">
-	<label class="control-label" for="multiselect">Multiselect</label>
+	<label class="control-label" for="multiselect">Multiselect values</label>
 	<textarea class="form-control" name="multiselect" rows="4"
 		  >{{ '\n'.join(field.get('multiselect') or []) }}</textarea>
       </div>
     </div>
     <span class="help-block">
-      Values to select among. One per line. A label for a groups of
-      options is denoted by a leading dash '-'; this is just a group
-      label, and not an option in itself.
+      One value per line. A label for a group of options is denoted
+      by a leading dash '-'; this is just a group label, and not an
+      option in itself.
     </span>
   </div>
 
@@ -199,16 +192,33 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
       <div class="col-md-10">
 	<label class="control-label" for="checkbox">Checkbox</label>
 	<div class="checkbox">
-	  {% set checked = field.get('checkbox') and 'checked' or '' %}
 	  <label>
-	    <input type="checkbox" value="yes"
-		   id="checkbox" name="checkbox" {{ checked }}>
+	    <input type="checkbox"
+		   id="checkbox"
+		   name="checkbox"
+		   value="yes"
+		   {{ field.get('checkbox') and 'checked' or '' }}>
 	    Display the field as a checkbox: Otherwise a selection menu
 	    with the choices of '-----' (= none), 'True' or 'False' is shown.
 	  </label>
 	</div>
       </div>
     </div>
+  </div>
+
+  {% elif field['type'] == constants.TABLE %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+	<label class="control-label" for="table">Table column headers</label>
+	<textarea class="form-control" name="table" rows="4"
+		  >{{ '\n'.join(field.get('table') or []) }}</textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      One identifier per row to specify one column in the resulting table.
+      May be edited later.
+    </span>
   </div>
   {% end %} {# if field['type'] == ... #}
 
@@ -218,10 +228,12 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
       <div class="col-md-10">
 	<label class="control-label" for="required">Required</label>
 	<div class="checkbox">
-	  {% set checked = field['required'] and 'checked' or '' %}
 	  <label>
-	    <input type="checkbox" value="yes"
-		   id="required" name="required" {{ checked }}>
+	    <input type="checkbox"
+		   id="required"
+		   name="required"
+		   value="yes"
+		   {{ field['required'] and 'checked' or '' }}>
 	    Require the field to have a defined value for the order to
 	    be submittable.
 	  </label>
@@ -238,13 +250,12 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 	  Restricted read
 	</label>
 	<div class="checkbox">
-	  {% set checked = field['restrict_read'] and 'checked' or ''%}
 	  <label>
 	    <input type="checkbox"
 		   id="restrict_read"
 		   name="restrict_read"
 		   value="yes"
-		   {{ checked }}>
+		   {{ field['restrict_read'] and 'checked' or '' }}>
 	    The field in the form is visible only to admin and staff,
 	    not the user.
 	  </label>
@@ -253,7 +264,32 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
     </div>
   </div>
 
-  {% if field['type'] != constants.GROUP %}
+  {% if field['type'] == constants.GROUP %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="initial_display">
+	  Initial display
+	</label>
+	<div class="checkbox">
+	  <label>
+	    <input type="checkbox"
+		   name="initial_display"
+		   id="initial_display"
+		   value="yes"
+		   {{ field.get('initial_display') and 'checked' or '' }}>
+	    Yes
+	  </label>
+	</div>
+      </div>
+    </div>
+    <span class="help-block">
+      The group's fields are shown already when the page is
+      opened. This is used only for groups at the top level.
+    </span>
+  </div>
+
+  {% else %} {# if field['type'] == constants.GROUP #}
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
@@ -261,13 +297,12 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 	  Restricted write
 	</label>
 	<div class="checkbox">
-	  {% set checked = field['restrict_write'] and 'checked' or ''%}
 	  <label>
 	    <input type="checkbox"
 		   id="restrict_write"
 		   name="restrict_write"
 		   value="yes"
-		   {{ checked }}>
+		   {{ field['restrict_write'] and 'checked' or ' }}>
 	    The field is visible to all, but can be edited only
 	    by admin and staff.
 	  </label>
@@ -283,13 +318,12 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 	  Erase on clone
 	</label>
 	<div class="checkbox">
-	  {% set checked = field.get('erase_on_clone') and 'checked' or ''%}
 	  <label>
 	    <input type="checkbox"
 		   name="erase_on_clone"
 		   id="erase_on_clone"
 		   value="true"
-		   {{ checked }}>
+		   {{ field.get('erase_on_clone') and 'checked' or '' }}>
 	    Erase the value of the field in a new order when cloning.
 	  </label>
 	</div>
@@ -317,7 +351,7 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
       The named processor is called when the field value is changed.
     </span>
   </div>
-  {% end %} {# if field['type'] != constants.GROUP #}
+  {% end %} {# if field['type'] == constants.GROUP #}
 
   <div class="form-group">
     <div class="row">

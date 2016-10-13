@@ -95,6 +95,8 @@ class Fields(object):
                        rqh.get_argument('restrict_write', False)),
                    erase_on_clone=utils.to_bool(
                        rqh.get_argument('erase_on_clone', False)),
+                   initial_display=utils.to_bool(
+                       rqh.get_argument('initial_display', False)),
                    description=rqh.get_argument('description', None))
         if type == constants.GROUP:
             new['fields'] = []
@@ -111,6 +113,12 @@ class Fields(object):
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new['multiselect'] = values
+        # Set the column identifiers for a table field.
+        elif type == constants.TABLE:
+            values = rqh.get_argument('table', '').split('\n')
+            values = [v.strip() for v in values]
+            values = [v for v in values if v]
+            new['table'] = values
         # Set the group which the field is a member of.
         group = rqh.get_argument('group', None)
         if group == '': group = None
@@ -145,6 +153,8 @@ class Fields(object):
                        rqh.get_argument('restrict_write', False)),
                    erase_on_clone=utils.to_bool(
                        rqh.get_argument('erase_on_clone', False)),
+                   initial_display=utils.to_bool(
+                       rqh.get_argument('initial_display', False)),
                    description=rqh.get_argument('description', None))
         field = self._lookup[identifier]
         # Conditional field setup
@@ -168,6 +178,12 @@ class Fields(object):
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new['multiselect'] = values
+        # Set the column identifiers for a table field.
+        elif field['type'] == constants.TABLE:
+            values = rqh.get_argument('table', '').split('\n')
+            values = [v.strip() for v in values]
+            values = [v for v in values if v]
+            new['table'] = values
         # Represent the boolean by a checkbox or a menu.
         elif field['type'] == constants.BOOLEAN:
             new['checkbox'] = utils.to_bool(rqh.get_argument('checkbox', None))

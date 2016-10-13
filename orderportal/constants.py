@@ -53,11 +53,12 @@ SELECT  = 'select'
 MULTISELECT  = 'multiselect'
 TEXT    = 'text'
 DATE    = 'date'
+TABLE   = 'table'
 ### This constant already defined above.
 ### GROUP   = 'group'
 ### FILE    = 'file'
 TYPES = [STRING, INT, FLOAT, BOOLEAN, URL, SELECT, MULTISELECT,
-         TEXT, DATE, FILE, GROUP]
+         TEXT, DATE, TABLE, FILE, GROUP]
 TYPE_LABELS = {INT: 'integer'}
 TYPE_HTML = {STRING: 'text', INT: 'number'}
 

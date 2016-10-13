@@ -226,12 +226,17 @@
 	  <pre>{{ '\n'.join(field.get('select') or []) }}</pre>
 	  {% elif field['type'] == constants.MULTISELECT %}
 	  <pre>{{ '\n'.join(field.get('multiselect') or []) }}</pre>
+	  {% elif field['type'] == constants.TABLE %}
+	  <pre>{{ '\n'.join(field.get('table') or []) }}</pre>
 	  {% end %}
 	  {% if field.get('processor') %}
 	  <br><em>{{ field.get('processor') }}</em>
 	  {% end %}
 	</td>
 	<td>
+	  {% if field.get('initial_display') %}
+	  <em>initial</em><br>
+	  {% end %}
 	  {% set identifier = field.get('visible_if_field') %}
 	  {% if identifier %}
 	  if {{ identifier }} == '{{ field.get("visible_if_value") }}'
@@ -267,7 +272,7 @@
 	    </button>
 	  </form>
 	{% else %}
-	{# Allow edit of label, clone erase, description when not editable. #}
+	{# Allow edit of non-data properties when not editable. #}
 	  <button type="button" class="btn btn-primary btn-xs"
 		  data-toggle="modal" data-target="#{{ field['identifier'] }}">
 	    <span class="glyphicon glyphicon-edit"></span>
@@ -301,8 +306,10 @@
 	      role="form"
 	      method="POST">
 	  {% module xsrf_form_html() %}
+
 	  <div class="form-group">
-	    <label class="control-label" for="{{ field['identifier'] }}/label">
+	    <label class="control-label"
+		   for="{{ field['identifier'] }}/label">
 	      Label
 	    </label>
 	    <input class="form-control"
@@ -314,8 +321,10 @@
 	      identifier will be used if this is not provided.
 	    </span>
 	  </div>
+
 	  <div class="form-group">
-	    <label class="control-label" for="{{ field['identifier'] }}/erase_on_clone">
+	    <label class="control-label"
+		   for="{{ field['identifier'] }}/erase_on_clone">
 	      Erase on clone
 	    </label>
 	    <div class="checkbox">
@@ -329,6 +338,30 @@
 	      </label>
 	    </div>
 	  </div>
+
+	  {% if field['type'] == constants.GROUP %}
+	  <div class="form-group">
+	    <label class="control-label"
+		   for="{{ field['identifier'] }}/initial_display">
+	      Initial display
+	    </label>
+	    <div class="checkbox">
+	      <label>
+		<input type="checkbox"
+		       name="{{ field['identifier'] }}/initial_display"
+		       id="{{ field['identifier'] }}/initial_display"
+		       value="yes"
+		       {{ field.get('initial_display') and 'checked' or '' }}>
+		Yes
+	      </label>
+	      <span class="help-block">
+		The group's fields are shown already when the page is
+		opened. This is used only for groups at the top level.
+	      </span>
+	    </div>
+	  </div>
+	  {% end %}
+
 	  <div class="form-group">
 	    <label class="control-label" for="{{ field['identifier'] }}/descr">
 	      Description
