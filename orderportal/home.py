@@ -173,8 +173,12 @@ class Statistics(RequestHandler):
 
     def get_orders(self):
         view = self.db.view('order/status', reduce=True)
-        r = list(view)[0]
-        orders = dict(count=r.value)
+        try:
+            r = list(view)[0]
+        except IndexError:
+            orders = dict(count=0)
+        else:
+            orders = dict(count=r.value)
         view = self.db.view('order/status',
                             group_level=1,
                             startkey=[''],
