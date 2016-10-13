@@ -2,7 +2,7 @@
 
 {% for field in fields %}
 
-{# Check if field may not be seen. #}
+{# Check if field may not be viewed by the current user. #}
 {% if field['restrict_read'] and not is_staff %}
 {% continue %}
 {% end %}
@@ -64,10 +64,12 @@
   </td>
 </tr>
 
-{# Recursion: 'include' cannot be used! #}
+{# Recursion into fields of this group: 'include' cannot be used! #}
 {% if field['fields'] %}
+{% set default_show = field.get('default_show') %}
 {% if field['depth'] == 0 %}
-  <tbody id="{{ field['identifier'] }}" class="collapse">
+  <tbody id="{{ field['identifier'] }}"
+	 class="collapse {{ field.get('initial_shown') and 'in' or '' }}">
 {% end %}
 {% module Template('order_fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
 {% if field['depth'] == 0 %}

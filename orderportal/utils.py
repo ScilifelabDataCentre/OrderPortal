@@ -12,6 +12,7 @@ import os
 import socket
 import sys
 import time
+import traceback
 import unicodedata
 import urllib
 import urlparse
@@ -119,8 +120,10 @@ def load_settings(filepath=None, pidfile=None):
         try:
             fromlist = '.'.join(path.split('.')[:-1])
             module = __import__(path, fromlist=fromlist)
-        except (ImportError, NameError), msg:
-            logging.error("could not import processor module %s", path)
+        except:
+            logging.error("could not import processor module %s\n%s",
+                          path,
+                          traceback.format_exc(limit=20))
         else:
             for name in dir(module):
                 entity = getattr(module, name)

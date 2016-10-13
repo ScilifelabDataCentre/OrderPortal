@@ -3,11 +3,11 @@
 {% extends "base.html" %}
 
 {% block head_title %}
-Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
+Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 {% end %}
 
 {% block body_title %}
-Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
+Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 {% end %}
 
 {% block main_content %}
@@ -19,9 +19,9 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label for="type">Group parent field</label>
+	<label for="type">Parent group field</label>
 	<select class="form-control" name="parent" id="parent">
-	  <option value="">[current]</option>
+	  <option value="">[no change]</option>
 	  {% for parent in alt_parents %}
 	  {% if parent is None %}
 	  <option>[top level]</option>
@@ -33,8 +33,8 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
       </div>
     </div>
     <span class="help-block">
-      Change group parent field for this field. If this field is a
-      group, all its fields will follow along.
+      Change parent group for this field. If this field is a group,
+      all its fields will follow along.
     </span>
   </div>
 
@@ -84,21 +84,6 @@ Edit field '{{ field['identifier'] }}' in '{{ form['title'] }}'
     <span class="help-block">
       Label to display for the field in the order form. The identifier
       will be used if no label is provided.
-    </span>
-  </div>
-
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-6">
-	<label for="type">Type</label>
-	<p class="form-control-static">
-	  <i>{{ constants.TYPE_LABELS.get(field['type'], field['type'])}}</i>
-	</p>
-      </div>
-    </div>
-    <span class="help-block">
-      Data type for the field. Cannot be changed.
-      {% module Help('help_datatypes') %}
     </span>
   </div>
 
