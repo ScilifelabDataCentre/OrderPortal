@@ -96,6 +96,31 @@
 
   <div class="form-group visible-if"
        data-if-id="type"
+       data-if-val="group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="initial_display">
+	  Initial display
+	</label>
+	<div class="checkbox">
+	  <label>
+	    <input type="checkbox"
+		   name="initial_display"
+		   id="initial_display"
+		   value="yes">
+	    Yes
+	  </label>
+	</div>
+      </div>
+    </div>
+    <span class="help-block">
+      The group's fields are shown already when the page is
+      opened. This is used only for groups at the top level.
+    </span>
+  </div>
+
+  <div class="form-group visible-if"
+       data-if-id="type"
        data-if-val="select">
     <div class="row">
       <div class="col-md-3">
