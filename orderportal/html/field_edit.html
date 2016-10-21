@@ -302,7 +302,7 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
 		   id="restrict_write"
 		   name="restrict_write"
 		   value="yes"
-		   {{ field['restrict_write'] and 'checked' or ' }}>
+		   {{ field['restrict_write'] and 'checked' or '' }}>
 	    The field is visible to all, but can be edited only
 	    by admin and staff.
 	  </label>
