@@ -43,10 +43,10 @@ class OrderSaver(saver.Saver):
             counter = self.rqh.get_next_counter(constants.ORDER)
             self['identifier'] = fmt.format(counter)
 
-    def set_status(self, new):
+    def set_status(self, new, date=None):
         if self.get('status') == new: return
         self['status'] = new
-        self.doc['history'][new] = utils.today()
+        self.doc['history'][new] = date or utils.today()
         self.changed_status = new
 
     def update_fields(self, fields):
