@@ -218,6 +218,15 @@ def process_project(db, project, orders_lookup, dryrun=False):
     if changed:
         if dryrun:
             print('Would have updated information for', portal_id)
+            print('  tags', sorted(tags))
+            if processing:
+                print('  processing', processing)
+            if closed:
+                print('  closed', closed)
+            if aborted:
+                print('  history', aborted)
+            if current:
+                print('  current:', current, date)
         else:
             old_order = copy.deepcopy(order)
             with OrderSaver(doc=order, db=db) as saver:
