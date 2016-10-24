@@ -244,7 +244,7 @@ def regenerate_view(db, viewname):
         break
 
 if __name__ == '__main__':
-    print(utils.now())
+    print(utils.timestamp())
     parser = utils.get_command_line_parser(description=
         'Load project info from Clarity LIMS into OrderPortal.')
     parser.add_option('-d', '--dryrun',
