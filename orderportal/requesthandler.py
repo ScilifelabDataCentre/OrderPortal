@@ -70,19 +70,16 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def order_reverse_url(self, order, api=False, **query):
         "URL for order; use identifier variant if available. Always absolute"
+        URL = self.absolute_reverse_url
         try:
             identifier = order['identifier']
         except KeyError:
-            return self.absolute_reverse_url('order', order['_id'], **query)
+            return URL('order', order['_id'], **query)
         else:
             if api:
-                return self.absolute_reverse_url('order_id_api',
-                                                 identifier,
-                                                 **query)
+                return URL('order_id_api', identifier, **query)
             else:
-                return self.absolute_reverse_url('order_id',
-                                                 identifier,
-                                                 **query)
+                return URL('order_id', identifier, **query)
 
     def get_current_user(self):
         """Get the currently logged-in user account, if any.
@@ -110,7 +107,7 @@ class RequestHandler(tornado.web.RequestHandler):
         account = self.get_account(email)
         # Check if login session is invalidated.
         if account.get('login') is None: raise ValueError
-        logging.debug("Session login account %s", account['email'])
+        logging.info("Session login: account %s", account['email'])
         return account
 
     def get_current_user_basic(self):
@@ -132,7 +129,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 raise ValueError
         except (IndexError, ValueError, TypeError):
             raise ValueError
-        logging.debug("Basic auth login account %s", account['email'])
+        logging.info("Basic auth login: account %s", account['email'])
         return account
 
     def get_current_user_api_key(self):
@@ -148,7 +145,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 account = self.get_entity_view('account/api_key', api_key)
             except tornado.web.HTTPError:
                 raise ValueError
-            logging.debug("API key login account %s", account['email'])
+            logging.info("API key login: account %s", account['email'])
             return account
 
     def write_error(self, status_code, **kwargs):

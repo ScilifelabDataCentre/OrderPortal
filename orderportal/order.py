@@ -7,6 +7,7 @@ import re
 import urlparse
 from collections import OrderedDict as OD
 from cStringIO import StringIO
+import traceback
 
 import tornado.web
 
@@ -23,7 +24,11 @@ class OrderSaver(saver.Saver):
     doctype = constants.ORDER
 
     def setup(self):
-        "Additional setup: prepare for attaching files."
+        """Additional setup.
+        1) Initialize flag for changed status.
+        2) Prepare for attaching files.
+        """
+        self.changed_status = None
         self.files = []
 
     def set_identifier(self, form):
@@ -38,9 +43,11 @@ class OrderSaver(saver.Saver):
             counter = self.rqh.get_next_counter(constants.ORDER)
             self['identifier'] = fmt.format(counter)
 
-    def set_status(self, new):
+    def set_status(self, new, date=None):
+        if self.get('status') == new: return
         self['status'] = new
-        self.doc['history'][new] = utils.today()
+        self.doc['history'][new] = date or utils.today()
+        self.changed_status = new
 
     def update_fields(self, fields):
         "Update all fields from the HTML form input."
@@ -116,7 +123,7 @@ class OrderSaver(saver.Saver):
             if select_id:
                 select_value = docfields.get(select_id)
                 if select_value is not None:
-                    select_value = str(select_value).lower()
+                    select_value = unicode(select_value).lower()
                 if_value = field.get('visible_if_value')
                 if if_value:
                     if_value = if_value.lower()
@@ -198,6 +205,11 @@ class OrderSaver(saver.Saver):
             return True
 
     def post_process(self):
+        self.modify_attachments()
+        if self.changed_status:
+            self.prepare_message()
+
+    def modify_attachments(self):
         "Save or delete the file as an attachment to the document."
         docfields = self.doc['fields']
         try:                    # Delete a named file.
@@ -231,6 +243,54 @@ class OrderSaver(saver.Saver):
                                        StringIO(file.body),
                                        filename=file.filename,
                                        content_type=file.content_type)
+    def prepare_message(self):
+        """Prepare a message to send after status change.
+        It is sent later by cron job script 'script/messenger.py'
+        """
+        try:
+            template = settings['ORDER_MESSAGES'][self.doc['status']]
+        except KeyError:
+            return
+        recipients = set()
+        owner = self.get_account(self.doc['owner'])
+        # Owner account may have been deleted.
+        if owner:
+            email = owner['email'].strip().lower()
+            if 'owner' in template['recipients']:
+                recipients = set([owner['email']])
+            if 'group' in template['recipients']:
+                for row in self.db.view('group/member',
+                                        include_docs=True,
+                                        key=email):
+                    for member in row.doc['members']:
+                        account = self.get_account(member)
+                        if account and account['status'] == constants.ENABLED:
+                            recipients.add(account['email'])
+        if 'admin' in template['recipients']:
+            view = self.db.view('account/role', include_docs=True)
+            admins = [r.doc for r in view[constants.ADMIN]]
+            for admin in admins:
+                if admin['status'] == constants.ENABLED:
+                    recipients.add(admin['email'])
+        with MessageSaver(rqh=self) as saver:
+            saver.set_params(
+                owner=self.doc['owner'],
+                title=self.doc['title'],
+                identifier=self.doc.get('identifier') or self.doc['_id'],
+                url=self.rqh.order_reverse_url(self.doc), # XXX script won't work
+                tags=', '.join(self.doc.get('tags', [])))
+            saver.set_template(template)
+            saver['recipients'] = list(recipients)
+
+    def get_account(self, email):
+        "Get the account document for the given email."
+        view = self.db.view('account/email', include_docs=True)
+        rows = list(view[email])
+        if len(rows) == 1:
+            return rows[0].doc
+        else:
+            return None
+
 
 class OrderMixin(object):
     "Mixin for various useful methods."
@@ -308,37 +368,6 @@ class OrderMixin(object):
                                       constants.DISABLED)
         else:
             return form['status'] in (constants.ENABLED, constants.TESTING)
-
-    def prepare_message(self, order):
-        """Prepare a message to send after status change.
-        It is sent later by cron job script 'script/messenger.py'
-        """
-        try:
-            template = settings['ORDER_MESSAGES'][order['status']]
-        except KeyError:
-            return
-        try:
-            owner = self.get_account(order['owner'])
-        except ValueError:
-            # Owner account may have been deleted.
-            owner = None
-            recipients = set()
-        if owner and 'owner' in template['recipients']:
-            recipients = set([owner['email']])
-        if owner and 'group' in template['recipients']:
-            recipients.update([a['email']
-                               for a in self.get_colleagues(owner['email'])])
-        if 'admin' in template['recipients']:
-            recipients.update([a['email'] for a in self.get_admins()])
-        with MessageSaver(rqh=self) as saver:
-            saver.set_params(
-                owner=order['owner'],
-                title=order['title'],
-                identifier=order.get('identifier') or order['_id'],
-                url=self.order_reverse_url(order),
-                tags=', '.join(order.get('tags', [])))
-            saver.set_template(template)
-            saver['recipients'] = list(recipients)
 
 
 class Orders(RequestHandler):
@@ -763,7 +792,6 @@ class OrderEdit(OrderMixin, RequestHandler):
                     if target['identifier'] == 'submitted':
                         with OrderSaver(doc=order, rqh=self) as saver:
                             saver.set_status('submitted')
-                        self.prepare_message(order)
                         self.redirect(self.order_reverse_url(
                                 order,
                                 absolute=True,
@@ -828,14 +856,20 @@ class OrderClone(OrderMixin, RequestHandler):
 class OrderTransition(OrderMixin, RequestHandler):
     "Change the status of an order."
 
+    API = False
+
     @tornado.web.authenticated
     def post(self, iuid, targetid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
             self.check_editable(order)
         except ValueError, msg:
-            self.see_other('home', error=str(msg))
-            return
+            if self.API:
+                raise tornado.web.HTTPError(403,
+                                            reason='May not edit the order.')
+            else:
+                self.see_other('home', error=str(msg))
+                return
         for target in self.get_targets(order):
             if target['identifier'] == targetid: break
         else:
@@ -843,8 +877,17 @@ class OrderTransition(OrderMixin, RequestHandler):
                 403, reason='Invalid order transition target.')
         with OrderSaver(doc=order, rqh=self) as saver:
             saver.set_status(targetid)
-        self.prepare_message(order)
-        self.redirect(self.order_reverse_url(order))
+        self.redirect(self.order_reverse_url(order, api=self.API))
+
+
+class OrderTransitionApiV1(OrderTransition):
+    "Change the status of an order by an API call."
+
+    API = True
+
+    def check_xsrf_cookie(self):
+        "Do not check for XSRF cookie when script is calling."
+        pass
 
 
 class OrderFile(OrderMixin, RequestHandler):

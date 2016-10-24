@@ -48,6 +48,8 @@ def get_handlers():
         url(r'/order/([0-9a-f]{32})/edit', OrderEdit, name='order_edit'),
         url(r'/order/([0-9a-f]{32})/transition/(\w+)',
             OrderTransition, name='order_transition'),
+        url(r'/api/v1/order/([0-9a-f]{32})/transition/(\w+)',
+            OrderTransitionApiV1, name='order_transition_api'),
         url(r'/order/([0-9a-f]{32})/clone', OrderClone, name='order_clone'),
         url(r'/order/([0-9a-f]{32})/file', OrderAttach, name='order_attach'),
         url(r'/order/([0-9a-f]{32})/file/([^/]+)', OrderFile,name='order_file'),

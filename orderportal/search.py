@@ -178,7 +178,7 @@ var lint = {{'and': 1, 'the': 1, 'was': 1, 'not': 1}};"""
             try:
                 views.pop(delete_field)
             except KeyError:
-                logging.debug("no such field %s", delete_field)
+                logging.warning("no such field %s to delete", delete_field)
         add_field = self.get_argument('add_field', '')
         if constants.ID_RX.match(add_field) and add_field not in views:
             views[add_field] = dict(map=self.MAP_TEMPLATE.format(fieldid=add_field))
