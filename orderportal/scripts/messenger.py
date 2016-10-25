@@ -20,12 +20,10 @@ from orderportal.message import MessageSaver
 class Messenger(object):
     "Send unsent messages to given recipients."
 
-    def __init__(self, db, verbose=False, dry_run=False):
+    def __init__(self, db, dry_run=False):
         self.db = db
-        self.verbose = verbose
         self.dry_run = dry_run
-        if self.verbose:
-            print('Messenger', utils.timestamp())
+        print('Messenger', utils.timestamp())
 
     @property
     def server(self):
@@ -78,10 +76,9 @@ class Messenger(object):
         self.server.sendmail(message['sender'],
                              message['recipients'],
                              mail.as_string())
-        if self.verbose:
-            print(u"sent email '{0}' to {1}".format(
-                    message['subject'],
-                    ', '.join(message['recipients'])).encode('utf-8'))
+        print(u"sent email '{0}' to {1}".format(
+                message['subject'],
+                ', '.join(message['recipients'])).encode('utf-8'))
 
 
 def get_args():
@@ -96,7 +93,5 @@ def get_args():
 if __name__ == '__main__':
     (options, args) = get_args()
     utils.load_settings(filepath=options.settings)
-    messenger = Messenger(utils.get_db(),
-                          verbose=options.verbose,
-                          dry_run=options.dry_run)
+    messenger = Messenger(utils.get_db(), dry_run=options.dry_run)
     messenger.process()
