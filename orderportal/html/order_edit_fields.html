@@ -7,6 +7,9 @@
 {% continue %}
 {% end %}
 
+{# Update field exclusion list; remaining output by order_edit.html. #}
+{% set garbage = field_values.pop(field['identifier'], None) %}
+
 {% set label = field.get('label') or field['identifier'].capitalize().replace('_', ' ') %}
 
 {# Is there a visibility condition? #}
@@ -59,7 +62,7 @@
     </div>
     <div class="panel-body">
       {# Recursion: 'include' cannot be used! #}
-      {% module Template('order_edit_fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
+      {% module Template('order_edit_fields.html', order=order, fields=field['fields'], is_staff=is_staff, field_values=field_values) %}
     </div>
   </div>
 </div>
