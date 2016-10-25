@@ -37,10 +37,12 @@ def get_handlers():
     except KeyError:
         pass
     else:
+        # If changed, then OrderSaver.get_url must also be modified!
         urls.append(url(r"/order/({0})".format(regexp), Order, name='order_id'))
         urls.append(url(r"/api/v1/order/({0})".format(regexp),
                         OrderApiV1, name='order_id_api'))
     urls.extend([
+        # If changed, then OrderSaver.get_url must also be modified!
         url(r'/order/([0-9a-f]{32})', Order, name='order'),
         url(r'/api/v1/order/([0-9a-f]{32})', OrderApiV1, name='order_api'),
         url(r'/order/([0-9a-f]{32})/logs', OrderLogs, name='order_logs'),

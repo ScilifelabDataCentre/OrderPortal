@@ -277,10 +277,21 @@ class OrderSaver(saver.Saver):
                 owner=self.doc['owner'],
                 title=self.doc['title'],
                 identifier=self.doc.get('identifier') or self.doc['_id'],
-                url=self.rqh.order_reverse_url(self.doc), # XXX script won't work
+                url=self.get_order_url(self.doc),
                 tags=', '.join(self.doc.get('tags', [])))
             saver.set_template(template)
             saver['recipients'] = list(recipients)
+
+    def get_order_url(self, doc):
+        """Member rqh is not available when used from a stand-alone script,
+        so self.rqh.order_reverse_url cannot be used.
+        The URL has to be synthesized explicitly here. """
+        try:
+            identifier = order['identifier']
+        except KeyError:
+            identifier = order['_id']
+        path = "/order/{0}".format(identifier)
+        return settings['BASE_URL'].rstrip('/') + path
 
     def get_account(self, email):
         "Get the account document for the given email."
