@@ -164,12 +164,12 @@ class OrderSaver(saver.Saver):
                     if value not in field['select']:
                         raise ValueError('invalid selection')
                 elif field['type'] == constants.MULTISELECT:
-                    if not value and field['required']:
+                    # Value is here always a list, no matter what.
+                    if field['required'] and len(value) == 1 and value[0] == '':
                         raise ValueError('missing value')
-                    else:
-                        for v in value:
-                            if v not in field['multiselect']:
-                                raise ValueError('value not among alternatives')
+                    for v in value:
+                        if v and v not in field['multiselect']:
+                            raise ValueError('value not among alternatives')
                 elif field['type'] == constants.TEXT:
                     pass
                 elif field['type'] == constants.DATE:
