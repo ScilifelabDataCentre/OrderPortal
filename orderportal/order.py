@@ -282,7 +282,7 @@ class OrderSaver(saver.Saver):
             saver.set_template(template)
             saver['recipients'] = list(recipients)
 
-    def get_order_url(self, doc):
+    def get_order_url(self, order):
         """Member rqh is not available when used from a stand-alone script,
         so self.rqh.order_reverse_url cannot be used.
         The URL has to be synthesized explicitly here. """
