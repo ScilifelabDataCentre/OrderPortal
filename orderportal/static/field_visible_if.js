@@ -13,6 +13,9 @@ $(document).ready(function() {
 	    /* Explicit cast to string, since 'true' is interpreted. */
 	    var thisValue = String($(this).data('if-val'));
 	    var theseValues = thisValue.split('|');
+/*
+	    console.log("fieldId " + fieldId + " " + fieldValue + "; " + " " + thisValue + " " + theseValues + " checked=" + fieldChecked);
+*/
 	    if (fieldType === 'checkbox') {
 		if (thisValue === 'true') {
 		    if (fieldChecked) {
@@ -30,11 +33,25 @@ $(document).ready(function() {
 	    } else if (fieldType === 'radio') {
 		if ($(this).hasClass('radio-tested')) {
 		    if (fieldChecked && theseValues.indexOf(fieldValue) > -1) {
+/*
+			console.log("  show 1");
+*/
 			$(this).show(0);
 		    };
 		} else if (!fieldChecked) {
 		    $(this).addClass('radio-tested')
+/*
+		    console.log("  hide 1");
+*/
 		    $(this).hide(0);
+		} else {
+		    if (theseValues.indexOf(fieldValue) > -1) {
+			$(this).addClass('radio-tested')
+/*
+			console.log("  show 2");
+*/
+			$(this).show(0);
+		    };
 		};
 	    } else {
 		if (theseValues.indexOf(fieldValue) > -1) {
