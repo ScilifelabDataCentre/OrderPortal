@@ -173,42 +173,44 @@ def process_project(db, project, orders_lookup, dryrun=False):
     changed = old_tags != tags
 
     current = None
+    current_date = None
     processing = [project.get('samples received'),
                   project.get('sample information received'),
                   project.get('queued')]
-    processing = [p for p in processing if p is not None]
+    processing = [p for p in processing if p]
     if processing:
         processing = reduce(min, processing)
-        if processing:
+        if processing and processing > order['history'].get('processing'):
+            changed = True
             current = 'processing'
-            date = processing
-            if processing > order['history'].get('processing'):
-                changed = True
-            else:
-                processing = False
+            current_date = processing
 
     closed = [project.get('close-date'),
               project.get('all raw data delivered'),
               project.get('best practice analysis completed')]
-    closed = [c for c in closed if c is not None]
+    closed = [c for c in closed if c]
     if closed:
         closed = reduce(min, closed)
-        if closed:
-            current = 'closed'
-            date = closed
-            if closed > order['history'].get('closed'):
-                changed = True
+        if closed and closed > order['history'].get('closed'):
+            changed = True
+            if current:
+                if closed > current_date:
+                    current = 'closed'
+                    current_date = closed
             else:
-                closed = False
+                current = 'closed'
+                current_date = closed
 
     aborted = project.get('aborted')
-    if aborted:
-        current = 'aborted'
-        date = aborted
-        if aborted > order['history'].get('aborted'):
-            changed = True
+    if aborted and aborted > order['history'].get('aborted'):
+        changed = True
+        if current:
+            if aborted > current_date:
+                current = 'aborted'
+                current_date = aborted
         else:
-            aborted = False
+            current = 'aborted'
+            current_date = aborted
 
     if current and current != order.get('status'):
         changed = True
@@ -226,7 +228,7 @@ def process_project(db, project, orders_lookup, dryrun=False):
             if aborted:
                 print('  history', aborted)
             if current:
-                print('  current:', current, date)
+                print('  current:', current, current_date)
         else:
             old_order = copy.deepcopy(order)
             with OrderSaver(doc=order, db=db) as saver:
@@ -243,7 +245,7 @@ def process_project(db, project, orders_lookup, dryrun=False):
                 if current:
                     # Using the call 'set_status' ensures that a message is
                     # generated for sending to the user, when so configured.
-                    saver.set_status(current, date=date)
+                    saver.set_status(current, date=current_date)
             print('Updated information for', portal_id)
 
 def regenerate_view(db, viewname):
