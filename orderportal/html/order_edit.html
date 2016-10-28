@@ -116,13 +116,13 @@
   </div>
 
   {# Recursion: 'include' cannot be used! #}
-  {% module Template('order_edit_fields.html', fields=fields, order=order, is_staff=is_staff, field_values=field_values) %}
+  {% module Template('order_edit_fields.html', fields=fields, order=order, is_staff=is_staff, hidden_fields=hidden_fields) %}
 
   <div>
-    {# Fields must be allowed to influence others, even when excluded. #}
-    {% for f in field_values %}
+    {# Fields must be allowed to influence others, even when hidden. #}
+    {% for f in hidden_fields %}
     <input type="hidden" class="visible-if-source"
-	   name="{{ f }}" id="{{ f }}" value="{{ field_values[f] or '' }}">
+	   name="{{ f }}" id="{{ f }}" value="{{ order['fields'].get(f)  or '' }}">
     {% end %}
   </div>
 

@@ -27,7 +27,7 @@ class Search(RequestHandler):
     def get(self):
         orig = self.get_argument('term', '')
         params = dict(term=orig)
-        items = []
+        items = {}
         # Search order identifier; exact match
         term = orig.strip().upper()
         parts = term.split()
@@ -36,9 +36,8 @@ class Search(RequestHandler):
         for part in parts:
             id_sets.append(set([r.id for r in view[part]]))
         if id_sets:
-            id_set = reduce(lambda i,j: i.union(j), id_sets)
-            items.extend([self.get_entity(id, doctype=constants.ORDER)
-                          for id in id_set])
+            for id in reduce(lambda i,j: i.union(j), id_sets):
+                items[id] = self.get_entity(id, doctype=constants.ORDER)
         # Seach order tags; exact match
         term = ''.join([c in ",;'" and ' ' or c for c in orig]).strip().lower()
         parts = term.split()
@@ -47,9 +46,8 @@ class Search(RequestHandler):
         for part in parts:
             id_sets.append(set([r.id for r in view[part]]))
         if id_sets:
-            id_set = reduce(lambda i,j: i.union(j), id_sets)
-            items.extend([self.get_entity(id, doctype=constants.ORDER)
-                          for id in id_set])
+            for id in reduce(lambda i,j: i.union(j), id_sets):
+                items[id] = self.get_entity(id, doctype=constants.ORDER)
         # Keep this in sync with JS script 'designs/order/views/keyword.js'
         term = ''.join([c in ":,;'" and ' ' or c for c in orig]).strip().lower()
         parts = [part for part in term.split()
@@ -63,8 +61,8 @@ class Search(RequestHandler):
         if id_sets:
             # All words must exist in title
             id_set = reduce(lambda i,j: i.intersection(j), id_sets)
-            items.extend([self.get_entity(id, doctype=constants.ORDER)
-                          for id in id_set])
+            for id in reduce(lambda i,j: i.intersection(j), id_sets):
+                items[id] = self.get_entity(id, doctype=constants.ORDER)
         # Search dynamically defined indexes for order fields
         try:
             fields = self.db['_design/fields']['views'].keys()
@@ -77,9 +75,8 @@ class Search(RequestHandler):
                 id_sets.append(set([r.id for r in
                                     view[part : part+constants.CEILING]]))
             if id_sets:
-                id_set = reduce(lambda i,j: i.intersection(j), id_sets)
-                items.extend([self.get_entity(id, doctype=constants.ORDER)
-                              for id in id_set])
+                for id in reduce(lambda i,j: i.intersection(j), id_sets):
+                    items[id] = self.get_entity(id, doctype=constants.ORDER)
         # Only staff may search account (as yet).
         if self.is_staff():
             # Search account email
@@ -91,9 +88,8 @@ class Search(RequestHandler):
                                     view[part : part+constants.CEILING]]))
             # Only require one hit in email
             if id_sets:
-                id_set = reduce(lambda i,j: i.union(j), id_sets)
-                items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
-                              for id in id_set])
+                for id in reduce(lambda i,j: i.union(j), id_sets):
+                    items[id] = self.get_entity(id, doctype=constants.ACCOUNT)
             # Search account last names
             view = self.db.view('account/last_name')
             id_sets = []
@@ -102,9 +98,8 @@ class Search(RequestHandler):
                                     view[part : part+constants.CEILING]]))
             # Only require one hit in last name
             if id_sets:
-                id_set = reduce(lambda i,j: i.union(j), id_sets)
-                items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
-                              for id in id_set])
+                for id in reduce(lambda i,j: i.union(j), id_sets):
+                    items[id] = self.get_entity(id, doctype=constants.ACCOUNT)
             # Search account first names
             view = self.db.view('account/first_name')
             id_sets = []
@@ -113,24 +108,28 @@ class Search(RequestHandler):
                                     view[part : part+constants.CEILING]]))
             # Only require one hit in first name
             if id_sets:
-                id_set = reduce(lambda i,j: i.union(j), id_sets)
-                items.extend([self.get_entity(id, doctype=constants.ACCOUNT)
-                              for id in id_set])
+                for id in reduce(lambda i,j: i.union(j), id_sets):
+                    items[id] = self.get_entity(id, doctype=constants.ACCOUNT)
         # Remove all orders not readable by the user
+            items = items.values()
         else:
-            items = [i for i in items
+            items = [i for i in items.values()
                      if self.is_owner(i) or self.is_colleague(i['owner'])]
-        # All items contain 'modified'
-        items.sort(lambda i,j: cmp(i['modified'], j['modified']), reverse=True)
-        # Paging
-        page = self.get_page(count=len(items))
-        items = items[page['start'] : page['end']]
-        account_names = self.get_account_names([i['owner'] for i in items])
-        self.render('search.html',
-                    items=items,
-                    account_names=account_names,
-                    params=params,
-                    page=page)
+        if len(items) == 1:
+            self.see_other('entity', items[0]['_id'])
+        else:
+            # All items contain 'modified'
+            items.sort(lambda i,j: cmp(i['modified'], j['modified']),
+                       reverse=True)
+            # Paging
+            page = self.get_page(count=len(items))
+            items = items[page['start'] : page['end']]
+            account_names = self.get_account_names([i['owner'] for i in items])
+            self.render('search.html',
+                        items=items,
+                        account_names=account_names,
+                        params=params,
+                        page=page)
 
 
 class SearchFields(RequestHandler):

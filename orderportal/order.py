@@ -743,15 +743,14 @@ class OrderEdit(OrderMixin, RequestHandler):
         colleagues = sorted(self.get_account_colleagues(self.current_user['email']))
         form = self.get_entity(order['form'], doctype=constants.FORM)
         fields = Fields(form)
-        field_values = dict([(f['identifier'], f.get('value'))
-                             for f in fields.flatten()])
+        hidden_fields = set([f['identifier'] for f in fields.flatten()])
         self.render('order_edit.html',
                     title=u"Edit order '{0}'".format(order['title']),
                     order=order,
                     colleagues=colleagues,
                     form=form,
                     fields=form['fields'],
-                    field_values=field_values)
+                    hidden_fields=hidden_fields)
 
     @tornado.web.authenticated
     def post(self, iuid):
