@@ -9,6 +9,14 @@ Edit {% module Icon('account') %} {{ account['email'] }}
 {% end %}
 
 {% block main_content %}
+<p>
+The email address of your account cannot be changed, since it is the
+unique identifier for the account. If your email address has changed,
+then you must create a new account with the new email address. The
+administrator of the site can then change the ownership of your orders
+to the new account.
+</p>
+
 <form action="{{ reverse_url('account_edit', account['email']) }}"
       role="form"
       method="POST">
