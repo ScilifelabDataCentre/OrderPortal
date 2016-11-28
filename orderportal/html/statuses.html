@@ -33,7 +33,14 @@
 	    </tr>
 	    {% end %}
 	    <tr>
-	      <td>Order editable by {{ ', '.join(status.get('edit', [])) or 'none' }}.</td>
+	      {% set editable = ['admin'] %}
+	      {% set editable.extend(status.get('edit', [])) %}
+	      <td>Order editable by {{ ', '.join(editable) or 'none' }}.</td>
+	    </tr>
+	    <tr>
+	      {% set attachable = ['admin'] %}
+	      {% set attachable.extend(status.get('attach', [])) %}
+	      <td>Order attachable by {{ ', '.join(attachable) or 'none' }}.</td>
 	    </tr>
 	    <tr>
 	      <td>From

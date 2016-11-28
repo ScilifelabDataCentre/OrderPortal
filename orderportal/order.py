@@ -352,13 +352,13 @@ class OrderMixin(object):
         "Get the order status lookup item."
         return settings['ORDER_STATUSES_LOOKUP'][order['status']]
 
-    def get_targets(self, order):
+    def get_targets(self, order, check_valid=True):
         "Get the allowed status transition targets."
         result = []
         for transition in settings['ORDER_TRANSITIONS']:
             if transition['source'] != order['status']: continue
-            # Check validity
-            if transition.get('require') == 'valid' and order['invalid']:
+            if check_valid and \
+               transition.get('require') == 'valid' and order['invalid']:
                 continue
             permission = transition['permission']
             if (self.is_admin() and constants.ADMIN in permission) or \
@@ -366,6 +366,13 @@ class OrderMixin(object):
                (self.is_owner(order) and constants.USER in permission):
                 result.extend(transition['targets'])
         return [settings['ORDER_STATUSES_LOOKUP'][t] for t in result]
+
+    def is_submittable(self, order, check_valid=True):
+        "Is the order submittable? Special hard-wired status."
+        for target in self.get_targets(order, check_valid=check_valid):
+            if target['identifier'] == 'submitted':
+                return True
+        return False
 
     def is_clonable(self, order):
         """Can the given order be cloned? Its form must be enabled.
@@ -750,7 +757,8 @@ class OrderEdit(OrderMixin, RequestHandler):
                     colleagues=colleagues,
                     form=form,
                     fields=form['fields'],
-                    hidden_fields=hidden_fields)
+                    hidden_fields=hidden_fields,
+                    is_submittable=self.is_submittable(order,check_valid=False))
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -801,22 +809,19 @@ class OrderEdit(OrderMixin, RequestHandler):
                                order['_id'],
                                message='Order saved.')
             elif flag == 'submit': # XXX Hard-wired, currently
-                targets = self.get_targets(order)
-                for target in targets:
-                    if target['identifier'] == 'submitted':
-                        with OrderSaver(doc=order, rqh=self) as saver:
-                            saver.set_status('submitted')
-                        self.redirect(self.order_reverse_url(
-                                order,
-                                absolute=True,
-                                message='Order saved and submitted.'))
-                        break
+                if self.is_submittable(order):
+                    with OrderSaver(doc=order, rqh=self) as saver:
+                        saver.set_status('submitted')
+                    self.redirect(self.order_reverse_url(
+                            order,
+                            absolute=True,
+                            message='Order saved and submitted.'))
                 else:
-                        self.redirect(self.order_reverse_url(
-                                order,
-                                message='Order saved.',
-                                error='Order could not be submitted due to'
-                                ' invalid or missing values.'))
+                    self.redirect(self.order_reverse_url(
+                            order,
+                            message='Order saved.',
+                            error='Order could not be submitted due to'
+                            ' invalid or missing values.'))
             else:
                 self.redirect(
                     self.order_reverse_url(order, message='Order saved.'))
