@@ -20,7 +20,7 @@
       </button>
     </div>
   </div>
-  {% if 'submitted' in [s['identifier'] for s in settings['ORDER_STATUSES']] %}
+  {% if is_submittable %}
   <div class="col-md-3">
     <div class="form-group">
       <label class="control-label"></label>
