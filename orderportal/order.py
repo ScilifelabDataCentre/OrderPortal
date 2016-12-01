@@ -58,6 +58,9 @@ class OrderSaver(saver.Saver):
         docfields = self.doc['fields']
         self.removed_files = []       # Due to field update
         for field in fields:
+            # Field not displayed or not writeable must not be changed.
+            if not self.rqh.is_staff() and \
+                (field['restrict_read'] or field['restrict_write']): continue
             if field['type'] == constants.GROUP: continue
             identifier = field['identifier']
             if field['type'] == constants.FILE:
@@ -71,6 +74,7 @@ class OrderSaver(saver.Saver):
                     self.removed_files.append(docfields.get(identifier))
             elif field['type'] == constants.MULTISELECT:
                 value = self.rqh.get_arguments(identifier)
+                logging.debug("multiselect> %s", value)
             elif field['type'] == constants.TABLE:
                 value = docfields.get(identifier) or []
                 for i, row in enumerate(value):
@@ -750,7 +754,10 @@ class OrderEdit(OrderMixin, RequestHandler):
         colleagues = sorted(self.get_account_colleagues(self.current_user['email']))
         form = self.get_entity(order['form'], doctype=constants.FORM)
         fields = Fields(form)
-        hidden_fields = set([f['identifier'] for f in fields.flatten()])
+        # XXX Currently, multiselect fields are not handled correctly.
+        #     Too much effort; leave as is for the time being.
+        hidden_fields = set([f['identifier'] for f in fields.flatten()
+                             if f['type'] == 'multiselect'])
         self.render('order_edit.html',
                     title=u"Edit order '{0}'".format(order['title']),
                     order=order,

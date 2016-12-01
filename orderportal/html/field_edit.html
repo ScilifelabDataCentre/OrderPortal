@@ -95,7 +95,8 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
 		name="visible_if_field" id="visible_if_field">
 	  <option value="">[none]</option>
 	  {% for other in fields %}
-	    {% if other is not field and other['depth'] <= field['depth'] %}
+	    {# XXX Multiselect fields currently not allowed; too complicated #}
+	    {% if other is not field and other['depth'] <= field['depth'] and other['type'] != 'multiselect' %}
 	      {% set sel = field.get('visible_if_field') == other['identifier'] and 'selected' or '' %}
 	      <option {{ sel }}>{{ other['identifier'] }}</option>
 	    {% end %}
