@@ -8,7 +8,7 @@
 {% end %}
 
 {# Update hidden fields set; remaining will be output by order_edit.html. #}
-{% set garbage = hidden_fields.remove(field['identifier']) %}
+{% set garbage = hidden_fields.discard(field['identifier']) %}
 
 {% set label = field.get('label') or field['identifier'].capitalize().replace('_', ' ') %}
 
