@@ -757,7 +757,7 @@ class OrderEdit(OrderMixin, RequestHandler):
         # XXX Currently, multiselect fields are not handled correctly.
         #     Too much effort; leave as is for the time being.
         hidden_fields = set([f['identifier'] for f in fields.flatten()
-                             if f['type'] == 'multiselect'])
+                             if f['type'] != 'multiselect'])
         self.render('order_edit.html',
                     title=u"Edit order '{0}'".format(order['title']),
                     order=order,
