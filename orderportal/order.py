@@ -49,14 +49,16 @@ class OrderSaver(saver.Saver):
         self.doc['history'][new] = date or utils.today()
         self.changed_status = new
 
-    def update_fields(self, fields):
+    def update_fields(self):
         "Update all fields from the HTML form input."
         assert self.rqh is not None
+        fields = Fields(self.rqh.get_entity(self.doc['form'],
+                                            doctype=constants.FORM))
+        docfields = self.doc['fields']
+        self.removed_files = []       # Due to field update
         # Loop over fields defined in the form document and get values.
         # Do not change values for a field if that argument is missing,
         # except for checkbox, in which case missing value means False.
-        docfields = self.doc['fields']
-        self.removed_files = []       # Due to field update
         for field in fields:
             # Field not displayed or not writeable must not be changed.
             if not self.rqh.is_staff() and \
@@ -109,7 +111,7 @@ class OrderSaver(saver.Saver):
         self.check_fields_validity(fields)
 
     def check_fields_validity(self, fields):
-        "Check validity of current values."
+        "Check validity of current field values."
         self.doc['invalid'] = dict()
         for field in fields:
             if field['depth'] == 0:
@@ -215,19 +217,8 @@ class OrderSaver(saver.Saver):
 
     def modify_attachments(self):
         "Save or delete the file as an attachment to the document."
-        docfields = self.doc['fields']
-        try:                    # Delete a named file.
-            filename = self.delete_filename
-            for key in docfields:
-                # Remove the field value if it is the filename.
-                # XXX Somewhat dangerous: may delete a value that happens to
-                # be identical to the filename. Shouldn't be too commmon...
-                if docfields[key] == filename:
-                    docfields[key] = None
-                    self.db.save(self.doc)
-                    break
-            self.db.delete_attachment(self.doc, filename)
-            self.changed['file_deleted'] = filename
+        try:                    # Delete the named file.
+            self.db.delete_attachment(self.doc, self.delete_filename)
         except AttributeError:
             # Else add any new attached files.
             try:
@@ -775,8 +766,10 @@ class OrderEdit(OrderMixin, RequestHandler):
         except ValueError, msg:
             self.see_other('home', error=str(msg))
             return
-        form = self.get_entity(order['form'], doctype=constants.FORM)
+        flag = self.get_argument('__save__', None)
         try:
+            message = 'Order saved.'
+            error = None
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver['title'] = self.get_argument('__title__', None) or '[no title]'
                 tags = []
@@ -809,29 +802,24 @@ class OrderEdit(OrderMixin, RequestHandler):
                     raise ValueError('Sorry, no such owner account.')
                 else:
                     saver['owner'] = account['email']
-                saver.update_fields(Fields(form))
-            flag = self.get_argument('__save__', None)
-            if flag == 'continue':
-                self.see_other('order_edit',
-                               order['_id'],
-                               message='Order saved.')
-            elif flag == 'submit': # XXX Hard-wired, currently
-                if self.is_submittable(order):
-                    with OrderSaver(doc=order, rqh=self) as saver:
+                saver.update_fields()
+                if flag == 'submit': # XXX Hard-wired, currently
+                    if self.is_submittable(saver.doc):
                         saver.set_status('submitted')
-                    self.redirect(self.order_reverse_url(
-                            order,
-                            absolute=True,
-                            message='Order saved and submitted.'))
-                else:
-                    self.redirect(self.order_reverse_url(
-                            order,
-                            message='Order saved.',
-                            error='Order could not be submitted due to'
-                            ' invalid or missing values.'))
+                        message = 'Order saved and submitted.'
+                    else:
+                        error = 'Order could not be submitted due to' \
+                                ' invalid or missing values.'
+            if flag == 'continue':
+                self.see_other('order_edit', order['_id'], message=message)
             else:
-                self.redirect(
-                    self.order_reverse_url(order, message='Order saved.'))
+                if error:
+                    url = self.order_reverse_url(order,
+                                                 message=message,
+                                                 error=error)
+                else:
+                    url = self.order_reverse_url(order, message=message)
+                self.redirect(url)
         except ValueError, msg:
             self.redirect(self.order_reverse_url(order, error=str(msg)))
 
@@ -850,8 +838,8 @@ class OrderClone(OrderMixin, RequestHandler):
         if not self.is_clonable(order):
             raise ValueError('This order is outdated; its form has been disabled.')
         form = self.get_entity(order['form'], doctype=constants.FORM)
-        erased_files = set()
         fields = Fields(form)
+        erased_files = set()
         with OrderSaver(rqh=self) as saver:
             saver['form'] = form['_id']
             saver['title'] = u"Clone of {0}".format(order['title'])
@@ -950,8 +938,25 @@ class OrderFile(OrderMixin, RequestHandler):
     def delete(self, iuid, filename):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_attachable(order)
+        fields = Fields(self.get_entity(order['form'], doctype=constants.FORM))
         with OrderSaver(doc=order, rqh=self) as saver:
+            docfields = order['fields']
+            for key in docfields:
+                # Remove the field value if it is the filename.
+                # XXX Slightly dangerous: may delete a value that happens to
+                # be identical to the filename. Shouldn't be too commmon...
+                if docfields[key] == filename:
+                    docfields[key] = None
+                    if fields[key]['required']:
+                        saver.doc['invalid'][key] = 'missing value'
+                    else:
+                        try:
+                            del saver.doc['invalid'][key]
+                        except KeyError:
+                            pass
+                    break
             saver.delete_filename = filename
+            saver.changed['file_deleted'] = filename
         self.redirect(self.order_reverse_url(order))
 
 
