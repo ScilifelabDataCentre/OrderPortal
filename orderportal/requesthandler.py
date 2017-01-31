@@ -421,7 +421,7 @@ class RequestHandler(tornado.web.RequestHandler):
         forms.sort()
         return forms
 
-    def get_logs(self, iuid, limit=constants.DEFAULT_MAX_DISPLAY_LOG+1):
+    def get_logs(self, iuid, limit=settings['DISPLAY_DEFAULT_MAX_LOG']+1):
         "Return the event log documents for the given entity iuid."
         kwargs = dict(include_docs=True,
                       startkey=[iuid, constants.CEILING],

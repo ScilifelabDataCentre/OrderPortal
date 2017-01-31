@@ -61,7 +61,7 @@ TYPE_HTML = {STRING: 'text', INT: 'number'}
 TRUE  = frozenset(['true', 'yes', 't', 'y', '1'])
 FALSE = frozenset(['false', 'no', 'f', 'n', '0'])
 
-# Default global modes
+# Default global modes for database initialization
 DEFAULT_GLOBAL_MODES = dict(allow_registration=True,
                             allow_login=True,
                             allow_order_creation=True,
@@ -86,15 +86,6 @@ ACCOUNT_ROLES = [USER, STAFF, ADMIN]
 # Form status; hard-wired!
 TESTING = 'testing'
 FORM_STATUSES = [PENDING, TESTING, ENABLED, DISABLED]
-
-# To be filled in from separate YAML file
-ORDER_STATES = {}
-ORDER_TRANSITIONS = {}
-
-# Display
-MAX_RECENT_ORDERS = 10
-MAX_PENDING_ACCOUNTS = 10
-DEFAULT_MAX_DISPLAY_LOG = 20
 
 # Content-type to icon mapping
 CONTENT_TYPE_ICONS = {
