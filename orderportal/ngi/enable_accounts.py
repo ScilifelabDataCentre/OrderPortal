@@ -15,7 +15,7 @@ from orderportal.message import MessageSaver
 
 PAUSE = 2.0
 
-def enable_accounts(db, verbose=False):
+def enable_accounts(db):
     view = db.view('account/status',
                    include_docs=True,
                    key=constants.PENDING)
@@ -45,8 +45,7 @@ def enable_accounts(db, verbose=False):
                     code=account['code'])
                 saver.set_template(template)
                 saver['recipients'] = [account['email']]
-        if verbose:
-            print(account['email'])
+        print(account['email'])
         time.sleep(PAUSE)
 
 def absolute_reverse_url(path, **kwargs):
@@ -60,7 +59,5 @@ if __name__ == '__main__':
     parser = utils.get_command_line_parser(description=
         "Enable all pending accounts.")
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
-    db = utils.get_db()
-    enable_accounts(db, verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
+    enable_accounts(utils.get_db())

@@ -9,7 +9,7 @@ from orderportal import utils
 from orderportal import admin
 
 
-def add_text(db, name, textfilepath, force=False, verbose=False):
+def add_text(db, name, textfilepath, force=False):
     "Load the text from file, overwriting the current."
     with open(utils.expand_filepath(textfilepath)) as infile:
         text = infile.read()
@@ -24,8 +24,7 @@ def add_text(db, name, textfilepath, force=False, verbose=False):
         with admin.TextSaver(doc=doc, db=db) as saver:
             saver['name'] = name
             saver['text'] = text
-        if verbose:
-            print("Text '{0}' loaded".format(name))
+        print("Text '{0}' loaded".format(name))
 
 
 if __name__ == '__main__':
@@ -38,5 +37,4 @@ if __name__ == '__main__':
     add_text(utils.get_db(),
              name=args[0],
              textfilepath=args[1],
-             force=options.force,
-             verbose=options.verbose)
+             force=options.force)

@@ -12,13 +12,12 @@ from orderportal import settings
 from orderportal import utils
 
 
-def put_documents(db, filepaths=[], verbose=False):
+def put_documents(db, filepaths=[]):
     docs = []
     try:
         if filepaths:
             for filepath in filepaths:
-                if verbose:
-                    print('reading', filepath)
+                print('reading', filepath)
                 with open(filepath, 'r') as infile:
                     add_docs(docs, json.load(infile))
         else:
@@ -28,8 +27,7 @@ def put_documents(db, filepaths=[], verbose=False):
         sys.exit("item in file {0} not a dictionary".format(filepath))
     except KeyError:
         sys.exit("item in file {0} lacks '_id'".format(filepath))
-    if verbose:
-        print(len(docs), 'documents')
+    print(len(docs), 'documents')
     for doc in docs:
         if doc['_id'] in db:
             print('document', doc['_id'], 'already exists; not overwritten',
@@ -40,8 +38,7 @@ def put_documents(db, filepaths=[], verbose=False):
             except KeyError:
                 pass
             db.save(doc)
-            if verbose:
-                print('saved', doc['_id'])
+            print('saved', doc['_id'])
 
 def add_docs(docs, data):
     if isinstance(data, dict):
@@ -66,6 +63,4 @@ def get_args():
 if __name__ == '__main__':
     (options, args) = get_args()
     utils.load_settings(filepath=options.settings)
-    put_documents(utils.get_db(),
-                  filepaths=args,
-                  verbose=options.verbose)
+    put_documents(utils.get_db(), filepaths=args)

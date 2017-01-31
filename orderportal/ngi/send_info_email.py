@@ -75,9 +75,7 @@ def send_email(server, sender, recipients, options):
     mail['From'] = sender
     for recipient in recipients:
         mail['To'] = recipient
-    if options.verbose:
-        print("sent email '{0}' to {1}".format(
-                SUBJECT, ', '.join(recipients)))
+    print("sent email '{0}' to {1}".format(SUBJECT, ', '.join(recipients)))
     if not options.dry_run:
         server.sendmail(sender, recipients, mail.as_string())
         with open('sent.log', 'a') as sentfile:
@@ -115,8 +113,7 @@ def get_args():
 
 if __name__ == '__main__':
     (options, args) = get_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
     send_info_email('accounts.csv',
                     sender='Per Kraulis <per.kraulis@scilifelab.se>',
                     options=options)

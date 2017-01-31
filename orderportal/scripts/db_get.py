@@ -12,7 +12,7 @@ from orderportal import settings
 from orderportal import utils
 
 
-def get_documents(db, docids=[], filepath=None, verbose=False):
+def get_documents(db, docids=[], filepath=None):
     docs = []
     for docid in docids:
         try:
@@ -20,8 +20,6 @@ def get_documents(db, docids=[], filepath=None, verbose=False):
         except couchdb.ResourceNotFound:
             print('no such document', docid, file=sys.stderr)
         else:
-            if verbose:
-                print('found', docid)
             docs.append(doc)
     if docs:
         if filepath:
@@ -47,5 +45,4 @@ if __name__ == '__main__':
     utils.load_settings(filepath=options.settings)
     get_documents(utils.get_db(),
                   docids=args,
-                  filepath=options.FILE,
-                  verbose=options.verbose)
+                  filepath=options.FILE)

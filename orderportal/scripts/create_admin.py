@@ -15,8 +15,7 @@ def get_args():
         'Create a new admin account account.')
     return parser.parse_args()
 
-def create_admin(email, password, first_name, last_name, university,
-                 verbose=False):
+def create_admin(email, password, first_name, last_name, university):
     with AccountSaver(db=utils.get_db()) as saver:
         saver.set_email(email)
         saver['first_name'] = first_name
@@ -29,8 +28,7 @@ def create_admin(email, password, first_name, last_name, university,
         saver.set_password(password)
         saver['role'] = constants.ADMIN
         saver['status'] = constants.ENABLED
-    if verbose:
-        print('Created admin account', email)
+    print('Created admin account', email)
 
 
 if __name__ == '__main__':
@@ -45,5 +43,4 @@ if __name__ == '__main__':
     first_name = raw_input('First name > ') or 'first'
     last_name = raw_input('Last name > ') or 'last'
     university = raw_input('University > ') or 'university'
-    create_admin(email, password, first_name, last_name, university,
-                 verbose=options.verbose)
+    create_admin(email, password, first_name, last_name, university)

@@ -15,7 +15,6 @@ class BaseFixer(object):
     def __init__(self):
         (options, args) = self.get_args()
         utils.load_settings(filepath=options.settings)
-        self.verbose = options.verbose
         self.dry_run = options.dry_run
         self.db = utils.get_db()
         self.args = args
@@ -51,17 +50,13 @@ class BaseFixer(object):
             if result:
                 count += 1
                 if self.dry_run:
-                    if self.verbose:
-                        print('would have saved', docid)
+                    print('would have saved', docid)
                 else:
                     self.db.save(result)
-                    if self.verbose:
-                        print('saved', docid)
+                    print('saved', docid)
             else:
-                if self.verbose:
-                    print('no change', docid)
-        if self.verbose:
-            print(count, 'modified out of', total)
+                print('no change', docid)
+        print(count, 'modified out of', total)
 
     def __call__(self, doc):
         """Modify the document if needed.

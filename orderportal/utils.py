@@ -39,15 +39,12 @@ def get_command_line_parser(usage='usage: %prog [options]', description=None):
     parser.add_option('-p', '--pidfile',
                       action='store', dest='pidfile', default=None,
                       metavar="FILE", help="filename of file containing PID")
-    parser.add_option('-v', '--verbose',
-                      action="store_true", dest="verbose", default=False,
-                      help='verbose output of actions taken')
     parser.add_option('-f', '--force',
                       action="store_true", dest="force", default=False,
                       help='force action, rather than ask for confirmation')
     return parser
 
-def load_settings(filepath=None, pidfile=None):
+def load_settings(filepath=None):
     """Load and return the settings from the file path given by
     1) the argument to this procedure,
     2) the environment variable ORDERPORTAL_SETTINGS,
@@ -71,7 +68,7 @@ def load_settings(filepath=None, pidfile=None):
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
     settings['SETTINGS_FILEPATH'] = filepath
-    # Set ROOT if defined
+    # Set ROOT and current working dir
     try:
         constants.ROOT = settings['ROOT']
         os.chdir(constants.ROOT)
