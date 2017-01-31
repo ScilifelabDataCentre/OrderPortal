@@ -146,28 +146,39 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   </div>
   <div class="form-group">
     <div class="row">
-      <div class="col-md-3">
+      <div class="col-md-4">
 	<label class="control-label" for="display">Display</label>
-	<div>
-	  <label class="radio-inline">
+	<div class="radio">
+	  <label>
 	    <input type="radio"
 		   name="display"
 		   value="menu"
 		   {{ field.get('display', 'menu') == 'menu' and 'checked' }}>
 	    Menu
 	  </label>
-	  <label class="radio-inline">
+	</div>
+	<div class="radio">
+	  <label>
 	    <input type="radio"
 		   name="display"
 		   value="radio"
 		   {{ field.get('display') == 'radio' and 'checked' }}>
-	    Radio buttons
+	    Radio buttons, on the same line
+	  </label>
+	</div>
+	<div class="radio">
+	  <label>
+	    <input type="radio"
+		   name="display"
+		   value="radio-newline"
+		   {{ field.get('display') == 'radio-newline' and 'checked' }}>
+	    Radio buttons, one per line
 	  </label>
 	</div>
       </div>
     </div>
     <span class="help-block">
-      Display element to use for the field.
+      Display type to use for the field.
     </span>
   </div>
 
