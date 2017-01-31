@@ -32,8 +32,8 @@ class RequestHandler(tornado.web.RequestHandler):
         "Set the variables accessible within the template."
         result = super(RequestHandler, self).get_template_namespace()
         result['version'] = orderportal.__version__
-        result['settings'] = settings
         result['constants'] = constants
+        result['settings'] = settings
         result['global_modes'] = self.global_modes
         result['absolute_reverse_url'] = self.absolute_reverse_url
         result['order_reverse_url'] = self.order_reverse_url
@@ -69,7 +69,7 @@ class RequestHandler(tornado.web.RequestHandler):
         return url
 
     def order_reverse_url(self, order, api=False, **query):
-        "URL for order; use identifier variant if available. Always absolute"
+        "URL for order; use identifier variant if available. Always absolute."
         URL = self.absolute_reverse_url
         try:
             identifier = order['identifier']

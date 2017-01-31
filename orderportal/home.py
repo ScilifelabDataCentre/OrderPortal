@@ -114,17 +114,28 @@ class TechInfo(RequestHandler):
     "Display information about the web site technology."
 
     def get(self):
-        versions = dict(python=[('CouchDB-Python', couchdb.__version__),
-                                ('tornado', tornado.version),
-                                ('PyYAML', yaml.__version__),
-                                ('markdown', markdown.version)],
-                        other=[('<a href="http://couchdb.apache.org/">Apache CouchDB</a>',
-                                utils.get_dbserver().version()),
-                               ('<a href="http://getbootstrap.com/">bootstrap</a>', '3.3.6'),
-                               ('<a href="https://jquery.com/">jQuery</a>', '1.12.3'),
-                               ('<a href="https://jqueryui.com/">jQuery UI</a>', '1.11.4'),
-                               ('<a href="https://github.com/GregDThomas/jquery-localtime">jQuery localtime</a>', '0.9.1'),
-                               ('<a href="https://www.datatables.net/">jQuery DataTables</a>', '1.10.11')])
+        search = constants.VERSION_RX.search
+        versions = dict(
+            python=[('CouchDB-Python', couchdb.__version__),
+                    ('tornado', tornado.version),
+                    ('PyYAML', yaml.__version__),
+                    ('markdown', markdown.version)],
+            other=[('<a href="{}">CouchDB</a>'.format(settings['COUCHDB_HOME']),
+                    utils.get_dbserver().version()),
+                   ('<a href="{}">bootstrap</a>'.format(
+                        settings['BOOTSTRAP_HOME']),
+                    search(settings['BOOTSTRAP_CSS_URL']).group()),
+                   ('<a href="{}">jQuery</a>'.format(settings['JQUERY_HOME']),
+                    search(settings['JQUERY_URL']).group()),
+                   ('<a href="{}">jQuery UI</a>'.format(
+                        settings['JQUERY_UI_HOME']),
+                    search(settings['JQUERY_UI_URL']).group()),
+                   ('<a href="{}">jQuery localtime</a>'.format(
+                        settings['JQUERY_LOCALTIME_HOME']),
+                    search(settings['JQUERY_LOCALTIME_VERSION']).group()),
+                   ('<a href="{}">jQuery DataTables</a>'.format(
+                        settings['DATATABLES_HOME']),
+                    search(settings['DATATABLES_CSS_URL']).group())])
         self.render('techinfo.html',
                     version=orderportal.__version__,
                     versions=versions)

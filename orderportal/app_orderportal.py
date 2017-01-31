@@ -40,14 +40,12 @@ def main():
     except KeyError:
         pass
     else:
-        # If changed, then OrderSaver.get_url must also be modified!
         handlers.append(url(r"/order/({0})".format(regexp),
                             Order, name='order_id'))
         handlers.append(url(r"/api/v1/order/({0})".format(regexp),
                             OrderApiV1, name='order_id_api'))
 
     handlers.extend([
-        # If changed, then OrderSaver.get_url must also be modified!
         url(r'/order/([0-9a-f]{32})', Order, name='order'),
         url(r'/api/v1/order/([0-9a-f]{32})', OrderApiV1, name='order_api'),
         url(r'/order/([0-9a-f]{32})/logs', OrderLogs, name='order_logs'),
@@ -155,7 +153,8 @@ def main():
         template_path='html',
         static_path='static',
         login_url=r'/login')
-    # Add href URLs for the status icons
+    # Add href URLs for the status icons.
+    # This depends on order status setup.
     for key, value in settings['ORDER_STATUSES_LOOKUP'].iteritems():
         value['href'] = application.reverse_url('site', key + '.png')
     application.listen(settings['PORT'], xheaders=True)
