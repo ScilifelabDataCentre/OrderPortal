@@ -491,7 +491,7 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
                                           self.params.get(f['identifier']),
                                           orders=orders)
         try:
-            limit = settings['ORDERS_DISPLAY_MOST_RECENT']
+            limit = settings['DISPLAY_ORDERS_MOST_RECENT']
             if not isinstance(limit, int): raise ValueError
         except (ValueError, KeyError):
             limit = 0

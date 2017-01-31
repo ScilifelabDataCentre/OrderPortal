@@ -4,10 +4,14 @@ to a facility from its users.
 
 from __future__ import print_function, absolute_import
 
+import os
+
+
 __version__ = '2.8.7'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
+    ROOT=os.path.dirname(__file__),
     BASE_URL='http://localhost:8885/',
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
@@ -24,9 +28,11 @@ settings = dict(
     DATATABLES_CSS_URL='https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css',
     DATATABLES_JS_URL='https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js',
     DATATABLES_BOOTSTRAP_JS_URL='https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js',
+    MIN_PASSWORD_LENGTH=8,
     LOGIN_MAX_AGE_DAYS=14,
     LOGIN_MAX_FAILURES=6,
-    ORDERS_DISPLAY_MOST_RECENT=500,
+    DISPLAY_DEFAULT_PAGE_SIZE=25,
+    DISPLAY_ORDERS_MOST_RECENT=500,
     INITIAL_TEXTS_FILEPATH='{SITE_DIR}/initial_texts.yaml',
     ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',
     ORDER_STATUSES_FILEPATH='{SITE_DIR}/order_statuses.yaml',

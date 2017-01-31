@@ -317,7 +317,7 @@ class RequestHandler(tornado.web.RequestHandler):
         except (TypeError, IndexError):
             pass
         result = dict(count=count,
-                      size=constants.DEFAULT_PAGE_SIZE)
+                      size=settings['DISPLAY_DEFAULT_PAGE_SIZE'])
         result['max_page'] = (count - 1) / result['size']
         try:
             result['current'] = max(0,

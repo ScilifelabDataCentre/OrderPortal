@@ -7,14 +7,14 @@ import sys
 
 import couchdb
 
-from orderportal import constants
+from orderportal import settings
 from orderportal import utils
 
 
 def load_designs(db, root=None):
     "Load all CouchDB database design documents."
     if root is None:
-        root = os.path.join(constants.ROOT, 'designs')
+        root = os.path.join(settings['ROOT'], 'designs')
     for design in os.listdir(root):
         views = dict()
         path = os.path.join(root, design)
@@ -51,7 +51,7 @@ def load_designs(db, root=None):
 def regenerate_views(db, root=None):
     "Trigger CouchDB to regenerate views by accessing them."
     if root is None:
-        root = os.path.join(constants.ROOT, 'designs')
+        root = os.path.join(settings['ROOT'], 'designs')
     viewnames = []
     for design in os.listdir(root):
         path = os.path.join(root, design)

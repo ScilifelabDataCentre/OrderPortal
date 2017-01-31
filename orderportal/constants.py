@@ -3,11 +3,6 @@
 from __future__ import print_function, absolute_import
 
 import re
-import os
-
-# Source code directory
-ROOT = os.path.dirname(__file__)
-os.chdir(ROOT)
 
 # Patterns
 ID_RX    = re.compile(r'^[a-z][_a-z0-9]*$', re.IGNORECASE)
@@ -96,11 +91,7 @@ FORM_STATUSES = [PENDING, TESTING, ENABLED, DISABLED]
 ORDER_STATES = {}
 ORDER_TRANSITIONS = {}
 
-# Password
-MIN_PASSWORD_LENGTH = 8
-
 # Display
-DEFAULT_PAGE_SIZE = 25
 MAX_RECENT_ORDERS = 10
 MAX_PENDING_ACCOUNTS = 10
 DEFAULT_MAX_DISPLAY_LOG = 20
