@@ -120,20 +120,20 @@ class TechInfo(RequestHandler):
                     ('tornado', tornado.version),
                     ('PyYAML', yaml.__version__),
                     ('markdown', markdown.version)],
-            other=[('<a href="{}">CouchDB</a>'.format(settings['COUCHDB_HOME']),
+            other=[('<a href="{0}">CouchDB</a>'.format(settings['COUCHDB_HOME']),
                     utils.get_dbserver().version()),
-                   ('<a href="{}">bootstrap</a>'.format(
+                   ('<a href="{0}">bootstrap</a>'.format(
                         settings['BOOTSTRAP_HOME']),
                     search(settings['BOOTSTRAP_CSS_URL']).group()),
-                   ('<a href="{}">jQuery</a>'.format(settings['JQUERY_HOME']),
+                   ('<a href="{0}">jQuery</a>'.format(settings['JQUERY_HOME']),
                     search(settings['JQUERY_URL']).group()),
-                   ('<a href="{}">jQuery UI</a>'.format(
+                   ('<a href="{0}">jQuery UI</a>'.format(
                         settings['JQUERY_UI_HOME']),
                     search(settings['JQUERY_UI_URL']).group()),
-                   ('<a href="{}">jQuery localtime</a>'.format(
+                   ('<a href="{0}">jQuery localtime</a>'.format(
                         settings['JQUERY_LOCALTIME_HOME']),
                     search(settings['JQUERY_LOCALTIME_VERSION']).group()),
-                   ('<a href="{}">jQuery DataTables</a>'.format(
+                   ('<a href="{0}">jQuery DataTables</a>'.format(
                         settings['DATATABLES_HOME']),
                     search(settings['DATATABLES_CSS_URL']).group())])
         self.render('techinfo.html',
