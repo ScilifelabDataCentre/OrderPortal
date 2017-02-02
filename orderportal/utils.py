@@ -39,15 +39,12 @@ def get_command_line_parser(usage='usage: %prog [options]', description=None):
     parser.add_option('-p', '--pidfile',
                       action='store', dest='pidfile', default=None,
                       metavar="FILE", help="filename of file containing PID")
-    parser.add_option('-v', '--verbose',
-                      action="store_true", dest="verbose", default=False,
-                      help='verbose output of actions taken')
     parser.add_option('-f', '--force',
                       action="store_true", dest="force", default=False,
                       help='force action, rather than ask for confirmation')
     return parser
 
-def load_settings(filepath=None, pidfile=None):
+def load_settings(filepath=None):
     """Load and return the settings from the file path given by
     1) the argument to this procedure,
     2) the environment variable ORDERPORTAL_SETTINGS,
@@ -60,23 +57,20 @@ def load_settings(filepath=None, pidfile=None):
     if not filepath:
         filepath = os.environ.get('ORDERPORTAL_SETTINGS')
     if not filepath:
-        basedir = constants.ROOT
         hostname = socket.gethostname().split('.')[0]
+        basedir = os.path.dirname(__file__)
         for filepath in [os.path.join(basedir, "{0}.yaml".format(hostname)),
                          os.path.join(basedir, 'default.yaml')]:
             if os.path.exists(filepath) and os.path.isfile(filepath):
                 break
         else:
             raise ValueError('No settings file specified.')
+    # Read the settings file, updating the defaults
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
     settings['SETTINGS_FILEPATH'] = filepath
-    # Set ROOT if defined
-    try:
-        constants.ROOT = settings['ROOT']
-        os.chdir(constants.ROOT)
-    except KeyError:
-        pass
+    # Set ROOT as the current working dir
+    os.chdir(settings['ROOT'])
     # Expand environment variables (ROOT, SITE_DIR) once and for all
     for key, value in settings.items():
         if isinstance(value, (str, unicode)):
@@ -226,7 +220,7 @@ def expand_filepath(filepath):
             filepath = filepath.replace('{SITE_DIR}', settings['SITE_DIR'])
         except KeyError:
             pass
-        filepath = filepath.replace('{ROOT}', constants.ROOT)
+        filepath = filepath.replace('{ROOT}', settings['ROOT'])
     return filepath
 
 def get_dbserver():
@@ -320,14 +314,14 @@ def cmp_modified(i, j):
 
 def absolute_path(filename):
     "Return the absolute path given the current directory."
-    return os.path.join(constants.ROOT, filename)
+    return os.path.join(settings['ROOT'], filename)
 
 def check_password(password):
     """Check that the password is long and complex enough.
     Raise ValueError otherwise."""
-    if len(password) < constants.MIN_PASSWORD_LENGTH:
+    if len(password) < settings['MIN_PASSWORD_LENGTH']:
         raise ValueError("Password must be at least {0} characters long.".
-                         format(constants.MIN_PASSWORD_LENGTH))
+                         format(settings['MIN_PASSWORD_LENGTH']))
 
 def hashed_password(password):
     "Return the password in hashed form."

@@ -64,7 +64,7 @@
 	  {% end %}
 	</select>
       </div>
-      {% if settings['ORDERS_DISPLAY_MOST_RECENT'] > 0 %}
+      {% if settings['DISPLAY_ORDERS_MOST_RECENT'] > 0 %}
       <div class="form-group">
 	<div class="control-label refresh" for="recent">
 	  &nbsp;
@@ -76,11 +76,11 @@
 	  <label class="radio">
 	    {% set checked = not checked and 'checked' or '' %}
 	    <input type="radio" name="recent" value="true" {{ checked }}>
-	    Only {{ settings['ORDERS_DISPLAY_MOST_RECENT'] }} most recent
+	    Only {{ settings['DISPLAY_ORDERS_MOST_RECENT'] }} most recent
 	  </label>
 	</div>
       </div>
-      {% end %} {# if settings['ORDERS_DISPLAY_MOST_RECENT'] > 0 #}
+      {% end %} {# if settings['DISPLAY_ORDERS_MOST_RECENT'] > 0 #}
     </form>
   </div>
 </div>

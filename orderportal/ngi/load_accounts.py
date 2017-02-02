@@ -48,11 +48,10 @@ UNI_LOOKUP['sveriges lantbruksuniversitet'] = 'SLU'
 UNI_LOOKUP['university of gothenburg'] = 'GU'
 
 
-def load_accounts(db, filepath='users.json', verbose=False):
+def load_accounts(db, filepath='users.json'):
     with open(filepath) as infile:
         accounts = json.load(infile)
-    if verbose:
-        print(len(accounts), 'accounts in input file')
+    print(len(accounts), 'accounts in input file')
     counter = 0
     for account in accounts:
         doc = collections.OrderedDict()
@@ -62,13 +61,11 @@ def load_accounts(db, filepath='users.json', verbose=False):
         docs = [r.doc
                 for r in db.view('account/email', include_docs=True, key=email)]
         if len(docs) > 0:
-            if verbose:
-                print(email, 'exists already; skipped')
+            print(email, 'exists already; skipped')
             continue
         status = account['status']
         if status != '1':
-            if verbose:
-                print(email, 'status', status, '; skipped')
+            print(email, 'status', status, '; skipped')
             continue
         doc['email'] = email
         doc['status'] = constants.PENDING
@@ -133,21 +130,18 @@ def load_accounts(db, filepath='users.json', verbose=False):
         doc['owner'] = email
         doc['created'] = utils.epoch_to_iso(account['created'])
         doc['modified'] = utils.epoch_to_iso(account.get('last_access') or account['created'])
-        if verbose:
-            print('loaded', email)
+        print('loaded', email)
         db.save(doc)
 
         counter += 1
-    if verbose:
-        print(counter, 'accounts loaded')
+    print(counter, 'accounts loaded')
 
 
 if __name__ == '__main__':
     parser = utils.get_command_line_parser(description=
         "Load accounts from old Drupal site JSON dump 'users.json'.")
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
     db = utils.get_db()
-    load_accounts(db, verbose=options.verbose)
-    regenerate_views(db, verbose=options.verbose)
+    load_accounts(db)
+    regenerate_views(db)

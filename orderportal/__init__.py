@@ -4,10 +4,14 @@ to a facility from its users.
 
 from __future__ import print_function, absolute_import
 
-__version__ = '2.8.7'
+import os
+
+
+__version__ = '2.9.0'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
+    ROOT=os.path.dirname(__file__),
     BASE_URL='http://localhost:8885/',
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
@@ -16,17 +20,29 @@ settings = dict(
     SITE_DIR='{ROOT}/generic',
     SITE_NAME='OrderPortal',
     DB_SERVER='http://localhost:5984/',
-    JQUERY_URL='https://code.jquery.com/jquery-1.12.3.min.js',
-    JQUERY_UI_URL='https://code.jquery.com/ui/1.11.4/jquery-ui.min.js',
-    JQUERY_UI_THEME_URL='https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css',
+    COUCHDB_HOME='http://couchdb.apache.org/',
+    BOOTSTRAP_HOME='http://getbootstrap.com/',
     BOOTSTRAP_CSS_URL='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
     BOOTSTRAP_JS_URL='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js',
+    JQUERY_HOME='https://jquery.com/',
+    JQUERY_URL='https://code.jquery.com/jquery-1.12.3.min.js',
+    JQUERY_UI_HOME='https://jqueryui.com/',
+    JQUERY_UI_URL='https://code.jquery.com/ui/1.11.4/jquery-ui.min.js',
+    JQUERY_UI_THEME_URL='https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css',
+    JQUERY_LOCALTIME_HOME='https://github.com/GregDThomas/jquery-localtime',
+    JQUERY_LOCALTIME_VERSION='0.9.1',  # Must agree with file in ./static
+    DATATABLES_HOME='https://www.datatables.net/',
     DATATABLES_CSS_URL='https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css',
     DATATABLES_JS_URL='https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js',
     DATATABLES_BOOTSTRAP_JS_URL='https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js',
+    MIN_PASSWORD_LENGTH=8,
     LOGIN_MAX_AGE_DAYS=14,
     LOGIN_MAX_FAILURES=6,
-    ORDERS_DISPLAY_MOST_RECENT=500,
+    DISPLAY_DEFAULT_PAGE_SIZE=25,
+    DISPLAY_MAX_RECENT_ORDERS=10,
+    DISPLAY_ORDERS_MOST_RECENT=500,
+    DISPLAY_MAX_PENDING_ACCOUNTS=10,
+    DISPLAY_DEFAULT_MAX_LOG=20,
     INITIAL_TEXTS_FILEPATH='{SITE_DIR}/initial_texts.yaml',
     ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',
     ORDER_STATUSES_FILEPATH='{SITE_DIR}/order_statuses.yaml',

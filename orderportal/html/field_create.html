@@ -139,13 +139,24 @@
        data-if-id="type"
        data-if-val="select">
     <div class="row">
-      <div class="col-md-3">
+      <div class="col-md-4">
 	<label class="control-label" for="display">Display</label>
-	<div>
-	  <label class="radio-inline">
-	    <input type="radio" name="display" value="menu" checked>Menu</label>
-	  <label class="radio-inline">
-	    <input type="radio" name="display" value="radio">Radio buttons</label>
+	<div class="radio">
+	  <label>
+	    <input type="radio" name="display" value="menu" checked>Menu
+	  </label>
+	</div>
+	<div class="radio">
+	  <label>
+	    <input type="radio" name="display" value="radio">
+	    Radio buttons, on the same line
+	  </label>
+	</div>
+	<div class="radio">
+	  <label>
+	    <input type="radio" name="display" value="radio-newline">
+	    Radio buttons, one per line
+	  </label>
 	</div>
       </div>
     </div>

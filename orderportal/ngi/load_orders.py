@@ -42,7 +42,7 @@ class OldOrderSaver(OrderSaver):
         pass
 
 
-def load_users(filename='users.json', verbose=False):
+def load_users(filename='users.json'):
     "Prepare the lookup from author id (as string) to email."
     with open(filename) as infile:
         data = json.load(infile)
@@ -53,11 +53,10 @@ def load_users(filename='users.json', verbose=False):
         email = record['mail']
         assert email
         result[uid] = email.lower()
-    if verbose:
-        print(len(result), 'accounts')
+    print(len(result), 'accounts')
     return result
 
-def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
+def load_orders(db, form_iuid, authors, filename='orders.json'):
     """Load the order and use the form given by IUID to transfer field values.
     The order identifier counter has to be updated."""
     try:
@@ -90,8 +89,7 @@ def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
             pass
     with open(filename) as infile:
         data = json.load(infile)
-    if verbose:
-        print(len(data), 'records in dump file')
+    print(len(data), 'records in dump file')
     total = 0
     for record in data:
         if int(record['nid']) in already_loaded: continue
@@ -120,11 +118,9 @@ def load_orders(db, form_iuid, authors, filename='orders.json', verbose=False):
             saver['history'] = {}
             saver.set_status('undefined')
             saver.check_fields_validity(fields)
-        if verbose:
-            print('loaded', saver.doc['identifier'], saver.doc['title'])
+        print('loaded', saver.doc['identifier'], saver.doc['title'])
         total += 1
-    if verbose:
-        print(total, 'orders loaded, counter', counter)
+    print(total, 'orders loaded, counter', counter)
     meta['counter'] = counter
     db.save(meta)
 
@@ -133,11 +129,9 @@ if __name__ == '__main__':
     parser = utils.get_command_line_parser(description=
         "Load orders from old Drupal site JSON dump 'orders.json'.")
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
     db = utils.get_db()
     load_orders(db,
-                authors=load_users(verbose=options.verbose),
-                form_iuid='ed37e428cd0e4b43894c9686555018a1',
-                verbose=options.verbose)
-    regenerate_views(db, verbose=options.verbose)
+                authors=load_users(),
+                form_iuid='ed37e428cd0e4b43894c9686555018a1')
+    regenerate_views(db)

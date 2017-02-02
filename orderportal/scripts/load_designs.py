@@ -7,14 +7,14 @@ import sys
 
 import couchdb
 
-from orderportal import constants
+from orderportal import settings
 from orderportal import utils
 
 
-def load_designs(db, root=None, verbose=False):
+def load_designs(db, root=None):
     "Load all CouchDB database design documents."
     if root is None:
-        root = os.path.join(constants.ROOT, 'designs')
+        root = os.path.join(settings['ROOT'], 'designs')
     for design in os.listdir(root):
         views = dict()
         path = os.path.join(root, design)
@@ -38,20 +38,20 @@ def load_designs(db, root=None, verbose=False):
         try:
             doc = db[id]
         except couchdb.http.ResourceNotFound:
-            if verbose: print('loading', id, file=sys.stderr)
+            print('loading', id, file=sys.stderr)
             db.save(dict(_id=id, views=views))
         else:
             if doc['views'] != views:
                 doc['views'] = views
-                if verbose: print('updating', id, file=sys.stderr)
+                print('updating', id, file=sys.stderr)
                 db.save(doc)
-            elif verbose:
+            else:
                 print('no change', id, file=sys.stderr)
 
-def regenerate_views(db, root=None, verbose=False):
+def regenerate_views(db, root=None):
     "Trigger CouchDB to regenerate views by accessing them."
     if root is None:
-        root = os.path.join(constants.ROOT, 'designs')
+        root = os.path.join(settings['ROOT'], 'designs')
     viewnames = []
     for design in os.listdir(root):
         path = os.path.join(root, design)
@@ -68,8 +68,7 @@ def regenerate_views(db, root=None, verbose=False):
             if viewname not in viewnames:
                 viewnames.append(viewname)
     for viewname in viewnames:
-        if verbose:
-            print('regenerating view', viewname)
+        print('regenerating view', viewname)
         view = db.view(viewname)
         for row in view:
             break
@@ -84,7 +83,6 @@ def get_args():
 if __name__ == '__main__':
     (options, args) = get_args()
     utils.load_settings(filepath=options.settings)
-    load_designs(utils.get_db(),
-                 verbose=options.verbose)
-    regenerate_views(utils.get_db(),
-                     verbose=options.verbose)
+    db = utils.get_db()
+    load_designs(db)
+    regenerate_views(db)

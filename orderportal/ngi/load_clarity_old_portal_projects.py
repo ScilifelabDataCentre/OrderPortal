@@ -62,7 +62,7 @@ class Clarity(object):
         for element in etree.findall('link'):
             self.resources[element.get('rel')] = element.get('uri')
 
-    def get_all_projects(self, verbose=False):
+    def get_all_projects(self):
         """Get list of records for all projects in the LIMS.
         Each record is a dictionary containing 'url',  'lims_id' 
         and 'project_name'.
@@ -71,8 +71,7 @@ class Clarity(object):
         url = self.resources['projects']
         params = {}
         while True:
-            if verbose:
-                print('getting', url, sorted(params.items()))
+            print('getting', url, sorted(params.items()))
             response = self.session.get(url, params=params)
             assert response.status_code == 200
             etree = ElementTree.fromstring(response.content)
@@ -88,10 +87,9 @@ class Clarity(object):
             params = dict(urlparse.parse_qsl(parts.query))
         return result
 
-    def fetch_project_info(self, record, verbose=True):
+    def fetch_project_info(self, record):
         "Get information for the project and add to the record."
-        if verbose:
-            print('getting', url)
+        print('getting', url)
         response = self.session.get(record['uri'])
         assert response.status_code == 200
         etree = ElementTree.fromstring(response.content)
@@ -137,7 +135,7 @@ def get_old_portal_projects(db):
         result[identifier] = doc
     return result
 
-def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
+def process_old_portal_projects(db, projects, clarity_lookup):
     """Process the project from the old portal which are not closed or aborted.
     Get info on each from the Clarity lookup, and add the values.
     """
@@ -209,39 +207,35 @@ def process_old_portal_projects(db, projects, clarity_lookup, verbose=False):
             else:
                 changed = True
         if changed:
-            if verbose:
-                print('saving',
-                      project['identifier'],
-                      project['fields']['lims_id'],
-                      project['status'],
-                      project['title'])
+            print('saving',
+                  project['identifier'],
+                  project['fields']['lims_id'],
+                  project['status'],
+                  project['title'])
             db.save(project)
         else:
-            if verbose:
-                print('no change for', project['identifier'])
+            print('no change for', project['identifier'])
 
 
 if __name__ == '__main__':
     parser = utils.get_command_line_parser(description=
         'Load project info from Clarity LIMS into OrderPortal.')
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings,
-                        verbose=options.verbose)
+    utils.load_settings(filepath=options.settings)
 
     db = utils.get_db()
     projects_lookup = get_old_portal_projects(db)
     print(len(projects_lookup), 'projects from old portal requiring more info')
     projects = projects_lookup.values()
     projects.sort(lambda i,j: cmp(i['modified'], j['modified']))
-    if options.verbose:
-        for project in projects:
-            print(project['identifier'], project['modified'])
+    for project in projects:
+        print(project['identifier'], project['modified'])
 
     clarity = Clarity()
-    clarity_projects = clarity.get_all_projects(verbose=options.verbose)
+    clarity_projects = clarity.get_all_projects()
     print(len(clarity_projects), 'projects in Clarity')
     for record in clarity_projects:
-        clarity.fetch_project_info(record, verbose=options.verbose)
+        clarity.fetch_project_info(record)
         print(record['lims_id'], record.get('identifier'))
 
     clarity_lookup = {}
@@ -252,5 +246,4 @@ if __name__ == '__main__':
 
     process_old_portal_projects(db,
                                 projects,
-                                clarity_lookup,
-                                verbose=options.verbose)
+                                clarity_lookup)

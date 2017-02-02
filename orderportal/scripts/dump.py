@@ -31,7 +31,7 @@ def get_command_line_parser():
                       metavar='DUMPFILE', help='name of dump file')
     return parser
 
-def dump(db, filepath, verbose=False):
+def dump(db, filepath):
     """Dump contents of the database to a tar file, optionally gzip compressed.
     Skip any entity that does not contain a doctype field.
     """
@@ -64,11 +64,10 @@ def dump(db, filepath, verbose=False):
             outfile.addfile(info, cStringIO.StringIO(data))
             count_files += 1
     outfile.close()
-    if verbose:
-        print('dumped', count_items, 'items and',
-              count_files, 'files to', filepath, file=sys.stderr)
+    print('dumped', count_items, 'items and',
+          count_files, 'files to', filepath, file=sys.stderr)
 
-def undump(db, filepath, verbose=False):
+def undump(db, filepath):
     """Reverse of dump; load all items from a tar file.
     Items are just added to the database, ignoring existing items.
     """
@@ -107,9 +106,8 @@ def undump(db, filepath, verbose=False):
                 attachments[key] = dict(filename=attname,
                                         content_type=attinfo['content_type'])
     infile.close()
-    if verbose:
-        print('undumped', count_items, 'items and',
-              count_files, 'files from', filepath, file=sys.stderr)
+    print('undumped', count_items, 'items and',
+          count_files, 'files from', filepath, file=sys.stderr)
 
 
 if __name__ == '__main__':
@@ -126,4 +124,4 @@ if __name__ == '__main__':
             filepath = os.path.join(settings['BACKUP_DIR'], filepath)
         except KeyError:
             pass
-    dump(db, filepath, verbose=options.verbose)
+    dump(db, filepath)

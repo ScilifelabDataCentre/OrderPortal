@@ -32,8 +32,8 @@ class RequestHandler(tornado.web.RequestHandler):
         "Set the variables accessible within the template."
         result = super(RequestHandler, self).get_template_namespace()
         result['version'] = orderportal.__version__
-        result['settings'] = settings
         result['constants'] = constants
+        result['settings'] = settings
         result['global_modes'] = self.global_modes
         result['absolute_reverse_url'] = self.absolute_reverse_url
         result['order_reverse_url'] = self.order_reverse_url
@@ -69,7 +69,7 @@ class RequestHandler(tornado.web.RequestHandler):
         return url
 
     def order_reverse_url(self, order, api=False, **query):
-        "URL for order; use identifier variant if available. Always absolute"
+        "URL for order; use identifier variant if available. Always absolute."
         URL = self.absolute_reverse_url
         try:
             identifier = order['identifier']
@@ -317,7 +317,7 @@ class RequestHandler(tornado.web.RequestHandler):
         except (TypeError, IndexError):
             pass
         result = dict(count=count,
-                      size=constants.DEFAULT_PAGE_SIZE)
+                      size=settings['DISPLAY_DEFAULT_PAGE_SIZE'])
         result['max_page'] = (count - 1) / result['size']
         try:
             result['current'] = max(0,
@@ -421,7 +421,7 @@ class RequestHandler(tornado.web.RequestHandler):
         forms.sort()
         return forms
 
-    def get_logs(self, iuid, limit=constants.DEFAULT_MAX_DISPLAY_LOG+1):
+    def get_logs(self, iuid, limit=settings['DISPLAY_DEFAULT_MAX_LOG']+1):
         "Return the event log documents for the given entity iuid."
         kwargs = dict(include_docs=True,
                       startkey=[iuid, constants.CEILING],

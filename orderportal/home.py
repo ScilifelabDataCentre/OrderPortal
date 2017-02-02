@@ -50,13 +50,13 @@ See your <a href="{0}">account</a>.""".format(url)
                             include_docs=True)
         pending = [r.doc for r in view]
         pending.sort(utils.cmp_modified, reverse=True)
-        pending = pending[:constants.MAX_PENDING_ACCOUNTS]
+        pending = pending[:settings['DISPLAY_MAX_PENDING_ACCOUNTS']]
         # XXX This status should not be hard-wired!
         view = self.db.view('order/status',
                             descending=True,
                             startkey=['submitted', constants.CEILING],
                             endkey=['submitted'],
-                            limit=constants.MAX_RECENT_ORDERS,
+                            limit=settings['DISPLAY_MAX_RECENT_ORDERS'],
                             reduce=False,
                             include_docs=True)
         orders = [r.doc for r in view]
@@ -72,7 +72,7 @@ See your <a href="{0}">account</a>.""".format(url)
                             descending=True,
                             startkey=['accepted', constants.CEILING],
                             endkey=['accepted'],
-                            limit=constants.MAX_RECENT_ORDERS,
+                            limit=settings['DISPLAY_MAX_RECENT_ORDERS'],
                             reduce=False,
                             include_docs=True)
         orders = [r.doc for r in view]
@@ -89,7 +89,7 @@ See your <a href="{0}">account</a>.""".format(url)
                             startkey=[self.current_user['email'],
                                       constants.CEILING],
                             endkey=[self.current_user['email']],
-                            limit=constants.MAX_RECENT_ORDERS)
+                            limit=settings['DISPLAY_MAX_RECENT_ORDERS'])
         orders = [r.doc for r in view]
         self.render('home_user.html',
                     orders=orders,
@@ -114,17 +114,28 @@ class TechInfo(RequestHandler):
     "Display information about the web site technology."
 
     def get(self):
-        versions = dict(python=[('CouchDB-Python', couchdb.__version__),
-                                ('tornado', tornado.version),
-                                ('PyYAML', yaml.__version__),
-                                ('markdown', markdown.version)],
-                        other=[('<a href="http://couchdb.apache.org/">Apache CouchDB</a>',
-                                utils.get_dbserver().version()),
-                               ('<a href="http://getbootstrap.com/">bootstrap</a>', '3.3.6'),
-                               ('<a href="https://jquery.com/">jQuery</a>', '1.12.3'),
-                               ('<a href="https://jqueryui.com/">jQuery UI</a>', '1.11.4'),
-                               ('<a href="https://github.com/GregDThomas/jquery-localtime">jQuery localtime</a>', '0.9.1'),
-                               ('<a href="https://www.datatables.net/">jQuery DataTables</a>', '1.10.11')])
+        search = constants.VERSION_RX.search
+        versions = dict(
+            python=[('CouchDB-Python', couchdb.__version__),
+                    ('tornado', tornado.version),
+                    ('PyYAML', yaml.__version__),
+                    ('markdown', markdown.version)],
+            other=[('<a href="{0}">CouchDB</a>'.format(settings['COUCHDB_HOME']),
+                    utils.get_dbserver().version()),
+                   ('<a href="{0}">bootstrap</a>'.format(
+                        settings['BOOTSTRAP_HOME']),
+                    search(settings['BOOTSTRAP_CSS_URL']).group()),
+                   ('<a href="{0}">jQuery</a>'.format(settings['JQUERY_HOME']),
+                    search(settings['JQUERY_URL']).group()),
+                   ('<a href="{0}">jQuery UI</a>'.format(
+                        settings['JQUERY_UI_HOME']),
+                    search(settings['JQUERY_UI_URL']).group()),
+                   ('<a href="{0}">jQuery localtime</a>'.format(
+                        settings['JQUERY_LOCALTIME_HOME']),
+                    search(settings['JQUERY_LOCALTIME_VERSION']).group()),
+                   ('<a href="{0}">jQuery DataTables</a>'.format(
+                        settings['DATATABLES_HOME']),
+                    search(settings['DATATABLES_CSS_URL']).group())])
         self.render('techinfo.html',
                     version=orderportal.__version__,
                     versions=versions)
