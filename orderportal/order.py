@@ -776,7 +776,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             return
         flag = self.get_argument('__save__', None)
         try:
-            message = 'Order saved.'
+            message = "{0} saved.".format(utils.term('Order'))
             error = None
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver['title'] = self.get_argument('__title__', None) or '[no title]'
