@@ -1,6 +1,6 @@
 {# Order page. #}
 
-{% block head_title %}Order: {{ order['title'] }}{% end %}
+{% block head_title %}{{ term('Order') }}: {{ order['title'] }}{% end %}
 
 {% block body_title %}
 {% module Icon('order', label=True) %}: {{ order['title'] }}
@@ -43,7 +43,7 @@
 {% elif not global_modes['allow_order_editing'] %}
 <p>
   <div class="well text-danger">
-    Order editing is currently disabled.
+    {{ term('Order') }} editing is currently disabled.
   </div>
 </p>
 {% end %} {# if is_editable #}
@@ -63,13 +63,13 @@
 {% elif not global_modes['allow_order_creation'] %}
 <p>
   <div class="well text-danger">
-    Order creation is currently disabled.
+    {{ term('Order') }} creation is currently disabled.
   </div>
 </p>
 {% else %}
 <p>
   <div class="well">
-    This order cannot be cloned.
+    This {{ term('order') }} cannot be cloned.
   </div>
 <p>
 {% end %} {# if is_clonable #}
@@ -96,7 +96,7 @@
   {% else %}
   {% if order['invalid'] %}
   <div class="well well-lg text-danger">
-    Order cannot be submitted due to invalid or missing values.
+    {{ term('Order') }} cannot be submitted due to invalid or missing values.
   </div>
   {% end %}
   {% end %} {# if targets #}
@@ -117,7 +117,7 @@
 
       {% if is_admin %}
       <tr>
-	<th>Order form</th>
+	<th>{{ term('Order') }} form</th>
 	<td>
 	  <a href="{{ reverse_url('form', form['_id']) }}">
 	    {{ form['title'] }}
@@ -260,7 +260,7 @@
 	    <label for="file">File</label>
 	    <input type="file" name="file" class="form-control">
 	    <span class="help-block">
-	      The file to upload and attach to the order.
+	      The file to upload and attach to the {{ term('order') }}.
 	    </span>
 	  </div>
 

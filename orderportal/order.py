@@ -326,7 +326,8 @@ class OrderMixin(object):
     def check_editable(self, order):
         "Check if current user may edit the order."
         if self.is_editable(order): return
-        raise ValueError('You may not edit the order.')
+        raise ValueError("You may not edit the {0}."
+                         .format(utils.term('order')))
 
     def is_attachable(self, order):
         "Check if the current user may attach a file to the order."
@@ -341,7 +342,9 @@ class OrderMixin(object):
         "Check if current user may attach a file to the order."
         if self.is_attachable(order): return
         raise tornado.web.HTTPError(
-            403, reason='You may not attach a file to the order.')
+            403,
+            reason="You may not attach a file to the {0}."
+            .format(utils.term('order')))
 
     def get_order_status(self, order):
         "Get the order status lookup item."
@@ -570,9 +573,6 @@ class Order(OrderMixin, RequestHandler):
             except tornado.web.HTTPError, msg:
                 self.see_other('home', error=str(msg))
                 return
-            # if order.get('identifier'):
-            #     self.see_other('order', order.get('identifier'))
-            #     return
         else:
             order = self.get_entity_view('order/identifier', match.group())
         try:
@@ -591,7 +591,8 @@ class Order(OrderMixin, RequestHandler):
                 files.sort(lambda i,j: cmp(i['filename'].lower(),
                                            j['filename'].lower()))
         self.render('order.html',
-                    title=u"Order '{0}'".format(order['title']),
+                    title=u"{0} '{1}'".format(utils.term('Order'),
+                                              order['title']),
                     order=order,
                     account_names=self.get_account_names([order['owner']]),
                     status=self.get_order_status(order),
@@ -651,7 +652,8 @@ class OrderLogs(OrderMixin, RequestHandler):
             self.see_other('home', error=str(msg))
             return
         self.render('logs.html',
-                    title=u"Logs for order '{0}'".format(order['title']),
+                    title=u"Logs for {0} '{1}'".format(utils.term('order'),
+                                                       order['title']),
                     entity=order,
                     logs=self.get_logs(order['_id']))
 
@@ -662,12 +664,15 @@ class OrderCreate(RequestHandler):
     def get(self):
         if not self.current_user:
             self.see_other('home',
-                           error="You need to be logged in to create an order."
-                           " Register to get an account if you don't have one.")
+                           error="You need to be logged in to create {0}."
+                           " Register to get an account if you don't have one."
+                           .format(utils.term('order')))
             return
         if not self.global_modes['allow_order_creation'] \
            and self.current_user['role'] != constants.ADMIN:
-            self.see_other('home',error='Order creation is currently disabled.')
+            self.see_other('home',
+                           error="{0} creation is currently disabled."
+                           .format(utils.term('Order')))
             return
         form = self.get_entity(self.get_argument('form'),doctype=constants.FORM)
         self.render('order_create.html', form=form)
@@ -734,7 +739,9 @@ class OrderEdit(OrderMixin, RequestHandler):
     def get(self, iuid):
         if not self.global_modes['allow_order_editing'] \
            and self.current_user['role'] != constants.ADMIN:
-            self.see_other('home', error='Order editing is currently disabled.')
+            self.see_other('home',
+                           error="{0} editing is currently disabled."
+                           .format(utils.term('Order')))
             return
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
@@ -750,7 +757,8 @@ class OrderEdit(OrderMixin, RequestHandler):
         hidden_fields = set([f['identifier'] for f in fields.flatten()
                              if f['type'] != 'multiselect'])
         self.render('order_edit.html',
-                    title=u"Edit order '{0}'".format(order['title']),
+                    title=u"Edit {0} '{1}'".format(utils.term('order'),
+                                                   order['title']),
                     order=order,
                     colleagues=colleagues,
                     form=form,
@@ -806,10 +814,12 @@ class OrderEdit(OrderMixin, RequestHandler):
                 if flag == 'submit': # XXX Hard-wired, currently
                     if self.is_submittable(saver.doc):
                         saver.set_status('submitted')
-                        message = 'Order saved and submitted.'
+                        message = "{0} saved and submitted."\
+                            .format(utils.term('Order'))
                     else:
-                        error = 'Order could not be submitted due to' \
-                                ' invalid or missing values.'
+                        error = "{0} could not be submitted due to" \
+                                " invalid or missing values."\
+                                .format(utils.term('Order'))
             if flag == 'continue':
                 self.see_other('order_edit', order['_id'], message=message)
             else:
@@ -836,7 +846,8 @@ class OrderClone(OrderMixin, RequestHandler):
             self.see_other('home', error=str(msg))
             return
         if not self.is_clonable(order):
-            raise ValueError('This order is outdated; its form has been disabled.')
+            raise ValueError("This {0} is outdated; its form has been disabled."
+                             .format(utils.term('order')))
         form = self.get_entity(order['form'], doctype=constants.FORM)
         fields = Fields(form)
         erased_files = set()
@@ -880,7 +891,8 @@ class OrderTransition(OrderMixin, RequestHandler):
         except ValueError, msg:
             if self.API:
                 raise tornado.web.HTTPError(403,
-                                            reason='May not edit the order.')
+                                            reason="May not edit the {0}."
+                                            .format(utils.term('order')))
             else:
                 self.see_other('home', error=str(msg))
                 return

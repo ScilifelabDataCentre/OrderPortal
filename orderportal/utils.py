@@ -210,6 +210,17 @@ def load_settings(filepath=None):
         else:
             raise ValueError('Could not determine port from BASE_URL.')
 
+def term(word):
+    "Return the display term for the given word. Use itself by default."
+    try:
+        istitle = word.istitle()
+        word = settings['TERMS'][word.lower()]
+    except KeyError:
+        pass
+    else:
+        if istitle: word = word.title()
+    return word
+
 def expand_filepath(filepath):
     "Expand environment variables (ROOT and SITE_DIR) in filepaths."
     filepath = os.path.expandvars(filepath)
