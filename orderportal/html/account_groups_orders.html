@@ -2,7 +2,9 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}Orders in groups of {{ account['email'] }}{% end %}
+{% block head_title %}
+{{ term('Orders') }} in groups of {{ account['email'] }}
+{% end %}
 
 {% block body_title %}
 {% module Icon('order', title='Orders', label=True) %}
@@ -31,7 +33,7 @@
   <div class="col-md-4 col-md-offset-6">
     <a href="{{ reverse_url('account_orders', account['email']) }}">
       {% module Icon('account') %}
-      Only account's orders
+      Only account's {{ term('orders') }}
     </a>
   </div>
 </div>

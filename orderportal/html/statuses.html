@@ -10,8 +10,8 @@
 <div class="row">
   <div class="col-md-10">
     <div class="well">
-      An order is always in one and only one of the statuses given
-      below.  The list of statuses and the allowed transitions between
+      An {{ term('order') }} is always in one and only one of the statuses
+      given below. The list of statuses and the allowed transitions between
       them are determined by settings YAML files, so only the system
       administrator can change them.
     </div>
@@ -35,12 +35,18 @@
 	    <tr>
 	      {% set editable = ['admin'] %}
 	      {% set editable.extend(status.get('edit', [])) %}
-	      <td>Order editable by {{ ', '.join(editable) or 'none' }}.</td>
+	      <td>
+		{{ term('Order') }} editable by
+		{{ ', '.join(editable) or 'none' }}.
+	      </td>
 	    </tr>
 	    <tr>
 	      {% set attachable = ['admin'] %}
 	      {% set attachable.extend(status.get('attach', [])) %}
-	      <td>Order attachable by {{ ', '.join(attachable) or 'none' }}.</td>
+	      <td>
+		{{ term('Order') }} attachable by
+		{{ ', '.join(attachable) or 'none' }}.
+	      </td>
 	    </tr>
 	    <tr>
 	      <td>From
