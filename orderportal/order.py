@@ -315,8 +315,8 @@ class OrderMixin(object):
 
     def is_editable(self, order):
         "Is the order editable by the current user?"
-        if not self.global_modes['allow_order_editing']: return False
         if self.is_admin(): return True
+        if not self.global_modes['allow_order_editing']: return False
         status = self.get_order_status(order)
         edit = status.get('edit', [])
         if self.is_staff() and constants.STAFF in edit: return True
@@ -326,8 +326,11 @@ class OrderMixin(object):
     def check_editable(self, order):
         "Check if current user may edit the order."
         if self.is_editable(order): return
-        raise ValueError("You may not edit the {0}."
-                         .format(utils.term('order')))
+        if not self.global_modes['allow_order_editing']:
+            msg = '{0} editing is currently disabled.'
+        else:
+            msg = 'You may not edit the {0}.'
+        raise ValueError(msg.format(utils.term('order')))
 
     def is_attachable(self, order):
         "Check if the current user may attach a file to the order."
@@ -376,14 +379,13 @@ class OrderMixin(object):
         """Can the given order be cloned? Its form must be enabled.
         Special case: Admin can clone an order even if its form is disabled.
         """
-        if not self.global_modes['allow_order_creation']: return False
         form = self.get_entity(order['form'], doctype=constants.FORM)
         if self.is_admin():
             return form['status'] in (constants.ENABLED,
                                       constants.TESTING,
                                       constants.DISABLED)
-        else:
-            return form['status'] in (constants.ENABLED, constants.TESTING)
+        if not self.global_modes['allow_order_creation']: return False
+        return form['status'] in (constants.ENABLED, constants.TESTING)
 
 
 class Orders(RequestHandler):
@@ -736,12 +738,6 @@ class OrderEdit(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
-        if not self.global_modes['allow_order_editing'] \
-           and self.current_user['role'] != constants.ADMIN:
-            self.see_other('home',
-                           error="{0} editing is currently disabled."
-                           .format(utils.term('Order')))
-            return
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
             self.check_editable(order)
