@@ -3,11 +3,12 @@
 from __future__ import print_function, absolute_import
 
 import logging
-import re
-import urlparse
 from collections import OrderedDict as OD
 from cStringIO import StringIO
+import os.path
+import re
 import traceback
+import urlparse
 
 import tornado.web
 
@@ -30,6 +31,22 @@ class OrderSaver(saver.Saver):
         """
         self.changed_status = None
         self.files = []
+        self.filenames = set(self.doc.get('_attachments', []))
+
+    def add_file(self, infile):
+        "Add the given file to the files. Return the unique filename."
+        filename = infile.filename
+        if filename in self.filenames:
+            count = 1
+            while True:
+                filename, ext = os.path.splitext(infile.filename)
+                filename = "{0}_{1}{2}".format(filename, count, ext)
+                if filename not in self.filenames: break
+                count += 1
+        self.files.append(dict(filename=filename,
+                               body=infile.body,
+                               content_type=infile.content_type))
+        return filename
 
     def set_identifier(self, form):
         """Set the order identifier if format defined.
@@ -71,12 +88,10 @@ class OrderSaver(saver.Saver):
                 except (KeyError, IndexError):
                     continue
                 else:
-                    self.files.append(infile)
-                    value = infile.filename
+                    value = self.add_file(infile)
                     self.removed_files.append(docfields.get(identifier))
             elif field['type'] == constants.MULTISELECT:
                 value = self.rqh.get_arguments(identifier)
-                logging.debug("multiselect> %s", value)
             elif field['type'] == constants.TABLE:
                 value = docfields.get(identifier) or []
                 for i, row in enumerate(value):
@@ -196,9 +211,9 @@ class OrderSaver(saver.Saver):
                         kwargs = dict()
                         if field['type'] == constants.FILE:
                             for file in self.files:
-                                if file.filename == value:
-                                    kwargs['body'] = file.body
-                                    kwargs['content_type'] = file.content_type
+                                if file['filename'] == value:
+                                    kwargs['body'] = file['body']
+                                    kwargs['content_type'] =file['content_type']
                                     break
                         processor.run(value, **kwargs)
         except ValueError, msg:
@@ -235,9 +250,10 @@ class OrderSaver(saver.Saver):
             # I found this solution by chance...
             for file in self.files:
                 self.db.put_attachment(self.doc,
-                                       StringIO(file.body),
-                                       filename=file.filename,
-                                       content_type=file.content_type)
+                                       StringIO(file['body']),
+                                       filename=file['filename'],
+                                       content_type=file['content_type'])
+
     def prepare_message(self):
         """Prepare a message to send after status change.
         It is sent later by cron job script 'script/messenger.py'
@@ -980,8 +996,5 @@ class OrderAttach(OrderMixin, RequestHandler):
             pass
         else:
             with OrderSaver(doc=order, rqh=self) as saver:
-                saver.files.append(infile)
-                saver['filename'] = infile.filename
-                saver['size'] = len(infile.body)
-                saver['content_type'] = infile.content_type or 'application/octet-stream'
+                saver.add_file(infile)
         self.redirect(self.order_reverse_url(order))
