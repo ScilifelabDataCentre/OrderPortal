@@ -333,9 +333,9 @@ class OrderMixin(object):
         "Check if the current user may attach a file to the order."
         if self.is_admin(): return True
         status = self.get_order_status(order)
-        edit = status.get('attach', [])
-        if self.is_staff() and constants.STAFF in edit: return True
-        if self.is_owner(order) and constants.USER in edit: return True
+        attach = status.get('attach', [])
+        if self.is_staff() and constants.STAFF in attach: return True
+        if self.is_owner(order) and constants.USER in attach: return True
         return False
 
     def check_attachable(self, order):
@@ -582,14 +582,13 @@ class Order(OrderMixin, RequestHandler):
             return
         form = self.get_entity(order['form'], doctype=constants.FORM)
         files = []
-        if self.is_attachable(order):
-            for filename in order.get('_attachments', []):
-                stub = order['_attachments'][filename]
-                files.append(dict(filename=filename,
-                                  size=stub['length'],
-                                  content_type=stub['content_type']))
-                files.sort(lambda i,j: cmp(i['filename'].lower(),
-                                           j['filename'].lower()))
+        for filename in order.get('_attachments', []):
+            stub = order['_attachments'][filename]
+            files.append(dict(filename=filename,
+                              size=stub['length'],
+                              content_type=stub['content_type']))
+            files.sort(lambda i,j: cmp(i['filename'].lower(),
+                                       j['filename'].lower()))
         self.render('order.html',
                     title=u"{0} '{1}'".format(utils.term('Order'),
                                               order['title']),
