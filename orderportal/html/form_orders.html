@@ -2,7 +2,7 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}Orders Form: {{ form['_id'] }}{% end %}
+{% block head_title %}{{ term('Orders') }} Form: {{ form['_id'] }}{% end %}
 
 {% block body_title %}
 {% module Icon('order', title='Orders', label=True) %}
@@ -23,7 +23,7 @@ Form: {% module Entity(form) %}
   <div class="col-md-12">
     <table class="table table-striped">
       <tr>
-	<th width="45%">Order</th>
+	<th width="45%">{{ term('Order') }}</th>
 	<th width="20%">Owner</th>
 	<th width="15%">Status</th>
 	<th width="20%">Modified</th>

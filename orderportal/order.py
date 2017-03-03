@@ -3,11 +3,12 @@
 from __future__ import print_function, absolute_import
 
 import logging
-import re
-import urlparse
 from collections import OrderedDict as OD
 from cStringIO import StringIO
+import os.path
+import re
 import traceback
+import urlparse
 
 import tornado.web
 
@@ -30,6 +31,23 @@ class OrderSaver(saver.Saver):
         """
         self.changed_status = None
         self.files = []
+        self.filenames = set(self.doc.get('_attachments', []))
+
+    def add_file(self, infile):
+        "Add the given file to the files. Return the unique filename."
+        filename = infile.filename
+        if filename in self.filenames:
+            count = 1
+            while True:
+                filename, ext = os.path.splitext(infile.filename)
+                filename = "{0}_{1}{2}".format(filename, count, ext)
+                if filename not in self.filenames: break
+                count += 1
+        self.filenames.add(filename)
+        self.files.append(dict(filename=filename,
+                               body=infile.body,
+                               content_type=infile.content_type))
+        return filename
 
     def set_identifier(self, form):
         """Set the order identifier if format defined.
@@ -71,12 +89,10 @@ class OrderSaver(saver.Saver):
                 except (KeyError, IndexError):
                     continue
                 else:
-                    self.files.append(infile)
-                    value = infile.filename
+                    value = self.add_file(infile)
                     self.removed_files.append(docfields.get(identifier))
             elif field['type'] == constants.MULTISELECT:
                 value = self.rqh.get_arguments(identifier)
-                logging.debug("multiselect> %s", value)
             elif field['type'] == constants.TABLE:
                 value = docfields.get(identifier) or []
                 for i, row in enumerate(value):
@@ -196,9 +212,9 @@ class OrderSaver(saver.Saver):
                         kwargs = dict()
                         if field['type'] == constants.FILE:
                             for file in self.files:
-                                if file.filename == value:
-                                    kwargs['body'] = file.body
-                                    kwargs['content_type'] = file.content_type
+                                if file['filename'] == value:
+                                    kwargs['body'] = file['body']
+                                    kwargs['content_type']= file['content_type']
                                     break
                         processor.run(value, **kwargs)
         except ValueError, msg:
@@ -235,9 +251,10 @@ class OrderSaver(saver.Saver):
             # I found this solution by chance...
             for file in self.files:
                 self.db.put_attachment(self.doc,
-                                       StringIO(file.body),
-                                       filename=file.filename,
-                                       content_type=file.content_type)
+                                       StringIO(file['body']),
+                                       filename=file['filename'],
+                                       content_type=file['content_type'])
+
     def prepare_message(self):
         """Prepare a message to send after status change.
         It is sent later by cron job script 'script/messenger.py'
@@ -315,8 +332,8 @@ class OrderMixin(object):
 
     def is_editable(self, order):
         "Is the order editable by the current user?"
-        if not self.global_modes['allow_order_editing']: return False
         if self.is_admin(): return True
+        if not self.global_modes['allow_order_editing']: return False
         status = self.get_order_status(order)
         edit = status.get('edit', [])
         if self.is_staff() and constants.STAFF in edit: return True
@@ -326,22 +343,28 @@ class OrderMixin(object):
     def check_editable(self, order):
         "Check if current user may edit the order."
         if self.is_editable(order): return
-        raise ValueError('You may not edit the order.')
+        if not self.global_modes['allow_order_editing']:
+            msg = '{0} editing is currently disabled.'
+        else:
+            msg = 'You may not edit the {0}.'
+        raise ValueError(msg.format(utils.term('order')))
 
     def is_attachable(self, order):
         "Check if the current user may attach a file to the order."
         if self.is_admin(): return True
         status = self.get_order_status(order)
-        edit = status.get('attach', [])
-        if self.is_staff() and constants.STAFF in edit: return True
-        if self.is_owner(order) and constants.USER in edit: return True
+        attach = status.get('attach', [])
+        if self.is_staff() and constants.STAFF in attach: return True
+        if self.is_owner(order) and constants.USER in attach: return True
         return False
 
     def check_attachable(self, order):
         "Check if current user may attach a file to the order."
         if self.is_attachable(order): return
         raise tornado.web.HTTPError(
-            403, reason='You may not attach a file to the order.')
+            403,
+            reason="You may not attach a file to the {0}."
+            .format(utils.term('order')))
 
     def get_order_status(self, order):
         "Get the order status lookup item."
@@ -373,14 +396,13 @@ class OrderMixin(object):
         """Can the given order be cloned? Its form must be enabled.
         Special case: Admin can clone an order even if its form is disabled.
         """
-        if not self.global_modes['allow_order_creation']: return False
         form = self.get_entity(order['form'], doctype=constants.FORM)
         if self.is_admin():
             return form['status'] in (constants.ENABLED,
                                       constants.TESTING,
                                       constants.DISABLED)
-        else:
-            return form['status'] in (constants.ENABLED, constants.TESTING)
+        if not self.global_modes['allow_order_creation']: return False
+        return form['status'] in (constants.ENABLED, constants.TESTING)
 
 
 class Orders(RequestHandler):
@@ -570,9 +592,6 @@ class Order(OrderMixin, RequestHandler):
             except tornado.web.HTTPError, msg:
                 self.see_other('home', error=str(msg))
                 return
-            # if order.get('identifier'):
-            #     self.see_other('order', order.get('identifier'))
-            #     return
         else:
             order = self.get_entity_view('order/identifier', match.group())
         try:
@@ -582,16 +601,16 @@ class Order(OrderMixin, RequestHandler):
             return
         form = self.get_entity(order['form'], doctype=constants.FORM)
         files = []
-        if self.is_attachable(order):
-            for filename in order.get('_attachments', []):
-                stub = order['_attachments'][filename]
-                files.append(dict(filename=filename,
-                                  size=stub['length'],
-                                  content_type=stub['content_type']))
-                files.sort(lambda i,j: cmp(i['filename'].lower(),
-                                           j['filename'].lower()))
+        for filename in order.get('_attachments', []):
+            stub = order['_attachments'][filename]
+            files.append(dict(filename=filename,
+                              size=stub['length'],
+                              content_type=stub['content_type']))
+            files.sort(lambda i,j: cmp(i['filename'].lower(),
+                                       j['filename'].lower()))
         self.render('order.html',
-                    title=u"Order '{0}'".format(order['title']),
+                    title=u"{0} '{1}'".format(utils.term('Order'),
+                                              order['title']),
                     order=order,
                     account_names=self.get_account_names([order['owner']]),
                     status=self.get_order_status(order),
@@ -651,7 +670,8 @@ class OrderLogs(OrderMixin, RequestHandler):
             self.see_other('home', error=str(msg))
             return
         self.render('logs.html',
-                    title=u"Logs for order '{0}'".format(order['title']),
+                    title=u"Logs for {0} '{1}'".format(utils.term('order'),
+                                                       order['title']),
                     entity=order,
                     logs=self.get_logs(order['_id']))
 
@@ -662,12 +682,15 @@ class OrderCreate(RequestHandler):
     def get(self):
         if not self.current_user:
             self.see_other('home',
-                           error="You need to be logged in to create an order."
-                           " Register to get an account if you don't have one.")
+                           error="You need to be logged in to create {0}."
+                           " Register to get an account if you don't have one."
+                           .format(utils.term('order')))
             return
         if not self.global_modes['allow_order_creation'] \
            and self.current_user['role'] != constants.ADMIN:
-            self.see_other('home',error='Order creation is currently disabled.')
+            self.see_other('home',
+                           error="{0} creation is currently disabled."
+                           .format(utils.term('Order')))
             return
         form = self.get_entity(self.get_argument('form'),doctype=constants.FORM)
         self.render('order_create.html', form=form)
@@ -732,10 +755,6 @@ class OrderEdit(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
-        if not self.global_modes['allow_order_editing'] \
-           and self.current_user['role'] != constants.ADMIN:
-            self.see_other('home', error='Order editing is currently disabled.')
-            return
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
             self.check_editable(order)
@@ -750,7 +769,8 @@ class OrderEdit(OrderMixin, RequestHandler):
         hidden_fields = set([f['identifier'] for f in fields.flatten()
                              if f['type'] != 'multiselect'])
         self.render('order_edit.html',
-                    title=u"Edit order '{0}'".format(order['title']),
+                    title=u"Edit {0} '{1}'".format(utils.term('order'),
+                                                   order['title']),
                     order=order,
                     colleagues=colleagues,
                     form=form,
@@ -768,7 +788,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             return
         flag = self.get_argument('__save__', None)
         try:
-            message = 'Order saved.'
+            message = "{0} saved.".format(utils.term('Order'))
             error = None
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver['title'] = self.get_argument('__title__', None) or '[no title]'
@@ -806,10 +826,12 @@ class OrderEdit(OrderMixin, RequestHandler):
                 if flag == 'submit': # XXX Hard-wired, currently
                     if self.is_submittable(saver.doc):
                         saver.set_status('submitted')
-                        message = 'Order saved and submitted.'
+                        message = "{0} saved and submitted."\
+                            .format(utils.term('Order'))
                     else:
-                        error = 'Order could not be submitted due to' \
-                                ' invalid or missing values.'
+                        error = "{0} could not be submitted due to" \
+                                " invalid or missing values."\
+                                .format(utils.term('Order'))
             if flag == 'continue':
                 self.see_other('order_edit', order['_id'], message=message)
             else:
@@ -836,7 +858,8 @@ class OrderClone(OrderMixin, RequestHandler):
             self.see_other('home', error=str(msg))
             return
         if not self.is_clonable(order):
-            raise ValueError('This order is outdated; its form has been disabled.')
+            raise ValueError("This {0} is outdated; its form has been disabled."
+                             .format(utils.term('order')))
         form = self.get_entity(order['form'], doctype=constants.FORM)
         fields = Fields(form)
         erased_files = set()
@@ -880,7 +903,8 @@ class OrderTransition(OrderMixin, RequestHandler):
         except ValueError, msg:
             if self.API:
                 raise tornado.web.HTTPError(403,
-                                            reason='May not edit the order.')
+                                            reason="May not edit the {0}."
+                                            .format(utils.term('order')))
             else:
                 self.see_other('home', error=str(msg))
                 return
@@ -973,8 +997,5 @@ class OrderAttach(OrderMixin, RequestHandler):
             pass
         else:
             with OrderSaver(doc=order, rqh=self) as saver:
-                saver.files.append(infile)
-                saver['filename'] = infile.filename
-                saver['size'] = len(infile.body)
-                saver['content_type'] = infile.content_type or 'application/octet-stream'
+                saver.add_file(infile)
         self.redirect(self.order_reverse_url(order))

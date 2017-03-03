@@ -34,6 +34,7 @@ class RequestHandler(tornado.web.RequestHandler):
         result['version'] = orderportal.__version__
         result['constants'] = constants
         result['settings'] = settings
+        result['term'] = utils.term
         result['global_modes'] = self.global_modes
         result['absolute_reverse_url'] = self.absolute_reverse_url
         result['order_reverse_url'] = self.order_reverse_url

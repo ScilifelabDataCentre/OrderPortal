@@ -218,7 +218,7 @@
 	      <div class="form-group">
 		&nbsp;
 		<button type="submit" class="btn btn-success btn-xs"
-			onclick="return confirm('All members of this group will be able to see all your orders. Really accept?');">
+			onclick="return confirm('All members of this group will be able to see all your data. Really accept?');">
 		  <span class="glyphicon glyphicon-ok"></span>
 		  Accept
 		</button>
@@ -247,7 +247,7 @@
     </td>
   </tr>
   <tr>
-    <th>Orders</th>
+    <th>{{ term('Orders') }}</th>
     <td>
       <a class="badge"
 	 href="{{ reverse_url('account_orders', account['email']) }}">

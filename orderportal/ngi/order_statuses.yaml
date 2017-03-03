@@ -11,7 +11,7 @@
   description: The order has been submitted by the user for consideration by the facility.
   action: Submit
   edit: []
-  attach: [user]
+  attach: []
 
 - identifier: review
   description: The order is under review by the facility.

@@ -2,8 +2,8 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}Edit order '{{ order['title'] }}'{% end %}
-{% block body_title %}Edit order '{{ order['title'] }}'{% end %}
+{% block head_title %}Edit {{ term('order') }} '{{ order['title'] }}'{% end %}
+{% block body_title %}Edit {{ term('order') }} '{{ order['title'] }}'{% end %}
 
 {% block content %}
 <h3>{{ form['title'] }}</h3>
@@ -11,8 +11,8 @@
 <div class="row">
   <div class="col-md-10">
     <span class="help-block">
-      You may save incomplete orders, but only complete orders
-      can be submitted.
+      You may save incomplete {{ term('orders') }}, but only complete
+      {{ term('orders') }} can be submitted.
       <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
       notation can be used in multi-line text input fields.
     </span>
@@ -51,8 +51,9 @@
       </div>
     </div>
     <span class="help-block">
-      Brief, descriptive title for the order. It is not required to
-      be unique, but it is a good idea to make it so anyway.
+      Brief, descriptive title for the {{ term('order') }}.
+      It is not required to be unique, but it is a good idea
+      to make it so anyway.
     </span>
   </div>
 
@@ -73,8 +74,8 @@
       </div>
     </div>
     <span class="help-block">
-      Optional keywords (tags) characterizing the order. Format as
-      identifiers, i.e. start with a letter, continue with letters,
+      Optional keywords (tags) characterizing the {{ term('order') }}.
+      Format as identifiers, i.e. start with a letter, continue with letters,
       digits and/or underscore; no blanks allowed.
       <br>
       More than one tag is allowed using comma ',' as delimiter.
@@ -105,12 +106,13 @@
     </div>
     <span class="help-block">
       {% if is_admin %}
-      The order's owner specified by email address.
+      The {{ term('order') }}'s owner specified by email address.
       May be changed to another account.
       {% else %}
-      The order's owner may be changed to an account in your groups.
+      The {{ term('order') }}'s owner may be changed to an account
+      in your groups.
       <strong>NOTE:</strong>
-      You will then no longer be able to edit the order.
+      You will then no longer be able to edit the {{ term('order') }}.
       {% end %}
     </span>
   </div>

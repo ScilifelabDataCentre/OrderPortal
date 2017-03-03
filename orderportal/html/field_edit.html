@@ -82,8 +82,8 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
       </div>
     </div>
     <span class="help-block">
-      Label to display for the field in the order form. The identifier
-      will be used if no label is provided.
+      Label to display for the field in the {{ term('order') }} form.
+      The identifier will be used if no label is provided.
     </span>
   </div>
 
@@ -246,8 +246,8 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
 		   name="required"
 		   value="yes"
 		   {{ field['required'] and 'checked' or '' }}>
-	    Require the field to have a defined value for the order to
-	    be submittable.
+	    Require the field to have a defined value for the
+	    {{ term('order') }} to be submittable.
 	  </label>
 	</div>
       </div>
@@ -336,7 +336,8 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
 		   id="erase_on_clone"
 		   value="true"
 		   {{ field.get('erase_on_clone') and 'checked' or '' }}>
-	    Erase the value of the field in a new order when cloning.
+	    Erase the value of the field in a new {{ term('order') }}
+	    when cloning.
 	  </label>
 	</div>
       </div>
@@ -375,8 +376,8 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
       </div>
     </div>
     <span class="help-block">
-      Description to display in the order to help the user fill in the
-      field correctly, using
+      Description to display in the {{ term('order') }} to help the user
+      fill in the field correctly, using
       <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
       format.
     </span>

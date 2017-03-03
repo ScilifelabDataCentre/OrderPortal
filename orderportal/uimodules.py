@@ -8,6 +8,7 @@ from tornado.escape import xhtml_escape as escape
 
 from . import constants
 from . import settings
+from . import utils
 
 
 ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""
@@ -27,12 +28,13 @@ class Icon(tornado.web.UIModule):
             url = self.handler.reverse_url('site', name + '.png')
         else:
             url = self.handler.static_url(name + '.png')
-        alt = name.capitalize()
-        title = title or alt
-        value = ICON_TEMPLATE.format(url=url, alt=alt, title=title)
+        name = name.capitalize()
+        title = utils.term(title or name)
+        value = ICON_TEMPLATE.format(url=url, alt=name, title=title)
         if label:
             value = '<span class="nobr">{0} {1}</span>'.format(value, title)
         return value
+
 
 class ContentType(tornado.web.UIModule):
     "HTML for an entity type icon."
