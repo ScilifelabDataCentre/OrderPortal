@@ -43,6 +43,7 @@ class OrderSaver(saver.Saver):
                 filename = "{0}_{1}{2}".format(filename, count, ext)
                 if filename not in self.filenames: break
                 count += 1
+        self.filenames.add(filename)
         self.files.append(dict(filename=filename,
                                body=infile.body,
                                content_type=infile.content_type))
@@ -213,7 +214,7 @@ class OrderSaver(saver.Saver):
                             for file in self.files:
                                 if file['filename'] == value:
                                     kwargs['body'] = file['body']
-                                    kwargs['content_type'] =file['content_type']
+                                    kwargs['content_type']= file['content_type']
                                     break
                         processor.run(value, **kwargs)
         except ValueError, msg:
