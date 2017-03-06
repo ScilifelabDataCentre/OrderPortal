@@ -100,6 +100,11 @@
   </div>
   {% end %}
   {% end %} {# if targets #}
+  {% if not global_modes['allow_order_submission'] %}
+  <div class="well well-lg text-danger">
+    {{ term('Order') }} submission is currently disabled.
+  </div>
+  {% end %} {# if not global_modes... #}
 </p>
 {% end %} {# block meta_content #}
 

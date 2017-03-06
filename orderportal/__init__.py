@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '2.9.1'
+__version__ = '2.9.2'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
