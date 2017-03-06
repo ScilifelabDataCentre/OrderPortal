@@ -23,10 +23,11 @@ class RequestHandler(tornado.web.RequestHandler):
     def prepare(self):
         "Get the database connection and global modes."
         self.db = utils.get_db()
+        self.global_modes = constants.DEFAULT_GLOBAL_MODES.copy()
         try:
-            self.global_modes = self.db['global_modes']
+            self.global_modes.update(self.db['global_modes'])
         except couchdb.ResourceNotFound:
-            self.global_modes = constants.DEFAULT_GLOBAL_MODES.copy()
+            pass
 
     def get_template_namespace(self):
         "Set the variables accessible within the template."

@@ -383,14 +383,28 @@ class OrderMixin(object):
                (self.is_staff() and constants.STAFF in permission) or \
                (self.is_owner(order) and constants.USER in permission):
                 result.extend(transition['targets'])
-        return [settings['ORDER_STATUSES_LOOKUP'][t] for t in result]
+        targets = [settings['ORDER_STATUSES_LOOKUP'][t] for t in result]
+        if not self.global_modes['allow_order_submission']:
+            targets = [t for t in targets
+                       if t['identifier'] != constants.SUBMITTED]
+        return targets
+
+    def is_transitionable(self, order, status, check_valid=True):
+        "Can the order be set to the given status?"
+        targets = self.get_targets(order, check_valid=check_valid)
+        return status in [t['identifier'] for t in targets]
+
+    def check_transitionable(self, order, status, check_valid=True):
+        "Check if the current user may set the order to the given status."
+        if self.is_transitionable(order, status, check_valid=check_valid):
+            return
+        raise ValueError('You may not change status of {0} to {1}.'
+                         .format(utils.term('order'), status))
 
     def is_submittable(self, order, check_valid=True):
         "Is the order submittable? Special hard-wired status."
-        for target in self.get_targets(order, check_valid=check_valid):
-            if target['identifier'] == 'submitted':
-                return True
-        return False
+        targets = self.get_targets(order, check_valid=check_valid)
+        return constants.SUBMITTED in [t['identifier'] for t in targets]
 
     def is_clonable(self, order):
         """Can the given order be cloned? Its form must be enabled.
@@ -823,9 +837,9 @@ class OrderEdit(OrderMixin, RequestHandler):
                 else:
                     saver['owner'] = account['email']
                 saver.update_fields()
-                if flag == 'submit': # XXX Hard-wired, currently
+                if flag == constants.SUBMIT: # Hard-wired status
                     if self.is_submittable(saver.doc):
-                        saver.set_status('submitted')
+                        saver.set_status(constants.SUBMITTED)
                         message = "{0} saved and submitted."\
                             .format(utils.term('Order'))
                     else:
@@ -893,35 +907,32 @@ class OrderClone(OrderMixin, RequestHandler):
 class OrderTransition(OrderMixin, RequestHandler):
     "Change the status of an order."
 
-    API = False
+    @tornado.web.authenticated
+    def post(self, iuid, targetid):
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        try:
+            self.check_transitionable(order, targetid)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
+        with OrderSaver(doc=order, rqh=self) as saver:
+            saver.set_status(targetid)
+        self.redirect(self.order_reverse_url(order))
+
+
+class OrderTransitionApiV1(OrderMixin, RequestHandler):
+    "Change the status of an order by an API call."
 
     @tornado.web.authenticated
     def post(self, iuid, targetid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
-            self.check_editable(order)
+            self.check_transitionable(order, targetid)
         except ValueError, msg:
-            if self.API:
-                raise tornado.web.HTTPError(403,
-                                            reason="May not edit the {0}."
-                                            .format(utils.term('order')))
-            else:
-                self.see_other('home', error=str(msg))
-                return
-        for target in self.get_targets(order):
-            if target['identifier'] == targetid: break
-        else:
-            raise tornado.web.HTTPError(
-                403, reason='Invalid order transition target.')
+            raise tornado.web.HTTPError(403, reason=str(msg))
         with OrderSaver(doc=order, rqh=self) as saver:
             saver.set_status(targetid)
-        self.redirect(self.order_reverse_url(order, api=self.API))
-
-
-class OrderTransitionApiV1(OrderTransition):
-    "Change the status of an order by an API call."
-
-    API = True
+        self.redirect(self.order_reverse_url(order, api=True))
 
     def check_xsrf_cookie(self):
         "Do not check for XSRF cookie when script is calling."

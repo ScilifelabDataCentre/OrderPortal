@@ -66,7 +66,8 @@ FALSE = frozenset(['false', 'no', 'f', 'n', '0'])
 DEFAULT_GLOBAL_MODES = dict(allow_registration=True,
                             allow_login=True,
                             allow_order_creation=True,
-                            allow_order_editing=True)
+                            allow_order_editing=True,
+                            allow_order_submission=True)
 
 # User login account
 USER_COOKIE = 'orderportal_user'
@@ -83,6 +84,10 @@ USER  = 'user'
 STAFF = 'staff'
 ADMIN = 'admin'
 ACCOUNT_ROLES = [USER, STAFF, ADMIN]
+
+# Hard-wired order status
+SUBMIT    = 'submit'
+SUBMITTED = 'submitted'
 
 # Form status; hard-wired!
 TESTING = 'testing'
