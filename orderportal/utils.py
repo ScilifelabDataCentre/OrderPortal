@@ -60,7 +60,8 @@ def load_settings(filepath=None):
         hostname = socket.gethostname().split('.')[0]
         basedir = os.path.dirname(__file__)
         for filepath in [os.path.join(basedir, "{0}.yaml".format(hostname)),
-                         os.path.join(basedir, 'default.yaml')]:
+                         os.path.join(basedir, 'default.yaml'),
+                         os.path.join(basedir, 'settings.yaml')]:
             if os.path.exists(filepath) and os.path.isfile(filepath):
                 break
         else:
@@ -69,7 +70,8 @@ def load_settings(filepath=None):
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
     settings['SETTINGS_FILEPATH'] = filepath
-    # Set ROOT as the current working dir
+    # Set current working dir to be ROOT while reading the files
+    orig_dir = os.getcwd()
     os.chdir(settings['ROOT'])
     # Expand environment variables (ROOT, SITE_DIR) once and for all
     for key, value in settings.items():
@@ -95,10 +97,8 @@ def load_settings(filepath=None):
     logging.basicConfig(**kwargs)
     logging.info("OrderPortal version %s", orderportal.__version__)
     logging.info("settings from %s", settings['SETTINGS_FILEPATH'])
-    if settings['LOGGING_DEBUG']:
-        logging.info('logging debug')
-    if settings['TORNADO_DEBUG']:
-        logging.info('tornado debug')
+    logging.info("logging debug %s", settings['LOGGING_DEBUG'])
+    logging.info("tornado debug %s", settings['TORNADO_DEBUG'])
     # Check settings
     for key in ['BASE_URL', 'DB_SERVER', 'COOKIE_SECRET', 'DATABASE']:
         if key not in settings:
@@ -126,8 +126,9 @@ def load_settings(filepath=None):
                    entity != BaseProcessor:
                     name = entity.__module__ + '.' + entity.__name__
                     settings['PROCESSORS'][name] = entity
-                    logging.info("loaded processor %s", name)
+                    logging.debug("loaded processor %s", name)
     # Read order state definitions and transitions
+    logging.debug("Order statuses from %s", settings['ORDER_STATUSES_FILEPATH'])
     with open(settings['ORDER_STATUSES_FILEPATH']) as infile:
         settings['ORDER_STATUSES'] = yaml.safe_load(infile)
     settings['ORDER_STATUSES_LOOKUP'] = lookup = dict()
@@ -141,6 +142,8 @@ def load_settings(filepath=None):
     if not initial:
         raise ValueError('No initial order status defined.')
     settings['ORDER_STATUS_INITIAL'] = initial
+    logging.debug("Order transitions from %s", 
+                  settings['ORDER_TRANSITIONS_FILEPATH'])
     with open(settings['ORDER_TRANSITIONS_FILEPATH']) as infile:
         settings['ORDER_TRANSITIONS'] = yaml.safe_load(infile)
     # Account messages
@@ -150,6 +153,7 @@ def load_settings(filepath=None):
     except KeyError:
         settings['ACCOUNT_MESSAGES'] = dict()
     else:
+        logging.debug("Account messages from %s", filepath)
         with open(filepath) as infile:
             settings['ACCOUNT_MESSAGES'] = yaml.safe_load(infile)
     # Order messages
@@ -159,6 +163,7 @@ def load_settings(filepath=None):
     except KeyError:
         settings['ORDER_MESSAGES'] = dict()
     else:
+        logging.debug("Order messages from %s", filepath)
         with open(filepath) as infile:
             settings['ORDER_MESSAGES'] = yaml.safe_load(infile)
     # Read universities lookup
@@ -168,6 +173,7 @@ def load_settings(filepath=None):
     except KeyError:
         settings['UNIVERSITIES'] = dict()
     else:
+        logging.debug("Universities lookup from %s", filepath)
         with open(filepath) as infile:
             unis = yaml.safe_load(infile)
         unis = unis.items()
@@ -181,6 +187,7 @@ def load_settings(filepath=None):
     except KeyError:
         settings['COUNTRIES'] = []
     else:
+        logging.debug("Country codes from %s", filepath)
         with open(filepath) as infile:
             settings['COUNTRIES'] = yaml.safe_load(infile)
         settings['COUNTRIES_LOOKUP'] = dict([(c['code'], c['name'])
@@ -192,6 +199,7 @@ def load_settings(filepath=None):
     except KeyError:
         settings['subjects'] = []
     else:
+        logging.debug("Subject terms from %s", filepath)
         with open(filepath) as infile:
             settings['subjects'] = yaml.safe_load(infile)
     settings['subjects_lookup'] = dict([(s['code'], s['term'])
@@ -209,6 +217,8 @@ def load_settings(filepath=None):
             settings['PORT'] =  443
         else:
             raise ValueError('Could not determine port from BASE_URL.')
+    # Set back current working dir
+    os.chdir(orig_dir)
 
 def term(word):
     "Return the display term for the given word. Use itself by default."

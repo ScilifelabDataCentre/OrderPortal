@@ -4,12 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block head_title %}OrderPortal{% end %}</title>
-    {% try %}
-      {% set url = reverse_url('site', settings['SITE_FAVICON']) %}
-    {% except KeyError %}
-      {% set url = static_url('orderportal_32.png') %}
-    {% end %}
-    <link rel="shortcut icon" type="image/png" href="{{ url }}">
+    <link rel="shortcut icon" type="image/png"
+	  href="{{ reverse_url('site', settings['SITE_FAVICON']) }}">
     <link rel="stylesheet" type="text/css"
 	  href="{{ settings['JQUERY_UI_THEME_URL'] }}">
     <link rel="stylesheet" type="text/css"
@@ -31,12 +27,7 @@
             <span class="icon-bar"></span>
 	  </button>
 	  <a class="navbar-brand" href="{{ reverse_url('home') }}">
-	    {% try %}
-	      {% set url = reverse_url('site', settings['SITE_NAVBAR_ICON']) %}
-	    {% except KeyError %}
-	      {% set url = static_url('orderportal_32.png') %}
-	    {% end %}
-	    <img src="{{ url }}"
+	    <img src="{{ reverse_url('site', settings['SITE_NAVBAR_ICON']) }}"
 		 title="{{ settings['SITE_NAME'] }}"
 		 alt="{{ settings['SITE_NAME'] }}">
 	  </a>

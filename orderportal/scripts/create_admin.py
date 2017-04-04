@@ -40,6 +40,13 @@ if __name__ == '__main__':
     password = getpass.getpass('Password > ')
     if not password:
         sys.exit('no password provided')
+    try:
+        utils.check_password(password)
+    except ValueError, msg:
+        sys.exit(str(msg))
+    again_password = getpass.getpass('Password again > ')
+    if password != again_password:
+        sys.exit('passwords do not match')
     first_name = raw_input('First name > ') or 'first'
     last_name = raw_input('Last name > ') or 'last'
     university = raw_input('University > ') or 'university'

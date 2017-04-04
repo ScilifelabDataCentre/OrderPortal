@@ -1,7 +1,7 @@
 *~
 *.yaml
 *.pyc
-dist
-misc
-backup
-orderportal.egg-info
+orderportal/ngi
+orderportal/nmi
+orderportal/cryoem
+!orderportal/site/*yaml

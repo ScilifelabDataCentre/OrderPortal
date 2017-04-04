@@ -84,28 +84,30 @@ class RequestHandler(tornado.web.RequestHandler):
                 return URL('order_id', identifier, **query)
 
     def get_current_user(self):
-        """Get the currently logged-in user account, if any.
+        """Get the currently logged-in user account, or None.
         This overrides a tornado function, otherwise it should have
-        been called 'get_current_account', since terminology 'account'
+        been called 'get_current_account', since the term 'account'
         is used in this code rather than 'user'."""
         try:
-            account = self.get_current_user_session()
-            if not account:
-                account = self.get_current_user_basic()
-            if not account:
-                account = self.get_current_user_api_key()
-            return account
+            return self.get_current_user_session()
         except ValueError:
-            raise tornado.web.HTTPError(403)
+            try:
+                return self.get_current_user_basic()
+            except ValueError:
+                try:
+                    return self.get_current_user_api_key()
+                except ValueError:
+                    pass
+        return None
 
     def get_current_user_session(self):
         """Get the current user from a secure login session cookie.
-        Return None if no attempt at authentication.
-        Raise ValueError if incorrect authentication."""
+        Raise ValueError if no or erroneous authentication.
+        """
         email = self.get_secure_cookie(
             constants.USER_COOKIE,
             max_age_days=settings['LOGIN_MAX_AGE_DAYS'])
-        if not email: return None
+        if not email: raise ValueError
         account = self.get_account(email)
         # Check if login session is invalidated.
         if account.get('login') is None: raise ValueError
@@ -115,12 +117,12 @@ class RequestHandler(tornado.web.RequestHandler):
     def get_current_user_basic(self):
         """Get the current user by HTTP Basic authentication.
         This should be used only if the site is using TLS (SSL, https).
-        Return None if no attempt at authentication.
-        Raise ValueError if incorrect authentication."""
+        Raise ValueError if no or erroneous authentication.
+        """
         try:
             auth = self.request.headers['Authorization']
         except KeyError:
-            return None
+            raise ValueError
         try:
             auth = auth.split()
             if auth[0].lower() != 'basic': raise ValueError
@@ -136,12 +138,12 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_current_user_api_key(self):
         """Get the current user by API key authentication.
-        Return None if no attempt at authentication.
-        Raise ValueError if incorrect authentication."""
+        Raise ValueError if no or erroneous authentication.
+        """
         try:
             api_key = self.request.headers[constants.API_KEY_HEADER]
         except KeyError:
-            return None
+            raise ValueError
         else:
             try:
                 account = self.get_entity_view('account/api_key', api_key)

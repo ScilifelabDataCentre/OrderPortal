@@ -7,12 +7,12 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '2.9.2'
+__version__ = '3.0.0'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
     ROOT=os.path.dirname(__file__),
-    BASE_URL='http://localhost:8885/',
+    BASE_URL='http://localhost/',
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
     LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',

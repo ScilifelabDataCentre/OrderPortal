@@ -47,6 +47,7 @@ def init_database(dumpfilepath=None):
     else:
         print('no dump file loaded')
     load_texts(db, settings['INITIAL_TEXTS_FILEPATH'], overwrite=False)
+    print('loaded initial texts file', settings['INITIAL_TEXTS_FILEPATH'])
 
 def wipeout_database(db):
     """Wipe out the contents of the database.
