@@ -217,8 +217,8 @@ def load_settings(filepath=None):
             settings['PORT'] =  443
         else:
             raise ValueError('Could not determine port from BASE_URL.')
-    # Set back current working dir
-    os.chdir(orig_dir)
+    # XXX Set back current working dir
+    # XXX os.chdir(orig_dir)
 
 def term(word):
     "Return the display term for the given word. Use itself by default."
