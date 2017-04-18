@@ -50,8 +50,11 @@ help_datatypes: |
   - **file**: An attached file.
   - **group**: A group of fields. Does not contain any value of its own.
 
+general: |
+  General information about the facility, and such like.
+
 contact: |
-  [This ought to contain information on how to contact the facility.]
+  [This should contain information on how to contact the facility.]
 
 about: |
-  [This ought to contain information about the facility.]
+  [This should contain information about the facility.]

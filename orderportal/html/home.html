@@ -6,16 +6,11 @@
 
 {% block body_header %}
 
-{% try %}
-  {% set url = reverse_url('site', settings['SITE_HOME_ICON']) %}
-{% except KeyError %}
-  {% set url = static_url('orderportal_144.png') %}
-{% end %}
 <div class="row">
 
   <div class="col-md-4">
     <img class="img-responsive"
-	 src="{{ url }}"
+	 src="{{ reverse_url('site', settings['SITE_HOME_ICON']) }}"
 	 title="{{ settings['SITE_NAME'] }}"
 	 alt="{{ settings['SITE_NAME'] }}">
   </div>

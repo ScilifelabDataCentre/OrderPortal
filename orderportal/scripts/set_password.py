@@ -1,4 +1,4 @@
-"Create an admin account."
+"Set the password for an account."
 
 from __future__ import print_function, absolute_import
 
@@ -12,23 +12,19 @@ from orderportal.account import AccountSaver
 
 def get_args():
     parser = utils.get_command_line_parser(description=
-        'Create a new admin account.')
+        'Set the password for an account.')
     return parser.parse_args()
 
-def create_admin(email, password, first_name, last_name, university):
-    with AccountSaver(db=utils.get_db()) as saver:
-        saver.set_email(email)
-        saver['first_name'] = first_name
-        saver['last_name'] = last_name
-        saver['address'] = dict()
-        saver['invoice_address'] = dict()
-        saver['university'] = university
-        saver['department'] = None
-        saver['owner'] = email
+def set_password(email, password):
+    db = utils.get_db()
+    view = db.view('account/email', include_docs=True)
+    rows = list(view[email])
+    if len(rows) != 1:
+        raise ValueError("no such account %s" % email)
+    doc = rows[0].doc
+    with AccountSaver(doc=doc, db=db) as saver:
         saver.set_password(password)
-        saver['role'] = constants.ADMIN
-        saver['status'] = constants.ENABLED
-    print('Created admin account', email)
+    print('Set password for', email)
 
 
 if __name__ == '__main__':
@@ -47,7 +43,4 @@ if __name__ == '__main__':
     again_password = getpass.getpass('Password again > ')
     if password != again_password:
         sys.exit('passwords do not match')
-    first_name = raw_input('First name > ') or 'first'
-    last_name = raw_input('Last name > ') or 'last'
-    university = raw_input('University > ') or 'university'
-    create_admin(email, password, first_name, last_name, university)
+    set_password(email, password)

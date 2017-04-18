@@ -2,6 +2,7 @@
 #
 # chkconfig: 35 90 12
 # description: OrderPortal NGI Sweden server
+# Modify for your site.
 #
 # Get function from functions library
 . /etc/init.d/functions

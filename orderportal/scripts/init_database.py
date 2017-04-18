@@ -23,7 +23,7 @@ def get_args():
         'Initialize the database, deleting all old data,'
         ' optionally load from dump file.')
     parser.add_option("-L", "--load",
-                      action='store', dest='FILE', default='dump.tar.gz',
+                      action='store', dest='FILE', default=None,
                       metavar="FILE", help="filepath of dump file to load")
     return parser.parse_args()
 
@@ -41,12 +41,14 @@ def init_database(dumpfilepath=None):
     if dumpfilepath:
         dumpfilepath = utils.expand_filepath(dumpfilepath)
         try:
+            print('reading dump file...')
             undump(db, dumpfilepath)
         except IOError:
             print('Warning: could not load', dumpfilepath)
     else:
         print('no dump file loaded')
     load_texts(db, settings['INITIAL_TEXTS_FILEPATH'], overwrite=False)
+    print('loaded initial texts file', settings['INITIAL_TEXTS_FILEPATH'])
 
 def wipeout_database(db):
     """Wipe out the contents of the database.
