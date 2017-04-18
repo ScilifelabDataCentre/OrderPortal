@@ -1,9 +1,9 @@
 *~
 *.yaml
 *.pyc
-orderportal/ngi
 orderportal/nmi
 orderportal/cryoem
 orderportal/natproj
 !orderportal/settings.yaml
 !orderportal/site/*yaml
+!orderportal/ngi/*.yaml
