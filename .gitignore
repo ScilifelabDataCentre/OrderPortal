@@ -6,4 +6,3 @@ orderportal/cryoem
 orderportal/natproj
 !orderportal/settings.yaml
 !orderportal/site/*yaml
-!orderportal/ngi/*.yaml
