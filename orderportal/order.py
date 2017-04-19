@@ -460,7 +460,7 @@ class Orders(RequestHandler):
 
 
 class OrderApiV1Mixin:
-    "Generate JSON for an order."
+    "Generate JSON for an order; both for orders list and order API."
 
     def get_json(self, order, names={}, forms={}, item=None):
         URL = self.absolute_reverse_url
@@ -481,16 +481,16 @@ class OrderApiV1Mixin:
             links=dict(api=dict(href=URL('account_api', order['owner'])),
                        display=dict(href=URL('account', order['owner']))))
         item['fields'] = {}
+        for f in settings['ORDERS_LIST_FIELDS']:
+            item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
         item['tags'] = order.get('tags', [])
         item['status'] = dict(
             name=order['status'],
             display=dict(href=URL('site', order['status']+'.png')))
         item['history'] = {}
-        item['modified'] = order['modified']
-        for f in settings['ORDERS_LIST_FIELDS']:
-            item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
         for s in settings['ORDERS_LIST_STATUSES']:
             item['history'][s] = order['history'].get(s)
+        item['modified'] = order['modified']
         item['links'] = dict(
             self=dict(href=self.order_reverse_url(order, api=True)),
             display=dict(href=self.order_reverse_url(order)))
@@ -668,6 +668,16 @@ class OrderApiV1(ApiV1Mixin, OrderApiV1Mixin, Order):
                              names=self.get_account_names([order['owner']]),
                              item=data)
         data['fields'] = order['fields']
+        data['files'] = []
+        for filename in order.get('_attachments', []):
+            stub = order['_attachments'][filename]
+            data['files'].append(
+                dict(filename=filename,
+                     href=self.absolute_reverse_url('order_file',
+                                                    order['_id'],
+                                                    filename),
+                     size=stub['length'],
+                     content_type=stub['content_type']))
         data['invalid'] = order['invalid']
         self.write(data)
 

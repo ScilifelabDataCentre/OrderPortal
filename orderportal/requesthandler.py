@@ -76,12 +76,11 @@ class RequestHandler(tornado.web.RequestHandler):
         try:
             identifier = order['identifier']
         except KeyError:
-            return URL('order', order['_id'], **query)
+            identifier = order['_id']
+        if api:
+            return URL('order_id_api', identifier, **query)
         else:
-            if api:
-                return URL('order_id_api', identifier, **query)
-            else:
-                return URL('order_id', identifier, **query)
+            return URL('order_id', identifier, **query)
 
     def get_current_user(self):
         """Get the currently logged-in user account, or None.
