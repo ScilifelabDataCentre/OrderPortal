@@ -1,0 +1,89 @@
+{# Site info page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}OrderPortal site information{% end %}
+{% block body_title %}OrderPortal site information{% end %}
+
+{% block main_content %}
+<div class="row">
+  <div class="col-md-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+	<strong>Version {{ version }}</strong>
+      </div>
+      <div class="panel-body">
+	<p>
+	  The system is written in
+	  <a href="https://www.python.org/">Python</a> (versions 2.6 and
+	  2.7) and is built on top of
+	  the <a href="http://www.tornadoweb.org/en/stable/">Tornado</a>
+	  web server and template system using
+	  <a href="http://getbootstrap.com/">bootstrap</a> for display.
+	  The <a href="http://couchdb.apache.org/">CouchDB</a>
+	  database system is the back-end storage.
+	</p>
+	<p>
+	  The Python code is available in the GitHub repo
+	  <a href="https://github.com/pekrau/OrderPortal">pekrau/OrderPortal</a>.
+	</p>
+	<p>
+	  The technical documentation is in the GitHub
+	  <a href="https://github.com/pekrau/OrderPortal/wiki">wiki</a>.
+	</p>
+      </div>
+    </div>
+      <div class="panel panel-default">
+	<div class="panel-heading">
+	  The system uses the following Python packages available from
+	  <a href="https://pypi.python.org/pypi">PyPi</a>:
+	</div>
+	<div class="panel-body">
+	  <table class="table table-noborder">
+	    {% for key, value in versions['python'] %}
+	    <tr>
+	      <th width="60%">{{ key }}</th>
+	      <td width="40%">{{ value }}</td>
+	    </tr>
+	    {% end %}
+	  </table>
+	</div>
+      </div>
+      <div class="panel panel-default">
+	<div class="panel-heading">
+	  The system uses the following non-Python software:
+	</div>
+	<div class="panel-body">
+	  <table class="table table-noborder">
+	    {% for key, value in versions['other'] %}
+	    <tr>
+	      <th width="60%">{% raw key %}</th>
+	      <td width="40%">{{ value }}</td>
+	    </tr>
+	    {% end %}
+	  </table>
+	</div>
+      </div>
+  </div>
+  <div class="col-md-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ term('Order') }} counts</div>
+      <div class="panel-body">
+	<table class="table">
+	  <tr>
+	    <th># Total</th>
+	    <td class="number">{{ orders['count'] }}</td>
+	  </tr>
+	  {% for status in settings['ORDER_STATUSES'] %}
+	  <tr>
+	    <th>{% module Icon(status['identifier'], label=True) %} </th>
+	    <td class="number">
+	      {{ orders['status'].get(status['identifier'], 0) }}
+	    </td>
+	  </tr>
+	  {% end %}
+	</table>
+      </div>
+    </div>
+</div>
+{% end %} {# block main_content #}
