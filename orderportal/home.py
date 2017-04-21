@@ -110,10 +110,22 @@ class About(RequestHandler):
         self.render('about.html')
 
 
-class TechInfo(RequestHandler):
-    "Display information about the web site technology."
+class SiteInfo(RequestHandler):
+    "Display information and statistics about the web site."
 
     def get(self):
+        view = self.db.view('order/status', reduce=True)
+        try:
+            r = list(view)[0]
+        except IndexError:
+            orders = dict(count=0)
+        else:
+            orders = dict(count=r.value)
+        view = self.db.view('order/status',
+                            group_level=1,
+                            startkey=[''],
+                            endkey=[constants.CEILING])
+        orders['status'] = dict([(r.key[0], r.value) for r in view])
         search = constants.VERSION_RX.search
         versions = dict(
             python=[('CouchDB-Python', couchdb.__version__),
@@ -136,7 +148,8 @@ class TechInfo(RequestHandler):
                    ('<a href="{0}">jQuery DataTables</a>'.format(
                         settings['DATATABLES_HOME']),
                     search(settings['DATATABLES_CSS_URL']).group())])
-        self.render('techinfo.html',
+        self.render('siteinfo.html',
+                    orders=orders,
                     version=orderportal.__version__,
                     versions=versions)
 
@@ -174,38 +187,3 @@ class NoSuchEntity(RequestHandler):
 
     def get(self):
         self.see_other('home', error='Sorry, no such entity found.')
-
-
-class Statistics(RequestHandler):
-    "Summary statistics for the site."
-
-    def get(self):
-        self.render('statistics.html', orders=self.get_orders())
-
-    def get_orders(self):
-        view = self.db.view('order/status', reduce=True)
-        try:
-            r = list(view)[0]
-        except IndexError:
-            orders = dict(count=0)
-        else:
-            orders = dict(count=r.value)
-        view = self.db.view('order/status',
-                            group_level=1,
-                            startkey=[''],
-                            endkey=[constants.CEILING])
-        orders['status'] = dict([(r.key[0], r.value) for r in view])
-        return orders
-
-
-class StatisticsApiV1(Statistics):
-
-    def get(self):
-        URL = self.absolute_reverse_url
-        data = OD()
-        data['base'] = URL('home')
-        data['type'] = 'statistics'
-        data['links'] = dict(self=dict(href=URL('statistics_api')),
-                             display=dict(href=URL('statistics')))
-        data['orders'] = self.get_orders()
-        self.write(data)

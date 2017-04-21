@@ -124,7 +124,7 @@
 		</li>
 		<li><a href="{{ reverse_url('statuses') }}">Statuses</a></li>
 		<li><a href="{{ reverse_url('settings') }}">Settings</a></li>
-		<li><a href="{{ reverse_url('techinfo') }}">Technical information</a></li>
+		<li><a href="{{ reverse_url('siteinfo') }}">Site information</a></li>
 		<li class="dropdown-submenu">
 		  <a class="submenu" href="#">Texts
 		    <span class="caret"></span>
@@ -262,7 +262,26 @@
       {% end %} {# block sub_main_content #}
       {% end %} {# block content #}
 
-    </div>
+      {% block body-footer %}
+      <div class="row">
+	<div class="col-md-12">
+	  <hr>
+	  <div class="pull-left">
+	    <a href="{{ reverse_url('home') }}">
+	      <span class="glyphicon glyphicon-home"></span>
+	      {{ settings['SITE_NAME'] }}
+	    </a>
+	  </div>
+	  <div class="pull-right">
+	    <a href="{{ reverse_url('siteinfo') }}">
+	      OrderPortal version {{ version }}
+	    </a>
+	  </div>
+	</div>
+      </div>
+      {% end %} {# block body-footer #}
+
+    </div> {# container #}
 
     {% block javascript_standard %}
     {# NOTE: jQuery has to be loaded before bootstrap! #}
