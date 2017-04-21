@@ -213,8 +213,8 @@
 	<div class="col-md-10">
 	  <h1>{% block body_title %}OrderPortal{% end %}</h1>
 	</div>
-	<div class="col-md-2">
-	  {% block body_header_meta %}
+	<div class="col-md-2 hidden-print">
+	  {% block body_header_alt_format %}
 	  {% end %}
 	</div>
       </div>
@@ -253,9 +253,9 @@
 	  {% block main_content %}
 	  {% end %} {# block main_content #}
 	</div>
-	<div class="col-md-2">
-	  {% block meta_content %}
-	  {% end %} {# block meta_content #}
+	<div class="col-md-2 hidden-print">
+	  {% block action_content %}
+	  {% end %} {# block action_content #}
 	</div>
       </div>
       {% block sub_main_content %}

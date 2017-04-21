@@ -13,13 +13,13 @@
 {{ form['title'] }}
 {% end %}
 
-{% block body_header_meta %}
+{% block body_header_alt_format %}
 <a href="{{ reverse_url('form_api', form['_id']) }}">
   {% module Icon('json') %} JSON
 </a>
 {% end %}
 
-{% block meta_content %}
+{% block action_content %}
 {% if form['status'] == constants.PENDING %}
 <p>
   <form action="{{ reverse_url('form_testing', form['_id']) }}"
@@ -123,7 +123,7 @@
     </button>
   </form>
 </p>
-{% end %} {# block meta_content #}
+{% end %} {# block action_content #}
 
 {% block main_content %}
 <div class="panel panel-default">

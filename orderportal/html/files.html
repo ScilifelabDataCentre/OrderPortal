@@ -22,7 +22,7 @@
 
 {% end %} {# block main_content #}
 
-{% block meta_content %}
+{% block action_content %}
 {% if is_admin %}
 <form action="{{ reverse_url('file_create') }}"
       role="form"
@@ -33,4 +33,4 @@
   </button>
 </form>
 {% end %} {# if is_admin #}
-{% end %} {# block meta_content #}
+{% end %} {# block action_content #}

@@ -8,13 +8,13 @@
 
 {% extends "base.html" %}
 
-{% block body_header_meta %}
+{% block body_header_alt_format %}
 <a href="{{ order_reverse_url(order, api=True) }}">
   {% module Icon('json') %} JSON
 </a>
 {% end %}
 
-{% block meta_content %}
+{% block action_content %}
 
 {% if is_editable %}
 <p>
@@ -106,7 +106,7 @@
   </div>
   {% end %} {# if not global_modes... #}
 </p>
-{% end %} {# block meta_content #}
+{% end %} {# block action_content #}
 
 {% block main_content %}
 <div class="panel panel-default">
