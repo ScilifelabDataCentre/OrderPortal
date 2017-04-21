@@ -14,6 +14,22 @@ register: |
   You will receive an email with a link to a page for setting the password
   when the account is enabled.
 
+  The personal data you provide in this registration form is to enable
+  SciLifeLab to: register and contact you about submitted information;
+  carry out administrative tasks and evaluate your submitted
+  information; and allow the compilation and analysis of submitted
+  information for internal purposes.
+
+  The information you provide will be processed in accordance with the
+  Swedish Personal Data Act (Personuppgiftslagen, SFS 1998:204) which
+  is based on Directive 95/46/EC of the European Parliament and of the
+  Council of 24 October 1995 on the protection of individuals with
+  regard to the processing of personal data.
+
+  By submitting you acknowledge that you have read and understood the
+  foregoing and consent to the uses of your information as set out
+  above.
+
 registered: |
   An activation email will be sent to you from the administrator when your
   account has been enabled. This may take up to two working days.
