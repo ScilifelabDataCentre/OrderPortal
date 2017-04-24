@@ -60,37 +60,33 @@ class AccountSaver(saver.Saver):
 
 
 class Accounts(RequestHandler):
-    "Accounts list page; just HTML, Datatables obtains data via API call."
+    "Accounts list page."
 
     @tornado.web.authenticated
     def get(self):
-        """HTML template output.
-        Uses DataTables which calls the API to get accounts."""
         self.check_staff()
-        self.render('accounts.html', params=self.get_filter_params())
+        self.set_filter()
+        self.render('accounts.html', 
+                    accounts=self.get_accounts(),
+                    filter=self.filter)
 
-    def get_filter_params(self):
-        "Return a dictionary with the given filter parameters."
-        result = dict()
+    def set_filter(self):
+        "Set the filter parameters dictionary."
+        self.filter = dict()
         for key in ['university', 'status', 'role']:
             try:
                 value = self.get_argument(key)
                 if not value: raise KeyError
-                result[key] = value
+                self.filter[key] = value
             except (tornado.web.MissingArgumentError, KeyError):
                 pass
-        return result
-
-
-class _AccountsFilter(Accounts):
-    "Get accounts according to filter parameters."
 
     def get_accounts(self):
         "Get the accounts."
-        accounts = self.filter_by_university(self.params.get('university'))
-        accounts = self.filter_by_role(self.params.get('role'),
+        accounts = self.filter_by_university(self.filter.get('university'))
+        accounts = self.filter_by_role(self.filter.get('role'),
                                        accounts=accounts)
-        accounts = self.filter_by_status(self.params.get('status'),
+        accounts = self.filter_by_status(self.filter.get('status'),
                                          accounts=accounts)
         # No filter; all accounts
         if accounts is None:
@@ -105,6 +101,14 @@ class _AccountsFilter(Accounts):
         counts = dict([(r.key[0], r.value) for r in view])
         for account in accounts:
             account['order_count'] = counts.get(account['email'], 0)
+            name = last_name = account.get('last_name')
+            first_name = account.get('first_name')
+            if name:
+                if first_name:
+                    name += ', ' + first_name
+            else:
+                name = first_name
+            account['name'] = name
         return accounts
 
     def filter_by_university(self, university, accounts=None):
@@ -151,7 +155,7 @@ class _AccountsFilter(Accounts):
         return accounts
 
 
-class AccountsApiV1(_AccountsFilter):
+class AccountsApiV1(Accounts):
     "Accounts API; JSON output."
 
     @tornado.web.authenticated
@@ -159,7 +163,7 @@ class AccountsApiV1(_AccountsFilter):
         "JSON output."
         URL = self.absolute_reverse_url
         self.check_staff()
-        self.params = self.get_filter_params()
+        self.set_filter()
         accounts = self.get_accounts()
         items = []
         for account in accounts:
@@ -182,9 +186,7 @@ class AccountsApiV1(_AccountsFilter):
             item['gender'] = account.get('gender')
             item['university'] = account.get('university')
             item['role'] = account['role']
-            item['status'] = dict(
-                name=account['status'],
-                image=dict(href=self.static_url(account['status']+'.png')))
+            item['status'] = dict(name=account['status'])
             item['address'] = account.get('address') or {}
             item['invoice_ref'] = account.get('invoice_ref')
             item['invoice_address'] = account.get('invoice_address') or {}
@@ -199,20 +201,20 @@ class AccountsApiV1(_AccountsFilter):
         data = OD()
         data['type'] = 'accounts'
         data['links'] = links = OD()
-        links['self'] = dict(href=URL('accounts_api', **self.params))
-        links['display'] = dict(href=URL('accounts', **self.params))
+        links['self'] = dict(href=URL('accounts_api', **self.filter))
+        links['display'] = dict(href=URL('accounts', **self.filter))
         data['items'] = items
         self.write(data)
 
 
-class AccountsCsv(_AccountsFilter):
+class AccountsCsv(Accounts):
     "Return a CSV file containing all data for all or filtered set of accounts."
 
     @tornado.web.authenticated
     def get(self):
         "CSV file output."
         self.check_staff()
-        self.params = self.get_filter_params()
+        self.set_filter()
         accounts = self.get_accounts()
         csvfile = StringIO()
         writer = csv.writer(csvfile)

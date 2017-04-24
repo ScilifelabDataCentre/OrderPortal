@@ -420,11 +420,11 @@ class OrderMixin(object):
 
 
 class Orders(RequestHandler):
-    "Orders list page; just HTML, Datatables obtains data via API call."
+    "Orders list page."
 
     @tornado.web.authenticated
     def get(self):
-        "Ordinary users are not allowed to see the overall orders list."
+        # Ordinary users are not allowed to see the overall orders list.
         if not self.is_staff():
             self.see_other('account_orders', self.current_user['email'])
             return
