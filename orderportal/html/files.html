@@ -11,14 +11,53 @@
   presentations, price lists, specifications and other documents.
 </div>
 
-{% set filelist = files %}
-{% include 'files_list.html' %}
-
-{% if is_admin %}
-{% set filelist = hidden %}
-<h2>Unlisted files</h2>
-{% include 'files_list.html' %}
-{% end %}
+<table id="files" class="table table-striped">
+  <thead>
+    <tr>
+      <th width="80%">Document</th>
+      <th></th>
+      <th>Modified</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for file in files %}
+    {% if is_admin or not file.get('hidden') %}
+    <tr>
+      <td>
+	<h4>
+	  <a href="{{ reverse_url('file_meta', file['name']) }}">
+	    {% module ContentType(file['content_type']) %}
+	    {{ file.get('title') or file['name'] }}
+	  </a>
+	  {% if file.get('hidden') %}
+	  <span class="glyphicon glyphicon-eye-close"></span>
+	  Hidden
+	  {% end %}
+	</h4>
+	{% module Markdown(file.get('description')) %}
+      </td>
+      <td>
+	<p>
+	  <a class="btn btn-xs btn-primary"
+	     href="{{ reverse_url('file', file['name']) }}">
+	    <span class="glyphicon glyphicon-eye-open"></span>
+	    View
+	  </a>
+	</p>
+	<p>
+	  <a class="btn btn-xs btn-primary"
+	     href="{{ reverse_url('file_download', file['name']) }}">
+	    <span class="glyphicon glyphicon-download"></span>
+	    Download
+	  </a>
+	</p>
+      </td>
+      <td class="localtime nobr">{{ file['modified'] }}</td>
+    </tr>
+    {% end %} {# if #}
+    {% end %} {# for #}
+  </tbody>
+</table>    
 
 {% end %} {# block main_content #}
 
@@ -34,3 +73,19 @@
 </form>
 {% end %} {# if is_admin #}
 {% end %} {# block action_content #}
+
+{% block javascript_code %}
+<script>
+  $(document).ready(function() {
+    $('#files').DataTable( {
+  "pagingType": "full_numbers",
+  "order": [[2, "desc"]],
+  "columnDefs": [
+  {
+      "targets"  : 1,
+      "orderable": false,
+    }],
+    } );
+  } );
+</script>
+{% end %}

@@ -7,11 +7,6 @@
 {% module Icon('order', title='Orders', label=True) %}
 {% end %}
 
-{% block header_css %}
-<link rel="stylesheet" type="text/css"
-      href="{{ settings['DATATABLES_CSS_URL'] }}">
-{% end %}
-
 {% block body_header_alt_format %}
 <a href="{{ reverse_url('orders_api', **params) }}">
   {% module Icon('json') %} JSON
@@ -118,8 +113,6 @@
 
 {% block javascript_code %}
 {% import json %}
-<script src="{{ settings['DATATABLES_JS_URL'] }}"></script>
-<script src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
 <script>
 $(document).ready(function() {
   $(".refresh").change(function () {

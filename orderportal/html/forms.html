@@ -69,11 +69,12 @@
 {% end %} {# block action_content #}
 
 {% block javascript_code %}
-<script src="{{ settings['DATATABLES_JS_URL'] }}"></script>
-<script src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
 <script>
   $(document).ready(function() {
-    $('#forms').DataTable();
+    $('#forms').DataTable( {
+      pagingType: "full_numbers",
+      order: [[7, "desc"]]
+    } );
   } );
 </script>
 {% end %}

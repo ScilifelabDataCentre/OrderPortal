@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-"OrderPortal: Web application server."
+"OrderPortal web application server."
 
 from __future__ import print_function, absolute_import
 
@@ -127,10 +127,11 @@ def main():
         url(r'/files', Files, name='files'),
         url(r'/file', FileCreate, name='file_create'),
         url(r'/file/([^/]+)', File, name='file'),
+        url(r'/file/([^/]+)/meta', FileMeta, name='file_meta'),
         url(r'/file/([^/]+)/download', FileDownload, name='file_download'),
         url(r'/file/([^/]+)/edit', FileEdit, name='file_edit'),
         url(r'/api/v1/file/([^/]+)/edit', FileEditApiV1, name='file_edit_api'),
-        url(r'/file/([^/]+)/logs', FileLogs, name='file_logs'),
+        url(r'/file/([0-9a-f]{32})/logs', FileLogs, name='file_logs'),
         url(r'/text/([^/]+)', Text, name='text'),
         url(r'/log/([0-9a-f]{32})', Log, name='log'),
         url(r'/([0-9a-f]{32})', Entity, name='entity'),

@@ -53,8 +53,6 @@ Messages to {% module Entity(account) %}
 {% end %} {# block content #}
 
 {% block javascript_code %}
-<script src="{{ settings['DATATABLES_JS_URL'] }}"></script>
-<script src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
 <script>
   $(document).ready(function() {
     $('#messages').DataTable();

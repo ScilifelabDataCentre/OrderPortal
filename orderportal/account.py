@@ -1,4 +1,4 @@
-"OrderPortal: Account and login pages."
+"Account and login pages."
 
 from __future__ import print_function, absolute_import
 

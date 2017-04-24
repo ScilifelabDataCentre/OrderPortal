@@ -10,6 +10,8 @@
 	  href="{{ settings['JQUERY_UI_THEME_URL'] }}">
     <link rel="stylesheet" type="text/css"
 	  href="{{ settings['BOOTSTRAP_CSS_URL'] }}">
+    <link rel="stylesheet" type="text/css"
+	  href="{{ settings['DATATABLES_CSS_URL'] }}">
     {% block header_css %}
     {% end %}
     <link rel="stylesheet" href="{{ static_url('mods.css') }}">
@@ -289,6 +291,8 @@
     <script src="{{ settings['JQUERY_UI_URL'] }}"></script>
     <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
     <script src="{{ settings['BOOTSTRAP_JS_URL'] }}"></script>
+    <script src="{{ settings['DATATABLES_JS_URL'] }}"></script>
+    <script src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
     <script>
       $(document).ready(function(){
         $('.dropdown-submenu a.submenu').on("click", function(e){

@@ -1,4 +1,4 @@
-"OrderPortal: File pages; uploaded files."
+"File (a.k.a document) pages; uploaded files."
 
 from __future__ import print_function, absolute_import
 
@@ -56,15 +56,9 @@ class Files(RequestHandler):
     "List of files page."
 
     def get(self):
-        docs = [r.doc for r in self.db.view('file/name', include_docs=True)]
-        files = [d for d in docs if not d.get('hidden')]
-        if self.is_admin():
-            hidden = [d for d in docs if d.get('hidden')]
-        else:
-            hidden = []
-        files.sort(lambda i,j: cmp(i['modified'], j['modified']), reverse=True)
-        hidden.sort(lambda i,j: cmp(i['modified'], j['modified']), reverse=True)
-        self.render('files.html', files=files, hidden=hidden)
+        files = [r.doc for r in self.db.view('file/name', include_docs=True)]
+        files.sort(key=lambda i: i['modified'], reverse=True)
+        self.render('files.html', files=files)
 
 
 class File(RequestHandler):
@@ -80,6 +74,14 @@ class File(RequestHandler):
             self.write(outfile.read())
             outfile.close()
         self.set_header('Content-Type', self.doc['content_type'])
+
+
+class FileMeta(RequestHandler):
+    "Display meta page for a file with buttons."
+
+    def get(self, name):
+        file = self.get_entity_view('file/name', name)
+        self.render('file_meta.html', file=file)
 
 
 class FileCreate(RequestHandler):
@@ -182,11 +184,10 @@ class FileDownload(File):
 class FileLogs(RequestHandler):
     "File log entries page."
 
-    @tornado.web.authenticated
-    def get(self, name):
-        self.check_admin()
-        file = self.get_entity_view('file/name', name)
+    def get(self, iuid):
+        file = self.get_entity(iuid, doctype=constants.FILE)
         self.render('logs.html',
-                    title="Logs for file '{0}'".format(name),
+                    title=u"Logs for document '%s'" % (file.get('title') or 
+                                                       file['name']),
                     entity=file,
                     logs=self.get_logs(file['_id']))

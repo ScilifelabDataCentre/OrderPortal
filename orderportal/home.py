@@ -1,4 +1,4 @@
-"OrderPortal: Home page variants, and a few general resources."
+"Home page variants, and a few general resources."
 
 from __future__ import print_function, absolute_import
 
