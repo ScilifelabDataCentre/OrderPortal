@@ -1,4 +1,4 @@
-"OrderPortal: Order pages."
+"Orders are the whole point of this app. The user fills in info for facility."
 
 from __future__ import print_function, absolute_import
 

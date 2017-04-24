@@ -1,4 +1,4 @@
-"OrderPortal: RequestHandler subclass."
+"RequestHandler subclass for all pages."
 
 from __future__ import print_function, absolute_import
 

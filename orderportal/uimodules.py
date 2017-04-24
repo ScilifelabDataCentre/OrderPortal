@@ -1,4 +1,4 @@
-" OrderPortal: UI modules. "
+"UI modules for tornado."
 
 from __future__ import print_function, absolute_import
 

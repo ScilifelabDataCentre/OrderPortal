@@ -10,43 +10,47 @@
 {% end %}
 
 {% block main_content %}
-<table class="table table-striped table-condensed">
-  <tr>
-    <th>Form</th>
-    <th>Description</th>
-    <th>Version</th>
-    <th>Status</th>
-    <th>Ordinal</th>
-    <th>{{ term('Orders') }}</th>
-    <th>Owner</th>
-    <th>Modified</th>
-  </tr>
-  {% for form in forms %}
-  <tr>
-    <td>
-      <a href="{{ reverse_url('form', form['_id']) }}">
-	{{ form['title'] }}
-      </a>
-    </td>
-    <td>{% module Markdown(form.get('description')) %}</td>
-    <td>{{ form.get('version') or '-' }}</td>
-    <td>{% module Icon(form['status'], label=True) %}</td>
-    <td>{{ form.get('ordinal') or 0 }}</td>
-    <td>
-      <a class="badge"
-	 href="{{ reverse_url('form_orders', form['_id']) }}">
-	{{ order_counts[form['_id']] }}
-      </a>
-    </td>
-    <td>
-      <a href="{{ reverse_url('account', form['owner']) }}">
-	{% module Icon('account') %}
-	{{ account_names.get(form['owner'], form['owner']) }}
-      </a>
-    </td>
-    <td class="localtime">{{ form['modified'] }}</td>
-  </tr>
-  {% end %}
+<table id="forms" class="table table-striped table-condensed">
+  <thead>
+    <tr>
+      <th>Form</th>
+      <th>Description</th>
+      <th>Version</th>
+      <th>Status</th>
+      <th>Ordinal</th>
+      <th>{{ term('Orders') }}</th>
+      <th>Owner</th>
+      <th>Modified</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for form in forms %}
+    <tr>
+      <td>
+	<a href="{{ reverse_url('form', form['_id']) }}">
+	  {{ form['title'] }}
+	</a>
+      </td>
+      <td>{% module Markdown(form.get('description')) %}</td>
+      <td>{{ form.get('version') or '-' }}</td>
+      <td>{% module Icon(form['status'], label=True) %}</td>
+      <td>{{ form.get('ordinal') or 0 }}</td>
+      <td>
+	<a class="badge"
+	   href="{{ reverse_url('form_orders', form['_id']) }}">
+	  {{ order_counts[form['_id']] }}
+	</a>
+      </td>
+      <td>
+	<a href="{{ reverse_url('account', form['owner']) }}">
+	  {% module Icon('account') %}
+	  {{ account_names.get(form['owner'], form['owner']) }}
+	</a>
+      </td>
+      <td class="localtime">{{ form['modified'] }}</td>
+    </tr>
+    {% end %}
+  </tbody>
 </table>
 {% end %} {# block main_content #}
 
@@ -63,3 +67,13 @@
   </div>
 </form>
 {% end %} {# block action_content #}
+
+{% block javascript_code %}
+<script src="{{ settings['DATATABLES_JS_URL'] }}"></script>
+<script src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
+<script>
+  $(document).ready(function() {
+    $('#forms').DataTable();
+  } );
+</script>
+{% end %}

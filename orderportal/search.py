@@ -1,4 +1,4 @@
-"OrderPortal: Search page."
+"Search page."
 
 from __future__ import print_function, absolute_import
 
