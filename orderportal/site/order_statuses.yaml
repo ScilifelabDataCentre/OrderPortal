@@ -28,7 +28,7 @@
   description: The order has been rejected by the facility.
   action: reject
 
-- identifier: processing
+- identifier: active
   description: The facility is working on the order, in the lab or in data analysis.
   attach: [admin]
   action: Process

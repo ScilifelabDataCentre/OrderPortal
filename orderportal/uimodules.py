@@ -14,6 +14,16 @@ from . import utils
 ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""
 
 
+class NoneStr(tornado.web.UIModule):
+    "Output empty string if value is None, else str(value)."
+
+    def render(self, value):
+        if value is None:
+            return ' '
+        else:
+            return str(value)
+
+
 class Icon(tornado.web.UIModule):
     "HTML for an icon, optionally labelled with a title."
 

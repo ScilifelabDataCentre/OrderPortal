@@ -428,23 +428,28 @@ class Orders(RequestHandler):
         if not self.is_staff():
             self.see_other('account_orders', self.current_user['email'])
             return
+        # Initial ordering by the 'modified' column.
         order_column = 5 + len(settings['ORDERS_LIST_STATUSES']) + \
             len(settings['ORDERS_LIST_FIELDS'])
-        form_titles = sorted(set([f[0] for f in self.get_forms()]))
+        self.set_filter()
+        all_forms = self.get_forms_titles(all=True)
         self.render('orders.html',
-                    form_titles=form_titles,
+                    all_forms=all_forms,
+                    form_titles=sorted(self.get_forms_titles().values()),
+                    filter=self.filter,
+                    orders=self.get_orders(all_forms),
                     order_column=order_column,
-                    params=self.get_filter_params())
+                    account_names=self.get_account_names())
 
-    def get_filter_params(self):
-        "Return a dictionary with the filter parameters."
-        result = dict()
+    def set_filter(self):
+        "Set the filter parameters dictionary."
+        self.filter = dict()
         for key in ['status', 'form_title'] + \
                    [f['identifier'] for f in settings['ORDERS_LIST_FIELDS']]:
             try:
                 value = self.get_argument(key)
                 if not value: raise KeyError
-                result[key] = value
+                self.filter[key] = value
             except (tornado.web.MissingArgumentError, KeyError):
                 pass
         recent = self.get_argument('recent', None)
@@ -455,12 +460,85 @@ class Orders(RequestHandler):
                 recent = utils.to_bool(recent)
             except ValueError:
                 recent = True
-        result['recent'] = recent
-        return result
+        self.filter['recent'] = recent
+
+    def get_orders(self, forms):
+        orders = self.filter_by_status(self.filter.get('status'))
+        orders = self.filter_by_forms(self.filter.get('form_title'),
+                                      forms=forms,
+                                      orders=orders)
+        for f in settings['ORDERS_LIST_FIELDS']:
+            orders = self.filter_by_field(f['identifier'],
+                                          self.filter.get(f['identifier']),
+                                          orders=orders)
+        try:
+            limit = settings['DISPLAY_ORDERS_MOST_RECENT']
+            if not isinstance(limit, int): raise ValueError
+        except (ValueError, KeyError):
+            limit = 0
+        # No filter; all orders
+        if orders is None:
+            if limit > 0 and self.filter.get('recent', True):
+                view = self.db.view('order/modified',
+                                    include_docs=True,
+                                    descending=True,
+                                    limit=limit)
+            else:
+                view = self.db.view('order/modified',
+                                    include_docs=True,
+                                    descending=True)
+            orders = [r.doc for r in view]
+        elif limit > 0 and self.filter.get('recent', True):
+            orders = orders[:limit]
+        return orders
+
+    def filter_by_status(self, status, orders=None):
+        "Return orders list if any status filter, or None if none."
+        if status:
+            if orders is None:
+                view = self.db.view('order/status',
+                                    descending=True,
+                                    startkey=[status, constants.CEILING],
+                                    endkey=[status],
+                                    reduce=False,
+                                    include_docs=True)
+                orders = [r.doc for r in view]
+            else:
+                orders = [o for o in orders if o['status'] == status]
+        return orders
+
+    def filter_by_forms(self, form_title, forms, orders=None):
+        "Return orders list if any form filter, or None if none."
+        if form_title:
+            forms = set([f[0] for f in forms.items() if f[1] == form_title])
+            if orders is None:
+                orders = []
+                for form in forms:
+                    view = self.db.view('order/form',
+                                        descending=True,
+                                        reduce=False,
+                                        include_docs=True)
+                    orders.extend([r.doc for r in
+                                   view[[form, constants.CEILING]:[form]]])
+            else:
+                orders = [o for o in orders if o['form'] in forms]
+        return orders
+
+    def filter_by_field(self, identifier, value, orders=None):
+        "Return orders list if any field filter, or None if none."
+        if value:
+            if orders is None:
+                view = self.db.view('order/modified',
+                                    include_docs=True,
+                                    descending=True)
+                orders = [r.doc for r in view]
+            if value == '__none__': value = None
+            orders = [o for o in orders if o['fields'].get(identifier) == value]
+        return orders
 
 
 class OrderApiV1Mixin:
-    "Generate JSON for an order; both for orders list and order API."
+    "Generate JSON for an order; both for orders list API and order API."
 
     def get_json(self, order, names={}, forms={}, item=None):
         URL = self.absolute_reverse_url
@@ -484,9 +562,7 @@ class OrderApiV1Mixin:
         for f in settings['ORDERS_LIST_FIELDS']:
             item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
         item['tags'] = order.get('tags', [])
-        item['status'] = dict(
-            name=order['status'],
-            display=dict(href=URL('site', order['status']+'.png')))
+        item['status'] = dict(name=order['status'])
         item['history'] = {}
         for s in settings['ORDERS_LIST_STATUSES']:
             item['history'][s] = order['history'].get(s)
@@ -505,10 +581,10 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
         "JSON output."
         URL = self.absolute_reverse_url
         self.check_staff()
-        self.params = self.get_filter_params()
+        self.set_filter()
         # Get names and forms lookups
         names = self.get_account_names()
-        forms = dict([(f[1], f[0]) for f in self.get_forms(all=True)])
+        forms = self.get_forms_titles(all=True)
         data = OD()
         data['type'] = 'orders'
         data['links'] = dict(self=dict(href=URL('orders_api')),
@@ -518,13 +594,13 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
         self.write(data)
 
     def get_orders(self, forms):
-        orders = self.filter_by_status(self.params.get('status'))
-        orders = self.filter_by_forms(self.params.get('form_title'),
+        orders = self.filter_by_status(self.filter.get('status'))
+        orders = self.filter_by_forms(self.filter.get('form_title'),
                                       forms=forms,
                                       orders=orders)
         for f in settings['ORDERS_LIST_FIELDS']:
             orders = self.filter_by_field(f['identifier'],
-                                          self.params.get(f['identifier']),
+                                          self.filter.get(f['identifier']),
                                           orders=orders)
         try:
             limit = settings['DISPLAY_ORDERS_MOST_RECENT']
@@ -533,7 +609,7 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
             limit = 0
         # No filter; all orders
         if orders is None:
-            if limit > 0 and self.params.get('recent', True):
+            if limit > 0 and self.filter.get('recent', True):
                 view = self.db.view('order/modified',
                                     include_docs=True,
                                     descending=True,
@@ -543,7 +619,7 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
                                     include_docs=True,
                                     descending=True)
             orders = [r.doc for r in view]
-        elif limit > 0 and self.params.get('recent', True):
+        elif limit > 0 and self.filter.get('recent', True):
             orders = orders[:limit]
         return orders
 
@@ -662,11 +738,9 @@ class OrderApiV1(ApiV1Mixin, OrderApiV1Mixin, Order):
 
     def render(self, templatefilename, **kwargs):
         order = kwargs['order']
-        data = OD()
-        data['type'] = 'order'
         data = self.get_json(order,
                              names=self.get_account_names([order['owner']]),
-                             item=data)
+                             item=OD(type='order'))
         data['fields'] = order['fields']
         data['files'] = []
         for filename in order.get('_attachments', []):

@@ -472,9 +472,19 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
             order_column = 3
         order_column += len(settings['ORDERS_LIST_STATUSES']) + \
             len(settings['ORDERS_LIST_FIELDS'])
+        view = self.db.view('order/owner',
+                            reduce=False,
+                            include_docs=True,
+                            startkey=[account['email']],
+                            endkey=[account['email'], constants.CEILING])
+        orders = [r.doc for r in view]
         self.render('account_orders.html',
-                    order_column=order_column,
+                    all_forms=self.get_forms_titles(all=True),
+                    form_titles=sorted(self.get_forms_titles().values()),
+                    orders=orders,
                     account=account,
+                    order_column=order_column,
+                    account_names=self.get_account_names(),
                     any_groups=bool(self.get_account_groups(account['email'])))
 
 
@@ -494,7 +504,7 @@ class AccountOrdersApiV1(AccountOrdersMixin,
             raise tornado.web.HTTPError(403, reason=str(msg))
         # Get names and forms lookups
         names = self.get_account_names()
-        forms = dict([(f[1], f[0]) for f in self.get_forms(all=True)])
+        forms = self.get_forms_titles(all=True)
         data = OD()
         data['type'] = 'account orders'
         data['links'] = dict(
@@ -556,7 +566,7 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
             orders.extend([r.doc for r in view])
         # Get names and forms lookups
         names = self.get_account_names()
-        forms = dict([(f[1], f[0]) for f in self.get_forms(all=True)])
+        forms = self.get_forms_titles(all=True)
         data = OD()
         data['type'] = 'account groups orders'
         data['links'] = dict(
