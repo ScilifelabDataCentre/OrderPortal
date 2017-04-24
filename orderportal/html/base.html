@@ -264,7 +264,10 @@
       {% end %} {# block sub_main_content #}
       {% end %} {# block content #}
 
-      {% block body-footer %}
+    </div> {# end of container for body content #}
+
+    {% block body-footer %}
+    <div class="container-fluid">
       <div class="row">
 	<div class="col-md-12">
 	  <hr>
@@ -281,9 +284,8 @@
 	  </div>
 	</div>
       </div>
-      {% end %} {# block body-footer #}
-
-    </div> {# container #}
+    </div>
+    {% end %} {# block body-footer #}
 
     {% block javascript_standard %}
     {# NOTE: jQuery has to be loaded before bootstrap! #}
