@@ -26,7 +26,7 @@ class Home(RequestHandler):
         forms = [r.doc for r in self.db.view('form/enabled', include_docs=True)]
         for f in forms:
             if f.get('ordinal') is None: f['ordinal'] = 0
-        forms.sort(lambda i,j: cmp(i['ordinal'], j['ordinal']))
+        forms.sort(key=lambda i: i['ordinal'])
         kwargs = dict(forms=forms,
                       news_items=self.get_news(),
                       events=self.get_events())

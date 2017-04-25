@@ -150,7 +150,7 @@ class FormApiV1(ApiV1Mixin, Form):
         data = OD()
         data['type'] = 'form'
         data['iuid'] = form['_id']
-        data['title'] = form.get('title')
+        data['title'] = form['title']
         data['version'] = form.get('version')
         data['description'] = form.get('description')
         data['owner'] = dict(
@@ -178,7 +178,7 @@ class FormLogs(RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.render('logs.html',
-                    title=u"Logs for form'{0}'".format(form['title']),
+                    title=u"Logs for form '{0}'".format(form['title']),
                     entity=form,
                     logs=self.get_logs(form['_id']))
 

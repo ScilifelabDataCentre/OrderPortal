@@ -284,7 +284,7 @@ class RequestHandler(tornado.web.RequestHandler):
         for new in news:
             if not new.get('date'):
                 new['date'] = new['modified'].split('T')[0]
-        news.sort(lambda i,j:cmp(i['date'],j['date']), reverse=True)
+        news.sort(key=lambda i: i['date'], reverse=True)
         return news
 
     def get_events(self):
@@ -358,7 +358,7 @@ class RequestHandler(tornado.web.RequestHandler):
         email = email.strip().lower()
         view = self.db.view('group/member', include_docs=True)
         return sorted([r.doc for r in view[email]],
-                      cmp=lambda i,j: cmp(i['name'], j['name']))
+                      key=lambda i: i['name'])
 
     def get_account_colleagues(self, email):
         """Return the set of all emails for colleagues of the account;

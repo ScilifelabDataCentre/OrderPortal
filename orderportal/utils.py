@@ -177,8 +177,7 @@ def load_settings(filepath=None):
         with open(filepath) as infile:
             unis = yaml.safe_load(infile)
         unis = unis.items()
-        unis.sort(lambda i,j: cmp((i[1].get('rank'), i[0]),
-                                  (j[1].get('rank'), j[0])))
+        unis.sort(key=lambda i: (i[1].get('rank'), i[0]))
         settings['UNIVERSITIES'] = collections.OrderedDict(unis)
     # Read country codes
     try:

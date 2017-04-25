@@ -2,9 +2,10 @@
 
 from __future__ import print_function, absolute_import
 
-import logging
+import csv
 from collections import OrderedDict as OD
 from cStringIO import StringIO
+import logging
 import os.path
 import re
 import traceback
@@ -539,7 +540,7 @@ class Orders(RequestHandler):
 
 
 class OrderApiV1Mixin:
-    "Generate JSON for an order; both for orders list API and order API."
+    "Generate JSON for an order."
 
     def get_order_json(self, order, names={}, forms={}, item=None):
         URL = self.absolute_reverse_url
@@ -564,9 +565,10 @@ class OrderApiV1Mixin:
             item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
         item['tags'] = order.get('tags', [])
         item['status'] = order['status']
-        item['history'] = {}
-        for s in settings['ORDERS_LIST_STATUSES']:
-            item['history'][s] = order['history'].get(s)
+        item['history'] = OD()
+        for s in settings['ORDER_STATUSES']:
+            key = s['identifier']
+            item['history'][key] = order['history'].get(key)
         item['modified'] = order['modified']
         item['links'] = dict(
             self=dict(href=self.order_reverse_url(order, api=True)),
@@ -623,8 +625,7 @@ class Order(OrderMixin, RequestHandler):
             files.append(dict(filename=filename,
                               size=stub['length'],
                               content_type=stub['content_type']))
-            files.sort(lambda i,j: cmp(i['filename'].lower(),
-                                       j['filename'].lower()))
+            files.sort(key=lambda i: i['filename'].lower())
         self.render('order.html',
                     title=u"{0} '{1}'".format(utils.terminology('Order'),
                                               order['title']),
@@ -680,6 +681,82 @@ class OrderApiV1(ApiV1Mixin, OrderApiV1Mixin, Order):
                      content_type=stub['content_type']))
         data['invalid'] = order['invalid']
         self.write(data)
+
+
+class OrderCsv(Order):
+    "Return a CSV file containing the order data."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        try:
+            match = re.match(settings['ORDER_IDENTIFIER_REGEXP'], iuid)
+            if not match: raise KeyError
+        except KeyError:
+            try:
+                order = self.get_entity(iuid, doctype=constants.ORDER)
+            except tornado.web.HTTPError, msg:
+                self.see_other('home', error=str(msg))
+                return
+        else:
+            order = self.get_entity_view('order/identifier', match.group())
+        try:
+            self.check_readable(order)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
+        form = self.get_entity(order['form'], doctype=constants.FORM)
+        files = []
+        for filename in order.get('_attachments', []):
+            stub = order['_attachments'][filename]
+            files.append(dict(filename=filename,
+                              size=stub['length'],
+                              content_type=stub['content_type']))
+            files.sort(key=lambda i: i['filename'].lower())
+        csvfile = StringIO()
+        writer = csv.writer(csvfile)
+        writer.writerow((settings['SITE_NAME'],))
+        writer.writerow(('Iuid', order['_id']))
+        try:
+            writer.writerow(('Identifier', order['identifier']))
+        except KeyError:
+            pass
+        writer.writerow(('Title', order.get('title') or '[no title]'))
+        writer.writerow(('URL', self.order_reverse_url(order)))
+        writer.writerow(('Form', 'Title', form['title']))
+        writer.writerow(('', 'Version', form.get('version') or '-'))
+        writer.writerow(('', 'Iuid', form['_id']))
+        account = self.get_account(order['owner'])
+        writer.writerow(('Owner', 'Name', utils.get_account_name(account)))
+        writer.writerow(('', 'URL', 
+                         self.absolute_reverse_url('account', account['email'])))
+        writer.writerow(('', 'Email', order['owner']))
+        writer.writerow(('', 'University',
+                         account.get('university') or '-'))
+        writer.writerow(('', 'Department',
+                         account.get('department') or '-'))
+        writer.writerow(('', 'PI',
+                         account.get('pi') and 'Yes' or 'No'))
+        if settings.get('ACCOUNT_FUNDER_INFO') and \
+           settings.get('ACCOUNT_FUNDER_INFO_GENDER'):
+            writer.writerow(('', 'Gender',
+                             account.get('gender', '-').capitalize()))
+        writer.writerow(('Status', order['status']))
+        for i, s in enumerate(settings['ORDER_STATUSES']):
+            key = s['identifier']
+            writer.writerow((i == 0 and 'History' or '',
+                             key,
+                             order['history'].get(key, '-')))
+        writer.writerow(('Modified', order['modified']))
+        writer.writerow(('Created', order['created']))
+        # XXX files
+        # XXX fields
+        # writer.writerow((,))
+        self.write(csvfile.getvalue())
+        self.set_header('Content-Type', constants.CSV_MIME)
+        filename = "%s_%s.csv" % (utils.terminology('Order'),
+                                  order.get('identifier') or order['_id'])
+        self.set_header('Content-Disposition',
+                        'attachment; filename="%s"' % filename)
 
 
 class OrderLogs(OrderMixin, RequestHandler):
