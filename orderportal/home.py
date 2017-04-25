@@ -49,7 +49,7 @@ See your <a href="{0}">account</a>.""".format(url)
                             key=constants.PENDING,
                             include_docs=True)
         pending = [r.doc for r in view]
-        pending.sort(utils.cmp_modified, reverse=True)
+        pending.sort(key=lambda i: i['modified'], reverse=True)
         pending = pending[:settings['DISPLAY_MAX_PENDING_ACCOUNTS']]
         # XXX This status should not be hard-wired!
         view = self.db.view('order/status',

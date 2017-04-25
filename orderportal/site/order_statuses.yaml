@@ -31,7 +31,7 @@
 - identifier: active
   description: The facility is working on the order, in the lab or in data analysis.
   attach: [admin]
-  action: Process
+  action: Active
 
 - identifier: aborted
   description: The work on the order has been permanently stopped.

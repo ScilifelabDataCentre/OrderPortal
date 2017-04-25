@@ -14,16 +14,6 @@ from . import utils
 ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""
 
 
-class NoneStr(tornado.web.UIModule):
-    "Output undef string if value is None, else str(value)."
-
-    def render(self, value, undef=''):
-        if value is None:
-            return undef
-        else:
-            return str(value)
-
-
 class Icon(tornado.web.UIModule):
     "HTML for an icon, optionally labelled with a title."
 
@@ -143,3 +133,24 @@ class Help(tornado.web.UIModule):
 title="Help information" data-toggle="collapse" href="#{id}"></a>
 <div id="{id}" class="collapse">{html}</div>
 """.format(id=name, html=html)
+
+
+class NoneStr(tornado.web.UIModule):
+    "Output undef string if value is None, else str(value)."
+
+    def render(self, value, undef=''):
+        if value is None:
+            return undef
+        else:
+            return str(value)
+
+
+class Version(tornado.web.UIModule):
+    "Output version string if defined."
+
+    def render(self, doc):
+        version = doc.get('version')
+        if version is None:
+            return ''
+        else:
+            return "(version %s)" % version

@@ -387,29 +387,15 @@ class RequestHandler(tornado.web.RequestHandler):
         if emails:
             for email in emails:
                 try:
-                    first, last = list(view[email.strip().lower()])[0].value
+                    value = list(view[email.strip().lower()])[0].value
                 except IndexError:
                     name = '[unknown]'
                 else:
-                    if last:
-                        if first:
-                            name = u"{0}, {1}".format(last, first)
-                        else:
-                            name = last
-                    else:
-                        name = first
-                    result[email] = name
+                    name = utils.get_account_name(value=value)
+                result[email] = name
         else:
             for row in view:
-                first, last = row.value
-                if last:
-                    if first:
-                        name = u"{0}, {1}".format(last, first)
-                    else:
-                        name = last
-                else:
-                    name = first
-                result[row.key] = name
+                result[row.key] = utils.get_account_name(value=row.value)
         return result
 
     def get_forms_titles(self, all=False):

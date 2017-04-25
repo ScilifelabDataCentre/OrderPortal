@@ -101,14 +101,7 @@ class Accounts(RequestHandler):
         counts = dict([(r.key[0], r.value) for r in view])
         for account in accounts:
             account['order_count'] = counts.get(account['email'], 0)
-            name = last_name = account.get('last_name')
-            first_name = account.get('first_name')
-            if name:
-                if first_name:
-                    name += ', ' + first_name
-            else:
-                name = first_name
-            account['name'] = name
+            account['name'] = utils.get_account_name(account=account)
         return accounts
 
     def filter_by_university(self, university, accounts=None):

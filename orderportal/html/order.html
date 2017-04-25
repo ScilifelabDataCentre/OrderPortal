@@ -125,8 +125,7 @@
 	<th>{{ term('Order') }} form</th>
 	<td>
 	  <a href="{{ reverse_url('form', form['_id']) }}">
-	    {{ form['title'] }}
-	    ({% module NoneStr(form.get('version'), '-') %})
+	    {{ form['title'] }} {% module Version(form) %}
 	  </a>
 	</td>
       </tr>

@@ -14,8 +14,8 @@
   <thead>
     <tr>
       <th>Form</th>
-      <th>Description</th>
       <th>Version</th>
+      <th>Description</th>
       <th>Status</th>
       <th>Ordinal</th>
       <th>{{ term('Orders') }}</th>
@@ -31,8 +31,8 @@
 	  {{ form['title'] }}
 	</a>
       </td>
-      <td>{% module Markdown(form.get('description')) %}</td>
       <td>{{ form.get('version') or '-' }}</td>
+      <td>{% module Markdown(form.get('description')) %}</td>
       <td>{% module Icon(form['status'], label=True) %}</td>
       <td>{{ form.get('ordinal') or 0 }}</td>
       <td>
