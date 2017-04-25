@@ -43,11 +43,15 @@
 	    </li>
 	    {% if current_user %}
 	    {% if is_staff %}
-            <li><a href="{{ reverse_url('orders') }}">{{ term('Orders') }}</a></li>
+            <li>
+	      <a href="{{ reverse_url('orders') }}">
+		{{ terminology('Orders') }}
+	      </a>
+	    </li>
 	    {% else %}
 	    <li>
 	      <a href="{{ reverse_url('account_orders', current_user['email']) }}">
-		My {{ term('orders') }}
+		My {{ terminology('orders') }}
 	      </a>
 	    </li>
 	    {% end %} {# if is_staff #}

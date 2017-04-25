@@ -449,6 +449,18 @@ class AccountOrdersMixin(object):
         if self.is_readable(account): return
         raise ValueError('You may not view these orders.')
 
+    def get_group_orders(self, account):
+        "Return all orders for the accounts in the account's group."
+        orders = []
+        for colleague in self.get_account_colleagues(account['email']):
+            view = self.db.view('order/owner',
+                                reduce=False,
+                                include_docs=True,
+                                startkey=[colleague],
+                                endkey=[colleague, constants.CEILING])
+            orders.extend([r.doc for r in view])
+        return orders
+
 
 class AccountOrders(AccountOrdersMixin, RequestHandler):
     "Page for a list of all orders for an account."
@@ -533,8 +545,10 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
         order_column += len(settings['ORDERS_LIST_STATUSES']) + \
             len(settings['ORDERS_LIST_FIELDS'])
         self.render('account_groups_orders.html',
-                    order_column=order_column,
-                    account=account)
+                    account=account,
+                    all_forms=self.get_forms_titles(all=True),
+                    orders=self.get_group_orders(account),
+                    order_column=order_column)
 
 
 class AccountGroupsOrdersApiV1(AccountOrdersMixin, 
@@ -551,24 +565,16 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
             self.check_readable(account)
         except ValueError, msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        orders = []
-        for colleague in self.get_account_colleagues(account['email']):
-            view = self.db.view('order/owner',
-                                reduce=False,
-                                include_docs=True,
-                                startkey=[colleague],
-                                endkey=[colleague, constants.CEILING])
-            orders.extend([r.doc for r in view])
         # Get names and forms lookups
         names = self.get_account_names()
-        forms = self.get_forms_titles(all=True)
+        all_forms = self.get_forms_titles(all=True)
         data = OD()
         data['type'] = 'account groups orders'
         data['links'] = dict(
             self=dict(href=URL('account_orders_api', account['email'])),
             display=dict(href=URL('account_orders', account['email'])))
-        data['items'] = [self.get_order_json(o, names=names, forms=forms)
-                         for o in orders]
+        data['items'] = [self.get_order_json(o, names=names, forms=all_forms)
+                         for o in self.get_group_orders(account)]
         self.write(data)
 
 

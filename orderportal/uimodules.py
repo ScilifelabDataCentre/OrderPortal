@@ -29,7 +29,7 @@ class Icon(tornado.web.UIModule):
         else:
             url = self.handler.static_url(name + '.png')
         name = name.capitalize()
-        title = utils.term(title or name)
+        title = utils.terminology(title or name)
         value = ICON_TEMPLATE.format(url=url, alt=name, title=title)
         if label:
             value = '<span class="nobr">{0} {1}</span>'.format(value, title)
@@ -49,12 +49,17 @@ class ContentType(tornado.web.UIModule):
 
 
 class Entity(tornado.web.UIModule):
-    "HTML for a link to an entity with an icon."
+    "HTML for a link to an entity, optionally with an icon."
 
-    def render(self, entity):
+    def render(self, entity, icon=True):
         doctype = entity[constants.DOCTYPE]
         assert doctype in constants.ENTITIES
-        if doctype == constants.ACCOUNT:
+        if doctype == constants.ORDER:
+            icon_url = self.handler.static_url('order.png')
+            title = entity.get('identifier') or (entity['_id'][:6] + '...')
+            alt = 'order'
+            url = self.handler.order_reverse_url(entity)
+        elif doctype == constants.ACCOUNT:
             icon_url = self.handler.static_url(entity['role'] + '.png')
             title = entity['email']
             alt = entity['role']
@@ -79,9 +84,13 @@ class Entity(tornado.web.UIModule):
                 url = self.handler.reverse_url(doctype, iuid)
             except KeyError, msg:
                 raise KeyError(str(msg) + ':', doctype)
-        icon = ICON_TEMPLATE.format(url=icon_url, alt=alt, title=alt)
-        return u"""<a href="{url}">{icon} {title}</a>""".format(
-            url=url, icon=icon, title=title)
+        if icon:
+            icon = ICON_TEMPLATE.format(url=icon_url, alt=alt, title=alt)
+            return u"""<a href="{url}">{icon} {title}</a>""".format(
+                url=url, icon=icon, title=title)
+        else:
+            return u"""<a href="{url}">{title}</a>""".format(
+                url=url, title=title)
 
 
 class Address(tornado.web.UIModule):
@@ -133,6 +142,17 @@ class Help(tornado.web.UIModule):
 title="Help information" data-toggle="collapse" href="#{id}"></a>
 <div id="{id}" class="collapse">{html}</div>
 """.format(id=name, html=html)
+
+
+class Tags(tornado.web.UIModule):
+    "Output tags with links to search."
+
+    def render(self, tags):
+        result = []
+        for tag in tags:
+            url = self.handler.reverse_url('search', term=tag)
+            result.append('<a href="%s">%s</a>' % (url, tag))
+        return ', '.join(result)
 
 
 class NoneStr(tornado.web.UIModule):

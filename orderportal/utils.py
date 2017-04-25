@@ -220,7 +220,7 @@ def load_settings(filepath=None):
     # Set back current working dir
     os.chdir(orig_dir)
 
-def term(word):
+def terminology(word):
     "Return the display term for the given word. Use itself by default."
     try:
         istitle = word.istitle()

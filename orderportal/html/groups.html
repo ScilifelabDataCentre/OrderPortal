@@ -8,71 +8,55 @@
 {% end %}
 
 {% block content %}
-{% import functools %}
-<form action="{{ reverse_url('groups', **params) }}"
-      id="refresh"
-      role="form"
-      class="form-inline"
-      method="GET">
-  <input type="hidden" name="page" value="{{ params.get('page') or 0 }}">
-</form>
-
 <div class="row">
   <div class="col-md-12">
-    {% set url_func = functools.partial(reverse_url, 'groups') %}
-    {% include 'paging.html' %}
-  </div>
-  <div class="col-md-1">
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-md-12">
-    <table class="table table-striped table-condensed">
-      <tr>
-	<th>Group</th>
-	<th>Owner</th>
-	<th>Members</th>
-	<th>Modified</th>
-      </tr>
-      {% for group in groups %}
-      <tr>
-	<td>
-	  <a href="{{ reverse_url('group', group['_id']) }}">
-	    {% module Entity(group) %}
-	  </a>
-	</td>
-	<td>
-	  <a href="{{ reverse_url('account', group['owner']) }}">
-	    {% module Icon('account') %}
-	    {{ group['owner'] }}
-	  </a>
-	</td>
-	<td>
-	  {% for member in group['members'] %}
-	  <a href="{{ reverse_url('account', member) }}">
-	    {% module Icon('account') %}
-	    {{ member }}
-	  </a>
-	  <br>
-	  {% end %}
-	</td>
-	<td class="localtime">{{ group['modified'] }}</td>
-      </tr>
-      {% end %}
+    <table id="groups" class="table table-striped table-condensed">
+      <thead>
+	<tr>
+	  <th>Group</th>
+	  <th>Owner</th>
+	  <th>Members</th>
+	  <th>Modified</th>
+	</tr>
+      </thead>
+      <tbody>
+	{% for group in groups %}
+	<tr>
+	  <td>
+	    <a href="{{ reverse_url('group', group['_id']) }}">
+	      {% module Entity(group) %}
+	    </a>
+	  </td>
+	  <td>
+	    <a href="{{ reverse_url('account', group['owner']) }}">
+	      {{ group['owner'] }}
+	    </a>
+	  </td>
+	  <td>
+	    {% for member in group['members'] %}
+	    <a href="{{ reverse_url('account', member) }}">
+	      {{ member }}
+	    </a>
+	    <br>
+	    {% end %}
+	  </td>
+	  <td class="localtime nobr">{{ group['modified'] }}</td>
+	</tr>
+	{% end %}
+      </tbody>
     </table>
   </div>
-  <div class="col-md-1">
-  </div>
 </div>
-{% end %}{# block content #}
+{% end %} {# block content #}
 
 {% block javascript_code %}
 <script>
 $(document).ready(function() {
-    $('.refresh').change(function () {
-	$('#refresh').submit();
-    });
+  $("#groups").DataTable( {
+    "pagingType": "full_numbers",
+    "pageLength": 25,
+    "order": [[3, "desc"]],
+  });
 });
 </script>
-{% end %}
+{% end %} {# block javascript_code #}
