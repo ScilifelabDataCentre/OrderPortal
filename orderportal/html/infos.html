@@ -37,7 +37,7 @@
 {% end %}{# block main_content #}
 
 {% if is_admin %}
-{% block meta_content %}
+{% block action_content %}
 <form action="{{ reverse_url('info_create') }}"
       role="form"
       method="GET">
@@ -46,5 +46,5 @@
     Create
   </button>
 </form>
-{% end %} {# block meta_content #}
+{% end %} {# block action_content #}
 {% end %}

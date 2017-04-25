@@ -1,18 +1,10 @@
-"OrderPortal: Message to send by email to account users."
+"Message to account user; optionally by email."
 
 from __future__ import print_function, absolute_import
-
-import email.mime.text
-import smtplib
-import urllib
-
-import couchdb
-import yaml
 
 from orderportal import constants
 from orderportal import saver
 from orderportal import settings
-from orderportal import utils
 
 
 class MessageSaver(saver.Saver):

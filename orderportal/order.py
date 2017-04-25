@@ -1,4 +1,4 @@
-"OrderPortal: Order pages."
+"Orders are the whole point of this app. The user fills in info for facility."
 
 from __future__ import print_function, absolute_import
 
@@ -420,31 +420,36 @@ class OrderMixin(object):
 
 
 class Orders(RequestHandler):
-    "Orders list page; just HTML, Datatables obtains data via API call."
+    "Orders list page."
 
     @tornado.web.authenticated
     def get(self):
-        "Ordinary users are not allowed to see the overall orders list."
+        # Ordinary users are not allowed to see the overall orders list.
         if not self.is_staff():
             self.see_other('account_orders', self.current_user['email'])
             return
+        # Initial ordering by the 'modified' column.
         order_column = 5 + len(settings['ORDERS_LIST_STATUSES']) + \
             len(settings['ORDERS_LIST_FIELDS'])
-        form_titles = sorted(set([f[0] for f in self.get_forms()]))
+        self.set_filter()
+        all_forms = self.get_forms_titles(all=True)
         self.render('orders.html',
-                    form_titles=form_titles,
+                    all_forms=all_forms,
+                    form_titles=sorted(self.get_forms_titles().values()),
+                    filter=self.filter,
+                    orders=self.get_orders(all_forms),
                     order_column=order_column,
-                    params=self.get_filter_params())
+                    account_names=self.get_account_names())
 
-    def get_filter_params(self):
-        "Return a dictionary with the filter parameters."
-        result = dict()
+    def set_filter(self):
+        "Set the filter parameters dictionary."
+        self.filter = dict()
         for key in ['status', 'form_title'] + \
                    [f['identifier'] for f in settings['ORDERS_LIST_FIELDS']]:
             try:
                 value = self.get_argument(key)
                 if not value: raise KeyError
-                result[key] = value
+                self.filter[key] = value
             except (tornado.web.MissingArgumentError, KeyError):
                 pass
         recent = self.get_argument('recent', None)
@@ -455,76 +460,17 @@ class Orders(RequestHandler):
                 recent = utils.to_bool(recent)
             except ValueError:
                 recent = True
-        result['recent'] = recent
-        return result
-
-
-class OrderApiV1Mixin:
-    "Generate JSON for an order."
-
-    def get_json(self, order, names={}, forms={}, item=None):
-        URL = self.absolute_reverse_url
-        if not item:
-            item = OD()
-        item['iuid'] = order['_id']
-        item['identifier'] = order.get('identifier')
-        item['name'] = order.get('identifier') or order['_id'][:6] + '...'
-        item['title'] = order.get('title') or '[no title]'
-        item['form'] = dict(
-            iuid=order['form'],
-            title=forms.get(order['form']),
-            links=dict(api=dict(href=URL('form_api', order['form'])),
-                       display=dict(href=URL('form', order['form']))))
-        item['owner'] = dict(
-            email=order['owner'],
-            name=names.get(order['owner']),
-            links=dict(api=dict(href=URL('account_api', order['owner'])),
-                       display=dict(href=URL('account', order['owner']))))
-        item['fields'] = {}
-        item['tags'] = order.get('tags', [])
-        item['status'] = dict(
-            name=order['status'],
-            display=dict(href=URL('site', order['status']+'.png')))
-        item['history'] = {}
-        item['modified'] = order['modified']
-        for f in settings['ORDERS_LIST_FIELDS']:
-            item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
-        for s in settings['ORDERS_LIST_STATUSES']:
-            item['history'][s] = order['history'].get(s)
-        item['links'] = dict(
-            self=dict(href=self.order_reverse_url(order, api=True)),
-            display=dict(href=self.order_reverse_url(order)))
-        return item
-
-
-class OrdersApiV1(OrderApiV1Mixin, Orders):
-    "Orders API; JSON output."
-
-    @tornado.web.authenticated
-    def get(self):
-        "JSON output."
-        URL = self.absolute_reverse_url
-        self.check_staff()
-        self.params = self.get_filter_params()
-        # Get names and forms lookups
-        names = self.get_account_names()
-        forms = dict([(f[1], f[0]) for f in self.get_forms(all=True)])
-        data = OD()
-        data['type'] = 'orders'
-        data['links'] = dict(self=dict(href=URL('orders_api')),
-                             display=dict(href=URL('orders')))
-        data['items'] = [self.get_json(o, names, forms)
-                         for o in self.get_orders(forms)]
-        self.write(data)
+        self.filter['recent'] = recent
 
     def get_orders(self, forms):
-        orders = self.filter_by_status(self.params.get('status'))
-        orders = self.filter_by_forms(self.params.get('form_title'),
+        "Get all orders according to current filter."
+        orders = self.filter_by_status(self.filter.get('status'))
+        orders = self.filter_by_forms(self.filter.get('form_title'),
                                       forms=forms,
                                       orders=orders)
         for f in settings['ORDERS_LIST_FIELDS']:
             orders = self.filter_by_field(f['identifier'],
-                                          self.params.get(f['identifier']),
+                                          self.filter.get(f['identifier']),
                                           orders=orders)
         try:
             limit = settings['DISPLAY_ORDERS_MOST_RECENT']
@@ -533,7 +479,7 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
             limit = 0
         # No filter; all orders
         if orders is None:
-            if limit > 0 and self.params.get('recent', True):
+            if limit > 0 and self.filter.get('recent', True):
                 view = self.db.view('order/modified',
                                     include_docs=True,
                                     descending=True,
@@ -543,7 +489,7 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
                                     include_docs=True,
                                     descending=True)
             orders = [r.doc for r in view]
-        elif limit > 0 and self.params.get('recent', True):
+        elif limit > 0 and self.filter.get('recent', True):
             orders = orders[:limit]
         return orders
 
@@ -590,6 +536,63 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
             if value == '__none__': value = None
             orders = [o for o in orders if o['fields'].get(identifier) == value]
         return orders
+
+
+class OrderApiV1Mixin:
+    "Generate JSON for an order; both for orders list API and order API."
+
+    def get_order_json(self, order, names={}, forms={}, item=None):
+        URL = self.absolute_reverse_url
+        if not item:
+            item = OD()
+        item['iuid'] = order['_id']
+        item['identifier'] = order.get('identifier')
+        item['name'] = order.get('identifier') or order['_id'][:6] + '...'
+        item['title'] = order.get('title') or '[no title]'
+        item['form'] = dict(
+            iuid=order['form'],
+            title=forms.get(order['form']),
+            links=dict(api=dict(href=URL('form_api', order['form'])),
+                       display=dict(href=URL('form', order['form']))))
+        item['owner'] = dict(
+            email=order['owner'],
+            name=names.get(order['owner']),
+            links=dict(api=dict(href=URL('account_api', order['owner'])),
+                       display=dict(href=URL('account', order['owner']))))
+        item['fields'] = {}
+        for f in settings['ORDERS_LIST_FIELDS']:
+            item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
+        item['tags'] = order.get('tags', [])
+        item['status'] = order['status']
+        item['history'] = {}
+        for s in settings['ORDERS_LIST_STATUSES']:
+            item['history'][s] = order['history'].get(s)
+        item['modified'] = order['modified']
+        item['links'] = dict(
+            self=dict(href=self.order_reverse_url(order, api=True)),
+            display=dict(href=self.order_reverse_url(order)))
+        return item
+
+
+class OrdersApiV1(OrderApiV1Mixin, Orders):
+    "Orders API; JSON output."
+
+    @tornado.web.authenticated
+    def get(self):
+        "JSON output."
+        URL = self.absolute_reverse_url
+        self.check_staff()
+        self.set_filter()
+        # Get names and forms lookups
+        names = self.get_account_names()
+        forms = self.get_forms_titles(all=True)
+        data = OD()
+        data['type'] = 'orders'
+        data['links'] = dict(self=dict(href=URL('orders_api')),
+                             display=dict(href=URL('orders')))
+        data['items'] = [self.get_order_json(o, names, forms)
+                         for o in self.get_orders(forms)]
+        self.write(data)
 
 
 class Order(OrderMixin, RequestHandler):
@@ -662,12 +665,19 @@ class OrderApiV1(ApiV1Mixin, OrderApiV1Mixin, Order):
 
     def render(self, templatefilename, **kwargs):
         order = kwargs['order']
-        data = OD()
-        data['type'] = 'order'
-        data = self.get_json(order,
-                             names=self.get_account_names([order['owner']]),
-                             item=data)
+        names = self.get_account_names([order['owner']])
+        data = self.get_order_json(order, names=names, item=OD(type='order'))
         data['fields'] = order['fields']
+        data['files'] = []
+        for filename in order.get('_attachments', []):
+            stub = order['_attachments'][filename]
+            data['files'].append(
+                dict(filename=filename,
+                     href=self.absolute_reverse_url('order_file',
+                                                    order['_id'],
+                                                    filename),
+                     size=stub['length'],
+                     content_type=stub['content_type']))
         data['invalid'] = order['invalid']
         self.write(data)
 

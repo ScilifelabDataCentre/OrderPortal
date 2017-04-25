@@ -1,6 +1,7 @@
 *~
 *.yaml
 *.pyc
+orderportal/ngi
 orderportal/nmi
 orderportal/cryoem
 orderportal/natproj

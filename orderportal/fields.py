@@ -1,4 +1,4 @@
-"OrderPortal: Fields utility class."
+"Order form fields utility class."
 
 from __future__ import print_function, absolute_import
 

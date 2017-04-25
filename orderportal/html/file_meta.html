@@ -1,0 +1,99 @@
+{# File meta page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}
+Document {{ file.get('title') or file['name'] }}
+{% end %}
+
+{% block body_title %}
+Document {% module Icon('file') %} {{ file.get('title') or file['name'] }}
+{% end %}
+
+{% block action_content %}
+{% if is_admin %}
+<p>
+  <form action="{{ reverse_url('file_edit', file['name']) }}"
+	role="form"
+	method="GET">
+    <button type="submit" class="btn btn-md btn-primary">
+      <span class="glyphicon glyphicon-edit"></span>
+      Edit
+    </button>
+  </form>
+</p>
+<p>
+  <form action="{{ reverse_url('file_edit', file['name']) }}"
+	role="form"
+	method="POST">
+    {% module xsrf_form_html() %}
+    <input type="hidden" name="_http_method" value="delete">
+    <button type="submit" class="btn btn-danger"
+	    onclick="return confirm('Cannot be undone! Really delete?');">
+      <span class="glyphicon glyphicon-floppy-trash"></span>
+      Delete
+    </button>
+  </form>
+</p>
+{% end %}
+{% end %} {# block action_content #}
+
+{% block main_content %}
+<div class="panel panel-default">
+  <div class="panel-body">
+    <table class="table table-condensed table-fields table-noborder">
+      <tr>
+	<th width="20%">Description</th>
+	<td>{% module Markdown(file.get('description')) %}</td>
+      </tr>
+      <tr>
+	<th>Content type</th>
+	<td>
+	  {% module ContentType(file['content_type']) %}
+	  {{ file['content_type'] }}
+	</td>
+      </tr>
+      <tr>
+	<th>Size</th>
+	<td>
+	  {% if file['size'] < 2000 %}
+	  {{ file['size'] }} B
+	  {% else %}
+	  {{ int(0.5 + file['size'] / 1000.0) }} kB
+	  {% end %}
+	</td>
+      </tr>
+      <tr>
+	<th>Modified</th>
+	<td>
+	  <span class="localtime">{{ file['modified'] }}</span>
+	  <a href="{{ reverse_url('file_logs', file['_id']) }}">
+	    {% module Icon('logs', label=True) %}
+	  </a>
+	</td>
+      </tr>
+      <tr>
+	<th></th>
+	<td>
+	  <a class="btn btn-primary"
+	     href="{{ reverse_url('file', file['name']) }}">
+	    <span class="glyphicon glyphicon-eye-open"></span>
+	    View
+	  </a>
+	</td>
+      </tr>
+      <tr>
+	<th></th>
+	<td>
+	  <a class="btn btn-primary"
+	     href="{{ reverse_url('file_download', file['name']) }}">
+	    <span class="glyphicon glyphicon-download"></span>
+	    Download
+	  </a>
+	</td>
+      </tr>
+    </table>
+  </div>
+</div>
+{% end %} {# block main_content #}
+

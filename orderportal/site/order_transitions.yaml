@@ -14,13 +14,13 @@
   permission: [admin]
 
 - source: accepted
-  targets: [processing]
+  targets: [active]
   permission: [admin]
 
 - source: rejected
   targets: [preparation]
   permission: [user]
 
-- source: processing
+- source: active
   targets: [aborted, closed]
   permission: [admin]

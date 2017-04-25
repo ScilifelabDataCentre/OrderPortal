@@ -1,4 +1,4 @@
-"OrderPortal: Information pages; simplest possible CMS using Markdown."
+"Information pages; simplest possible CMS using Markdown."
 
 from __future__ import print_function, absolute_import
 

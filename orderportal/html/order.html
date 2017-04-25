@@ -8,13 +8,13 @@
 
 {% extends "base.html" %}
 
-{% block body_header_meta %}
+{% block body_header_alt_format %}
 <a href="{{ order_reverse_url(order, api=True) }}">
   {% module Icon('json') %} JSON
 </a>
 {% end %}
 
-{% block meta_content %}
+{% block action_content %}
 
 {% if is_editable %}
 <p>
@@ -106,7 +106,7 @@
   </div>
   {% end %} {# if not global_modes... #}
 </p>
-{% end %} {# block meta_content #}
+{% end %} {# block action_content #}
 
 {% block main_content %}
 <div class="panel panel-default">
@@ -116,7 +116,7 @@
       {% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
       <tr>
 	<th>Identifier</th>
-	<td colspan="2">{{ order.get('identifier') or '-' }}</td>
+	<td colspan="2">{% module NoneStr(order.get('identifier'), '-') %}</td>
       </tr>
       {% end %} {# if settings.get('ORDER_IDENTIFIER_FORMAT') #}
 
@@ -125,8 +125,7 @@
 	<th>{{ term('Order') }} form</th>
 	<td>
 	  <a href="{{ reverse_url('form', form['_id']) }}">
-	    {{ form['title'] }}
-	    ({{ form.get('version') or '-' }})
+	    {{ form['title'] }} {% module Version(form) %}
 	  </a>
 	</td>
       </tr>
@@ -154,7 +153,8 @@
 	<td>
 	  {% set tags = order.get('tags', []) %}
 	  {% for tag in tags %}
-	  <a href="{{ reverse_url('search', term=tag) }}">{{ tag }}</a>{{ tag != tags[-1] and ',' or '' }}
+	  <a href="{{ reverse_url('search', term=tag) }}">{{ tag }}</a>
+	  {{ tag != tags[-1] and ',' or '' }}
 	  {% end %}
 	</td>
       </tr>

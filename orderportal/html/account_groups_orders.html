@@ -12,12 +12,7 @@
 {% module Entity(account) %}
 {% end %}
 
-{% block header_css %}
-<link rel="stylesheet" type="text/css"
-      href="{{ settings['DATATABLES_CSS_URL'] }}">
-{% end %}
-
-{% block body_header_meta %}
+{% block body_header_alt_format %}
 <a href="{{ reverse_url('account_groups_orders_api', account['email']) }}">
   {% module Icon('json') %} JSON
 </a>
@@ -86,8 +81,6 @@ $(document).ready(function() {
 {% end %}
 
 {% block javascript_code %}
-<script src="{{ settings['DATATABLES_JS_URL'] }}"></script>
-<script src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
 <script>
 $(document).ready(function() {
   $(".refresh").change(function () {

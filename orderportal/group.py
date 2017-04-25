@@ -1,4 +1,4 @@
-"OrderPortal: Group pages."
+"Group pages; accounts which are able to see all orders of each other."
 
 from __future__ import print_function, absolute_import
 

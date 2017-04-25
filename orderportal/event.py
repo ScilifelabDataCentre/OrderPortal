@@ -1,4 +1,4 @@
-"OrderPortal: Event handling."
+"Event list handling; meeting and seminar announcements for home page."
 
 from __future__ import print_function, absolute_import
 

@@ -9,7 +9,7 @@
 {% module Text('about') %}
 {% end %}
 
-{% block meta_content %}
+{% block action_content %}
 {% if is_admin %}
 <form action="{{ reverse_url('text', 'about') }}"
       role="form"
@@ -21,4 +21,4 @@
   </button>
 </form>
 {% end %}
-{% end %} {# block meta_content #}
+{% end %} {# block action_content #}

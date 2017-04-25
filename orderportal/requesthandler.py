@@ -1,4 +1,4 @@
-"OrderPortal: RequestHandler subclass."
+"RequestHandler subclass for all pages."
 
 from __future__ import print_function, absolute_import
 
@@ -76,12 +76,11 @@ class RequestHandler(tornado.web.RequestHandler):
         try:
             identifier = order['identifier']
         except KeyError:
-            return URL('order', order['_id'], **query)
+            identifier = order['_id']
+        if api:
+            return URL('order_id_api', identifier, **query)
         else:
-            if api:
-                return URL('order_id_api', identifier, **query)
-            else:
-                return URL('order_id', identifier, **query)
+            return URL('order_id', identifier, **query)
 
     def get_current_user(self):
         """Get the currently logged-in user account, or None.
@@ -388,42 +387,26 @@ class RequestHandler(tornado.web.RequestHandler):
         if emails:
             for email in emails:
                 try:
-                    first, last = list(view[email.strip().lower()])[0].value
+                    value = list(view[email.strip().lower()])[0].value
                 except IndexError:
                     name = '[unknown]'
                 else:
-                    if last:
-                        if first:
-                            name = u"{0}, {1}".format(last, first)
-                        else:
-                            name = last
-                    else:
-                        name = first
-                    result[email] = name
+                    name = utils.get_account_name(value=value)
+                result[email] = name
         else:
             for row in view:
-                first, last = row.value
-                if last:
-                    if first:
-                        name = u"{0}, {1}".format(last, first)
-                    else:
-                        name = last
-                else:
-                    name = first
-                result[row.key] = name
+                result[row.key] = utils.get_account_name(value=row.value)
         return result
 
-    def get_forms(self, all=False):
-        """Get forms, all or only the enabled+disabled.
-        Return list of tuple (title, iuid) sorted by title."""
-        view = self.db.view('form/modified', include_docs=True)
+    def get_forms_titles(self, all=False):
+        "Get form titles lookup for iuid, all or only the enabled+disabled."
+        view = self.db.view('form/modified', include_docs=not all)
         if all:
-            forms = [(r.value, r.id) for r in view]
+            return dict([(r.id, r.value) for r in view])
         else:
-            forms = [(r.value, r.id) for r in view
-                     if r.doc['status'] in (constants.ENABLED, constants.DISABLED)]
-        forms.sort()
-        return forms
+            return dict([(r.id, r.value) for r in view
+                         if r.doc['status'] in 
+                         (constants.ENABLED, constants.DISABLED)])
 
     def get_logs(self, iuid, limit=settings['DISPLAY_DEFAULT_MAX_LOG']+1):
         "Return the event log documents for the given entity iuid."

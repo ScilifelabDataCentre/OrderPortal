@@ -9,13 +9,13 @@
 {{ account['email'] }}
 {% end %}
 
-{% block body_header_meta %}
+{% block body_header_alt_format %}
 <a href="{{ reverse_url('account_api', account['email']) }}">
   {% module Icon('json') %} JSON
 </a>
 {% end %}
 
-{% block meta_content %}
+{% block action_content %}
 
 {% if current_user['email'] == account['email'] %}
 <p>
@@ -143,7 +143,7 @@
 {% end %} {# if is_deletable #}
 
 {% end %} {# if is_admin and current_user['email'] != account['email'] #}
-{% end %} {# block meta_content #}
+{% end %} {# block action_content #}
 
 {% block main_content %}
 <table class="table-condensed table-fields">

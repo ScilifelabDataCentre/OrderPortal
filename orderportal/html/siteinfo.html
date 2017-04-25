@@ -1,14 +1,13 @@
-{# Tech info page. #}
+{# Site info page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}OrderPortal technical information{% end %}
-{% block body_title %}OrderPortal technical information{% end %}
+{% block head_title %}OrderPortal site information{% end %}
+{% block body_title %}OrderPortal site information{% end %}
 
 {% block main_content %}
-
 <div class="row">
-  <div class="col-md-8">
+  <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
 	<strong>Version {{ version }}</strong>
@@ -29,7 +28,7 @@
 	  <a href="https://github.com/pekrau/OrderPortal">pekrau/OrderPortal</a>.
 	</p>
 	<p>
-	  The technical documentation is in the GitHub repo
+	  The technical documentation is in the GitHub
 	  <a href="https://github.com/pekrau/OrderPortal/wiki">wiki</a>.
 	</p>
       </div>
@@ -66,6 +65,25 @@
 	</div>
       </div>
   </div>
+  <div class="col-md-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ term('Order') }} counts</div>
+      <div class="panel-body">
+	<table class="table">
+	  <tr>
+	    <th># Total</th>
+	    <td class="number">{{ orders['count'] }}</td>
+	  </tr>
+	  {% for status in settings['ORDER_STATUSES'] %}
+	  <tr>
+	    <th>{% module Icon(status['identifier'], label=True) %} </th>
+	    <td class="number">
+	      {{ orders['status'].get(status['identifier'], 0) }}
+	    </td>
+	  </tr>
+	  {% end %}
+	</table>
+      </div>
+    </div>
 </div>
-
 {% end %} {# block main_content #}

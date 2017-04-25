@@ -1,4 +1,4 @@
-" OrderPortal: UI modules. "
+"UI modules for tornado."
 
 from __future__ import print_function, absolute_import
 
@@ -68,7 +68,7 @@ class Entity(tornado.web.UIModule):
             icon_url = self.handler.static_url('file.png')
             title = entity['name']
             alt = doctype
-            url = self.handler.reverse_url('files')
+            url = self.handler.reverse_url('file_meta', entity['name'])
         else:
             icon_url = self.handler.static_url(doctype + '.png')
             iuid = entity['_id']
@@ -133,3 +133,24 @@ class Help(tornado.web.UIModule):
 title="Help information" data-toggle="collapse" href="#{id}"></a>
 <div id="{id}" class="collapse">{html}</div>
 """.format(id=name, html=html)
+
+
+class NoneStr(tornado.web.UIModule):
+    "Output undef string if value is None, else str(value)."
+
+    def render(self, value, undef=''):
+        if value is None:
+            return undef
+        else:
+            return str(value)
+
+
+class Version(tornado.web.UIModule):
+    "Output version string if defined."
+
+    def render(self, doc):
+        version = doc.get('version')
+        if version is None:
+            return ''
+        else:
+            return "(version %s)" % version

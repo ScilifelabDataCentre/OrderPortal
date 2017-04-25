@@ -1,4 +1,4 @@
-"OrderPortal: Form pages."
+"Forms are templates for orders."
 
 from __future__ import print_function, absolute_import
 
@@ -87,7 +87,7 @@ class Forms(FormMixin, RequestHandler):
         view = self.db.view('form/modified', descending=True, include_docs=True)
         title = 'Recent forms'
         forms = [r.doc for r in view]
-        names = self.get_account_names([f['owner'] for f in forms])
+        names = self.get_account_names()
         counts = dict([(f['_id'], self.get_order_count(f))
                        for f in forms])
         self.render('forms.html',
@@ -475,22 +475,14 @@ class FormOrders(RequestHandler):
         self.check_staff()
         form = self.get_entity(iuid, doctype=constants.FORM)
         view = self.db.view('order/form',
-                            startkey=[iuid],
-                            endkey=[iuid, constants.CEILING])
-        page = self.get_page(view=view)
-        view = self.db.view('order/form',
                             reduce=False,
                             include_docs=True,
                             descending=True,
                             startkey=[iuid, constants.CEILING],
-                            endkey=[iuid],
-                            skip=page['start'],
-                            limit=page['size'])
+                            endkey=[iuid])
         orders = [r.doc for r in view]
-        account_names = self.get_account_names([o['owner'] for o in orders])
+        account_names = self.get_account_names()
         self.render('form_orders.html',
                     form=form,
                     orders=orders,
-                    account_names=account_names,
-                    params=dict(),
-                    page=page)
+                    account_names=account_names)

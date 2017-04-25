@@ -10,6 +10,8 @@
 	  href="{{ settings['JQUERY_UI_THEME_URL'] }}">
     <link rel="stylesheet" type="text/css"
 	  href="{{ settings['BOOTSTRAP_CSS_URL'] }}">
+    <link rel="stylesheet" type="text/css"
+	  href="{{ settings['DATATABLES_CSS_URL'] }}">
     {% block header_css %}
     {% end %}
     <link rel="stylesheet" href="{{ static_url('mods.css') }}">
@@ -124,7 +126,7 @@
 		</li>
 		<li><a href="{{ reverse_url('statuses') }}">Statuses</a></li>
 		<li><a href="{{ reverse_url('settings') }}">Settings</a></li>
-		<li><a href="{{ reverse_url('techinfo') }}">Technical information</a></li>
+		<li><a href="{{ reverse_url('siteinfo') }}">Site information</a></li>
 		<li class="dropdown-submenu">
 		  <a class="submenu" href="#">Texts
 		    <span class="caret"></span>
@@ -213,8 +215,8 @@
 	<div class="col-md-10">
 	  <h1>{% block body_title %}OrderPortal{% end %}</h1>
 	</div>
-	<div class="col-md-2">
-	  {% block body_header_meta %}
+	<div class="col-md-2 hidden-print">
+	  {% block body_header_alt_format %}
 	  {% end %}
 	</div>
       </div>
@@ -253,16 +255,37 @@
 	  {% block main_content %}
 	  {% end %} {# block main_content #}
 	</div>
-	<div class="col-md-2">
-	  {% block meta_content %}
-	  {% end %} {# block meta_content #}
+	<div class="col-md-2 hidden-print">
+	  {% block action_content %}
+	  {% end %} {# block action_content #}
 	</div>
       </div>
       {% block sub_main_content %}
       {% end %} {# block sub_main_content #}
       {% end %} {# block content #}
 
+    </div> {# end of container for body content #}
+
+    {% block body-footer %}
+    <div class="container-fluid">
+      <div class="row">
+	<div class="col-md-12">
+	  <hr>
+	  <div class="pull-left">
+	    <a href="{{ reverse_url('home') }}">
+	      <span class="glyphicon glyphicon-home"></span>
+	      {{ settings['SITE_NAME'] }}
+	    </a>
+	  </div>
+	  <div class="pull-right">
+	    <a href="{{ reverse_url('siteinfo') }}">
+	      OrderPortal version {{ version }}
+	    </a>
+	  </div>
+	</div>
+      </div>
     </div>
+    {% end %} {# block body-footer #}
 
     {% block javascript_standard %}
     {# NOTE: jQuery has to be loaded before bootstrap! #}
@@ -270,6 +293,8 @@
     <script src="{{ settings['JQUERY_UI_URL'] }}"></script>
     <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
     <script src="{{ settings['BOOTSTRAP_JS_URL'] }}"></script>
+    <script src="{{ settings['DATATABLES_JS_URL'] }}"></script>
+    <script src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
     <script>
       $(document).ready(function(){
         $('.dropdown-submenu a.submenu').on("click", function(e){

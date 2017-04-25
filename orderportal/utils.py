@@ -1,4 +1,4 @@
-"OrderPortal: Various utility functions."
+"Various utility functions."
 
 from __future__ import print_function, absolute_import
 
@@ -329,9 +329,23 @@ def convert(type, value):
     else:
         return value
 
-def cmp_modified(i, j):
-    "Compare the two documents by their 'modified' values."
-    return cmp(i['modified'], j['modified'])
+def get_account_name(account=None, value=None):
+    """Return person name of accountas 'lastname, firstname'.
+    'account' is an account document.
+    'value' is a row value from a view."""
+    if account is not None:
+        last_name = account.get('last_name')
+        first_name = account.get('first_name')
+    elif value is not None:
+        first_name, last_name = value
+    if last_name:
+        if first_name:
+            name = u"{0}, {1}".format(last_name, first_name)
+        else:
+            name = last_name
+    else:
+        name = first_name
+    return name
 
 def absolute_path(filename):
     "Return the absolute path given the current directory."

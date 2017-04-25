@@ -6,50 +6,56 @@
 
 {% block body_title %}
 {% module Icon('message') %}
-Messages to {{ account['email'] }}
+Messages to {% module Entity(account) %}
 {% end %}
 
 {% block content %}
-<div class="panel panel-default">
-  <div class="panel-body">
-    {% module Entity(account) %}
-  </div>
-</div>
-
-<table class="table table-striped">
-  <tr>
-    <th>Date</th>
-    <th width="80%">Message</th>
-  </tr>
-  {% for message in messages %}
-  <tr>
-    <td class="localtime">{{ message['modified'] }}</td>
-    <td>
-      <table>
-	<tr>
-	  <td>
-	    <button type="button" class="btn btn-default btn-xs"
-		    data-toggle="collapse" data-target="#{{ message['_id'] }}">
-	      <span class="glyphicon glyphicon-chevron-down"></span>
-	    </button>
-	    {{ message['subject'] }}
-	  </td>
-	</tr>
-	<tr id="{{ message['_id'] }}" class="collapse">
-	  <td>
-	    <div class="panel panel-default">
-	      <div class="panel-heading">
-		Recipients: {{ ', '.join(message['recipients']) }}
+<table id="messages" class="table table-striped">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th width="80%">Message</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for message in messages %}
+    <tr>
+      <td class="localtime">{{ message['modified'] }}</td>
+      <td>
+	<table>
+	  <tr>
+	    <td>
+	      <button type="button" class="btn btn-default btn-xs"
+		      data-toggle="collapse" data-target="#{{ message['_id'] }}">
+		<span class="glyphicon glyphicon-chevron-down"></span>
+	      </button>
+	      {{ message['subject'] }}
+	    </td>
+	  </tr>
+	  <tr id="{{ message['_id'] }}" class="collapse">
+	    <td>
+	      <div class="panel panel-default">
+		<div class="panel-heading">
+		  Email sent to {{ ', '.join(message['recipients']) }}
+		</div>
+		<div class="panel-body pre">
+		  {{ message['text'] }}
+		</div>
 	      </div>
-	      <div class="panel-body pre">
-		{{ message['text'] }}
-	      </div>
-	    </div>
-	  </td>
-	</tr>
-      </table>
-    </td>
-  </tr>
-  {% end %}
+	    </td>
+	  </tr>
+	</table>
+      </td>
+    </tr>
+    {% end %}
+  </tbody>
 </table>
 {% end %} {# block content #}
+
+{% block javascript_code %}
+<script>
+  $(document).ready(function() {
+    $('#messages').DataTable();
+  } );
+</script>
+{% end %}
