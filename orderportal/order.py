@@ -816,10 +816,8 @@ class OrderEdit(OrderMixin, RequestHandler):
             error = None
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver['title'] = self.get_argument('__title__', None) or '[no title]'
-                tags = []
-                for tag in self.get_argument('__tags__', '').split(','):
-                    tag = tag.strip()
-                    if tag: tags.append(tag)
+                tags = self.get_argument('__tags__', '')
+                tags = [t for t in tags.replace(',', ' ').split()]
                 # Allow staff to add prefixed tags
                 if self.is_staff():
                     for pos, tag in enumerate(tags):
@@ -828,7 +826,7 @@ class OrderEdit(OrderMixin, RequestHandler):
                             if not constants.ID_RX.match(part):
                                 tags[pos] = None
                     tags = [t for t in tags if t]
-                # User may not use prefixes
+                # User may use only proper identifier-like tags, no prefixes
                 else:
                     tags = [t for t in tags if constants.ID_RX.match(t)]
                     # Add back the previously defined prefixed tags
