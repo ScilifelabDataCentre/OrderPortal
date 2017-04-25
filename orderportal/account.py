@@ -186,7 +186,7 @@ class AccountsApiV1(Accounts):
             item['gender'] = account.get('gender')
             item['university'] = account.get('university')
             item['role'] = account['role']
-            item['status'] = dict(name=account['status'])
+            item['status'] = account['status']
             item['address'] = account.get('address') or {}
             item['invoice_ref'] = account.get('invoice_ref')
             item['invoice_address'] = account.get('invoice_address') or {}
