@@ -116,7 +116,7 @@
       {% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
       <tr>
 	<th>Identifier</th>
-	<td colspan="2">{{ order.get('identifier') or '-' }}</td>
+	<td colspan="2">{% module NoneStr(order.get('identifier'), '-') %}</td>
       </tr>
       {% end %} {# if settings.get('ORDER_IDENTIFIER_FORMAT') #}
 
@@ -126,7 +126,7 @@
 	<td>
 	  <a href="{{ reverse_url('form', form['_id']) }}">
 	    {{ form['title'] }}
-	    ({{ form.get('version') or '-' }})
+	    ({% module NoneStr(form.get('version'), '-') %})
 	  </a>
 	</td>
       </tr>
@@ -154,7 +154,8 @@
 	<td>
 	  {% set tags = order.get('tags', []) %}
 	  {% for tag in tags %}
-	  <a href="{{ reverse_url('search', term=tag) }}">{{ tag }}</a>{{ tag != tags[-1] and ',' or '' }}
+	  <a href="{{ reverse_url('search', term=tag) }}">{{ tag }}</a>
+	  {{ tag != tags[-1] and ',' or '' }}
 	  {% end %}
 	</td>
       </tr>

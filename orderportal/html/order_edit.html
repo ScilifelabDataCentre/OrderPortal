@@ -97,8 +97,7 @@
 	{% else %}
 	<select class="form-control" name="__owner__" id="__owner__">
 	  {% for colleague in colleagues %}
-	    {% set sel = colleague == current_user['email'] and 'selected' or '' %}
-	    <option {{ sel }}>{{ colleague }}</option>
+	    <option {{ colleague == current_user['email'] and 'selected' or '' }}>{{ colleague }}</option>
 	  {% end %}
 	</select>
 	{% end %}
@@ -124,7 +123,8 @@
     {# Fields must be allowed to influence others, even when hidden. #}
     {% for f in hidden_fields %}
     <input type="hidden" class="visible-if-source"
-	   name="{{ f }}" id="{{ f }}" value="{{ order['fields'].get(f)  or '' }}">
+	   name="{{ f }}" id="{{ f }}" 
+	   value="{% module NoneStr(order['fields'].get(f)) %}">
     {% end %}
   </div>
 

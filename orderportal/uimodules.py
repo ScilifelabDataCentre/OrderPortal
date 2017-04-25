@@ -15,11 +15,11 @@ ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""
 
 
 class NoneStr(tornado.web.UIModule):
-    "Output empty string if value is None, else str(value)."
+    "Output undef string if value is None, else str(value)."
 
-    def render(self, value):
+    def render(self, value, undef=''):
         if value is None:
-            return ' '
+            return undef
         else:
             return str(value)
 

@@ -18,7 +18,7 @@
 {% if visible_if_field %}
 <div class="row visible-if"
      data-if-id="{{ visible_if_field }}"
-     data-if-val="{{ field.get('visible_if_value') or '' }}">
+     data-if-val="{% module NoneStr(field.get('visible_if_value')) %}">
 {% else %}
 <div class="row">
 {% end %} {# if visible_if_field #}
@@ -93,12 +93,9 @@
     {% if field.get('checkbox') %}
     <div class="checkbox">
       <label>
-        <input type="checkbox"
-	       class="visible-if-source"
-	       id="{{ field['identifier'] }}"
-	       name="{{ field['identifier'] }}"
-	       {{ value == True and 'checked' or '' }}
-	       value="true">
+        <input type="checkbox" class="visible-if-source"
+	       id="{{ field['identifier'] }}" name="{{ field['identifier'] }}"
+	       {{ value == True and 'checked' or '' }} value="true">
 	Check box if "true".
       </label>
     </div>
@@ -107,10 +104,8 @@
     <select class="form-control visible-if-source"
 	    id="{{ field['identifier'] }}"
 	    name="{{ field['identifier'] }}">
-      <option value="false"
-	      {{ bool(value) and 'selected' or '' }}>False</option>
-      <option value="true"
-	      {{ bool(value) and 'selected' or '' }}>True</option>
+      <option value="false" {{ bool(value) and 'selected' or '' }}>False</option>
+      <option value="true" {{ bool(value) and 'selected' or '' }}>True</option>
     </select>
     {% end %} {# if field.get('checkbox') #}
 
@@ -119,13 +114,12 @@
     {% if field.get('display') == 'radio' %}
     <div>
       {% for v in field['select'] %}
-      {% set checked = v == value and 'checked' or '' %}
       <label class="radio-inline">
 	<input type="radio" class="visible-if-source"
 	       name="{{ field['identifier'] }}"
 	       {# XXX This is not proper HTML. But it works... #}
 	       id="{{ field['identifier'] }}"
-	       value="{{ v }}" {{ checked }}>{{ v }}
+	       value="{{ v }}" {{ v == value and 'checked' or '' }}>{{ v }}
       </label>
       {% end %}
     </div>
@@ -133,13 +127,12 @@
     {% elif field.get('display') == 'radio-newline' %}
     {% for v in field['select'] %}
     <div class="radio">
-      {% set checked = v == value and 'checked' or '' %}
       <label>
 	<input type="radio" class="visible-if-source"
 	       name="{{ field['identifier'] }}"
 	       {# XXX This is not proper HTML. But it works... #}
 	       id="{{ field['identifier'] }}"
-	       value="{{ v }}" {{ checked }}>{{ v }}
+	       value="{{ v }}" {{ v == value and 'checked' or '' }}>{{ v }}
       </label>
     </div>
     {% end %}
