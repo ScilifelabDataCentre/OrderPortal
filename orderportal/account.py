@@ -517,7 +517,7 @@ class AccountOrdersApiV1(AccountOrdersMixin,
                             include_docs=True,
                             startkey=[account['email']],
                             endkey=[account['email'], constants.CEILING])
-        data['items'] = [self.get_json(r.doc, names=names, forms=forms)
+        data['items'] = [self.get_order_json(r.doc, names=names, forms=forms)
                          for r in view]
         self.write(data)
 
@@ -574,7 +574,7 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
         data['links'] = dict(
             self=dict(href=URL('account_orders_api', account['email'])),
             display=dict(href=URL('account_orders', account['email'])))
-        data['items'] = [self.get_json(o, names=names, forms=forms)
+        data['items'] = [self.get_order_json(o, names=names, forms=forms)
                          for o in orders]
         self.write(data)
 
