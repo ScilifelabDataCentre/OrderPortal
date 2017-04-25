@@ -33,37 +33,37 @@
 	</p>
       </div>
     </div>
-      <div class="panel panel-default">
-	<div class="panel-heading">
-	  The system uses the following Python packages available from
-	  <a href="https://pypi.python.org/pypi">PyPi</a>:
-	</div>
-	<div class="panel-body">
-	  <table class="table table-noborder">
-	    {% for key, value in versions['python'] %}
-	    <tr>
-	      <th width="60%">{{ key }}</th>
-	      <td width="40%">{{ value }}</td>
-	    </tr>
-	    {% end %}
-	  </table>
-	</div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+	The system uses the following Python packages available from
+	<a href="https://pypi.python.org/pypi">PyPi</a>:
       </div>
-      <div class="panel panel-default">
-	<div class="panel-heading">
-	  The system uses the following non-Python software:
-	</div>
-	<div class="panel-body">
-	  <table class="table table-noborder">
-	    {% for key, value in versions['other'] %}
-	    <tr>
-	      <th width="60%">{% raw key %}</th>
-	      <td width="40%">{{ value }}</td>
-	    </tr>
-	    {% end %}
-	  </table>
-	</div>
+      <div class="panel-body">
+	<table class="table table-noborder">
+	  {% for key, value in versions['python'] %}
+	  <tr>
+	    <th width="60%">{{ key }}</th>
+	    <td width="40%">{{ value }}</td>
+	  </tr>
+	  {% end %}
+	</table>
       </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+	The system uses the following non-Python software:
+      </div>
+      <div class="panel-body">
+	<table class="table table-noborder">
+	  {% for key, value in versions['other'] %}
+	  <tr>
+	    <th width="60%">{% raw key %}</th>
+	    <td width="40%">{{ value }}</td>
+	  </tr>
+	  {% end %}
+	</table>
+      </div>
+    </div>
   </div>
   <div class="col-md-6">
     <div class="panel panel-default">
@@ -85,5 +85,6 @@
 	</table>
       </div>
     </div>
+  </div>
 </div>
 {% end %} {# block main_content #}
