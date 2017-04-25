@@ -347,7 +347,7 @@ class OrderMixin(object):
             msg = '{0} editing is currently disabled.'
         else:
             msg = 'You may not edit the {0}.'
-        raise ValueError(msg.format(utils.term('order')))
+        raise ValueError(msg.format(utils.terminology('order')))
 
     def is_attachable(self, order):
         "Check if the current user may attach a file to the order."
@@ -364,7 +364,7 @@ class OrderMixin(object):
         raise tornado.web.HTTPError(
             403,
             reason="You may not attach a file to the {0}."
-            .format(utils.term('order')))
+            .format(utils.terminology('order')))
 
     def get_order_status(self, order):
         "Get the order status lookup item."
@@ -399,7 +399,7 @@ class OrderMixin(object):
         if self.is_transitionable(order, status, check_valid=check_valid):
             return
         raise ValueError('You may not change status of {0} to {1}.'
-                         .format(utils.term('order'), status))
+                         .format(utils.terminology('order'), status))
 
     def is_submittable(self, order, check_valid=True):
         "Is the order submittable? Special hard-wired status."
@@ -626,7 +626,7 @@ class Order(OrderMixin, RequestHandler):
             files.sort(lambda i,j: cmp(i['filename'].lower(),
                                        j['filename'].lower()))
         self.render('order.html',
-                    title=u"{0} '{1}'".format(utils.term('Order'),
+                    title=u"{0} '{1}'".format(utils.terminology('Order'),
                                               order['title']),
                     order=order,
                     account_names=self.get_account_names([order['owner']]),
@@ -694,7 +694,7 @@ class OrderLogs(OrderMixin, RequestHandler):
             self.see_other('home', error=str(msg))
             return
         self.render('logs.html',
-                    title=u"Logs for {0} '{1}'".format(utils.term('order'),
+                    title=u"Logs for {0} '{1}'".format(utils.terminology('order'),
                                                        order['title']),
                     entity=order,
                     logs=self.get_logs(order['_id']))
@@ -708,13 +708,13 @@ class OrderCreate(RequestHandler):
             self.see_other('home',
                            error="You need to be logged in to create {0}."
                            " Register to get an account if you don't have one."
-                           .format(utils.term('order')))
+                           .format(utils.terminology('order')))
             return
         if not self.global_modes['allow_order_creation'] \
            and self.current_user['role'] != constants.ADMIN:
             self.see_other('home',
                            error="{0} creation is currently disabled."
-                           .format(utils.term('Order')))
+                           .format(utils.terminology('Order')))
             return
         form = self.get_entity(self.get_argument('form'),doctype=constants.FORM)
         self.render('order_create.html', form=form)
@@ -793,7 +793,7 @@ class OrderEdit(OrderMixin, RequestHandler):
         hidden_fields = set([f['identifier'] for f in fields.flatten()
                              if f['type'] != 'multiselect'])
         self.render('order_edit.html',
-                    title=u"Edit {0} '{1}'".format(utils.term('order'),
+                    title=u"Edit {0} '{1}'".format(utils.terminology('order'),
                                                    order['title']),
                     order=order,
                     colleagues=colleagues,
@@ -812,7 +812,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             return
         flag = self.get_argument('__save__', None)
         try:
-            message = "{0} saved.".format(utils.term('Order'))
+            message = "{0} saved.".format(utils.terminology('Order'))
             error = None
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver['title'] = self.get_argument('__title__', None) or '[no title]'
@@ -849,11 +849,11 @@ class OrderEdit(OrderMixin, RequestHandler):
                     if self.is_submittable(saver.doc):
                         saver.set_status(constants.SUBMITTED)
                         message = "{0} saved and submitted."\
-                            .format(utils.term('Order'))
+                            .format(utils.terminology('Order'))
                     else:
                         error = "{0} could not be submitted due to" \
                                 " invalid or missing values."\
-                                .format(utils.term('Order'))
+                                .format(utils.terminology('Order'))
             if flag == 'continue':
                 self.see_other('order_edit', order['_id'], message=message)
             else:
@@ -881,7 +881,7 @@ class OrderClone(OrderMixin, RequestHandler):
             return
         if not self.is_clonable(order):
             raise ValueError("This {0} is outdated; its form has been disabled."
-                             .format(utils.term('order')))
+                             .format(utils.terminology('order')))
         form = self.get_entity(order['form'], doctype=constants.FORM)
         fields = Fields(form)
         erased_files = set()

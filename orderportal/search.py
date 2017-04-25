@@ -26,7 +26,6 @@ class Search(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         orig = self.get_argument('term', '')
-        params = dict(term=orig)
         items = {}
         # Search order identifier; exact match
         term = orig.strip().upper()
@@ -118,18 +117,11 @@ class Search(RequestHandler):
         if len(items) == 1:
             self.see_other('entity', items[0]['_id'])
         else:
-            # All items contain 'modified'
-            items.sort(lambda i,j: cmp(i['modified'], j['modified']),
-                       reverse=True)
-            # Paging
-            page = self.get_page(count=len(items))
-            items = items[page['start'] : page['end']]
             account_names = self.get_account_names()
             self.render('search.html',
+                        term=orig,
                         items=items,
-                        account_names=account_names,
-                        params=params,
-                        page=page)
+                        account_names=account_names)
 
 
 class SearchFields(RequestHandler):

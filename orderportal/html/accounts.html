@@ -70,7 +70,7 @@
 	<tr>
 	  <th>Account</th>
 	  <th>Name</th>
-	  <th>{{ term('Orders') }}</th>
+	  <th>{{ terminology('Orders') }}</th>
 	  <th width="10%">University</th>
 	  <th>Role</th>
 	  <th>Status</th>
@@ -81,11 +81,7 @@
       <tbody>
 	{% for account in accounts %}
 	<tr>
-	  <td>
-	    <a href="{{ reverse_url('account', account['email']) }}">
-	      {{ account['email'] }}
-	    </a>
-	  </td>
+	  <td>{% module Entity(account, icon=False) %}</td>
 	  <td>{{ account['name'] }}</td>
 	  <td>
 	    <a class="badge"
