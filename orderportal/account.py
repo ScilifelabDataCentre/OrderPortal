@@ -158,7 +158,12 @@ class AccountsApiV1(Accounts):
         self.check_staff()
         self.set_filter()
         accounts = self.get_accounts()
-        items = []
+        data = OD(id=URL('accounts_api', **self.filter))
+        data['type'] = 'accounts'
+        data['filter'] = self.filter
+        data['links'] = dict(api=dict(href=URL('accounts_api')),
+                             display=dict(href=URL('accounts')))
+        data['items'] = []
         for account in accounts:
             item = OD()
             item['email'] = account['email']
@@ -190,13 +195,7 @@ class AccountsApiV1(Accounts):
                 links=dict(
                     display=dict(href=URL('account_orders', account['email'])),
                     api=dict(href=URL('account_orders_api', account['email']))))
-            items.append(item)
-        data = OD()
-        data['type'] = 'accounts'
-        data['links'] = links = OD()
-        links['self'] = dict(href=URL('accounts_api', **self.filter))
-        links['display'] = dict(href=URL('accounts', **self.filter))
-        data['items'] = items
+            data['items'].append(item)
         self.write(data)
 
 
@@ -402,7 +401,7 @@ class AccountApiV1(AccountMixin, RequestHandler):
         else:
             name = first_name
         data['links'] = dict(
-            self=dict(href=URL('account_api', account['email'])),
+            api=dict(href=URL('account_api', account['email'])),
             display=dict(href=URL('account', account['email'])))
         data['name'] = name
         data['first_name'] = first_name
@@ -512,17 +511,17 @@ class AccountOrdersApiV1(AccountOrdersMixin,
         # Get names and forms lookups
         names = self.get_account_names()
         forms = self.get_forms_titles(all=True)
-        data = OD()
+        data = OD(id=URL('account_orders', account['email']))
         data['type'] = 'account orders'
         data['links'] = dict(
-            self=dict(href=URL('account_orders_api', account['email'])),
+            api=dict(href=URL('account_orders_api', account['email'])),
             display=dict(href=URL('account_orders', account['email'])))
         view = self.db.view('order/owner',
                             reduce=False,
                             include_docs=True,
                             startkey=[account['email']],
                             endkey=[account['email'], constants.CEILING])
-        data['items'] = [self.get_order_json(r.doc, names=names, forms=forms)
+        data['items'] = [self.get_order_json(r.doc, names, forms)
                          for r in view]
         self.write(data)
 
@@ -567,13 +566,13 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
             raise tornado.web.HTTPError(403, reason=str(msg))
         # Get names and forms lookups
         names = self.get_account_names()
-        all_forms = self.get_forms_titles(all=True)
-        data = OD()
+        forms = self.get_forms_titles(all=True)
+        data = OD(id=URL('account_groups_orders_api', account['email']))
         data['type'] = 'account groups orders'
         data['links'] = dict(
-            self=dict(href=URL('account_orders_api', account['email'])),
-            display=dict(href=URL('account_orders', account['email'])))
-        data['items'] = [self.get_order_json(o, names=names, forms=all_forms)
+            api=dict(href=URL('account_groups_orders_api', account['email'])),
+            display=dict(href=URL('account_groups_orders', account['email'])))
+        data['items'] = [self.get_order_json(o, names, forms)
                          for o in self.get_group_orders(account)]
         self.write(data)
 
@@ -609,20 +608,16 @@ class AccountMessages(AccountMixin, RequestHandler):
         view = self.db.view('message/recipient',
                             startkey=[account['email']],
                             endkey=[account['email'], constants.CEILING])
-        page = self.get_page(view=view)
         view = self.db.view('message/recipient',
                             descending=True,
                             startkey=[account['email'], constants.CEILING],
                             endkey=[account['email']],
-                            skip=page['start'],
-                            limit=page['size'],
                             reduce=False,
                             include_docs=True)
         messages = [r.doc for r in view]
         self.render('account_messages.html',
                     account=account,
-                    messages=messages,
-                    page=page)
+                    messages=messages)
 
 
 class AccountEdit(AccountMixin, RequestHandler):

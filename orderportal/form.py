@@ -160,7 +160,7 @@ class FormApiV1(ApiV1Mixin, Form):
         data['status'] = form['status']
         data['modified'] = form['modified']
         data['created'] = form['created']
-        data['links'] = dict(self=dict(href=URL('form_api', form['_id'])),
+        data['links'] = dict(api=dict(href=URL('form_api', form['_id'])),
                              display=dict(href=URL('form', form['_id'])))
         data['orders'] = dict(
             count=self.get_order_count(form),

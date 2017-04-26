@@ -314,25 +314,6 @@ class RequestHandler(tornado.web.RequestHandler):
             infile.close()
         return data
 
-    def get_page(self, view=None, count=0):
-        "Return the list paging parameters in a dictionary."
-        try:
-            count = list(view)[0].value
-        except (TypeError, IndexError):
-            pass
-        result = dict(count=count,
-                      size=settings['DISPLAY_DEFAULT_PAGE_SIZE'])
-        result['max_page'] = (count - 1) / result['size']
-        try:
-            result['current'] = max(0,
-                                    min(int(self.get_argument('page', 0)),
-                                        result['max_page']))
-        except (ValueError, TypeError):
-            result['current'] = 0
-        result['start'] = result['current'] * result['size']
-        result['end'] = min(result['start'] + result['size'], count)
-        return result
-
     def get_account(self, email):
         """Get the account identified by the email address.
         Raise ValueError if no such account.
