@@ -833,7 +833,7 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
         # Get names and forms lookups once only
         names = self.get_account_names()
         forms = self.get_forms_titles(all=True)
-        result['orders'] = []
+        result['items'] = []
         keys = [f['identifier'] for f in settings['ORDERS_LIST_FIELDS']]
         for order in self.get_orders():
             data = self.get_order_json(order, names, forms)
@@ -845,7 +845,7 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
                     data['fields'].append(fields[key])
                 except KeyError:
                     pass
-            result['orders'].append(data)
+            result['items'].append(data)
         self.write(result)
 
 
