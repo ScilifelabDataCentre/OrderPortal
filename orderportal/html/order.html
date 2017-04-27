@@ -12,9 +12,14 @@
 <a href="{{ order_reverse_url(order, api=True) }}">
   {% module Icon('json') %} JSON
 </a>
-&nbsp;
-<a href="{{ reverse_url('order_csv', order['_id']) }}">
+<br>
+{% set name = order.get('identifier') or order['_id'] %}
+<a href="{{ absolute_reverse_url('order_csv', name) }}">
   {% module Icon('csv') %} CSV
+</a>
+<br>
+<a href="{{ absolute_reverse_url('order_zip', name) }}">
+  {% module Icon('zip') %} ZIP
 </a>
 {% end %}
 

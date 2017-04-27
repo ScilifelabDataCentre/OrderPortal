@@ -328,6 +328,15 @@ def convert(type, value):
     else:
         return value
 
+def get_json(id, type):
+    "Return the initialized JSON dictionary with id and type."
+    result = collections.OrderedDict()
+    result['id'] = id
+    result['type'] = type
+    result['site'] = settings['SITE_NAME']
+    result['timestamp'] = timestamp()
+    return result
+
 def get_account_name(account=None, value=None):
     """Return person name of accountas 'lastname, firstname'.
     'account' is an account document.

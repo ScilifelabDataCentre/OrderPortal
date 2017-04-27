@@ -158,8 +158,7 @@ class AccountsApiV1(Accounts):
         self.check_staff()
         self.set_filter()
         accounts = self.get_accounts()
-        data = OD(id=URL('accounts_api', **self.filter))
-        data['type'] = 'accounts'
+        data = utils.get_json(URL('accounts_api', **self.filter), 'accounts')
         data['filter'] = self.filter
         data['links'] = dict(api=dict(href=URL('accounts_api')),
                              display=dict(href=URL('accounts')))
@@ -210,6 +209,7 @@ class AccountsCsv(Accounts):
         accounts = self.get_accounts()
         csvfile = StringIO()
         writer = csv.writer(csvfile)
+        writer.writerow((settings['SITE_NAME'], utils.timestamp()))
         writer.writerow(('Email', 'Last name', 'First name', 'Role', 'Status',
                          'Order count', 'University', 'Department', 'PI',
                          'Gender', 'Group size', 'Subject', 'Address', 'Zip',
@@ -390,8 +390,7 @@ class AccountApiV1(AccountMixin, RequestHandler):
             self.check_readable(account)
         except ValueError, msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        data = OD()
-        data['type'] = 'account'
+        data = utils.get_json(URL('account', email), 'account')
         data['email'] = account['email']
         name = last_name = account.get('last_name')
         first_name = account.get('first_name')
@@ -511,8 +510,8 @@ class AccountOrdersApiV1(AccountOrdersMixin,
         # Get names and forms lookups
         names = self.get_account_names()
         forms = self.get_forms_titles(all=True)
-        data = OD(id=URL('account_orders', account['email']))
-        data['type'] = 'account orders'
+        data = utils.get_json(URL('account_orders', account['email']),
+                              'account orders')
         data['links'] = dict(
             api=dict(href=URL('account_orders_api', account['email'])),
             display=dict(href=URL('account_orders', account['email'])))
@@ -521,8 +520,8 @@ class AccountOrdersApiV1(AccountOrdersMixin,
                             include_docs=True,
                             startkey=[account['email']],
                             endkey=[account['email'], constants.CEILING])
-        data['items'] = [self.get_order_json(r.doc, names, forms)
-                         for r in view]
+        data['orders'] = [self.get_order_json(r.doc, names, forms)
+                          for r in view]
         self.write(data)
 
 
@@ -567,13 +566,13 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
         # Get names and forms lookups
         names = self.get_account_names()
         forms = self.get_forms_titles(all=True)
-        data = OD(id=URL('account_groups_orders_api', account['email']))
-        data['type'] = 'account groups orders'
+        data =utils.get_json(URL('account_groups_orders_api',account['email']),
+                             'account groups orders')
         data['links'] = dict(
             api=dict(href=URL('account_groups_orders_api', account['email'])),
             display=dict(href=URL('account_groups_orders', account['email'])))
-        data['items'] = [self.get_order_json(o, names, forms)
-                         for o in self.get_group_orders(account)]
+        data['orders'] = [self.get_order_json(o, names, forms)
+                          for o in self.get_group_orders(account)]
         self.write(data)
 
 
