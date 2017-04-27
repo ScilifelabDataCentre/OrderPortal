@@ -16,6 +16,7 @@ VERSION_RX = re.compile(r'\d+\.\d+\.\d+')
 HTML_MIME = 'text/html'
 JSON_MIME = 'application/json'
 CSV_MIME  = 'text/csv'
+ZIP_MIME  = 'application/zip'
 
 # CouchDB
 # For view ranges: CouchDB uses the Unicode Collation Algorithm,

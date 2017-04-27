@@ -177,8 +177,7 @@ def load_settings(filepath=None):
         with open(filepath) as infile:
             unis = yaml.safe_load(infile)
         unis = unis.items()
-        unis.sort(lambda i,j: cmp((i[1].get('rank'), i[0]),
-                                  (j[1].get('rank'), j[0])))
+        unis.sort(key=lambda i: (i[1].get('rank'), i[0]))
         settings['UNIVERSITIES'] = collections.OrderedDict(unis)
     # Read country codes
     try:
@@ -328,6 +327,15 @@ def convert(type, value):
         return to_bool(value)
     else:
         return value
+
+def get_json(id, type):
+    "Return the initialized JSON dictionary with id and type."
+    result = collections.OrderedDict()
+    result['id'] = id
+    result['type'] = type
+    result['site'] = settings['SITE_NAME']
+    result['timestamp'] = timestamp()
+    return result
 
 def get_account_name(account=None, value=None):
     """Return person name of accountas 'lastname, firstname'.

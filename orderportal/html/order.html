@@ -12,6 +12,15 @@
 <a href="{{ order_reverse_url(order, api=True) }}">
   {% module Icon('json') %} JSON
 </a>
+<br>
+{% set name = order.get('identifier') or order['_id'] %}
+<a href="{{ absolute_reverse_url('order_csv', name) }}">
+  {% module Icon('csv') %} CSV
+</a>
+<br>
+<a href="{{ absolute_reverse_url('order_zip', name) }}">
+  {% module Icon('zip') %} ZIP
+</a>
 {% end %}
 
 {% block action_content %}
@@ -139,13 +148,6 @@
 	  </a>
 	</td>
       </tr>
-      <tr>
-	<th>Status</th>
-	<td>
-	  {% module Icon(order['status'], label=True) %}
-	  ({{ status['description'] }})
-	</td>
-      </tr>
       {% if is_staff or settings.get('ORDER_USER_TAGS') %}
       <tr>
 	<th>Keywords</th>
@@ -154,15 +156,24 @@
       </tr>
       {% end %} {#if is_staff or settings.get('ORDER_USER_TAGS') #}
       <tr>
+	<th>Status</th>
+	<td>
+	  {% module Icon(order['status'], label=True) %}
+	  ({{ status['description'] }})
+	</td>
+      </tr>
+      <tr>
 	<th>History</th>
 	<td>
 	  <table>
-	  {% for st, date in sorted(order['history'].items(), key=lambda i: i[1], reverse=True) %}
-	  <tr>
-	    <td>{% module Icon(st, label=True) %}</td>
-	    <td>&nbsp;{{ date }}</td>
-	  <tr>
-	  {% end %}
+	    {% for s in reversed(settings['ORDER_STATUSES']) %}
+	    {% if order['history'].get(s['identifier']) %}
+	    <tr>
+	      <td>{% module Icon(s['identifier'], label=True) %}</td>
+	      <td>&nbsp;{{ order['history'][s['identifier']] }}</td>
+	    </tr>
+	    {% end %} {# if #}
+	    {% end %} {# for #}
 	  </table>
 	</td>
       </tr>

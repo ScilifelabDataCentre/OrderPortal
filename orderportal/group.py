@@ -24,18 +24,12 @@ class Groups(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_staff()
-        page = self.get_page(view=self.db.view('group/modified'))
         view = self.db.view('group/modified',
                             descending=True,
-                            skip=page['start'],
-                            limit=page['size'],
                             reduce=False,
                             include_docs=True)
         groups = [r.doc for r in view]
-        self.render('groups.html',
-                    groups=groups,
-                    params=dict(),
-                    page=page)
+        self.render('groups.html', groups=groups)
 
 
 class GroupMixin(object):

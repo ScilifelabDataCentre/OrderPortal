@@ -2,13 +2,16 @@
 
 from __future__ import print_function, absolute_import
 
-import logging
+import csv
 from collections import OrderedDict as OD
 from cStringIO import StringIO
+import json
+import logging
 import os.path
 import re
 import traceback
 import urlparse
+import zipfile
 
 import tornado.web
 
@@ -318,6 +321,25 @@ class OrderSaver(saver.Saver):
 class OrderMixin(object):
     "Mixin for various useful methods."
 
+    def get_order(self, iuid):
+        """Get the order for the identifier or IUID.
+        Raise ValueError if no such order or not readable."""
+        try:
+            match = re.match(settings['ORDER_IDENTIFIER_REGEXP'], iuid)
+            if not match: raise KeyError
+        except KeyError:
+            try:
+                order = self.get_entity(iuid, doctype=constants.ORDER)
+            except tornado.web.HTTPError:
+                raise ValueError('Sorry, no such order')
+        else:
+            try:
+                order = self.get_entity_view('order/identifier', match.group())
+            except tornado.web.HTTPError:
+                raise ValueError('Sorry, no such order')
+        self.check_readable(order)
+        return order
+
     def is_readable(self, order):
         "Is the order readable by the current user?"
         if self.is_owner(order): return True
@@ -365,6 +387,40 @@ class OrderMixin(object):
             403,
             reason="You may not attach a file to the {0}."
             .format(utils.terminology('order')))
+
+    def get_fields(self, order, depth=0, fields=None):
+        """Return a list of dictionaries for each field
+        that is visible to the current user."""
+        if fields is None:
+            form = self.get_entity(order['form'], doctype=constants.FORM)
+            fields = form['fields']
+        result = []
+        for field in fields:
+            # Check if field may not be viewed by the current user.
+            if field['restrict_read'] and not self.is_staff(): continue
+            # Is there a visibility condition? If so, check it.
+            fid = field.get('visible_if_field')
+            if fid:
+                value = unicode(order['fields'].get(fid)).lower()
+                opt = unicode(field.get('visible_if_value')).lower().split('|')
+                if value not in opt: continue
+            item = OD(identifier=field['identifier'])
+            item['label'] = field.get('label') or \
+                            field['identifier'].capitalize().replace('_', ' ')
+            item['depth'] = depth
+            item['type'] = field['type']
+            item['value'] = order['fields'].get(field['identifier'])
+            item['restrict_read'] = field['restrict_read']
+            item['restrict_write'] = field['restrict_write']
+            item['invalid'] = order['invalid'].get(field['identifier'])
+            item['description'] = field.get('description')
+            result.append(item)
+            if field['type'] == constants.GROUP:
+                result.extend(self.get_fields(order, depth+1, field['fields']))
+        for item in result:
+            for key, value in item.iteritems():
+                item[key] = utils.to_utf8(value)
+        return result
 
     def get_order_status(self, order):
         "Get the order status lookup item."
@@ -419,6 +475,229 @@ class OrderMixin(object):
         return form['status'] in (constants.ENABLED, constants.TESTING)
 
 
+class OrderApiV1Mixin(ApiV1Mixin):
+    "Mixin for order JSON data structure."
+
+    def get_order_json(self, order, names={}, forms={}, full=False):
+        """Return a dictionary for JSON output for the order.
+        Account names or forms title lookup are computed if not given.
+        If 'full' then add all data, else only for orders list."""
+        URL = self.absolute_reverse_url
+        if full:
+            data = utils.get_json(self.order_reverse_url(order, api=True),
+                                  'order')
+        else:
+            data = OD()
+        data['identifier'] = order.get('identifier')
+        data['title'] = order.get('title') or '[no title]'
+        data['iuid'] = order['_id']
+        if full:
+            form = self.get_entity(order['form'], doctype=constants.FORM)
+            data['form'] = OD(
+                [('title', form['title']),
+                 ('version', form.get('version')),
+                 ('iuid', form['_id']),
+                 ('links', dict(api=dict(href=URL('form_api', form['_id'])),
+                                display=dict(href=URL('form', form['_id']))))])
+        else:
+            if not forms:
+                forms = self.get_forms_titles(all=True)
+            data['form'] = OD(
+                [('iuid', order['form']),
+                 ('title', forms[order['form']]),
+                 ('links', dict(api=dict(href=URL('form', order['form']))))])
+        if not names:
+            names = self.get_account_names([order['owner']])
+        data['owner'] = dict(
+            email=order['owner'],
+            name=names.get(order['owner']),
+            links=dict(api=dict(href=URL('account_api', order['owner'])),
+                       display=dict(href=URL('account', order['owner']))))
+        data['status'] = order['status']
+        data['history'] = OD()
+        for s in settings['ORDER_STATUSES']:
+            key = s['identifier']
+            data['history'][key] = order['history'].get(key)
+        data['tags'] = order.get('tags', [])
+        data['modified'] = order['modified']
+        data['created'] = order['created']
+        data['links'] = dict(
+            api=dict(href=self.order_reverse_url(order, api=True)),
+            display=dict(href=self.order_reverse_url(order)))
+        if full:
+            data['fields'] = self.get_fields(order)
+            data['files'] = OD()
+            for name in sorted(order.get('_attachments', [])):
+                stub = order['_attachments'][name]
+                url = self.absolute_reverse_url('order_file',order['_id'],name)
+                data['files'][name] = dict(size=stub['length'],
+                                           content_type=stub['content_type'],
+                                           href=url)
+        return data
+
+
+class Order(OrderMixin, RequestHandler):
+    "Order page."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        try:
+            order = self.get_order(iuid)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
+        form = self.get_entity(order['form'], doctype=constants.FORM)
+        files = []
+        for filename in order.get('_attachments', []):
+            stub = order['_attachments'][filename]
+            files.append(dict(filename=filename,
+                              size=stub['length'],
+                              content_type=stub['content_type']))
+            files.sort(key=lambda i: i['filename'].lower())
+        self.render('order.html',
+                    title=u"{0} '{1}'".format(utils.terminology('Order'),
+                                              order['title']),
+                    order=order,
+                    account_names=self.get_account_names([order['owner']]),
+                    status=self.get_order_status(order),
+                    form=form,
+                    fields=form['fields'],
+                    attached_files=files,
+                    is_editable=self.is_admin() or self.is_editable(order),
+                    is_clonable=self.is_clonable(order),
+                    is_attachable=self.is_attachable(order),
+                    targets=self.get_targets(order))
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        if self.get_argument('_http_method', None) == 'delete':
+            self.delete(iuid)
+            return
+        raise tornado.web.HTTPError(
+            405, reason='Internal problem; POST only allowed for DELETE.')
+
+    @tornado.web.authenticated
+    def delete(self, iuid):
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        try:
+            self.check_editable(order)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
+        self.delete_logs(order['_id'])
+        self.db.delete(order)
+        self.see_other('orders')
+
+
+class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
+    "Order API; JSON output."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        try:
+            order = self.get_order(iuid)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(404, reason=str(msg))
+        self.write(self.get_order_json(order, full=True))
+
+
+class OrderCsv(OrderMixin, RequestHandler):
+    "Return a CSV file containing the order data."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        try:
+            order = self.get_order(iuid)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(404, reason=str(msg))
+        self.write(self.get_order_csv_stringio(order).getvalue())
+        self.set_header('Content-Type', constants.CSV_MIME)
+        self.set_header('Content-Disposition',
+                        'attachment; filename="%s.csv"' %
+                        order.get('identifier') or order['_id'])
+
+    def get_order_csv_stringio(self, order):
+        "Return the content of the order as CSV-formatted data in StringIO."
+        form = self.get_entity(order['form'], doctype=constants.FORM)
+        csvbuffer = StringIO()
+        writer = csv.writer(csvbuffer)
+        writer.writerow((settings['SITE_NAME'], utils.timestamp()))
+        try:
+            writer.writerow(('Identifier', order['identifier']))
+        except KeyError:
+            pass
+        writer.writerow(('Title', order.get('title') or '[no title]'))
+        writer.writerow(('URL', self.order_reverse_url(order)))
+        writer.writerow(('IUID', order['_id']))
+        writer.writerow(('Form', 'Title', form['title']))
+        writer.writerow(('', 'Version', form.get('version') or '-'))
+        writer.writerow(('', 'IUID', form['_id']))
+        account = self.get_account(order['owner'])
+        writer.writerow(('Owner', 'Name', utils.get_account_name(account)))
+        writer.writerow(('', 'URL', 
+                         self.absolute_reverse_url('account', account['email'])))
+        writer.writerow(('', 'Email', order['owner']))
+        writer.writerow(('', 'University',
+                         account.get('university') or '-'))
+        writer.writerow(('', 'Department',
+                         account.get('department') or '-'))
+        writer.writerow(('', 'PI',
+                         account.get('pi') and 'Yes' or 'No'))
+        if settings.get('ACCOUNT_FUNDER_INFO') and \
+           settings.get('ACCOUNT_FUNDER_INFO_GENDER'):
+            writer.writerow(('', 'Gender',
+                             account.get('gender', '-').capitalize()))
+        writer.writerow(('Status', order['status']))
+        for i, s in enumerate(settings['ORDER_STATUSES']):
+            key = s['identifier']
+            writer.writerow((i == 0 and 'History' or '',
+                             key,
+                             order['history'].get(key, '-')))
+        for t in order.get('tags', []):
+            writer.writerow(('Tag', t))
+        writer.writerow(('Modified', order['modified']))
+        writer.writerow(('Created', order['created']))
+        writer.writerow(('',))
+        writer.writerow(('Field', 'Label', 'Depth', 'Type', 'Value',
+                         'Restrict read', 'Restrict write',
+                         'Invalid', 'Description'))
+        for field in self.get_fields(order):
+            writer.writerow(field.values())
+        writer.writerow(('',))
+        writer.writerow(('File', 'Size', 'Content type', 'URL'))
+        for name in sorted(order.get('_attachments', [])):
+            stub = order['_attachments'][name]
+            url = self.absolute_reverse_url('order_file', order['_id'], name)
+            writer.writerow((name, stub['length'], stub['content_type'], url))
+        return csvbuffer
+
+
+class OrderZip(OrderApiV1Mixin, OrderCsv):
+    "Return a ZIP file containing CSV, JSON and files for the order."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        try:
+            order = self.get_order(iuid)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(404, reason=str(msg))
+        zip_stringio = StringIO()
+        with zipfile.ZipFile(zip_stringio, 'w') as writer:
+            name = order.get('identifier') or order['_id']
+            writer.writestr(name + '.csv',
+                            self.get_order_csv_stringio(order).getvalue())
+            writer.writestr(name + '.json',
+                            json.dumps(self.get_order_json(order, full=True)))
+            for filename in sorted(order.get('_attachments', [])):
+                outfile = self.db.get_attachment(order, filename)
+                writer.writestr(filename, outfile.read())
+        self.write(zip_stringio.getvalue())
+        self.set_header('Content-Type', constants.ZIP_MIME)
+        self.set_header('Content-Disposition',
+                        'attachment; filename="%s.zip"' %
+                        order.get('identifier') or order['_id'])
+
+
 class Orders(RequestHandler):
     "Orders list page."
 
@@ -432,12 +711,11 @@ class Orders(RequestHandler):
         order_column = 5 + len(settings['ORDERS_LIST_STATUSES']) + \
             len(settings['ORDERS_LIST_FIELDS'])
         self.set_filter()
-        all_forms = self.get_forms_titles(all=True)
         self.render('orders.html',
-                    all_forms=all_forms,
+                    all_forms=self.get_forms_titles(all=True),
                     form_titles=sorted(self.get_forms_titles().values()),
                     filter=self.filter,
-                    orders=self.get_orders(all_forms),
+                    orders=self.get_orders(),
                     order_column=order_column,
                     account_names=self.get_account_names())
 
@@ -462,8 +740,9 @@ class Orders(RequestHandler):
                 recent = True
         self.filter['recent'] = recent
 
-    def get_orders(self, forms):
+    def get_orders(self):
         "Get all orders according to current filter."
+        forms = self.get_forms_titles(all=True)
         orders = self.filter_by_status(self.filter.get('status'))
         orders = self.filter_by_forms(self.filter.get('form_title'),
                                       forms=forms,
@@ -538,43 +817,7 @@ class Orders(RequestHandler):
         return orders
 
 
-class OrderApiV1Mixin:
-    "Generate JSON for an order; both for orders list API and order API."
-
-    def get_order_json(self, order, names={}, forms={}, item=None):
-        URL = self.absolute_reverse_url
-        if not item:
-            item = OD()
-        item['iuid'] = order['_id']
-        item['identifier'] = order.get('identifier')
-        item['name'] = order.get('identifier') or order['_id'][:6] + '...'
-        item['title'] = order.get('title') or '[no title]'
-        item['form'] = dict(
-            iuid=order['form'],
-            title=forms.get(order['form']),
-            links=dict(api=dict(href=URL('form_api', order['form'])),
-                       display=dict(href=URL('form', order['form']))))
-        item['owner'] = dict(
-            email=order['owner'],
-            name=names.get(order['owner']),
-            links=dict(api=dict(href=URL('account_api', order['owner'])),
-                       display=dict(href=URL('account', order['owner']))))
-        item['fields'] = {}
-        for f in settings['ORDERS_LIST_FIELDS']:
-            item['fields'][f['identifier']] = order['fields'].get(f['identifier'])
-        item['tags'] = order.get('tags', [])
-        item['status'] = order['status']
-        item['history'] = {}
-        for s in settings['ORDERS_LIST_STATUSES']:
-            item['history'][s] = order['history'].get(s)
-        item['modified'] = order['modified']
-        item['links'] = dict(
-            self=dict(href=self.order_reverse_url(order, api=True)),
-            display=dict(href=self.order_reverse_url(order)))
-        return item
-
-
-class OrdersApiV1(OrderApiV1Mixin, Orders):
+class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
     "Orders API; JSON output."
 
     @tornado.web.authenticated
@@ -583,103 +826,75 @@ class OrdersApiV1(OrderApiV1Mixin, Orders):
         URL = self.absolute_reverse_url
         self.check_staff()
         self.set_filter()
-        # Get names and forms lookups
+        result = utils.get_json(URL('orders_api', **self.filter), 'orders')
+        result['filter'] = self.filter
+        result['links'] = dict(api=dict(href=URL('orders_api')),
+                               display=dict(href=URL('orders')))
+        # Get names and forms lookups once only
         names = self.get_account_names()
         forms = self.get_forms_titles(all=True)
-        data = OD()
-        data['type'] = 'orders'
-        data['links'] = dict(self=dict(href=URL('orders_api')),
-                             display=dict(href=URL('orders')))
-        data['items'] = [self.get_order_json(o, names, forms)
-                         for o in self.get_orders(forms)]
-        self.write(data)
+        result['orders'] = []
+        keys = [f['identifier'] for f in settings['ORDERS_LIST_FIELDS']]
+        for order in self.get_orders():
+            data = self.get_order_json(order, names, forms)
+            fields = dict([(f['identifier'], f)
+                           for f in self.get_fields(order)])
+            data['fields'] = []
+            for key in keys:
+                try:
+                    data['fields'].append(fields[key])
+                except KeyError:
+                    pass
+            result['orders'].append(data)
+        self.write(result)
 
 
-class Order(OrderMixin, RequestHandler):
-    "Order page."
-
-    @tornado.web.authenticated
-    def get(self, iuid):
-        try:
-            match = re.match(settings['ORDER_IDENTIFIER_REGEXP'], iuid)
-            if not match: raise KeyError
-        except KeyError:
-            try:
-                order = self.get_entity(iuid, doctype=constants.ORDER)
-            except tornado.web.HTTPError, msg:
-                self.see_other('home', error=str(msg))
-                return
-        else:
-            order = self.get_entity_view('order/identifier', match.group())
-        try:
-            self.check_readable(order)
-        except ValueError, msg:
-            self.see_other('home', error=str(msg))
-            return
-        form = self.get_entity(order['form'], doctype=constants.FORM)
-        files = []
-        for filename in order.get('_attachments', []):
-            stub = order['_attachments'][filename]
-            files.append(dict(filename=filename,
-                              size=stub['length'],
-                              content_type=stub['content_type']))
-            files.sort(lambda i,j: cmp(i['filename'].lower(),
-                                       j['filename'].lower()))
-        self.render('order.html',
-                    title=u"{0} '{1}'".format(utils.terminology('Order'),
-                                              order['title']),
-                    order=order,
-                    account_names=self.get_account_names([order['owner']]),
-                    status=self.get_order_status(order),
-                    form=form,
-                    fields=form['fields'],
-                    attached_files=files,
-                    is_editable=self.is_admin() or self.is_editable(order),
-                    is_clonable=self.is_clonable(order),
-                    is_attachable=self.is_attachable(order),
-                    targets=self.get_targets(order))
+class OrdersCsv(Orders):
+    "Orders list as CSV file."
 
     @tornado.web.authenticated
-    def post(self, iuid):
-        if self.get_argument('_http_method', None) == 'delete':
-            self.delete(iuid)
+    def get(self):
+        # Ordinary users are not allowed to see the overall orders list.
+        if not self.is_staff():
+            self.see_other('account_orders', self.current_user['email'])
             return
-        raise tornado.web.HTTPError(
-            405, reason='Internal problem; POST only allowed for DELETE.')
-
-    @tornado.web.authenticated
-    def delete(self, iuid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
-        try:
-            self.check_editable(order)
-        except ValueError, msg:
-            self.see_other('home', error=str(msg))
-            return
-        self.delete_logs(order['_id'])
-        self.db.delete(order)
-        self.see_other('orders')
-
-
-class OrderApiV1(ApiV1Mixin, OrderApiV1Mixin, Order):
-    "Order API; JSON."
-
-    def render(self, templatefilename, **kwargs):
-        order = kwargs['order']
-        names = self.get_account_names([order['owner']])
-        data = self.get_order_json(order, names=names, item=OD(type='order'))
-        data['fields'] = order['fields']
-        data['files'] = []
-        for filename in order.get('_attachments', []):
-            stub = order['_attachments'][filename]
-            data['files'].append(
-                dict(filename=filename,
-                     href=self.absolute_reverse_url('order_file',
-                                                    order['_id'],
-                                                    filename),
-                     size=stub['length'],
-                     content_type=stub['content_type']))
-        data['invalid'] = order['invalid']
-        self.write(data)
+        self.set_filter()
+        csv_stringio = StringIO()
+        writer = csv.writer(csv_stringio)
+        writer.writerow((settings['SITE_NAME'], utils.timestamp()))
+        row = ['Identifier', 'Title', 'IUID', 'URL', 
+               'Form', 'Form IUID', 'Form URL',
+               'Owner', 'Owner name', 'Owner URL', 'Tags']
+        row.extend([f['identifier'] for f in settings['ORDERS_LIST_FIELDS']])
+        row.append('Status')
+        row.extend([s.capitalize() for s in settings['ORDERS_LIST_STATUSES']])
+        row.append('Modified')
+        writer.writerow(row)
+        names = self.get_account_names()
+        forms = self.get_forms_titles(all=True)
+        for order in self.get_orders():
+            row = [order.get('identifier') or '',
+                   utils.to_utf8(order.get('title') or '[no title]'),
+                   order['_id'],
+                   self.order_reverse_url(order),
+                   utils.to_utf8(forms[order['form']]),
+                   order['form'],
+                   self.absolute_reverse_url('form', order['form']),
+                   order['owner'],
+                   utils.to_utf8(names[order['owner']]),
+                   self.absolute_reverse_url('account', order['owner']),
+                   utils.to_utf8(', '.join(order.get('tags', [])))]
+            for f in settings['ORDERS_LIST_FIELDS']:
+                row.append(utils.to_utf8(order['fields'].get(f['identifier'])))
+            row.append(order['status'])
+            for s in settings['ORDERS_LIST_STATUSES']:
+                row.append(order['history'].get(s))
+            row.append(order['modified'])
+            writer.writerow(row)
+        self.write(csv_stringio.getvalue())
+        self.set_header('Content-Type', constants.CSV_MIME)
+        self.set_header('Content-Disposition',
+                        'attachment; filename="orders.csv"')
 
 
 class OrderLogs(OrderMixin, RequestHandler):
@@ -687,15 +902,15 @@ class OrderLogs(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
-            self.check_readable(order)
+            order = self.get_order(iuid)
         except ValueError, msg:
             self.see_other('home', error=str(msg))
             return
+        title = u"Logs for {0} '{1}'".format(utils.terminology('order'),
+                                             order['title'])
         self.render('logs.html',
-                    title=u"Logs for {0} '{1}'".format(utils.terminology('order'),
-                                                       order['title']),
+                    title=title,
                     entity=order,
                     logs=self.get_logs(order['_id']))
 

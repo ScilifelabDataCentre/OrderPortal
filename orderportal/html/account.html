@@ -271,13 +271,7 @@
   {% if settings.get('ACCOUNT_FUNDER_INFO_GENDER') %}
   <tr>
     <th>Gender</th>
-    <td>
-      {% try %}
-      {{ account['gender'].capitalize() }}
-      {% except KeyError %}
-      <span class="text-warning glyphicon glyphicon-question-sign"></span>
-      {% end %}
-    </td>
+    <td>{{ account.get('gender', '-').capitalize() }}</td>
   </tr>
   {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GENDER') #}
   {% if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') %}
