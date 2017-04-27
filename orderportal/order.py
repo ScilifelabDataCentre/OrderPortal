@@ -481,7 +481,10 @@ class OrderApiV1Mixin(ApiV1Mixin):
     def get_order_json(self, order, names={}, forms={}, full=False):
         """Return a dictionary for JSON output for the order.
         Account names or forms title lookup are computed if not given.
-        If 'full' then add all data, else only for orders list."""
+        If 'full' then add all fields, else only for orders list.
+        NOTE: Only the values of the fields are included, not
+        the full definition of the fields. To obtain that,
+        one must fetch the JSON for the corresponding form."""
         URL = self.absolute_reverse_url
         if full:
             data = utils.get_json(self.order_reverse_url(order, api=True),
@@ -525,7 +528,10 @@ class OrderApiV1Mixin(ApiV1Mixin):
             api=dict(href=self.order_reverse_url(order, api=True)),
             display=dict(href=self.order_reverse_url(order)))
         if full:
-            data['fields'] = self.get_fields(order)
+            data['fields'] = OD()
+            # A bit roundabout, but the fields will come out in correct order
+            for field in self.get_fields(order):
+                data['fields'][field['identifier']] = field['value']
             data['files'] = OD()
             for name in sorted(order.get('_attachments', [])):
                 stub = order['_attachments'][name]
@@ -602,7 +608,7 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
 
 
 class OrderCsv(OrderMixin, RequestHandler):
-    "Return a CSV file containing the order data."
+    "Return a CSV file containing the order data. Contains field definitions."
 
     @tornado.web.authenticated
     def get(self, iuid):
@@ -837,15 +843,11 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
         keys = [f['identifier'] for f in settings['ORDERS_LIST_FIELDS']]
         for order in self.get_orders():
             data = self.get_order_json(order, names, forms)
-            fields = dict([(f['identifier'], f)
-                           for f in self.get_fields(order)])
-            data['fields'] = []
+            data['fields'] = OD()
             for key in keys:
-                try:
-                    data['fields'].append(fields[key])
-                except KeyError:
-                    pass
+                data['fields'][key] = order['fields'].get(key)
             result['items'].append(data)
+            result['invalid'] = order['invalid']
         self.write(result)
 
 
