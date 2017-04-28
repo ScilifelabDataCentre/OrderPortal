@@ -1,0 +1,38 @@
+{# Listing of all news items. #}
+
+{% if news_items %}
+<table class="table table-condensed">
+  {% for news in news_items %}
+  <tr>
+    {% if is_admin %}
+    <td>
+      <button type="button" class="btn btn-primary btn-xs"
+	      data-toggle="modal" data-target="#{{ news['_id'] }}">
+	<span class="glyphicon glyphicon-edit"></span>
+	Edit
+      </button>
+      <p></p>
+      <form action="{{ reverse_url('news_edit', news['_id']) }}"
+	    role="form"
+	    method="POST">
+	{% module xsrf_form_html() %}
+	<input type="hidden" name="_http_method" value="delete">
+	<button type="submit" class="btn btn-danger btn-xs"
+		onclick="return confirm('Cannot be undone! Really delete?');">
+	  <span class="glyphicon glyphicon-trash"></span>
+	  Delete
+	</button>
+      </form>
+    </td>
+    {% end %}{# if is_admin #}
+    <td>
+      <strong>{{ news.get('title') or '[no title]' }}</strong>
+      ({{ news['modified'].split('T')[0] }})
+      {% module Markdown(news.get('text')) %}
+    </td>
+  </tr>
+  {% end %}
+</table>
+{% else %}
+<i>Currently none. Check again later.</i>
+{% end %}

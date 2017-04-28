@@ -16,7 +16,7 @@ class NewsSaver(saver.Saver):
     doctype = constants.NEWS
 
 
-class News(RequestHandler):
+class NewsEdit(RequestHandler):
     "Edit or delete a news item."
 
     @tornado.web.authenticated
@@ -30,9 +30,9 @@ class News(RequestHandler):
             self.see_other('home', error='No such news item.')
             return
         with NewsSaver(doc=news, rqh=self) as saver:
-            saver['date'] = self.get_argument('date', None)
+            saver['date'] = self.get_argument('date', '') or utils.today()
             saver['title'] = self.get_argument('title')
-            saver['text'] = self.get_argument('text', None) or ''
+            saver['text'] = self.get_argument('text', '')
         self.see_other('home')
 
     @tornado.web.authenticated
@@ -53,7 +53,14 @@ class NewsCreate(RequestHandler):
     def post(self):
         self.check_admin()
         with NewsSaver(rqh=self) as saver:
-            saver['date'] = self.get_argument('date', None)
+            saver['date'] = utils.today()
             saver['title'] = self.get_argument('title')
-            saver['text'] = self.get_argument('text', None) or ''
+            saver['text'] = self.get_argument('text', '')
         self.see_other('home')
+
+
+class News(RequestHandler):
+    "List all news items."
+
+    def get(self):
+        self.render('news.html', news_items=self.get_news())

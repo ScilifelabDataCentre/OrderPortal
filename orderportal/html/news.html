@@ -1,0 +1,12 @@
+{# List of all news. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}News{% end %}
+{% block body_title %}
+<span class="glyphicon glyphicon-info-sign"></span> News
+{% end %}
+
+{% block content %}
+{% include 'news_list.html' %}
+{% end %}

@@ -276,16 +276,13 @@ class RequestHandler(tornado.web.RequestHandler):
         else:
             raise tornado.web.HTTPError(404, reason=reason)
 
-    def get_news(self):
+    def get_news(self, limit=None):
         "Get all news items in descending 'modified' order."
-        view = self.db.view('news/modified', include_docs=True)
-        news = [r.doc for r in view]
-        # Fill in date from modified, if not explicit
-        for new in news:
-            if not new.get('date'):
-                new['date'] = new['modified'].split('T')[0]
-        news.sort(key=lambda i: i['date'], reverse=True)
-        return news
+        kwargs = dict(include_docs=True, descending=True)
+        if limit is not None:
+            kwargs['limit'] = limit
+        view = self.db.view('news/modified', **kwargs)
+        return [r.doc for r in view]
 
     def get_events(self):
         "Get all events items in descending 'date' order."
