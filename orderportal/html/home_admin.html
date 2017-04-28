@@ -1,6 +1,6 @@
 {# Home page for a logged in user having role 'admin'. #}
 
-{% extends "home.html" %}
+{% extends "home_base.html" %}
 
 {% block content_left %}
 
@@ -76,8 +76,300 @@
 
 {% end %} {# block content_left #}
 
-{% block javascript_autofocus %}
-<script>
-  $(document).ready(function(){ $("#term").focus(); });
-</script>
-{% end %}
+{% block content_edit_modals %}
+{# Modals for editing news items. #}
+{% for pos, news in enumerate(news_items) %}
+<div id="{{ news['_id'] }}" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+	<button type="button" class="close"
+		data-dismiss="modal" aria-label="Close">
+	  <span aria-hidden="true">&times;</span>
+	</button>
+        <h4 class="modal-title">Edit news item</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('news', news['_id']) }}"
+	      role="form"
+	      method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label"
+		       for="news_title_edit_{{ pos }}">Title</label>
+		<input type="text" class="form-control"
+		       name="title" id="news_title_edit_{{ pos }}"
+		       value="{{ news.get('title') or '' }}">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Title for the news item.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <label for="news_text_edit_{{ pos }}">Text</label>
+	    <textarea class="form-control" rows="4"
+		      name="text" id="news_text_edit_{{ pos }}"
+		      >{{ news.get('text') or '' }}</textarea>
+	    <span class="help-block">
+	      Text for the news item, which will be formatted using
+	      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>.
+	    </span>
+	  </div>
+	  
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-4">
+		<label class="control-label"
+		       for="news_date_edit_{{ pos }}">Date</label>
+		<input type="text" class="datepicker form-control"
+		       name="date" id="news_date_edit_{{ pos }}"
+		       value="{{ news['date'] or '' }}">
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Date of publication for the news item.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit" class="btn btn-success">
+	      <span class="glyphicon glyphicon-floppy-disk"></span>
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% end %}{# for news in news_items #}
+
+{# Modals for editing event items. #}
+{% for pos, event in enumerate(events) %}
+<div id="{{ event['_id'] }}" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close"
+		data-dismiss="modal" aria-label="Close">
+	  <span aria-hidden="true">&times;</span>
+	</button>
+        <h4 class="modal-title">Edit event item</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('event', event['_id']) }}"
+	      role="form"
+	      method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-4">
+		<label class="control-label"
+		       for="event_date_edit_{{ pos }}">Date</label>
+		<input type="text" class="datepicker form-control"
+		       name="date" id="event_date_edit_{{ pos }}"
+		       value="{{ event['date'] }}">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Date for the event; start date if multi-day event.
+	    </span>
+	  </div>
+
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label"
+		       for="event_title_edit_{{ pos }}">Title</label>
+		<input type="text" class="form-control"
+		       name="title" id="event_title_edit_{{ pos }}"
+		       value="{{ event['title'] }}">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Title for the event.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-10">
+		<label class="control-label"
+		       for="event_text_edit_{{ pos }}">Text</label>
+		<textarea class="form-control" rows="4"
+			  name="text" id="event_text_edit_{{ pos }}"
+			  >{{ event.get('text') or '' }}</textarea>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Text for the event, which will be formatted using
+	      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit" class="btn btn-success">
+	      <span class="glyphicon glyphicon-floppy-disk"></span>
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% end %} {# for pos, event in enum(events) #}
+
+{# Modal for creating a news item. #}
+<div id="news_create" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close"
+		data-dismiss="modal" aria-label="Close">
+	  <span aria-hidden="true">&times;</span>
+	</button>
+        <h4 class="modal-title">Create a news item</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('news_create') }}"
+	      role="form"
+	      method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label"
+		       for="news_title_create">Title</label>
+		<input type="text" class="form-control"
+		       name="title" id="news_title_create">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Title for the news item.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <label for="news_text_create">Text</label>
+	    <textarea class="form-control" rows="4"
+		      name="text" id="news_text_create"></textarea>
+	    <span class="help-block">
+	      Text for the news item, which will be formatted using
+	      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>.
+	    </span>
+	  </div>
+	  
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit" class="btn btn-success">
+	      <span class="glyphicon glyphicon-floppy-disk"></span>
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{# Modal for creating an event item. #}
+<div id="event_create" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close"
+		data-dismiss="modal" aria-label="Close">
+	  <span aria-hidden="true">&times;</span>
+	</button>
+        <h4 class="modal-title">Create an event item</h4>
+      </div>
+      <div class="modal-body">
+	<form action="{{ reverse_url('event_create') }}"
+	      role="form"
+	      method="POST">
+	  {% module xsrf_form_html() %}
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-4">
+		<label class="control-label"
+		       for="event_date_create">Date</label>
+		<input type="text" class="datepicker form-control"
+		       name="date" id="event_date_create">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Date for the event; start date if multi-day event.
+	    </span>
+	  </div>
+
+	  <div class="form-group has-feedback">
+	    <div class="row">
+	      <div class="col-md-8">
+		<label class="control-label"
+		       for="event_title_create">Title</label>
+		<input type="text" class="form-control"
+		       name="title" id="event_title_create">
+		<span style="color:red; margin-right: 1em;"
+		      class="glyphicon glyphicon-star form-control-feedback"
+		      aria-hidden="true"></span>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Title for the event.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-md-10">
+		<label class="control-label"
+		       for="event_text_create">Text</label>
+		<textarea class="form-control" rows="4"
+			  name="text" id="event_text_create"></textarea>
+	      </div>
+	    </div>
+	    <span class="help-block">
+	      Text for the event, which will be formatted using
+	      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>.
+	    </span>
+	  </div>
+
+	  <div class="form-group">
+	    <label class="control-label"></label>
+	    <button type="submit" class="btn btn-success">
+	      <span class="glyphicon glyphicon-floppy-disk"></span>
+	      Save
+	    </button>
+	  </div>
+	</form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% end %} {# block content_edit_modals #}
