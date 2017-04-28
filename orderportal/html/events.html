@@ -1,16 +1,16 @@
-{# List of all news. #}
+{# List of all events. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}News{% end %}
+{% block head_title %}Events{% end %}
 {% block body_title %}
-<span class="glyphicon glyphicon-info-sign"></span> News
+<span class="glyphicon glyphicon-calendar"></span> Events
 {% end %}
 
 {% block action_content %}
 {% if is_admin %}
 <button type="button" class="btn btn-success"
-	data-toggle="modal" data-target="#news_create">
+	data-toggle="modal" data-target="#event_create">
   <span class="glyphicon glyphicon-plus"></span>
   Create
 </button>
@@ -18,5 +18,5 @@
 {% end %}
 
 {% block main_content %}
-{% include 'news_list.html' %}
+{% include 'events_list.html' %}
 {% end %}

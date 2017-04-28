@@ -149,7 +149,7 @@
 		</li>
 		<li><a href="{{ reverse_url('statuses') }}">Statuses</a></li>
 		<li><a href="{{ reverse_url('settings') }}">Settings</a></li>
-		<li><a href="{{ reverse_url('siteinfo') }}">Site information</a></li>
+		<li><a href="{{ reverse_url('statistics') }}">Statistics</a></li>
 		<li class="dropdown-submenu">
 		  <a class="submenu" href="#">Texts
 		    <span class="caret"></span>
@@ -162,6 +162,7 @@
 		    {% end %}
 		  </ul>
 		</li>
+		<li><a href="{{ reverse_url('software') }}">Software info</a></li>
 	      </ul>
 	    </li>
 	    {% if not reduce(lambda i,j: i and j, [global_modes[k] for k in global_modes.keys() if k.startswith('allow')]) %}
@@ -289,7 +290,6 @@
 
     </div> {# end of container for body content #}
 
-    {% block body-footer %}
     <div class="container-fluid">
       <div class="row">
 	<div class="col-md-12">
@@ -301,14 +301,13 @@
 	    </a>
 	  </div>
 	  <div class="pull-right">
-	    <a href="{{ reverse_url('siteinfo') }}">
+	    <a href="{{ reverse_url('software') }}">
 	      OrderPortal version {{ version }}
 	    </a>
 	  </div>
 	</div>
       </div>
     </div>
-    {% end %} {# block body-footer #}
 
     {% block javascript_autofocus %}
     <script>

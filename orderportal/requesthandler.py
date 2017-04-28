@@ -284,9 +284,15 @@ class RequestHandler(tornado.web.RequestHandler):
         view = self.db.view('news/modified', **kwargs)
         return [r.doc for r in view]
 
-    def get_events(self):
-        "Get all events items in descending 'date' order."
-        view = self.db.view('event/date', include_docs=True)
+    def get_events(self, upcoming=False):
+        "Get all (descending) or upcoming (ascending) events."
+        kwargs = dict(include_docs=True)
+        if upcoming:
+            kwargs['startkey'] = utils.today()
+            kwargs['endkey'] = constants.CEILING
+        else:
+            kwargs['descending'] = True
+        view = self.db.view('event/date', **kwargs)
         return [r.doc for r in view]
 
     def get_entity_attachment_filename(self, entity):
