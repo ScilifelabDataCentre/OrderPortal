@@ -122,7 +122,7 @@ class Text(tornado.web.UIModule):
             doc = self.handler.get_entity_view('text/name', name)
             text = doc['text']
         except (tornado.web.HTTPError, KeyError):
-            text = default or u"<i>No text for '{0}'.</i>".format(name)
+            text = default or u"<i>No text defined.</i>"
         return markdown.markdown(text, output_format='html5')
 
 

@@ -2,19 +2,14 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}{{ settings['SITE_NAME'] }}{% end %}
-
 {% block body_header %}
-
 <div class="row">
-
   <div class="col-md-4">
     <img class="img-responsive"
 	 src="{{ reverse_url('site', settings['SITE_HOME_ICON']) }}"
 	 title="{{ settings['SITE_NAME'] }}"
 	 alt="{{ settings['SITE_NAME'] }}">
   </div>
-
   <div class="col-md-8">
     <h2>{{ settings['SITE_NAME'] }}</h2>
     {% if is_admin %}
@@ -26,11 +21,8 @@
     {% end %}
     {% module Text('header') %}
   </div>
-
 </div>
-
 <br>
-
 {% end %} {# block body_header #}
 
 {% block content %}
@@ -564,7 +556,6 @@
 </div>
 {% end %} {# if is_admin #}
 
-{% block content-footer %}
 <div class="row">
   <div class="col-md-12">
     <div class="panel panel-default">
@@ -581,14 +572,11 @@
     </div>
   </div>
 </div>
-{% end %} {# block content-footer #}
 
 {% end %} {# block content #}
 
 {% block javascript_autofocus %}
 <script>
-  $(document).ready(function(){
-    $("#email").focus();
-  });
+  $(document).ready(function(){ $("#email").focus(); });
 </script>
 {% end %}

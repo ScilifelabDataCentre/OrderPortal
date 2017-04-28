@@ -85,8 +85,6 @@ Edit {% module Icon('form', label=True) %} {{ form['title'] }}
 
 {% block javascript_autofocus %}
 <script>
-  $(document).ready(function(){
-    $("#title").focus();
-  });
+  $(document).ready(function(){ $("#title").focus(); });
 </script>
 {% end %}

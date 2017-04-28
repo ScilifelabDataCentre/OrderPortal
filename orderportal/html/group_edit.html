@@ -97,8 +97,6 @@ Edit {% module Icon('group') %} {{ group['name'] }}
 
 {% block javascript_autofocus %}
 <script>
-  $(document).ready(function(){
-    $("#owner").focus();
-  });
+  $(document).ready(function(){ $("#owner").focus(); });
 </script>
 {% end %}

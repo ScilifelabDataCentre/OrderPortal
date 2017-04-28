@@ -425,8 +425,6 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
 
 {% block javascript_autofocus %}
 <script>
-  $(document).ready(function(){
-    $("#parent").focus();
-  });
+  $(document).ready(function(){ $("#parent").focus(); });
 </script>
 {% end %}
