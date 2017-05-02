@@ -1,7 +1,7 @@
 /* field_visible_if.js
    Change visibility of fields according to value of another field.
 */
-$(document).ready(function() {
+$(function() {
     var set_visible_if_initial = function() {
 	var field = $(this);
 	var fieldId = $(this).attr('id');

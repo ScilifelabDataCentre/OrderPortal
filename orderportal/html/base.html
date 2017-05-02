@@ -21,7 +21,7 @@
     <script defer src="{{ settings['DATATABLES_JS_URL'] }}"></script>
     <script defer src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
     <script>
-      $(document).ready(function(){
+      $(function(){
         $('.dropdown-submenu a.submenu').on("click", function(e){
           $(this).next('ul').toggle();
           e.stopPropagation();
@@ -31,7 +31,7 @@
     </script>
     <script>
       $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
-      $(document).ready(function(){ $(".datepicker").datepicker(); });
+      $(function(){ $(".datepicker").datepicker(); });
     </script>
 
   </head>
@@ -246,7 +246,6 @@
       </div>
       {% end %} {# block body_header #}
 
-      {% block error %}
       {% try %}
       {% if error %}
       <div class="row">
@@ -257,9 +256,7 @@
       {% end %} {# if error #}
       {% except NameError %}
       {% end %} {# try #}
-      {% end %} {# block error #}
 
-      {% block message %}
       {% try %}
       {% if message %}
       <div class="row">
@@ -271,7 +268,6 @@
       {% end %} {# if message #}
       {% except NameError %}
       {% end %} {# try #}
-      {% end %} {# block message #}
 
       {% block content %}
       <div class="row">
@@ -311,7 +307,7 @@
 
     {% block javascript_autofocus %}
     <script>
-      $(document).ready(function(){ $("#term").focus(); });
+      $(function(){ $("#term").focus(); });
     </script>
     {% end %}
 

@@ -324,7 +324,7 @@
 
 {% block javascript_code %}
 <script>
-$(document).ready(function() {
+$(function() {
   $("#_identifier").change(function(event) {
     $("#identifier").val(event.target.value);
   });
@@ -335,6 +335,6 @@ $(document).ready(function() {
 
 {% block javascript_autofocus %}
 <script>
-  $(document).ready(function(){ $("#group").focus(); });
+  $(function(){ $("#group").focus(); });
 </script>
 {% end %}
