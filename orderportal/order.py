@@ -688,15 +688,17 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
         except ValueError, msg:
             raise tornado.web.HTTPError(404, reason=str(msg))
         zip_stringio = StringIO()
-        with zipfile.ZipFile(zip_stringio, 'w') as writer:
-            name = order.get('identifier') or order['_id']
-            writer.writestr(name + '.csv',
-                            self.get_order_csv_stringio(order).getvalue())
-            writer.writestr(name + '.json',
-                            json.dumps(self.get_order_json(order, full=True)))
-            for filename in sorted(order.get('_attachments', [])):
-                outfile = self.db.get_attachment(order, filename)
-                writer.writestr(filename, outfile.read())
+        # This should use a context, but it is not implemented in Python 2.6
+        writer = zipfile.ZipFile(zip_stringio, 'w')
+        name = order.get('identifier') or order['_id']
+        writer.writestr(name + '.csv',
+                        self.get_order_csv_stringio(order).getvalue())
+        writer.writestr(name + '.json',
+                        json.dumps(self.get_order_json(order, full=True)))
+        for filename in sorted(order.get('_attachments', [])):
+            outfile = self.db.get_attachment(order, filename)
+            writer.writestr(filename, outfile.read())
+        writer.close()
         self.write(zip_stringio.getvalue())
         self.set_header('Content-Type', constants.ZIP_MIME)
         self.set_header('Content-Disposition',
