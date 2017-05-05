@@ -1,0 +1,39 @@
+{# Statistics page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Statistics{% end %}
+{% block body_title %}Statistics{% end %}
+
+{% block main_content %}
+<div class="row">
+  <div class="col-md-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">{{ terminology('Order') }} counts</div>
+      <div class="panel-body">
+	<table class="table">
+	  {% for status in settings['ORDER_STATUSES'] %}
+	  <tr>
+	    <th>{% module Icon(status['identifier'], label=True) %} </th>
+	    <td class="text-right">
+	      <a href="{{ reverse_url('orders', status=status['identifier']) }}"
+		 class="badge">
+		{{ orders['status'].get(status['identifier'], 0) }}
+	      </a>
+	    </td>
+	  </tr>
+	  {% end %}
+	  <tr>
+	    <th># Total</th>
+	    <td class="text-right">
+	      <a href="{{ reverse_url('orders') }}" class="badge">
+		{{ orders['count'] }}
+	      </a>
+	    </td>
+	  </tr>
+	</table>
+      </div>
+    </div>
+  </div>
+</div>
+{% end %} {# block main_content #}

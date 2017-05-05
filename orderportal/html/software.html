@@ -1,16 +1,16 @@
-{# Site info page. #}
+{# Software info page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}OrderPortal site information{% end %}
-{% block body_title %}OrderPortal site information{% end %}
+{% block head_title %}Software information{% end %}
+{% block body_title %}Software information{% end %}
 
 {% block main_content %}
 <div class="row">
   <div class="col-md-6">
     <div class="panel panel-default">
       <div class="panel-heading">
-	<strong>Version {{ version }}</strong>
+	<strong>OrderPortal version {{ version }}</strong>
       </div>
       <div class="panel-body">
 	<p>
@@ -35,8 +35,8 @@
     </div>
     <div class="panel panel-default">
       <div class="panel-heading">
-	The system uses the following Python packages available from
-	<a href="https://pypi.python.org/pypi">PyPi</a>:
+	Relies on Python packages available from
+	<a href="https://pypi.python.org/pypi">PyPi</a>.
       </div>
       <div class="panel-body">
 	<table class="table table-noborder">
@@ -51,7 +51,7 @@
     </div>
     <div class="panel panel-default">
       <div class="panel-heading">
-	The system uses the following non-Python software:
+	Relies on non-Python software.
       </div>
       <div class="panel-body">
 	<table class="table table-noborder">
@@ -59,27 +59,6 @@
 	  <tr>
 	    <th width="60%">{% raw key %}</th>
 	    <td width="40%">{{ value }}</td>
-	  </tr>
-	  {% end %}
-	</table>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-6">
-    <div class="panel panel-default">
-      <div class="panel-heading">{{ terminology('Order') }} counts</div>
-      <div class="panel-body">
-	<table class="table">
-	  <tr>
-	    <th># Total</th>
-	    <td class="number">{{ orders['count'] }}</td>
-	  </tr>
-	  {% for status in settings['ORDER_STATUSES'] %}
-	  <tr>
-	    <th>{% module Icon(status['identifier'], label=True) %} </th>
-	    <td class="number">
-	      {{ orders['status'].get(status['identifier'], 0) }}
-	    </td>
 	  </tr>
 	  {% end %}
 	</table>

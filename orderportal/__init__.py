@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.1.2'
+__version__ = '3.2.1'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -25,7 +25,7 @@ settings = dict(
     BOOTSTRAP_CSS_URL='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
     BOOTSTRAP_JS_URL='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js',
     JQUERY_HOME='https://jquery.com/',
-    JQUERY_URL='https://code.jquery.com/jquery-1.12.3.min.js',
+    JQUERY_URL='https://code.jquery.com/jquery-1.12.4.min.js',
     JQUERY_UI_HOME='https://jqueryui.com/',
     JQUERY_UI_URL='https://code.jquery.com/ui/1.11.4/jquery-ui.min.js',
     JQUERY_UI_THEME_URL='https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css',
@@ -43,6 +43,7 @@ settings = dict(
     DISPLAY_ORDERS_MOST_RECENT=500,
     DISPLAY_MAX_PENDING_ACCOUNTS=10,
     DISPLAY_DEFAULT_MAX_LOG=20,
+    DISPLAY_MAX_NEWS=4,
     INITIAL_TEXTS_FILEPATH='{SITE_DIR}/initial_texts.yaml',
     ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',
     ORDER_STATUSES_FILEPATH='{SITE_DIR}/order_statuses.yaml',

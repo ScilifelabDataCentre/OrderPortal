@@ -1,6 +1,6 @@
 {# Home page for a logged in user having role 'staff'. #}
 
-{% extends "home.html" %}
+{% extends "home_base.html" %}
 
 {% block content_left %}
 <div class="panel panel-default">
@@ -22,11 +22,3 @@
   </div>
 </div>
 {% end %} {# block content_left #}
-
-{% block javascript_autofocus %}
-<script>
-  $(document).ready(function(){
-    $("#term").focus();
-  });
-</script>
-{% end %}

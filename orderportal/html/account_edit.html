@@ -424,8 +424,6 @@ administrator of the site can then change the ownership of your
 
 {% block javascript_autofocus %}
 <script>
-  $(document).ready(function(){
-    $("#first_name").focus();
-  });
+  $(function(){ $("#first_name").focus(); });
 </script>
 {% end %}

@@ -70,10 +70,10 @@
 
 {% block javascript_code %}
 <script>
-  $(document).ready(function() {
-    $('#forms').DataTable( {
-      pagingType: "full_numbers",
-      order: [[7, "desc"]]
+  $(function() {
+    $("#forms").DataTable( {
+      "pagingType": "full_numbers",
+      "order": [[7, "desc"]]
     } );
   } );
 </script>

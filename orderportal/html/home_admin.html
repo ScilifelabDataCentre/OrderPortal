@@ -1,6 +1,6 @@
 {# Home page for a logged in user having role 'admin'. #}
 
-{% extends "home.html" %}
+{% extends "home_base.html" %}
 
 {% block content_left %}
 
@@ -8,16 +8,15 @@
   <div class="panel-heading">
     <span class="glyphicon glyphicon-user"></span>
     Pending accounts
+    <a href="{{ reverse_url('accounts', status='pending') }}"
+       class="btn btn-warning btn-xs pull-right" role="button">
+      <span class="glyphicon glyphicon-user"></span>
+      All pending
+    </a>
   </div>
-
   <div class="panel-body">
     {% if pending %}
-    <table class="table table-condensed">
-      <tr>
-	<th>Account</th>
-	<th>Role</th>
-	<th>Created</th>
-      </tr>
+    <table class="table table-condensed table-noborder">
       {% for account in pending %}
       <tr>
 	<td>
@@ -26,15 +25,10 @@
 	  </a>
 	</td>
 	<td>{% module Icon(account['role'], label=True) %}</td>
-	<td class="localtime">{{ account['created'] }}</td>
+	<td class="localtime nobr">{{ account['created'] }}</td>
       </tr>
       {% end %}
     </table>
-    <a href="{{ reverse_url('accounts', status='pending') }}"
-       class="btn btn-warning btn-xs pull-right" role="button">
-      <span class="glyphicon glyphicon-user"></span>
-      All pending
-    </a>
     {% else %}
     <i>Currently none.</i>
     {% end %}
@@ -45,9 +39,14 @@
   <div class="panel-heading">
     <span class="glyphicon glyphicon-list-alt"></span>
     Recently submitted {{ terminology('orders') }}
+    <a href="{{ reverse_url('orders', status='submitted') }}"
+       class="btn btn-default btn-xs pull-right" role="button">
+      <span class="glyphicon glyphicon-list-alt"></span>
+      All submitted
+    </a>
   </div>
   <div class="panel-body">
-    <table class="table-condensed">
+    <table class="table table-condensed table-noborder">
       {% for order in orders %}
       <tr>
 	<th>
@@ -62,24 +61,11 @@
 	  {% end %}
 	</th>
 	<td>{% module Icon(order['status'], label=True) %}</td>
-	<td class="localtime">{{ order['modified'] }}</td>
+	<td class="localtime nobr">{{ order['modified'] }}</td>
       </tr>
       {% end %}
     </table>
-    <a href="{{ reverse_url('orders', status='submitted') }}"
-       class="btn btn-default btn-xs pull-right" role="button">
-      <span class="glyphicon glyphicon-list-alt"></span>
-      All submitted
-    </a>
   </div>
 </div>
 
 {% end %} {# block content_left #}
-
-{% block javascript_autofocus %}
-<script>
-  $(document).ready(function(){
-    $("#term").focus();
-  });
-</script>
-{% end %}

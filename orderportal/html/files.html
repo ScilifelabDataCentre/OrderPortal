@@ -71,16 +71,16 @@
 
 {% block javascript_code %}
 <script>
-  $(document).ready(function() {
-    $('#files').DataTable( {
-  "pagingType": "full_numbers",
-  "order": [[2, "desc"]],
-  "columnDefs": [
-  {
-      "targets"  : 1,
-      "orderable": false,
-    }],
-    } );
-  } );
+  $(function() {
+    $("#files").DataTable( {
+      "pagingType": "full_numbers",
+      "order": [[2, "desc"]],
+      "columnDefs": [
+      {
+        "targets"  : 1,
+        "orderable": false,
+      }],
+    });
+  });
 </script>
 {% end %}

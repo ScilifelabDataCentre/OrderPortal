@@ -60,3 +60,10 @@ class Event(RequestHandler):
             return
         self.db.delete(event)
         self.see_other('home')
+
+
+class Events(RequestHandler):
+    "List of all events."
+
+    def get(self):
+        self.render('events.html', events=self.get_events())

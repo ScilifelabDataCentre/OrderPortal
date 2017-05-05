@@ -1,4 +1,4 @@
-{# List of all orders; for staff. #}
+{# List of all orders; for admin and staff. #}
 
 {% extends "base.html" %}
 
@@ -142,7 +142,7 @@
 
 {% block javascript_code %}
 <script>
-$(document).ready(function() {
+$(function() {
   $(".refresh").change(function () {
     $("#refresh").submit();
   });
