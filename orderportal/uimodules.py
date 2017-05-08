@@ -118,7 +118,7 @@ class Markdown(tornado.web.UIModule):
 class Text(tornado.web.UIModule):
     "Fetch text object from the database, process it, and output."
 
-    def render(self, name, default=None):
+    def render(self, name, default=''):
         try:
             doc = self.handler.get_entity_view('text/name', name)
             text = doc['text']
