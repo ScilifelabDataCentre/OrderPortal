@@ -109,15 +109,16 @@ class Markdown(tornado.web.UIModule):
     "Process the text as Markdown."
 
     def render(self, text, safe=False):
+        text = text or ''
         if not safe:
-            text = escape(text or '')
-        return markdown.markdown(text or '', output_format='html5')
+            text = escape(text)
+        return markdown.markdown(text, output_format='html5')
 
 
 class Text(tornado.web.UIModule):
     "Fetch text object from the database, process it, and output."
 
-    def render(self, name, default=None):
+    def render(self, name, default=''):
         try:
             doc = self.handler.get_entity_view('text/name', name)
             text = doc['text']
