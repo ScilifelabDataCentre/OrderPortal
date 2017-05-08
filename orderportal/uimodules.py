@@ -109,9 +109,10 @@ class Markdown(tornado.web.UIModule):
     "Process the text as Markdown."
 
     def render(self, text, safe=False):
+        text = text or ''
         if not safe:
-            text = escape(text or '')
-        return markdown.markdown(text or '', output_format='html5')
+            text = escape(text)
+        return markdown.markdown(text, output_format='html5')
 
 
 class Text(tornado.web.UIModule):
