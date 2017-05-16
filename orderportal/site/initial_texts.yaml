@@ -1,5 +1,4 @@
-# Initial texts displayed in various sections of the portal.
-# See https://github.com/pekrau/OrderPortal/wiki/Menu-bar;-Admin;-Texts
+# Initialization of texts displayed in various sections of the portal.
 header: |
   This is a portal for placing orders. You need to have an account and
   be logged in to create, edit, submit and view orders.

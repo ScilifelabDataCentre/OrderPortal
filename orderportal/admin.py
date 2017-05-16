@@ -29,7 +29,7 @@ class Text(RequestHandler):
             text = self.get_entity_view('text/name', name)
         except tornado.web.HTTPError:
             text = dict(name=name)
-        origin = self.get_argument('origin', self.absolute_reverse_url('home'))
+        origin = self.get_argument('origin', self.absolute_reverse_url('texts'))
         self.render('text.html', text=text, origin=origin)
 
     @tornado.web.authenticated
@@ -41,8 +41,17 @@ class Text(RequestHandler):
             text = dict(name=name)
         with TextSaver(doc=text, rqh=self) as saver:
             saver['text'] = self.get_argument('text')
-        url = self.get_argument('origin', self.absolute_reverse_url('home'))
+        url = self.get_argument('origin', self.absolute_reverse_url('texts'))
         self.redirect(url, status=303)
+
+
+class Texts(RequestHandler):
+    "Page listing texts used in the web site."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render('texts.html', texts=sorted(constants.TEXTS.items()))
 
 
 class Statuses(RequestHandler):

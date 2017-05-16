@@ -139,6 +139,7 @@ def main():
         url(r'/api/v1/file/([^/]+)/edit', FileEditApiV1, name='file_edit_api'),
         url(r'/file/([0-9a-f]{32})/logs', FileLogs, name='file_logs'),
         url(r'/text/([^/]+)', Text, name='text'),
+        url(r'/texts', Texts, name='texts'),
         url(r'/log/([0-9a-f]{32})', Log, name='log'),
         url(r'/([0-9a-f]{32})', Entity, name='entity'),
         url(r'/admin/search_fields', SearchFields, name='search_fields'),

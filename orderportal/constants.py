@@ -59,6 +59,17 @@ TYPES = [STRING, INT, FLOAT, BOOLEAN, URL, SELECT, MULTISELECT,
 TYPE_LABELS = {INT: 'integer'}
 TYPE_HTML = {STRING: 'text', INT: 'number'}
 
+# Texts for use in web site
+TEXTS = dict(header='Header on portal home page.',
+             register='Registration page.',
+             registered='Page after registration.',
+             reset='Password reset page.',
+             password='Password setting page.',
+             help_datatypes='Page explaining available data types.',
+             general='General information on portal home page.',
+             contact='Contact page.',
+             about='About page.')
+
 # Boolean string values
 TRUE  = frozenset(['true', 'yes', 't', 'y', '1'])
 FALSE = frozenset(['false', 'no', 'f', 'n', '0'])

@@ -11,10 +11,13 @@
       method="POST">
   {% module xsrf_form_html() %}
 
+  <p>
+    {{ constants.TEXTS[text['name']] }}
+  </p>
+
   <div class="form-group">
     <div class="row">
-      <div class="col-md-8">
-	<label class="control-label" for="text">Text</label>
+      <div class="col-md-10">
 	<textarea rows="16" class="form-control"
 		  id="text" name="text"
 		  >{{ text.get('text') or '' }}</textarea>
@@ -37,8 +40,9 @@
   </div>
 
 </form>
+{% end %} {# block main_content #}
 
-<br>
+{% block action_content %}
 <form action="{{ origin }}"
       role="form"
       method="GET">
@@ -50,5 +54,4 @@
     </button>
   </div>
 </form>
-
-{% end %} {# block main_content #}
+{% end %} {# block action_content #}

@@ -13,7 +13,7 @@
   <div class="col-md-8">
     <h2>{{ settings['SITE_NAME'] }}</h2>
     {% if is_admin %}
-    <a href="{{ reverse_url('text', 'header') }}"
+    <a href="{{ reverse_url('text', 'header', origin=reverse_url('home')) }}"
        class="btn btn-primary btn-xs pull-right" role="button">
       <span class="glyphicon glyphicon-edit"></span>
       Edit
@@ -196,7 +196,7 @@
   <div class="col-md-12">
     <div class="panel-body">
       {% if is_admin %}
-      <a href="{{ reverse_url('text', 'general') }}"
+      <a href="{{ reverse_url('text','general', origin=reverse_url('home')) }}"
 	 class="btn btn-primary btn-xs pull-right" role="button">
 	<span class="glyphicon glyphicon-edit"></span>
 	Edit

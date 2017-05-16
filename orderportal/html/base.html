@@ -21,15 +21,6 @@
     <script defer src="{{ settings['DATATABLES_JS_URL'] }}"></script>
     <script defer src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
     <script>
-      $(function(){
-        $('.dropdown-submenu a.submenu').on("click", function(e){
-          $(this).next('ul').toggle();
-          e.stopPropagation();
-          e.preventDefault();
-        });
-      });
-    </script>
-    <script>
       $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
       $(function(){ $(".datepicker").datepicker(); });
     </script>
@@ -150,18 +141,7 @@
 		<li><a href="{{ reverse_url('statuses') }}">Statuses</a></li>
 		<li><a href="{{ reverse_url('settings') }}">Settings</a></li>
 		<li><a href="{{ reverse_url('statistics') }}">Statistics</a></li>
-		<li class="dropdown-submenu">
-		  <a class="submenu" href="#">Texts
-		    <span class="caret"></span>
-		  </a>
-		  <ul class="dropdown-menu">
-		    {% for name in texts %}
-		    <li>
-		      <a href="{{ reverse_url('text', name) }}">{{ name }}</a>
-		    </li>
-		    {% end %}
-		  </ul>
-		</li>
+		<li><a href="{{ reverse_url('texts') }}">Texts</a></li>
 		<li><a href="{{ reverse_url('software') }}">Software info</a></li>
 	      </ul>
 	    </li>
