@@ -528,6 +528,11 @@ class OrderApiV1Mixin(ApiV1Mixin):
             api=dict(href=self.order_reverse_url(order, api=True)),
             display=dict(href=self.order_reverse_url(order)))
         if full:
+            data['transitions'] = dict(
+                [(s['identifier'],
+                  {'href': 
+                   URL('order_transition', order['_id'], s['identifier'])})
+                 for s in self.get_targets(order, check_valid=True)])
             data['fields'] = OD()
             # A bit roundabout, but the fields will come out in correct order
             for field in self.get_fields(order):
