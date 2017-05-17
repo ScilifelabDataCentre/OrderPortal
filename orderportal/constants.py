@@ -17,6 +17,8 @@ HTML_MIME = 'text/html'
 JSON_MIME = 'application/json'
 CSV_MIME  = 'text/csv'
 ZIP_MIME  = 'application/zip'
+TEXT_MIME = 'text/plain'
+BIN_MIME  = 'application/octet-stream'
 
 # CouchDB
 # For view ranges: CouchDB uses the Unicode Collation Algorithm,

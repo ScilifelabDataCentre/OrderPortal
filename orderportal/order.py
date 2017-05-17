@@ -531,19 +531,22 @@ class OrderApiV1Mixin(ApiV1Mixin):
             data['transitions'] = dict(
                 [(s['identifier'],
                   {'href': 
-                   URL('order_transition', order['_id'], s['identifier'])})
+                   URL('order_transition_api', order['_id'], s['identifier'])})
                  for s in self.get_targets(order, check_valid=True)])
             data['fields'] = OD()
             # A bit roundabout, but the fields will come out in correct order
             for field in self.get_fields(order):
                 data['fields'][field['identifier']] = field['value']
             data['files'] = OD()
-            for name in sorted(order.get('_attachments', [])):
-                stub = order['_attachments'][name]
-                url = self.absolute_reverse_url('order_file',order['_id'],name)
-                data['files'][name] = dict(size=stub['length'],
-                                           content_type=stub['content_type'],
-                                           href=url)
+            for filename in sorted(order.get('_attachments', [])):
+                if filename.startswith('system'): continue
+                stub = order['_attachments'][filename]
+                data['files'][filename] = dict(
+                    size=stub['length'],
+                    content_type=stub['content_type'],
+                    href=self.absolute_reverse_url('order_file',
+                                                   order['_id'],
+                                                   filename))
         return data
 
 
@@ -560,6 +563,7 @@ class Order(OrderMixin, RequestHandler):
         form = self.get_entity(order['form'], doctype=constants.FORM)
         files = []
         for filename in order.get('_attachments', []):
+            if filename.startswith('system'): continue
             stub = order['_attachments'][filename]
             files.append(dict(filename=filename,
                               size=stub['length'],
@@ -629,6 +633,7 @@ class OrderCsv(OrderMixin, RequestHandler):
 
     def get_order_csv_stringio(self, order):
         "Return the content of the order as CSV-formatted data in StringIO."
+        URL = self.absolute_reverse_url
         form = self.get_entity(order['form'], doctype=constants.FORM)
         csvbuffer = StringIO()
         writer = csv.writer(csvbuffer)
@@ -645,8 +650,7 @@ class OrderCsv(OrderMixin, RequestHandler):
         writer.writerow(('', 'IUID', form['_id']))
         account = self.get_account(order['owner'])
         writer.writerow(('Owner', 'Name', utils.get_account_name(account)))
-        writer.writerow(('', 'URL', 
-                         self.absolute_reverse_url('account', account['email'])))
+        writer.writerow(('', 'URL', URL('account', account['email'])))
         writer.writerow(('', 'Email', order['owner']))
         writer.writerow(('', 'University',
                          account.get('university') or '-'))
@@ -676,10 +680,13 @@ class OrderCsv(OrderMixin, RequestHandler):
             writer.writerow(field.values())
         writer.writerow(('',))
         writer.writerow(('File', 'Size', 'Content type', 'URL'))
-        for name in sorted(order.get('_attachments', [])):
-            stub = order['_attachments'][name]
-            url = self.absolute_reverse_url('order_file', order['_id'], name)
-            writer.writerow((name, stub['length'], stub['content_type'], url))
+        for filename in sorted(order.get('_attachments', [])):
+            if filename.startswith('system'): continue
+            stub = order['_attachments'][filename]
+            writer.writerow((filename,
+                             stub['length'],
+                             stub['content_type'],
+                             URL('order_file', order['_id'], filename)))
         return csvbuffer
 
 
@@ -1126,6 +1133,7 @@ class OrderClone(OrderMixin, RequestHandler):
             saver.check_fields_validity(fields)
             saver.set_identifier(form)
         for filename in order.get('_attachments', []):
+            if filename.startswith('system'): continue
             if filename in erased_files: continue
             stub = order['_attachments'][filename]
             outfile = self.db.get_attachment(order, filename)
@@ -1175,7 +1183,9 @@ class OrderFile(OrderMixin, RequestHandler):
     "File attached to an order."
 
     @tornado.web.authenticated
-    def get(self, iuid, filename):
+    def get(self, iuid, filename=None):
+        if filename is None:
+            raise tornado.web.HTTPError(400)
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
             self.check_readable(order)
@@ -1194,15 +1204,31 @@ class OrderFile(OrderMixin, RequestHandler):
                             'attachment; filename="{0}"'.format(filename))
 
     @tornado.web.authenticated
-    def post(self, iuid, filename):
+    def post(self, iuid, filename=None):
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid, filename)
             return
-        raise tornado.web.HTTPError(
-            405, reason='Internal problem; POST only allowed for DELETE.')
+        if filename:
+            raise tornado.web.HTTPError(400)
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.check_attachable(order)
+        try:
+            infile = self.request.files['file'][0]
+        except (KeyError, IndexError):
+            pass
+        else:
+            if infile.filename.startswith('system'):
+                raise tornado.web.HTTPError(403, reason='Reserved filename.')
+            with OrderSaver(doc=order, rqh=self) as saver:
+                saver.add_file(infile)
+        self.redirect(self.order_reverse_url(order))
 
     @tornado.web.authenticated
     def delete(self, iuid, filename):
+        if filename is None:
+            raise tornado.web.HTTPError(400)
+        if filename.startswith('system'):
+            raise tornado.web.HTTPError(403, reason='Reserved filename.')
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_attachable(order)
         fields = Fields(self.get_entity(order['form'], doctype=constants.FORM))
@@ -1227,18 +1253,104 @@ class OrderFile(OrderMixin, RequestHandler):
         self.redirect(self.order_reverse_url(order))
 
 
-class OrderAttach(OrderMixin, RequestHandler):
-    "Attach a file to an order."
+class OrderReport(OrderMixin, RequestHandler):
+    "View the report for an order."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.check_readable(order)
+        try:
+            report = order['report']
+            outfile = self.db.get_attachment(order, 'system_report')
+            if outfile is None: raise KeyError
+        except KeyError:
+            self.see_other('order', iuid, error='No report available.')
+            return
+        content_type = order['_attachments']['system_report']['content_type']
+        if report.get('inline'):
+            self.render('order_report.html',
+                        order=order,
+                        content=outfile.read(),
+                        content_type=content_type)
+        else:
+            self.write(outfile.read())
+            outfile.close()
+            self.set_header('Content-Type', content_type)
+            name = order.get('identifier') or order['_id']
+            ext = utils.get_filename_extension(content_type)
+            self.set_header('Content-Disposition',
+                            'attachment; filename="%s_report%s"' % (name, ext))
+
+
+class OrderReportEdit(OrderMixin, RequestHandler):
+    "Edit the report for an order."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        self.check_admin()
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.render('order_report_edit.html', order=order)
 
     @tornado.web.authenticated
     def post(self, iuid):
+        self.check_admin()
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_attachable(order)
-        try:
-            infile = self.request.files['file'][0]
-        except (KeyError, IndexError):
-            pass
-        else:
-            with OrderSaver(doc=order, rqh=self) as saver:
-                saver.add_file(infile)
+        with OrderSaver(doc=order, rqh=self) as saver:
+            try:
+                infile = self.request.files['report'][0]
+            except (KeyError, IndexError):
+                if order.get('report'):
+                    saver.delete_filename = 'system_report'
+                    saver['report'] = dict()
+            else:
+                saver['report'] = dict(
+                    timestamp=utils.timestamp(),
+                    inline=infile.content_type in (constants.HTML_MIME,
+                                                   constants.TEXT_MIME))
+                saver.files.append(dict(filename='system_report',
+                                        body=infile.body,
+                                        content_type=infile.content_type))
         self.redirect(self.order_reverse_url(order))
+
+
+class OrderReportApiV1(OrderMixin, RequestHandler):
+    "Order report API: get or set."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        self.check_readable(order)
+        try:
+            report = order['report']
+            outfile = self.db.get_attachment(order, 'system_report')
+            if outfile is None: raise KeyError
+        except KeyError:
+            raise tornado.web.HTTPError(400)
+        logging.debug("write")
+        self.write(outfile.read())
+        outfile.close()
+        content_type = order['_attachments']['system_report']['content_type']
+        self.set_header('Content-Type', content_type)
+        name = order.get('identifier') or order['_id']
+        ext = utils.get_filename_extension(content_type)
+        self.set_header('Content-Disposition',
+                        'attachment; filename="%s_report%s"' % (name, ext))
+
+    @tornado.web.authenticated
+    def put(self, iuid):
+        self.check_admin()
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        with OrderSaver(doc=order, rqh=self) as saver:
+            content_type = self.request.headers.get('content-type') or constants.BIN_MIME
+            saver['report'] = dict(timestamp=utils.timestamp(),
+                                   inline=content_type in (constants.HTML_MIME,
+                                                           constants.TEXT_MIME))
+            saver.files.append(dict(filename='system_report',
+                                    body=self.request.body,
+                                    content_type=content_type))
+        self.write('')
+
+    def check_xsrf_cookie(self):
+        "Do not check for XSRF cookie when script is calling."
+        pass

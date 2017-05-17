@@ -7,7 +7,8 @@ Edit {{ terminology('order') }} '{{ order['title'] }}'
 {% end %}
 
 {% block body_title %}
-Edit {{ terminology('order') }} '{{ order['title'] }}'
+Edit  {% module Icon('order') %}
+{{ terminology('order') }} '{{ order['title'] }}'
 {% end %}
 
 {% block content %}
@@ -24,13 +25,12 @@ Edit {{ terminology('order') }} '{{ order['title'] }}'
   </div>
   <div class="col-md-2">
     <form action="{{ reverse_url('order', order['_id']) }}"
-	  class="myForm"
 	  role="form"
 	  method="GET">
       <div class="form-group">
 	<button type="submit" class="btn btn-default btn-block">
 	  <span class="glyphicon glyphicon-remove"></span>
-	  Cancel edit
+	  Cancel
 	</button>
       </div>
     </form>
@@ -38,7 +38,6 @@ Edit {{ terminology('order') }} '{{ order['title'] }}'
 </div>
 
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
-      class="myForm"
       role="form"
       enctype="multipart/form-data"
       method="POST">
