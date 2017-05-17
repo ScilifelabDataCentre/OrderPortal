@@ -1,0 +1,33 @@
+{# Texts list page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Texts{% end %}
+{% block body_title %}Texts{% end %}
+
+{% block main_content %}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Text</th>
+      <th>Description</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for name, description in texts %}
+    <tr>
+      <td>{{ name }}</td>
+      <td>{{ description }}</td>
+      <td>
+	<a href="{{ reverse_url('text', name) }}"
+	   class="btn btn-success btn-sm" role="button">
+	  Edit
+	</a>
+      </td>
+    </tr>
+    {% end %}
+  </tbody>
+</table>
+{% end %} {# block main_content #}

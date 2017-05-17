@@ -163,6 +163,31 @@
 	</td>
       </tr>
       <tr>
+	<th>Report</th>
+	<td>
+	  {% if order.get('report') %}
+	  <a href="{{ reverse_url('order_report', order['_id']) }}"
+	     role="button"
+	     class="btn btn-success btn-sm">
+	    <span class="glyphicon glyphicon-briefcase"></span>
+	    Report
+	  </a>
+	  (updated 
+	  <span class="localtime">{{ order['report']['timestamp'] }}</span>)
+	  {% else %}
+	  -	
+	  {% end %}
+	  {% if is_admin %}
+	  <a href="{{ reverse_url('order_report_edit', order['_id']) }}"
+	     class="btn btn-primary btn-xs"
+	     role="button">
+	    <span class="glyphicon glyphicon-edit"></span>
+	    Edit
+	  </a>
+	  {% end %}
+	</td>
+      </tr>
+      <tr>
 	<th>History</th>
 	<td>
 	  <table>
@@ -263,7 +288,7 @@
         <h4 class="modal-title">Attach a file</h4>
       </div>
       <div class="modal-body">
-	<form action="{{ reverse_url('order_attach', order['_id']) }}"
+	<form action="{{ reverse_url('order_file_add', order['_id']) }}"
 	      role="form"
 	      enctype="multipart/form-data"
 	      method="POST">

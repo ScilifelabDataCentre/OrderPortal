@@ -1,35 +1,31 @@
-{# Text edit page. #}
+{# Order report edit page. #}
+
+{% block head_title %}
+Edit {{ terminology('order') }} report: {{ order['title'] }}
+{% end %}
+
+{% block body_title %}
+Edit {% module Icon('order') %}
+{{ terminology('order') }} report: {{ order['title'] }}
+{% end %}
 
 {% extends "base.html" %}
 
-{% block head_title %}Edit text '{{ text['name'] }}'{% end %}
-{% block body_title %}Edit text '{{ text['name'] }}'{% end %}
-
 {% block main_content %}
-<form action="{{ reverse_url('text', text['name']) }}"
+<form action="{{ reverse_url('order_report_edit', order['_id']) }}"
       role="form"
+      enctype="multipart/form-data"
       method="POST">
   {% module xsrf_form_html() %}
 
-  <p>
-    {{ constants.TEXTS[text['name']] }}
-  </p>
-
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-10">
-	<textarea rows="16" class="form-control"
-		  id="text" name="text"
-		  >{{ text.get('text') or '' }}</textarea>
-      </div>
-    </div>
+    <label for="report">File</label>
+    <input type="file" name="report" id="report" class="form-control">
     <span class="help-block">
-      This text will be formatted using
-      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>.
+      The report file to upload. An HTML file will be displayed in-line;
+      other content types will be downloaded as a file.
     </span>
   </div>
-
-  <input type="hidden" name="origin" value="{{ origin }}">
 
   <div class="form-group">
     <label class="control-label"></label>
@@ -43,7 +39,7 @@
 {% end %} {# block main_content #}
 
 {% block action_content %}
-<form action="{{ origin }}"
+<form action="{{ reverse_url('order', order['_id']) }}"
       role="form"
       method="GET">
   <div class="form-group">
