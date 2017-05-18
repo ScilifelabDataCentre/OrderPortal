@@ -25,6 +25,7 @@ Edit  {% module Icon('order') %}
   </div>
   <div class="col-md-2">
     <form action="{{ reverse_url('order', order['_id']) }}"
+	  class="allow_leaving_without_question"
 	  role="form"
 	  method="GET">
       <div class="form-group">
@@ -38,6 +39,7 @@ Edit  {% module Icon('order') %}
 </div>
 
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
+      class="allow_leaving_without_question"
       role="form"
       enctype="multipart/form-data"
       method="POST">
