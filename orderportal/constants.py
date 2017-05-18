@@ -42,6 +42,10 @@ LOG     = 'log'
 META    = 'meta'
 ENTITIES = frozenset([ACCOUNT, GROUP, FORM, ORDER, INFO, FILE, MESSAGE])
 
+# System attachments to order
+SYSTEM = 'system'
+SYSTEM_REPORT = 'system_report'
+
 # Field types
 STRING  = 'string'
 INT     = 'int'

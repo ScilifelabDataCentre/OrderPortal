@@ -517,6 +517,12 @@ class OrderApiV1Mixin(ApiV1Mixin):
             links=dict(api=dict(href=URL('account_api', order['owner'])),
                        display=dict(href=URL('account', order['owner']))))
         data['status'] = order['status']
+        data['report'] = OD()
+        if order.get('report'):
+            data['report']['content_type'] = order['_attachments'][constants.SYSTEM_REPORT]['content_type']
+            data['report']['timestamp'] = order['report']['timestamp']
+            data['report']['link'] = dict(href=URL('order_report_api',
+                                                   order['_id']))
         data['history'] = OD()
         for s in settings['ORDER_STATUSES']:
             key = s['identifier']
@@ -539,7 +545,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
                 data['fields'][field['identifier']] = field['value']
             data['files'] = OD()
             for filename in sorted(order.get('_attachments', [])):
-                if filename.startswith('system'): continue
+                if filename.startswith(constants.SYSTEM): continue
                 stub = order['_attachments'][filename]
                 data['files'][filename] = dict(
                     size=stub['length'],
@@ -563,7 +569,7 @@ class Order(OrderMixin, RequestHandler):
         form = self.get_entity(order['form'], doctype=constants.FORM)
         files = []
         for filename in order.get('_attachments', []):
-            if filename.startswith('system'): continue
+            if filename.startswith(constants.SYSTEM): continue
             stub = order['_attachments'][filename]
             files.append(dict(filename=filename,
                               size=stub['length'],
@@ -681,7 +687,7 @@ class OrderCsv(OrderMixin, RequestHandler):
         writer.writerow(('',))
         writer.writerow(('File', 'Size', 'Content type', 'URL'))
         for filename in sorted(order.get('_attachments', [])):
-            if filename.startswith('system'): continue
+            if filename.startswith(constants.SYSTEM): continue
             stub = order['_attachments'][filename]
             writer.writerow((filename,
                              stub['length'],
@@ -1133,7 +1139,7 @@ class OrderClone(OrderMixin, RequestHandler):
             saver.check_fields_validity(fields)
             saver.set_identifier(form)
         for filename in order.get('_attachments', []):
-            if filename.startswith('system'): continue
+            if filename.startswith(constants.SYSTEM): continue
             if filename in erased_files: continue
             stub = order['_attachments'][filename]
             outfile = self.db.get_attachment(order, filename)
@@ -1217,7 +1223,7 @@ class OrderFile(OrderMixin, RequestHandler):
         except (KeyError, IndexError):
             pass
         else:
-            if infile.filename.startswith('system'):
+            if infile.filename.startswith(constants.SYSTEM):
                 raise tornado.web.HTTPError(403, reason='Reserved filename.')
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver.add_file(infile)
@@ -1227,7 +1233,7 @@ class OrderFile(OrderMixin, RequestHandler):
     def delete(self, iuid, filename):
         if filename is None:
             raise tornado.web.HTTPError(400)
-        if filename.startswith('system'):
+        if filename.startswith(constants.SYSTEM):
             raise tornado.web.HTTPError(403, reason='Reserved filename.')
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_attachable(order)
@@ -1262,12 +1268,12 @@ class OrderReport(OrderMixin, RequestHandler):
         self.check_readable(order)
         try:
             report = order['report']
-            outfile = self.db.get_attachment(order, 'system_report')
+            outfile = self.db.get_attachment(order, constants.SYSTEM_REPORT)
             if outfile is None: raise KeyError
         except KeyError:
             self.see_other('order', iuid, error='No report available.')
             return
-        content_type = order['_attachments']['system_report']['content_type']
+        content_type = order['_attachments'][constants.SYSTEM_REPORT]['content_type']
         if report.get('inline'):
             self.render('order_report.html',
                         order=order,
@@ -1301,14 +1307,14 @@ class OrderReportEdit(OrderMixin, RequestHandler):
                 infile = self.request.files['report'][0]
             except (KeyError, IndexError):
                 if order.get('report'):
-                    saver.delete_filename = 'system_report'
+                    saver.delete_filename = constants.SYSTEM_REPORT
                     saver['report'] = dict()
             else:
                 saver['report'] = dict(
                     timestamp=utils.timestamp(),
                     inline=infile.content_type in (constants.HTML_MIME,
                                                    constants.TEXT_MIME))
-                saver.files.append(dict(filename='system_report',
+                saver.files.append(dict(filename=constants.SYSTEM_REPORT,
                                         body=infile.body,
                                         content_type=infile.content_type))
         self.redirect(self.order_reverse_url(order))
@@ -1323,14 +1329,13 @@ class OrderReportApiV1(OrderMixin, RequestHandler):
         self.check_readable(order)
         try:
             report = order['report']
-            outfile = self.db.get_attachment(order, 'system_report')
+            outfile = self.db.get_attachment(order, constants.SYSTEM_REPORT)
             if outfile is None: raise KeyError
         except KeyError:
             raise tornado.web.HTTPError(400)
-        logging.debug("write")
         self.write(outfile.read())
         outfile.close()
-        content_type = order['_attachments']['system_report']['content_type']
+        content_type = order['_attachments'][constants.SYSTEM_REPORT]['content_type']
         self.set_header('Content-Type', content_type)
         name = order.get('identifier') or order['_id']
         ext = utils.get_filename_extension(content_type)
@@ -1346,7 +1351,7 @@ class OrderReportApiV1(OrderMixin, RequestHandler):
             saver['report'] = dict(timestamp=utils.timestamp(),
                                    inline=content_type in (constants.HTML_MIME,
                                                            constants.TEXT_MIME))
-            saver.files.append(dict(filename='system_report',
+            saver.files.append(dict(filename=constants.SYSTEM_REPORT,
                                     body=self.request.body,
                                     content_type=content_type))
         self.write('')

@@ -2,11 +2,11 @@
    Force using submit or cancel to navigate away from page.
 */
 $(window).on("beforeunload", function() {
-    return "Form data has not been saved! Leave this page only via the Submit or Cancel buttons!";
+    return "Order data has not been saved! Leave this page only via the Save or Cancel buttons!";
 });
         
 $(function() {
-    $(".myForm").on("submit", function(e) {
+    $(".allow_leaving_without_question").on("submit", function(e) {
         //remove the ev
         $(window).off("beforeunload");
         return true;
