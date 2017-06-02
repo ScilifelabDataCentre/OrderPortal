@@ -199,14 +199,13 @@ class RequestHandler(tornado.web.RequestHandler):
     def check_admin(self):
         "Check if current user is admin."
         if not self.is_admin():
-            raise tornado.web.HTTPError(
-                403, reason="Role 'admin' is required for this.")
+            raise tornado.web.HTTPError(403, reason="Role 'admin' is required")
 
     def check_staff(self):
         "Check if current user is staff or admin."
         if not self.is_staff():
             raise tornado.web.HTTPError(
-                403, reason="Role 'admin' or 'staff' is required for this.")
+                403, reason="Role 'admin' or 'staff' is required")
 
     def get_admins(self):
         "Get the list of enabled admin accounts."
