@@ -38,7 +38,7 @@ class OrderSaver(saver.Saver):
 
     def add_file(self, infile):
         "Add the given file to the files. Return the unique filename."
-        filename = infile.filename
+        filename = os.path.basename(infile.filename)
         if filename in self.filenames:
             count = 1
             while True:
@@ -710,7 +710,6 @@ class OrderCsv(OrderMixin, RequestHandler):
 class OrderZip(OrderApiV1Mixin, OrderCsv):
     "Return a ZIP file containing CSV, JSON and files for the order."
 
-    @tornado.web.authenticated
     def get(self, iuid):
         try:
             order = self.get_order(iuid)
@@ -861,7 +860,6 @@ class Orders(RequestHandler):
 class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
     "Orders API; JSON output."
 
-    @tornado.web.authenticated
     def get(self):
         "JSON output."
         URL = self.absolute_reverse_url
@@ -1189,9 +1187,12 @@ class OrderTransition(OrderMixin, RequestHandler):
 class OrderTransitionApiV1(OrderMixin, RequestHandler):
     "Change the status of an order by an API call."
 
-    @tornado.web.authenticated
     def post(self, iuid, targetid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
+        try:
+            self.check_editable(order)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
         try:
             self.check_transitionable(order, targetid)
         except ValueError, msg:
@@ -1343,7 +1344,6 @@ class OrderReportEdit(OrderMixin, RequestHandler):
 class OrderReportApiV1(OrderMixin, RequestHandler):
     "Order report API: get or set."
 
-    @tornado.web.authenticated
     def get(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_readable(order)
@@ -1352,7 +1352,7 @@ class OrderReportApiV1(OrderMixin, RequestHandler):
             outfile = self.db.get_attachment(order, constants.SYSTEM_REPORT)
             if outfile is None: raise KeyError
         except KeyError:
-            raise tornado.web.HTTPError(400)
+            raise tornado.web.HTTPError(404)
         self.write(outfile.read())
         outfile.close()
         content_type = order['_attachments'][constants.SYSTEM_REPORT]['content_type']
@@ -1362,7 +1362,6 @@ class OrderReportApiV1(OrderMixin, RequestHandler):
         self.set_header('Content-Disposition',
                         'attachment; filename="%s_report%s"' % (name, ext))
 
-    @tornado.web.authenticated
     def put(self, iuid):
         self.check_admin()
         order = self.get_entity(iuid, doctype=constants.ORDER)

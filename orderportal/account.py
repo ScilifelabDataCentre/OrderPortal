@@ -151,7 +151,6 @@ class Accounts(RequestHandler):
 class AccountsApiV1(Accounts):
     "Accounts API; JSON output."
 
-    @tornado.web.authenticated
     def get(self):
         "JSON output."
         URL = self.absolute_reverse_url
@@ -382,11 +381,13 @@ class Account(AccountMixin, RequestHandler):
 class AccountApiV1(AccountMixin, RequestHandler):
     "Account API; JSON output."
 
-    @tornado.web.authenticated
     def get(self, email):
         URL = self.absolute_reverse_url
         try:
             account = self.get_account(email)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(404, reason=str(msg))
+        try:
             self.check_readable(account)
         except ValueError, msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
@@ -498,12 +499,14 @@ class AccountOrdersApiV1(AccountOrdersMixin,
                          RequestHandler):
     "Account orders API; JSON output."
 
-    @tornado.web.authenticated
     def get(self, email):
         "JSON output."
         URL = self.absolute_reverse_url
         try:
             account = self.get_account(email)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(404, reason=str(msg))
+        try:
             self.check_readable(account)
         except ValueError, msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
@@ -554,12 +557,14 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
                                RequestHandler):
     "Account group orders API; JSON output."
 
-    @tornado.web.authenticated
     def get(self, email):
         "JSON output."
         URL = self.absolute_reverse_url
         try:
             account = self.get_account(email)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(404, reason=str(msg))
+        try:
             self.check_readable(account)
         except ValueError, msg:
             raise tornado.web.HTTPError(403, reason=str(msg))

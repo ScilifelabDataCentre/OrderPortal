@@ -115,14 +115,6 @@ class FileCreate(RequestHandler):
             self.see_other('files')
 
 
-class FileCreateApiV1(FileCreate):
-    "Create a new file via a script."
-
-    def check_xsrf_cookie(self):
-        "Do not check for XSRF cookie when script is calling."
-        pass
-
-
 class FileEdit(RequestHandler):
     "Edit or delete a file."
 
@@ -159,14 +151,6 @@ class FileEdit(RequestHandler):
         self.delete_logs(file['_id'])
         self.db.delete(file)
         self.see_other('files')
-
-
-class FileEditApiV1(FileEdit):
-    "Edit a file via a script."
-
-    def check_xsrf_cookie(self):
-        "Do not check for XSRF cookie when script is calling."
-        pass
 
 
 class FileDownload(File):
