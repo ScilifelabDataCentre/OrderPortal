@@ -152,33 +152,6 @@ class RequestHandler(tornado.web.RequestHandler):
             logging.info("API key login: account %s", account['email'])
             return account
 
-    def write_error(self, status_code, **kwargs):
-        """Override to implement custom error pages.
-
-        ``write_error`` may call `write`, `render`, `set_header`, etc
-        to produce output as usual.
-
-        If this error was caused by an uncaught exception (including
-        HTTPError), an ``exc_info`` triple will be available as
-        ``kwargs["exc_info"]``.  Note that this exception may not be
-        the "current" exception for purposes of methods like
-        ``sys.exc_info()`` or ``traceback.format_exc``.
-        """
-        if not hasattr(self, 'db'):
-            self.set_header('Content-Type', 'text/plain')
-            self.write('Site is down due to off-line back-end database.\n')
-            self.write('Try again later...\n')
-            self.finish()
-        elif self.settings.get("serve_traceback") and "exc_info" in kwargs:
-            # in debug mode, try to send a traceback
-            self.set_header('Content-Type', 'text/plain')
-            for line in traceback.format_exception(*kwargs["exc_info"]):
-                self.write(line)
-            self.finish()
-        else:
-            msg = "{0} (code {1})".format(self._reason, status_code)
-            self.see_other('home', error=msg)
-
     def is_owner(self, entity):
         "Does the current user own the given entity?"
         return self.current_user and \
