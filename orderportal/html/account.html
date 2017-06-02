@@ -355,7 +355,7 @@
     <th>Phone</th>
     <td>{{ account.get('phone') or '-' }}</td>
   </tr>
-  {% if account['role'] == constants.ADMIN %}
+  {% if account['role'] in (constants.ADMIN, constants.STAFF) %}
   <tr>
     <th>API key</th>
     <td>{{ account.get('api_key') or '-' }}</td>

@@ -323,7 +323,7 @@ class OrderMixin(object):
 
     def get_order(self, iuid):
         """Get the order for the identifier or IUID.
-        Raise ValueError if no such order or not readable."""
+        Raise ValueError if no such order."""
         try:
             match = re.match(settings['ORDER_IDENTIFIER_REGEXP'], iuid)
             if not match: raise KeyError
@@ -337,7 +337,6 @@ class OrderMixin(object):
                 order = self.get_entity_view('order/identifier', match.group())
             except tornado.web.HTTPError:
                 raise ValueError('Sorry, no such order')
-        self.check_readable(order)
         return order
 
     def is_readable(self, order):
@@ -566,6 +565,11 @@ class Order(OrderMixin, RequestHandler):
         except ValueError, msg:
             self.see_other('home', error=str(msg))
             return
+        try:
+            self.check_readable(order)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
         form = self.get_entity(order['form'], doctype=constants.FORM)
         files = []
         for filename in order.get('_attachments', []):
@@ -613,12 +617,15 @@ class Order(OrderMixin, RequestHandler):
 class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
     "Order API; JSON output."
 
-    @tornado.web.authenticated
     def get(self, iuid):
         try:
             order = self.get_order(iuid)
         except ValueError, msg:
             raise tornado.web.HTTPError(404, reason=str(msg))
+        try:
+            self.check_readable(order)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
         self.write(self.get_order_json(order, full=True))
 
 
@@ -631,6 +638,10 @@ class OrderCsv(OrderMixin, RequestHandler):
             order = self.get_order(iuid)
         except ValueError, msg:
             raise tornado.web.HTTPError(404, reason=str(msg))
+        try:
+            self.check_readable(order)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
         self.write(self.get_order_csv_stringio(order).getvalue())
         self.set_header('Content-Type', constants.CSV_MIME)
         self.set_header('Content-Disposition',
@@ -705,6 +716,10 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
             order = self.get_order(iuid)
         except ValueError, msg:
             raise tornado.web.HTTPError(404, reason=str(msg))
+        try:
+            self.check_readable(order)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
         zip_stringio = StringIO()
         # This should use a context, but it is not implemented in Python 2.6
         writer = zipfile.ZipFile(zip_stringio, 'w')
@@ -926,6 +941,11 @@ class OrderLogs(OrderMixin, RequestHandler):
     def get(self, iuid):
         try:
             order = self.get_order(iuid)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+            return
+        try:
+            self.check_readable(order)
         except ValueError, msg:
             self.see_other('home', error=str(msg))
             return

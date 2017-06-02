@@ -383,7 +383,7 @@ administrator of the site can then change the ownership of your
     </span>
   </div>
 
-  {% if account['role'] == constants.ADMIN %}
+  {% if account['role'] in (constants.ADMIN, constants.STAFF) %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
