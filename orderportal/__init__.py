@@ -44,7 +44,6 @@ settings = dict(
     DISPLAY_MAX_PENDING_ACCOUNTS=10,
     DISPLAY_DEFAULT_MAX_LOG=20,
     DISPLAY_MAX_NEWS=4,
-    INITIAL_TEXTS_FILEPATH='{SITE_DIR}/initial_texts.yaml',
     ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',
     ORDER_STATUSES_FILEPATH='{SITE_DIR}/order_statuses.yaml',
     ORDER_TRANSITIONS_FILEPATH='{SITE_DIR}/order_transitions.yaml',
@@ -53,6 +52,7 @@ settings = dict(
     ORDERS_LIST_TAGS=True,
     ORDERS_LIST_FIELDS=[],
     ORDERS_LIST_STATUSES=[],
+    # XXX To be removed
     ORDER_MESSAGES_FILEPATH='{SITE_DIR}/order_messages.yaml',
     ACCOUNT_INVOICE_INFO=True,
     ACCOUNT_FUNDER_INFO=True,
@@ -64,4 +64,7 @@ settings = dict(
     SUBJECT_TERMS_FILEPATH='{SITE_DIR}/subjects.yaml',
     DOCUMENTATION_URL='https://github.com/pekrau/OrderPortal/wiki',
     MARKDOWN_URL='http://daringfireball.net/projects/markdown/syntax',
+    # For database initialization only; ignored after that.
+    INITIAL_TEXTS_FILEPATH='{SITE_DIR}/initial_texts.yaml',
+    INITIAL_ORDER_MESSAGES_FILEPATH='{SITE_DIR}/initial_order_messages.yaml',
     )

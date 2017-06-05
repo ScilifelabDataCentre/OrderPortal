@@ -8,6 +8,7 @@ from __future__ import print_function, absolute_import
 
 import sys
 
+import couchdb
 import yaml
 
 from orderportal import constants
@@ -47,7 +48,25 @@ def init_database(dumpfilepath=None):
             print('Warning: could not load', dumpfilepath)
     else:
         print('no dump file loaded')
-    # Load only missing texts from the init text file
+    # Load initial order messages from file if missing in db
+    try:
+        db['order_messages']
+    except couchdb.ResourceNotFound:
+        try:
+            filepath = settings['INITIAL_ORDER_MESSAGES_FILEPATH']
+        except KeyError:
+            print('Warning: no initial order messages')
+        else:
+            try:
+                with open(utils.expand_filepath(filepath)) as infile:
+                      messages = yaml.safe_load(infile)
+            except IOError:
+                print('Warning: could not load', filepath)
+                messages = dict()
+            messages['_id'] = 'order_messages'
+            messages[constants.DOCTYPE] = constants.META
+            db.save(messages)
+    # Load texts from the init text file only if missing id db
     filepath = settings.get('INITIAL_TEXTS_FILEPATH')
     if filepath:
         print('loading missing texts from', filepath)

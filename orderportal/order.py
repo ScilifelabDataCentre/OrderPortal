@@ -263,7 +263,7 @@ class OrderSaver(saver.Saver):
         It is sent later by cron job script 'script/messenger.py'
         """
         try:
-            template = settings['ORDER_MESSAGES'][self.doc['status']]
+            template = self.rqh.get_order_messages()[self.doc['status']]
         except KeyError:
             return
         recipients = set()
@@ -560,6 +560,7 @@ class Order(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
+        self.get_order_messages()
         try:
             order = self.get_order(iuid)
         except ValueError, msg:
