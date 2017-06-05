@@ -42,15 +42,26 @@ class RequestHandler(tornado.web.RequestHandler):
         result['order_reverse_url'] = self.order_reverse_url
         result['is_staff'] = self.is_staff()
         result['is_admin'] = self.is_admin()
-        result['error'] = self.get_argument('error', None)
-        result['message'] = self.get_argument('message', None)
+        result['error'] = self.get_cookie('error', '').replace('_', ' ')
+        self.clear_cookie('error')
+        result['message'] = self.get_cookie('message', '').replace('_', ' ')
+        self.clear_cookie('message')
         result['infos'] = [r.value for r in self.db.view('info/menu')]
         result['texts'] = [r.key for r in self.db.view('text/name')]
         return result
 
-    def see_other(self, name, *args, **query):
+    def see_other(self, name, *args, **kwargs):
         """Redirect to the absolute URL given by name
         using HTTP status 303 See Other."""
+        query = kwargs.copy()
+        try:
+            self.set_error_flash(query.pop('error'))
+        except KeyError:
+            pass
+        try:
+            self.set_message_flash(query.pop('message'))
+        except KeyError:
+            pass
         url = self.absolute_reverse_url(name, *args, **query)
         self.redirect(url, status=303)
 
@@ -82,6 +93,20 @@ class RequestHandler(tornado.web.RequestHandler):
             return URL('order_id_api', identifier, **query)
         else:
             return URL('order_id', identifier, **query)
+
+    def set_message_flash(self, message):
+        "Set message flash cookie."
+        self.set_flash('message', message)
+
+    def set_error_flash(self, message):
+        "Set error flash cookie message."
+        self.set_flash('error', message)
+
+    def set_flash(self, name, message):
+        message = message.replace(' ', '_')
+        message = message.replace(';', '_')
+        message = message.replace(',', '_')
+        self.set_cookie(name, message)
 
     def get_current_user(self):
         """Get the currently logged-in user account, or None.
