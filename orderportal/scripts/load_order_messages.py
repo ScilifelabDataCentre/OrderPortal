@@ -17,7 +17,7 @@ def load_order_messages(db):
     "Load the order messages document."
     filepath = settings['ORDER_MESSAGES_FILEPATH']
     if not filepath: raise KeyError('no filepath')
-    print("Order messages from %s", filepath)
+    print('Order messages from', filepath)
     with open(filepath) as infile:
         doc = yaml.safe_load(infile)
     doc['_id'] = 'order_messages'

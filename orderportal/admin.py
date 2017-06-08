@@ -101,7 +101,6 @@ class GlobalModes(RequestHandler):
         self.check_admin()
         self.render('global_modes.html')
 
-    @tornado.web.authenticated
     def post(self):
         self.check_admin()
         try:
@@ -117,3 +116,13 @@ class GlobalModes(RequestHandler):
                 self.global_modes[constants.DOCTYPE] = constants.META
             self.db.save(self.global_modes)
         self.see_other('global_modes')
+
+
+class OrderMessages(RequestHandler):
+    "Page for displaying order messages configuration."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render('order_messages.html',
+                    order_messages=self.db['order_messages'])

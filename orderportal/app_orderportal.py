@@ -150,6 +150,7 @@ def main():
         url(r'/admin/global_modes', GlobalModes, name='global_modes'),
         url(r'/admin/statuses', Statuses, name='statuses'),
         url(r'/admin/settings', Settings, name='settings'),
+        url(r'/admin/order_messages', OrderMessages, name='order_messages'),
         url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
             {'path': settings['SITE_DIR']}, name='site'),
         ])
