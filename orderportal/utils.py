@@ -156,16 +156,6 @@ def load_settings(filepath=None):
         logging.debug("Account messages from %s", filepath)
         with open(filepath) as infile:
             settings['ACCOUNT_MESSAGES'] = yaml.safe_load(infile)
-    # Order messages
-    # try:
-    #     filepath = settings['ORDER_MESSAGES_FILEPATH']
-    #     if not filepath: raise KeyError
-    # except KeyError:
-    #     settings['ORDER_MESSAGES'] = dict()
-    # else:
-    #     logging.debug("Order messages from %s", filepath)
-    #     with open(filepath) as infile:
-    #         settings['ORDER_MESSAGES'] = yaml.safe_load(infile)
     # Read universities lookup
     try:
         filepath = settings['UNIVERSITIES_FILEPATH']

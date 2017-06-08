@@ -15,8 +15,11 @@ from orderportal import utils
 
 def load_order_messages(db):
     "Load the order messages document."
-    filepath = settings['ORDER_MESSAGES_FILEPATH']
-    if not filepath: raise KeyError('no filepath')
+    for key in ['ORDER_MESSAGES_FILEPATH', 'INITIAL_ORDER_MESSAGES_FILEPATH']:
+        filepath = settings.get(key)
+        if filepath: break
+    else:
+        raise KeyError('no order messages file specified')
     print('Order messages from', filepath)
     with open(filepath) as infile:
         doc = yaml.safe_load(infile)
