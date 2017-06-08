@@ -246,18 +246,6 @@ class RequestHandler(tornado.web.RequestHandler):
             except couchdb.ResourceConflict:
                 pass
 
-    def get_order_messages(self):
-        "Get the order messages template lookup."
-        try:
-            return self.db['order_messages']
-        except couchdb.ResourceNotFound:
-            doc = settings['ORDER_MESSAGES']
-            doc['_id'] = 'order_messages'
-            doc[constants.DOCTYPE] = constants.META
-            logging.debug('saving order messages in database')
-            self.db.save(doc)
-            return doc
-
     def get_entity(self, iuid, doctype=None):
         """Get the entity by the IUID. Check the doctype, if given.
         Raise HTTP 404 if no such entity.

@@ -157,15 +157,15 @@ def load_settings(filepath=None):
         with open(filepath) as infile:
             settings['ACCOUNT_MESSAGES'] = yaml.safe_load(infile)
     # Order messages
-    try:
-        filepath = settings['ORDER_MESSAGES_FILEPATH']
-        if not filepath: raise KeyError
-    except KeyError:
-        settings['ORDER_MESSAGES'] = dict()
-    else:
-        logging.debug("Order messages from %s", filepath)
-        with open(filepath) as infile:
-            settings['ORDER_MESSAGES'] = yaml.safe_load(infile)
+    # try:
+    #     filepath = settings['ORDER_MESSAGES_FILEPATH']
+    #     if not filepath: raise KeyError
+    # except KeyError:
+    #     settings['ORDER_MESSAGES'] = dict()
+    # else:
+    #     logging.debug("Order messages from %s", filepath)
+    #     with open(filepath) as infile:
+    #         settings['ORDER_MESSAGES'] = yaml.safe_load(infile)
     # Read universities lookup
     try:
         filepath = settings['UNIVERSITIES_FILEPATH']
@@ -204,7 +204,7 @@ def load_settings(filepath=None):
     settings['subjects_lookup'] = dict([(s['code'], s['term'])
                                         for s in settings['subjects']])
     # Settings computable from others
-    settings['DB_SERVER_VERSION'] = couchdb.Server(settings['DB_SERVER']).version()
+    settings['DB_SERVER_VERSION'] = get_dbserver().version()
     if 'PORT' not in settings:
         parts = urlparse.urlparse(settings['BASE_URL'])
         items = parts.netloc.split(':')

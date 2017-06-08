@@ -13,6 +13,7 @@ import traceback
 import urlparse
 import zipfile
 
+import couchdb
 import tornado.web
 
 from orderportal import constants
@@ -263,8 +264,8 @@ class OrderSaver(saver.Saver):
         It is sent later by cron job script 'script/messenger.py'
         """
         try:
-            template = self.rqh.get_order_messages()[self.doc['status']]
-        except KeyError:
+            template = self.db['order_messages'][self.doc['status']]
+        except (couchdb.ResourceNotFound, KeyError):
             return
         recipients = set()
         owner = self.get_account(self.doc['owner'])
@@ -560,7 +561,6 @@ class Order(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
-        self.get_order_messages()
         try:
             order = self.get_order(iuid)
         except ValueError, msg:

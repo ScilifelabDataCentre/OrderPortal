@@ -26,7 +26,7 @@
 
 - identifier: rejected
   description: The order has been rejected by the facility.
-  action: reject
+  action: Reject
 
 - identifier: active
   description: The facility is working on the order, in the lab or in data analysis.
