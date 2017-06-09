@@ -8,7 +8,7 @@
 #     When applicable also:
 # {password_url} URL for password setting page.
 # {password_code_url} URL for password setting page, including code and email.
-# {code}    The password setting code itself.
+# {code}    The password setting code.
 
 pending:
   subject: "An account {account} in the {site} is pending approval."

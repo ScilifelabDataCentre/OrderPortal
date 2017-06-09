@@ -1,0 +1,71 @@
+{# Account messages admin page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Account messages admin{% end %}
+{% block body_title %}Account messages admin{% end %}
+
+{% block main_content %}
+<div class="well">
+  <p>
+    Templates for messages sent when an account is set to a certain status.
+  </p>
+  <p>
+    Variables denoted <code>{name}</code> are replaced by their
+    corresponding values when the message is prepared.
+  </p>
+  <table class="table">
+    <tr>
+      <th>Variable</th>
+      <th>Value</th>
+    </tr>
+    <tr>
+      <td><code>{site}</code></td>
+      <td>The name of the OrderPortal site.</td>
+    </tr>
+    <tr>
+      <td><code>{support}</code></td>
+      <td>The contact email for the OrderPortal site.</td>
+    </tr>
+    <tr>
+      <td><code>{account}</code></td>
+      <td>The email of the account.</td>
+    </tr>
+    <tr>
+      <td><code>{url}</code></td>
+      <td>The URL of the account.</td>
+    </tr>
+    <tr>
+      <td><code>{password_url}</code></td>
+      <td>The URL for the password setting page.</td>
+    </tr>
+    <tr>
+      <td><code>{password_code_url}</code></td>
+      <td>The URL for the password setting page, including code and account email..</td>
+    </tr>
+    <tr>
+      <td><code>{code}</code></td>
+      <td>The password setting code.</td>
+    </tr>
+  </table>
+</div>
+
+<table class="table">
+  <tr>
+    <th>Status</th>
+    <th>Recipients</th>
+    <th>Subject</th>
+    <th>Text</th>
+  </tr>
+  {% set statuses = constants.ACCOUNT_STATUSES + [constants.RESET] %}
+  {% for status in  statuses %}
+  {% set message = account_messages.get(status, dict()) %}
+  <tr>
+    <td>{% module Icon(status, label=True) %}</td>
+    <td>{{ ', '.join(message.get('recipients', [])) or '-' }}</td>
+    <td>{{ message.get('subject') or '-' }}</td>
+    <td class="pre">{{ message.get('text') or '-' }}</td>
+  </tr>
+  {% end %}
+</table>
+{% end %} {# block main_content #}
