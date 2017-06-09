@@ -7,92 +7,54 @@
 
 {% block main_content %}
 
-<div class="row">
-  <div class="col-md-10 well">
-    <p>
-      List of values of various system settings, for keeping track
-      which files are actually used during server startup.
-    </p>
-    <p>
-      The proper way of changing the settings is by specifying the new
-      values in the site-specific YAML settings file. The OrderPortal
-      server must be restarted for the changes to take effect.  Only
-      the IT responsible for the server system is allowed to do this.
-      The default values are set in the <code>__init__.py</code> file
-      which should not be changed.
-    </p>
-  </div>
+<div class="well">
+  <p>
+    List of values of various system settings, for keeping track
+    which files were actually read when the server started.
+  </p>
+  <p>
+    The proper way of changing the settings is by specifying the new
+    values in the site-specific YAML settings file. The OrderPortal
+    server must then be restarted for the changes to take effect.
+    Only the IT responsible for the server system is allowed to do this.
+    The default values are set in the <code>__init__.py</code> file
+    and should not be changed.
+  </p>
 </div>
 
-<div class="row">
-  <div class="col-md-10">
-    <table class="table">
-      {% for key, value in params %}
-      <tr>
-	<th>{{ key }}</th>
-	<td>{{ value }}</td>
-      </tr>
-      {% end %}
-    </table>
-  </div>
-  <div class="col-md-2">
-  </div>
-</div>
+<table class="table">
+  {% for key, value in params %}
+  <tr>
+    <th>{{ key }}</th>
+    <td>{{ value }}</td>
+  </tr>
+  {% end %}
+</table>
 
-<div class="row">
-  <div class="col-md-12">
-    <h3>{{ terminology('Order') }} messages</h3>
-    <table class="table">
-      <tr>
-	<th>Event</th>
-	<th>Recipients</th>
-	<th>Subject</th>
-	<th>Text</th>
-      </tr>
-      {% for key, value in sorted(settings['ORDER_MESSAGES'].items()) %}
-      <tr>
-	<td>{{ key }}</td>
-	<td>{{ ', '.join(value['recipients']) }}</td>
-	<td>{{ value['subject'] }}</td>
-	<td class="pre">{{ value['text'] }}</td>
-      </tr>
-      {% end %}
-    </table>
-  </div>
-  <div class="col-md-2">
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-md-12">
-    <h3>Universities</h3>
-    <table class="table">
-      <tr>
-	<th>Abbreviation</th>
-	<th>Name</th>
-	<th>Rank</th>
-	<th>Autopopulate {{ terminology('order') }} fields</th>
-      </tr>
-      {% for key, value in sorted(settings['UNIVERSITIES'].items()) %}
-      <tr>
-	<td>{{ key }}</td>
-	<td>{{ value.get('name') }}</td>
-	<td>{{ value.get('rank') }}</td>
-	<td>
-	  <table class="table table-condensed table-striped table-noborder">
-	  {% for k, v in sorted(value.get('fields', {}).items()) %}
-	  <tr>
-	    <td width="40%">{{ k }}</td>
-	    <td class="pre">{{ v }}</td>
-	  </tr>
-	  {% end %}
-	  </table>
-	</td>
-      </tr>
-      {% end %}
-    </table>
-  </div>
-  <div class="col-md-2">
-  </div>
-</div>
+<h3>Universities</h3>
+<table class="table">
+  <tr>
+    <th>Abbreviation</th>
+    <th>Name</th>
+    <th>Rank</th>
+    <th>Autopopulate {{ terminology('order') }} fields</th>
+  </tr>
+  {% for key, value in sorted(settings['UNIVERSITIES'].items()) %}
+  <tr>
+    <td>{{ key }}</td>
+    <td>{{ value.get('name') }}</td>
+    <td>{{ value.get('rank') }}</td>
+    <td>
+      <table class="table table-condensed table-striped table-noborder">
+	{% for k, v in sorted(value.get('fields', {}).items()) %}
+	<tr>
+	  <td width="40%">{{ k }}</td>
+	  <td class="pre">{{ v }}</td>
+	</tr>
+	{% end %}
+      </table>
+    </td>
+  </tr>
+  {% end %}
+</table>
 {% end %} {# block main_content #}

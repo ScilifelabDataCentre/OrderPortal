@@ -96,6 +96,7 @@ PENDING  = 'pending'
 ENABLED  = 'enabled'
 DISABLED = 'disabled'
 ACCOUNT_STATUSES = [PENDING, ENABLED, DISABLED]
+RESET    = 'reset'
 
 # Account role
 USER  = 'user'

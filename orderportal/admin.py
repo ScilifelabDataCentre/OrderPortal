@@ -101,7 +101,6 @@ class GlobalModes(RequestHandler):
         self.check_admin()
         self.render('global_modes.html')
 
-    @tornado.web.authenticated
     def post(self):
         self.check_admin()
         try:
@@ -117,3 +116,29 @@ class GlobalModes(RequestHandler):
                 self.global_modes[constants.DOCTYPE] = constants.META
             self.db.save(self.global_modes)
         self.see_other('global_modes')
+
+
+class AdminOrderMessages(RequestHandler):
+    "Page for displaying order messages configuration."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render('admin_order_messages.html',
+                    order_messages=self.db['order_messages'])
+
+
+class AdminAccountMessages(RequestHandler):
+    "Page for displaying account messages configuration."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        account_messages = self.db['account_messages']
+        # Add in the recipients, which are hardwired in code.
+        account_messages[constants.PENDING]['recipients'] = ['admin']
+        account_messages[constants.ENABLED]['recipients'] = ['account']
+        account_messages[constants.DISABLED]['recipients'] = ['account']
+        account_messages[constants.RESET]['recipients'] = ['account']
+        self.render('admin_account_messages.html',
+                    account_messages=account_messages)

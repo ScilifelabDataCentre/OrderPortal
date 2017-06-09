@@ -138,11 +138,27 @@
 		<li>
 		  <a href="{{ reverse_url('global_modes') }}">Global modes</a>
 		</li>
-		<li><a href="{{ reverse_url('statuses') }}">Statuses</a></li>
-		<li><a href="{{ reverse_url('settings') }}">Settings</a></li>
-		<li><a href="{{ reverse_url('statistics') }}">Statistics</a></li>
-		<li><a href="{{ reverse_url('texts') }}">Texts</a></li>
-		<li><a href="{{ reverse_url('software') }}">Software info</a></li>
+		<li>
+		  <a href="{{ reverse_url('statuses') }}">Statuses</a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('settings') }}">Settings</a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('admin_order_messages') }}">Order messages</a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('admin_account_messages') }}">Account messages</a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('statistics') }}">Statistics</a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('texts') }}">Texts</a>
+		</li>
+		<li>
+		  <a href="{{ reverse_url('software') }}">Software info</a>
+		</li>
 	      </ul>
 	    </li>
 	    {% if not reduce(lambda i,j: i and j, [global_modes[k] for k in global_modes.keys() if k.startswith('allow')]) %}
