@@ -83,7 +83,6 @@ class Settings(RequestHandler):
                   ('Site directory', settings['SITE_DIR']),
                   ('Tornado debug', settings['TORNADO_DEBUG']),
                   ('logging debug', settings['LOGGING_DEBUG']),
-                  ('account messages', settings['ACCOUNT_MESSAGES_FILEPATH']),
                   ('order statuses', settings['ORDER_STATUSES_FILEPATH']),
                   ('order transitions', settings['ORDER_TRANSITIONS_FILEPATH']),
                   ('universities', settings.get('UNIVERSITIES_FILEPATH')),

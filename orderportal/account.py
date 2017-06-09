@@ -741,7 +741,7 @@ class Login(RequestHandler):
                       ' disabled. You must contact the site administrators.'
                 # Prepare message sent by cron job script 'script/messenger.py'
                 try:
-                    template = settings['ACCOUNT_MESSAGES']['disabled']
+                    template = self.db['account_messages']['disabled']
                 except KeyError:
                     pass
                 else:
@@ -813,7 +813,7 @@ class Reset(RequestHandler):
                 saver.reset_password()
             # Prepare message sent by cron job script 'script/messenger.py'
             try:
-                template = settings['ACCOUNT_MESSAGES']['reset']
+                template = self.db['account_messages']['reset']
             except KeyError:
                 pass
             else:
@@ -966,7 +966,7 @@ class Register(RequestHandler):
             return
         # Prepare message sent by cron job script 'script/messenger.py'
         try:
-            template = settings['ACCOUNT_MESSAGES']['pending']
+            template = self.db['account_messages']['pending']
         except KeyError:
             pass
         else:
@@ -1003,7 +1003,7 @@ class AccountEnable(RequestHandler):
             saver.reset_password()
         # Prepare message sent by cron job script 'script/messenger.py'
         try:
-            template = settings['ACCOUNT_MESSAGES']['enabled']
+            template = self.db['account_messages']['enabled']
         except KeyError:
             pass
         else:
