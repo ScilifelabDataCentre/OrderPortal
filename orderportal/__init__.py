@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.3.4'
+__version__ = '3.3.5'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -44,7 +44,6 @@ settings = dict(
     DISPLAY_MAX_PENDING_ACCOUNTS=10,
     DISPLAY_DEFAULT_MAX_LOG=20,
     DISPLAY_MAX_NEWS=4,
-    ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',
     ORDER_STATUSES_FILEPATH='{SITE_DIR}/order_statuses.yaml',
     ORDER_TRANSITIONS_FILEPATH='{SITE_DIR}/order_transitions.yaml',
     ORDER_USER_TAGS=True,
