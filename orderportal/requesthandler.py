@@ -106,6 +106,7 @@ class RequestHandler(tornado.web.RequestHandler):
         message = message.replace(' ', '_')
         message = message.replace(';', '_')
         message = message.replace(',', '_')
+        message = message.replace('\n', '_')
         self.set_cookie(name, message)
 
     def get_current_user(self):

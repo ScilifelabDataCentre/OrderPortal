@@ -762,7 +762,8 @@ class Login(RequestHandler):
            and account['role'] != constants.ADMIN:
             self.see_other('home', error='Login is currently disabled.')
             return
-        self.set_secure_cookie(constants.USER_COOKIE, account['email'],
+        self.set_secure_cookie(constants.USER_COOKIE, 
+                               account['email'],
                                expires_days=settings['LOGIN_MAX_AGE_DAYS'])
         with AccountSaver(doc=account, rqh=self) as saver:
             saver['login'] = utils.timestamp() # Set login timestamp.
@@ -855,9 +856,10 @@ class Password(RequestHandler):
             return
         if account.get('code') != self.get_argument('code'):
             self.see_other('home',
-                           error=
-"""Either the email address or the code for setting password was wrong.
- You should probably request a new code using the 'Reset password' button.""")
+                           error="Either the email address or the code" +
+                           " for setting password was wrong." +
+                           " Try to request a new code using the" +
+                           " 'Reset password' button.")
             return
         password = self.get_argument('password', '')
         try:
@@ -877,7 +879,8 @@ class Password(RequestHandler):
         with AccountSaver(doc=account, rqh=self) as saver:
             saver.set_password(password)
             saver['login'] = utils.timestamp() # Set login session.
-        self.set_secure_cookie(constants.USER_COOKIE, account['email'],
+        self.set_secure_cookie(constants.USER_COOKIE,
+                               account['email'],
                                expires_days=settings['LOGIN_MAX_AGE_DAYS'])
         if account.get('update_info'):
             self.see_other('account_edit', account['email'],
