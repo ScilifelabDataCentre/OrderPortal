@@ -100,6 +100,8 @@ Edit  {% module Icon('order') %}
 	<input type="text" class="form-control"
 	       name="__owner__" id="__owner__"
 	       value="{{ order['owner'] }}">
+	{% elif is_staff %}
+	<p id="__owner__" class="form-control-static">{{ order['owner'] }}</p>
 	{% else %}
 	<select class="form-control" name="__owner__" id="__owner__">
 	  {% for colleague in colleagues %}
