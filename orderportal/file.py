@@ -153,6 +153,14 @@ class FileEdit(RequestHandler):
         self.see_other('files')
 
 
+class FileEditApiV1(FileEdit):
+    "API for editing a file."
+
+    def check_xsrf_cookie(self):
+        "Do not check for XSRF cookie when script is calling."
+        pass
+    
+
 class FileDownload(File):
     "Download the file."
 
