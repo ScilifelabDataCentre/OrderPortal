@@ -141,6 +141,7 @@ def main():
         url(r'/file/([^/]+)/meta', FileMeta, name='file_meta'),
         url(r'/file/([^/]+)/download', FileDownload, name='file_download'),
         url(r'/file/([^/]+)/edit', FileEdit, name='file_edit'),
+        url(r'/api/v1/file/([^/]+)/edit', FileEditApiV1, name='file_edit_api'),
         url(r'/file/([0-9a-f]{32})/logs', FileLogs, name='file_logs'),
         url(r'/text/([^/]+)', Text, name='text'),
         url(r'/texts', Texts, name='texts'),
