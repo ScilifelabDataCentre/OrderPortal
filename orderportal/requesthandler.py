@@ -96,11 +96,13 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def set_message_flash(self, message):
         "Set message flash cookie."
-        self.set_flash('message', message)
+        if message:
+            self.set_flash('message', message)
 
     def set_error_flash(self, message):
         "Set error flash cookie message."
-        self.set_flash('error', message)
+        if message:
+            self.set_flash('error', message)
 
     def set_flash(self, name, message):
         message = message.replace(' ', '_')
@@ -322,7 +324,7 @@ class RequestHandler(tornado.web.RequestHandler):
         try:
             return self.get_entity_view('account/email', email.strip().lower())
         except tornado.web.HTTPError:
-            raise ValueError('Sorry, no such account.')
+            raise ValueError("Sorry, no such account: '%s'" % email)
 
     def get_account_order_count(self, email):
         "Get the number of orders for the account."

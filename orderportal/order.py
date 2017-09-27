@@ -1096,8 +1096,6 @@ class OrderEdit(OrderMixin, RequestHandler):
                         raise ValueError('Owner account is not enabled.')
                 except tornado.web.MissingArgumentError:
                     pass
-                except tornado.web.HTTPError:
-                    raise ValueError('Sorry, no such owner account.')
                 else:
                     saver['owner'] = account['email']
                 saver.update_fields()
@@ -1110,18 +1108,15 @@ class OrderEdit(OrderMixin, RequestHandler):
                         error = "{0} could not be submitted due to" \
                                 " invalid or missing values."\
                                 .format(utils.terminology('Order'))
+            self.set_error_flash(error)
+            self.set_message_flash(message)
             if flag == 'continue':
-                self.see_other('order_edit', order['_id'], message=message)
+                self.see_other('order_edit', order['_id'])
             else:
-                if error:
-                    url = self.order_reverse_url(order,
-                                                 message=message,
-                                                 error=error)
-                else:
-                    url = self.order_reverse_url(order, message=message)
-                self.redirect(url)
+                self.redirect(self.order_reverse_url(order))
         except ValueError, msg:
-            self.redirect(self.order_reverse_url(order, error=str(msg)))
+            self.set_error_flash(str(msg))
+            self.redirect(self.order_reverse_url(order))
 
 
 class OrderClone(OrderMixin, RequestHandler):
