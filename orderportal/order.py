@@ -655,56 +655,58 @@ class OrderCsv(OrderMixin, RequestHandler):
         form = self.get_entity(order['form'], doctype=constants.FORM)
         csvbuffer = StringIO()
         writer = csv.writer(csvbuffer)
-        writer.writerow((settings['SITE_NAME'], utils.timestamp()))
+        safe = utils.csv_safe_row
+        writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
         try:
-            writer.writerow(('Identifier', order['identifier']))
+            writer.writerow(safe(('Identifier', order['identifier'])))
         except KeyError:
             pass
-        writer.writerow(('Title', order.get('title') or '[no title]'))
-        writer.writerow(('URL', self.order_reverse_url(order)))
-        writer.writerow(('IUID', order['_id']))
-        writer.writerow(('Form', 'Title', form['title']))
-        writer.writerow(('', 'Version', form.get('version') or '-'))
-        writer.writerow(('', 'IUID', form['_id']))
+        writer.writerow(safe(('Title', order.get('title') or '[no title]')))
+        writer.writerow(safe(('URL', self.order_reverse_url(order))))
+        writer.writerow(safe(('IUID', order['_id'])))
+        writer.writerow(safe(('Form', 'Title', form['title'])))
+        writer.writerow(safe(('', 'Version', form.get('version') or '-')))
+        writer.writerow(safe(('', 'IUID', form['_id'])))
         account = self.get_account(order['owner'])
-        writer.writerow(('Owner', 'Name', utils.get_account_name(account)))
-        writer.writerow(('', 'URL', URL('account', account['email'])))
-        writer.writerow(('', 'Email', order['owner']))
-        writer.writerow(('', 'University',
-                         account.get('university') or '-'))
-        writer.writerow(('', 'Department',
-                         account.get('department') or '-'))
-        writer.writerow(('', 'PI',
-                         account.get('pi') and 'Yes' or 'No'))
+        writer.writerow(safe(('Owner', 'Name',
+                              utils.get_account_name(account))))
+        writer.writerow(safe(('', 'URL', URL('account', account['email']))))
+        writer.writerow(safe(('', 'Email', order['owner'])))
+        writer.writerow(safe(('', 'University',
+                         account.get('university') or '-')))
+        writer.writerow(safe(('', 'Department',
+                         account.get('department') or '-')))
+        writer.writerow(safe(('', 'PI',
+                         account.get('pi') and 'Yes' or 'No')))
         if settings.get('ACCOUNT_FUNDER_INFO') and \
            settings.get('ACCOUNT_FUNDER_INFO_GENDER'):
-            writer.writerow(('', 'Gender',
-                             account.get('gender', '-').capitalize()))
-        writer.writerow(('Status', order['status']))
+            writer.writerow(safe(('', 'Gender',
+                                  account.get('gender', '-').capitalize())))
+        writer.writerow(safe(('Status', order['status'])))
         for i, s in enumerate(settings['ORDER_STATUSES']):
             key = s['identifier']
-            writer.writerow((i == 0 and 'History' or '',
-                             key,
-                             order['history'].get(key, '-')))
+            writer.writerow(safe((i == 0 and 'History' or '',
+                                  key,
+                                  order['history'].get(key, '-'))))
         for t in order.get('tags', []):
-            writer.writerow(('Tag', t))
-        writer.writerow(('Modified', order['modified']))
-        writer.writerow(('Created', order['created']))
-        writer.writerow(('',))
-        writer.writerow(('Field', 'Label', 'Depth', 'Type', 'Value',
-                         'Restrict read', 'Restrict write',
-                         'Invalid', 'Description'))
+            writer.writerow(safe(('Tag', t)))
+        writer.writerow(safe(('Modified', order['modified'])))
+        writer.writerow(safe(('Created', order['created'])))
+        writer.writerow(safe(('',)))
+        writer.writerow(safe(('Field', 'Label', 'Depth', 'Type', 'Value',
+                              'Restrict read', 'Restrict write',
+                              'Invalid', 'Description')))
         for field in self.get_fields(order):
-            writer.writerow(field.values())
-        writer.writerow(('',))
-        writer.writerow(('File', 'Size', 'Content type', 'URL'))
+            writer.writerow(safe(field.values()))
+        writer.writerow(safe(('',)))
+        writer.writerow(safe(('File', 'Size', 'Content type', 'URL')))
         for filename in sorted(order.get('_attachments', [])):
             if filename.startswith(constants.SYSTEM): continue
             stub = order['_attachments'][filename]
-            writer.writerow((filename,
-                             stub['length'],
-                             stub['content_type'],
-                             URL('order_file', order['_id'], filename)))
+            writer.writerow(safe((filename,
+                                  stub['length'],
+                                  stub['content_type'],
+                                  URL('order_file', order['_id'], filename))))
         return csvbuffer
 
 
@@ -897,7 +899,8 @@ class OrdersCsv(Orders):
         self.set_filter()
         csv_stringio = StringIO()
         writer = csv.writer(csv_stringio)
-        writer.writerow((settings['SITE_NAME'], utils.timestamp()))
+        safe = utils.csv_safe_row
+        writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
         row = ['Identifier', 'Title', 'IUID', 'URL', 
                'Form', 'Form IUID', 'Form URL',
                'Owner', 'Owner name', 'Owner URL', 'Tags']
@@ -905,7 +908,7 @@ class OrdersCsv(Orders):
         row.append('Status')
         row.extend([s.capitalize() for s in settings['ORDERS_LIST_STATUSES']])
         row.append('Modified')
-        writer.writerow(row)
+        writer.writerow(safe(row))
         names = self.get_account_names()
         forms = self.get_forms_titles(all=True)
         for order in self.get_orders():
@@ -926,7 +929,7 @@ class OrdersCsv(Orders):
             for s in settings['ORDERS_LIST_STATUSES']:
                 row.append(order['history'].get(s))
             row.append(order['modified'])
-            writer.writerow(row)
+            writer.writerow(safe(row))
         self.write(csv_stringio.getvalue())
         self.set_header('Content-Type', constants.CSV_MIME)
         self.set_header('Content-Disposition',
