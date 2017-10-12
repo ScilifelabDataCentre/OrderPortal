@@ -308,6 +308,18 @@ def convert(type, value):
     else:
         return value
 
+def csv_safe_row(row):
+    """Remove any beginning character '=-+@' from string values to output.
+    See http://georgemauer.net/2017/10/07/csv-injection.html
+    """
+    row = list(row)
+    for pos, value in enumerate(row):
+        if not isinstance(value, basestring): continue
+        while len(value) and value[0] in '=-+@':
+            value = value[1:]
+        row[pos] = value
+    return row
+
 def get_json(id, type):
     "Return the initialized JSON dictionary with id and type."
     result = collections.OrderedDict()
