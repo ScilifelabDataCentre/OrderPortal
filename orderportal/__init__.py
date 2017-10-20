@@ -66,4 +66,5 @@ settings = dict(
     # For database initialization only; ignored after that.
     INITIAL_TEXTS_FILEPATH='{SITE_DIR}/initial_texts.yaml',
     INITIAL_ORDER_MESSAGES_FILEPATH='{SITE_DIR}/initial_order_messages.yaml',
+    INITIAL_ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/initial_account_messages.yaml',
     )
