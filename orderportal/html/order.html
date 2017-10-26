@@ -150,8 +150,7 @@
       </tr>
       {% if is_staff or settings.get('ORDER_USER_TAGS') %}
       <tr>
-	<th>Keywords</th>
-	{# A user was confused by terminology. No change in the code. #}
+	<th>Keywords (tags)</th>
 	<td>{% module Tags(order.get('tags', [])) %}</td>
       </tr>
       {% end %} {#if is_staff or settings.get('ORDER_USER_TAGS') #}

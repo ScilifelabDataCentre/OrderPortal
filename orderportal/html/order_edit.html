@@ -67,7 +67,7 @@ Edit  {% module Icon('order') %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
-	<label class="control-label" for="__tags__">Keywords</label>
+	<label class="control-label" for="__tags__">Keywords (tags)</label>
 	{# A user was confused by terminology. No change in the code. #}
 	{% if is_staff %}
 	{% set tags = order.get('tags', []) %}
@@ -80,12 +80,14 @@ Edit  {% module Icon('order') %}
       </div>
     </div>
     <span class="help-block">
-      Optional keywords (tags) characterizing the {{ terminology('order') }}.
-      Format a tag as an identifier, i.e. start with a letter,
-      continue with letters, digits and/or underscore '_'.
+      Optional keywords (tags) characterizing the {{ terminology('order') }},
+      which are used in searches.
       <br>
-      More than one tag is allowed; use blank or comma ',' as delimiter.
+      Format a keyword as an identifier: Start with a letter, continue
+      with letters, digits and/or underscore '_'. Use blank or comma
+      ',' as delimiter between keywords.
       {% if is_staff %}
+      <br>
       Staff may use namespace prefixes, e.g. "project_id:P12345".
       {% end %}
     </span>
