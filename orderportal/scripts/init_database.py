@@ -66,6 +66,24 @@ def init_database(dumpfilepath=None):
             messages['_id'] = 'order_messages'
             messages[constants.DOCTYPE] = constants.META
             db.save(messages)
+    # Load initial account messages from file if missing in db
+    try:
+        db['account_messages']
+    except couchdb.ResourceNotFound:
+        try:
+            filepath = settings['INITIAL_ACCOUNT_MESSAGES_FILEPATH']
+        except KeyError:
+            print('Warning: no initial account messages')
+        else:
+            try:
+                with open(utils.expand_filepath(filepath)) as infile:
+                      messages = yaml.safe_load(infile)
+            except IOError:
+                print('Warning: could not load', filepath)
+                messages = dict()
+            messages['_id'] = 'account_messages'
+            messages[constants.DOCTYPE] = constants.META
+            db.save(messages)
     # Load texts from the init text file only if missing id db
     filepath = settings.get('INITIAL_TEXTS_FILEPATH')
     if filepath:

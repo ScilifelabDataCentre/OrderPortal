@@ -94,7 +94,7 @@
 	  <th>{% module Icon('form', label=True) %}</th>
 	  <th>{% module Icon('account', label=True, title='Owner') %}</th>
 	  {% if settings['ORDERS_LIST_TAGS'] %}
-	  <th width="5%">Tags</th>
+	  <th width="5%">Keywords (tags)</th>
 	  {% end %}
 	  {% for f in settings['ORDERS_LIST_FIELDS'] %}
 	  <th>{{ f['identifier'].capitalize().replace('_', ' ') }}</th>

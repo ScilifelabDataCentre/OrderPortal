@@ -283,20 +283,26 @@
     </div> {# end of container for body content #}
 
     <div class="container-fluid">
+      <hr>
       <div class="row">
-	<div class="col-md-12">
-	  <hr>
-	  <div class="pull-left">
-	    <a href="{{ reverse_url('home') }}">
-	      <span class="glyphicon glyphicon-home"></span>
-	      {{ settings['SITE_NAME'] }}
-	    </a>
-	  </div>
-	  <div class="pull-right">
-	    <a href="{{ reverse_url('software') }}">
-	      OrderPortal version {{ version }}
-	    </a>
-	  </div>
+	<div class="col-md-2">
+	  <a href="{{ reverse_url('home') }}">
+	    <span class="glyphicon glyphicon-home"></span>
+	    {{ settings['SITE_NAME'] }}
+	  </a>
+	</div>
+        <div class="col-md-8 text-center">
+          Cookie policy: 
+          {% if current_user %}
+          A cookie is used to handle your login session.
+          {% else %}
+          Cookies are <b>not</b> used for anonymous users.
+          {% end %}
+        </div>
+	<div class="col-md-2">
+	  <a class="pull-right" href="{{ reverse_url('software') }}">
+	    OrderPortal version {{ version }}
+	  </a>
 	</div>
       </div>
     </div>
