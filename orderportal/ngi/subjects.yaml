@@ -1,0 +1,193 @@
+# Vetenskapsrådet (VR) subject term list and codes
+-
+  code: 1
+  term: Natural sciences 
+  level: 0
+-
+  code: 101
+  term: Mathematics
+  level: 1
+-
+  code: 102
+  term: Computer and Information Sciences
+  level: 1
+-
+  code: 103
+  term: Physical Sciences
+  level: 1
+-
+  code: 104
+  term: Chemical Sciences
+  level: 1
+-
+  code: 105
+  term: Earth and Related Environmental Sciences
+  level: 1
+-
+  code: 106
+  term: Biological Sciences
+  level: 1
+-
+  code: 107
+  term: Other Natural Sciences 
+  level: 1
+-
+  code: 2
+  term: Engineering and Technology
+  level: 0
+-
+  code: 201
+  term: Civil Engineering 
+  level: 1
+-
+  code: 202
+  term: Electrical Engineering, Electronic Engineering, Information Engineering
+  level: 1
+-
+  code: 203
+  term: Mechanical Engineering
+  level: 1
+-
+  code: 204
+  term: Chemical Engineering
+  level: 1
+-
+  code: 205
+  term: Materials Engineering
+  level: 1
+-
+  code: 206
+  term: Medical Engineering
+  level: 1
+-
+  code: 207
+  term: Environmental Engineering
+  level: 1
+-
+  code: 208
+  term: Environmental Biotechnology
+  level: 1
+-
+  code: 209
+  term: Industrial Biotechnology
+  level: 1
+-
+  code: 210
+  term: Nano-technology
+  level: 1
+-
+  code: 211
+  term: Other Engineering and Technologies
+  level: 1
+-
+  code: 3
+  term: Medical and Health Sciences 
+  level: 0
+-
+  code: 301
+  term: Basic Medicine
+  level: 1
+-
+  code: 302
+  term: Clinical Medicine
+  level: 1
+-
+  code: 303
+  term: Health Sciences
+  level: 1
+-
+  code: 304
+  term: Medical Biotechnology
+  level: 1
+-
+  code: 305
+  term: Other Medical and Health Sciences
+  level: 1
+-
+  code: 4
+  term: Agricultural Sciences
+  level: 0
+-
+  code: 401
+  term: Agricultural, Forestry and Fisheries
+  level: 1
+-
+  code: 402
+  term: Animal and Dairy Sience
+  level: 1
+-
+  code: 403
+  term: Veterinary Science
+  level: 1
+-
+  code: 404
+  term: Agricultural Biotechnology
+  level: 1
+-
+  code: 405
+  term: Other Agricultural Sciences
+  level: 1
+-
+  code: 5
+  term: Social Sciences
+  level: 0
+-
+  code: 501
+  term: Psychology
+  level: 1
+-
+  code: 502
+  term: Economics and Business
+  level: 1
+-
+  code: 503
+  term: Educational Sciences
+  level: 1
+-
+  code: 504
+  term: Sociology
+  level: 1
+-
+  code: 505
+  term: Law
+  level: 1
+-
+  code: 506
+  term: Political Science
+  level: 1
+-
+  code: 507
+  term: Social and Economic Geography
+  level: 1
+-
+  code: 508
+  term: Media and Communications
+  level: 1
+-
+  code: 509
+  term: Other Social Sciences
+  level: 1
+-
+  code: 6
+  term: Humanities
+  level: 0
+-
+  code: 601
+  term: History and Archaeology 
+  level: 1
+-
+  code: 602
+  term: Languages and Literature 
+  level: 1
+-
+  code: 603
+  term: Philosophy, Ethics and Religion
+  level: 1
+-
+  code: 604
+  term: Arts
+  level: 1
+-
+  code: 605
+  term: Other Humanities 
+  level: 1

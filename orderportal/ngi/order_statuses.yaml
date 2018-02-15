@@ -1,0 +1,55 @@
+# OrderPortal order status definitions.
+
+- identifier: preparation
+  initial: true
+  description: The order has been created and is being edited by the user.
+  action: Prepare
+  edit: [user]
+  attach: [user]
+
+- identifier: submitted
+  description: The order has been submitted by the user for consideration by the facility.
+  action: Submit
+  edit: []
+  attach: []
+
+- identifier: review
+  description: The order is under review by the facility.
+  action: Review
+  edit: [staff]
+  attach: [staff]
+
+- identifier: accepted
+  description: The order has been checked and accepted by the facility.
+  action: Accept
+  edit: []
+  attach: []
+
+- identifier: rejected
+  description: The order has been rejected by the facility.
+  action: Reject
+  edit: []
+  attach: []
+
+- identifier: processing
+  description: The facility is working on the order, in the lab or in data analysis.
+  action: Process
+  edit: []
+  attach: []
+
+- identifier: aborted
+  description: The work on the order has been permanently stopped.
+  action: Abort
+  edit: []
+  attach: []
+
+- identifier: closed
+  description: All work and other actions for the order have been performed.
+  action: Close
+  edit: []
+  attach: []
+
+- identifier: undefined
+  description: The order was loaded from the old portal, which did not transfer any status information.
+  edit: []
+  attach: []
