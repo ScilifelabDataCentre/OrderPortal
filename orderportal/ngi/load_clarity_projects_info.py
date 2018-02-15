@@ -57,7 +57,7 @@ class Clarity(object):
         self.session = requests.Session()
         self.session.auth = (clarity_settings['USERNAME'],
                              clarity_settings['PASSWORD'])
-        self.session.headers.update({'headers': {'Accept':'application/xml'}})
+        self.session.headers.update({'Accept':'application/xml'})
         self.resources = {}
         response = self.session.get(clarity_settings['API_URL'])
         if response.status_code != 200:
