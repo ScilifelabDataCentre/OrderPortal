@@ -2,9 +2,11 @@
 
 from __future__ import print_function, absolute_import
 
+import csv
 import json
 import logging
 from collections import OrderedDict as OD
+from cStringIO import StringIO
 
 import tornado.web
 
@@ -486,3 +488,50 @@ class FormOrders(RequestHandler):
                     form=form,
                     orders=orders,
                     account_names=account_names)
+
+class FormOrdersCsv(RequestHandler):
+    """Return a CSV file containing all orders for the form,
+    with some info on PI and values for all fields.
+    NOTE: field visibility is not checked; all fields are output."""
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        self.check_staff()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        view = self.db.view('order/form',
+                            reduce=False,
+                            include_docs=True,
+                            descending=True,
+                            startkey=[iuid, constants.CEILING],
+                            endkey=[iuid])
+        orders = [r.doc for r in view]
+        csvbuffer = StringIO()
+        writer = csv.writer(csvbuffer)
+        safe = utils.csv_safe_row
+        writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
+        header = ['Order IUID', 'Identifier', 'Title', 'Status',
+                  'Owner email', 'Last name', 'First name', 'University']
+        fields = Fields(form).flatten()
+        for field in fields:
+            header.append(field['identifier'])
+        writer.writerow(header)
+        for order in orders:
+            row = [order['_id'],
+                   order.get('identifier') or '-',
+                   order.get('title') or '-',
+                   order.get('status') or '-']
+            row.append(order['owner'])
+            account = self.get_account(order['owner'])
+            row.append(account.get('last_name') or '-')
+            row.append(account.get('first_name') or '-')
+            row.append(account.get('university') or '-')
+            for field in fields:
+                value = order['fields'].get(field['identifier'])
+                if isinstance(value, list):
+                    value = u','.join(value)
+                row.append(value)
+            writer.writerow(safe(row))
+        self.write(csvbuffer.getvalue())
+        self.set_header('Content-Type', constants.CSV_MIME)
+        self.set_header('Content-Disposition',
+                        'attachment; filename="orders_form_%s.csv"' % iuid)

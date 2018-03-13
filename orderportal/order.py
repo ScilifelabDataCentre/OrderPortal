@@ -3,8 +3,6 @@
 from __future__ import print_function, absolute_import
 
 import csv
-from collections import OrderedDict as OD
-from cStringIO import StringIO
 import json
 import logging
 import os.path
@@ -12,17 +10,19 @@ import re
 import traceback
 import urlparse
 import zipfile
+from collections import OrderedDict as OD
+from cStringIO import StringIO
 
 import couchdb
 import tornado.web
 
-from orderportal import constants
-from orderportal import saver
-from orderportal import settings
-from orderportal import utils
-from orderportal.fields import Fields
-from orderportal.message import MessageSaver
-from orderportal.requesthandler import RequestHandler, ApiV1Mixin
+from . import constants
+from . import saver
+from . import settings
+from . import utils
+from .fields import Fields
+from .message import MessageSaver
+from .requesthandler import RequestHandler, ApiV1Mixin
 
 
 class OrderSaver(saver.Saver):
@@ -389,8 +389,8 @@ class OrderMixin(object):
             .format(utils.terminology('order')))
 
     def get_fields(self, order, depth=0, fields=None):
-        """Return a list of dictionaries for each field
-        that is visible to the current user."""
+        """Return a list of dictionaries, each of which
+        for a field that is visible to the current user."""
         if fields is None:
             form = self.get_entity(order['form'], doctype=constants.FORM)
             fields = form['fields']

@@ -120,6 +120,8 @@ def main():
         url(r'/form/([0-9a-f]{32})/field/([a-zA-Z][_a-zA-Z0-9]*)/descr',
             FormFieldEditDescr, name='field_edit_descr'),
         url(r'/form/([0-9a-f]{32})/orders', FormOrders, name='form_orders'),
+        url(r'/form/([0-9a-f]{32})/orders.csv', 
+            FormOrdersCsv, name='form_orders_csv'),
         url(r'/news', News, name='news'),
         url(r'/new/([0-9a-f]{32})', NewsEdit, name='news_edit'),
         url(r'/new', NewsCreate, name='news_create'),
