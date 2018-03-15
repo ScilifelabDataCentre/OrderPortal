@@ -207,7 +207,7 @@ class AccountsCsv(Accounts):
         self.set_filter()
         accounts = self.get_accounts()
         csvfile = StringIO()
-        writer = csv.writer(csvfile)
+        writer = csv.writer(csvfile, quoting=csv.QUOTE_NONNUMERIC)
         safe = utils.csv_safe_row
         writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
         writer.writerow(safe(('Email', 'Last name', 'First name', 'Role',

@@ -506,7 +506,7 @@ class FormOrdersCsv(RequestHandler):
                             endkey=[iuid])
         orders = [r.doc for r in view]
         csvbuffer = StringIO()
-        writer = csv.writer(csvbuffer)
+        writer = csv.writer(csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
         safe = utils.csv_safe_row
         writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
         header = ['Order IUID', 'Identifier', 'Title', 'Status',

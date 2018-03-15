@@ -654,7 +654,7 @@ class OrderCsv(OrderMixin, RequestHandler):
         URL = self.absolute_reverse_url
         form = self.get_entity(order['form'], doctype=constants.FORM)
         csvbuffer = StringIO()
-        writer = csv.writer(csvbuffer)
+        writer = csv.writer(csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
         safe = utils.csv_safe_row
         writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
         try:
@@ -898,7 +898,7 @@ class OrdersCsv(Orders):
             return
         self.set_filter()
         csv_stringio = StringIO()
-        writer = csv.writer(csv_stringio)
+        writer = csv.writer(csv_stringio, quoting=csv.QUOTE_NONNUMERIC)
         safe = utils.csv_safe_row
         writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
         row = ['Identifier', 'Title', 'IUID', 'URL', 
