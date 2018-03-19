@@ -166,6 +166,9 @@ class OrderSaver(saver.Saver):
                         raise ValueError('missing value')
                 elif field['type'] == constants.STRING:
                     pass
+                elif field['type'] == constants.EMAIL:
+                    if not constants.EMAIL_RX.match(value):
+                        raise ValueError('not a valid email address')
                 elif field['type'] == constants.INT:
                     try:
                         docfields[field['identifier']] = int(value)

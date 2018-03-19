@@ -19,7 +19,19 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label for="type">Parent group field</label>
+	<label for="type">Field type</label>
+        <p id="type" class="form-control-static">{{ field['type'] }}</p>
+      </div>
+    </div>
+    <span class="help-block">
+      Data type for the field. Cannot be edited.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label for="parent">Parent group field</label>
 	<select class="form-control" name="parent" id="parent">
 	  <option value="">[no change]</option>
 	  {% for parent in alt_parents %}
@@ -41,7 +53,7 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label for="type">Position within group</label>
+	<label for="position">Position within group</label>
 	<select class="form-control" name="position" id="position">
 	  {% if siblings and field['identifier'] == siblings[0]['identifier'] %}
 	    <option selected value="__first__">[first]</option>

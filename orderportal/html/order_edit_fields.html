@@ -253,7 +253,7 @@
       Currently loaded file: {{ value }}
       {% end %}
 
-    {% else %} {# All other field types: string, integer, float, url #}
+    {% else %} {# All other field types: STRING, EMAIL, INT, FLOAT, URL #}
     {% if value is None %}
     {% set value = '' %}
     {% end %}

@@ -134,7 +134,7 @@
       {% else %}
       file <a href="{{ reverse_url('order_file', order['_id'], value) }}">{{ value }}</a>
       {% end %}
-    {% else %}
+    {% else %} {# All other field types. #}
       {% if value is None %}
       -
       {% else %}

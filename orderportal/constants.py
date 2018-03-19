@@ -48,6 +48,7 @@ SYSTEM_REPORT = 'system_report'
 
 # Field types
 STRING  = 'string'
+EMAIL   = 'email'
 INT     = 'int'
 FLOAT   = 'float'
 BOOLEAN = 'boolean'
@@ -60,10 +61,10 @@ TABLE   = 'table'
 ### This constant already defined above.
 ### GROUP   = 'group'
 ### FILE    = 'file'
-TYPES = [STRING, INT, FLOAT, BOOLEAN, URL, SELECT, MULTISELECT,
+TYPES = [STRING, EMAIL, INT, FLOAT, BOOLEAN, URL, SELECT, MULTISELECT,
          TEXT, DATE, TABLE, FILE, GROUP]
 TYPE_LABELS = {INT: 'integer'}
-TYPE_HTML = {STRING: 'text', INT: 'number'}
+TYPE_HTML = {STRING: 'text', INT: 'number', EMAIL: 'email'}
 
 # Texts for use in web site
 TEXTS = dict(header='Header on portal home page.',
