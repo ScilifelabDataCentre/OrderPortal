@@ -451,6 +451,8 @@ class FormEnable(RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         if form['status'] == constants.PENDING:
             with FormSaver(doc=form, rqh=self) as saver:
+                if not form.get('version'):
+                    saver['version'] = utils.today()
                 saver['status'] = constants.ENABLED
         self.see_other('form', iuid)
 
