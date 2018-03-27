@@ -139,7 +139,6 @@ class OrderSaver(saver.Saver):
 
     def check_validity(self, field):
         """Check validity of field value. Convert for some field types.
-        Execute the processor, if any.
         Skip field if not visible, else check recursively in postorder.
         Return True if valid, False otherwise.
         """
@@ -207,23 +206,6 @@ class OrderSaver(saver.Saver):
                     pass
                 elif field['type'] == constants.FILE:
                     pass
-                processor = field.get('processor')
-                if processor:
-                    try:
-                        processor = settings['PROCESSORS'][processor]
-                    except KeyError:
-                        raise ValueError("System error: No such processor '%s'"
-                                         % processor)
-                    else:
-                        processor = processor(self.db, self.doc, field)
-                        kwargs = dict()
-                        if field['type'] == constants.FILE:
-                            for file in self.files:
-                                if file['filename'] == value:
-                                    kwargs['body'] = file['body']
-                                    kwargs['content_type']= file['content_type']
-                                    break
-                        processor.run(value, **kwargs)
         except ValueError, msg:
             self.doc['invalid'][field['identifier']] = str(msg)
             return False

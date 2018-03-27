@@ -25,7 +25,6 @@ import yaml
 import orderportal
 from . import constants
 from . import settings
-from .processors.baseprocessor import BaseProcessor
 
 
 def get_command_line_parser(usage='usage: %prog [options]', description=None):
@@ -107,27 +106,6 @@ def load_settings(filepath=None):
             raise ValueError("settings['{0}'] has invalid value.".format(key))
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short.")
-    # Load processor modules and the classes in them
-    # Processors are classes for checking that a field value is valid.
-    paths = settings.get('PROCESSORS', [])
-    settings['PROCESSORS'] = {}
-    for path in paths:
-        try:
-            fromlist = '.'.join(path.split('.')[:-1])
-            module = __import__(path, fromlist=fromlist)
-        except:
-            logging.error("could not import processor module %s\n%s",
-                          path,
-                          traceback.format_exc(limit=20))
-        else:
-            for name in dir(module):
-                entity = getattr(module, name)
-                if isinstance(entity, type) and \
-                   issubclass(entity, BaseProcessor) and \
-                   entity != BaseProcessor:
-                    name = entity.__module__ + '.' + entity.__name__
-                    settings['PROCESSORS'][name] = entity
-                    logging.debug("loaded processor %s", name)
     # Read order state definitions and transitions
     logging.debug("Order statuses from %s", settings['ORDER_STATUSES_FILEPATH'])
     with open(settings['ORDER_STATUSES_FILEPATH']) as infile:

@@ -229,9 +229,6 @@
 	  {% elif field['type'] == constants.TABLE %}
 	  <pre>{{ '\n'.join(field.get('table') or []) }}</pre>
 	  {% end %}
-	  {% if field.get('processor') %}
-	  <br><em>{{ field.get('processor') }}</em>
-	  {% end %}
 	</td>
 	<td>
 	  {% if field.get('initial_display') %}

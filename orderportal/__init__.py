@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.3.14'
+__version__ = '3.3.15'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -16,7 +16,6 @@ settings = dict(
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
     LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',
-    PROCESSORS=[],
     SITE_DIR='{ROOT}/generic',
     SITE_NAME='OrderPortal',
     SITE_PERSONAL_DATA_POLICY='The data will be used only for activities directly related to this site.',
