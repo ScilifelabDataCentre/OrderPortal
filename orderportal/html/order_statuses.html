@@ -1,21 +1,40 @@
-{# Status display page. #}
+{# Order status display page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}Statuses{% end %}
-{% block body_title %}Statuses{% end %}
+{% block head_title %}{{ terminology('Order') }} statuses{% end %}
+
+{% block body_title %}
+{{ terminology('Order') }} statuses
+<small>An order has one and only one status at all times.</small>
+{% end %}
 
 {% block main_content %}
 
-<div class="row">
-  <div class="col-md-10">
-    <div class="well">
-      An {{ terminology('order') }} is always in one and only one of
-      the statuses given below. The list of statuses and the allowed
-      transitions between them are determined by YAML files defined 
-      in the settings, so only the system administrator can change them.
-    </div>
-  </div>
+<div class="well">
+  <p>
+    The available order statuses are defined in the YAML file 
+    <code>{{ settings.get('ORDER_STATUSES_FILEPATH') }}</code> 
+    which is read on startup of the OrderPortal server.
+  </p>
+  <p>
+    To change the available statuses, the YAML file must be edited and
+    the OrderPortal server restarted. Only the sysadmin for the server
+    machine can do this. A status can be added, <bold>but must never
+    be removed</bold>, since orders with that deleted status will
+    become undefined.
+  </p>
+  <p>
+    The possible transitions between statuses are defined in the YAML file 
+    <code>{{ settings.get('ORDER_TRANSITIONS_FILEPATH') }}</code> 
+    which is read on startup of the OrderPortal server.
+  </p>
+  <p>
+    To change the possible transitions, the YAML file must be edited and
+    the OrderPortal server restarted. Only the sysadmin for the server
+    machine can do this. There are no hard restrictions on changing
+    transitions.
+  </p>
 </div>
 
 <div class="row">

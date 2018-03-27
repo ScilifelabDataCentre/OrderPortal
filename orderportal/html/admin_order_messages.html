@@ -1,19 +1,16 @@
-{# Order messages display page. #}
+{# Order messages admin page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}Order messages admin{% end %}
-{% block body_title %}Order messages admin{% end %}
+{% block head_title %}Order messagesn{% end %}
+
+{% block body_title %}
+Order messages
+<small>Templates for messages sent when the status of an order is set.</small>
+{% end %}
 
 {% block main_content %}
 <div class="well">
-  <p>
-    Templates for messages sent when an order is set to a certain status.
-  </p>
-  <p>
-    Variables denoted <code>{name}</code> are replaced by their
-    corresponding values when the message is prepared.
-  </p>
   <table class="table">
     <tr>
       <th>Variable</th>

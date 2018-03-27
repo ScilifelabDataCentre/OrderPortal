@@ -15,6 +15,31 @@ from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 
 
+class GlobalModes(RequestHandler):
+    "Page for display and change of global modes."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render('global_modes.html')
+
+    def post(self):
+        self.check_admin()
+        try:
+            mode = self.get_argument('mode')
+            if mode not in self.global_modes: raise ValueError
+            self.global_modes[mode] = utils.to_bool(self.get_argument('value'))
+        except (tornado.web.MissingArgumentError, ValueError, TypeError):
+            pass
+        else:
+            # Create global_modes meta document if it does not exist.
+            if '_id' not in self.global_modes:
+                self.global_modes['_id'] = 'global_modes'
+                self.global_modes[constants.DOCTYPE] = constants.META
+            self.db.save(self.global_modes)
+        self.see_other('global_modes')
+
+
 class TextSaver(saver.Saver):
     doctype = constants.TEXT
 
@@ -54,67 +79,38 @@ class Texts(RequestHandler):
         self.render('texts.html', texts=sorted(constants.TEXTS.items()))
 
 
-class Statuses(RequestHandler):
-    "Page displaying currently defined statuses and transitions."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        self.render('statuses.html')
-
-
 class Settings(RequestHandler):
     "Page displaying settings info."
 
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        # Don't show the password
+        mod_settings = settings.copy()
+        # Don't show the password in the CouchDB URL
         url = settings['DB_SERVER']
         match = re.search(r':([^/].+)@', url)
         if match:
             url = list(url)
             url[match.start(1):match.end(1)] = '***'
-            url = ''.join(url)
-        params = [('Settings', settings['SETTINGS_FILEPATH']),
-                  ('Database server', url),
-                  ('Database', settings['DATABASE']),
-                  ('Site name', settings['SITE_NAME']),
-                  ('Site directory', settings['SITE_DIR']),
-                  ('Tornado debug', settings['TORNADO_DEBUG']),
-                  ('logging debug', settings['LOGGING_DEBUG']),
-                  ('order statuses', settings['ORDER_STATUSES_FILEPATH']),
-                  ('order transitions', settings['ORDER_TRANSITIONS_FILEPATH']),
-                  ('universities', settings.get('UNIVERSITIES_FILEPATH')),
-                  ('country codes', settings.get('COUNTRY_CODES_FILEPATH')),
-                  ('subject terms', settings.get('SUBJECT_TERMS_FILEPATH')),
-                  ]
-        self.render('settings.html', params=params)
+            mod_settings['DB_SERVER'] = ''.join(url)
+        params = ['SETTINGS_FILEPATH',
+                  'BASE_URL', 'SITE_NAME', 'SITE_DIR', 'SITE_SUPPORT_EMAIL',
+                  'DATABASE', 'DB_SERVER',
+                  'TORNADO_DEBUG', 'LOGGING_DEBUG',
+                  'ORDER_STATUSES_FILEPATH', 'ORDER_TRANSITIONS_FILEPATH',
+                  'UNIVERSITIES_FILEPATH', 'COUNTRY_CODES_FILEPATH',
+                  'SUBJECT_TERMS_FILEPATH',
+                  'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES']
+        self.render('settings.html', params=params, settings=mod_settings)
 
 
-class GlobalModes(RequestHandler):
-    "Page for display and change of global modes."
+class OrderStatuses(RequestHandler):
+    "Page displaying currently defined order statuses and transitions."
 
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render('global_modes.html')
-
-    def post(self):
-        self.check_admin()
-        try:
-            mode = self.get_argument('mode')
-            if mode not in self.global_modes: raise ValueError
-            self.global_modes[mode] = utils.to_bool(self.get_argument('value'))
-        except (tornado.web.MissingArgumentError, ValueError, TypeError):
-            pass
-        else:
-            # Create global_modes meta document if it does not exist.
-            if '_id' not in self.global_modes:
-                self.global_modes['_id'] = 'global_modes'
-                self.global_modes[constants.DOCTYPE] = constants.META
-            self.db.save(self.global_modes)
-        self.see_other('global_modes')
+        self.render('order_statuses.html')
 
 
 class AdminOrderMessages(RequestHandler):

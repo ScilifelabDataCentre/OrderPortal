@@ -2,18 +2,15 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}Account messages admin{% end %}
-{% block body_title %}Account messages admin{% end %}
+{% block head_title %}Account messages{% end %}
+
+{% block body_title %}
+Account messages
+<small>Templates for messages sent when the status of an account is set.</small>
+{% end %}
 
 {% block main_content %}
 <div class="well">
-  <p>
-    Templates for messages sent when an account is set to a certain status.
-  </p>
-  <p>
-    Variables denoted <code>{name}</code> are replaced by their
-    corresponding values when the message is prepared.
-  </p>
   <table class="table">
     <tr>
       <th>Variable</th>

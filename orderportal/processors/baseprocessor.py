@@ -2,7 +2,7 @@
 
 
 class BaseProcessor(object):
-    """Abstract vase class for processor classes.
+    """Abstract base class for processor classes.
     Implement the 'run' method, which should raise a ValueError
     if there is something wrong with the value.
     """

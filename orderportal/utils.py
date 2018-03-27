@@ -108,6 +108,7 @@ def load_settings(filepath=None):
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short.")
     # Load processor modules and the classes in them
+    # Processors are classes for checking that a field value is valid.
     paths = settings.get('PROCESSORS', [])
     settings['PROCESSORS'] = {}
     for path in paths:

@@ -9,28 +9,35 @@
 <div class="row">
   <div class="col-md-6">
     <div class="panel panel-default">
-      <div class="panel-heading">{{ terminology('Order') }} counts</div>
       <div class="panel-body">
 	<table class="table">
-	  {% for status in settings['ORDER_STATUSES'] %}
-	  <tr>
-	    <th>{% module Icon(status['identifier'], label=True) %} </th>
-	    <td class="text-right">
-	      <a href="{{ reverse_url('orders', status=status['identifier']) }}"
-		 class="badge">
-		{{ orders['status'].get(status['identifier'], 0) }}
-	      </a>
-	    </td>
-	  </tr>
-	  {% end %}
-	  <tr>
-	    <th># Total</th>
-	    <td class="text-right">
-	      <a href="{{ reverse_url('orders') }}" class="badge">
-		{{ orders['count'] }}
-	      </a>
-	    </td>
-	  </tr>
+          <thead>
+            <tr>
+              <th>{{ terminology('Order') }} status</th>
+              <th class="text-right">Count</th>
+            </tr>
+          </thead>
+          <tbody>
+	    {% for status in settings['ORDER_STATUSES'] %}
+	    <tr>
+	      <td>{% module Icon(status['identifier'], label=True) %}</td>
+	      <td class="text-right">
+	        <a href="{{ reverse_url('orders', status=status['identifier']) }}"
+		   class="badge">
+		  {{ orders['status'].get(status['identifier'], 0) }}
+	        </a>
+	      </td>
+	    </tr>
+	    {% end %}
+	    <tr>
+	      <td># Total</td>
+	      <td class="text-right">
+	        <a href="{{ reverse_url('orders') }}" class="badge">
+		  {{ orders['count'] }}
+	        </a>
+	      </td>
+	    </tr>
+          </tbody>
 	</table>
       </div>
     </div>

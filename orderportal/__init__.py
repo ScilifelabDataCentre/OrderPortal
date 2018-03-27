@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.3.13'
+__version__ = '3.3.14'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -52,8 +52,6 @@ settings = dict(
     ORDERS_LIST_TAGS=True,
     ORDERS_LIST_FIELDS=[],
     ORDERS_LIST_STATUSES=[],
-    # XXX To be removed
-    ORDER_MESSAGES_FILEPATH='{SITE_DIR}/order_messages.yaml',
     ACCOUNT_INVOICE_INFO=True,
     ACCOUNT_FUNDER_INFO=True,
     ACCOUNT_FUNDER_INFO_GENDER=True,
