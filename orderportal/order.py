@@ -546,6 +546,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
             # A bit roundabout, but the fields will come out in correct order
             for field in self.get_fields(order):
                 data['fields'][field['identifier']] = field['value']
+            data['invalid'] = order.get('invalid', {})
             data['files'] = OD()
             for filename in sorted(order.get('_attachments', [])):
                 if filename.startswith(constants.SYSTEM): continue
