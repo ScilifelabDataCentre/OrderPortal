@@ -17,7 +17,7 @@ from orderportal import settings
 from orderportal import utils
 from orderportal import admin
 from orderportal.scripts.dump import undump
-from orderportal.scripts.load_designs import load_designs
+from orderportal.init.load_designs import load_designs
 
 INIT_TEXTS_FILEPATH = 'init_texts.yaml'
 
