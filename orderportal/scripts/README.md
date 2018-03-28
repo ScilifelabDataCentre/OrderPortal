@@ -1,10 +1,4 @@
-This directory contains a number of stand-alone scripts for OrderPortal.
-
-    init_database.py
-
-Initializes the database. The CouchDB instance must already exist, and
-the account to connect with it must have been created and defined in
-the settings file. This will clobber any existing data!
+This directory contains a few stand-alone scripts for OrderPortal.
 
     dump.py
 

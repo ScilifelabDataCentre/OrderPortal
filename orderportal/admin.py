@@ -40,6 +40,31 @@ class GlobalModes(RequestHandler):
         self.see_other('global_modes')
 
 
+class Settings(RequestHandler):
+    "Page displaying settings info."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        mod_settings = settings.copy()
+        # Don't show the password in the CouchDB URL
+        url = settings['DB_SERVER']
+        match = re.search(r':([^/].+)@', url)
+        if match:
+            url = list(url)
+            url[match.start(1):match.end(1)] = '***'
+            mod_settings['DB_SERVER'] = ''.join(url)
+        params = ['SETTINGS_FILEPATH',
+                  'BASE_URL', 'SITE_NAME', 'SITE_DIR', 'SITE_SUPPORT_EMAIL',
+                  'DATABASE', 'DB_SERVER',
+                  'TORNADO_DEBUG', 'LOGGING_DEBUG',
+                  'ORDER_STATUSES_FILEPATH', 'ORDER_TRANSITIONS_FILEPATH',
+                  'UNIVERSITIES_FILEPATH', 'COUNTRY_CODES_FILEPATH',
+                  'SUBJECT_TERMS_FILEPATH',
+                  'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES']
+        self.render('settings.html', params=params, settings=mod_settings)
+
+
 class TextSaver(saver.Saver):
     doctype = constants.TEXT
 
@@ -79,31 +104,6 @@ class Texts(RequestHandler):
         self.render('texts.html', texts=sorted(constants.TEXTS.items()))
 
 
-class Settings(RequestHandler):
-    "Page displaying settings info."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        mod_settings = settings.copy()
-        # Don't show the password in the CouchDB URL
-        url = settings['DB_SERVER']
-        match = re.search(r':([^/].+)@', url)
-        if match:
-            url = list(url)
-            url[match.start(1):match.end(1)] = '***'
-            mod_settings['DB_SERVER'] = ''.join(url)
-        params = ['SETTINGS_FILEPATH',
-                  'BASE_URL', 'SITE_NAME', 'SITE_DIR', 'SITE_SUPPORT_EMAIL',
-                  'DATABASE', 'DB_SERVER',
-                  'TORNADO_DEBUG', 'LOGGING_DEBUG',
-                  'ORDER_STATUSES_FILEPATH', 'ORDER_TRANSITIONS_FILEPATH',
-                  'UNIVERSITIES_FILEPATH', 'COUNTRY_CODES_FILEPATH',
-                  'SUBJECT_TERMS_FILEPATH',
-                  'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES']
-        self.render('settings.html', params=params, settings=mod_settings)
-
-
 class OrderStatuses(RequestHandler):
     "Page displaying currently defined order statuses and transitions."
 
@@ -137,3 +137,24 @@ class AdminAccountMessages(RequestHandler):
         account_messages[constants.RESET]['recipients'] = ['account']
         self.render('admin_account_messages.html',
                     account_messages=account_messages)
+
+
+class Statistics(RequestHandler):
+    "Display statistics for the database."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        view = self.db.view('order/status', reduce=True)
+        try:
+            r = list(view)[0]
+        except IndexError:
+            orders = dict(count=0)
+        else:
+            orders = dict(count=r.value)
+        view = self.db.view('order/status',
+                            group_level=1,
+                            startkey=[''],
+                            endkey=[constants.CEILING])
+        orders['status'] = dict([(r.key[0], r.value) for r in view])
+        self.render('statistics.html', orders=orders)

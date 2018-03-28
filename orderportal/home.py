@@ -142,27 +142,6 @@ class Software(RequestHandler):
                     versions=versions)
 
 
-class Statistics(RequestHandler):
-    "Display statistics for the database."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        view = self.db.view('order/status', reduce=True)
-        try:
-            r = list(view)[0]
-        except IndexError:
-            orders = dict(count=0)
-        else:
-            orders = dict(count=r.value)
-        view = self.db.view('order/status',
-                            group_level=1,
-                            startkey=[''],
-                            endkey=[constants.CEILING])
-        orders['status'] = dict([(r.key[0], r.value) for r in view])
-        self.render('statistics.html', orders=orders)
-
-
 class Log(RequestHandler):
     "Singe log entry; JSON output."
 

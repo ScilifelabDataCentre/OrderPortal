@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.3.15'
+__version__ = '3.3.16'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -62,7 +62,6 @@ settings = dict(
     DOCUMENTATION_URL='https://github.com/pekrau/OrderPortal/wiki',
     MARKDOWN_URL='http://daringfireball.net/projects/markdown/syntax',
     # For database initialization only; ignored after that.
-    INITIAL_TEXTS_FILEPATH='{SITE_DIR}/initial_texts.yaml',
     INITIAL_ORDER_MESSAGES_FILEPATH='{SITE_DIR}/initial_order_messages.yaml',
     INITIAL_ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/initial_account_messages.yaml',
     )
