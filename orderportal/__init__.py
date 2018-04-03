@@ -1,5 +1,5 @@
-"""OrderPortal: A portal for orders (a.k.a. requests, project applications)
-to a facility from its users.
+"""OrderPortal: A portal for orders to a facility from its users.
+An order can be a project application, a request, a report, etc.
 """
 
 from __future__ import print_function, absolute_import
@@ -16,7 +16,7 @@ settings = dict(
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
     LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',
-    SITE_DIR='{ROOT}/generic',
+    SITE_DIR='{ROOT}/site',
     SITE_NAME='OrderPortal',
     SITE_PERSONAL_DATA_POLICY='The data will be used only for activities directly related to this site.',
     DB_SERVER='http://localhost:5984/',

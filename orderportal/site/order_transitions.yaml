@@ -1,4 +1,10 @@
-# OrderPortal order status transitions
+# OrderPortal order status transitions allowed for different users.
+
+# Transitions may be changed for a deployed site. Statuses may become
+# unreachable, but the database will not become corrupt.
+
+# This file is read on server startup, so a restart is required 
+# whenever it has been modified.
 
 - source: preparation
   targets: [submitted]
