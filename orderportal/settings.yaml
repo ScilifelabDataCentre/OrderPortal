@@ -43,8 +43,8 @@ ORDER_STATUSES_FILEPATH: '{SITE_DIR}/order_statuses.yaml'
 ORDER_TRANSITIONS_FILEPATH: '{SITE_DIR}/order_transitions.yaml'
 
 # Use sequentially numbered order identifiers
-ORDER_ID_FORMAT: 'MY{0:=05d}'
-ORDER_ID_REGEXP: 'MY\d+'
+ORDER_IDENTIFIER_FORMAT: 'MY{0:=05d}'
+ORDER_IDENTIFIER_REGEXP: 'MY\d+'
 
 # The statuses to show in the orders list.
 # The statuses must be defined in the ORDER_STATUSES_FILEPATH file.
