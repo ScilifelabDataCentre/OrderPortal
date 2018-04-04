@@ -54,13 +54,14 @@ ORDERS_LIST_STATUSES:
   - processing
   - closed
 
-# University symbols (abbreviations), names and rank in list
+# University symbols (abbreviations), names and rank in list.
+# Optional, may be set to null.
 UNIVERSITIES_FILEPATH: '{SITE_DIR}/swedish_universities.yaml'
 
-# Country names and codes
+# Country names and codes. Optional, may be set to null.
 COUNTRY_CODES_FILEPATH: '{SITE_DIR}/country_codes.yaml'
 
-# Subject codes, terms in a hierarchy
+# Subject codes, terms in a hierarchy. Optional, may be set to null.
 SUBJECT_TERMS_FILEPATH: '{SITE_DIR}/subjects.yaml'
 
 # Messages; email server info.
