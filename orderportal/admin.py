@@ -54,14 +54,16 @@ class Settings(RequestHandler):
             url = list(url)
             url[match.start(1):match.end(1)] = '***'
             mod_settings['DB_SERVER'] = ''.join(url)
-        params = ['SETTINGS_FILEPATH',
-                  'BASE_URL', 'SITE_NAME', 'SITE_DIR', 'SITE_SUPPORT_EMAIL',
+        params = ['ROOT',' ROOT_DIR',
+                  'SETTINGS_FILEPATH',
+                  'BASE_URL', 'SITE_NAME', 'SITE_SUPPORT_EMAIL',
                   'DATABASE', 'DB_SERVER',
                   'TORNADO_DEBUG', 'LOGGING_DEBUG',
+                  'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES',
+                  'SITE_DIR', 
                   'ORDER_STATUSES_FILEPATH', 'ORDER_TRANSITIONS_FILEPATH',
                   'UNIVERSITIES_FILEPATH', 'COUNTRY_CODES_FILEPATH',
-                  'SUBJECT_TERMS_FILEPATH',
-                  'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES']
+                  'SUBJECT_TERMS_FILEPATH']
         self.render('settings.html', params=params, settings=mod_settings)
 
 

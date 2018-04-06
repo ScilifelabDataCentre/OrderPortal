@@ -9,7 +9,6 @@ import logging
 import mimetypes
 import optparse
 import os
-import socket
 import sys
 import time
 import traceback
@@ -33,45 +32,29 @@ def get_command_line_parser(usage='usage: %prog [options]', description=None):
     # this code must be possible to run under Python 2.6
     parser = optparse.OptionParser(usage=usage, description=description)
     parser.add_option('-s', '--settings',
-                      action='store', dest='settings', default=None,
-                      metavar="FILE", help="filename of settings YAML file")
+                      action='store', dest='settings', default='settings.yaml',
+                      metavar="FILE", help="filepath of settings YAML file")
     parser.add_option('-p', '--pidfile',
                       action='store', dest='pidfile', default=None,
-                      metavar="FILE", help="filename of file containing PID")
+                      metavar="FILE", help="filepath of file containing PID")
     parser.add_option('-f', '--force',
                       action="store_true", dest="force", default=False,
                       help='force action, rather than ask for confirmation')
     return parser
 
-def load_settings(filepath=None):
-    """Load and return the settings from the file path given by
-    1) the argument to this procedure,
-    2) the environment variable ORDERPORTAL_SETTINGS,
-    3) the first existing file in a predefined list of filepaths.
-    Raise ValueError if no settings file was given.
+def load_settings(filepath):
+    """Load and return the settings from the given file path.
     Raise IOError if settings file could not be read.
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
     """
-    if not filepath:
-        filepath = os.environ.get('ORDERPORTAL_SETTINGS')
-    if not filepath:
-        hostname = socket.gethostname().split('.')[0]
-        basedir = os.path.dirname(__file__)
-        for filepath in [os.path.join(basedir, "{0}.yaml".format(hostname)),
-                         os.path.join(basedir, 'default.yaml'),
-                         os.path.join(basedir, 'settings.yaml')]:
-            if os.path.exists(filepath) and os.path.isfile(filepath):
-                break
-        else:
-            raise ValueError('No settings file specified.')
+    # Set current working dir to be where this file is located.
+    orig_dir = os.getcwd()
+    os.chdir(os.path.dirname(__file__))
     # Read the settings file, updating the defaults
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
     settings['SETTINGS_FILEPATH'] = filepath
-    # Set current working dir to be ROOT while reading the files
-    orig_dir = os.getcwd()
-    os.chdir(settings['ROOT'])
     # Expand environment variables (ROOT, SITE_DIR) once and for all
     for key, value in settings.items():
         if isinstance(value, (str, unicode)):

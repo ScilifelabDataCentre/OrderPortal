@@ -102,17 +102,15 @@ def get_server():
         server.login(user, password)
     return server
 
+
+if __name__ == '__main__':
 def get_args():
-    parser = utils.get_command_line_parser(description=
-        'Send info message to all users.')
+    parser = utils.get_command_line_parser(
+        description='Send info message to all users.')
     parser.add_option('-d', '--dry-run',
                       action='store_true', dest='dry_run', default=False,
                       help='do not send messages; for debug')
-    return parser.parse_args()
-
-
-if __name__ == '__main__':
-    (options, args) = get_args()
+    (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings)
     send_info_email('accounts.csv',
                     sender='Per Kraulis <per.kraulis@scilifelab.se>',

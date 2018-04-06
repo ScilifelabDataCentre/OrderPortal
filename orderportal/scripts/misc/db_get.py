@@ -31,17 +31,14 @@ def get_documents(db, docids=[], filepath=None):
     else:
         print('no such document(s)', file=sys.stderr)
 
-def get_args():
-    parser = utils.get_command_line_parser(description=
-        'Get document(s) from CouchDB and write to JSON file.')
+
+if __name__ == '__main__':
+    parser = utils.get_command_line_parser(
+        description='Get document(s) from CouchDB and write to JSON file.')
     parser.add_option("-w", "--write",
                       action='store', dest='FILE', default=None,
                       metavar="FILE", help="filepath of file to write")
-    return parser.parse_args()
-
-
-if __name__ == '__main__':
-    (options, args) = get_args()
+    (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings)
     get_documents(utils.get_db(),
                   docids=args,

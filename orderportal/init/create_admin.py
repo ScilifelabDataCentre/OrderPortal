@@ -10,11 +10,6 @@ from orderportal import utils
 from orderportal.account import AccountSaver
 
 
-def get_args():
-    parser = utils.get_command_line_parser(description=
-        'Create a new admin account.')
-    return parser.parse_args()
-
 def create_admin(email, password, first_name, last_name, university):
     with AccountSaver(db=utils.get_db()) as saver:
         saver.set_email(email)
@@ -32,7 +27,9 @@ def create_admin(email, password, first_name, last_name, university):
 
 
 if __name__ == '__main__':
-    (options, args) = get_args()
+    parser = utils.get_command_line_parser(
+        description='Create a new admin account.')
+    (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings)
     email = raw_input('Email address (=account name) > ')
     if not email:

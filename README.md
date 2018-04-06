@@ -1,6 +1,9 @@
 OrderPortal
 ===========
 
+A portal for orders (requests, project applications, etc) to a
+facility from its users.
+
 The [GitHub wiki](https://github.com/pekrau/OrderPortal/wiki) contains
 technical instructions and information.
 
@@ -13,22 +16,24 @@ which is a service facility for DNA sequencing and genotyping on
 samples provided by external researchers. The facility processes
 the samples according to the order from the scientist.
 
-The OrderPortal system has been designed to work for different types
-of service facilities. The system is not hardcoded for DNA
-sequencing. On the contrary, considerable effort has gone into making
-sure the design is as general as possible. This means that
-installation of the system requires configuration of a number of
-aspects.
+The OrderPortal system has been designed to work for any type of
+service facility that handles discrete orders. It may also be used for
+other uses, such as project applications, report submission, etc. The
+system allows basically any type of form-based submission of
+information.
 
-__Note__: A few of the features described in this document have not
-yet been implemented.
+The OrderPortal system is not hardcoded for any specific area such as
+DNA sequencing. On the contrary, considerable effort has gone into
+making sure the design is as general as possible. This means that
+installation of the system requires configuration of a number of
+aspects to suite your particular needs.
 
 Features
 --------
 
-We needed a portal where users (researchers) can place orders for a
-project to be executed by a research service facility. The portal had
-to have the following features:
+We (NGI Sweden) needed a portal where users (researchers) can place
+orders for a project to be executed by a research service
+facility. The portal had to have the following features:
 
 * Allow users to register an account, which is approved by the facility staff.
 * Allow the user to specify an order.
@@ -45,10 +50,10 @@ to have the following features:
 Design outline
 --------------
 
-The system is a portal for orders (_a.k.a._ requests or project
-applications) to one single facility from its users. A user is a
-researcher external to the service facility, and may or may not be the
-Principal Investigator (PI) for one or more projects.
+The system is a portal for orders (requests, project applications,
+etc) to a single facility from its users. A user is a researcher
+external to the service facility, and may or may not be the Principal
+Investigator (PI) for one or more projects.
 
 An order is created from a template which is called a form in this
 system. The facility administrators must set up and publish the order

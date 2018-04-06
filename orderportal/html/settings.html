@@ -13,9 +13,9 @@ Settings
 
 <div class="well">
   <p>
-    The settings are defined in the YAML settings file 
-    <code>{{ settings.get('SETTINGS_FILEPATH') }}</code> 
-    which is read on startup of the OrderPortal server.
+    The settings are defined in the YAML settings file given by
+    SETTINGS_FILEPATH (see below), which is read on startup of the
+    OrderPortal server.
   </p>
   <p>
     To change the settings, the YAML file must be edited and the
@@ -32,7 +32,7 @@ Settings
   {% for param in params %}
   <tr>
     <th>{{ param }}</th>
-    <td>{{ settings[param] }}</td>
+    <td>{{ settings.get(param) }}</td>
   </tr>
   {% end %}
 </table>

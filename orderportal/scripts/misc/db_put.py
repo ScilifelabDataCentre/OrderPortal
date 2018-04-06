@@ -54,13 +54,10 @@ def add_docs(docs, data):
     else:
         raise ValueError
 
-def get_args():
-    parser = utils.get_command_line_parser(description=
-        'Put document(s) to CouchDB from JSON file.')
-    return parser.parse_args()
-
 
 if __name__ == '__main__':
-    (options, args) = get_args()
+    parser = utils.get_command_line_parser(
+        description='Put document(s) to CouchDB from JSON file.')
+    (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings)
     put_documents(utils.get_db(), filepaths=args)

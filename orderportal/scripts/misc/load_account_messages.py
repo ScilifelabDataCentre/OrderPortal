@@ -29,14 +29,11 @@ def load_account_messages(db):
     print('saving account messages in database')
     db.save(doc)
 
-def get_args():
-    parser = utils.get_command_line_parser(description=
-        'Load the account messages document.')
-    return parser.parse_args()
-
 
 if __name__ == '__main__':
-    (options, args) = get_args()
+    parser = utils.get_command_line_parser(
+        description='Load the account messages document.')
+    (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings)
     db = utils.get_db()
     load_account_messages(db)

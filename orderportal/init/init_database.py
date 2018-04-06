@@ -21,15 +21,6 @@ from orderportal.init.load_designs import load_designs
 
 INIT_TEXTS_FILEPATH = 'init_texts.yaml'
 
-def get_args():
-    parser = utils.get_command_line_parser(description=
-        'Initialize the database, deleting all old data,'
-        ' optionally load from dump file.')
-    parser.add_option("-L", "--load",
-                      action='store', dest='FILE', default=None,
-                      metavar="FILE", help="filepath of dump file to load")
-    return parser.parse_args()
-
 def init_database(dumpfilepath=None):
     db = utils.get_db(create=True)
     print('wiping out database...')
@@ -111,7 +102,13 @@ def wipeout_database(db):
 
 
 if __name__ == '__main__':
-    (options, args) = get_args()
+    parser = utils.get_command_line_parser(
+        description='Initialize the database, deleting all old data,'
+        ' optionally load from dump file.')
+    parser.add_option("-L", "--load",
+                      action='store', dest='FILE', default=None,
+                      metavar="FILE", help="filepath of dump file to load")
+    (options, args) = parser.parse_args()
     if not options.force:
         response = raw_input('about to delete everything; really sure? [n] > ')
         if not utils.to_bool(response):

@@ -13,21 +13,18 @@ class BaseFixer(object):
     doctype = None
 
     def __init__(self):
-        (options, args) = self.get_args()
+        parser = utils.get_command_line_parser(
+            description='Fix documents in CouchDB.')
+        parser.add_option('-d', '--dry-run',
+                          action='store_true', dest='dry_run', default=False,
+                          help='do not perform save; for debug')
+        (options, args) = parser.parse_args()
         utils.load_settings(filepath=options.settings)
         self.dry_run = options.dry_run
         self.db = utils.get_db()
         self.args = args
         self.prepare()
 
-    def get_args(self):
-        parser = utils.get_command_line_parser(description=
-                                               'Fix documents in CouchDB.')
-        parser.add_option('-d', '--dry-run',
-                          action='store_true', dest='dry_run', default=False,
-                          help='do not perform save; for debug')
-        return parser.parse_args()
-        
     def prepare(self):
         pass
 

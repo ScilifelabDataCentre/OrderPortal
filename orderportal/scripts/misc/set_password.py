@@ -10,11 +10,6 @@ from orderportal import utils
 from orderportal.account import AccountSaver
 
 
-def get_args():
-    parser = utils.get_command_line_parser(description=
-        'Set the password for an account.')
-    return parser.parse_args()
-
 def set_password(email, password):
     db = utils.get_db()
     view = db.view('account/email', include_docs=True)
@@ -28,7 +23,9 @@ def set_password(email, password):
 
 
 if __name__ == '__main__':
-    (options, args) = get_args()
+    parser = utils.get_command_line_parser(
+        description='Set the password for an account.')
+    (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings)
     email = raw_input('Email address (=account name) > ')
     if not email:

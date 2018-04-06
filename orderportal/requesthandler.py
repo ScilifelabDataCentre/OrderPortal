@@ -4,7 +4,6 @@ from __future__ import print_function, absolute_import
 
 import base64
 import logging
-import socket
 import traceback
 import urllib
 
