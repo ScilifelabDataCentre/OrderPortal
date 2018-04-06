@@ -1,9 +1,8 @@
 *~
 *.yaml
 *.pyc
-orderportal/nmi
-orderportal/cryoem
-orderportal/natproj
+orderportal/other-sites
 !orderportal/settings.yaml
+!orderportal/settings_template.yaml
 !orderportal/init/*yaml
 !orderportal/site/*yaml
