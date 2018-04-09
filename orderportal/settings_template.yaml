@@ -30,8 +30,8 @@ LOGGING_DEBUG: true
 COOKIE_SECRET: 'a long string of random characters %!120()='
 PASSWORD_SALT: 'a long string of random characters ?=}%&;19'
 
-# Site customization
-SITE_DIR: '{ROOT}/site'
+# Site customization; change for your site
+SITE_DIR: '{ROOT_DIR}/site'
 SITE_NAME: 'My Order Portal'
 SITE_SUPPORT_EMAIL: 'my.email@my-domain.com'
 

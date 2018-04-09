@@ -48,14 +48,14 @@ def load_settings(filepath):
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
     """
-    # Set current working dir to be where this file is located.
+    # Set current working dir to ROOT_DIR; remember where we started in.
     orig_dir = os.getcwd()
-    os.chdir(os.path.dirname(__file__))
+    os.chdir(settings['ROOT_DIR'])
     # Read the settings file, updating the defaults
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
     settings['SETTINGS_FILEPATH'] = filepath
-    # Expand environment variables (ROOT, SITE_DIR) once and for all
+    # Expand environment variables (ROOT_DIR, SITE_DIR) once and for all
     for key, value in settings.items():
         if isinstance(value, (str, unicode)):
             settings[key] = expand_filepath(value)
@@ -187,7 +187,7 @@ def terminology(word):
     return word
 
 def expand_filepath(filepath):
-    "Expand environment variables (ROOT and SITE_DIR) in filepaths."
+    "Expand environment variables (ROOT_DIR and SITE_DIR) in filepaths."
     filepath = os.path.expandvars(filepath)
     old = None
     while filepath != old:
@@ -196,7 +196,7 @@ def expand_filepath(filepath):
             filepath = filepath.replace('{SITE_DIR}', settings['SITE_DIR'])
         except KeyError:
             pass
-        filepath = filepath.replace('{ROOT}', settings['ROOT'])
+        filepath = filepath.replace('{ROOT_DIR}', settings['ROOT_DIR'])
     return filepath
 
 def get_dbserver():
@@ -323,10 +323,6 @@ def get_account_name(account=None, value=None):
     else:
         name = first_name
     return name
-
-def absolute_path(filename):
-    "Return the absolute path given the current directory."
-    return os.path.join(settings['ROOT'], filename)
 
 def check_password(password):
     """Check that the password is long and complex enough.

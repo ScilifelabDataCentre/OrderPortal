@@ -11,7 +11,7 @@ __version__ = '3.3.19'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
-    ROOT=os.path.dirname(__file__),
+    ROOT_DIR=os.path.dirname(__file__),
     BASE_URL='http://localhost/',
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
@@ -55,7 +55,7 @@ settings = dict(
     ACCOUNT_FUNDER_INFO_GENDER=True,
     ACCOUNT_FUNDER_INFO_GROUP_SIZE=True,
     ACCOUNT_FUNDER_INFO_SUBJECT=True,
-    SITE_DIR='{ROOT}/site',
+    SITE_DIR='{ROOT_DIR}/site',
     ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',
     ORDER_STATUSES_FILEPATH='{SITE_DIR}/order_statuses.yaml',
     ORDER_TRANSITIONS_FILEPATH='{SITE_DIR}/order_transitions.yaml',
