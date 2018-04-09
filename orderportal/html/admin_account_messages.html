@@ -11,6 +11,16 @@ Account messages
 
 {% block main_content %}
 <div class="well">
+  <p>
+    The account messages are defined in the YAML file 
+    <code>{{ settings.get('ACCOUNT_MESSAGES_FILEPATH') }}</code> 
+    which is read on startup of the OrderPortal server.
+  </p>
+  <p>
+    To change the messages, the YAML file must be edited and the
+    OrderPortal server restarted. Only the sysadmin for the server
+    machine can do this.
+  </p>
   <table class="table">
     <tr>
       <th>Variable</th>

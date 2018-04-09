@@ -13,12 +13,12 @@
 
 <div class="well">
   <p>
-    The available order statuses are defined in the YAML file 
+    The order statuses are defined in the YAML file 
     <code>{{ settings.get('ORDER_STATUSES_FILEPATH') }}</code> 
     which is read on startup of the OrderPortal server.
   </p>
   <p>
-    To change the available statuses, the YAML file must be edited and
+    To change the set of statuses, the YAML file must be edited and
     the OrderPortal server restarted. Only the sysadmin for the server
     machine can do this. A status can be added, <bold>but must never
     be removed</bold>, since orders with that deleted status will

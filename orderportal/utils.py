@@ -89,7 +89,20 @@ def load_settings(filepath):
             raise ValueError("settings['{0}'] has invalid value.".format(key))
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short.")
-    # Read order state definitions and transitions
+    # Read account messages YAML file.
+    logging.debug("Account messages from %s", settings['ACCOUNT_MESSAGES_FILEPATH'])
+    with open(settings['ACCOUNT_MESSAGES_FILEPATH']) as infile:
+        settings['ACCOUNT_MESSAGES'] = yaml.safe_load(infile)
+    # Set recipients, which are hardwired into the source code.
+    # Also checks for missing message for a status.
+    try:
+        settings['ACCOUNT_MESSAGES'][constants.PENDING]['recipients'] = ['admin']
+        settings['ACCOUNT_MESSAGES'][constants.ENABLED]['recipients'] = ['account']
+        settings['ACCOUNT_MESSAGES'][constants.DISABLED]['recipients'] = ['account']
+        settings['ACCOUNT_MESSAGES'][constants.RESET]['recipients'] = ['account']
+    except KeyError:
+        raise ValueError('Account messages file: missing message for status')
+    # Read order statuses definitions YAML file.
     logging.debug("Order statuses from %s", settings['ORDER_STATUSES_FILEPATH'])
     with open(settings['ORDER_STATUSES_FILEPATH']) as infile:
         settings['ORDER_STATUSES'] = yaml.safe_load(infile)
@@ -104,11 +117,12 @@ def load_settings(filepath):
     if not initial:
         raise ValueError('No initial order status defined.')
     settings['ORDER_STATUS_INITIAL'] = initial
+    # Read order status transition definiton YAML file.
     logging.debug("Order transitions from %s", 
                   settings['ORDER_TRANSITIONS_FILEPATH'])
     with open(settings['ORDER_TRANSITIONS_FILEPATH']) as infile:
         settings['ORDER_TRANSITIONS'] = yaml.safe_load(infile)
-    # Read universities lookup
+    # Read universities YAML file.
     try:
         filepath = settings['UNIVERSITIES_FILEPATH']
         if not filepath: raise KeyError
@@ -121,7 +135,7 @@ def load_settings(filepath):
         unis = unis.items()
         unis.sort(key=lambda i: (i[1].get('rank'), i[0]))
         settings['UNIVERSITIES'] = collections.OrderedDict(unis)
-    # Read country codes
+    # Read country codes YAML file
     try:
         filepath = settings['COUNTRY_CODES_FILEPATH']
         if not filepath: raise KeyError
@@ -133,7 +147,7 @@ def load_settings(filepath):
             settings['COUNTRIES'] = yaml.safe_load(infile)
         settings['COUNTRIES_LOOKUP'] = dict([(c['code'], c['name'])
                                              for c in settings['COUNTRIES']])
-    # Read subject terms
+    # Read subject terms YAML file.
     try:
         filepath = settings['SUBJECT_TERMS_FILEPATH']
         if not filepath: raise KeyError
@@ -145,7 +159,7 @@ def load_settings(filepath):
             settings['subjects'] = yaml.safe_load(infile)
     settings['subjects_lookup'] = dict([(s['code'], s['term'])
                                         for s in settings['subjects']])
-    # Settings computable from others
+    # Settings computable from others.
     settings['DB_SERVER_VERSION'] = get_dbserver().version()
     if 'PORT' not in settings:
         parts = urlparse.urlparse(settings['BASE_URL'])

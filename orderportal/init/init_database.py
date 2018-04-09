@@ -59,24 +59,6 @@ def init_database(dumpfilepath=None):
             messages['_id'] = 'order_messages'
             messages[constants.DOCTYPE] = constants.META
             db.save(messages)
-    # Load initial account messages from file if missing in db
-    try:
-        db['account_messages']
-    except couchdb.ResourceNotFound:
-        try:
-            filepath = settings['INITIAL_ACCOUNT_MESSAGES_FILEPATH']
-        except KeyError:
-            print('Warning: no initial account messages')
-        else:
-            try:
-                with open(utils.expand_filepath(filepath)) as infile:
-                      messages = yaml.safe_load(infile)
-            except IOError:
-                print('Warning: could not load', filepath)
-                messages = dict()
-            messages['_id'] = 'account_messages'
-            messages[constants.DOCTYPE] = constants.META
-            db.save(messages)
     # Load texts from the initial texts YAML file only if missing in db
     print('loading any missing texts from', INIT_TEXTS_FILEPATH)
     try:
@@ -94,8 +76,8 @@ def init_database(dumpfilepath=None):
 
 def wipeout_database(db):
     """Wipe out the contents of the database.
-    This is used rather than total delete of the database instance, since
-    that may require additional privileges, depending on the setup.
+    This doc-by-doc approach is used rather than total delete of
+    the database instance, since that may require additional privileges.
     """
     for doc in db:
         del db[doc]

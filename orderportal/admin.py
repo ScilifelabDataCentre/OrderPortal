@@ -131,14 +131,8 @@ class AdminAccountMessages(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        account_messages = self.db['account_messages']
-        # Add in the recipients, which are hardwired in code.
-        account_messages[constants.PENDING]['recipients'] = ['admin']
-        account_messages[constants.ENABLED]['recipients'] = ['account']
-        account_messages[constants.DISABLED]['recipients'] = ['account']
-        account_messages[constants.RESET]['recipients'] = ['account']
         self.render('admin_account_messages.html',
-                    account_messages=account_messages)
+                    account_messages=settings['ACCOUNT_MESSAGES'])
 
 
 class Statistics(RequestHandler):

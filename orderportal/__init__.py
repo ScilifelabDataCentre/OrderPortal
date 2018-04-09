@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.3.18'
+__version__ = '3.3.19'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -16,9 +16,6 @@ settings = dict(
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
     LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',
-    SITE_DIR='{ROOT}/site',
-    SITE_NAME='OrderPortal',
-    SITE_PERSONAL_DATA_POLICY='The data will be used only for activities directly related to this site.',
     DB_SERVER='http://localhost:5984/',
     COUCHDB_HOME='http://couchdb.apache.org/',
     BOOTSTRAP_HOME='http://getbootstrap.com/',
@@ -35,6 +32,10 @@ settings = dict(
     DATATABLES_CSS_URL='https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css',
     DATATABLES_JS_URL='https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js',
     DATATABLES_BOOTSTRAP_JS_URL='https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js',
+    DOCUMENTATION_URL='https://github.com/pekrau/OrderPortal/wiki',
+    MARKDOWN_URL='http://daringfireball.net/projects/markdown/syntax',
+    SITE_NAME='OrderPortal',
+    SITE_PERSONAL_DATA_POLICY='The data will be used only for activities directly related to this site.',
     MIN_PASSWORD_LENGTH=8,
     LOGIN_MAX_AGE_DAYS=14,
     LOGIN_MAX_FAILURES=6,
@@ -44,8 +45,6 @@ settings = dict(
     DISPLAY_MAX_PENDING_ACCOUNTS=10,
     DISPLAY_DEFAULT_MAX_LOG=20,
     DISPLAY_MAX_NEWS=4,
-    ORDER_STATUSES_FILEPATH='{SITE_DIR}/order_statuses.yaml',
-    ORDER_TRANSITIONS_FILEPATH='{SITE_DIR}/order_transitions.yaml',
     ORDER_USER_TAGS=True,
     ORDER_TABLE_NEW_ROWS=4,
     ORDERS_LIST_TAGS=True,
@@ -56,12 +55,13 @@ settings = dict(
     ACCOUNT_FUNDER_INFO_GENDER=True,
     ACCOUNT_FUNDER_INFO_GROUP_SIZE=True,
     ACCOUNT_FUNDER_INFO_SUBJECT=True,
+    SITE_DIR='{ROOT}/site',
+    ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',
+    ORDER_STATUSES_FILEPATH='{SITE_DIR}/order_statuses.yaml',
+    ORDER_TRANSITIONS_FILEPATH='{SITE_DIR}/order_transitions.yaml',
     UNIVERSITIES_FILEPATH='{SITE_DIR}/swedish_universities.yaml',
     COUNTRY_CODES_FILEPATH='{SITE_DIR}/country_codes.yaml',
-    SUBJECT_TERMS_FILEPATH='{SITE_DIR}/subjects.yaml',
-    DOCUMENTATION_URL='https://github.com/pekrau/OrderPortal/wiki',
-    MARKDOWN_URL='http://daringfireball.net/projects/markdown/syntax',
+    SUBJECT_TERMS_FILEPATH='{SITE_DIR}/subject_terms.yaml',
     # For database initialization only; ignored after that.
     INITIAL_ORDER_MESSAGES_FILEPATH='{SITE_DIR}/initial_order_messages.yaml',
-    INITIAL_ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/initial_account_messages.yaml',
     )
