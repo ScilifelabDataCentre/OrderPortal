@@ -60,7 +60,8 @@ class Settings(RequestHandler):
                   'DATABASE', 'DB_SERVER',
                   'TORNADO_DEBUG', 'LOGGING_DEBUG',
                   'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES',
-                  'SITE_DIR', 
+                  'SITE_DIR',
+                  'ACCOUNT_MESSAGES_FILEPATH',
                   'ORDER_STATUSES_FILEPATH', 'ORDER_TRANSITIONS_FILEPATH',
                   'UNIVERSITIES_FILEPATH', 'COUNTRY_CODES_FILEPATH',
                   'SUBJECT_TERMS_FILEPATH']
