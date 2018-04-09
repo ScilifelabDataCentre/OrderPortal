@@ -5,3 +5,4 @@ orderportal/other-sites
 !orderportal/settings_template.yaml
 !orderportal/init/*yaml
 !orderportal/site/*yaml
+!orderportal/ngi/*yaml
