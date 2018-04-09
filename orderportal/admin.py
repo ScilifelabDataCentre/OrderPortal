@@ -57,7 +57,7 @@ class Settings(RequestHandler):
         params = ['ROOT',' ROOT_DIR',
                   'SETTINGS_FILEPATH',
                   'BASE_URL', 'SITE_NAME', 'SITE_SUPPORT_EMAIL',
-                  'DATABASE', 'DB_SERVER',
+                  'DB_SERVER', 'DATABASE',
                   'TORNADO_DEBUG', 'LOGGING_DEBUG',
                   'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES',
                   'SITE_DIR',

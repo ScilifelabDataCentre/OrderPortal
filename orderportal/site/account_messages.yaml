@@ -1,6 +1,6 @@
 # Message definitions for account status events.
 
-# Recipients are not specified here; these are hard-wired in the source code.
+# Recipients are not specified here; those are hardwired in the source code.
 
 # The following parameters may be used:
 # {site}    The name of the OrderPortal site.
