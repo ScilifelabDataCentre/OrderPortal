@@ -171,7 +171,7 @@ def terminology(word):
     "Return the display term for the given word. Use itself by default."
     try:
         istitle = word.istitle()
-        word = settings['TERMS'][word.lower()]
+        word = settings['TERMINOLOGY'][word.lower()]
     except KeyError:
         pass
     else:
