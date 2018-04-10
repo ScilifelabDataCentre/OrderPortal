@@ -1,5 +1,8 @@
 # Message definitions for order status events.
 
+# This file is read on server startup, so a restart is required 
+# whenever it has been modified.
+
 # The following parameters may be used:
 # {site}       The name of the OrderPortal site.
 # {support}    Contact address.
@@ -18,6 +21,7 @@ submitted:
 
     The order will be reviewed by the {site} administrators.
     A quote and information about sample delivery will be sent later.
+
     Do NOT send any samples at this time.
 
     For more information on how orders are processed, see the page
