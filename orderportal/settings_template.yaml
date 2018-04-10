@@ -43,7 +43,7 @@ SITE_HOME_ICON:   'orderportal144.png'
 # Account messages definitions
 ACCOUNT_MESSAGES_FILEPATH: '{SITE_DIR}/account_messages.yaml'
 
-# Order status and transition definition files
+# Order status, transition, messages definition files
 ORDER_STATUSES_FILEPATH:    '{SITE_DIR}/order_statuses.yaml'
 ORDER_TRANSITIONS_FILEPATH: '{SITE_DIR}/order_transitions.yaml'
 ORDER_MESSAGES_FILEPATH:    '{SITE_DIR}/order_messages.yaml'
