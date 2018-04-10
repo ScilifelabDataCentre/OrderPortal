@@ -32,7 +32,8 @@ def get_command_line_parser(usage='usage: %prog [options]', description=None):
     # this code must be possible to run under Python 2.6
     parser = optparse.OptionParser(usage=usage, description=description)
     parser.add_option('-s', '--settings',
-                      action='store', dest='settings', default='settings.yaml',
+                      action='store', dest='settings',
+                      default='{ROOT_DIR}/settings.yaml',
                       metavar="FILE", help="filepath of settings YAML file")
     parser.add_option('-p', '--pidfile',
                       action='store', dest='pidfile', default=None,
@@ -48,17 +49,10 @@ def load_settings(filepath):
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
     """
-    # Set current working dir to ROOT_DIR; remember where we started in.
-    orig_dir = os.getcwd()
-    os.chdir(settings['ROOT_DIR'])
     # Read the settings file, updating the defaults
-    with open(filepath) as infile:
+    with open(expand_filepath(filepath)) as infile:
         settings.update(yaml.safe_load(infile))
     settings['SETTINGS_FILEPATH'] = filepath
-    # Expand environment variables (ROOT_DIR, SITE_DIR) once and for all
-    for key, value in settings.items():
-        if isinstance(value, (str, unicode)):
-            settings[key] = expand_filepath(value)
     # Set logging state
     if settings.get('LOGGING_DEBUG'):
         kwargs = dict(level=logging.DEBUG)
@@ -78,9 +72,11 @@ def load_settings(filepath):
         pass
     logging.basicConfig(**kwargs)
     logging.info("OrderPortal version %s", orderportal.__version__)
-    logging.info("settings from %s", settings['SETTINGS_FILEPATH'])
-    logging.info("logging debug %s", settings['LOGGING_DEBUG'])
-    logging.info("tornado debug %s", settings['TORNADO_DEBUG'])
+    logging.info("ROOT_DIR: %s", settings['ROOT_DIR'])
+    logging.info("SITE_DIR: %s", settings['SITE_DIR'])
+    logging.info("settings: %s", settings['SETTINGS_FILEPATH'])
+    logging.info("logging debug: %s", settings['LOGGING_DEBUG'])
+    logging.info("tornado debug: %s", settings['TORNADO_DEBUG'])
     # Check settings
     for key in ['BASE_URL', 'DB_SERVER', 'COOKIE_SECRET', 'DATABASE']:
         if key not in settings:
@@ -90,8 +86,8 @@ def load_settings(filepath):
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short.")
     # Read account messages YAML file.
-    logging.debug("Account messages from %s", settings['ACCOUNT_MESSAGES_FILEPATH'])
-    with open(settings['ACCOUNT_MESSAGES_FILEPATH']) as infile:
+    logging.info("account messages: %s", settings['ACCOUNT_MESSAGES_FILEPATH'])
+    with open(expand_filepath(settings['ACCOUNT_MESSAGES_FILEPATH'])) as infile:
         settings['ACCOUNT_MESSAGES'] = yaml.safe_load(infile)
     # Set recipients, which are hardwired into the source code.
     # Also checks for missing message for a status.
@@ -103,8 +99,8 @@ def load_settings(filepath):
     except KeyError:
         raise ValueError('Account messages file: missing message for status')
     # Read order statuses definitions YAML file.
-    logging.debug("Order statuses from %s", settings['ORDER_STATUSES_FILEPATH'])
-    with open(settings['ORDER_STATUSES_FILEPATH']) as infile:
+    logging.info("order statuses: %s", settings['ORDER_STATUSES_FILEPATH'])
+    with open(expand_filepath(settings['ORDER_STATUSES_FILEPATH'])) as infile:
         settings['ORDER_STATUSES'] = yaml.safe_load(infile)
     settings['ORDER_STATUSES_LOOKUP'] = lookup = dict()
     initial = None
@@ -118,44 +114,38 @@ def load_settings(filepath):
         raise ValueError('No initial order status defined.')
     settings['ORDER_STATUS_INITIAL'] = initial
     # Read order status transition definiton YAML file.
-    logging.debug("Order transitions from %s", 
-                  settings['ORDER_TRANSITIONS_FILEPATH'])
-    with open(settings['ORDER_TRANSITIONS_FILEPATH']) as infile:
+    logging.info("order transitions: %s", 
+                 settings['ORDER_TRANSITIONS_FILEPATH'])
+    with open(expand_filepath(settings['ORDER_TRANSITIONS_FILEPATH'])) as infile:
         settings['ORDER_TRANSITIONS'] = yaml.safe_load(infile)
     # Read universities YAML file.
-    try:
-        filepath = settings['UNIVERSITIES_FILEPATH']
-        if not filepath: raise KeyError
-    except KeyError:
+    filepath = settings.get('UNIVERSITIES_FILEPATH')
+    if not filepath:
         settings['UNIVERSITIES'] = dict()
     else:
-        logging.debug("Universities lookup from %s", filepath)
-        with open(filepath) as infile:
+        logging.info("universities lookup: %s", filepath)
+        with open(expand_filepath(filepath)) as infile:
             unis = yaml.safe_load(infile)
         unis = unis.items()
         unis.sort(key=lambda i: (i[1].get('rank'), i[0]))
         settings['UNIVERSITIES'] = collections.OrderedDict(unis)
     # Read country codes YAML file
-    try:
-        filepath = settings['COUNTRY_CODES_FILEPATH']
-        if not filepath: raise KeyError
-    except KeyError:
+    filepath = settings.get('COUNTRY_CODES_FILEPATH')
+    if not filepath:
         settings['COUNTRIES'] = []
     else:
-        logging.debug("Country codes from %s", filepath)
-        with open(filepath) as infile:
+        logging.info("country codes: %s", filepath)
+        with open(expand_filepath(filepath)) as infile:
             settings['COUNTRIES'] = yaml.safe_load(infile)
         settings['COUNTRIES_LOOKUP'] = dict([(c['code'], c['name'])
                                              for c in settings['COUNTRIES']])
     # Read subject terms YAML file.
-    try:
-        filepath = settings['SUBJECT_TERMS_FILEPATH']
-        if not filepath: raise KeyError
-    except KeyError:
+    filepath = settings.get('SUBJECT_TERMS_FILEPATH')
+    if not filepath:
         settings['subjects'] = []
     else:
-        logging.debug("Subject terms from %s", filepath)
-        with open(filepath) as infile:
+        logging.info("subject terms: %s", filepath)
+        with open(expand_filepath(filepath)) as infile:
             settings['subjects'] = yaml.safe_load(infile)
     settings['subjects_lookup'] = dict([(s['code'], s['term'])
                                         for s in settings['subjects']])
@@ -172,8 +162,6 @@ def load_settings(filepath):
             settings['PORT'] =  443
         else:
             raise ValueError('Could not determine port from BASE_URL.')
-    # Set back current working dir
-    os.chdir(orig_dir)
 
 def terminology(word):
     "Return the display term for the given word. Use itself by default."
@@ -187,16 +175,11 @@ def terminology(word):
     return word
 
 def expand_filepath(filepath):
-    "Expand environment variables (ROOT_DIR and SITE_DIR) in filepaths."
-    filepath = os.path.expandvars(filepath)
-    old = None
-    while filepath != old:
-        old = filepath
-        try:
-            filepath = filepath.replace('{SITE_DIR}', settings['SITE_DIR'])
-        except KeyError:
-            pass
-        filepath = filepath.replace('{ROOT_DIR}', settings['ROOT_DIR'])
+    "Expand variables (ROOT_DIR and SITE_DIR) in filepaths."
+    filepath = filepath.replace('{SITE_DIR}', settings['SITE_DIR'])
+    filepath = filepath.replace('{ROOT_DIR}', settings['ROOT_DIR'])
+    if not os.path.isabs(filepath):
+        filepath = os.path.join(settings['ROOT_DIR'], filepath)
     return filepath
 
 def get_dbserver():
