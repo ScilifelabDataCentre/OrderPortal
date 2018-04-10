@@ -1,4 +1,8 @@
 # Country codes in alphabetical order
+
+# This file is read on server startup, so a restart is required 
+# whenever it has been modified.
+
 -
   code: AF
   name: Afghanistan

@@ -1,4 +1,7 @@
-# Optional subject terms definitions.
+# Subject terms definitions. From Swedish Research Council (VR).
+
+# This file is read on server startup, so a restart is required 
+# whenever it has been modified.
 
 -
   code: 1

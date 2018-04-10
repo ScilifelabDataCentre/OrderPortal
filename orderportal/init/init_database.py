@@ -41,25 +41,7 @@ def init_database(dumpfilepath=None):
             print('Warning: could not load', dumpfilepath)
     else:
         print('no dump file loaded')
-    # Load initial order messages from file if missing in db
-    try:
-        db['order_messages']
-    except couchdb.ResourceNotFound:
-        try:
-            filepath = settings['INITIAL_ORDER_MESSAGES_FILEPATH']
-        except KeyError:
-            print('Warning: no initial order messages')
-        else:
-            try:
-                with open(utils.expand_filepath(filepath)) as infile:
-                      messages = yaml.safe_load(infile)
-            except IOError:
-                print('Warning: could not load', filepath)
-                messages = dict()
-            messages['_id'] = 'order_messages'
-            messages[constants.DOCTYPE] = constants.META
-            db.save(messages)
-    # Load texts from the initial texts YAML file only if missing in db
+    # Load texts from the initial texts YAML file. Only if missing in db!
     print('loading any missing texts from', INIT_TEXTS_FILEPATH)
     try:
         with open(INIT_TEXTS_FILEPATH) as infile:

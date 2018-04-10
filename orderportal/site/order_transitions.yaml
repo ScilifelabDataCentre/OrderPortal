@@ -1,10 +1,10 @@
 # OrderPortal order status transitions allowed for different users.
 
-# Transitions may be changed for a deployed site. Statuses may become
-# unreachable, but the database will not become corrupt.
-
 # This file is read on server startup, so a restart is required 
 # whenever it has been modified.
+
+# Transitions may be changed for a deployed site. Statuses may become
+# unreachable, but this will not corrupt the database.
 
 - source: preparation
   targets: [submitted]
@@ -20,13 +20,13 @@
   permission: [admin]
 
 - source: accepted
-  targets: [active]
+  targets: [processing]
   permission: [admin]
 
 - source: rejected
   targets: [preparation]
   permission: [user]
 
-- source: active
+- source: processing
   targets: [aborted, closed]
   permission: [admin]

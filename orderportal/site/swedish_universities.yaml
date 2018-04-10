@@ -1,3 +1,8 @@
+# OrderPortal university lookup; Swedish universities only.
+
+# This file is read on server startup, so a restart is required 
+# whenever it has been modified.
+
 KI:
   name: Karolinska institutet
   rank: 1

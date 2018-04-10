@@ -249,7 +249,7 @@ class OrderSaver(saver.Saver):
         It is sent later by cron job script 'script/messenger.py'
         """
         try:
-            template = self.db['order_messages'][self.doc['status']]
+            template = settings['ORDER_MESSAGES'][self.doc['status']]
         except (couchdb.ResourceNotFound, KeyError):
             return
         recipients = set()

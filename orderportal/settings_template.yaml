@@ -31,21 +31,22 @@ COOKIE_SECRET: 'a long string of random characters %!120()='
 PASSWORD_SALT: 'a long string of random characters ?=}%&;19'
 
 # Site customization; change for your site
-SITE_DIR: '{ROOT_DIR}/site'
+SITE_DIR:  '{ROOT_DIR}/site'
 SITE_NAME: 'My Order Portal'
 SITE_SUPPORT_EMAIL: 'my.email@my-domain.com'
 
 # The icon files must be in the SITE_DIR; absolute file path is not allowed.
-SITE_FAVICON: 'orderportal32.png'
+SITE_FAVICON:     'orderportal32.png'
 SITE_NAVBAR_ICON: 'orderportal32.png'
-SITE_HOME_ICON: 'orderportal144.png'
+SITE_HOME_ICON:   'orderportal144.png'
 
 # Account messages definitions
 ACCOUNT_MESSAGES_FILEPATH: '{SITE_DIR}/account_messages.yaml'
 
 # Order status and transition definition files
-ORDER_STATUSES_FILEPATH: '{SITE_DIR}/order_statuses.yaml'
+ORDER_STATUSES_FILEPATH:    '{SITE_DIR}/order_statuses.yaml'
 ORDER_TRANSITIONS_FILEPATH: '{SITE_DIR}/order_transitions.yaml'
+ORDER_MESSAGES_FILEPATH:    '{SITE_DIR}/order_messages.yaml'
 
 # Use sequentially numbered order identifiers
 ORDER_IDENTIFIER_FORMAT: 'MY{0:=05d}'

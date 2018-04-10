@@ -158,7 +158,8 @@ def main():
             AdminAccountMessages, name='admin_account_messages'),
         url(r'/admin/statistics', Statistics, name='statistics'),
         url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
-            {'path': settings['SITE_DIR']}, name='site'),
+            {'path': utils.expand_filepath(settings['SITE_DIR'])},
+            name='site'),
         ])
     handlers.append(url(r'/.*', NoSuchEntity))
     application = tornado.web.Application(

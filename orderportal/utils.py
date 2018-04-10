@@ -118,6 +118,10 @@ def load_settings(filepath):
                  settings['ORDER_TRANSITIONS_FILEPATH'])
     with open(expand_filepath(settings['ORDER_TRANSITIONS_FILEPATH'])) as infile:
         settings['ORDER_TRANSITIONS'] = yaml.safe_load(infile)
+    # Read order messages YAML file.
+    logging.info("order messages: %s", settings['ORDER_MESSAGES_FILEPATH'])
+    with open(expand_filepath(settings['ORDER_MESSAGES_FILEPATH'])) as infile:
+        settings['ORDER_MESSAGES'] = yaml.safe_load(infile)
     # Read universities YAML file.
     filepath = settings.get('UNIVERSITIES_FILEPATH')
     if not filepath:

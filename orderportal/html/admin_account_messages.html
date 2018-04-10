@@ -66,7 +66,7 @@ Account messages
   </tr>
   {% set statuses = constants.ACCOUNT_STATUSES + [constants.RESET] %}
   {% for status in  statuses %}
-  {% set message = account_messages.get(status, dict()) %}
+  {% set message = settings['ACCOUNT_MESSAGES'].get(status, dict()) %}
   <tr>
     <td>{% module Icon(status, label=True) %}</td>
     <td>{{ ', '.join(message.get('recipients', [])) or '-' }}</td>

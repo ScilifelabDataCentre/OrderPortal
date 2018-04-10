@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.3.19'
+__version__ = '3.3.20'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -59,9 +59,8 @@ settings = dict(
     ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',
     ORDER_STATUSES_FILEPATH='{SITE_DIR}/order_statuses.yaml',
     ORDER_TRANSITIONS_FILEPATH='{SITE_DIR}/order_transitions.yaml',
+    ORDER_MESSAGES_FILEPATH='{SITE_DIR}/order_messages.yaml',
     UNIVERSITIES_FILEPATH='{SITE_DIR}/swedish_universities.yaml',
     COUNTRY_CODES_FILEPATH='{SITE_DIR}/country_codes.yaml',
     SUBJECT_TERMS_FILEPATH='{SITE_DIR}/subject_terms.yaml',
-    # For database initialization only; ignored after that.
-    INITIAL_ORDER_MESSAGES_FILEPATH='{SITE_DIR}/initial_order_messages.yaml',
     )
