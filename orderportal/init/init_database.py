@@ -33,7 +33,6 @@ def init_database(dumpfilepath=None):
                  orderportal_doctype=constants.META))
     print('created meta documents')
     if dumpfilepath:
-        dumpfilepath = utils.expand_filepath(dumpfilepath)
         try:
             print('reading dump file...')
             undump(db, dumpfilepath)
