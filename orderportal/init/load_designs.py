@@ -11,15 +11,15 @@ from orderportal import settings
 from orderportal import utils
 
 
-def load_designs(db, root=None):
+def load_designs(db, root_dir=None):
     "Load all CouchDB database design documents."
-    if root is None:
-        root = os.path.join(settings['ROOT'], 'designs')
-    for design in os.listdir(root):
+    if root_dir is None:
+        root_dir = os.path.join(settings['ROOT_DIR'], 'designs')
+    for design in os.listdir(root_dir):
         views = dict()
-        path = os.path.join(root, design)
+        path = os.path.join(root_dir, design)
         if not os.path.isdir(path): continue
-        path = os.path.join(root, design, 'views')
+        path = os.path.join(root_dir, design, 'views')
         for filename in os.listdir(path):
             name, ext = os.path.splitext(filename)
             if ext != '.js': continue
@@ -48,15 +48,15 @@ def load_designs(db, root=None):
             else:
                 print('no change', id, file=sys.stderr)
 
-def regenerate_views(db, root=None):
+def regenerate_views(db, root_dir=None):
     "Trigger CouchDB to regenerate views by accessing them."
-    if root is None:
-        root = os.path.join(settings['ROOT'], 'designs')
+    if root_dir is None:
+        root_dir = os.path.join(settings['ROOT_DIR'], 'designs')
     viewnames = []
-    for design in os.listdir(root):
-        path = os.path.join(root, design)
+    for design in os.listdir(root_dir):
+        path = os.path.join(root_dir, design)
         if not os.path.isdir(path): continue
-        path = os.path.join(root, design, 'views')
+        path = os.path.join(root_dir, design, 'views')
         for filename in os.listdir(path):
             name, ext = os.path.splitext(filename)
             if ext != '.js': continue
