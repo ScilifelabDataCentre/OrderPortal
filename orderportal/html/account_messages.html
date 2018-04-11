@@ -55,7 +55,11 @@ Messages to {% module Entity(account) %}
 {% block javascript_code %}
 <script>
   $(function() { 
-    $("#messages").DataTable();
+    $("#messages").DataTable( {
+      "pagingType": "full_numbers",
+      "pageLength": 25,
+      "order": [[0, "desc"]],
+    });
   });
 </script>
 {% end %}
