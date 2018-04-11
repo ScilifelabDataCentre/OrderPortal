@@ -218,7 +218,7 @@ class OrderSaver(saver.Saver):
     def post_process(self):
         self.modify_attachments()
         if self.changed_status:
-            self.prepare_message()
+            self.send_message()
 
     def modify_attachments(self):
         "Save or delete the file as an attachment to the document."
@@ -244,10 +244,8 @@ class OrderSaver(saver.Saver):
                                        filename=file['filename'],
                                        content_type=file['content_type'])
 
-    def prepare_message(self):
-        """Prepare a message to send after status change.
-        It is sent later by cron job script 'script/messenger.py'
-        """
+    def send_message(self):
+        "Send a message after status change."
         try:
             template = settings['ORDER_MESSAGES'][self.doc['status']]
         except (couchdb.ResourceNotFound, KeyError):
@@ -274,14 +272,13 @@ class OrderSaver(saver.Saver):
                 if admin['status'] == constants.ENABLED:
                     recipients.add(admin['email'])
         with MessageSaver(rqh=self) as saver:
-            saver.set_params(
-                owner=self.doc['owner'],
-                title=self.doc['title'],
-                identifier=self.doc.get('identifier') or self.doc['_id'],
-                url=self.get_order_url(self.doc),
-                tags=', '.join(self.doc.get('tags', [])))
-            saver.set_template(template)
-            saver['recipients'] = list(recipients)
+            saver.create(template,
+                         owner=self.doc['owner'],
+                         title=self.doc['title'],
+                         identifier=self.doc.get('identifier') or self.doc['_id'],
+                         url=self.get_order_url(self.doc),
+                         tags=', '.join(self.doc.get('tags', [])))
+            saver.send(list(recipients))
 
     def get_order_url(self, order):
         """Member rqh is not available when used from a stand-alone script,

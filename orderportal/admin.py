@@ -48,15 +48,15 @@ class Settings(RequestHandler):
         self.check_admin()
         mod_settings = settings.copy()
         # Don't show the password in the CouchDB URL
-        url = settings['DB_SERVER']
+        url = settings['DATABASE_SERVER']
         match = re.search(r':([^/].+)@', url)
         if match:
             url = list(url)
             url[match.start(1):match.end(1)] = '***'
-            mod_settings['DB_SERVER'] = ''.join(url)
+            mod_settings['DATABASE_SERVER'] = ''.join(url)
         params = ['ROOT_DIR', 'SETTINGS_FILEPATH',
                   'BASE_URL', 'SITE_NAME', 'SITE_SUPPORT_EMAIL',
-                  'DB_SERVER', 'DATABASE',
+                  'DATABASE_SERVER', 'DATABASE',
                   'TORNADO_DEBUG', 'LOGGING_DEBUG',
                   'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES',
                   'SITE_DIR', 'ACCOUNT_MESSAGES_FILEPATH',

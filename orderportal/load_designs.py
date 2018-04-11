@@ -70,9 +70,11 @@ def regenerate_views(db, root_dir=None):
     for viewname in viewnames:
         print('regenerating view', viewname)
         view = db.view(viewname)
+        count = 0
         for row in view:
-            break
-        
+            count += 1
+            if count > 4: break
+
 
 if __name__ == '__main__':
     parser = utils.get_command_line_parser(

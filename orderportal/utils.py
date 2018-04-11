@@ -28,8 +28,7 @@ from . import settings
 
 def get_command_line_parser(usage='usage: %prog [options]', description=None):
     "Get the base command line argument parser."
-    # optparse is used (rather than argparse) since
-    # this code must be possible to run under Python 2.6
+    # optparse is used (rather than argparse) due to Python 2.6
     parser = optparse.OptionParser(usage=usage, description=description)
     parser.add_option('-s', '--settings',
                       action='store', dest='settings',
@@ -37,7 +36,7 @@ def get_command_line_parser(usage='usage: %prog [options]', description=None):
                       metavar="FILE", help="filepath of settings YAML file")
     parser.add_option('-p', '--pidfile',
                       action='store', dest='pidfile', default=None,
-                      metavar="FILE", help="filepath of file containing PID")
+                      metavar="FILE", help="filepath of file to contain PID")
     parser.add_option('-f', '--force',
                       action="store_true", dest="force", default=False,
                       help='force action, rather than ask for confirmation')
@@ -78,7 +77,7 @@ def load_settings(filepath):
     logging.info("logging debug: %s", settings['LOGGING_DEBUG'])
     logging.info("tornado debug: %s", settings['TORNADO_DEBUG'])
     # Check settings
-    for key in ['BASE_URL', 'DB_SERVER', 'COOKIE_SECRET', 'DATABASE']:
+    for key in ['BASE_URL', 'DATABASE_SERVER', 'COOKIE_SECRET', 'DATABASE']:
         if key not in settings:
             raise KeyError("No settings['{0}'] item.".format(key))
         if not settings[key]:
@@ -154,7 +153,7 @@ def load_settings(filepath):
     settings['subjects_lookup'] = dict([(s['code'], s['term'])
                                         for s in settings['subjects']])
     # Settings computable from others.
-    settings['DB_SERVER_VERSION'] = get_dbserver().version()
+    settings['DATABASE_SERVER_VERSION'] = get_dbserver().version()
     if 'PORT' not in settings:
         parts = urlparse.urlparse(settings['BASE_URL'])
         items = parts.netloc.split(':')
@@ -187,7 +186,7 @@ def expand_filepath(filepath):
     return filepath
 
 def get_dbserver():
-    return couchdb.Server(settings['DB_SERVER'])
+    return couchdb.Server(settings['DATABASE_SERVER'])
 
 def get_db(create=False):
     """Return the handle for the CouchDB database.

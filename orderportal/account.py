@@ -750,10 +750,9 @@ class Login(RequestHandler):
                     pass
                 else:
                     with MessageSaver(rqh=self) as saver:
-                        saver.set_params()
-                        saver.set_template(template)
-                        # Recipient is hard-wired.
-                        saver['recipients'] = [account['email']]
+                        saver.create(template)
+                        # Recipient is hardwired here.
+                        saver.send([account['email']])
             self.see_other('home', error=msg)
             return
         try:
@@ -825,17 +824,16 @@ class Reset(RequestHandler):
                 pass
             else:
                 with MessageSaver(rqh=self) as saver:
-                    saver.set_params(
-                        account=account['email'],
-                        url=URL('password'),
-                        password_url=URL('password'),
-                        password_code_url=URL('password',
-                                              email=account['email'],
-                                              code=account['code']),
-                        code=account['code'])
-                    saver.set_template(template)
-                    # Recipient is hard-wired.
-                    saver['recipients'] = [account['email']]
+                    saver.create(template,
+                                 account=account['email'],
+                                 url=URL('password'),
+                                 password_url=URL('password'),
+                                 password_code_url=URL('password',
+                                                       email=account['email'],
+                                                       code=account['code']),
+                                 code=account['code'])
+                    # Recipient is hardwired here.
+                    saver.send([account['email']])
             if self.current_user:
                 if not self.is_admin():
                     # Log out the user
@@ -974,7 +972,6 @@ class Register(RequestHandler):
                     get(key) or ''
             self.see_other('register', error=str(msg), **kwargs)
             return
-        # Prepare message sent by cron job script 'script/messenger.py'
         try:
             template = settings['ACCOUNT_MESSAGES'][constants.PENDINGS]
         except KeyError:
@@ -982,12 +979,12 @@ class Register(RequestHandler):
         else:
             account = saver.doc
             with MessageSaver(rqh=self) as saver:
-                saver.set_params(
-                    account=account['email'],
-                    url=self.absolute_reverse_url('account', account['email']))
-                saver.set_template(template)
-                # Recipient is hard-wired.
-                saver['recipients'] = [a['email'] for a in self.get_admins()]
+                saver.create(template,
+                             account=account['email'],
+                             url=self.absolute_reverse_url(
+                                 'account', account['email']))
+                # Recipients are hardwired here.
+                saver.send([a['email'] for a in self.get_admins()])
         self.see_other('registered')
 
 
@@ -1019,17 +1016,16 @@ class AccountEnable(RequestHandler):
             pass
         else:
             with MessageSaver(rqh=self) as saver:
-                saver.set_params(
-                    account=account['email'],
-                    password_url=self.absolute_reverse_url('password'),
-                    password_code_url=self.absolute_reverse_url(
-                        'password',
-                        email=account['email'],
-                        code=account['code']),
-                    code=account['code'])
-                saver.set_template(template)
-                # Recipient is hard-wired.
-                saver['recipients'] = [account['email']]
+                saver.create(template,
+                             account=account['email'],
+                             password_url=self.absolute_reverse_url('password'),
+                             password_code_url=self.absolute_reverse_url(
+                                 'password',
+                                 email=account['email'],
+                                 code=account['code']),
+                             code=account['code'])
+                # Recipient is hardwired here.
+                saver.send([account['email']])
         self.see_other('account', account['email'])
 
 

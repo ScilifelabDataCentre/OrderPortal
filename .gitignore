@@ -3,6 +3,6 @@
 *.pyc
 orderportal/other-sites
 !orderportal/settings_template.yaml
-!orderportal/init/*yaml
+!orderportal/init_texts.yaml
 !orderportal/site/*yaml
 !orderportal/ngi/*yaml

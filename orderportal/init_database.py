@@ -1,8 +1,9 @@
 """ OrderPortal: Initialize the order database, directly towards CouchDB.
+The database must exist, and the account for accessing it must have been set up.
 1) Wipe out the old database.
 2) Load the design documents.
 3) Load the dump file, if given.
-4) Load the initial texts from files, unless already loaded.
+4) Load the initial texts from file, unless already loaded.
 """
 
 from __future__ import print_function, absolute_import
@@ -16,8 +17,8 @@ from orderportal import constants
 from orderportal import settings
 from orderportal import utils
 from orderportal import admin
-from orderportal.scripts.dump import undump
-from orderportal.init.load_designs import load_designs
+from orderportal.dump import undump
+from orderportal.load_designs import load_designs, regenerate_views
 
 INIT_TEXTS_FILEPATH = 'init_texts.yaml'
 
@@ -36,6 +37,7 @@ def init_database(dumpfilepath=None):
         try:
             print('reading dump file...')
             undump(db, dumpfilepath)
+            regenerate_views(db)
         except IOError:
             print('Warning: could not load', dumpfilepath)
     else:
