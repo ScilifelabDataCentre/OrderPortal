@@ -45,7 +45,8 @@ def dump(db, filepath):
         outfile.addfile(info, cStringIO.StringIO(data))
         count_items += 1
         for attname in doc.get('_attachments', dict()):
-            info = tarfile.TarInfo("{0}_att/{1}".format(doc['_id'], attname))
+            info = tarfile.TarInfo("{0}_att/{1}".format(
+                doc['_id'], utils.to_ascii(attname)))
             attfile = db.get_attachment(doc, attname)
             if attfile is None:
                 data = ''
@@ -71,9 +72,11 @@ def undump(db, filepath):
         itemfile = infile.extractfile(item)
         itemdata = itemfile.read()
         itemfile.close()
-        if item.name in attachments:
+        # Handle problematic non-ASCII filenames
+        itemname2 = utils.to_ascii(item.name)
+        if itemname2 in attachments:
             # This relies on an attachment being after its item in the tarfile.
-            db.put_attachment(doc, itemdata, **attachments.pop(item.name))
+            db.put_attachment(doc, itemdata, **attachments.pop(itemname2))
             count_files += 1
         else:
             doc = json.loads(itemdata)
@@ -94,8 +97,10 @@ def undump(db, filepath):
             db.save(doc)
             count_items += 1
             for attname, attinfo in atts.items():
-                key = "{0}_att/{1}".format(doc['_id'], attname)
-                attachments[key] = dict(filename=attname,
+                # Handle problematic non-ASCII filenames
+                attname2 = utils.to_ascii(attname)
+                key = "{0}_att/{1}".format(doc['_id'], attname2)
+                attachments[key] = dict(filename=attname2,
                                         content_type=attinfo['content_type'])
     infile.close()
     print('undumped', count_items, 'items and',
