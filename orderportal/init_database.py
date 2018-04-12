@@ -51,11 +51,13 @@ def init_database(dumpfilepath=None):
         print('Warning: could not load', INIT_TEXTS_FILEPATH)
         texts = dict()
     for name in constants.TEXTS:
-        if len(list(db.view('text/name', key=name))) == 0:
+        try:
+            if len(list(db.view('text/name', key=name))) == 0:
+                raise ValueError
+        except (ValueError, couchdb.http.ResourceNotFound):
             with admin.TextSaver(db=db) as saver:
                 saver['name'] = name
                 saver['text'] = texts.get(name, '')
-            
 
 def wipeout_database(db):
     """Wipe out the contents of the database.
