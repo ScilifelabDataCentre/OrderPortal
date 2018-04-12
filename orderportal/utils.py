@@ -190,12 +190,11 @@ def get_dbserver():
     url = settings['DATABASE_SERVER']
     if settings.get('DATABASE_ACCOUNT') and settings.get('DATABASE_PASSWORD'):
         method, domain = url.split('://')
-        url = "%s%s:%s@%s" % (method,
-                              settings.get('DATABASE_ACCOUNT'),
-                              settings.get('DATABASE_PASSWORD'),
-                              domain)
-    server = couchdb.Server(url)
-    return server
+        url = "%s://%s:%s@%s" % (method,
+                                 settings.get('DATABASE_ACCOUNT'),
+                                 settings.get('DATABASE_PASSWORD'),
+                                 domain)
+    return couchdb.Server(url)
 
 def get_db():
     "Return the handle for the CouchDB database."
