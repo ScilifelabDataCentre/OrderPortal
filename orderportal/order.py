@@ -958,12 +958,14 @@ class OrderCreate(RequestHandler):
                            error="{0} creation is currently disabled."
                            .format(utils.terminology('Order')))
             return
-        form = self.get_entity(self.get_argument('form'),doctype=constants.FORM)
+        form = self.get_entity(self.get_argument('form'),
+                               doctype=constants.FORM)
         self.render('order_create.html', form=form)
 
     @tornado.web.authenticated
     def post(self):
-        form = self.get_entity(self.get_argument('form'),doctype=constants.FORM)
+        form = self.get_entity(self.get_argument('form'),
+                               doctype=constants.FORM)
         fields = Fields(form)
         with OrderSaver(rqh=self) as saver:
             saver['form'] = form['_id']

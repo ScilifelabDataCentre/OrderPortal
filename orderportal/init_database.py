@@ -1,9 +1,8 @@
 """ OrderPortal: Initialize the order database, directly towards CouchDB.
 The database must exist, and the account for accessing it must have been set up.
-1) Wipe out the old database.
-2) Load the design documents.
-3) Load the dump file, if given.
-4) Load the initial texts from file, unless already loaded.
+1) Load the design documents.
+2) Load the dump file, if given.
+3) Load the initial texts from file, unless already loaded.
 """
 
 from __future__ import print_function, absolute_import
@@ -23,12 +22,14 @@ from orderportal.load_designs import load_designs, regenerate_views
 INIT_TEXTS_FILEPATH = 'init_texts.yaml'
 
 def init_database(dumpfilepath=None):
-    db = utils.get_db(create=True)
-    print('wiping out database...')
-    wipeout_database(db)
-    print('wiped out database')
+    db = utils.get_db()
+    try:
+        db['order']
+    except couchdb.ResourceNotFound:
+        pass
+    else:
+        sys.exit('Error: database is not empty')
     load_designs(db)
-    print('loaded designs')
     # No specific items set here; done on-the-fly in e.g. get_next_number
     db.save(dict(_id='order',
                  orderportal_doctype=constants.META))
@@ -56,26 +57,13 @@ def init_database(dumpfilepath=None):
                 saver['name'] = name
                 saver['text'] = texts.get(name, '')
 
-def wipeout_database(db):
-    """Wipe out the contents of the database.
-    This doc-by-doc approach is used rather than total delete of
-    the database instance, since that may require additional privileges.
-    """
-    for doc in db:
-        del db[doc]
-
 
 if __name__ == '__main__':
     parser = utils.get_command_line_parser(
-        description='Initialize the database, deleting all old data,'
-        ' optionally load from dump file.')
+        description='Initialize the database, optionally load from dump file.')
     parser.add_option("-L", "--load",
                       action='store', dest='FILE', default=None,
                       metavar="FILE", help="filepath of dump file to load")
     (options, args) = parser.parse_args()
-    if not options.force:
-        response = raw_input('about to delete everything; really sure? [n] > ')
-        if not utils.to_bool(response):
-            sys.exit('aborted')
     utils.load_settings(filepath=options.settings)
     init_database(dumpfilepath=options.FILE)

@@ -1,7 +1,6 @@
 *~
-*.yaml
 *.pyc
-orderportal/other-sites
+*.yaml
 !orderportal/settings_template.yaml
 !orderportal/init_texts.yaml
 !orderportal/site/*yaml

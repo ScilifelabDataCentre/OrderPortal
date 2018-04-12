@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.4.1'
+__version__ = '3.4.2'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -17,7 +17,7 @@ settings = dict(
     LOGGING_DEBUG=False,
     LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',
     DATABASE_SERVER='http://localhost:5984/',
-    DATABASE='orderportal',
+    DATABASE_NAME='orderportal',
     COUCHDB_HOME='http://couchdb.apache.org/',
     BOOTSTRAP_HOME='http://getbootstrap.com/',
     BOOTSTRAP_CSS_URL='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',

@@ -56,7 +56,7 @@ class Settings(RequestHandler):
             mod_settings['DATABASE_SERVER'] = ''.join(url)
         params = ['ROOT_DIR', 'SETTINGS_FILEPATH',
                   'BASE_URL', 'SITE_NAME', 'SITE_SUPPORT_EMAIL',
-                  'DATABASE_SERVER', 'DATABASE',
+                  'DATABASE_SERVER', 'DATABASE_NAME', 'DATABASE_ACCOUNT',
                   'TORNADO_DEBUG', 'LOGGING_DEBUG',
                   'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES',
                   'SITE_DIR', 'ACCOUNT_MESSAGES_FILEPATH',

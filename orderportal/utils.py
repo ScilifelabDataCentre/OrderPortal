@@ -77,11 +77,12 @@ def load_settings(filepath):
     logging.info("logging debug: %s", settings['LOGGING_DEBUG'])
     logging.info("tornado debug: %s", settings['TORNADO_DEBUG'])
     # Check settings
-    for key in ['BASE_URL', 'DATABASE_SERVER', 'COOKIE_SECRET', 'DATABASE']:
+    for key in ['BASE_URL','DATABASE_SERVER','DATABASE_NAME','COOKIE_SECRET']:
         if key not in settings:
             raise KeyError("No settings['{0}'] item.".format(key))
         if not settings[key]:
             raise ValueError("settings['{0}'] has invalid value.".format(key))
+    logging.info("CouchDB database name: %s", settings['DATABASE_NAME'])
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short.")
     # Read account messages YAML file.
@@ -186,21 +187,20 @@ def expand_filepath(filepath):
     return filepath
 
 def get_dbserver():
-    return couchdb.Server(settings['DATABASE_SERVER'])
+    server = couchdb.Server(settings['DATABASE_SERVER'])
+    if settings.get('DATABASE_ACCOUNT') and settings.get('DATABASE_PASSWORD'):
+        server.login(settings.get('DATABASE_ACCOUNT'),
+                     settings.get('DATABASE_PASSWORD'))
+    return server
 
-def get_db(create=False):
-    """Return the handle for the CouchDB database.
-    If 'create' is True, then create the database if it does not exist.
-    """
+def get_db():
+    "Return the handle for the CouchDB database."
     server = get_dbserver()
-    name = settings['DATABASE']
     try:
-        return server[name]
+        return server[settings['DATABASE_NAME']]
     except couchdb.http.ResourceNotFound:
-        if create:
-            return server.create(name)
-        else:
-            raise KeyError("CouchDB database '%s' does not exist." % name)
+        raise KeyError("CouchDB database '%s' does not exist." % 
+                       settings['DATABASE_NAME'])
 
 def get_iuid():
     "Return a unique instance identifier."
