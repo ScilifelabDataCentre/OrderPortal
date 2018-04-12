@@ -3,36 +3,38 @@
 # This file changes the default values set in the 'settings' dictionary
 # defined in the '__init__.py' file.
 
-### You should copy this file and modify for your site.
-### Name the file 'hostname.yaml', where hostname is the
-### obtained by the following shell command:
-### $ python -c "import socket; print socket.gethostname().split('.')[0]"
+# You must customize most of these for your own site.
 
-### In particular, 'your-domain.com' must be changed.
+### You should copy this file to 'settings.yaml', which is
+### the file that 'app_orderportal.py' looks for by default.
 
 # Official URL to the portal; access from the outside world.
-#BASE_URL: 'http://my-domain.com/'
-BASE_URL: 'http://localhost:8886/'
+BASE_URL: 'http://my-domain.com/'
+# XXX This may be useful for testing on a laptop
+# XXX BASE_URL: 'http://localhost:8880/'
 
 # tornado server port; may be different from above if proxy is used.
-PORT: 8886
+PORT: 8880
 
 # CouchDB server
-# DB_SERVER: 'http://username:password@localhost:5984/'
-DB_SERVER: 'http://localhost:5984/'
+DATABASE_SERVER: 'http://username:password@localhost:5984/'
+# XXX This is useful if your CouchDB instance is on the same
+#     machine as the web server, and is in admin party mode.
+# XXX DATABASE_SERVER: 'http://localhost:5984/'
 DATABASE: 'orderportal'
 
 # Logging and debug.
 TORNADO_DEBUG: true
 LOGGING_DEBUG: true
+LOGGING_FILEPATH: '/var/log/orderportal/debug.log'
 
 # Login
-COOKIE_SECRET: 'a long string of random characters %!120()='
-PASSWORD_SALT: 'a long string of random characters ?=}%&;19'
+COOKIE_SECRET: 'Change this to a long string of random characters.'
+PASSWORD_SALT: 'Change this to a long string of random characters.'
 
 # Site customization; change for your site
-SITE_DIR:  '{ROOT_DIR}/site'
-SITE_NAME: 'My Order Portal'
+SITE_DIR:           '{ROOT_DIR}/my-site'
+SITE_NAME:          'My Order Portal'
 SITE_SUPPORT_EMAIL: 'my.email@my-domain.com'
 
 # The icon files must be in the SITE_DIR; absolute file path is not allowed.

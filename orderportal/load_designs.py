@@ -7,12 +7,34 @@ import sys
 
 import couchdb
 
+from orderportal import constants
 from orderportal import settings
 from orderportal import utils
 
 
+MAP_TEMPLATE = """function(doc) {{
+  if (doc.orderportal_doctype !== 'order') return;
+  var value = doc.fields.{fieldid};
+  if (!value) return;
+  var type = typeof(value);
+  if (type === 'string') {{
+    var words = value.replace(/[:,']/g, " ").toLowerCase().split(/\s+/);
+  }} else if (type === 'number') {{
+    var words = [value.toString()];
+  }} else {{
+    var words = value;
+  }};
+  if (words.length) {{
+    words.forEach(function(word) {{
+      if (word.length > 2 && !lint[word]) emit(word, null);
+    }});
+  }};
+}};
+var lint = {{'and': 1, 'the': 1, 'was': 1, 'not': 1}};"""
+
 def load_designs(db, root_dir=None):
     "Load all CouchDB database design documents."
+    # First the static ones from files.
     if root_dir is None:
         root_dir = os.path.join(settings['ROOT_DIR'], 'designs')
     for design in os.listdir(root_dir):
@@ -47,6 +69,19 @@ def load_designs(db, root_dir=None):
                 db.save(doc)
             else:
                 print('no change', id, file=sys.stderr)
+    # Next the dynamic search fields defined in settings.
+    try:
+        doc = db['_design/fields']
+    except couchdb.ResourceNotFound:
+        doc = dict(_id='_design/fields')
+    doc['views'] = dict()
+    for field in settings['ORDERS_SEARCH_FIELDS']:
+        if not constants.ID_RX.match(field):
+            print("ERROR: search field %s invalid identifier; ignored." % field)
+            continue
+        doc['views'][field] = dict(map=MAP_TEMPLATE.format(fieldid=field))
+    print('updating order search fields', file=sys.stderr)
+    db.save(doc)
 
 def regenerate_views(db, root_dir=None):
     "Trigger CouchDB to regenerate views by accessing them."
@@ -67,6 +102,9 @@ def regenerate_views(db, root_dir=None):
             viewname = design + '/' + name
             if viewname not in viewnames:
                 viewnames.append(viewname)
+    for field in settings['ORDERS_SEARCH_FIELDS']:
+        if constants.ID_RX.match(field):
+            viewnames.append("fields/%s" % field)
     for viewname in viewnames:
         print('regenerating view', viewname)
         view = db.view(viewname)

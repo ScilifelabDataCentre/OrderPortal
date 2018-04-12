@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.4.0'
+__version__ = '3.4.1'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -51,6 +51,7 @@ settings = dict(
     ORDERS_LIST_TAGS=True,
     ORDERS_LIST_FIELDS=[],
     ORDERS_LIST_STATUSES=[],
+    ORDERS_SEARCH_FIELDS=[],
     ACCOUNT_INVOICE_INFO=True,
     ACCOUNT_FUNDER_INFO=True,
     ACCOUNT_FUNDER_INFO_GENDER=True,
