@@ -187,10 +187,14 @@ def expand_filepath(filepath):
     return filepath
 
 def get_dbserver():
-    server = couchdb.Server(settings['DATABASE_SERVER'])
+    url = settings['DATABASE_SERVER']
     if settings.get('DATABASE_ACCOUNT') and settings.get('DATABASE_PASSWORD'):
-        server.login(settings.get('DATABASE_ACCOUNT'),
-                     settings.get('DATABASE_PASSWORD'))
+        method, domain = url.split('://')
+        url = "%s%s:%s@%s" % (method,
+                              settings.get('DATABASE_ACCOUNT'),
+                              settings.get('DATABASE_PASSWORD'),
+                              domain)
+    server = couchdb.Server(url)
     return server
 
 def get_db():
