@@ -52,7 +52,7 @@ class Settings(RequestHandler):
         match = re.search(r':([^/].+)@', url)
         if match:
             url = list(url)
-            url[match.start(1):match.end(1)] = '***'
+            url[match.start(1):match.end(1)] = 'password'
             mod_settings['DATABASE_SERVER'] = ''.join(url)
         params = ['ROOT_DIR', 'SETTINGS_FILEPATH',
                   'BASE_URL', 'SITE_NAME', 'SITE_SUPPORT_EMAIL',
