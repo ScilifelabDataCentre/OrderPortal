@@ -186,15 +186,21 @@ def expand_filepath(filepath):
         filepath = os.path.join(settings['ROOT_DIR'], filepath)
     return filepath
 
+# def get_dbserver():
+#     url = settings['DATABASE_SERVER']
+#     if settings.get('DATABASE_ACCOUNT') and settings.get('DATABASE_PASSWORD'):
+#         method, domain = url.split('://')
+#         url = "%s://%s:%s@%s" % (method,
+#                                  settings.get('DATABASE_ACCOUNT'),
+#                                  settings.get('DATABASE_PASSWORD'),
+#                                  domain)
+#     return couchdb.Server(url)
 def get_dbserver():
-    url = settings['DATABASE_SERVER']
+    server = couchdb.Server(settings['DATABASE_SERVER'])
     if settings.get('DATABASE_ACCOUNT') and settings.get('DATABASE_PASSWORD'):
-        method, domain = url.split('://')
-        url = "%s://%s:%s@%s" % (method,
-                                 settings.get('DATABASE_ACCOUNT'),
-                                 settings.get('DATABASE_PASSWORD'),
-                                 domain)
-    return couchdb.Server(url)
+        server.resource.credentials(settings.get('DATABASE_ACCOUNT'),
+                                    settings.get('DATABASE_PASSWORD'))
+    return server
 
 def get_db():
     "Return the handle for the CouchDB database."
