@@ -13,15 +13,14 @@ BASE_URL: 'http://my-domain.com/'
 # XXX This may be useful for testing on a laptop
 # XXX BASE_URL: 'http://localhost:8880/'
 
-# tornado server port; may be different from above if proxy is used.
+# tornado server port; may be different from the above if proxy is used.
 PORT: 8880
 
 # CouchDB server
-DATABASE_SERVER: 'http://username:password@localhost:5984/'
-# XXX This is useful if your CouchDB instance is on the same
-#     machine as the web server, and is in admin party mode.
-# XXX DATABASE_SERVER: 'http://localhost:5984/'
-DATABASE: 'orderportal'
+DATABASE_SERVER:   'http://localhost:5984/'
+DATABASE_ACCOUNT:  'couchdb_account'
+DATABASE_PASSWORD: 'pwd'
+DATABASE_NAME:     'orderportal'
 
 # Logging and debug.
 TORNADO_DEBUG: true
