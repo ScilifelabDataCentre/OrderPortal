@@ -51,6 +51,11 @@
   attach: [admin]
   action: Process
 
+- identifier: active
+  description: Th order is active in the lab.
+  attach: [admin]
+  action: Active
+
 - identifier: onhold
   description: The order is on hold.
   action: On hold

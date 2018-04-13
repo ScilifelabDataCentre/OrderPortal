@@ -733,6 +733,14 @@ class Orders(RequestHandler):
         if not self.is_staff():
             self.see_other('account_orders', self.current_user['email'])
             return
+        # Count of all orders
+        view = self.db.view('order/status', reduce=True)
+        try:
+            r = list(view)[0]
+        except IndexError:
+            all_count = 0
+        else:
+            all_count = count=r.value
         # Initial ordering by the 'modified' column.
         order_column = 5 + len(settings['ORDERS_LIST_STATUSES']) + \
             len(settings['ORDERS_LIST_FIELDS'])
@@ -743,7 +751,8 @@ class Orders(RequestHandler):
                     filter=self.filter,
                     orders=self.get_orders(),
                     order_column=order_column,
-                    account_names=self.get_account_names())
+                    account_names=self.get_account_names(),
+                    all_count=all_count)
 
     def set_filter(self):
         "Set the filter parameters dictionary."

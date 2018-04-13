@@ -37,84 +37,78 @@
   </p>
 </div>
 
-<div class="row">
-  <div class="col-md-10">
-    <table class="table table-condensed">
-      {% for status in settings['ORDER_STATUSES'] %}
-      <tr>
-	<th>{% module Icon(status['identifier'], label=True) %}</th>
-	<td>
-	  {{ status['description'] }}
-	  <table>
-	    {% if status.get('initial') %}
-	    <tr>
-	      <td>Initial status.</td>
-	    </tr>
-	    {% end %}
-	    <tr>
-	      {% set editable = ['admin'] %}
-	      {% set editable.extend(status.get('edit', [])) %}
-	      <td>
-		{{ terminology('Order') }} editable by
-		{{ ', '.join(editable) or 'none' }}.
-	      </td>
-	    </tr>
-	    <tr>
-	      {% set attachable = ['admin'] %}
-	      {% set attachable.extend(status.get('attach', [])) %}
-	      <td>
-		{{ terminology('Order') }} attachable by
-		{{ ', '.join(attachable) or 'none' }}.
-	      </td>
-	    </tr>
-	    <tr>
-	      <td>From
-		{% set none = '[none]' %}
-		{% set first = True %}
-		{% for trans in settings['ORDER_TRANSITIONS'] %}
-		{% if status['identifier'] in trans['targets'] %}
-		{% if first %}
-		{% set first = False %}
-		{% else %}
-		,
-		{% end %}
-		{% set none = '' %}
-		<strong>{{ trans['source'] }}</strong>
-		(by {{', '.join(trans['permission']) }})
-		{% end %}
-		{% end %}
-		{{ none }}
-	      </td>
-	    </tr>
-	    <tr>
-	      <td>To
-		{% set none = '[none]' %}
-		{% set first = True %}
-		{% for trans in settings['ORDER_TRANSITIONS'] %}
-		{% if status['identifier'] == trans['source'] %}
-		{% for target in trans['targets'] %}
-		{% if first %}
-		{% set first = False %}
-		{% else %}
-		,
-		{% end %}
-		{% set none = '' %}
-		<strong>{{ target }}</strong>
-		(by {{', '.join(trans['permission']) }})
-		{% end %}
-		{% end %}
-		{% end %}
-		{{ none }}
-	      </td>
-	    </tr>
-	  </table>
-	</td>
-      </tr>
+<table class="table table-condensed">
+  <tr>
+    <th>Status</th>
+    <th>Description</th>
+    <th>From</th>
+    <th>To</th>
+    <th>May edit {{ terminology('order') }}</th>
+    <th>May attach to {{ terminology('order') }}</th>
+    <th># orders</th>
+  </tr>
+  {% for status in settings['ORDER_STATUSES'] %}
+  <tr>
+    <th>{% module Icon(status['identifier'], label=True) %}</th>
+    <td>
+      {{ status['description'] }}
+      {% if status.get('initial') %}
+      <br><strong>Initial status.</strong>
       {% end %}
-    </table>
-  </div>
-  <div class="col-md-2">
-  </div>
-</div>
-
+    </td>
+    <td>
+      {% set none = '[none]' %}
+      {% set first = True %}
+      {% for trans in settings['ORDER_TRANSITIONS'] %}
+      {% if status['identifier'] in trans['targets'] %}
+      {% if first %}
+      {% set first = False %}
+      {% else %}
+      <br>
+      {% end %}
+      {% set none = '' %}
+      <strong>{{ trans['source'] }}</strong>
+      ({{', '.join(trans['permission']) }})
+      {% end %}
+      {% end %}
+      {{ none }}
+    </td>
+    <td>
+      {% set none = '[none]' %}
+      {% set first = True %}
+      {% for trans in settings['ORDER_TRANSITIONS'] %}
+      {% if status['identifier'] == trans['source'] %}
+      {% for target in trans['targets'] %}
+      {% if first %}
+      {% set first = False %}
+      {% else %}
+      <br>
+      {% end %}
+      {% set none = '' %}
+      <strong>{{ target }}</strong>
+      ({{', '.join(trans['permission']) }})
+      {% end %}
+      {% end %}
+      {% end %}
+      {{ none }}
+    </td>
+    <td>
+      {% set editable = ['admin'] %}
+      {% set editable.extend(status.get('edit', [])) %}
+      {{ ', '.join(editable) or 'none' }}
+    </td>
+    <td>
+      {% set attachable = ['admin'] %}
+      {% set attachable.extend(status.get('attach', [])) %}
+      {{ ', '.join(attachable) or 'none' }}
+    </td>
+    <td class="text-right">
+      <a href="{{ reverse_url('orders', status=status['identifier']) }}"
+	 class="badge">
+	{{ counts.get(status['identifier'], 0) }}
+      </a>
+    </td>
+  </tr>
+  {% end %}
+</table>
 {% end %} {# block main_content #}

@@ -63,15 +63,16 @@
 	  {% end %}
 	</select>
       </div>
-      {% if settings['DISPLAY_ORDERS_MOST_RECENT'] > 0 %}
+      {% if settings['DISPLAY_ORDERS_MOST_RECENT'] > 0 and settings['DISPLAY_ORDERS_MOST_RECENT'] < all_count %}
       <div class="form-group">
 	<div class="control-label refresh" for="recent">
 	  &nbsp;
 	  <label class="radio">
 	    {% set checked = not filter.get('recent', False) and 'checked' or '' %}
 	    <input type="radio" name="recent" value="false" {{ checked }}>
-	    All
+	    All {{ all_count }} orders
 	  </label>
+	  &nbsp;
 	  <label class="radio">
 	    {% set checked = not checked and 'checked' or '' %}
 	    <input type="radio" name="recent" value="true" {{ checked }}>

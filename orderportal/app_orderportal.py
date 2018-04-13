@@ -155,7 +155,6 @@ def main():
             AdminOrderMessages, name='admin_order_messages'),
         url(r'/admin/account_messages',
             AdminAccountMessages, name='admin_account_messages'),
-        url(r'/admin/statistics', Statistics, name='statistics'),
         url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
             {'path': utils.expand_filepath(settings['SITE_DIR'])},
             name='site'),
