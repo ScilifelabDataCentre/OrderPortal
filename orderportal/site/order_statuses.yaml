@@ -52,7 +52,7 @@
   action: Process
 
 - identifier: active
-  description: Th order is active in the lab.
+  description: The order is active in the lab.
   attach: [admin]
   action: Active
 
