@@ -194,6 +194,7 @@
 	      </li>
 	      {% end %} {# if current_user #}
 	      {% block search_field %}
+	      {% if current_user %}
 	      <li>
 		<form action="{{ reverse_url('search') }}"
 		      role="form"
@@ -202,11 +203,12 @@
 		  <div class="form-group has-feedback">
 		    <input type="search" id="term" name="term"
 			   class="form-control"
-			   placeholder="Search">
+			   placeholder="Search orders">
 		    <span class="glyphicon glyphicon-search form-control-feedback"></span>
 		  </div>
 		</form>
 	      </li>
+	      {% end %} {# if current_user #}
 	      {% end %} {# block search_field #}
 	    </ul>
 	  </div>
