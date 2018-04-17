@@ -973,7 +973,7 @@ class Register(RequestHandler):
             self.see_other('register', error=str(msg), **kwargs)
             return
         try:
-            template = settings['ACCOUNT_MESSAGES'][constants.PENDINGS]
+            template = settings['ACCOUNT_MESSAGES'][constants.PENDING]
         except KeyError:
             pass
         else:
