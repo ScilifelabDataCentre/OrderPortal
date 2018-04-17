@@ -145,7 +145,8 @@
 
 <div class="row">
 
-  <div class="col-md-6">
+  {% if settings['DISPLAY_NEWS'] %}
+  <div class="{{ settings['DISPLAY_EVENTS'] and 'col-md-6' or 'col-md-12' }}">
     <div class="panel panel-info">
       <div class="panel-heading">
 	<span class="glyphicon glyphicon-info-sign"></span>
@@ -166,8 +167,10 @@
       </div>
     </div>
   </div>
+  {% end %}
 
-  <div class="col-md-6">
+  {% if settings['DISPLAY_EVENTS'] %}
+  <div class="{{ settings['DISPLAY_NEWS'] and 'col-md-6' or 'col-md-12' }}">
     <div class="panel panel-success">
       <div class="panel-heading">
 	<span class="glyphicon glyphicon-calendar"></span>
@@ -189,6 +192,7 @@
       </div>
     </div>
   </div>
+  {% end %}
 
 </div>
 
