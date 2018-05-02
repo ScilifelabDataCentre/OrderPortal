@@ -41,6 +41,7 @@
 	</select>
       </div>
       {% for f in settings['ORDERS_LIST_FIELDS'] %}
+      {% if f.get('values') %}
       <div class="form-group">
 	<select name="{{ f['identifier'] }}" class="form-control refresh">
 	  <option value="">[any {{ f['identifier'].replace('_', ' ') }}]</option>
@@ -52,6 +53,7 @@
 	  <option {{ sel }} value="__none__">[none]</option>
 	</select>
       </div>
+      {% end %} {# if f.get('values') #}
       {% end %} {# for f in settings['ORDERS_LIST_FIELDS'] #}
       <div class="form-group">
 	<select name="status" class="form-control refresh">
