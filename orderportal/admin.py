@@ -61,7 +61,9 @@ class Settings(RequestHandler):
                   'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES',
                   'SITE_DIR', 'ACCOUNT_MESSAGES_FILEPATH',
                   'ORDER_STATUSES_FILEPATH', 'ORDER_TRANSITIONS_FILEPATH',
-                  'ORDER_MESSAGES_FILEPATH', 'ORDERS_SEARCH_FIELDS',
+                  'ORDER_MESSAGES_FILEPATH', 'ORDER_USER_TAGS', 
+                  'ORDERS_SEARCH_FIELDS', 'ORDERS_LIST_FIELDS',
+                  'ORDERS_LIST_STATUSES',
                   'UNIVERSITIES_FILEPATH', 'COUNTRY_CODES_FILEPATH',
                   'SUBJECT_TERMS_FILEPATH']
         self.render('settings.html', params=params, settings=mod_settings)
