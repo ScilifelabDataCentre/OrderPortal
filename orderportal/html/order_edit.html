@@ -104,12 +104,14 @@ Edit  {% module Icon('order') %}
 	       value="{{ order['owner'] }}">
 	{% elif is_staff %}
 	<p id="__owner__" class="form-control-static">{{ order['owner'] }}</p>
-	{% else %}
+	{% elif colleagues %}
 	<select class="form-control" name="__owner__" id="__owner__">
 	  {% for colleague in colleagues %}
 	    <option {{ colleague == current_user['email'] and 'selected' or '' }}>{{ colleague }}</option>
 	  {% end %}
 	</select>
+        {% else %}
+	<p id="__owner__" class="form-control-static">{{ order['owner'] }}</p>
 	{% end %}
       </div>
     </div>
