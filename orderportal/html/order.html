@@ -146,6 +146,7 @@
 	  <a href="{{ reverse_url('account', order['owner']) }}">
 	    {{ account_names.get(order['owner'], order['owner']) }}
 	  </a>
+          ({{ order['owner'] }})
 	</td>
       </tr>
       {% if is_staff or settings.get('ORDER_USER_TAGS') %}
