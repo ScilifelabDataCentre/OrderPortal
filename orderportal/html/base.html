@@ -288,8 +288,10 @@
 	  </a>
 	</div>
         <div class="col-md-8 text-center">
-          Cookie policy: 
           {% if current_user %}
+          GDPR information: See
+          <a href="{{ reverse_url('account', current_user['email']) }}">
+            your account page</a>.
           A cookie is used solely to handle your login session.
           {% else %}
           Cookies are <b>not</b> used for anonymous users.

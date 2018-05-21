@@ -146,10 +146,17 @@
 {% end %} {# block action_content #}
 
 {% block main_content %}
+<h4>Personal data information (GDPR)</h4>
 <p>
   By having registered, you have given {{ settings['SITE_NAME'] }}
   permission to store and use the personal information you provide.
   {{ settings['SITE_PERSONAL_DATA_POLICY'] }}
+</p>
+<p>
+  All your personal data is reachable via links from this page and the
+  pages for all your {{ terminology('orders') }} (see below). The logs
+  for your account and {{ terminology('orders') }} contains a record
+  of all changes to those items.
 </p>
 <table class="table-condensed table-fields">
   <tr>
