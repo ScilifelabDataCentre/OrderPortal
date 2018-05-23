@@ -150,7 +150,9 @@
 <p>
   By having registered, you have given {{ settings['SITE_NAME'] }}
   permission to store and use the personal information you provide.
-  {{ settings['SITE_PERSONAL_DATA_POLICY'] }}
+</p>
+<p>
+  {% raw settings['SITE_PERSONAL_DATA_POLICY'] %}
 </p>
 <p>
   All your personal data is reachable via links from this page and the

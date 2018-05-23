@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.4.10'
+__version__ = '3.4.11'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -67,4 +67,5 @@ settings = dict(
     UNIVERSITIES_FILEPATH='{SITE_DIR}/swedish_universities.yaml',
     COUNTRY_CODES_FILEPATH='{SITE_DIR}/country_codes.yaml',
     SUBJECT_TERMS_FILEPATH='{SITE_DIR}/subject_terms.yaml',
+    GDPR_INFO_URL=None,
     )
