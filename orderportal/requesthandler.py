@@ -3,6 +3,7 @@
 from __future__ import print_function, absolute_import
 
 import base64
+import json
 import logging
 import traceback
 import urllib
@@ -426,3 +427,11 @@ class ApiV1Mixin(object):
         "Change _id to iuid and remove _id."
         doc['iuid'] = doc.pop('_id')
         del doc['_rev']
+
+    def get_json_body(self):
+        "Return the body of the request interpreted as JSON."
+        content_type = self.request.headers.get('Content-Type', '')
+        if content_type.startswith(constants.JSON_MIME):
+            return json.loads(self.request.body)
+        else:
+            return {}

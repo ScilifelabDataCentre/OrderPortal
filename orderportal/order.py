@@ -65,11 +65,39 @@ class OrderSaver(saver.Saver):
             counter = self.rqh.get_next_counter(constants.ORDER)
             self['identifier'] = fmt.format(counter)
 
-    def set_status(self, new, date=None):
+    def set_status(self, new):
+        "Set the new status of the order."
         if self.get('status') == new: return
+        if new not in settings['ORDER_STATUSES_LOOKUP']:
+            raise ValueError("invalid status '%s'" % new)
+        if 'status' in self.doc:
+            targets = self.rqh.get_targets(self.doc)
+            if new not in [t['identifier'] for t in targets]:
+                raise ValueError('You may not change status of {0} to {1}.'
+                                 .format(utils.terminology('order'), new))
         self['status'] = new
-        self.doc['history'][new] = date or utils.today()
+        self.doc['history'][new] = utils.today()
         self.changed_status = new
+
+    def set_tags(self, tags):
+        """Set the tags of the order.
+        Ordinary user may not add or remove prefixed tags.
+        """
+        # Allow staff to add prefixed tags.
+        if self.rqh.is_staff():
+            for pos, tag in enumerate(tags):
+                parts = tag.split(':', 1)
+                for part in parts:
+                    if not constants.ID_RX.match(part):
+                        tags[pos] = None
+            tags = [t for t in tags if t]
+        # User may use only proper identifier-like tags, no prefixes.
+        else:
+            tags = [t for t in tags if constants.ID_RX.match(t)]
+            # Add back the previously defined prefixed tags.
+            tags.extend([t for t in self.get('tags', [])
+                         if ':' in t])
+        self['tags'] = sorted(set(tags))
 
     def update_fields(self):
         "Update all fields from the HTML form input."
@@ -427,18 +455,6 @@ class OrderMixin(object):
                        if t['identifier'] != constants.SUBMITTED]
         return targets
 
-    def is_transitionable(self, order, status, check_valid=True):
-        "Can the order be set to the given status?"
-        targets = self.get_targets(order, check_valid=check_valid)
-        return status in [t['identifier'] for t in targets]
-
-    def check_transitionable(self, order, status, check_valid=True):
-        "Check if the current user may set the order to the given status."
-        if self.is_transitionable(order, status, check_valid=check_valid):
-            return
-        raise ValueError('You may not change status of {0} to {1}.'
-                         .format(utils.terminology('order'), status))
-
     def is_submittable(self, order, check_valid=True):
         "Is the order submittable? Special hard-wired status."
         targets = self.get_targets(order, check_valid=check_valid)
@@ -599,10 +615,12 @@ class Order(OrderMixin, RequestHandler):
 
 
 class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
-    "Order API; JSON output."
+    "Order API; JSON output; JSON input for edit."
 
+    @tornado.web.authenticated
     def get(self, iuid):
         try:
+            logging.debug('order %s', iuid)
             order = self.get_order(iuid)
         except ValueError, msg:
             raise tornado.web.HTTPError(404, reason=str(msg))
@@ -611,6 +629,38 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         except ValueError, msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
         self.write(self.get_order_json(order, full=True))
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        try:
+            order = self.get_order(iuid)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(404, reason=str(msg))
+        try:
+            self.check_edit(order)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
+        data = self.get_json_body()
+        try:
+            with OrderSaver(doc=order, rqh=self) as saver:
+                try:
+                    saver['title'] = data['title']
+                except KeyError:
+                    pass
+                try:
+                    saver.set_tags(data['tags'])
+                except KeyError:
+                    pass
+                # XXX set field values
+                # XXX other values?
+        except ValueError, msg:
+            raise tornado.web.HTTPError(400, reason=str(msg))
+        else:
+            self.write(self.get_order_json(order, full=True))
+
+    def check_xsrf_cookie(self):
+        "Do not check for XSRF cookie when API."
+        pass
 
 
 class OrderCsv(OrderMixin, RequestHandler):
@@ -951,7 +1001,7 @@ class OrderLogs(OrderMixin, RequestHandler):
                     logs=self.get_logs(order['_id']))
 
 
-class OrderCreate(RequestHandler):
+class OrderCreate(OrderMixin, RequestHandler):
     "Create a new order. Redirect with error message if not logged in."
 
     def get(self):
@@ -1071,21 +1121,7 @@ class OrderEdit(OrderMixin, RequestHandler):
                 saver['title'] = self.get_argument('__title__', None) or '[no title]'
                 tags = self.get_argument('__tags__', '')
                 tags = [t for t in tags.replace(',', ' ').split()]
-                # Allow staff to add prefixed tags
-                if self.is_staff():
-                    for pos, tag in enumerate(tags):
-                        parts = tag.split(':', 1)
-                        for part in parts:
-                            if not constants.ID_RX.match(part):
-                                tags[pos] = None
-                    tags = [t for t in tags if t]
-                # User may use only proper identifier-like tags, no prefixes
-                else:
-                    tags = [t for t in tags if constants.ID_RX.match(t)]
-                    # Add back the previously defined prefixed tags
-                    tags.extend([t for t in order.get('tags', [])
-                                 if ':' in t])
-                saver['tags'] = sorted(set(tags))
+                saver.set_tags(tags)
                 try:
                     owner = self.get_argument('__owner__')
                     account = self.get_account(owner)
@@ -1168,34 +1204,28 @@ class OrderTransition(OrderMixin, RequestHandler):
     def post(self, iuid, targetid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
-            self.check_transitionable(order, targetid)
+            with OrderSaver(doc=order, rqh=self) as saver:
+                saver.set_status(targetid)
         except ValueError, msg:
             self.see_other('home', error=str(msg))
-            return
-        with OrderSaver(doc=order, rqh=self) as saver:
-            saver.set_status(targetid)
-        self.redirect(self.order_reverse_url(order))
+        else:
+            self.redirect(self.order_reverse_url(order))
 
 
-class OrderTransitionApiV1(OrderMixin, RequestHandler):
+class OrderTransitionApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
     "Change the status of an order by an API call."
 
     def post(self, iuid, targetid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
-            self.check_editable(order)
+            with OrderSaver(doc=order, rqh=self) as saver:
+                saver.set_status(targetid)
         except ValueError, msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        try:
-            self.check_transitionable(order, targetid)
-        except ValueError, msg:
-            raise tornado.web.HTTPError(403, reason=str(msg))
-        with OrderSaver(doc=order, rqh=self) as saver:
-            saver.set_status(targetid)
-        self.redirect(self.order_reverse_url(order, api=True))
+        self.write(self.get_order_json(order, full=True))
 
     def check_xsrf_cookie(self):
-        "Do not check for XSRF cookie when script is calling."
+        "Do not check for XSRF cookie when API."
         pass
 
 
@@ -1369,5 +1399,5 @@ class OrderReportApiV1(OrderMixin, RequestHandler):
         self.write('')
 
     def check_xsrf_cookie(self):
-        "Do not check for XSRF cookie when script is calling."
+        "Do not check for XSRF cookie when API."
         pass

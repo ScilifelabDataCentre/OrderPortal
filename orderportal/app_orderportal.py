@@ -159,7 +159,8 @@ def main():
             {'path': utils.expand_filepath(settings['SITE_DIR'])},
             name='site'),
         ])
-    handlers.append(url(r'/.*', NoSuchEntity))
+    handlers.append(url(r'/api/v1/(.*)', NoSuchEntityApiV1))
+    handlers.append(url(r'/(.*)', NoSuchEntity))
     application = tornado.web.Application(
         handlers=handlers,
         debug=settings.get('TORNADO_DEBUG', False),
