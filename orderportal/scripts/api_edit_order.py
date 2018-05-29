@@ -16,18 +16,22 @@ import requests # http://docs.python-requests.org/en/master/
 # Change the following:
 API_KEY = '7f075a4c5b324e3ca63f22d8dc0929c4'  # API key for the user account.
 BASE_URL = 'http://localhost:8886'  # Base URL for your OrderPortal instance.
-ORDER_IUID = 'b1abccfbc77048e1941034d7c0101f22'  # The IUID for the order!
+ORDER_ID = 'NMI00603'  # The ID or IUID for the order.
 
-url = "{base}/api/v1/order/{iuid}/report".format(base=BASE_URL,
-                                                 iuid=ORDER_IUID)
-headers = {'X-OrderPortal-API-key': API_KEY,
-           'content-type': 'text/plain'}
-data = 'Some report text.\nAnd a second line.'
 
-# NOTE: The method PUT must be used here.
-response = requests.put(url, headers=headers, data=data)
+url = "{base}/api/v1/order/{id}".format(base=BASE_URL,
+                                        id=ORDER_ID)
+headers = {'X-OrderPortal-API-key': API_KEY}
+
+data = {'title': 'New title',
+        'tags': ['first_tag', 'second_tag'],  # NOTE: identifier format!
+        'fields': {'Expected_results': 'Great!',
+                   'Node_support': 'UmU'},
+        'history': {'review': '2018-05-30'}
+}
+response = requests.post(url, headers=headers, json=data)
 
 if response.status_code != 200:
     sys.exit("{} {}".format(response.status_code, response.reason))
 
-print('report uploaded')
+print(json.dumps(response.json(), indent=2))

@@ -435,3 +435,7 @@ class ApiV1Mixin(object):
             return json.loads(self.request.body)
         else:
             return {}
+
+    def check_xsrf_cookie(self):
+        "Do not check for XSRF cookie when API."
+        pass

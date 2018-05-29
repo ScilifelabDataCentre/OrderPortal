@@ -80,9 +80,14 @@ class OrderSaver(saver.Saver):
         self.changed_status = new
 
     def set_tags(self, tags):
-        """Set the tags of the order.
+        """Set the tags of the order from JSON data (list of strings).
         Ordinary user may not add or remove prefixed tags.
         """
+        if not isinstance(tags, list):
+            raise ValueError('tags data is not a list')
+        for s in tags:
+            if not isinstance(s, basestring):
+                raise ValueError('tags list item is not a string')
         # Allow staff to add prefixed tags.
         if self.rqh.is_staff():
             for pos, tag in enumerate(tags):
@@ -99,16 +104,16 @@ class OrderSaver(saver.Saver):
                          if ':' in t])
         self['tags'] = sorted(set(tags))
 
-    def update_fields(self):
-        "Update all fields from the HTML form input."
+    def update_fields(self, data=None):
+        "Update all fields from JSON data if given, else HTML form input."
         assert self.rqh is not None
         fields = Fields(self.rqh.get_entity(self.doc['form'],
                                             doctype=constants.FORM))
-        docfields = self.doc['fields']
         self.removed_files = []       # Due to field update
         # Loop over fields defined in the form document and get values.
         # Do not change values for a field if that argument is missing,
-        # except for checkbox, in which case missing value means False.
+        # except for checkbox: missing value means False,
+        # and except for multiselect: missing value means empty list.
         for field in fields:
             # Field not displayed or not writeable must not be changed.
             if not self.rqh.is_staff() and \
@@ -116,46 +121,67 @@ class OrderSaver(saver.Saver):
             if field['type'] == constants.GROUP: continue
             identifier = field['identifier']
             if field['type'] == constants.FILE:
+                # Files are uploaded by the normal form multi-part
+                # encoding approach, not by JSON data.
                 try:
                     infile = self.rqh.request.files[identifier][0]
                 except (KeyError, IndexError):
                     continue
                 else:
                     value = self.add_file(infile)
-                    self.removed_files.append(docfields.get(identifier))
+                    self.removed_files.append(self.doc['fields'].get(identifier))
             elif field['type'] == constants.MULTISELECT:
-                value = self.rqh.get_arguments(identifier)
+                if data:
+                    try:
+                        value = data[identifier]
+                    except KeyError:
+                        continue
+                else:
+                    # Missing argument implies empty list.
+                    # This is a special case for HTML form input.
+                    value = self.rqh.get_arguments(identifier)
             elif field['type'] == constants.TABLE:
-                value = docfields.get(identifier) or []
-                for i, row in enumerate(value):
-                    for j, item in enumerate(row):
-                        key = "cell_{0}_{1}".format(i, j)
-                        value[i][j] = self.rqh.get_argument(key, '')
-                offset = len(value)
-                for i in xrange(settings['ORDER_TABLE_NEW_ROWS']):
-                    row = []
-                    for j in xrange(len(field['table'])):
-                        key = "cell_{0}_{1}".format(i+offset, j)
-                        row.append(self.rqh.get_argument(key, ''))
-                    value.append(row)
-                # Remove empty rows
-                value = [r for r in value if reduce(lambda x,y: x or y, r)]
-            else:
+                if data:        # JSON data: complete table.
+                    try:
+                        value = data[identifier]
+                    except KeyError:
+                        continue
+                else:         # HTML form input: individual cells.
+                    value = self.doc['fields'].get(identifier) or []
+                    for i, row in enumerate(value):
+                        for j, item in enumerate(row):
+                            key = "cell_{0}_{1}".format(i, j)
+                            value[i][j] = self.rqh.get_argument(key, '')
+                    offset = len(value)
+                    for i in xrange(settings['ORDER_TABLE_NEW_ROWS']):
+                        row = []
+                        for j in xrange(len(field['table'])):
+                            key = "cell_{0}_{1}".format(i+offset, j)
+                            row.append(self.rqh.get_argument(key, ''))
+                        value.append(row)
+                    # Remove empty rows.
+                    value = [r for r in value if reduce(lambda x,y: x or y, r)]
+            elif data:          # JSON data.
+                try:
+                    value = data[identifier]
+                except KeyError:
+                    continue
+            else:               # HTML form input.
                 try:
                     value = self.rqh.get_argument(identifier)
                     if value == '': value = None
                 except tornado.web.MissingArgumentError:
-                    # Missing arg means no change,
-                    # which is not same as value None!
-                    # Except for boolean checkbox:
+                    # Missing argument means no change,
+                    # which is not same as value None.
+                    # Except for boolean checkbox!
                     if field['type'] == constants.BOOLEAN and field.get('checkbox'):
                         value = False
                     else:
                         continue
-            if value != docfields.get(identifier):
+            if value != self.doc['fields'].get(identifier):
                 changed = self.changed.setdefault('fields', dict())
                 changed[identifier] = value
-                docfields[identifier] = value
+                self.doc['fields'][identifier] = value
         self.check_fields_validity(fields)
 
     def check_fields_validity(self, fields):
@@ -170,11 +196,10 @@ class OrderSaver(saver.Saver):
         Skip field if not visible, else check recursively in postorder.
         Return True if valid, False otherwise.
         """
-        docfields = self.doc['fields']
         try:
             select_id = field.get('visible_if_field')
             if select_id:
-                select_value = docfields.get(select_id)
+                select_value = self.doc['fields'].get(select_id)
                 if select_value is not None:
                     select_value = unicode(select_value).lower()
                 if_value = field.get('visible_if_value')
@@ -187,7 +212,7 @@ class OrderSaver(saver.Saver):
                     if not self.check_validity(subfield):
                         raise ValueError('subfield(s) invalid')
             else:
-                value = docfields[field['identifier']]
+                value = self.doc['fields'][field['identifier']]
                 if value is None:
                     if field['required']:
                         raise ValueError('missing value')
@@ -198,18 +223,18 @@ class OrderSaver(saver.Saver):
                         raise ValueError('not a valid email address')
                 elif field['type'] == constants.INT:
                     try:
-                        docfields[field['identifier']] = int(value)
+                        self.doc['fields'][field['identifier']] = int(value)
                     except (TypeError, ValueError):
                         raise ValueError('not an integer value')
                 elif field['type'] == constants.FLOAT:
                     try:
-                        docfields[field['identifier']] = float(value)
+                        self.doc['fields'][field['identifier']] = float(value)
                     except (TypeError, ValueError):
                         raise ValueError('not a float value')
                 elif field['type'] == constants.BOOLEAN:
                     try:
                         if value is None: raise ValueError
-                        docfields[field['identifier']] = utils.to_bool(value)
+                        self.doc['fields'][field['identifier']] = utils.to_bool(value)
                     except (TypeError, ValueError):
                         raise ValueError('not a boolean value')
                 elif field['type'] == constants.URL:
@@ -218,20 +243,27 @@ class OrderSaver(saver.Saver):
                         raise ValueError('incomplete URL')
                 elif field['type'] == constants.SELECT:
                     if value not in field['select']:
-                        raise ValueError('invalid selection')
+                        raise ValueError('value not among alternatives')
                 elif field['type'] == constants.MULTISELECT:
-                    # Value is here always a list, no matter what.
+                    if not isinstance(value, list):
+                        raise ValueError('value is not a list')
                     if field['required'] and len(value) == 1 and value[0] == '':
                         raise ValueError('missing value')
                     for v in value:
                         if v and v not in field['multiselect']:
                             raise ValueError('value not among alternatives')
                 elif field['type'] == constants.TEXT:
-                    pass
+                    if not isinstance(value, basestring):
+                        raise ValueError('value is not a text string')
                 elif field['type'] == constants.DATE:
-                    pass
+                    if not constants.DATE_RX.match(value):
+                        raise ValueError('value is not a valid date')
                 elif field['type'] == constants.TABLE:
-                    pass
+                    if not isinstance(value, list):
+                        raise ValueError('value is not a list')
+                    for r in value:
+                        if not isinstance(r, list):
+                            raise ValueError('value is not a list of lists')
                 elif field['type'] == constants.FILE:
                     pass
         except ValueError, msg:
@@ -242,6 +274,18 @@ class OrderSaver(saver.Saver):
             return False
         else:
             return True
+
+    def set_history(self, history):
+        "Set the history the JSON data (dict of status->date)"
+        if not isinstance(history, dict):
+            raise ValueError('history data is not a dictionary')
+        for status, date in history.items():
+            if not (date is None or (isinstance(date, basestring) and
+                                     constants.DATE_RX.match(date))):
+                raise ValueError('invalid date in history data')
+            if not status in settings['ORDER_STATUSES_LOOKUP']:
+                raise ValueError('invalid status in history data')
+            self['history'][status] = date
 
     def post_process(self):
         self.modify_attachments()
@@ -620,7 +664,6 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         try:
-            logging.debug('order %s', iuid)
             order = self.get_order(iuid)
         except ValueError, msg:
             raise tornado.web.HTTPError(404, reason=str(msg))
@@ -637,7 +680,7 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         except ValueError, msg:
             raise tornado.web.HTTPError(404, reason=str(msg))
         try:
-            self.check_edit(order)
+            self.check_editable(order)
         except ValueError, msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
         data = self.get_json_body()
@@ -648,19 +691,25 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
                 except KeyError:
                     pass
                 try:
-                    saver.set_tags(data['tags'])
+                    tags = data['tags']
                 except KeyError:
                     pass
-                # XXX set field values
-                # XXX other values?
+                else:
+                    if isinstance(tags, str):
+                        tags = [tags]
+                    saver.set_tags(tags)
+                try:
+                    saver.update_fields(data=data['fields'])
+                except KeyError:
+                    pass
+                try:
+                    saver.set_history(data['history'])
+                except KeyError:
+                    pass
         except ValueError, msg:
             raise tornado.web.HTTPError(400, reason=str(msg))
         else:
             self.write(self.get_order_json(order, full=True))
-
-    def check_xsrf_cookie(self):
-        "Do not check for XSRF cookie when API."
-        pass
 
 
 class OrderCsv(OrderMixin, RequestHandler):
@@ -1224,10 +1273,6 @@ class OrderTransitionApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             raise tornado.web.HTTPError(403, reason=str(msg))
         self.write(self.get_order_json(order, full=True))
 
-    def check_xsrf_cookie(self):
-        "Do not check for XSRF cookie when API."
-        pass
-
 
 class OrderFile(OrderMixin, RequestHandler):
     "File attached to an order."
@@ -1283,13 +1328,12 @@ class OrderFile(OrderMixin, RequestHandler):
         self.check_attachable(order)
         fields = Fields(self.get_entity(order['form'], doctype=constants.FORM))
         with OrderSaver(doc=order, rqh=self) as saver:
-            docfields = order['fields']
-            for key in docfields:
+            for key in order['fields']:
                 # Remove the field value if it is the filename.
                 # XXX Slightly dangerous: may delete a value that happens to
                 # be identical to the filename. Shouldn't be too commmon...
-                if docfields[key] == filename:
-                    docfields[key] = None
+                if order['fields'][key] == filename:
+                    order['fields'][key] = None
                     if fields[key]['required']:
                         saver.doc['invalid'][key] = 'missing value'
                     else:
@@ -1364,7 +1408,7 @@ class OrderReportEdit(OrderMixin, RequestHandler):
         self.redirect(self.order_reverse_url(order))
 
 
-class OrderReportApiV1(OrderMixin, RequestHandler):
+class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
     "Order report API: get or set."
 
     def get(self, iuid):
@@ -1397,7 +1441,3 @@ class OrderReportApiV1(OrderMixin, RequestHandler):
                                     body=self.request.body,
                                     content_type=content_type))
         self.write('')
-
-    def check_xsrf_cookie(self):
-        "Do not check for XSRF cookie when API."
-        pass
