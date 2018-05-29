@@ -8,7 +8,6 @@ the standard 'urllib' module.
 
 from __future__ import print_function
 import json
-import sys
 import requests # http://docs.python-requests.org/en/master/
 
 # Change the following:
@@ -23,20 +22,15 @@ headers = {'X-OrderPortal-API-key': API_KEY}
 
 # First just get the order data as JSON.
 response = requests.get(url, headers=headers)
-if response.status_code != 200:
-    sys.exit("{} {}".format(response.status_code, response.reason))
+assert response.status_code == 200, (response.status_code, response.reason)
 
 # Verify the the transition to status 'submitted' is allowed.
 data = response.json()
-try:
-    url = data['transitions']['submitted']['href']
-except KeyError:
-    sys.exit("no 'submitted' transition available")
+url = data['transitions']['submitted'].get('href')
 
 # Actually do the transition by the POST method.
 response = requests.post(url, headers=headers)
-if response.status_code != 200:
-    sys.exit("{} {}".format(response.status_code, response.reason))
+assert response.status_code == 200, (response.status_code, response.reason)
 
 data = response.json()
 if data['status'] == 'submitted':

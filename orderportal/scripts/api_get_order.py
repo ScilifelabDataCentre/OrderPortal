@@ -8,7 +8,6 @@ the standard 'urllib' module.
 
 from __future__ import print_function
 import json
-import sys
 import requests # http://docs.python-requests.org/en/master/
 
 # Change the following:
@@ -22,8 +21,6 @@ url = "{base}/api/v1/order/{id}".format(base=BASE_URL,
 headers = {'X-OrderPortal-API-key': API_KEY}
 
 response = requests.get(url, headers=headers)
-
-if response.status_code != 200:
-    sys.exit("{} {}".format(response.status_code, response.reason))
+assert response.status_code == 200, (response.status_code, response.reason)
 
 print(json.dumps(response.json(), indent=2))

@@ -9,7 +9,6 @@ the standard 'urllib' module.
 """
 
 from __future__ import print_function
-import json
 import sys
 import requests # http://docs.python-requests.org/en/master/
 
@@ -26,8 +25,6 @@ data = 'Some report text.\nAnd a second line.'
 
 # NOTE: The method PUT must be used here.
 response = requests.put(url, headers=headers, data=data)
-
-if response.status_code != 200:
-    sys.exit("{} {}".format(response.status_code, response.reason))
+assert response.status_code == 200, (response.status_code, response.reason)
 
 print('report uploaded')

@@ -10,7 +10,6 @@ the standard 'urllib' module.
 
 from __future__ import print_function
 import json
-import sys
 import requests # http://docs.python-requests.org/en/master/
 
 # Change the following:
@@ -30,8 +29,6 @@ data = {'title': 'New title',
         'history': {'review': '2018-05-30'}
 }
 response = requests.post(url, headers=headers, json=data)
-
-if response.status_code != 200:
-    sys.exit("{} {}".format(response.status_code, response.reason))
+assert response.status_code == 200, (response.status_code, response.reason)
 
 print(json.dumps(response.json(), indent=2))
