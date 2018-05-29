@@ -1,7 +1,5 @@
 """API example script: Edit an order; fields, title, tags and history.
 
-NOTE: The upload operation URL requires the IUID for the order.
-
 NOTE: You need to change several variables to make this work. See below.
 
 NOTE: This uses the third-party 'requests' module, which is much nicer than
