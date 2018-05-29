@@ -28,6 +28,11 @@ from .requesthandler import RequestHandler, ApiV1Mixin
 class OrderSaver(saver.Saver):
     doctype = constants.ORDER
 
+    def initialize(self):
+        "Set the initial values for the new order. Create history field."
+        super(OrderSaver, self).initialize()
+        self['history'] = {}
+
     def setup(self):
         """Additional setup.
         1) Initialize flag for changed status.
@@ -36,6 +41,79 @@ class OrderSaver(saver.Saver):
         self.changed_status = None
         self.files = []
         self.filenames = set(self.doc.get('_attachments', []))
+        try:
+            form_iuid = self.doc['form']
+        except KeyError:
+            pass
+        else:
+            self.fields = Fields(self.rqh.get_entity(form_iuid,
+                                                     doctype=constants.FORM))
+
+    def create(self, form, title=None):
+        "Create the order from the given form."
+        self.fields = Fields(form)
+        self['form'] = form['_id']
+        self['title'] = title or form['title']
+        self['fields'] = dict([(f['identifier'], None) for f in self.fields])
+        self.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
+        # Set the order identifier if its format defined.
+        # Allow also for disabled, since admin may clone such orders.
+        if form['status'] in (constants.ENABLED, constants.DISABLED):
+            try:
+                fmt = settings['ORDER_IDENTIFIER_FORMAT']
+            except KeyError:    # No identifier; sequential counter not used
+                pass
+            else:               # Identifier; sequential counter is used
+                counter = self.rqh.get_next_counter(constants.ORDER)
+                self['identifier'] = fmt.format(counter)
+
+    def autopopulate(self):
+        "Autopopulate fields if defined."
+        # First try to set the value of a field from the corresponding
+        # value defined for the account's university.
+        autopop = settings.get('ORDER_AUTOPOPULATE')
+        if not autopop: return
+        try:
+            uni_fields = settings['UNIVERSITIES'] \
+                         [self.rqh.current_user['university']] \
+                         ['fields']
+        except KeyError:
+            uni_fields = {}
+        for target in autopop:
+            if target not in self.fields: continue
+            value = uni_fields.get(target)
+            # Terrible kludge! If it looks like a country field,
+            # then attempt to translate from country code to name.
+            if 'country' in target:
+                try:
+                    value = settings['COUNTRIES_LOOKUP'][value]
+                except KeyError:
+                    pass
+            self['fields'][target] = value
+        # Next try to set the value of a field from the corresponding
+        # value defined for the account. For use with e.g. invoice address.
+        # Do this only if not done already from university data.
+        for target, source in autopop.items():
+            if target not in self.fields: continue
+            value = self['fields'].get(target)
+            if isinstance(value, basestring):
+                if value: continue
+            elif value is not None: # Value 0 (zero) must be possible to set
+                continue
+            try:
+                key1, key2 = source.split('.')
+            except ValueError:
+                value = self.rqh.current_user.get(source)
+            else:
+                value = self.rqh.current_user.get(key1, {}).get(key2)
+            # Terrible kludge! If it looks like a country field,
+            # then attempt to translate from country code to name.
+            if 'country' in target:
+                try:
+                    value = settings['COUNTRIES_LOOKUP'][value]
+                except KeyError:
+                    pass
+            self['fields'][target] = value
 
     def add_file(self, infile):
         "Add the given file to the files. Return the unique filename."
@@ -52,18 +130,6 @@ class OrderSaver(saver.Saver):
                                body=infile.body,
                                content_type=infile.content_type))
         return filename
-
-    def set_identifier(self, form):
-        """Set the order identifier if format defined.
-        Allow also for disabled, since admin may clone such orders."""
-        if form['status'] not in (constants.ENABLED, constants.DISABLED): return
-        try:
-            fmt = settings['ORDER_IDENTIFIER_FORMAT']
-        except KeyError:    # No identifier; sequential counter not used
-            pass
-        else:               # Identifier; sequential counter is used
-            counter = self.rqh.get_next_counter(constants.ORDER)
-            self['identifier'] = fmt.format(counter)
 
     def set_status(self, new):
         "Set the new status of the order."
@@ -107,14 +173,12 @@ class OrderSaver(saver.Saver):
     def update_fields(self, data=None):
         "Update all fields from JSON data if given, else HTML form input."
         assert self.rqh is not None
-        fields = Fields(self.rqh.get_entity(self.doc['form'],
-                                            doctype=constants.FORM))
         self.removed_files = []       # Due to field update
         # Loop over fields defined in the form document and get values.
         # Do not change values for a field if that argument is missing,
         # except for checkbox: missing value means False,
         # and except for multiselect: missing value means empty list.
-        for field in fields:
+        for field in self.fields:
             # Field not displayed or not writeable must not be changed.
             if not self.rqh.is_staff() and \
                 (field['restrict_read'] or field['restrict_write']): continue
@@ -182,12 +246,12 @@ class OrderSaver(saver.Saver):
                 changed = self.changed.setdefault('fields', dict())
                 changed[identifier] = value
                 self.doc['fields'][identifier] = value
-        self.check_fields_validity(fields)
+        self.check_fields_validity()
 
-    def check_fields_validity(self, fields):
+    def check_fields_validity(self):
         "Check validity of current field values."
         self.doc['invalid'] = dict()
-        for field in fields:
+        for field in self.fields:
             if field['depth'] == 0:
                 self.check_validity(field)
 
@@ -1074,55 +1138,10 @@ class OrderCreate(OrderMixin, RequestHandler):
     def post(self):
         form = self.get_entity(self.get_argument('form'),
                                doctype=constants.FORM)
-        fields = Fields(form)
         with OrderSaver(rqh=self) as saver:
-            saver['form'] = form['_id']
-            saver['title'] = self.get_argument('title', None) or form['title']
-            saver['fields'] = dict([(f['identifier'], None) for f in fields])
-            saver['history'] = {}
-            saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
-            # First try to set the value of a field from the corresponding
-            # value defined for the account's university.
-            autopopulate = settings.get('ORDER_AUTOPOPULATE', {})
-            uni_fields = settings['UNIVERSITIES'].\
-                get(self.current_user.get('university'), {}).get('fields', {})
-            for target in autopopulate:
-                if target not in fields: continue
-                value = uni_fields.get(target)
-                # Terrible kludge! If it looks like a country field,
-                # then translate from country code to name.
-                if 'country' in target:
-                    try:
-                        value = settings['COUNTRIES_LOOKUP'][value]
-                    except KeyError:
-                        pass
-                saver['fields'][target] = value
-            # Next try to set the value of a field from the corresponding
-            # value defined for the account. For use with e.g. invoice address.
-            # Do this only if not done already from university data.
-            for target, source in autopopulate.iteritems():
-                if target not in fields: continue
-                value = saver['fields'].get(target)
-                if isinstance(value, basestring):
-                    if value: continue
-                elif value is not None: # Value 0 (zero) must be possible to set
-                    continue
-                try:
-                    key1, key2 = source.split('.')
-                except ValueError:
-                    value = self.current_user.get(source)
-                else:
-                    value = self.current_user.get(key1, {}).get(key2)
-                # Terrible kludge! If it looks like a country field,
-                # then translate from country code to name.
-                if 'country' in target:
-                    try:
-                        value = settings['COUNTRIES_LOOKUP'][value]
-                    except KeyError:
-                        pass
-                saver['fields'][target] = value
-            saver.check_fields_validity(fields)
-            saver.set_identifier(form)
+            saver.create(form, title=self.get_argument('title', None))
+            saver.autopopulate()
+            saver.check_fields_validity()
         self.see_other('order_edit', saver.doc['_id'])
 
 
@@ -1216,13 +1235,10 @@ class OrderClone(OrderMixin, RequestHandler):
             raise ValueError("This {0} is outdated; its form has been disabled."
                              .format(utils.terminology('order')))
         form = self.get_entity(order['form'], doctype=constants.FORM)
-        fields = Fields(form)
         erased_files = set()
         with OrderSaver(rqh=self) as saver:
-            saver['form'] = form['_id']
-            saver['title'] = u"Clone of {0}".format(order['title'])
-            saver['fields'] = dict()
-            for field in fields:
+            saver.create(form, title=u"Clone of {0}".format(order['title']))
+            for field in saver.fields:
                 id = field['identifier']
                 if field.get('erase_on_clone'):
                     if field['type'] == constants.FILE:
@@ -1230,10 +1246,9 @@ class OrderClone(OrderMixin, RequestHandler):
                     saver['fields'][id] = None
                 else:
                     saver['fields'][id] = order['fields'][id]
-            saver['history'] = {}
-            saver.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
-            saver.check_fields_validity(fields)
-            saver.set_identifier(form)
+            saver.check_fields_validity()
+        # Make copies of attached files.
+        #  Must be done after initial save to avoid version mismatches.
         for filename in order.get('_attachments', []):
             if filename.startswith(constants.SYSTEM): continue
             if filename in erased_files: continue

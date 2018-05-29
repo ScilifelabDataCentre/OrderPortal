@@ -63,7 +63,7 @@ class Settings(RequestHandler):
                   'ORDER_STATUSES_FILEPATH', 'ORDER_TRANSITIONS_FILEPATH',
                   'ORDER_MESSAGES_FILEPATH', 'ORDER_USER_TAGS', 
                   'ORDERS_SEARCH_FIELDS', 'ORDERS_LIST_FIELDS',
-                  'ORDERS_LIST_STATUSES',
+                  'ORDERS_LIST_STATUSES', 'ORDER_AUTOPOPULATE',
                   'UNIVERSITIES_FILEPATH', 'COUNTRY_CODES_FILEPATH',
                   'SUBJECT_TERMS_FILEPATH']
         self.render('settings.html', params=params, settings=mod_settings)
