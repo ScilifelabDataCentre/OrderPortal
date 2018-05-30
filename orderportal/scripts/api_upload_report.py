@@ -24,7 +24,7 @@ headers = {'X-OrderPortal-API-key': API_KEY,
            'content-type': 'text/plain'}
 data = 'Some text in a report.\nAnd a second line.'
 
-# NOTE: The method PUT must be used here.
+# NOTE: The method PUT is used for this.
 response = requests.put(url, headers=headers, data=data)
 assert response.status_code == 200, (response.status_code, response.reason)
 

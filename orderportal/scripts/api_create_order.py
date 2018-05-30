@@ -20,8 +20,8 @@ url = "{base}/api/v1/order".format(base=BASE_URL)
 headers = {'X-OrderPortal-API-key': API_KEY}
 
 data = {'title': 'The title for the new order',
-        'form': FORM_IUID
-}
+        'form': FORM_IUID}
+
 response = requests.post(url, headers=headers, json=data)
 assert response.status_code == 200, (response.status_code, response.reason)
 

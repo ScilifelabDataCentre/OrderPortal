@@ -24,8 +24,8 @@ data = {'title': 'New title',
         'tags': ['first_tag', 'second_tag'],  # NOTE: identifier format!
         'fields': {'Expected_results': 'Great!',
                    'Node_support': 'KTH'},
-        'history': {'review': '2018-05-30'}
-}
+        'history': {'review': '2018-05-30'}}
+
 response = requests.post(url, headers=headers, json=data)
 assert response.status_code == 200, (response.status_code, response.reason)
 

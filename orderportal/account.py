@@ -159,13 +159,13 @@ class AccountsApiV1(Accounts):
         accounts = self.get_accounts()
         data = utils.get_json(URL('accounts_api', **self.filter), 'accounts')
         data['filter'] = self.filter
-        data['links'] = dict(api=dict(href=URL('accounts_api')),
-                             display=dict(href=URL('accounts')))
+        data['_links'] = dict(api=dict(href=URL('accounts_api')),
+                              display=dict(href=URL('accounts')))
         data['items'] = []
         for account in accounts:
             item = OD()
             item['email'] = account['email']
-            item['links'] = dict(
+            item['_links'] = dict(
                 api=dict(href=URL('account_api',account['email'])),
                 display=dict(href=URL('account',account['email'])))
             name = last_name = account.get('last_name')
@@ -190,7 +190,7 @@ class AccountsApiV1(Accounts):
             item['modified'] = account['modified']
             item['orders'] = dict(
                 count=account['order_count'],
-                links=dict(
+                _links=dict(
                     display=dict(href=URL('account_orders', account['email'])),
                     api=dict(href=URL('account_orders_api', account['email']))))
             data['items'].append(item)
@@ -402,7 +402,7 @@ class AccountApiV1(AccountMixin, RequestHandler):
                 name += ', ' + first_name
         else:
             name = first_name
-        data['links'] = dict(
+        data['_links'] = dict(
             api=dict(href=URL('account_api', account['email'])),
             display=dict(href=URL('account', account['email'])))
         data['name'] = name
@@ -517,7 +517,7 @@ class AccountOrdersApiV1(AccountOrdersMixin,
         forms = self.get_forms_titles(all=True)
         data = utils.get_json(URL('account_orders', account['email']),
                               'account orders')
-        data['links'] = dict(
+        data['_links'] = dict(
             api=dict(href=URL('account_orders_api', account['email'])),
             display=dict(href=URL('account_orders', account['email'])))
         view = self.db.view('order/owner',
@@ -575,7 +575,7 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
         forms = self.get_forms_titles(all=True)
         data =utils.get_json(URL('account_groups_orders_api',account['email']),
                              'account groups orders')
-        data['links'] = dict(
+        data['_links'] = dict(
             api=dict(href=URL('account_groups_orders_api', account['email'])),
             display=dict(href=URL('account_groups_orders', account['email'])))
         data['orders'] = [self.get_order_json(o, names, forms)
