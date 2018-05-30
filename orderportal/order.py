@@ -42,12 +42,9 @@ class OrderSaver(saver.Saver):
         self.files = []
         self.filenames = set(self.doc.get('_attachments', []))
         try:
-            form_iuid = self.doc['form']
+            self.fields = Fields(self.rqh.get_form(self.doc['form']))
         except KeyError:
             pass
-        else:
-            self.fields = Fields(self.rqh.get_entity(form_iuid,
-                                                     doctype=constants.FORM))
 
     def create(self, form, title=None):
         "Create the order from the given form."
@@ -269,12 +266,16 @@ class OrderSaver(saver.Saver):
                 if_value = field.get('visible_if_value')
                 if if_value:
                     if_value = if_value.lower()
-                if select_value != if_value: return True
+                if select_value != if_value:
+                    return True
 
             if field['type'] == constants.GROUP:
+                failure = False
                 for subfield in field['fields']:
                     if not self.check_validity(subfield):
-                        raise ValueError('subfield(s) invalid')
+                        failure = True
+                if failure:
+                    raise ValueError('subfield(s) invalid')
             else:
                 value = self.doc['fields'][field['identifier']]
                 if value is None:
@@ -506,11 +507,26 @@ class OrderMixin(object):
             reason="You may not attach a file to the {0}."
             .format(utils.terminology('order')))
 
+    def check_creation_enabled(self):
+        "If order creation is disabled, raise ValueError."
+        if not self.global_modes['allow_order_creation'] \
+           and self.current_user['role'] != constants.ADMIN:
+            raise ValueError("{0} creation is currently disabled."
+                             .format(utils.terminology('Order')))
+
+    def get_form(self, iuid, check=False):
+        "Get the form given by its IUID. Optionally check that it is enabled."
+        form = self.get_entity(iuid, doctype=constants.FORM)
+        if check:
+            if form['status'] not in (constants.ENABLED, constants.TESTING):
+                raise ValueError('form is not available for creation')
+        return form
+
     def get_fields(self, order, depth=0, fields=None):
         """Return a list of dictionaries, each of which
         for a field that is visible to the current user."""
         if fields is None:
-            form = self.get_entity(order['form'], doctype=constants.FORM)
+            form = self.get_form(order['form'])
             fields = form['fields']
         result = []
         for field in fields:
@@ -572,7 +588,7 @@ class OrderMixin(object):
         """Can the given order be cloned? Its form must be enabled.
         Special case: Admin can clone an order even if its form is disabled.
         """
-        form = self.get_entity(order['form'], doctype=constants.FORM)
+        form = self.get_form(order['form'])
         if self.is_admin():
             return form['status'] in (constants.ENABLED,
                                       constants.TESTING,
@@ -601,7 +617,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
         data['title'] = order.get('title') or '[no title]'
         data['iuid'] = order['_id']
         if full:
-            form = self.get_entity(order['form'], doctype=constants.FORM)
+            form = self.get_form(order['form'])
             data['form'] = OD(
                 [('title', form['title']),
                  ('version', form.get('version')),
@@ -678,7 +694,7 @@ class Order(OrderMixin, RequestHandler):
         except ValueError, msg:
             self.see_other('home', error=str(msg))
             return
-        form = self.get_entity(order['form'], doctype=constants.FORM)
+        form = self.get_form(order['form'])
         files = []
         for filename in order.get('_attachments', []):
             if filename.startswith(constants.SYSTEM): continue
@@ -725,7 +741,6 @@ class Order(OrderMixin, RequestHandler):
 class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
     "Order API; JSON output; JSON input for edit."
 
-    @tornado.web.authenticated
     def get(self, iuid):
         try:
             order = self.get_order(iuid)
@@ -737,7 +752,6 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             raise tornado.web.HTTPError(403, reason=str(msg))
         self.write(self.get_order_json(order, full=True))
 
-    @tornado.web.authenticated
     def post(self, iuid):
         try:
             order = self.get_order(iuid)
@@ -798,7 +812,7 @@ class OrderCsv(OrderMixin, RequestHandler):
     def get_order_csv_stringio(self, order):
         "Return the content of the order as CSV-formatted data in StringIO."
         URL = self.absolute_reverse_url
-        form = self.get_entity(order['form'], doctype=constants.FORM)
+        form = self.get_form(order['form'])
         csvbuffer = StringIO()
         writer = csv.writer(csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
         safe = utils.csv_safe_row
@@ -1115,35 +1129,60 @@ class OrderLogs(OrderMixin, RequestHandler):
 
 
 class OrderCreate(OrderMixin, RequestHandler):
-    "Create a new order. Redirect with error message if not logged in."
+    "Create a new order."
 
+    # Do not use auth decorator: Instead show error message if not logged in.
     def get(self):
-        if not self.current_user:
-            self.see_other('home',
-                           error="You need to be logged in to create {0}."
-                           " Register to get an account if you don't have one."
-                           .format(utils.terminology('order')))
-            return
-        if not self.global_modes['allow_order_creation'] \
-           and self.current_user['role'] != constants.ADMIN:
-            self.see_other('home',
-                           error="{0} creation is currently disabled."
-                           .format(utils.terminology('Order')))
-            return
-        form = self.get_entity(self.get_argument('form'),
-                               doctype=constants.FORM)
-        self.render('order_create.html', form=form)
+        try:
+            if not self.current_user:
+                raise ValueError("You need to be logged in to create {0}."
+                                 " Register to get an account if you don't have one."
+                                 .format(utils.terminology('order')))
+            self.check_creation_enabled()
+            form = self.get_form(self.get_argument('form'), check=True)
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+        else:
+            self.render('order_create.html', form=form)
 
     @tornado.web.authenticated
     def post(self):
-        form = self.get_entity(self.get_argument('form'),
-                               doctype=constants.FORM)
-        with OrderSaver(rqh=self) as saver:
-            saver.create(form, title=self.get_argument('title', None))
-            saver.autopopulate()
-            saver.check_fields_validity()
-        self.see_other('order_edit', saver.doc['_id'])
+        try:
+            self.check_creation_enabled()
+            form = self.get_form(self.get_argument('form'), check=True)
+            with OrderSaver(rqh=self) as saver:
+                saver.create(form, title=self.get_argument('title', None))
+                saver.autopopulate()
+                saver.check_fields_validity()
+        except ValueError, msg:
+            self.see_other('home', error=str(msg))
+        else:
+            self.see_other('order_edit', saver.doc['_id'])
 
+
+class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
+    "Create a new order by an API call."
+
+    def post(self):
+        "Form IUID and title in the JSON body of the request."
+        try:
+            self.check_login()
+        except ValueError, msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
+        try:
+            self.check_creation_enabled()
+            data = self.get_json_body()
+            iuid = data.get('form')
+            if not iuid: raise ValueError('no form IUID given')
+            form = self.get_form(iuid, check=True)
+            with OrderSaver(rqh=self) as saver:
+                saver.create(form, title=data.get('title'))
+                saver.autopopulate()
+                saver.check_fields_validity()
+        except ValueError, msg:
+            raise tornado.web.HTTPError(400, reason=str(msg))
+        else:
+            self.write(self.get_order_json(saver.doc, full=True))
 
 class OrderEdit(OrderMixin, RequestHandler):
     "Page for editing an order."
@@ -1157,7 +1196,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             self.see_other('home', error=str(msg))
             return
         colleagues = sorted(self.get_account_colleagues(self.current_user['email']))
-        form = self.get_entity(order['form'], doctype=constants.FORM)
+        form = self.get_form(order['form'])
         fields = Fields(form)
         # XXX Currently, multiselect fields are not handled correctly.
         #     Too much effort; leave as is for the time being.
@@ -1216,7 +1255,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             else:
                 self.redirect(self.order_reverse_url(order))
         except ValueError, msg:
-            self.set_error_flash(str(msg))
+            self.set_error_flash(msg)
             self.redirect(self.order_reverse_url(order))
 
 
@@ -1234,7 +1273,7 @@ class OrderClone(OrderMixin, RequestHandler):
         if not self.is_clonable(order):
             raise ValueError("This {0} is outdated; its form has been disabled."
                              .format(utils.terminology('order')))
-        form = self.get_entity(order['form'], doctype=constants.FORM)
+        form = self.get_form(order['form'])
         erased_files = set()
         with OrderSaver(rqh=self) as saver:
             saver.create(form, title=u"Clone of {0}".format(order['title']))
@@ -1268,12 +1307,12 @@ class OrderTransition(OrderMixin, RequestHandler):
     def post(self, iuid, targetid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
+            self.check_editable(order)
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver.set_status(targetid)
         except ValueError, msg:
-            self.see_other('home', error=str(msg))
-        else:
-            self.redirect(self.order_reverse_url(order))
+            self.set_error_flash(msg)
+        self.redirect(self.order_reverse_url(order))
 
 
 class OrderTransitionApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
@@ -1282,6 +1321,7 @@ class OrderTransitionApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
     def post(self, iuid, targetid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
+            self.check_editable(order)
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver.set_status(targetid)
         except ValueError, msg:
@@ -1318,8 +1358,6 @@ class OrderFile(OrderMixin, RequestHandler):
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(iuid, filename)
             return
-        if filename:
-            raise tornado.web.HTTPError(400)
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_attachable(order)
         try:
@@ -1328,7 +1366,7 @@ class OrderFile(OrderMixin, RequestHandler):
             pass
         else:
             if infile.filename.startswith(constants.SYSTEM):
-                raise tornado.web.HTTPError(403, reason='Reserved filename.')
+                raise tornado.web.HTTPError(400, reason='Reserved filename.')
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver.add_file(infile)
         self.redirect(self.order_reverse_url(order))
@@ -1338,10 +1376,10 @@ class OrderFile(OrderMixin, RequestHandler):
         if filename is None:
             raise tornado.web.HTTPError(400)
         if filename.startswith(constants.SYSTEM):
-            raise tornado.web.HTTPError(403, reason='Reserved filename.')
+            raise tornado.web.HTTPError(400, reason='Reserved filename.')
         order = self.get_entity(iuid, doctype=constants.ORDER)
         self.check_attachable(order)
-        fields = Fields(self.get_entity(order['form'], doctype=constants.FORM))
+        fields = Fields(self.get_form(order['form']))
         with OrderSaver(doc=order, rqh=self) as saver:
             for key in order['fields']:
                 # Remove the field value if it is the filename.
@@ -1428,7 +1466,10 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
 
     def get(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.check_readable(order)
+        try:
+            self.check_readable(order)
+        except ValueError, msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
         try:
             report = order['report']
             outfile = self.db.get_attachment(order, constants.SYSTEM_REPORT)
@@ -1445,7 +1486,10 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
                         'attachment; filename="%s_report%s"' % (name, ext))
 
     def put(self, iuid):
-        self.check_admin()
+        try:
+            self.check_admin()
+        except ValueError, msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
         order = self.get_entity(iuid, doctype=constants.ORDER)
         with OrderSaver(doc=order, rqh=self) as saver:
             content_type = self.request.headers.get('content-type') or constants.BIN_MIME

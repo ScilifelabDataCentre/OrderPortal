@@ -97,12 +97,12 @@ class RequestHandler(tornado.web.RequestHandler):
     def set_message_flash(self, message):
         "Set message flash cookie."
         if message:
-            self.set_flash('message', message)
+            self.set_flash('message', str(message))
 
     def set_error_flash(self, message):
         "Set error flash cookie message."
         if message:
-            self.set_flash('error', message)
+            self.set_flash('error', str(message))
 
     def set_flash(self, name, message):
         message = message.replace(' ', '_')
@@ -207,6 +207,11 @@ class RequestHandler(tornado.web.RequestHandler):
         if not self.is_staff():
             raise tornado.web.HTTPError(
                 403, reason="Role 'admin' or 'staff' is required")
+
+    def check_login(self):
+        "Check if logged in."
+        if not self.current_user:
+            raise tornado.web.HTTPError(403, reason='Must be logged in.')
 
     def get_admins(self):
         "Get the list of enabled admin accounts."

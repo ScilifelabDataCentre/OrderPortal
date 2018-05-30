@@ -10,9 +10,9 @@ from __future__ import print_function
 import json
 import requests # http://docs.python-requests.org/en/master/
 
-# Change the following:
-API_KEY = '7f075a4c5b324e3ca63f22d8dc0929c4'  # API key for the user account.
+# Variables whose values must be changed for your site:
 BASE_URL = 'http://localhost:8886'  # Base URL for your OrderPortal instance.
+API_KEY = '7f075a4c5b324e3ca63f22d8dc0929c4'  # API key for the user account.
 ORDER_ID = 'NMI00603'  # The ID or IUID for the order.
 
 
