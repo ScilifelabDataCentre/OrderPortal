@@ -26,7 +26,7 @@ assert response.status_code == 200, (response.status_code, response.reason)
 
 # Get the URL for the transition to status 'submitted'.
 data = response.json()
-url = data['_links']['submitted']['href']
+url = data['links']['submitted']['href']
 
 # Actually do the transition by the POST method.
 response = requests.post(url, headers=headers)

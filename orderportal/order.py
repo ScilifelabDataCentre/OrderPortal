@@ -622,22 +622,22 @@ class OrderApiV1Mixin(ApiV1Mixin):
                 [('title', form['title']),
                  ('version', form.get('version')),
                  ('iuid', form['_id']),
-                 ('_links', dict(api=dict(href=URL('form_api', form['_id'])),
-                                 display=dict(href=URL('form', form['_id']))))])
+                 ('links', dict(api=dict(href=URL('form_api', form['_id'])),
+                                display=dict(href=URL('form', form['_id']))))])
         else:
             if not forms:
                 forms = self.get_forms_titles(all=True)
             data['form'] = OD(
                 [('iuid', order['form']),
                  ('title', forms[order['form']]),
-                 ('_links', dict(api=dict(href=URL('form', order['form']))))])
+                 ('links', dict(api=dict(href=URL('form', order['form']))))])
         if not names:
             names = self.get_account_names([order['owner']])
         data['owner'] = dict(
             email=order['owner'],
             name=names.get(order['owner']),
-            _links=dict(api=dict(href=URL('account_api', order['owner'])),
-                        display=dict(href=URL('account', order['owner']))))
+            links=dict(api=dict(href=URL('account_api', order['owner'])),
+                       display=dict(href=URL('account', order['owner']))))
         data['status'] = order['status']
         data['report'] = OD()
         if order.get('report'):
@@ -652,12 +652,12 @@ class OrderApiV1Mixin(ApiV1Mixin):
         data['tags'] = order.get('tags', [])
         data['modified'] = order['modified']
         data['created'] = order['created']
-        data['_links'] = dict(
+        data['links'] = dict(
             api=dict(href=self.order_reverse_url(order, api=True)),
             display=dict(href=self.order_reverse_url(order)))
         if full:
             for status in self.get_targets(order, check_valid=True):
-                data['_links'][status['identifier']] = dict(
+                data['links'][status['identifier']] = dict(
                     href=URL('order_transition_api',
                              order['_id'],
                              status['identifier']),
@@ -1040,8 +1040,8 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
         self.set_filter()
         result = utils.get_json(URL('orders_api', **self.filter), 'orders')
         result['filter'] = self.filter
-        result['_links'] = dict(api=dict(href=URL('orders_api')),
-                                display=dict(href=URL('orders')))
+        result['links'] = dict(api=dict(href=URL('orders_api')),
+                               display=dict(href=URL('orders')))
         # Get names and forms lookups once only
         names = self.get_account_names()
         forms = self.get_forms_titles(all=True)

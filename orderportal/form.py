@@ -157,13 +157,13 @@ class FormApiV1(ApiV1Mixin, Form):
         data['description'] = form.get('description')
         data['owner'] = dict(
             email=form['owner'],
-            _links=dict(api=dict(href=URL('account_api', form['owner'])),
-                        display=dict(href=URL('account', form['owner']))))
+            links=dict(api=dict(href=URL('account_api', form['owner'])),
+                       display=dict(href=URL('account', form['owner']))))
         data['status'] = form['status']
         data['modified'] = form['modified']
         data['created'] = form['created']
-        data['_links'] = dict(api=dict(href=URL('form_api', form['_id'])),
-                              display=dict(href=URL('form', form['_id'])))
+        data['links'] = dict(api=dict(href=URL('form_api', form['_id'])),
+                             display=dict(href=URL('form', form['_id'])))
         data['orders'] = dict(
             count=self.get_order_count(form),
             # XXX Add API href when available.
