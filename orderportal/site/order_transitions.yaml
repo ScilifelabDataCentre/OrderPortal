@@ -13,15 +13,15 @@
 
 - source: submitted
   targets: [review, accepted, rejected]
-  permission: [admin]
+  permission: [admin, staff]
 
 - source: review
   targets: [accepted, preparation, rejected]
-  permission: [admin]
+  permission: [admin, staff]
 
 - source: accepted
   targets: [active]
-  permission: [admin]
+  permission: [admin, staff]
 
 - source: rejected
   targets: [preparation]

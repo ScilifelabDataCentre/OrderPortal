@@ -491,7 +491,7 @@ class OrderMixin(object):
         raise ValueError(msg.format(utils.terminology('order')))
 
     def is_attachable(self, order):
-        "Check if the current user may attach a file to the order."
+        "May the current user may attach a file to the order?"
         if self.is_admin(): return True
         status = self.get_order_status(order)
         attach = status.get('attach', [])
@@ -560,24 +560,24 @@ class OrderMixin(object):
         "Get the order status lookup item."
         return settings['ORDER_STATUSES_LOOKUP'][order['status']]
 
-    def get_targets(self, order, check_valid=True):
-        "Get the allowed status transition targets."
-        result = []
+    def get_targets(self, order):
+        "Get the allowed status transition targets as status lookup items."
         for transition in settings['ORDER_TRANSITIONS']:
-            if transition['source'] != order['status']: continue
-            if check_valid and \
-               transition.get('require') == 'valid' and order['invalid']:
-                continue
-            permission = transition['permission']
-            if (self.is_admin() and constants.ADMIN in permission) or \
-               (self.is_staff() and constants.STAFF in permission) or \
-               (self.is_owner(order) and constants.USER in permission):
-                result.extend(transition['targets'])
-        targets = [settings['ORDER_STATUSES_LOOKUP'][t] for t in result]
+            if (transition['source'] == order['status']) and \
+               not (transition.get('require') == 'valid' and order['invalid']):
+                permission = transition['permission']
+                if (self.is_admin() and constants.ADMIN in permission) or \
+                   (self.is_staff() and constants.STAFF in permission) or \
+                   (self.is_owner(order) and constants.USER in permission):
+                    targets = transition['targets']
+                    break
+        else:
+            return []
+        result = [settings['ORDER_STATUSES_LOOKUP'][t] for t in targets]
         if not self.global_modes['allow_order_submission']:
-            targets = [t for t in targets
-                       if t['identifier'] != constants.SUBMITTED]
-        return targets
+            result = [r for r in result
+                       if r['identifier'] != constants.SUBMITTED]
+        return result
 
     def is_submittable(self, order, check_valid=True):
         "Is the order submittable? Special hard-wired status."
@@ -656,7 +656,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
             api=dict(href=self.order_reverse_url(order, api=True)),
             display=dict(href=self.order_reverse_url(order)))
         if full:
-            for status in self.get_targets(order, check_valid=True):
+            for status in self.get_targets(order):
                 data['links'][status['identifier']] = dict(
                     href=URL('order_transition_api',
                              order['_id'],
@@ -1308,7 +1308,10 @@ class OrderTransition(OrderMixin, RequestHandler):
     def post(self, iuid, targetid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
-            self.check_editable(order)
+            for target in self.get_targets(order):
+                if target['identifier'] == targetid: break
+            else:
+                raise ValueError('disallowed status transition')
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver.set_status(targetid)
         except ValueError, msg:
