@@ -581,7 +581,7 @@ class OrderMixin(object):
 
     def is_submittable(self, order, check_valid=True):
         "Is the order submittable? Special hard-wired status."
-        targets = self.get_targets(order, check_valid=check_valid)
+        targets = self.get_targets(order)
         return constants.SUBMITTED in [t['identifier'] for t in targets]
 
     def is_clonable(self, order):
@@ -1210,8 +1210,7 @@ class OrderEdit(OrderMixin, RequestHandler):
                     colleagues=colleagues,
                     form=form,
                     fields=form['fields'],
-                    hidden_fields=hidden_fields,
-                    is_submittable=self.is_submittable(order,check_valid=False))
+                    hidden_fields=hidden_fields)
 
     @tornado.web.authenticated
     def post(self, iuid):
