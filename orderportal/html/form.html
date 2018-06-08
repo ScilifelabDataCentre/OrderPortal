@@ -223,11 +223,11 @@
 	  {{ field['type'] }}
 	  {% if field['type'] == constants.SELECT %}
 	  ({{ field.get('display') or 'menu' }})
-	  <pre>{{ '\n'.join(field.get('select') or []) }}</pre>
+          {% module ShortenedPre(field.get('select')) %}
 	  {% elif field['type'] == constants.MULTISELECT %}
-	  <pre>{{ '\n'.join(field.get('multiselect') or []) }}</pre>
+          {% module ShortenedPre(field.get('multiselect')) %}
 	  {% elif field['type'] == constants.TABLE %}
-	  <pre>{{ '\n'.join(field.get('table') or []) }}</pre>
+          {% module ShortenedPre(field.get('table')) %}
 	  {% end %}
 	</td>
 	<td>

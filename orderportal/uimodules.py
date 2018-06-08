@@ -179,3 +179,15 @@ class Version(tornado.web.UIModule):
             return ''
         else:
             return "(version %s)" % version
+
+
+class ShortenedPre(tornado.web.UIModule):
+    "Shorten lines to output within <pre> tags."
+
+    def render(self, lines, maxlength=16):
+        lines = lines or []
+        for pos, line in enumerate(lines):
+            if len(line) > maxlength:
+                line = line[:maxlength] + '...'
+                lines[pos] = line
+        return "<pre>%s</pre>" % '\n'.join(lines)
