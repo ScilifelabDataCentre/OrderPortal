@@ -68,12 +68,7 @@ Edit  {% module Icon('order') %}
     <div class="row">
       <div class="col-md-9">
 	<label class="control-label" for="__tags__">Keywords (tags)</label>
-	{# A user was confused by terminology. No change in the code. #}
-	{% if is_staff %}
-	{% set tags = order.get('tags', []) %}
-	{% else %}
-	{% set tags = [t for t in order.get('tags', []) if not ':' in t] %}
-	{% end %}
+	{# Display terminology: keyword; Code terminology: tag #}
 	<textarea class="form-control"
 		  name="__tags__" id="__tags__" rows="2"
 		  >{{ ', '.join(tags) }}</textarea>
@@ -93,6 +88,26 @@ Edit  {% module Icon('order') %}
     </span>
   </div>
   {% end %} {#if is_staff or settings.get('ORDER_USER_TAGS') #}
+
+  {% if settings.get('ORDER_LINKS') %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-9">
+	<label class="control-label" for="__links__">Links</label>
+	<textarea class="form-control"
+		  name="__links__" id="__links__" rows="2"
+		  >{{ '\n'.join(links) }}</textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      Optional links to external resources for the {{ terminology('order') }}.
+      <br>
+      One line per link, with the URL as the first item. The
+      URL is <b>not</b> checked for validity. Any words after the
+      URL are shown as the label for the link.
+    </span>
+  </div>
+  {% end %} {#if settings.get('ORDER_LINKS') #}
 
   <div class="form-group">
     <div class="row">

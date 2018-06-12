@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.5.3'
+__version__ = '3.5.4'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -49,6 +49,7 @@ settings = dict(
     DISPLAY_MAX_NEWS=4,
     DISPLAY_EVENTS=True,
     ORDER_USER_TAGS=True,
+    ORDER_LINKS=True,
     ORDER_TABLE_NEW_ROWS=4,
     ORDERS_LIST_TAGS=True,
     ORDERS_LIST_FIELDS=[],

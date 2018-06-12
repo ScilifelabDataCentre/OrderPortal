@@ -167,6 +167,33 @@ class OrderSaver(saver.Saver):
                          if ':' in t])
         self['tags'] = sorted(set(tags))
 
+    def set_links(self, links):
+        """Set the links of the order from JSON data, a list of dictionaries
+        with items 'href' and 'title', or from lines where the first word
+        of each line is the URL, and remaining items are used as title.
+        """
+        self['links'] = []
+        for link in links:
+            if isinstance(link, dict):
+                try:
+                    href = link['href']
+                except KeyError:
+                    pass
+                else:
+                    if isinstance(href, basestring):
+                        title = link.get('title') or href
+                        self['links'].append({'href': href,
+                                              'title': title})
+            elif isinstance(link, basestring):
+                link = link.strip()
+                if link:
+                    parts = link.split()
+                    if len(parts) > 1:
+                        link = (parts[0], ' '.join(parts[1:]))
+                    else:
+                        link = (parts[0], parts[0])
+                    self['links'].append(link)
+
     def update_fields(self, data=None):
         "Update all fields from JSON data if given, else HTML form input."
         assert self.rqh is not None
@@ -662,6 +689,8 @@ class OrderApiV1Mixin(ApiV1Mixin):
                              order['_id'],
                              status['identifier']),
                     name='transition')
+            data['links']['external'] = [{'href': l[0], 'title': l[1]}
+                                         for l in order.get('links', [])]
             data['fields'] = OD()
             # A bit roundabout, but the fields will come out in correct order
             for field in self.get_fields(order):
@@ -777,6 +806,10 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
                     if isinstance(tags, str):
                         tags = [tags]
                     saver.set_tags(tags)
+                try:
+                    saver.set_links(data['links']['external'])
+                except KeyError:
+                    pass
                 try:
                     saver.update_fields(data=data['fields'])
                 except KeyError:
@@ -1199,6 +1232,16 @@ class OrderEdit(OrderMixin, RequestHandler):
         colleagues = sorted(self.get_account_colleagues(self.current_user['email']))
         form = self.get_form(order['form'])
         fields = Fields(form)
+        if self.is_staff():
+            tags = order.get('tags', [])
+        else:
+            tags = [t for t in order.get('tags', []) if not ':' in t]
+        links = []
+        for link in order.get('links', []):
+            if link[0] == link[1]:
+                links.append(link[0])
+            else:
+                links.append(link[0] + ' ' + link[1])
         # XXX Currently, multiselect fields are not handled correctly.
         #     Too much effort; leave as is for the time being.
         hidden_fields = set([f['identifier'] for f in fields.flatten()
@@ -1207,6 +1250,8 @@ class OrderEdit(OrderMixin, RequestHandler):
                     title=u"Edit {0} '{1}'".format(utils.terminology('order'),
                                                    order['title']),
                     order=order,
+                    tags=tags,
+                    links=links,
                     colleagues=colleagues,
                     form=form,
                     fields=form['fields'],
@@ -1226,9 +1271,9 @@ class OrderEdit(OrderMixin, RequestHandler):
             error = None
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver['title'] = self.get_argument('__title__', None) or '[no title]'
-                tags = self.get_argument('__tags__', '')
-                tags = [t for t in tags.replace(',', ' ').split()]
-                saver.set_tags(tags)
+                saver.set_tags(self.get_argument('__tags__', '').\
+                               replace(',', ' ').split())
+                saver.set_links(self.get_argument('__links__', '').split('\n'))
                 try:
                     owner = self.get_argument('__owner__')
                     account = self.get_account(owner)

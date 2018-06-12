@@ -155,6 +155,16 @@
 	<td>{% module Tags(order.get('tags', [])) %}</td>
       </tr>
       {% end %} {#if is_staff or settings.get('ORDER_USER_TAGS') #}
+      {% if settings.get('ORDER_LINKS') %}
+      <tr>
+	<th>Links</th>
+	<td>
+          {% for link in order.get('links', []) %}
+          <a href="{{ link[0] }}" target="_blank">{{ link[1] }}</a><br>
+          {% end %}
+        </td>
+      </tr>
+      {% end %} {#if settings.get('ORDER_LINKS') #}
       <tr>
 	<th>Status</th>
 	<td>
