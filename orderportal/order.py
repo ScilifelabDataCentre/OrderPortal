@@ -167,12 +167,14 @@ class OrderSaver(saver.Saver):
                          if ':' in t])
         self['tags'] = sorted(set(tags))
 
-    def set_links(self, links):
-        """Set the links of the order from JSON data, a list of dictionaries
-        with items 'href' and 'title', or from lines where the first word
-        of each line is the URL, and remaining items are used as title.
+    def set_external(self, links):
+        """Set the external links of the order from JSON data, 
+        a list of dictionaries with items 'href' and 'title',
+        or from lines where the first word of each line is the URL,
+        and remaining items are used as title.
         """
-        self['links'] = []
+        if not isinstance(links, list): return
+        external = []
         for link in links:
             if isinstance(link, dict):
                 try:
@@ -182,17 +184,18 @@ class OrderSaver(saver.Saver):
                 else:
                     if isinstance(href, basestring):
                         title = link.get('title') or href
-                        self['links'].append({'href': href,
-                                              'title': title})
+                        external.append({'href': href,
+                                         'title': title})
             elif isinstance(link, basestring):
                 link = link.strip()
                 if link:
                     parts = link.split()
                     if len(parts) > 1:
-                        link = (parts[0], ' '.join(parts[1:]))
+                        link = {'href': parts[0], 'title': ' '.join(parts[1:])}
                     else:
-                        link = (parts[0], parts[0])
-                    self['links'].append(link)
+                        link = {'href': parts[0], 'title': parts[0]}
+                    external.append(link)
+        self['links'] = {'external': external}
 
     def update_fields(self, data=None):
         "Update all fields from JSON data if given, else HTML form input."
@@ -689,8 +692,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
                              order['_id'],
                              status['identifier']),
                     name='transition')
-            data['links']['external'] = [{'href': l[0], 'title': l[1]}
-                                         for l in order.get('links', [])]
+            data['links']['external'] = order.get('links', {}).get('external', [])
             data['fields'] = OD()
             # A bit roundabout, but the fields will come out in correct order
             for field in self.get_fields(order):
@@ -807,7 +809,7 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
                         tags = [tags]
                     saver.set_tags(tags)
                 try:
-                    saver.set_links(data['links']['external'])
+                    saver.set_external(data['links']['external'])
                 except KeyError:
                     pass
                 try:
@@ -1237,11 +1239,11 @@ class OrderEdit(OrderMixin, RequestHandler):
         else:
             tags = [t for t in order.get('tags', []) if not ':' in t]
         links = []
-        for link in order.get('links', []):
-            if link[0] == link[1]:
-                links.append(link[0])
+        for link in order.get('links', {}).get('external', []):
+            if link['href'] == link['title']:
+                links.append(link['href'])
             else:
-                links.append(link[0] + ' ' + link[1])
+                links.append("%s %s" % (link['href'], link['title']))
         # XXX Currently, multiselect fields are not handled correctly.
         #     Too much effort; leave as is for the time being.
         hidden_fields = set([f['identifier'] for f in fields.flatten()
@@ -1273,7 +1275,8 @@ class OrderEdit(OrderMixin, RequestHandler):
                 saver['title'] = self.get_argument('__title__', None) or '[no title]'
                 saver.set_tags(self.get_argument('__tags__', '').\
                                replace(',', ' ').split())
-                saver.set_links(self.get_argument('__links__', '').split('\n'))
+                saver.set_external(self.get_argument('__links__', '').\
+                                   split('\n'))
                 try:
                     owner = self.get_argument('__owner__')
                     account = self.get_account(owner)

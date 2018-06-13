@@ -22,9 +22,12 @@ headers = {'X-OrderPortal-API-key': API_KEY}
 
 data = {'title': 'New title',
         'tags': ['first_tag', 'second_tag'],  # NOTE: identifier format!
+        'links': {'external': [{'href': 'http://scilifelab.se',
+                                'title': 'SciLifeLab'},
+                               {'href': 'http://dummy.com'}]},
         'fields': {'Expected_results': 'Great!',
                    'Node_support': 'KTH'},
-        'history': {'review': '2018-05-30'}}
+        'history': {'accepted': '2018-06-01'}}
 
 response = requests.post(url, headers=headers, json=data)
 assert response.status_code == 200, (response.status_code, response.reason)

@@ -159,8 +159,9 @@
       <tr>
 	<th>Links</th>
 	<td>
-          {% for link in order.get('links', []) %}
-          <a href="{{ link[0] }}" target="_blank">{{ link[1] }}</a><br>
+          {% for link in order.get('links', {}).get('external', []) %}
+          <a href="{{ link['href'] }}" target="_blank">
+            {{ link['title'] }}</a><br>
           {% end %}
         </td>
       </tr>
