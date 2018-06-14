@@ -841,9 +841,9 @@ class OrderCsv(OrderMixin, RequestHandler):
             raise tornado.web.HTTPError(403, reason=str(msg))
         self.write(self.get_order_csv_stringio(order).getvalue())
         self.set_header('Content-Type', constants.CSV_MIME)
+        filename = utils.to_ascii(order.get('identifier')) or order['_id']
         self.set_header('Content-Disposition',
-                        'attachment; filename="%s.csv"' %
-                        order.get('identifier') or order['_id'])
+                        'attachment; filename="%s.csv"' % filename)
 
     def get_order_csv_stringio(self, order):
         "Return the content of the order as CSV-formatted data in StringIO."
@@ -932,9 +932,9 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
         writer.close()
         self.write(zip_stringio.getvalue())
         self.set_header('Content-Type', constants.ZIP_MIME)
+        filename = utils.to_ascii(order.get('identifier')) or order['_id']
         self.set_header('Content-Disposition',
-                        'attachment; filename="%s.zip"' %
-                        order.get('identifier') or order['_id'])
+                        'attachment; filename="%s.zip"' % filename)
 
 
 class Orders(RequestHandler):
@@ -1137,7 +1137,7 @@ class OrdersCsv(Orders):
             writer.writerow(safe(row))
         self.write(csv_stringio.getvalue())
         self.set_header('Content-Type', constants.CSV_MIME)
-        self.set_header('Content-Disposition',
+        self.set_header('Content-Disposition', 
                         'attachment; filename="orders.csv"')
 
 
@@ -1401,8 +1401,9 @@ class OrderFile(OrderMixin, RequestHandler):
             outfile.close()
             self.set_header('Content-Type',
                             order['_attachments'][filename]['content_type'])
+            filename = utils.to_ascii(filename)
             self.set_header('Content-Disposition',
-                            'attachment; filename="{0}"'.format(filename))
+                            'attachment; filename="%s"' % filename)
 
     @tornado.web.authenticated
     def post(self, iuid, filename=None):
@@ -1477,8 +1478,9 @@ class OrderReport(OrderMixin, RequestHandler):
             self.set_header('Content-Type', content_type)
             name = order.get('identifier') or order['_id']
             ext = utils.get_filename_extension(content_type)
+            filename = utils.to_ascii("%s_report%s" % (name, ext))
             self.set_header('Content-Disposition',
-                            'attachment; filename="%s_report%s"' % (name, ext))
+                            'attachment; filename="%s"' % filename)
 
 
 class OrderReportEdit(OrderMixin, RequestHandler):
@@ -1533,8 +1535,9 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         self.set_header('Content-Type', content_type)
         name = order.get('identifier') or order['_id']
         ext = utils.get_filename_extension(content_type)
+        filename = utils.to_ascii("%s_report%s" % (name, ext))
         self.set_header('Content-Disposition',
-                        'attachment; filename="%s_report%s"' % (name, ext))
+                        'attachment; filename="%s"' % filename)
 
     def put(self, iuid):
         try:
