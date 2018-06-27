@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.5.5'
+__version__ = '3.5.6'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -20,19 +20,11 @@ settings = dict(
     DATABASE_NAME='orderportal',
     COUCHDB_HOME='http://couchdb.apache.org/',
     BOOTSTRAP_HOME='http://getbootstrap.com/',
-    BOOTSTRAP_CSS_URL='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css',
-    BOOTSTRAP_JS_URL='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js',
     JQUERY_HOME='https://jquery.com/',
-    JQUERY_URL='https://code.jquery.com/jquery-1.12.4.min.js',
     JQUERY_UI_HOME='https://jqueryui.com/',
-    JQUERY_UI_URL='https://code.jquery.com/ui/1.11.4/jquery-ui.min.js',
-    JQUERY_UI_THEME_URL='https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css',
     JQUERY_LOCALTIME_HOME='https://github.com/GregDThomas/jquery-localtime',
     JQUERY_LOCALTIME_VERSION='0.9.1',  # Must agree with file in ./static
     DATATABLES_HOME='https://www.datatables.net/',
-    DATATABLES_CSS_URL='https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css',
-    DATATABLES_JS_URL='https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js',
-    DATATABLES_BOOTSTRAP_JS_URL='https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js',
     DOCUMENTATION_URL='https://github.com/pekrau/OrderPortal/wiki',
     MARKDOWN_URL='http://daringfireball.net/projects/markdown/syntax',
     SITE_NAME='OrderPortal',

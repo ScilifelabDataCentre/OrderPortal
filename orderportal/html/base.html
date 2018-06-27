@@ -7,19 +7,19 @@
     <link rel="shortcut icon" type="image/png"
 	  href="{{ reverse_url('site', settings['SITE_FAVICON']) }}">
     <link rel="stylesheet" type="text/css"
-	  href="{{ settings['JQUERY_UI_THEME_URL'] }}">
+	  href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" type="text/css"
-	  href="{{ settings['BOOTSTRAP_CSS_URL'] }}">
+	  href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css"
-	  href="{{ settings['DATATABLES_CSS_URL'] }}">
+	  href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css">
     <link rel="stylesheet" href="{{ static_url('mods.css') }}">
     {# NOTE: jQuery has to be loaded before bootstrap JS! #}
-    <script src="{{ settings['JQUERY_URL'] }}"></script>
-    <script src="{{ settings['JQUERY_UI_URL'] }}"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
     <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
-    <script defer src="{{ settings['BOOTSTRAP_JS_URL'] }}"></script>
-    <script defer src="{{ settings['DATATABLES_JS_URL'] }}"></script>
-    <script defer src="{{ settings['DATATABLES_BOOTSTRAP_JS_URL'] }}"></script>
+    <script defer src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script defer src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+    <script defer src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js"></script>
     <script>
       $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
       $(function(){ $(".datepicker").datepicker(); });
