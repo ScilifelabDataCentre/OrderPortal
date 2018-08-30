@@ -282,9 +282,10 @@
 	  <div class="col-md-8">
 	    <label class="control-label" for="country">Country</label>
 	    <select class="form-control" name="country" id="country">
+              {% set country = values.get('country') or settings['ACCOUNT_DEFAULT_COUNTRY_CODE'] %}
 	      {% for c in settings['COUNTRIES'] %}
 	      <option value="{{ c['code'] }}"
-		      {{ c['code'] == values.get('country') and 'selected' or '' }}>
+		      {{ c['code'] == country and 'selected' or '' }}>
 		{{ c['name'] }}
 	      </option>
 	      {% end %}
@@ -357,9 +358,10 @@
 	    <label class="control-label" for="invoice_country">Country</label>
 	    <select class="form-control"
 		    name="invoice_country" id="invoice_country">
+              {% set country = values.get('invoice_country') or settings['ACCOUNT_DEFAULT_COUNTRY_CODE'] %}
 	      {% for c in settings['COUNTRIES'] %}
 	      <option value="{{ c['code'] }}"
-		      {{ c['code'] == values.get('invoice_country') and 'selected' or '' }}>
+		      {{ c['code'] == country and 'selected' or '' }}>
 		{{ c['name'] }}</option>
 	      {% end %}
 	    </select>

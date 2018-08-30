@@ -270,8 +270,9 @@ administrator of the site can then change the ownership of your
 	    <label class="control-label" for="country">Country</label>
 	    <select class="form-control" name="country" id="country">
 	      <option value="">[none]</option>
+              {% set country = account['address'].get('country') %}
 	      {% for c in settings['COUNTRIES'] %}
-	      {% set sel = account['address'].get('country') == c['code'] and 'selected' or '' %}
+	      {% set sel = country == c['code'] and 'selected' or '' %}
 	      <option {{ sel }} value="{{ c['code'] }}">{{ c['name'] }}</option>
 	      {% end %}
 	    </select>
