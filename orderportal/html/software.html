@@ -19,7 +19,7 @@
 	  2.7) and is built on top of
 	  the <a href="http://www.tornadoweb.org/en/stable/">Tornado</a>
 	  web server and template system using
-	  <a href="http://getbootstrap.com/">bootstrap</a> for display.
+	  <a href="http://getbootstrap.com/docs/3.3/">bootstrap</a> for display.
 	  The <a href="http://couchdb.apache.org/">CouchDB</a>
 	  database system is the back-end storage.
 	</p>
@@ -35,30 +35,17 @@
     </div>
     <div class="panel panel-default">
       <div class="panel-heading">
-	Relies on Python packages available from
-	<a href="https://pypi.python.org/pypi">PyPi</a>.
+        Software and systems used in this instance.
       </div>
       <div class="panel-body">
 	<table class="table table-noborder">
-	  {% for key, value in versions['python'] %}
+	  {% for label, url, ver, rem in info %}
 	  <tr>
-	    <th width="60%">{{ key }}</th>
-	    <td width="40%">{{ value }}</td>
-	  </tr>
-	  {% end %}
-	</table>
-      </div>
-    </div>
-    <div class="panel panel-default">
-      <div class="panel-heading">
-	Relies on non-Python software.
-      </div>
-      <div class="panel-body">
-	<table class="table table-noborder">
-	  {% for key, value in versions['other'] %}
-	  <tr>
-	    <th width="60%">{% raw key %}</th>
-	    <td width="40%">{{ value }}</td>
+	    <th width="50%">
+              <a href="{{ url }}">{{ label }}</a>
+            </th>
+	    <td width="25%">{{ ver }}</td>
+	    <td width="25%">{{ rem }}</td>
 	  </tr>
 	  {% end %}
 	</table>

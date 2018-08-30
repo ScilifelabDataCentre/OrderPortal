@@ -6,10 +6,11 @@
     <title>{% block head_title %}{{ settings['SITE_NAME'] }}{% end %}</title>
     <link rel="shortcut icon" type="image/png"
 	  href="{{ reverse_url('site', settings['SITE_FAVICON']) }}">
+    {# Versions here and in home.py must be kept in sync! #}
     <link rel="stylesheet" type="text/css"
 	  href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" type="text/css"
-	  href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+	  href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css"
 	  href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css">
     <link rel="stylesheet" href="{{ static_url('mods.css') }}">
@@ -17,7 +18,7 @@
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
     <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
-    <script defer src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script defer src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script defer src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
     <script defer src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js"></script>
     <script>

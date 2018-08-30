@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.5.6'
+__version__ = '3.5.7'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -18,20 +18,13 @@ settings = dict(
     LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',
     DATABASE_SERVER='http://localhost:5984/',
     DATABASE_NAME='orderportal',
-    COUCHDB_HOME='http://couchdb.apache.org/',
-    BOOTSTRAP_HOME='http://getbootstrap.com/',
-    JQUERY_HOME='https://jquery.com/',
-    JQUERY_UI_HOME='https://jqueryui.com/',
-    JQUERY_LOCALTIME_HOME='https://github.com/GregDThomas/jquery-localtime',
-    JQUERY_LOCALTIME_VERSION='0.9.1',  # Must agree with file in ./static
-    DATATABLES_HOME='https://www.datatables.net/',
-    DOCUMENTATION_URL='https://github.com/pekrau/OrderPortal/wiki',
     MARKDOWN_URL='http://daringfireball.net/projects/markdown/syntax',
     SITE_NAME='OrderPortal',
     SITE_PERSONAL_DATA_POLICY='The data will be used only for activities directly related to this site.',
     MIN_PASSWORD_LENGTH=8,
     LOGIN_MAX_AGE_DAYS=14,
     LOGIN_MAX_FAILURES=6,
+    TERMINOLOGY=dict(),         # Terms translation lookup.
     DISPLAY_DEFAULT_PAGE_SIZE=25,
     DISPLAY_MAX_RECENT_ORDERS=10,
     DISPLAY_ORDERS_MOST_RECENT=500,

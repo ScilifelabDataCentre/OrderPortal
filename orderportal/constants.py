@@ -10,7 +10,6 @@ NAME_RX  = re.compile(r'^[^/]+$')
 IUID_RX  = re.compile(r'^[0-9a-f]{32}$')
 DATE_RX  = re.compile(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$') # Safe until 9999 CE...
 EMAIL_RX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
-VERSION_RX = re.compile(r'\d+\.\d+\.\d+')
 
 # Content types (MIME types)
 HTML_MIME = 'text/html'
