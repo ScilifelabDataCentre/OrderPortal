@@ -159,6 +159,7 @@ def main():
         url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
             {'path': utils.expand_filepath(settings['SITE_DIR'])},
             name='site'),
+        url(r'/test', Test, name='test'),
         ])
     handlers.append(url(r'/api/v1/(.*)', NoSuchEntityApiV1))
     handlers.append(url(r'/(.*)', NoSuchEntity))
