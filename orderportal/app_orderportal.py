@@ -178,7 +178,7 @@ def main():
         value['href'] = application.reverse_url('site', key + '.png')
     application.listen(settings['PORT'], xheaders=True)
     pid = os.getpid()
-    logging.info("web server PID %s on port %s", pid, settings['PORT'])
+    logging.info("web server %s (PID %s)", settings['BASE_URL'], pid)
     if options.pidfile:
         with open(options.pidfile, 'w') as pf:
             pf.write(str(pid))

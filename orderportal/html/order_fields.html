@@ -119,13 +119,15 @@
 	  <th>{{ identifier }}</th>
 	  {% end %}
 	</tr>
+        {% if value %}
 	{% for i, row in enumerate(value) %}
 	<tr>
 	  <td class="number">{{ i + 1 }}</td>
 	  {% for item in row %}
-	  <td>{{ item }}</td>
+	  <td>{{ '' if item is None else item }}</td>
 	  {% end %}
 	</tr>
+	{% end %}
 	{% end %}
       </table>
     {% elif field['type'] == constants.FILE %}

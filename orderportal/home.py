@@ -202,7 +202,17 @@ class Test(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
-        self.render('test.html')
+        rowcode = ["<tr>"]
+        rowcode.append(
+            "<td>"
+            "<input type='text' class='form-control' name='rowid_0' id='rowid_0'>"
+            "</td>")
+        rowcode.append(
+            "<td>"
+            "<input type='text' class='form-control' name='rowid_1'>"
+            "</td>")
+        rowcode.append("</tr>")
+        self.render('test.html', rowcode=''.join(rowcode))
 
     @tornado.web.authenticated
     def post(self):
