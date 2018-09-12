@@ -244,18 +244,16 @@ class OrderSaver(saver.Saver):
                     except (ValueError, TypeError):
                         count = 0
                     n_columns = len(field['table'])
-                    value = []
-                    for i in xrange(count):
-                        row = []
-                        non_empty = False
-                        for j in xrange(n_columns):
-                            name = "_table_%s_%i_%i" % (identifier, i, j)
-                            item = self.rqh.get_argument(name, None)
-                            if not item: item = None
-                            row.append(item)
-                            non_empty = non_empty or item is not None
-                        if non_empty:
-                            value.append(row)
+                    if n_columns:
+                        value = []
+                        for i in xrange(count):
+                            row = []
+                            for j in xrange(n_columns):
+                                name = "_table_%s_%i_%i" % (identifier, i, j)
+                                item = self.rqh.get_argument(name, None)
+                                row.append(item or None)
+                            if row[0] is not None:
+                                value.append(row)
             elif data:          # JSON data.
                 try:
                     value = data[identifier]
