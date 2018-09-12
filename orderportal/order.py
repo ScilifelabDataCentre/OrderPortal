@@ -252,8 +252,10 @@ class OrderSaver(saver.Saver):
                                 name = "_table_%s_%i_%i" % (identifier, i, j)
                                 item = self.rqh.get_argument(name, None)
                                 row.append(item or None)
-                            if row[0] is not None:
-                                value.append(row)
+                            for item in row:
+                                if item is not None:
+                                    value.append(row)
+                                    break
             elif data:          # JSON data.
                 try:
                     value = data[identifier]

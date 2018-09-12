@@ -218,7 +218,8 @@
       </tr>
       {% if value %}
       {% for i, row in enumerate(value) %}
-      <tr id="_table_{{ field['identifier'] }}_{{ i }}">
+      {% set rowid = "_table_" + field["identifier"] + "_" + str(i) %}
+      <tr id="{{ rowid }}">
 	<td class="table-input-row-0">{{ i + 1 }}</td>
 	{% for j, item in enumerate(row) %}
 	<td>
@@ -228,17 +229,17 @@
 		 value="{{ '' if item is None else item }}">
 	</td>
 	{% end %} {# for j #}
+        <td>
+          <button type="button" class="btn btn-danger"
+                  onclick="$('#{{ rowid }}').remove()">Delete</button>
+        </td>
       </tr>
       {% end %} {# for i #}
       {% end %} {# if value #}
     </table>
-    <span class="help-block">
-      To delete a row: Make the first cell of the row blank.
-    </span>
-
     <div class="form-group">
       <button type="button" id="_table_{{ field['identifier'] }}_add_button" 
-              class="btn btn-default"> 
+              class="btn btn-info"> 
         Add row
       </button>
     </div>

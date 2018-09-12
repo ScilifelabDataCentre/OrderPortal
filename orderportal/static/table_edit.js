@@ -1,5 +1,5 @@
 /* table_edit.js
-   Function for editing an input field table.
+   Edit an input field table.
 */
 function table_add_row(event)
 {
