@@ -129,24 +129,6 @@ class Text(tornado.web.UIModule):
         return markdown.markdown(text, output_format='html5')
 
 
-class Help(tornado.web.UIModule):
-    """Fetch text object from the database, process it,
-    and show in a collapsible div.
-    """
-
-    def render(self, name, default=None):
-        try:
-            doc = self.handler.get_entity_view('text/name', name)
-            text = doc['text']
-        except (tornado.web.HTTPError, KeyError):
-            text = default or u"<i>No text for '{0}'.</i>".format(name)
-        html = markdown.markdown(text, output_format='html5')
-        return u"""<a class="glyphicon glyphicon-info-sign"
-title="Help information" data-toggle="collapse" href="#{id}"></a>
-<div id="{id}" class="collapse">{html}</div>
-""".format(id=name, html=html)
-
-
 class Tags(tornado.web.UIModule):
     "Output tags with links to search."
 

@@ -50,21 +50,6 @@ password: |
   If the code does not work, it may have been overwritten or already been used.
   Go to [the reset page](/reset) to obtain a new code.
 
-help_datatypes: |
-  An input field must have a data type, which determines what values are
-  considered valid for the field. The types are:
-
-  - **string**: A string of characters. Intended for one-line text input.
-  - **integer**: A valid integer value, e.g. 12, -39 or 1098009.
-  - **float**: A valid floating point value, e.g. 1.0, 3.141 or 9.1e10.
-  - **boolean**: A logical value of either "true" or "false". Shown as a dropdown menu.
-  - **url**: A value that looks like a URL; no check is made that it actually is reachable.
-  - **select**: A selection of predefined string values. The values are specificed in the field edit page.
-  - **text**: A block of text spanning more than one line.
-  - **date**: A valid date. Shown as a date selection widget.
-  - **file**: An attached file.
-  - **group**: A group of fields. Does not contain any value of its own.
-
 general: |
   General information about the facility, and such like.
 

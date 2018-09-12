@@ -132,7 +132,7 @@ class Software(RequestHandler):
             ('jQuery-UI', 'https://jqueryui.com/', '1.11.4', 'CDN'),
             ('jQuery localtime', 
              'https://github.com/GregDThomas/jquery-localtime',
-             '0.9.1', 'part of distro'),
+             '0.9.1', 'in distro'),
             ('jQuery DataTables', 'https://www.datatables.net/',
              '1.10.11', 'CDN')
             ]
