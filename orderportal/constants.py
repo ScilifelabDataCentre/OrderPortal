@@ -71,7 +71,6 @@ TEXTS = dict(header='Header on portal home page.',
              registered='Page after registration.',
              reset='Password reset page.',
              password='Password setting page.',
-             help_datatypes='Page explaining available data types.',
              general='General information on portal home page.',
              contact='Contact page.',
              about='About page.')

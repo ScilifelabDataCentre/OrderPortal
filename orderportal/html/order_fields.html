@@ -20,8 +20,8 @@
   <th>
     <div style="padding-left:{{ 1.5*field['depth'] }}em;">
       {% if field['depth'] == 0 %}
-      <button data-toggle="collapse" data-target="#{{ field['identifier'] }}"
-	      class="btn btn-md">
+      <button type="button" class="btn btn-default btn-lg"
+              data-toggle="collapse" data-target="#{{ field['identifier'] }}">
 	<span class="glyphicon glyphicon-triangle-bottom"></span>
 	{{ label }}
       </button>
