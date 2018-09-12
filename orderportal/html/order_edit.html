@@ -162,6 +162,13 @@ Edit  {% module Icon('order') %}
 {% block javascript_code %}
 <script src="{{ static_url('field_visible_if.js') }}"></script>
 <script src="{{ static_url('quit_through_submit.js') }}"></script>
+<script src="{{ static_url('table_edit.js') }}"></script>
+{% for tableid in rowcodes %}
+<script>
+  $("#_table_{{ tableid }}_add_button").click({tableid: "{{ tableid }}", rowcode: "{% raw rowcodes[tableid] %}"}, table_add_row);
+</script>
+
+{% end %}
 {% end %}
 
 {% block javascript_autofocus %}

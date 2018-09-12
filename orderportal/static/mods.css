@@ -22,6 +22,11 @@
 .table-hierarchy { margin-bottom: 0px; }
 .table-hierarchy td.left { text-align: left; padding-left: 1em; }
 
+.table-input-row-0 {vertical-align: middle !important;
+                    text-align: right;
+                    font-family: monospace;
+                   }
+
 /* Pre-formatted text variants. */
 .pre {white-space: pre; }
 .nobr {white-space:nowrap; }

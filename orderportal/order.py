@@ -232,26 +232,30 @@ class OrderSaver(saver.Saver):
                     # This is a special case for HTML form input.
                     value = self.rqh.get_arguments(identifier)
             elif field['type'] == constants.TABLE:
-                if data:        # JSON data: complete table.
+                if data:        # JSON data: contains complete table.
                     try:
                         value = data[identifier]
                     except KeyError:
                         continue
                 else:         # HTML form input: individual cells.
-                    value = self.doc['fields'].get(identifier) or []
-                    for i, row in enumerate(value):
-                        for j, item in enumerate(row):
-                            key = "cell_{0}_{1}".format(i, j)
-                            value[i][j] = self.rqh.get_argument(key, '')
-                    offset = len(value)
-                    for i in xrange(settings['ORDER_TABLE_NEW_ROWS']):
+                    try:
+                        name = "_table_%s_count" % identifier
+                        count = int(self.rqh.get_argument(name, 0))
+                    except (ValueError, TypeError):
+                        count = 0
+                    n_columns = len(field['table'])
+                    value = []
+                    for i in xrange(count):
                         row = []
-                        for j in xrange(len(field['table'])):
-                            key = "cell_{0}_{1}".format(i+offset, j)
-                            row.append(self.rqh.get_argument(key, ''))
-                        value.append(row)
-                    # Remove empty rows.
-                    value = [r for r in value if reduce(lambda x,y: x or y, r)]
+                        non_empty = False
+                        for j in xrange(n_columns):
+                            name = "_table_%s_%i_%i" % (identifier, i, j)
+                            item = self.rqh.get_argument(name, None)
+                            if not item: item = None
+                            row.append(item)
+                            non_empty = non_empty or item is not None
+                        if non_empty:
+                            value.append(row)
             elif data:          # JSON data.
                 try:
                     value = data[identifier]
@@ -841,7 +845,7 @@ class OrderCsv(OrderMixin, RequestHandler):
             raise tornado.web.HTTPError(403, reason=str(msg))
         self.write(self.get_order_csv_stringio(order).getvalue())
         self.set_header('Content-Type', constants.CSV_MIME)
-        filename = utils.to_ascii(order.get('identifier')) or order['_id']
+        filename = utils.to_ascii(order.get('identifier') or order['_id'])
         self.set_header('Content-Disposition',
                         'attachment; filename="%s.csv"' % filename)
 
@@ -1248,6 +1252,20 @@ class OrderEdit(OrderMixin, RequestHandler):
         #     Too much effort; leave as is for the time being.
         hidden_fields = set([f['identifier'] for f in fields.flatten()
                              if f['type'] != 'multiselect'])
+        # For each table input field, create code for use in bespoke JavaScript
+        rowcodes = dict()
+        for field in fields.flatten():
+            if field['type'] != 'table': continue
+            rowcode = ["<tr>"
+                       "<td id='rowid__' class='table-input-row-0'></td>"]
+            for i, item in enumerate(field['table']):
+                rowid = "rowid_%s" % i
+                rowcode.append(
+                    "<td>"
+                    "<input type='text' class='form-control' name='%s' id='%s'>"
+                    "</td>" % (rowid, rowid))
+            rowcode.append("</tr>")
+            rowcodes[field['identifier']] = ''.join(rowcode)
         self.render('order_edit.html',
                     title=u"Edit {0} '{1}'".format(utils.terminology('order'),
                                                    order['title']),
@@ -1257,7 +1275,8 @@ class OrderEdit(OrderMixin, RequestHandler):
                     colleagues=colleagues,
                     form=form,
                     fields=form['fields'],
-                    hidden_fields=hidden_fields)
+                    hidden_fields=hidden_fields,
+                    rowcodes=rowcodes)
 
     @tornado.web.authenticated
     def post(self, iuid):
