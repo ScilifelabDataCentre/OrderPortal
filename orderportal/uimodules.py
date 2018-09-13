@@ -173,3 +173,58 @@ class ShortenedPre(tornado.web.UIModule):
                 line = line[:maxlength] + '...'
                 lines[pos] = line
         return "<pre>%s</pre>" % '\n'.join(lines)
+
+
+class TableRows(tornado.web.UIModule):
+    "Display the table rows."
+
+    def render(self, field, value):
+        assert field['type'] == constants.TABLE
+        result = ['<tr>', '<th></th>']
+        for coldef in field['table']:
+            column = utils.parse_field_table_column(coldef)
+            result.append("<th>%s</th>" % column['identifier'])
+        result.append('</tr>')
+        if value:
+            for i, row in enumerate(value):
+                result.append('<tr>')
+                result.append('<td class="number">%s</td>' % (i+1))
+                for cell in row:
+                    if cell is None:
+                        cell = ''
+                    result.append("<td>%s</td>" % cell)
+        result.append('</tr>')
+        return '\n'.join(result)
+
+
+class TableRowsEdit(tornado.web.UIModule):
+    "Display the table rows for editing."
+
+    def render(self, field, value):
+        assert field['type'] == constants.TABLE
+        result = ['<tr>', '<th></th>']
+        for coldef in field['table']:
+            column = utils.parse_field_table_column(coldef)
+            result.append("<th>%s</th>" % column['identifier'])
+        result.append('</tr>')
+        if value:
+            for i, row in enumerate(value):
+                rowid = "_table_%s_%s" % (field['identifier'], i)
+                result.append('<tr id="%s">' % rowid)
+                result.append('<td class="table-input-row-0">%s</td>' % (i+1))
+                for j, cell in enumerate(row):
+                    if cell is None: cell = ''
+                    result.append('<td>')
+                    if column['type'] == 'select':
+                        pass # %%%
+                    else:
+                        name = "_table_%s_%s_%s" % (field['identifier'], i, j)
+                        result.append('<input type="text" class="form-control"'
+                                      ' name="%s" value="%s">' % (name, cell))
+                result.append('<td>'
+                              '<button type="button" class="btn btn-danger"'
+                              ''' onclick="$('#%s').remove()">Delete'''
+                              '</button>'
+                              '</td>' % rowid)
+                result.append('</tr>')
+        return '\n'.join(result)

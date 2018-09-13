@@ -210,32 +210,7 @@
            value="{{ value and len(value) or 0 }}">
     <table id="_table_{{ field['identifier'] }}"
            class="table table-bordered table-condensed">
-      <tr>
-	<th></th>
-	{% for identifier in field['table'] %}
-	<th>{{ identifier }}</th>
-	{% end %}
-      </tr>
-      {% if value %}
-      {% for i, row in enumerate(value) %}
-      {% set rowid = "_table_" + field["identifier"] + "_" + str(i) %}
-      <tr id="{{ rowid }}">
-	<td class="table-input-row-0">{{ i + 1 }}</td>
-	{% for j, item in enumerate(row) %}
-	<td>
-	  <input type="text"
-		 class="form-control"
-		 name="_table_{{ field['identifier'] }}_{{ i }}_{{ j }}"
-		 value="{{ '' if item is None else item }}">
-	</td>
-	{% end %} {# for j #}
-        <td>
-          <button type="button" class="btn btn-danger"
-                  onclick="$('#{{ rowid }}').remove()">Delete</button>
-        </td>
-      </tr>
-      {% end %} {# for i #}
-      {% end %} {# if value #}
+      {% module TableRowsEdit(field, value) %}
     </table>
     <div class="form-group">
       <button type="button" id="_table_{{ field['identifier'] }}_add_button" 

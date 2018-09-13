@@ -163,9 +163,9 @@ Edit  {% module Icon('order') %}
 <script src="{{ static_url('field_visible_if.js') }}"></script>
 <script src="{{ static_url('quit_through_submit.js') }}"></script>
 <script src="{{ static_url('table_edit.js') }}"></script>
-{% for tableid in rowcodes %}
+{% for tableid in tableinputs %}
 <script>
-  $("#_table_{{ tableid }}_add_button").click({tableid: "{{ tableid }}", rowcode: "{% raw rowcodes[tableid] %}"}, table_add_row);
+  $("#_table_{{ tableid }}_add_button").click({tableid: "{{ tableid }}", tableinput: "{% raw tableinputs[tableid] %}"}, table_add_row);
 </script>
 
 {% end %}

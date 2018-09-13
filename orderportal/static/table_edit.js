@@ -9,8 +9,7 @@ function table_add_row(event)
   var count = parseInt($("#" + countid).attr('value'));
   // Prepare the HTML code for the row: set the row number.
   var rowid = tableid + "_" + count;
-  var rowcode = event.data.rowcode.replace(/rowid/g, rowid);
-  $("#" + tableid).append(rowcode);
+  $("#" + tableid).append(event.data.tableinput.replace(/rowid/g, rowid));
   count = count + 1;
   //  Update the hidden input value for the current number of rows.
   $("#" + countid).attr('value', count);

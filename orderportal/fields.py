@@ -115,9 +115,11 @@ class Fields(object):
             new['multiselect'] = values
         # Set the column identifiers for a table field.
         elif type == constants.TABLE:
-            values = rqh.get_argument('table', '').split('\n')
-            values = [v.strip() for v in values]
-            values = [v for v in values if v]
+            lines = rqh.get_argument('table', '').split('\n')
+            lines = [l.strip() for l in lines]
+            lines = [l for l in lines if l]
+            values
+            # %%%
             new['table'] = values
         # Set the group which the field is a member of.
         group = rqh.get_argument('group', None)
