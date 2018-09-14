@@ -352,3 +352,16 @@ def get_filename_extension(content_type):
     if content_type == 'image/jpeg':
         return '.jpg'
     return mimetypes.guess_extension(content_type)
+
+def parse_field_table_column(coldef):
+    """Parse the input field table column definition.
+    Return dictionary with identifier, type and options (if any).
+    """
+    parts = [p.strip() for p in coldef.split(';')]
+    if len(parts) == 1:
+        return {'identifier': coldef, 'type': 'string'}
+    else:
+        result = {'identifier': parts[0], 'type': parts[1]}
+        if result['type'] == 'select':
+            result['options'] = parts[2].split('|')
+        return result

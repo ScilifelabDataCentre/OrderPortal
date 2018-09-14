@@ -37,7 +37,7 @@
       {% end %}
     </div>
   </th>
-  <td width="50%" class="left">
+  <td width="60%" class="left">
     {% if field.get('description') %}
     <div id="_collapsible_{{ field['identifier'] }}" class="collapse small">
       {% module Markdown(field.get('description')) %}
@@ -101,7 +101,7 @@
       {% end %}
     </div>
   </th>
-  <td width="50%" class="left">
+  <td width="60%" class="left">
     {% set value = order['fields'].get(field['identifier']) %}
     {% if field['type'] == constants.TEXT %}
       {% module Markdown(value or '-') %}
@@ -113,22 +113,7 @@
       {% end %}
     {% elif field['type'] == constants.TABLE %}
       <table class="table table-bordered table-condensed">
-	<tr>
-	  <th></th>
-	  {% for identifier in field['table'] %}
-	  <th>{{ identifier }}</th>
-	  {% end %}
-	</tr>
-        {% if value %}
-	{% for i, row in enumerate(value) %}
-	<tr>
-	  <td class="number">{{ i + 1 }}</td>
-	  {% for item in row %}
-	  <td>{{ '' if item is None else item }}</td>
-	  {% end %}
-	</tr>
-	{% end %}
-	{% end %}
+        {% module TableRows(field, value) %}
       </table>
     {% elif field['type'] == constants.FILE %}
       {% if value is None %}

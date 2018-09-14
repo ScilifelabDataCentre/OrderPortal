@@ -202,14 +202,14 @@
 	<th>History</th>
 	<td>
 	  <table>
-	    {% for s in reversed(settings['ORDER_STATUSES']) %}
-	    {% if order['history'].get(s['identifier']) %}
-	    <tr>
+            {% for s in reversed(settings['ORDER_STATUSES']) %}
+            {% if order['history'].get(s['identifier']) %}
+            <tr>
 	      <td>{% module Icon(s['identifier'], label=True) %}</td>
 	      <td>&nbsp;{{ order['history'][s['identifier']] }}</td>
 	    </tr>
-	    {% end %} {# if #}
-	    {% end %} {# for #}
+	    {% end %}
+	    {% end %}
 	  </table>
 	</td>
       </tr>
@@ -278,7 +278,9 @@
     </table>
   </div>
 </div>
+{% end %} {# block main_content #}
 
+{% block sub_main_content %}
 <table class="table table-condensed table-noborder table-hierarchy">
 {# Recursion: 'include' cannot be used! #}
 {% module Template('order_fields.html', fields=fields, order=order, is_staff=is_staff) %}
@@ -327,4 +329,4 @@
 </div>
 {% end %}{# if is_attachable #}
 
-{% end %} {# block main_content #}
+{% end %} {# block sub_main_content #}

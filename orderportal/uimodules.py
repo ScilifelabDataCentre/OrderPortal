@@ -173,3 +173,86 @@ class ShortenedPre(tornado.web.UIModule):
                 line = line[:maxlength] + '...'
                 lines[pos] = line
         return "<pre>%s</pre>" % '\n'.join(lines)
+
+
+class TableRows(tornado.web.UIModule):
+    "Display the table rows."
+
+    def render(self, field, value):
+        assert field['type'] == constants.TABLE
+        result = ['<tr>', '<th></th>']
+        for coldef in field['table']:
+            column = utils.parse_field_table_column(coldef)
+            header = column['identifier']
+            if column['type'] in (constants.INT, constants.FLOAT):
+                header += " (%s)" % column['type']
+            result.append("<th>%s</th>" % header)
+        result.append('</tr>')
+        if value:
+            for i, row in enumerate(value):
+                result.append('<tr>')
+                result.append('<td class="number">%s</td>' % (i+1))
+                for cell in row:
+                    if cell is None:
+                        cell = ''
+                    result.append("<td>%s</td>" % cell)
+        result.append('</tr>')
+        return '\n'.join(result)
+
+
+class TableRowsEdit(tornado.web.UIModule):
+    "Display the table rows for editing."
+
+    def render(self, field, value):
+        assert field['type'] == constants.TABLE
+        result = ['<tr>', '<th></th>']
+        columns = []
+        for coldef in field['table']:
+            column = utils.parse_field_table_column(coldef)
+            columns.append(column)
+            header = column['identifier']
+            if column['type'] in (constants.INT, constants.FLOAT):
+                header += " (%s)" % column['type']
+            result.append("<th>%s</th>" % header)
+        result.append('</tr>')
+        if value:
+            for i, row in enumerate(value):
+                rowid = "_table_%s_%s" % (field['identifier'], i)
+                result.append('<tr id="%s">' % rowid)
+                result.append('<td class="table-input-row-0">%s</td>' % (i+1))
+                for j, cell in enumerate(columns):
+                    try:
+                        cell = row[j]
+                        if cell is None: cell = ''
+                    except IndexError:
+                        cell = ''
+                    result.append('<td>')
+                    name = "_table_%s_%s_%s" % (field['identifier'], i, j)
+                    if columns[j]['type'] == constants.SELECT:
+                        result.append('<select class="form-control" name="%s">'
+                                      % name)
+                        for option in columns[j]['options']:
+                            if option == cell:
+                                result.append('<option selected>%s</option>'
+                                              % option)
+                            else:
+                                result.append('<option>%s</option>' % option)
+                        result.append('</select>')
+                    elif columns[j]['type'] == constants.INT:
+                        result.append('<input type="number" step="1"'
+                                      ' class="form-control"'
+                                      ' name="%s" value="%s">' % (name, cell))
+                    elif columns[j]['type'] == constants.FLOAT:
+                        result.append('<input type="number"'
+                                      ' class="form-control"'
+                                      ' name="%s" value="%s">' % (name, cell))
+                    else: # Default input type: text
+                        result.append('<input type="text" class="form-control"'
+                                      ' name="%s" value="%s">' % (name, cell))
+                result.append('<td>'
+                              '<button type="button" class="btn btn-danger"'
+                              ''' onclick="$('#%s').remove()">Delete'''
+                              '</button>'
+                              '</td>' % rowid)
+                result.append('</tr>')
+        return '\n'.join(result)

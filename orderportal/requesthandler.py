@@ -139,7 +139,7 @@ class RequestHandler(tornado.web.RequestHandler):
         account = self.get_account(email)
         # Check if login session is invalidated.
         if account.get('login') is None: raise ValueError
-        logging.info("Session login: account %s", account['email'])
+        logging.info("Session authentication: %s", account['email'])
         return account
 
     def get_current_user_basic(self):

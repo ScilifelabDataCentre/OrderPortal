@@ -240,17 +240,22 @@ class OrderSaver(saver.Saver):
                 else:         # HTML form input: individual cells.
                     try:
                         name = "_table_%s_count" % identifier
-                        count = int(self.rqh.get_argument(name, 0))
+                        n_rows = int(self.rqh.get_argument(name, 0))
                     except (ValueError, TypeError):
-                        count = 0
-                    n_columns = len(field['table'])
+                        n_rows = 0
+                    coldefs = [utils.parse_field_table_column(c)
+                               for c in field['table']]
+                    n_columns = len(coldefs)
                     if n_columns:
                         value = []
-                        for i in xrange(count):
+                        for i in xrange(n_rows):
                             row = []
                             for j in xrange(n_columns):
                                 name = "_table_%s_%i_%i" % (identifier, i, j)
                                 item = self.rqh.get_argument(name, None)
+                                if coldefs[j].get('type') == 'select':
+                                    if item not in coldefs[j]['options']:
+                                        item = None
                                 row.append(item or None)
                             for item in row:
                                 if item is not None:
@@ -1253,19 +1258,33 @@ class OrderEdit(OrderMixin, RequestHandler):
         hidden_fields = set([f['identifier'] for f in fields.flatten()
                              if f['type'] != 'multiselect'])
         # For each table input field, create code for use in bespoke JavaScript
-        rowcodes = dict()
+        tableinputs = {}
         for field in fields.flatten():
             if field['type'] != 'table': continue
-            rowcode = ["<tr>"
-                       "<td id='rowid__' class='table-input-row-0'></td>"]
-            for i, item in enumerate(field['table']):
+            tableinput = ["<tr>"
+                          "<td id='rowid__' class='table-input-row-0'></td>"]
+            for i, coldef in enumerate(field['table']):
+                column = utils.parse_field_table_column(coldef)
                 rowid = "rowid_%s" % i
-                rowcode.append(
-                    "<td>"
-                    "<input type='text' class='form-control' name='%s' id='%s'>"
-                    "</td>" % (rowid, rowid))
-            rowcode.append("</tr>")
-            rowcodes[field['identifier']] = ''.join(rowcode)
+                if column['type'] == constants.SELECT:
+                    inp = ["<select class='form-control' name='%s' id='%s'>"
+                           % (rowid, rowid)]
+                    inp.extend(["<option>%s</option>" % o
+                                for o in column['options']])
+                    inp = ''.join(inp)
+                elif column['type'] == constants.INT:
+                    inp = "<input type='number' step='1' class='form-control'"\
+                          " name='%s' id='%s'>" % (rowid, rowid)
+                elif column['type'] == constants.FLOAT:
+                    inp = "<input type='number' step='%s'" \
+                          " class='form-control' name='%s' id='%s'>" % \
+                          (constants.FLOAT_STEP, rowid, rowid)
+                else:           # default type: 'string'
+                    inp = "<input type='text' class='form-control'" \
+                          " name='%s' id='%s'>" % (rowid, rowid)
+                tableinput.append("<td>%s</td>" % inp)
+            tableinput.append("</tr>")
+            tableinputs[field['identifier']] = ''.join(tableinput)
         self.render('order_edit.html',
                     title=u"Edit {0} '{1}'".format(utils.terminology('order'),
                                                    order['title']),
@@ -1276,7 +1295,7 @@ class OrderEdit(OrderMixin, RequestHandler):
                     form=form,
                     fields=form['fields'],
                     hidden_fields=hidden_fields,
-                    rowcodes=rowcodes)
+                    tableinputs=tableinputs)
 
     @tornado.web.authenticated
     def post(self, iuid):

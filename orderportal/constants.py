@@ -62,8 +62,10 @@ TABLE   = 'table'
 ### FILE    = 'file'
 TYPES = [STRING, EMAIL, INT, FLOAT, BOOLEAN, URL, SELECT, MULTISELECT,
          TEXT, DATE, TABLE, FILE, GROUP]
-TYPE_LABELS = {INT: 'integer'}
-TYPE_HTML = {STRING: 'text', INT: 'number', EMAIL: 'email'}
+TYPE_HTML = {STRING: 'text', INT: 'number', DATE: 'date', 
+             EMAIL: 'email', URL: 'url'}
+# Step for use with input type 'float'
+FLOAT_STEP = '0.0000001'
 
 # Texts for use in web site
 TEXTS = dict(header='Header on portal home page.',
