@@ -1266,13 +1266,20 @@ class OrderEdit(OrderMixin, RequestHandler):
             for i, coldef in enumerate(field['table']):
                 column = utils.parse_field_table_column(coldef)
                 rowid = "rowid_%s" % i
-                if column.get('type') == 'select':
+                if column['type'] == constants.SELECT:
                     inp = ["<select class='form-control' name='%s' id='%s'>"
                            % (rowid, rowid)]
                     inp.extend(["<option>%s</option>" % o
                                 for o in column['options']])
                     inp = ''.join(inp)
-                else:           # type == 'string'
+                elif column['type'] == constants.INT:
+                    inp = "<input type='number' step='1' class='form-control'"\
+                          " name='%s' id='%s'>" % (rowid, rowid)
+                elif column['type'] == constants.FLOAT:
+                    inp = "<input type='number' step='%s'" \
+                          " class='form-control' name='%s' id='%s'>" % \
+                          (constants.FLOAT_STEP, rowid, rowid)
+                else:           # default type: 'string'
                     inp = "<input type='text' class='form-control'" \
                           " name='%s' id='%s'>" % (rowid, rowid)
                 tableinput.append("<td>%s</td>" % inp)

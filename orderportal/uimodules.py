@@ -183,7 +183,10 @@ class TableRows(tornado.web.UIModule):
         result = ['<tr>', '<th></th>']
         for coldef in field['table']:
             column = utils.parse_field_table_column(coldef)
-            result.append("<th>%s</th>" % column['identifier'])
+            header = column['identifier']
+            if column['type'] in (constants.INT, constants.FLOAT):
+                header += " (%s)" % column['type']
+            result.append("<th>%s</th>" % header)
         result.append('</tr>')
         if value:
             for i, row in enumerate(value):
@@ -203,22 +206,47 @@ class TableRowsEdit(tornado.web.UIModule):
     def render(self, field, value):
         assert field['type'] == constants.TABLE
         result = ['<tr>', '<th></th>']
+        columns = []
         for coldef in field['table']:
             column = utils.parse_field_table_column(coldef)
-            result.append("<th>%s</th>" % column['identifier'])
+            columns.append(column)
+            header = column['identifier']
+            if column['type'] in (constants.INT, constants.FLOAT):
+                header += " (%s)" % column['type']
+            result.append("<th>%s</th>" % header)
         result.append('</tr>')
         if value:
             for i, row in enumerate(value):
                 rowid = "_table_%s_%s" % (field['identifier'], i)
                 result.append('<tr id="%s">' % rowid)
                 result.append('<td class="table-input-row-0">%s</td>' % (i+1))
-                for j, cell in enumerate(row):
-                    if cell is None: cell = ''
+                for j, cell in enumerate(columns):
+                    try:
+                        cell = row[j]
+                        if cell is None: cell = ''
+                    except IndexError:
+                        cell = ''
                     result.append('<td>')
-                    if column['type'] == 'select':
-                        pass # %%%
-                    else:
-                        name = "_table_%s_%s_%s" % (field['identifier'], i, j)
+                    name = "_table_%s_%s_%s" % (field['identifier'], i, j)
+                    if columns[j]['type'] == constants.SELECT:
+                        result.append('<select class="form-control" name="%s">'
+                                      % name)
+                        for option in columns[j]['options']:
+                            if option == cell:
+                                result.append('<option selected>%s</option>'
+                                              % option)
+                            else:
+                                result.append('<option>%s</option>' % option)
+                        result.append('</select>')
+                    elif columns[j]['type'] == constants.INT:
+                        result.append('<input type="number" step="1"'
+                                      ' class="form-control"'
+                                      ' name="%s" value="%s">' % (name, cell))
+                    elif columns[j]['type'] == constants.FLOAT:
+                        result.append('<input type="number"'
+                                      ' class="form-control"'
+                                      ' name="%s" value="%s">' % (name, cell))
+                    else: # Default input type: text
                         result.append('<input type="text" class="form-control"'
                                       ' name="%s" value="%s">' % (name, cell))
                 result.append('<td>'

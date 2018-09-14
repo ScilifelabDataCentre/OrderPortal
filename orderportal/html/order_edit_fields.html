@@ -228,15 +228,19 @@
       Currently loaded file: {{ value }}
       {% end %}
 
-    {% else %} {# All other field types: STRING, EMAIL, INT, FLOAT, URL #}
-    {% if value is None %}
-    {% set value = '' %}
-    {% end %}
+    {% elif field['type'] == constants.FLOAT %}
+    <input type="number" step="{{ constants.FLOAT_STEP }}"
+	   class="form-control visible-if-source"
+	   name="{{ field['identifier'] }}"
+	   id="{{ field['identifier'] }}"
+	   value="{{ '' if value is None else value  }}">
+
+    {% else %} {# All other field types: STRING, EMAIL, INT, URL #}
     <input type="{{ constants.TYPE_HTML.get(field['type'], 'text') }}"
 	   class="form-control visible-if-source"
 	   name="{{ field['identifier'] }}"
 	   id="{{ field['identifier'] }}"
-	   value="{{ value }}">
+	   value="{{ '' if value is None else value  }}">
     {% end %} {# elif field['type'] == #}
     
     {% if field['required'] %}

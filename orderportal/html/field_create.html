@@ -84,7 +84,7 @@
 	<select class="form-control visible-if-source"
 		name="type" id="type">
 	  {% for type in constants.TYPES %}
-	  <option value="{{ type }}">{{ constants.TYPE_LABELS.get(type, type) }}</option>
+	  <option value="{{ type }}">{{ type }}</option>
 	  {% end %}
 	</select>
       </div>
