@@ -282,6 +282,11 @@
 
 {% block sub_main_content %}
 <table class="table table-condensed table-noborder table-hierarchy">
+  <colgroup>
+    <col>
+    <col class="table-width60 left">
+    <col>
+  </colgroup>
 {# Recursion: 'include' cannot be used! #}
 {% module Template('order_fields.html', fields=fields, order=order, is_staff=is_staff) %}
 </table>

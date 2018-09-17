@@ -19,8 +19,10 @@
 .table-noborder > tbody > tr > th {border-width: 0px; }
 .table-noborder > tbody > tr > td {border-width: 0px; }
 
-.table-hierarchy { margin-bottom: 0px; }
-.table-hierarchy td.left { text-align: left; padding-left: 1em; }
+.table-hierarchy {margin-bottom: 0px; }
+.table-hierarchy td.left {text-align: left; padding-left: 1em; }
+
+.table-width60 {width: 60%};
 
 .table-input-row-0 {vertical-align: middle !important;
                     text-align: right;
