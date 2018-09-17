@@ -193,8 +193,7 @@ class TableRows(tornado.web.UIModule):
                 result.append('<tr>')
                 result.append('<td class="number">%s</td>' % (i+1))
                 for cell in row:
-                    if cell is None:
-                        cell = ''
+                    if cell is None: cell = ''
                     result.append("<td>%s</td>" % cell)
         result.append('</tr>')
         return '\n'.join(result)

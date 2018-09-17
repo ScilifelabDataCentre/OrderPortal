@@ -37,7 +37,7 @@
       {% end %}
     </div>
   </th>
-  <td width="60%" class="left">
+  <td>
     {% if field.get('description') %}
     <div id="_collapsible_{{ field['identifier'] }}" class="collapse small">
       {% module Markdown(field.get('description')) %}
@@ -101,7 +101,7 @@
       {% end %}
     </div>
   </th>
-  <td width="60%" class="left">
+  <td>
     {% set value = order['fields'].get(field['identifier']) %}
     {% if field['type'] == constants.TEXT %}
       {% module Markdown(value or '-') %}
