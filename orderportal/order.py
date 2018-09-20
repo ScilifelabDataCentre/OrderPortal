@@ -58,6 +58,7 @@ class OrderSaver(saver.Saver):
         if form['status'] in (constants.ENABLED, constants.DISABLED):
             try:
                 fmt = settings['ORDER_IDENTIFIER_FORMAT']
+                if not fmt: raise KeyError
             except KeyError:    # No identifier; sequential counter not used
                 pass
             else:               # Identifier; sequential counter is used
@@ -484,7 +485,9 @@ class OrderMixin(object):
         """Get the order for the identifier or IUID.
         Raise ValueError if no such order."""
         try:
-            match = re.match(settings['ORDER_IDENTIFIER_REGEXP'], iuid)
+            regexp = settings['ORDER_IDENTIFIER_REGEXP']
+            if not regexp: raise KeyError
+            match = re.match(regexp, iuid)
             if not match: raise KeyError
         except KeyError:
             try:

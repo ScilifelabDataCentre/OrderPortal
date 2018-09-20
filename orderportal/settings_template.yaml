@@ -1,47 +1,50 @@
-# OrderPortal: Settings file.
+# OrderPortal: Settings file, to be edited for your instance.
 
-# This file changes the default values set in the 'settings' dictionary
-# defined in the '__init__.py' file.
+# This file changes the default values defined in the 'settings' dictionary
+# in the '__init__.py' file.
 
 ### You should copy this file to 'settings.yaml', which is
 ### the file that 'app_orderportal.py' looks for by default.
-### You must customize many of these for your own site.
 
 # Official URL to the portal; access from the outside world.
 BASE_URL: 'http://my-domain.com/'
-# XXX This may be useful for testing on a laptop
-# XXX BASE_URL: 'http://localhost:8880/'
+# The following may be useful for testing on a laptop:
+# BASE_URL: 'http://localhost:8880/'
 
-# tornado server port; may be different from the above if proxy is used.
+# Port for the tornado server; may be different from BASE_URL if proxy is used.
 PORT: 8880
 
 # CouchDB server
 DATABASE_SERVER:   'http://localhost:5984/'
 DATABASE_NAME:     'orderportal'
-DATABASE_ACCOUNT:  'couchdb_account'
-DATABASE_PASSWORD: 'pwd'
+DATABASE_ACCOUNT:  'orderportal_account'
+DATABASE_PASSWORD: 'Change this to CouchDB account password'
 
-# Logging and debug.
+# Logging and debug
 TORNADO_DEBUG: true
 LOGGING_DEBUG: true
 LOGGING_FILEPATH: '/var/log/orderportal/debug.log'
 
-# Login
+# Login; these *must* be changed for your instance.
 COOKIE_SECRET: 'Change this to a long string of random characters.'
 PASSWORD_SALT: 'Change this to a long string of random characters.'
 
-# Customize for your site
-SITE_DIR:           '{ROOT_DIR}/my-site'
+# The name of your instance, and support email address.
 SITE_NAME:          'My Order Portal'
 SITE_SUPPORT_EMAIL: 'my.email@my-domain.com'
+
+# The site directory; contains status icons, logos, definition YAML files.
+SITE_DIR:           '{ROOT_DIR}/my-site'
 
 # The icon files must be in the SITE_DIR; absolute file path is not allowed.
 SITE_FAVICON:     'orderportal32.png'
 SITE_NAVBAR_ICON: 'orderportal32.png'
 SITE_HOME_ICON:   'orderportal144.png'
 
-# Account setup
+# Account setup; email message templates.
 ACCOUNT_MESSAGES_FILEPATH: '{SITE_DIR}/account_messages.yaml'
+
+# Account registration input flags.
 ACCOUNT_INVOICE_INFO: true
 ACCOUNT_FUNDER_INFO: true
 ACCOUNT_DEFAULT_COUNTRY_CODES: 'SE'
@@ -51,10 +54,10 @@ ORDER_STATUSES_FILEPATH:    '{SITE_DIR}/order_statuses.yaml'
 ORDER_TRANSITIONS_FILEPATH: '{SITE_DIR}/order_transitions.yaml'
 ORDER_MESSAGES_FILEPATH:    '{SITE_DIR}/order_messages.yaml'
 
-# Allow users to set tags on orders
+# Allow users to set tags on orders.
 ORDER_USER_TAGS: true
 
-# Use sequentially numbered order identifiers
+# Define in order to use sequentially numbered order identifiers.
 ORDER_IDENTIFIER_FORMAT: 'MY{0:=05d}'
 ORDER_IDENTIFIER_REGEXP: 'MY\d+'
 
@@ -81,6 +84,6 @@ MESSAGE_SENDER_EMAIL: '"OrderPortal Support" <support@my-domain.com>'
 EMAIL:
   HOST: 'localhost'
 
-# Display setting
+# Display settings.
 DISPLAY_NEWS: true
 DISPLAY_EVENTS: true

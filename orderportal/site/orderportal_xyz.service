@@ -1,0 +1,13 @@
+[Unit]
+Description=Python app OrderPortal xyz instance
+After=network.target couchdb.service
+
+[Service]
+Type=simple
+PIDFile=/var/www/apps/xyz/OrderPortal/orderportal/xyz/tornado.pid
+ExecStart=/var/www/apps/xyz/OrderPortal/orderportal/app_orderportal.py
+Environment="PYTHONPATH=/var/www/apps/xyz/OrderPortal:$PYTHONPATH"
+Restart=always
+User=nginx
+[Install]
+WantedBy=default.target
