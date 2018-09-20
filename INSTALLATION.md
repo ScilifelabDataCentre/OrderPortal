@@ -11,7 +11,7 @@ Please adjust or replace by whatever is mandated by the policies at your site.
 Source code setup
 -----------------
 
-The SciLifeLab instances are setup as the nginx user.
+The Linux account `nginx` is used to host the SciLifeLab instance files.
 
 Clone the GitHub repo:
 
@@ -20,7 +20,7 @@ Clone the GitHub repo:
     $ cd xyz
     $ sudo -u nginx git clone https://github.com/pekrau/OrderPortal.git
 
-Create the site subdirectory using the template:
+Create the `site` subdirectory using the template:
 
     $ cd OrderPortal/orderportal
     $ sudo -u nginx cp -r site xyz
@@ -28,13 +28,16 @@ Create the site subdirectory using the template:
 The files in your `xyz` directory may need modification for your needs.
 In particular, the YAML files may need to be adjusted or replaced.
 
-Download and install the required third-party Python modules using the
-`requirements.txt` file. The directory `/var/www/apps/xyz/OrderPortal` 
-must be in the PYTHONPATH.
+All Python commands below rely on the Python path being correctly set.
+This can be included in a `.bashrc` file or executed interactively:
 
-    $ cd /var/www/apps/xyz/OrderPortal
-    $ export PYTHONPATH="${PYTHONPATH}:${PWD}"
-    $ pip install -r requirements.txt
+    $ export PYTHONPATH="${PYTHONPATH}:/var/www/apps/xyz/OrderPortal"
+
+Download and install the required third-party Python modules using the
+`requirements.txt` file. Whether you should do this as `root` or some other
+user depends on your policy.
+
+    $ sudo pip install -r requirements.txt
 
 The command code examples below assume that the PYTHONPATH environment
 variable has been set, as shown above.
@@ -102,14 +105,14 @@ System service
 
 The tornado server should be executed as a system service. This depends
 on the operating system. For SELinux, a template systemd file is available at
-[site/orderportal_xyz.service](/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.service).
+`[site/orderportal_xyz.service](https:/github.com/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.service)`.
 
 nginx configuration
 -------------------
 
 In our case, the tornado server is made available by reverse-proxy
 through nginx. The template nginx file is available at
-[site/orderportal_xyz.conf](/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.conf).
+`[site/orderportal_xyz.conf](https:/github.com/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.conf)`.
 
 Backup
 ------
@@ -119,7 +122,8 @@ to a tar file. Create a backup directory:
 
     $ sudo mkdir /home/backup/backup_files/orderportal_xyz
 
-Copy the template bash backup script [site/orderportal_xyz.bash](/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.service).
+Copy the template bash backup script
+`[site/orderportal_xyz.bash](https:/github.com/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.service)`.
 Create and edit the backup dump script:
 
     $ cd /etc/scripts
