@@ -4,12 +4,10 @@ OrderPortal
 A portal for orders (requests, project applications, etc) to a
 facility from its users.
 
-See also:
-
-- [INSTALLATION.md](INSTALLATION.md).
+Installation instructions are in [INSTALLATION.md](INSTALLATION.md).
 
 The [GitHub wiki](https://github.com/pekrau/OrderPortal/wiki) contains
-technical instructions and information.
+more information.
 
 Background
 ----------
@@ -18,7 +16,7 @@ The OrderPortal system was created to satisfy the needs of the
 [National Genomics Infrastructure (NGI) Sweden](https://ngisweden.scilifelab.se/),
 which is a service facility for DNA sequencing and genotyping on
 samples provided by external researchers. The facility processes
-the samples according to the order from the scientist.
+the samples according to the order from the researcher.
 
 The OrderPortal system has been designed to work for any type of
 service facility that handles discrete orders. It may also be used for
