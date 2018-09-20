@@ -4,6 +4,10 @@ OrderPortal
 A portal for orders (requests, project applications, etc) to a
 facility from its users.
 
+See also:
+
+- [INSTALLATION.md](INSTALLATION.md).
+
 The [GitHub wiki](https://github.com/pekrau/OrderPortal/wiki) contains
 technical instructions and information.
 
