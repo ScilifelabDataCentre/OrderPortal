@@ -105,14 +105,14 @@ System service
 
 The tornado server should be executed as a system service. This depends
 on the operating system. For SELinux, a template systemd file is available at
-[site/orderportal_xyz.service](https:/github.com/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.service).
+[site/orderportal_xyz.service](https://github.com/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.service).
 
 nginx configuration
 -------------------
 
 In our case, the tornado server is made available by reverse-proxy
 through nginx. The template nginx file is available at
-[site/orderportal_xyz.conf](https:/github.com/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.conf).
+[site/orderportal_xyz.conf](https://github.com/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.conf).
 
 Backup
 ------
@@ -123,13 +123,12 @@ to a tar file. Create a backup directory:
     $ sudo mkdir /home/backup/backup_files/orderportal_xyz
 
 Copy the template bash backup script
-[site/orderportal_xyz.bash](https:/github.com/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.service).
-Create and edit the backup dump script:
+[site/orderportal_xyz.bash](https://github.com/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.bash):
 
     $ cd /etc/scripts
-    cp dump_orderportal_facrep.bash dump_orderportal_protcore.bash
+    $ sudo cp dump_orderportal_facrep.bash dump_orderportal_protcore.bash
 
-The crontab entry looks like this:
+The crontab entry should look like this:
 
 45 22 * * * /etc/scripts/dump_orderportal_protcore.bash
 
