@@ -123,7 +123,7 @@ to a tar file. Create a backup directory:
     $ sudo mkdir /home/backup/backup_files/orderportal_xyz
 
 Copy the template bash backup script
-[site/orderportal_xyz.bash](https://github.com/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.bash):
+[site/dump_orderportal_xyz.bash](https://github.com/pekrau/OrderPortal/blob/master/orderportal/site/dump_orderportal_xyz.bash):
 
     $ cd /etc/scripts
     $ sudo cp dump_orderportal_facrep.bash dump_orderportal_protcore.bash
