@@ -127,10 +127,15 @@ to a tar file. Create a backup directory:
 Copy, rename and edit the template bash backup script
 [orderportal/site/dump_orderportal_xyz.bash](orderportal/site/dump_orderportal_xyz.bash):
 
-    $ cd /var/www/apps/xyz/OrderPortal/orderportal/site
-    $ sudo cp dump_orderportal_xyz.bash /etc/scripts/dump_orderportal_xyz.bash
+    $ cd /etc/scripts
+    $ sudo cp /var/www/apps/xyz/OrderPortal/orderportal/site/dump_orderportal_xyz.bash dump_orderportal_xyz.bash
 
-The line in the crontab file should be something like this:
+Edit the crontab file:
+
+    $ export EDITOR=emacs
+    $ crontab -e
+
+The line in the crontab file should look something like this:
 
 45 22 * * * /etc/scripts/dump_orderportal_xyz.bash
 
