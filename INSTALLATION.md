@@ -1,12 +1,11 @@
 Installation
 ============
 
-These installation instructions are valid for the instances running on
-the data-office machine at SciLifeLab. It will have to be adapted for
-other sites. In particular, the name "**xyz**" needs to be changed for your
-case.
+This installation instruction is derived from the procedure used for
+the instances running on the data-office machine at SciLifeLab. It
+will have to be adapted for your site.
 
-Please adjust or replace by whatever is mandated by the policies at your site.
+The name **xyz** is used below as a placeholder for the name of your instance.
 
 Source code setup
 -----------------
@@ -20,27 +19,19 @@ Clone the GitHub repo:
     $ cd xyz
     $ sudo -u nginx git clone https://github.com/pekrau/OrderPortal.git
 
-Create the `site` subdirectory using the template:
+Create the subdirectory for your site using the `site` template:
 
     $ cd OrderPortal/orderportal
     $ sudo -u nginx cp -r site xyz
 
-The files in your `xyz` directory may need modification for your needs.
+The files in your `xyz` directory most likely need to be modified.
 In particular, the YAML files may need to be adjusted or replaced.
-
-All Python commands below rely on the Python path being correctly set.
-This can be included in a `.bashrc` file or executed interactively:
-
-    $ export PYTHONPATH="${PYTHONPATH}:/var/www/apps/xyz/OrderPortal"
 
 Download and install the required third-party Python modules using the
 `requirements.txt` file. Whether you should do this as `root` or some other
-user depends on your policy.
+user depends on your local policy.
 
     $ sudo pip install -r requirements.txt
-
-The command code examples below assume that the PYTHONPATH environment
-variable has been set, as shown above.
 
 Settings file
 -------------
@@ -67,7 +58,7 @@ It is assumed that you already have a CouchDB instance running.
   - Go to the database **_users** and open the document for the user
     **orderportal_xyz**.
   - Create a new field with the key "password", and set its value to the
-    secret password. This password must be edited into the settings file.
+    secret password. This password must also be edited into the settings file.
   - When you save the document, CouchDB will hash the password and remove
     the password field.
 - Create the database **orderportal_xyz** in CouchDB.
@@ -82,12 +73,12 @@ Initialize the database in CouchDB to load the design documents (index
 definitions). This requires a valid **settings** file.
 
     $ cd /var/www/apps/xyz/OrderPortal/orderportal
-    $ sudo -u nginx python2 init_database.py
+    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python2 init_database.py
 
 Create the first admin account in the database by running a script that
 will interactively ask for input:
 
-    $ sudo -u nginx python2 create_admin.py
+    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python2 create_admin.py
 
 Logging
 -------
@@ -105,14 +96,23 @@ System service
 
 The tornado server should be executed as a system service. This depends
 on the operating system. For SELinux, a template systemd file is available at
-[site/orderportal_xyz.service](orderportal/site/orderportal_xyz.service).
+[orderportal/site/orderportal_xyz.service](orderportal/site/orderportal_xyz.service). Copy, rename and edit it.
 
-nginx configuration
--------------------
+    $ cd /etc/systemd/system
+    $ sudo cp /var/www/apps/ddd/OrderPortal/orderportal/site/orderportal_xyz.service orderportal_ddd.service
+    $ sudo emacs orderportal_ddd.service
+
+HTTP nginx configuration
+------------------------
 
 In our case, the tornado server is made available by reverse-proxy
 through nginx. The template nginx file is available at
-[site/orderportal_xyz.conf](https://github.com/pekrau/OrderPortal/blob/master/orderportal/site/orderportal_xyz.conf).
+[orderportal/site/orderportal_xyz.conf](orderportal/site/orderportal_xyz.conf).
+Copy, rename and edit it. In particular, ensure that the URL and port is
+specified correctly.
+
+    $ cd /etc/nginx/conf.d
+    $ sudo cp /var/www/apps/ddd/OrderPortal/orderportal/site/orderportal_xyz.conf orderportal_ddd.conf
 
 Backup
 ------
@@ -122,17 +122,15 @@ to a tar file. Create a backup directory:
 
     $ sudo mkdir /home/backup/backup_files/orderportal_xyz
 
-Copy the template bash backup script
-[site/dump_orderportal_xyz.bash](https://github.com/pekrau/OrderPortal/blob/master/orderportal/site/dump_orderportal_xyz.bash):
+Copy, rename and edit the template bash backup script
+[orderportal/site/dump_orderportal_xyz.bash](orderportal/site/dump_orderportal_xyz.bash):
 
     $ cd /var/www/apps/xyz/OrderPortal/orderportal/site
-    $ sudo cp dump_orderportal_xyz.bash /etc/scripts
+    $ sudo cp dump_orderportal_xyz.bash /etc/scripts/dump_orderportal_xyz.bash
 
 The line in the crontab file should be something like this:
 
 45 22 * * * /etc/scripts/dump_orderportal_xyz.bash
-
-Rename the script, as appropriate for your site.
 
 Maintenance, updates
 --------------------
@@ -141,17 +139,12 @@ To update the source code from the GitHub repo:
 
     $ cd /var/www/apps/xyz/OrderPortal
     $ sudo -u nginx git pull
-    $ sudo systemctl {status|start|stop|restart} orderportal_xyz
-
-If not done, set the PYTHONPATH environment variable:
-
-    $ cd /var/www/apps/xyz/OrderPortal
-    $ export PYTHONPATH="${PYTHONPATH}:${PWD}"
+    $ sudo systemctl restart orderportal_xyz
 
 To load any new CouchDB design documents (i.e. index definitions):
 
     $ cd /var/www/apps/xyz/OrderPortal/orderportal
-    $ sudo -u nginx python2 load_designs.py
+    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python2 load_designs.py
 
 Unless the OrderPortal app is running in debug mode, the tornado server
 will have to be restarted.
