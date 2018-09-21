@@ -93,12 +93,14 @@ the tornado server can write to. For example:
     $ sudo mkdir orderportal_xyz
     $ sudo chown nginx.nginx orderportal_xyz
 
-System service
+Tornado server
 --------------
 
-The tornado server should be executed as a system service. This depends
-on the operating system. For SELinux, a template systemd file is available at
-[orderportal/site/orderportal_xyz.service](orderportal/site/orderportal_xyz.service). Copy, rename and edit it.
+The tornado server should be executed as a system service. The
+mechanism for this depends on the operating system. For SELinux, a
+template systemd file is available at
+[orderportal/site/orderportal_xyz.service](orderportal/site/orderportal_xyz.service).
+Copy, rename and edit it.
 
     $ cd /etc/systemd/system
     $ sudo cp /var/www/apps/ddd/OrderPortal/orderportal/site/orderportal_xyz.service orderportal_ddd.service
@@ -107,14 +109,15 @@ on the operating system. For SELinux, a template systemd file is available at
 HTTP nginx configuration
 ------------------------
 
-In our case, the tornado server is made available by reverse-proxy
-through nginx. The template nginx file is available at
+In our case, the tornado server is accessed through a reverse-proxy
+via nginx. The template nginx file is available at
 [orderportal/site/orderportal_xyz.conf](orderportal/site/orderportal_xyz.conf).
 Copy, rename and edit it. In particular, ensure that the URL and port is
 specified correctly.
 
     $ cd /etc/nginx/conf.d
     $ sudo cp /var/www/apps/ddd/OrderPortal/orderportal/site/orderportal_xyz.conf orderportal_ddd.conf
+    $ sudo emacs orderportal_ddd.conf
 
 Backup
 ------
