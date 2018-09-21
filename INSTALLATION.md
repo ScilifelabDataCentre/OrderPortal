@@ -5,21 +5,23 @@ This installation instruction is derived from the procedure used for
 the instances running on the data-office machine at SciLifeLab. It
 will have to be adapted for your site.
 
+The Linux account `nginx` is used to host the instance files. Change
+according to the policy at your site.
+
 The name **xyz** is used below as a placeholder for the name of your instance.
 
 Source code setup
 -----------------
 
-The Linux account `nginx` is used to host the SciLifeLab instance files.
-
-Clone the GitHub repo:
+Clone the GitHub repo. The commands below use the base GitHub repo;
+substitute by whichever fork you are using.
 
     $ cd /var/www/apps
     $ sudo -u nginx mkdir xyz
     $ cd xyz
     $ sudo -u nginx git clone https://github.com/pekrau/OrderPortal.git
 
-Create the subdirectory for your site using the `site` template:
+Create the subdirectory for your instance using the `site` template:
 
     $ cd OrderPortal/orderportal
     $ sudo -u nginx cp -r site xyz
@@ -29,15 +31,15 @@ In particular, the YAML files may need to be adjusted or replaced.
 
 Download and install the required third-party Python modules using the
 `requirements.txt` file. Whether you should do this as `root` or some other
-user depends on your local policy.
+user depends on the policy at your site.
 
     $ sudo pip install -r requirements.txt
 
 Settings file
 -------------
 
-Create the settings file and edit its contents according to your site. Some
-of the settings depend on actions described below.
+Create the settings file and edit its contents according to your instance.
+Some of the settings depend on actions described below.
 
     $ cd /var/www/apps/xyz/OrderPortal/orderportal
     $ sudo -u nginx cp settings_template.yaml settings.yaml
