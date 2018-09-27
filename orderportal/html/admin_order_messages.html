@@ -2,19 +2,17 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}Order messages{% end %}
+{% block head_title %}{{ terminology('Order') }} messages{% end %}
 
-{% block body_title %}
-Order messages
-<small>Templates for messages for order status changes.</small>
-{% end %}
+{% block body_title %}{{ terminology('Order') }} messages{% end %}
 
 {% block main_content %}
 <div class="well">
   <p>
-    The order messages are defined in the YAML file 
-    <code>{{ settings.get('ORDER_MESSAGES_FILEPATH') }}</code> 
-    which is read on startup of the OrderPortal server.
+    The templates for {{ terminology('order') }} messages are defined
+    in the YAML file
+    <code>{{ settings.get('ORDER_MESSAGES_FILEPATH') }}</code> which
+    is read on startup of the OrderPortal server.
   </p>
   <p>
     To change the messages, the YAML file must be edited and the

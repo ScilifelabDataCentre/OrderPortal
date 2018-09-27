@@ -119,7 +119,7 @@ class OrderStatuses(RequestHandler):
                             startkey=[''],
                             endkey=[constants.CEILING])
         counts = dict([(r.key[0], r.value) for r in view])
-        self.render('order_statuses.html', counts=counts)
+        self.render('admin_order_statuses.html', counts=counts)
 
 
 class AdminOrderMessages(RequestHandler):
