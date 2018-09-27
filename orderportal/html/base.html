@@ -142,10 +142,12 @@
 		  <a href="{{ reverse_url('texts') }}">Texts</a>
 		</li>
 		<li>
-		  <a href="{{ reverse_url('order_statuses') }}">Order statuses</a>
+		  <a href="{{ reverse_url('order_statuses') }}">
+                    {{ terminology('Order') }} statuses</a>
 		</li>
 		<li>
-		  <a href="{{ reverse_url('admin_order_messages') }}">Order messages</a>
+		  <a href="{{ reverse_url('admin_order_messages') }}">
+                    {{ terminology('Order') }} messages</a>
 		</li>
 		<li>
 		  <a href="{{ reverse_url('admin_account_messages') }}">Account messages</a>
@@ -203,7 +205,7 @@
 		  <div class="form-group has-feedback">
 		    <input type="search" id="term" name="term"
 			   class="form-control"
-			   placeholder="Search orders">
+			   placeholder="Search {{ terminology('orders') }}">
 		    <span class="glyphicon glyphicon-search form-control-feedback"></span>
 		  </div>
 		</form>
