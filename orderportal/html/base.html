@@ -101,6 +101,7 @@
 	    </li>
 	    {% end %} {# if is_staff #}
 
+            {% if settings['DISPLAY_MENU_INFORMATION'] %}
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">
 		Information
@@ -121,10 +122,13 @@
 		{% end %}
               </ul>
             </li>
+            {% end %}
 
+            {% if settings['DISPLAY_MENU_DOCUMENTS'] %}
 	    <li>
 	      <a href="{{ reverse_url('files') }}">Documents</a>
 	    </li>
+            {% end %}
 
 	    {% if is_admin %}
             <li class="dropdown">

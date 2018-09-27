@@ -4,45 +4,39 @@ OrderPortal
 A portal for orders (requests, project applications, etc) to a
 facility from its users.
 
-Installation instructions are in [INSTALLATION.md](INSTALLATION.md).
+Installation instructions: [INSTALLATION.md](INSTALLATION.md).
 
 The [GitHub wiki](https://github.com/pekrau/OrderPortal/wiki) contains
-more information.
+some additional information.
 
 Background
 ----------
 
-The OrderPortal system was created to satisfy the needs of the
+The OrderPortal system allows basically any type of form-based
+submission of information. It was designed to work for any type of
+service facility that handles discrete orders or project applications,
+reports, etc.
+
+The OrderPortal system was originally created to satisfy the needs of the
 [National Genomics Infrastructure (NGI) Sweden](https://ngisweden.scilifelab.se/),
 which is a service facility for DNA sequencing and genotyping on
 samples provided by external researchers. The facility processes
 the samples according to the order from the researcher.
 
-The OrderPortal system has been designed to work for any type of
-service facility that handles discrete orders. It may also be used for
-other uses, such as project applications, report submission, etc. The
-system allows basically any type of form-based submission of
-information.
-
 The OrderPortal system is not hardcoded for any specific area such as
 DNA sequencing. On the contrary, considerable effort has gone into
 making sure the design is as general as possible. This means that
-installation of the system requires configuration of a number of
-aspects to suite your particular needs.
+installation of the system requires specific settings suite your
+particular needs.
 
 Features
 --------
 
-We (NGI Sweden) needed a portal where users (researchers) can place
-orders for a project to be executed by a research service
-facility. The portal had to have the following features:
-
 * Allow users to register an account, which is approved by the facility staff.
-* Allow the user to specify an order.
+* Allow the user to specify an order according to a predefined form.
 * Allow the user to submit the order to the facility.
 * Let the facility staff keep track of review and agreements.
-* The facility staff can accept an order, thus transforming it
-  into a project.
+* The facility staff can review, accept or decline an order.
 * Allow input from the user of required project data, such as sample sheets.
 * Allow attaching various documents to an order.
 * Display project status reports.
@@ -59,15 +53,16 @@ Investigator (PI) for one or more projects.
 
 An order is created from a template which is called a form in this
 system. The facility administrators must set up and publish the order
-forms for a researcher to be able to create and order. Each form
-contains data fields that can be hierarchically organized.
+forms for a researcher to be able to create an order. Each form
+contains fields for data input by the researcher.
 
 The OrderPortal system is designed for only one facility, displaying
-maybe 3-8 different order forms. The system can be used for several
-facilities within the same organisation by running several independent
-OrderPortal instances. Each instance must use its own database.
+up to about 8 different order forms. If an organization has different
+facilities requiring different sets of forms, then it is best to set
+up different instances of the OrderPortal system, with different
+back-end database instances.
 
-A user account is defined within each OrderPortal instance separately.
+A user account is defined within each OrderPortal instance.
 We decided against a design based on a single central user account
 database for all facilities. The email address of the user is used as
 the user account identifier.
@@ -86,9 +81,10 @@ information pages are under control of the facility administrators.
 The order form
 --------------
 
-The order form fields are fully configurable by the facility administrators
-via the web interface. The field definitions are generic, and allow
-order forms to be designed for a wide variety of input data.
+The order form fields are fully configurable by the facility
+administrators via the web interface. The field definitions are
+generic, and allow order forms to be designed for a wide variety of
+input data.
 
 The order form allows hierarchical grouping of fields, with
 dynamic display according to rules. This allows for cases where a
@@ -99,12 +95,13 @@ When the order form for a facility is changed, previously submitted
 orders are not affected. It is not possible to change the form for
 previously created orders.
 
-Simple info page facility
--------------------------
+Simple info pages
+-----------------
 
-There is a very simple information page facility in the system. This
-is not by far a full-fledged wiki, so it can be used only for basic needs.
-All administrators in the system can edit these pages via the web interface.
+There is a very simple information page subsystem. This is not by far
+a full-fledged wiki, so it can be used only for basic needs.  All
+administrators in the system can edit these pages via the web
+interface. This feature can be disabled by modifying the settings.
 
 Facility
 --------
@@ -165,6 +162,9 @@ if it appears legitimate. The user gets an email about the account
 having been enabled and with instructions on how to set the password
 for it.
 
+Some configuration operations (settings variables) can only be done on
+the command line on the machine hosting the system.
+
 
 Access privileges
 -----------------
@@ -179,10 +179,10 @@ individual order.
 Order: form and fields
 ----------------------
 
-The administrator designs the forms and their set of fields which determine
-what the user must fill in for an order. The administrator can clone a form in
-order to make a new variant. Old forms can be disabled, and new forms
-enabled, as needed.
+The administrator designs the forms and their set of fields which
+determine what the user must fill in for an order. The administrator
+can clone a form in order to make a new variant. Old forms can be
+disabled, and new forms enabled, as needed.
 
 Adding a field in a new form requires deciding on the followin parameters:
 
@@ -232,12 +232,12 @@ an order is configurable. Here is a list of standard statuses:
 | CLOSED      | All work and steps for the order have been done.     |
 
 The statuses and the allowed transitions between them are defined in a
-YAML configuration file for a facility. This allows a facility to
-define other statuses and transitions than the standard ones. It also
-allows new statuses and transitions to be added to an existing
-setup. Removing existing statuses may break the system, and should not
-be attempted; instead, the transitions should be modified to avoid the
-redundant status.
+YAML configuration file. This allows a facility to define other
+statuses and transitions than the standard ones. It also allows new
+statuses and transitions to be added to an existing setup. Removing
+existing statuses may break the system, and should not be attempted;
+instead, the transitions should be modified to avoid the redundant
+status.
 
 Interface
 ---------
@@ -270,27 +270,6 @@ The API allows other systems to interact with the order portal. It is
 based on RESTful principles using JSON and linked data to allow other
 systems to access and/or modify various data entities in the portal.
 
-Publications
-------------
-
-_Future feature_
-
-Facility coordinators and/or users should be allowed to to curate a
-list of publication references associated with the user, and possibly
-with the order.
-
-This will be of help when preparing reports for the grant review of a
-facility.
-
-Additional information
-----------------------
-
-Once an order has been submitted, additional information may be
-required from the user. For example, a sample information sheet may be
-requested by the facility. The facility should be able to specify a
-form for this, which should handle Excel and CSV files up- and
-download.
-
 Attached files
 --------------
 
@@ -300,21 +279,9 @@ to an order or to a sample.
 Links
 -----
 
-_Future feature_
-
 Links to other web pages can be set for orders and samples, allowing
-users to navigate to other relevant information systems. Both facility
-staff and users should be able to set this.
-
-Status
-------
-
-_Future feature_
-
-The system should allow display of a status page, in which the current
-status of the project corresponding to the order is provided to the
-user. The content of this page is extracted from other systems such as
-the LIMS of the laboratory.
+users to navigate to other relevant information systems.
+This feature can be disabled by modifying the settings.
 
 Log
 ---

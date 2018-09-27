@@ -146,6 +146,7 @@
     </span>
   </div>
 
+  {% if settings['ACCOUNT_PI_INFO'] %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
@@ -158,15 +159,16 @@
       </div>
     </div>
   </div>
+  {% end %} {# if settings['ACCOUNT_PI_INFO'] #}
 
-  {% if settings.get('ACCOUNT_FUNDER_INFO') %}
+  {% if settings['ACCOUNT_FUNDER_INFO'] %}
   <div class="panel panel-default">
     <div class="panel-heading">
       Information required by our funders for reporting purposes.
     </div>
     <div class="panel-body">
 
-      {% if settings.get('ACCOUNT_FUNDER_INFO_GENDER') %}
+      {% if settings['ACCOUNT_FUNDER_INFO_GENDER'] %}
       <div class="form-group has-feedback">
 	<div class="row">
 	  <div class="col-md-5">
@@ -187,9 +189,9 @@
 	  </div>
 	</div>
       </div>
-      {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GENDER') #}
+      {% end %} {# if settings['ACCOUNT_FUNDER_INFO_GENDER'] #}
 
-      {% if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') %}
+      {% if settings['ACCOUNT_FUNDER_INFO_GROUP_SIZE'] %}
       <div class="form-group has-feedback">
 	<div class="row">
 	  <div class="col-md-3">
@@ -206,9 +208,9 @@
 	  Specify the approximate number of members in your group.
 	</span>
       </div>
-      {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') #}
+      {% end %} {# if settings['ACCOUNT_FUNDER_INFO_GROUP_SIZE'] #}
 
-      {% if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['subjects'] %}
+      {% if settings['ACCOUNT_FUNDER_INFO_SUBJECT'] and settings['subjects'] %}
       <div class="form-group has-feedback">
 	<div class="row">
 	  <div class="col-md-6">
@@ -230,12 +232,13 @@
 	  Select the subject term that best characterizes your field.
 	</span>
       </div>
-      {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['subjects'] #}
+      {% end %} {# if settings['ACCOUNT_FUNDER_INFO_SUBJECT'] and settings['subjects'] #}
 
     </div>
   </div>
-  {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO') #}
+  {% end %} {# if settings['ACCOUNT_FUNDER_INFO'] #}
 
+  {% if settings['ACCOUNT_POSTAL_INFO'] %}
   <div class="panel panel-default">
     <div class="panel-heading">
       Postal address for delivery of paper documents, returned samples, etc.
@@ -292,6 +295,7 @@
       </div>
     </div>
   </div>
+  {% end %} {# if settings['ACCOUNT_POSTAL_INFO'] #}
 
   {% if settings['ACCOUNT_INVOICE_INFO'] %}
   <div class="form-group">

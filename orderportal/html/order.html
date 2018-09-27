@@ -173,6 +173,7 @@
 	  ({{ status['description'] }})
 	</td>
       </tr>
+      {% if settings['ORDER_REPORT'] %}
       <tr>
 	<th>Report</th>
 	<td>
@@ -198,6 +199,7 @@
 	  {% end %}
 	</td>
       </tr>
+      {% end %} {# if settings['ORDER_REPORT'] #}
       <tr>
 	<th>History</th>
 	<td>
