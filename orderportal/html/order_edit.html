@@ -129,7 +129,7 @@ Edit  {% module Icon('order') %}
       {% if is_admin %}
       The {{ terminology('order') }}'s owner specified by email address.
       May be changed to another account.
-      {% else %}
+      {% elif colleagues %}
       The {{ terminology('order') }}'s owner may be changed to an account
       in your groups, if any.
       <strong>NOTE:</strong>

@@ -149,12 +149,12 @@
           {{ order['owner'] }}
 	</td>
       </tr>
-      {% if is_staff or settings.get('ORDER_USER_TAGS') %}
+      {% if settings['ORDER_TAGS'] and (is_staff or settings['ORDER_USER_TAGS']) %}
       <tr>
 	<th>Keywords (tags)</th>
 	<td>{% module Tags(order.get('tags', [])) %}</td>
       </tr>
-      {% end %} {#if is_staff or settings.get('ORDER_USER_TAGS') #}
+      {% end %} {# if settings['ORDER_TAGS'] and ... #}
       {% if settings.get('ORDER_LINKS') %}
       <tr>
 	<th>Links</th>
