@@ -113,7 +113,8 @@
 	  <div class="form-group pull-right">
 	    <form action="{{ reverse_url('order_create') }}"
 		  role="form"
-		  method="GET">
+		  method="POST">
+              {% module xsrf_form_html() %}
 	      <button type="submit" class="btn btn-default btn-xs"
                       {% if not current_user %}
                       disabled="disabled"

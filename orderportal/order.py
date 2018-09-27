@@ -50,7 +50,7 @@ class OrderSaver(saver.Saver):
         "Create the order from the given form."
         self.fields = Fields(form)
         self['form'] = form['_id']
-        self['title'] = title or form['title']
+        self['title'] = title
         self['fields'] = dict([(f['identifier'], None) for f in self.fields])
         self.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
         # Set the order identifier if its format defined.
@@ -869,7 +869,7 @@ class OrderCsv(OrderMixin, RequestHandler):
             writer.writerow(safe(('Identifier', order['identifier'])))
         except KeyError:
             pass
-        writer.writerow(safe(('Title', order.get('title') or '[no title]')))
+        writer.writerow(safe(('Title', order['title'] or '[no title]')))
         writer.writerow(safe(('URL', self.order_reverse_url(order))))
         writer.writerow(safe(('IUID', order['_id'])))
         writer.writerow(safe(('Form', 'Title', form['title'])))
@@ -1130,7 +1130,7 @@ class OrdersCsv(Orders):
         forms = self.get_forms_titles(all=True)
         for order in self.get_orders():
             row = [order.get('identifier') or '',
-                   utils.to_utf8(order.get('title') or '[no title]'),
+                   utils.to_utf8(order['title'] or '[no title]'),
                    order['_id'],
                    self.order_reverse_url(order),
                    utils.to_utf8(forms[order['form']]),
@@ -1169,7 +1169,7 @@ class OrderLogs(OrderMixin, RequestHandler):
             self.see_other('home', error=str(msg))
             return
         title = u"Logs for {0} '{1}'".format(utils.terminology('order'),
-                                             order['title'])
+                                             order['title'] or '[no title]')
         self.render('logs.html',
                     title=title,
                     entity=order,
@@ -1199,7 +1199,7 @@ class OrderCreate(OrderMixin, RequestHandler):
             self.check_creation_enabled()
             form = self.get_form(self.get_argument('form'), check=True)
             with OrderSaver(rqh=self) as saver:
-                saver.create(form, title=self.get_argument('title', None))
+                saver.create(form)
                 saver.autopopulate()
                 saver.check_fields_validity()
         except ValueError, msg:
@@ -1290,7 +1290,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             tableinputs[field['identifier']] = ''.join(tableinput)
         self.render('order_edit.html',
                     title=u"Edit {0} '{1}'".format(utils.terminology('order'),
-                                                   order['title']),
+                                                   order['title'] or '[no title]'),
                     order=order,
                     tags=tags,
                     links=links,
@@ -1313,7 +1313,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             message = "{0} saved.".format(utils.terminology('Order'))
             error = None
             with OrderSaver(doc=order, rqh=self) as saver:
-                saver['title'] = self.get_argument('__title__', None) or '[no title]'
+                saver['title'] = self.get_argument('__title__', None)
                 saver.set_tags(self.get_argument('__tags__', '').\
                                replace(',', ' ').split())
                 saver.set_external(self.get_argument('__links__', '').\
@@ -1365,7 +1365,8 @@ class OrderClone(OrderMixin, RequestHandler):
         form = self.get_form(order['form'])
         erased_files = set()
         with OrderSaver(rqh=self) as saver:
-            saver.create(form, title=u"Clone of {0}".format(order['title']))
+            saver.create(form, title=u"Clone of {0}".format(
+                order['title'] or '[no title]'))
             for field in saver.fields:
                 id = field['identifier']
                 if field.get('erase_on_clone'):

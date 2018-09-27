@@ -1,9 +1,11 @@
 {# Order page. #}
 
-{% block head_title %}{{ terminology('Order') }}: {{ order['title'] }}{% end %}
+{% block head_title %}
+{{ terminology('Order') }}: {{ order['title'] or '[no title]' }}
+{% end %}
 
 {% block body_title %}
-{% module Icon('order', label=True) %}: {{ order['title'] }}
+{% module Icon('order', label=True) %}: {{ order['title']  or '[no title]'}}
 {% end %}
 
 {% extends "base.html" %}
@@ -120,7 +122,6 @@
 {% block main_content %}
 <div class="panel panel-default">
   <div class="panel-body">
-    <h3 style="padding-left: 4em;">{{ form['title'] }}</h3>
     <table class="table table-condensed table-fields table-noborder">
       {% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
       <tr>
@@ -129,16 +130,18 @@
       </tr>
       {% end %} {# if settings.get('ORDER_IDENTIFIER_FORMAT') #}
 
-      {% if is_admin %}
       <tr>
 	<th>{{ terminology('Order') }} form</th>
 	<td>
+          {% if is_admin %}
 	  <a href="{{ reverse_url('form', form['_id']) }}">
 	    {{ form['title'] }} {% module Version(form) %}
 	  </a>
+          {% else %}
+	  {{ form['title'] }} {% module Version(form) %}
+          {% end %}
 	</td>
       </tr>
-      {% end %}
 
       <tr>
 	<th>Owner</th>

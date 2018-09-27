@@ -49,7 +49,8 @@
 <p>
   <form action="{{ reverse_url('order_create') }}"
 	role="form"
-	method="GET">
+	method="POST">
+    {% module xsrf_form_html() %}
     <input type="hidden" name="form" value="{{ form['_id'] }}">
     <button type="submit" class="btn btn-success">
       <span class="glyphicon glyphicon-plus"></span>
@@ -73,7 +74,8 @@
 <p>
   <form action="{{ reverse_url('order_create') }}"
 	role="form"
-	method="GET">
+	method="POST">
+    {% module xsrf_form_html() %}
     <input type="hidden" name="form" value="{{ form['_id'] }}">
     <button type="submit" class="btn btn-success">
       <span class="glyphicon glyphicon-plus"></span>

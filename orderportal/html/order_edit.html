@@ -3,22 +3,17 @@
 {% extends "base.html" %}
 
 {% block head_title %}
-Edit {{ terminology('order') }} '{{ order['title'] }}'
+Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 {% end %}
 
 {% block body_title %}
 Edit  {% module Icon('order') %}
-{{ terminology('order') }} '{{ order['title'] }}'
+{{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 {% end %}
 
 {% block content %}
-<h3>{{ form['title'] }}</h3>
-
 <div class="row">
-  <div class="col-md-10 help-block">
-    {% module Markdown(form.get('description')) %}
-  </div>
-  <div class="col-md-2">
+  <div class="col-md-2 col-md-offset-10">
     <form action="{{ reverse_url('order', order['_id']) }}"
 	  class="allow_leaving_without_question"
 	  role="form"
@@ -48,7 +43,7 @@ Edit  {% module Icon('order') %}
 	<label class="control-label" for="__title__">Title</label>
 	<input type="text" class="form-control"
 	       name="__title__" id="__title__"
-	       value="{{ order['title'] }}">
+	       value="{{ order['title'] or '' }}">
       </div>
     </div>
     <span class="help-block">
@@ -56,6 +51,19 @@ Edit  {% module Icon('order') %}
       It is not required to be unique, but it is a good idea
       to make it so anyway.
     </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-9">
+	<label class="control-label" for="__form__">
+          {{ terminology('Order') }} form
+        </label>
+	<p id="__form__" class="form-control-static">
+	  {{ form['title'] }} {% module Version(form) %}
+        </p>
+      </div>
+    </div>
   </div>
 
   {% if settings['ORDER_TAGS'] and (is_staff or settings['ORDER_USER_TAGS']) %}
