@@ -96,7 +96,7 @@
 	  <th width="30%">Title</th>
 	  <th>{% module Icon('form', label=True) %}</th>
 	  <th>{% module Icon('account', label=True, title='Owner') %}</th>
-	  {% if settings['ORDERS_LIST_TAGS'] %}
+	  {% if settings['ORDER_TAGS'] and settings['ORDERS_LIST_TAGS'] %}
 	  <th width="5%">Keywords (tags)</th>
 	  {% end %}
 	  {% for f in settings['ORDERS_LIST_FIELDS'] %}
@@ -124,7 +124,7 @@
 	      {{ account_names[order['owner']] }}
 	    </a>
 	  </td>
-	  {% if settings['ORDERS_LIST_TAGS'] %}
+	  {% if settings['ORDER_TAGS'] and settings['ORDERS_LIST_TAGS'] %}
 	  <td>{% module Tags(order.get('tags', [])) %}</td>
 	  {% end %}
 	  {% for f in settings['ORDERS_LIST_FIELDS'] %}

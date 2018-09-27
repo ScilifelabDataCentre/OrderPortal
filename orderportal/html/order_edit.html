@@ -58,12 +58,12 @@ Edit  {% module Icon('order') %}
     </span>
   </div>
 
-  {% if is_staff or settings.get('ORDER_USER_TAGS') %}
+  {% if settings['ORDER_TAGS'] and (is_staff or settings['ORDER_USER_TAGS']) %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
 	<label class="control-label" for="__tags__">Keywords (tags)</label>
-	{# Display terminology: keyword; Code terminology: tag #}
+	{# Terminology in display: keyword; in code: tag #}
 	<textarea class="form-control"
 		  name="__tags__" id="__tags__" rows="2"
 		  >{{ ', '.join(tags) }}</textarea>
@@ -82,7 +82,7 @@ Edit  {% module Icon('order') %}
       {% end %}
     </span>
   </div>
-  {% end %} {#if is_staff or settings.get('ORDER_USER_TAGS') #}
+  {% end %} {# if settings['ORDER_TAGS'] and ... #}
 
   {% if settings.get('ORDER_LINKS') %}
   <div class="form-group">
