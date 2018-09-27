@@ -15,13 +15,8 @@ Edit  {% module Icon('order') %}
 <h3>{{ form['title'] }}</h3>
 
 <div class="row">
-  <div class="col-md-10">
-    <span class="help-block">
-      You may save an incomplete {{ terminology('order') }} and resume
-      work on it later.
-      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
-      notation can be used in multi-line text input fields.
-    </span>
+  <div class="col-md-10 help-block">
+    {% module Markdown(form.get('description')) %}
   </div>
   <div class="col-md-2">
     <form action="{{ reverse_url('order', order['_id']) }}"
@@ -78,9 +73,9 @@ Edit  {% module Icon('order') %}
       Optional keywords (tags) characterizing the {{ terminology('order') }},
       which are used in searches.
       <br>
-      Format a keyword as an identifier: Start with a letter, continue
-      with letters, digits and/or underscore '_'. Use blank or comma
-      ',' as delimiter between keywords.
+      A keyword must look like an identifier: It begins with a letter and
+      continues with letters, digits and/or underscore '_'. Blank or comma
+      ',' separates keywords from one another.
       {% if is_staff %}
       <br>
       Staff may use namespace prefixes, e.g. "project_id:P12345".

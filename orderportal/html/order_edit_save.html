@@ -1,22 +1,20 @@
 {# Order edit save buttons row. #}
 <div class="row">
   <div class="col-md-3">
-    <div class="form-group">
-      <label class="control-label"></label>
-      <button type="submit" class="btn btn-success btn-block"
-	      name="__save__" value="continue">
-	<span class="glyphicon glyphicon-floppy-disk"></span>
-	Save and continue edit
-      </button>
-    </div>
+    <button type="submit" class="btn btn-success btn-block"
+	    name="__save__" value="continue">
+      <span class="glyphicon glyphicon-floppy-disk"></span>
+      Save and continue edit
+    </button>
   </div>
   <div class="col-md-3">
-    <div class="form-group">
-      <label class="control-label"></label>
-      <button type="submit" class="btn btn-success btn-block">
-	<span class="glyphicon glyphicon-floppy-save"></span>
-	Save and view
-      </button>
-    </div>
+    <button type="submit" class="btn btn-success btn-block">
+      <span class="glyphicon glyphicon-floppy-save"></span>
+      Save and view
+    </button>
+  </div>
+  <div class="col-md-3">
+    You may save an incomplete {{ terminology('order') }} and resume
+    work on it later.
   </div>
 </div>
