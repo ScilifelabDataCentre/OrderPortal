@@ -171,9 +171,11 @@
 	    <li>
 	      <a href="{{ reverse_url('contact') }}">Contact</a>
 	    </li>
+            {% if settings['DISPLAY_MENU_ABOUT_US'] %}
 	    <li>
 	      <a href="{{ reverse_url('about') }}">About us</a>
 	    </li>
+            {% end %}
 
 	  </ul>
 
