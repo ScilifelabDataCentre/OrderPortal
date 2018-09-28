@@ -271,17 +271,22 @@ def convert(type, value):
         return value
 
 def csv_safe_row(row):
-    """Remove any beginning character '=-+@' from string values to output.
+    "Make all values in the row safe for CSV. See 'csv_safe'."
+    row = list(row)
+    for pos, value in enumerate(row):
+        row[pos] = csv_safe(value)
+    return row
+
+def csv_safe(value):
+    """Remove any beginning character '=-+@' from string value.
     Also convert to UTF-8.
     See http://georgemauer.net/2017/10/07/csv-injection.html
     """
-    row = list(row)
-    for pos, value in enumerate(row):
-        if not isinstance(value, basestring): continue
+    if isinstance(value, basestring):
         while len(value) and value[0] in '=-+@':
             value = value[1:]
-        row[pos] = to_utf8(value)
-    return row
+        value = to_utf8(value)
+    return value
 
 def get_json(id, type):
     "Return the initialized JSON dictionary with id and type."

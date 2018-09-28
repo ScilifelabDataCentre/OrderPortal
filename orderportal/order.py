@@ -590,6 +590,7 @@ class OrderMixin(object):
             item['restrict_write'] = field['restrict_write']
             item['invalid'] = order['invalid'].get(field['identifier'])
             item['description'] = field.get('description')
+            item._field = field
             result.append(item)
             if field['type'] == constants.GROUP:
                 result.extend(self.get_fields(order, depth+1, field['fields']))
@@ -905,7 +906,18 @@ class OrderCsv(OrderMixin, RequestHandler):
                               'Restrict read', 'Restrict write',
                               'Invalid', 'Description')))
         for field in self.get_fields(order):
-            writer.writerow(safe(field.values()))
+            # Special case for table field; spans more than one row
+            if field['type'] == constants.TABLE:
+                values = field.values()
+                table = values[4] # Column for 'Value'
+                values[4] = len(table) # Number of rows in table
+                values += [h.split(';')[0] for h in field._field['table']]
+                writer.writerow(safe(values))
+                prefix = [''] * 9
+                for row in table:
+                    writer.writerow(safe(prefix + row))
+            else:
+                writer.writerow(safe(field.values()))
         writer.writerow(safe(('',)))
         writer.writerow(safe(('File', 'Size', 'Content type', 'URL')))
         for filename in sorted(order.get('_attachments', [])):
