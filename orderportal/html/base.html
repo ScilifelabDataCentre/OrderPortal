@@ -220,6 +220,21 @@
     <div class="container">
     {% end %}
 
+      {% if alert %}
+      <div class="row">
+	<div class="col-md-12 lead alert alert-danger">
+          {% if is_admin %}
+          <a href="{{ reverse_url('text','alert',origin=reverse_url('home')) }}"
+	     class="btn btn-primary btn-xs pull-right" role="button">
+	    <span class="glyphicon glyphicon-edit"></span>
+	    Edit
+          </a>
+          {% end %}
+	  {% raw alert %}
+	</div>
+      </div>
+      {% end %} {# if alert #}
+
       <div class="row">
 	<div class="col-md-12">
 	  &nbsp;
@@ -238,7 +253,6 @@
       </div>
       {% end %} {# block body_header #}
 
-      {% try %}
       {% if error %}
       <div class="row">
 	<div class="col-md-12 lead alert alert-danger">
@@ -246,10 +260,7 @@
 	</div>
       </div>
       {% end %} {# if error #}
-      {% except NameError %}
-      {% end %} {# try #}
 
-      {% try %}
       {% if message %}
       <div class="row">
 	<div class="col-md-12 lead alert alert-warning">
@@ -258,8 +269,6 @@
 	</div>
       </div>
       {% end %} {# if message #}
-      {% except NameError %}
-      {% end %} {# try #}
 
       {% block content %}
       <div class="row">

@@ -83,7 +83,7 @@ class Text(RequestHandler):
             text = self.get_entity_view('text/name', name)
         except tornado.web.HTTPError:
             text = dict(name=name)
-        origin = self.get_argument('origin', self.absolute_reverse_url('texts'))
+        origin = self.get_argument('origin',self.absolute_reverse_url('texts'))
         self.render('text.html', text=text, origin=origin)
 
     @tornado.web.authenticated
