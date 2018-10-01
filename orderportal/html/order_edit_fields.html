@@ -198,7 +198,7 @@
     {% elif field['type'] == constants.DATE %}
     {# This requires jQuery datepicker! Loaded in calling HTML template. #}
     <input type="text"
-	   class="datepicker form-control visible-if-source"
+	   class="form-control datepicker visible-if-source"
 	   name="{{ field['identifier'] }}"
 	   id="{{ field['identifier'] }}"
 	   value="{{ value }}">

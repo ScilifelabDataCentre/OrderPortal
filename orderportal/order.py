@@ -1321,7 +1321,10 @@ class OrderEdit(OrderMixin, RequestHandler):
                     inp = "<input type='number' step='%s'" \
                           " class='form-control' name='%s' id='%s'>" % \
                           (constants.FLOAT_STEP, rowid, rowid)
-                else:           # default type: 'string'
+                elif column['type'] == constants.DATE:
+                    inp = "<input type='text' class='form-control datepicker'" \
+                          " name='%s' id='%s'>" % (rowid, rowid)
+                else:           # Default type: 'string'
                     inp = "<input type='text' class='form-control'" \
                           " name='%s' id='%s'>" % (rowid, rowid)
                 tableinput.append("<td>%s</td>" % inp)

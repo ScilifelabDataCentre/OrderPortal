@@ -232,7 +232,8 @@ class TableRowsEdit(tornado.web.UIModule):
                         cell = ''
                     result.append('<td>')
                     name = "_table_%s_%s_%s" % (field['identifier'], i, j)
-                    if columns[j]['type'] == constants.SELECT:
+                    coltype = columns[j]['type']
+                    if coltype == constants.SELECT:
                         result.append('<select class="form-control" name="%s">'
                                       % name)
                         for option in columns[j]['options']:
@@ -242,15 +243,19 @@ class TableRowsEdit(tornado.web.UIModule):
                             else:
                                 result.append('<option>%s</option>' % option)
                         result.append('</select>')
-                    elif columns[j]['type'] == constants.INT:
+                    elif coltype == constants.INT:
                         result.append('<input type="number" step="1"'
                                       ' class="form-control"'
                                       ' name="%s" value="%s">' % (name, cell))
-                    elif columns[j]['type'] == constants.FLOAT:
+                    elif coltype == constants.FLOAT:
                         result.append('<input type="number"'
                                       ' class="form-control"'
                                       ' name="%s" value="%s">' % (name, cell))
-                    else: # Default input type: text
+                    elif coltype == constants.DATE:
+                        result.append('<input type="text"'
+                                      ' class="form-control datepicker"'
+                                      ' name="%s" value="%s">' % (name, cell))
+                    else: # Input type for all other types: text
                         result.append('<input type="text" class="form-control"'
                                       ' name="%s" value="%s">' % (name, cell))
                 result.append('<td>'
