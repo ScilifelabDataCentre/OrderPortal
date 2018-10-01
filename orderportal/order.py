@@ -233,35 +233,62 @@ class OrderSaver(saver.Saver):
                     # This is a special case for HTML form input.
                     value = self.rqh.get_arguments(identifier)
             elif field['type'] == constants.TABLE:
+                coldefs = [utils.parse_field_table_column(c) 
+                           for c in field['table']]
+                n_columns = len(coldefs)
+                if n_columns == 0: continue
                 if data:        # JSON data: contains complete table.
                     try:
                         value = data[identifier]
                     except KeyError:
                         continue
+                    # Check validity of table items.
+                    try:
+                        table = value
+                        value = []
+                        for row in table:
+                            for j in xrange(n_columns):
+                                coltype = coldefs[j].get('type')
+                                if coltype == constants.SELECT:
+                                    if row[j] not in coldefs[j]['options']:
+                                        row[j] = None
+                                elif coltype == constants.INT:
+                                    try:
+                                        row[j] = int(row[j])
+                                    except (ValueError, TypeError):
+                                        row[j] = None
+                                elif not row[j]:
+                                    row[j] = None
+                    except (ValueError, TypeError, AttributeError):
+                        value = []
                 else:         # HTML form input: individual cells.
                     try:
                         name = "_table_%s_count" % identifier
                         n_rows = int(self.rqh.get_argument(name, 0))
                     except (ValueError, TypeError):
                         n_rows = 0
-                    coldefs = [utils.parse_field_table_column(c)
-                               for c in field['table']]
-                    n_columns = len(coldefs)
-                    if n_columns:
-                        value = []
-                        for i in xrange(n_rows):
-                            row = []
-                            for j in xrange(n_columns):
-                                name = "_table_%s_%i_%i" % (identifier, i, j)
-                                item = self.rqh.get_argument(name, None)
-                                if coldefs[j].get('type') == 'select':
-                                    if item not in coldefs[j]['options']:
-                                        item = None
-                                row.append(item or None)
-                            for item in row:
-                                if item is not None:
-                                    value.append(row)
-                                    break
+                    value = []
+                    for i in xrange(n_rows):
+                        row = []
+                        for j in xrange(n_columns):
+                            name = "_table_%s_%i_%i" % (identifier, i, j)
+                            item = self.rqh.get_argument(name, None)
+                            coltype = coldefs[j].get('type')
+                            if coltype == constants.SELECT:
+                                if item not in coldefs[j]['options']:
+                                    item = None
+                            elif coltype == constants.INT:
+                                try:
+                                    item = int(item)
+                                except (ValueError, TypeError):
+                                    item = None
+                            elif not item:
+                                item = None
+                            row.append(item)
+                        for item in row:
+                            if item is not None:
+                                value.append(row)
+                                break
             elif data:          # JSON data.
                 try:
                     value = data[identifier]
