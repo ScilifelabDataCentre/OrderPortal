@@ -180,7 +180,7 @@ class TableRows(tornado.web.UIModule):
 
     def render(self, field, value):
         assert field['type'] == constants.TABLE
-        result = ['<tr>', '<th></th>']
+        result = ['<thead>', '<tr>', '<th></th>']
         for coldef in field['table']:
             column = utils.parse_field_table_column(coldef)
             header = column['identifier']
@@ -188,6 +188,8 @@ class TableRows(tornado.web.UIModule):
                 header += " (%s)" % column['type']
             result.append("<th>%s</th>" % header)
         result.append('</tr>')
+        result.append('</thead>')
+        result.append('<tbody>')
         if value:
             for i, row in enumerate(value):
                 result.append('<tr>')
@@ -195,7 +197,8 @@ class TableRows(tornado.web.UIModule):
                 for cell in row:
                     if cell is None: cell = ''
                     result.append("<td>%s</td>" % cell)
-        result.append('</tr>')
+                result.append('</tr>')
+        result.append('</tbody>')
         return '\n'.join(result)
 
 
@@ -204,7 +207,7 @@ class TableRowsEdit(tornado.web.UIModule):
 
     def render(self, field, value):
         assert field['type'] == constants.TABLE
-        result = ['<tr>', '<th></th>']
+        result = ['<thead>', '<tr>', '<th></th>']
         columns = []
         for coldef in field['table']:
             column = utils.parse_field_table_column(coldef)
@@ -214,7 +217,9 @@ class TableRowsEdit(tornado.web.UIModule):
                 header += " (%s)" % column['type']
             result.append("<th>%s</th>" % header)
         result.append('</tr>')
+        result.append('</thead>')
         if value:
+            result.append('<tbody>')
             for i, row in enumerate(value):
                 rowid = "_table_%s_%s" % (field['identifier'], i)
                 result.append('<tr id="%s">' % rowid)
@@ -254,4 +259,5 @@ class TableRowsEdit(tornado.web.UIModule):
                               '</button>'
                               '</td>' % rowid)
                 result.append('</tr>')
+            result.append('</tbody>')
         return '\n'.join(result)

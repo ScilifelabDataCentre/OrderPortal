@@ -39,3 +39,13 @@
 			     content: ' *';
 			     display: inline;
 			   }
+
+/* Kludge for editing wide tables */
+.table-scrolling-wrapper {
+    overflow-x: scroll;
+    overflow-y: hidden;
+    whitespace: nowrap;
+    .table-scrolling {
+        display: inline-block;
+    }
+}

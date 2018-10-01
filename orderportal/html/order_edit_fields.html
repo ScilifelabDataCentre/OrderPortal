@@ -208,10 +208,21 @@
            name="_table_{{ field['identifier'] }}_count"
            id="_table_{{ field['identifier'] }}_count"
            value="{{ value and len(value) or 0 }}">
+    {% set ncols = len(field['table']) %}
+    {% if ncols > 5 %}
+    <div class="table-scrolling-wrapper">
+      <table id="_table_{{ field['identifier'] }}"
+             style="max-width:{{ 180*ncols }}px; width:{{ 180*ncols }}px"
+             class="table table-bordered table-condensed table-scrolling">
+        {% module TableRowsEdit(field, value) %}
+      </table>
+    </div>
+    {% else %}
     <table id="_table_{{ field['identifier'] }}"
            class="table table-bordered table-condensed">
       {% module TableRowsEdit(field, value) %}
     </table>
+    {% end %}
     <div class="form-group">
       <button type="button" id="_table_{{ field['identifier'] }}_add_button" 
               class="btn btn-info"> 
