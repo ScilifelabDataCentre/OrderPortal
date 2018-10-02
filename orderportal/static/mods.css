@@ -44,8 +44,10 @@
 .table-scrolling-wrapper {
     overflow-x: scroll;
     overflow-y: hidden;
-    whitespace: nowrap;
-    .table-scrolling {
-        display: inline-block;
-    }
+    white-space: nowrap;
+    margin-bottom: 20px;
+}
+.table-scrolling {
+    display: inline-block;
+    margin-bottom: 0px;
 }
