@@ -45,9 +45,9 @@
     overflow-x: scroll;
     overflow-y: hidden;
     white-space: nowrap;
-    margin-bottom: 20px;
+    margin-bottom: 4px;
 }
 .table-scrolling {
     display: inline-block;
-    margin-bottom: 0px;
+    margin-bottom: 4px;
 }
