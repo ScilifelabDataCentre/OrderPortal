@@ -4,9 +4,7 @@
 
 {% block head_title %}Edit form '{{ form['title'] }}'{% end %}
 
-{% block body_title %}
-Edit {% module Icon('form', label=True) %} {{ form['title'] }}
-{% end %}
+{% block body_title %}Edit form {{ form['title'] }}{% end %}
 
 {% block main_content %}
 <form action="{{ reverse_url('form_edit', form['_id']) }}"
@@ -30,23 +28,35 @@ Edit {% module Icon('form', label=True) %} {{ form['title'] }}
   </div>
 
   <div class="form-group">
+    <label for="version">Version</label>
+    <input type="text" class="form-control" name="version" id="version"
+	   value="{{ form.get('version') or '' }}">
+    <span class="help-block">
+      The version is visible for administrators only. It is intended
+      to help with the maintenance of forms.
+    </span>
+  </div>
+
+  <div class="form-group">
     <label for="description">Description</label>
     <textarea rows="6" class="form-control"
 	      id="description" name="description"
 	      >{{ form.get('description') or '' }}</textarea>
     <span class="help-block">
-      Description to display for the form as information to the user, using
-      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a>
-      format.
+      The description is displayed in the order creation panel on the
+      home page.
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a> format.
     </span>
   </div>
 
   <div class="form-group">
-    <label for="version">Version</label>
-    <input type="text" class="form-control" name="version" id="version"
-	   value="{{ form.get('version') or '' }}">
+    <label for="instruction">Instruction</label>
+    <textarea rows="6" class="form-control"
+	      id="instruction" name="instruction"
+	      >{{ form.get('instruction') or '' }}</textarea>
     <span class="help-block">
-      Version visible for administrators only.
+      The instruction is displayed at the top of the order edit page.
+      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a> format.
     </span>
   </div>
 

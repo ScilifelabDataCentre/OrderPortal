@@ -392,9 +392,7 @@
       Register
     </button>
     <span class="help-block">
-      By registering, you give {{ settings['SITE_NAME'] }} permission
-      to store and use the personal information you provide.
-      {% raw settings['SITE_PERSONAL_DATA_POLICY'] %}
+      {% module Text('privacy_policy') %}
     </span>
   </div>
 

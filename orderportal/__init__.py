@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.6.4'
+__version__ = '3.6.5'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -28,8 +28,6 @@ settings = dict(
     UNIVERSITIES_FILEPATH='{SITE_DIR}/swedish_universities.yaml',
     COUNTRY_CODES_FILEPATH='{SITE_DIR}/country_codes.yaml',
     SUBJECT_TERMS_FILEPATH='{SITE_DIR}/subject_terms.yaml',
-    SITE_PERSONAL_DATA_POLICY='The data will be used only for activities directly related to this site.',
-    GDPR_INFO_URL=None,
     TERMINOLOGY=dict(),         # Terms translation lookup.
     MIN_PASSWORD_LENGTH=8,
     LOGIN_MAX_AGE_DAYS=14,

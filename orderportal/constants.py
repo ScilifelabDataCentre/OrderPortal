@@ -76,7 +76,8 @@ TEXTS = dict(header='Header on portal home page.',
              general='General information on portal home page.',
              contact='Contact page.',
              about='About page.',
-             alert='Alert text at the top of every page.')
+             alert='Alert text at the top of every page.',
+             privacy_policy='Privacy policy statement; GDPR, etc.')
 
 # Boolean string values
 TRUE  = frozenset(['true', 'yes', 't', 'y', '1'])

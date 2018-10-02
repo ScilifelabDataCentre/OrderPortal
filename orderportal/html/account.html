@@ -5,8 +5,7 @@
 {% block head_title %}Account: {{ account['email'] }}{% end %}
 
 {% block body_title %}
-{% module Icon('account', label=True) %}:
-{{ account['email'] }}
+{% module Icon('account', label=True) %}: {{ account['email'] }}
 {% end %}
 
 {% block body_header_alt_format %}
@@ -146,20 +145,7 @@
 {% end %} {# block action_content #}
 
 {% block main_content %}
-<h4>Personal data information (GDPR)</h4>
-<p>
-  By having registered, you have given {{ settings['SITE_NAME'] }}
-  permission to store and use the personal information you provide.
-</p>
-<p>
-  {% raw settings['SITE_PERSONAL_DATA_POLICY'] %}
-</p>
-<p>
-  All your personal data is reachable via links from this page and the
-  pages for all your {{ terminology('orders') }} (see below). The logs
-  for your account and {{ terminology('orders') }} contains a record
-  of all changes to those items.
-</p>
+{% module Text('privacy_policy') %}
 <table class="table-condensed table-fields">
   <tr>
     <th>First name</th>

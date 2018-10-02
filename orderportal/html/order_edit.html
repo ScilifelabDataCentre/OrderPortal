@@ -7,13 +7,15 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 {% end %}
 
 {% block body_title %}
-Edit  {% module Icon('order') %}
-{{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
+Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 {% end %}
 
 {% block content %}
 <div class="row">
-  <div class="col-md-2 col-md-offset-10">
+  <div class="col-md-10">
+    {% module Markdown(form.get('instruction')) %}
+  </div>
+  <div class="col-md-2">
     <form action="{{ reverse_url('order', order['_id']) }}"
 	  class="allow_leaving_without_question"
 	  role="form"

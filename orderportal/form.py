@@ -155,6 +155,7 @@ class FormApiV1(ApiV1Mixin, Form):
         data['title'] = form['title']
         data['version'] = form.get('version')
         data['description'] = form.get('description')
+        data['instruction'] = form.get('instruction')
         data['owner'] = dict(
             email=form['owner'],
             links=dict(api=dict(href=URL('account_api', form['owner'])),
@@ -201,8 +202,9 @@ class FormCreate(RequestHandler):
             if not saver['title']:
                 self.see_other('forms', error='No title given.')
                 return
-            saver['description'] = self.get_argument('description', None)
             saver['version'] = self.get_argument('version', None)
+            saver['description'] = self.get_argument('description', None)
+            saver['instruction'] = self.get_argument('instruction', None)
             saver['status'] = constants.PENDING
             try:
                 infile = self.request.files['import'][0]
@@ -217,16 +219,18 @@ class FormCreate(RequestHandler):
                 self.see_other('home', error="Error importing form: %s" % msg)
                 return
             else:
-                if not saver['description']:
-                    saver['description'] = data.get('description')
                 if not saver['version']:
                     saver['version'] = data.get('version')
+                if not saver['description']:
+                    saver['description'] = data.get('description')
+                if not saver['instruction']:
+                    saver['instruction'] = data.get('instruction')
                 saver['fields'] = data['fields']
         self.see_other('form', saver.doc['_id'])
 
 
 class FormEdit(FormMixin, RequestHandler):
-    "Page for editing an form; title, description, version."
+    "Page for editing an form; title, version, description, instruction."
 
     @tornado.web.authenticated
     def get(self, iuid):
@@ -242,8 +246,9 @@ class FormEdit(FormMixin, RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(doc=form, rqh=self) as saver:
             saver['title'] = self.get_argument('title')
-            saver['description'] = self.get_argument('description', None)
             saver['version'] = self.get_argument('version', None)
+            saver['description'] = self.get_argument('description', None)
+            saver['instruction'] = self.get_argument('instruction', None)
             try:
                 saver['ordinal'] = int(self.get_argument('ordinal', 0))
             except (ValueError, TypeError):
@@ -396,8 +401,9 @@ class FormClone(RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(rqh=self) as saver:
             saver['title'] = u"Clone of {0}".format(form['title'])
-            saver['description'] = form.get('description')
             saver['version'] = form.get('version')
+            saver['description'] = form.get('description')
+            saver['instruction'] = form.get('instruction')
             saver.clone_fields(form)
             saver['status'] = constants.PENDING
         self.see_other('form_edit', saver.doc['_id'])

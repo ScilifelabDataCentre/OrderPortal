@@ -5,7 +5,7 @@
 {% end %}
 
 {% block body_title %}
-{% module Icon('order', label=True) %}: {{ order['title']  or '[no title]'}}
+{{ terminology('Order') }}: {{ order['title']  or '[no title]'}}
 {% end %}
 
 {% extends "base.html" %}
@@ -120,6 +120,7 @@
 {% end %} {# block action_content #}
 
 {% block main_content %}
+{% module Markdown(form.get('description')) %}
 <div class="panel panel-default">
   <div class="panel-body">
     <table class="table table-condensed table-fields table-noborder">
