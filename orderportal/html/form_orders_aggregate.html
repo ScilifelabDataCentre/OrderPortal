@@ -25,11 +25,11 @@ for form  {% module Entity(form, icon=False) %}
     <div class="col-sm-10">
       <select multiple size="6" class="form-control" name="order" id="order">
         <option value="_id">IUID</option>
-        <option value="identifier">Identifier</option>
-        <option value="title">Title</option>
-        <option value="status">Status</option>
-        <option value="modified">Modified</option>
-        <option value="created">Created</option>
+        <option selected>identifier</option>
+        <option>title</option>
+        <option>status</option>
+        <option>modified</option>
+        <option>created</option>
       </select>
       <span class="help-block">
         Select {{ terminology('order') }} metadata to include.

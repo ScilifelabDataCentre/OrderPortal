@@ -522,6 +522,10 @@ class FormOrdersAggregate(RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
 
         order_fields = self.get_arguments('order')
+        if not ('iuid' in order_fields or 'identifier' in order_fields):
+            self.see_other('form_orders_aggregate', form['_id'],
+                           error='Order IUID or identifier must be included.')
+            return
         history_fields = self.get_arguments('history')
         owner_fields = self.get_arguments('owner')
         data_fields = self.get_arguments('fields')
