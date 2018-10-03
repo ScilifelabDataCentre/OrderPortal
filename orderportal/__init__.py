@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.6.5'
+__version__ = '3.6.6'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -18,7 +18,7 @@ settings = dict(
     LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',
     DATABASE_SERVER='http://localhost:5984/',
     DATABASE_NAME='orderportal',
-    MARKDOWN_URL='http://daringfireball.net/projects/markdown/syntax',
+    MARKDOWN_URL='http://agea.github.io/tutorial.md/',
     SITE_DIR='{ROOT_DIR}/site',
     SITE_NAME='OrderPortal',
     ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',

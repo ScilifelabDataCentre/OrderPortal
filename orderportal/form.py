@@ -497,15 +497,54 @@ class FormOrders(RequestHandler):
                     orders=orders,
                     account_names=account_names)
 
-class FormOrdersCsv(RequestHandler):
-    """Return a CSV file containing all orders for the form,
-    with some info on PI and values for all fields.
-    NOTE: field visibility is not checked; all fields are output."""
+class FormOrdersAggregate(RequestHandler):
+    "Aggregate data from all orders for the form into a CSV file."
+
+    TITLES = dict(_id='Order IUID',
+                  email= 'Owner email')
 
     @tornado.web.authenticated
     def get(self, iuid):
         self.check_staff()
         form = self.get_entity(iuid, doctype=constants.FORM)
+        fields = Fields(form).flatten()
+        # Remove group fields
+        fields = [f for f in fields if f['type'] != constants.GROUP]
+        # Split out table fields
+        table_fields = [f for f in fields if f['type'] == constants.TABLE]
+        fields = [f for f in fields if f['type'] != constants.TABLE]
+        self.render('form_orders_aggregate.html', form=form, 
+                    fields=fields, table_fields=table_fields)
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_staff()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+
+        order_fields = self.get_arguments('order')
+        history_fields = self.get_arguments('history')
+        owner_fields = self.get_arguments('owner')
+        data_fields = self.get_arguments('fields')
+        table_field = self.get_argument('table_field', None)
+        if table_field:
+            table_field = Fields(form)[table_field]
+            colids = [utils.parse_field_table_column(c)['identifier']
+                       for c in table_field['table']]
+
+        csvbuffer = StringIO()
+        writer = csv.writer(csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
+        safe = utils.csv_safe_row
+        header = [self.TITLES.get(f, f.capitalize()) for f in order_fields]
+        header.extend(history_fields)
+        header.extend([self.TITLES.get(f,f.capitalize()) for f in owner_fields])
+        header.extend(data_fields)
+        if table_field:
+            header.extend(["%s: %s" % (table_field['identifier'], ci)
+                           for ci in colids])
+        writer.writerow(header)
+
+        account_lookup = {}
+        # Get all orders for the given form.
         view = self.db.view('order/form',
                             reduce=False,
                             include_docs=True,
@@ -513,33 +552,28 @@ class FormOrdersCsv(RequestHandler):
                             startkey=[iuid, constants.CEILING],
                             endkey=[iuid])
         orders = [r.doc for r in view]
-        csvbuffer = StringIO()
-        writer = csv.writer(csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
-        safe = utils.csv_safe_row
-        writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
-        header = ['Order IUID', 'Identifier', 'Title', 'Status',
-                  'Owner email', 'Last name', 'First name', 'University']
-        fields = Fields(form).flatten()
-        for field in fields:
-            header.append(field['identifier'])
-        writer.writerow(header)
         for order in orders:
-            row = [order['_id'],
-                   order.get('identifier') or '-',
-                   order.get('title') or '-',
-                   order.get('status') or '-']
-            row.append(order['owner'])
-            account = self.get_account(order['owner'])
-            row.append(account.get('last_name') or '-')
-            row.append(account.get('first_name') or '-')
-            row.append(account.get('university') or '-')
-            for field in fields:
-                value = order['fields'].get(field['identifier'])
-                if isinstance(value, list):
-                    value = u','.join(value)
-                row.append(value)
-            writer.writerow(safe(row))
+            row = [order.get(f) for f in order_fields]
+            row.extend([order['history'].get(s) or '' for s in history_fields])
+            if owner_fields:
+                try:
+                    account = account_lookup[order['owner']]
+                except KeyError:
+                    account = self.get_account(order['owner'])
+                    account_lookup[order['owner']] = account
+                row.extend([account.get(f) for f in owner_fields])
+            row.extend([order['fields'].get(df) for df in data_fields])
+            if table_field:
+                table = order['fields'].get(table_field['identifier']) or []
+                for tr in table:
+                    writer.writerow(safe(row + tr))
+            else:
+                writer.writerow(safe(row))
+
         self.write(csvbuffer.getvalue())
         self.set_header('Content-Type', constants.CSV_MIME)
-        self.set_header('Content-Disposition',
-                        'attachment; filename="orders_form_%s.csv"' % iuid)
+        filename = (form['title'] or form['_id']).replace(' ', '_')
+        if table_field:
+            filename += '_' + table_field['identifier']
+        self.set_header('Content-Disposition', 
+                        'attachment; filename="orders_%s.csv"' % filename)

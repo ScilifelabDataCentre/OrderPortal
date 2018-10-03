@@ -279,13 +279,15 @@ def csv_safe_row(row):
 
 def csv_safe(value):
     """Remove any beginning character '=-+@' from string value.
-    Also convert to UTF-8.
+    Also convert to UTF-8. Change None to empty string.
     See http://georgemauer.net/2017/10/07/csv-injection.html
     """
     if isinstance(value, basestring):
         while len(value) and value[0] in '=-+@':
             value = value[1:]
         value = to_utf8(value)
+    elif value is None:
+        value = ''
     return value
 
 def get_json(id, type):
