@@ -122,6 +122,16 @@
     </button>
   </form>
 </p>
+<p>
+  <form action="{{ reverse_url('form_orders_aggregate', form['_id']) }}"
+	role="form"
+	method="GET">
+    <button type="submit" class="btn btn-info">
+      <span class="glyphicon glyphicon-th"></span>
+      Aggregate
+    </button>
+  </form>
+</p>
 {% end %} {# block action_content #}
 
 {% block main_content %}
