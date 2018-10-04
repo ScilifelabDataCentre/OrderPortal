@@ -1006,8 +1006,10 @@ class Orders(RequestHandler):
         else:
             all_count = count=r.value
         # Initial ordering by the 'modified' column.
-        order_column = 5 + len(settings['ORDERS_LIST_STATUSES']) + \
-            len(settings['ORDERS_LIST_FIELDS'])
+        order_column = 5 + \
+                       int(settings['ORDERS_LIST_TAGS']) + \
+                       len(settings['ORDERS_LIST_FIELDS']) + \
+                       len(settings['ORDERS_LIST_STATUSES'])
         self.set_filter()
         self.render('orders.html',
                     all_forms=self.get_forms_titles(all=True),
