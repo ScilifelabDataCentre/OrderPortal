@@ -392,10 +392,12 @@ class OrderSaver(saver.Saver):
                         raise ValueError('value is not a valid date')
                 elif field['type'] == constants.TABLE:
                     if not isinstance(value, list):
-                        raise ValueError('value is not a list')
+                        raise ValueError('table value is not a list')
+                    if field['required'] and len(value) == 0:
+                        raise ValueError('missing data')
                     for r in value:
                         if not isinstance(r, list):
-                            raise ValueError('value is not a list of lists')
+                            raise ValueError('table value is not a list of lists')
                 elif field['type'] == constants.FILE:
                     pass
         except ValueError, msg:
