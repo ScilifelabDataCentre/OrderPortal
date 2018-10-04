@@ -63,14 +63,14 @@
     <th>Text</th>
   </tr>
   {% for status in settings['ORDER_STATUSES'] %}
-  {% set message = settings['ORDER_MESSAGES'].get(status['identifier'], dict()) %}
+  {% set msg = settings['ORDER_MESSAGES'].get(status['identifier'], dict()) %}
   <tr>
     <td>
       {% module Icon(status['identifier'], status.get('label'), True) %}
     </td>
-    <td>{{ ', '.join(message.get('recipients', [])) or '-' }}</td>
-    <td>{{ message.get('subject') or '-' }}</td>
-    <td class="pre">{{ message.get('text') or '-' }}</td>
+    <td>{{ ', '.join(msg.get('recipients', [])) or '-' }}</td>
+    <td>{{ msg.get('subject') or '-' }}</td>
+    <td class="pre">{{ msg.get('text') or '-' }}</td>
   </tr>
   {% end %}
 </table>
