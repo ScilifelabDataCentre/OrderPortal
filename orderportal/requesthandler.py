@@ -123,16 +123,32 @@ class RequestHandler(tornado.web.RequestHandler):
         been called 'get_current_account', since the term 'account'
         is used in this code rather than 'user'."""
         try:
-            return self.get_current_user_session()
+            return self.get_current_user_api_key()
         except ValueError:
             try:
-                return self.get_current_user_basic()
+                return self.get_current_user_session()
             except ValueError:
                 try:
-                    return self.get_current_user_api_key()
+                    return self.get_current_user_basic()
                 except ValueError:
                     pass
         return None
+
+    def get_current_user_api_key(self):
+        """Get the current user by API key authentication.
+        Raise ValueError if no or erroneous authentication.
+        """
+        try:
+            api_key = self.request.headers[constants.API_KEY_HEADER]
+        except KeyError:
+            raise ValueError
+        else:
+            try:
+                account = self.get_entity_view('account/api_key', api_key)
+            except tornado.web.HTTPError:
+                raise ValueError
+            logging.info("API key login: account %s", account['email'])
+            return account
 
     def get_current_user_session(self):
         """Get the current user from a secure login session cookie.
@@ -169,22 +185,6 @@ class RequestHandler(tornado.web.RequestHandler):
             raise ValueError
         logging.info("Basic auth login: account %s", account['email'])
         return account
-
-    def get_current_user_api_key(self):
-        """Get the current user by API key authentication.
-        Raise ValueError if no or erroneous authentication.
-        """
-        try:
-            api_key = self.request.headers[constants.API_KEY_HEADER]
-        except KeyError:
-            raise ValueError
-        else:
-            try:
-                account = self.get_entity_view('account/api_key', api_key)
-            except tornado.web.HTTPError:
-                raise ValueError
-            logging.info("API key login: account %s", account['email'])
-            return account
 
     def is_owner(self, entity):
         "Does the current user own the given entity?"
