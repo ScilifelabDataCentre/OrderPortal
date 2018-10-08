@@ -741,9 +741,9 @@ class Login(RequestHandler):
                     saver['status'] = constants.DISABLED
                     saver.erase_password()
                 msg = "Too many failed login attempts: Your account has been" \
-                      " disabled. Contact the site administrators %s." % \
+                      " disabled. Contact the site administrator %s." % \
                       settings.get('SITE_SUPPORT_EMAIL', '')
-                # Prepare message sent by cron job script 'script/messenger.py'
+                # Prepare email message
                 try:
                     template = settings['ACCOUNT_MESSAGES'][constants.DISABLED]
                 except KeyError:
@@ -759,7 +759,7 @@ class Login(RequestHandler):
             if not account.get('status') == constants.ENABLED:
                 raise ValueError
         except ValueError:
-            msg = "Account is disabled. Contact the site administrators %s." % \
+            msg = "Account is disabled. Contact the site administrator %s." % \
                   settings.get('SITE_SUPPORT_EMAIL', '')
             self.see_other('home', error=msg)
             return
@@ -770,6 +770,7 @@ class Login(RequestHandler):
         self.set_secure_cookie(constants.USER_COOKIE, 
                                account['email'],
                                expires_days=settings['LOGIN_MAX_AGE_DAYS'])
+        logging.info("Basic auth login: account %s", account['email'])
         with AccountSaver(doc=account, rqh=self) as saver:
             saver['login'] = utils.timestamp() # Set login timestamp.
         if account.get('update_info'):

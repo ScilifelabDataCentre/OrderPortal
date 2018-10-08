@@ -123,16 +123,19 @@ class RequestHandler(tornado.web.RequestHandler):
         been called 'get_current_account', since the term 'account'
         is used in this code rather than 'user'."""
         try:
-            return self.get_current_user_api_key()
+            account = self.get_current_user_api_key()
         except ValueError:
             try:
-                return self.get_current_user_session()
+                account = self.get_current_user_session()
             except ValueError:
                 try:
-                    return self.get_current_user_basic()
+                    account = self.get_current_user_basic()
                 except ValueError:
-                    pass
-        return None
+                    return None
+        if account.get('status') == constants.DISABLED:
+            logging.info("Account %s DISABLED", account['email'])
+            return None
+        return account
 
     def get_current_user_api_key(self):
         """Get the current user by API key authentication.
