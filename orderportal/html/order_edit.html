@@ -2,6 +2,11 @@
 
 {% extends "base.html" %}
 
+{% block css_page %}
+<link rel="stylesheet" type="text/css"
+      href="{{ static_url('jquery.jscrollpane.css') }}">
+{% end %}
+
 {% block head_title %}
 Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 {% end %}
@@ -172,12 +177,18 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 <script>
   $("#_table_{{ tableid }}_add_button").click({tableid: "{{ tableid }}", tableinput: "{% raw tableinputs[tableid] %}"}, table_add_row);
 </script>
-
 {% end %}
 {% end %}
 
 {% block javascript_autofocus %}
 <script>
   $(function(){ $("#__title__").focus(); });
+</script>
+{% end %}
+
+{% block javascript_code %}
+<script src="{{ static_url('jquery.jscrollpane.min.js') }}"></script>
+<script>
+  $(function() { $('.scroll-pane').jScrollPane({showArrows: true}); });
 </script>
 {% end %}

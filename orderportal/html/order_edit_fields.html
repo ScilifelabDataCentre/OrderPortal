@@ -210,18 +210,25 @@
            value="{{ value and len(value) or 0 }}">
     {% set ncols = len(field['table']) %}
     {% if ncols > 5 %}
-    <div class="table-scrolling-wrapper">
+    <!-- <div class="table-scrolling-wrapper"> -->
+    <!--   <table id="_table_{{ field['identifier'] }}" -->
+    <!--          style="max-width:{{ 180*ncols }}px; width:{{ 180*ncols }}px" -->
+    <!--          class="table table-bordered table-condensed table-scrolling"> -->
+    <!--     {% module TableRowsEdit(field, value) %} -->
+    <!--   </table> -->
+
+    <!-- </div> -->
+    <!-- <div> -->
+    <!--   <b>MacOS users:</b> -->
+    <!--   Scroll table horizontally using left/right arrow keys. Or try -->
+    <!--   <a target="_blank" href="https://www.quora.com/Why-is-the-scroll-bar-missing-in-Safari">this</a>. -->
+    <!-- </div> -->
+    <div class="scroll-pane">
       <table id="_table_{{ field['identifier'] }}"
              style="max-width:{{ 180*ncols }}px; width:{{ 180*ncols }}px"
              class="table table-bordered table-condensed table-scrolling">
         {% module TableRowsEdit(field, value) %}
       </table>
-
-    </div>
-    <div>
-      <b>MacOS users:</b>
-      Scroll table horizontally using left/right arrow keys. Or try
-      <a target="_blank" href="https://www.quora.com/Why-is-the-scroll-bar-missing-in-Safari">this</a>.
     </div>
     {% else %}
     <table id="_table_{{ field['identifier'] }}"
