@@ -69,7 +69,7 @@
 
 {% else %} {# if field['type'] == constants.GROUP #}
 
-<div class="col-md-10">
+<div class="col-md-12">
   <div class="form-group has-feedback">
 
     {% set value = order['fields'][field['identifier']] %}
@@ -87,6 +87,26 @@
 	    title="Writeable by admin only.">
       </span>
       {% end %}
+    <span style="margin-right: -3em;"
+	  class="form-control-feedback nobr">
+      {% if field['identifier'] in order['invalid'] %}
+      <span class="text-danger">
+	<span class="glyphicon glyphicon-remove"></span>
+	{{ order['invalid'][field['identifier']] }}
+      </span>
+      {% elif value in (None, '') %}
+      <span class="text-warning">
+	<span class="glyphicon glyphicon-question-sign"></span>
+	no value OK
+      </span>
+      {% else %}
+      <span class="text-success">
+	<span class="glyphicon glyphicon-ok"></span>
+	OK
+      </span>
+      {% end %}
+    </span>
+
     </label>
 
     {% if field['type'] == constants.BOOLEAN %}
@@ -210,26 +230,11 @@
            value="{{ value and len(value) or 0 }}">
     {% set ncols = len(field['table']) %}
     {% if ncols > 5 %}
-    <!-- <div class="table-scrolling-wrapper"> -->
-    <!--   <table id="_table_{{ field['identifier'] }}" -->
-    <!--          style="max-width:{{ 180*ncols }}px; width:{{ 180*ncols }}px" -->
-    <!--          class="table table-bordered table-condensed table-scrolling"> -->
-    <!--     {% module TableRowsEdit(field, value) %} -->
-    <!--   </table> -->
-
-    <!-- </div> -->
-    <!-- <div> -->
-    <!--   <b>MacOS users:</b> -->
-    <!--   Scroll table horizontally using left/right arrow keys. Or try -->
-    <!--   <a target="_blank" href="https://www.quora.com/Why-is-the-scroll-bar-missing-in-Safari">this</a>. -->
-    <!-- </div> -->
-    <div class="scroll-pane">
-      <table id="_table_{{ field['identifier'] }}"
-             style="max-width:{{ 180*ncols }}px; width:{{ 180*ncols }}px"
-             class="table table-bordered table-condensed table-scrolling">
-        {% module TableRowsEdit(field, value) %}
-      </table>
-    </div>
+    <table id="_table_{{ field['identifier'] }}"
+           style="max-width:{{ 180*ncols }}px; width:{{ 180*ncols }}px"
+           class="table table-bordered table-condensed">
+      {% module TableRowsEdit(field, value) %}
+    </table>
     {% else %}
     <table id="_table_{{ field['identifier'] }}"
            class="table table-bordered table-condensed">
@@ -282,26 +287,6 @@
     </span>
     {% end %}
     {% end %} {# if field['required'] #}
-
-    <span style="margin-right: -3em;"
-	  class="form-control-feedback nobr">
-      {% if field['identifier'] in order['invalid'] %}
-      <span class="text-danger">
-	<span class="glyphicon glyphicon-remove"></span>
-	{{ order['invalid'][field['identifier']] }}
-      </span>
-      {% elif value in (None, '') %}
-      <span class="text-warning">
-	<span class="glyphicon glyphicon-question-sign"></span>
-	no value OK
-      </span>
-      {% else %}
-      <span class="text-success">
-	<span class="glyphicon glyphicon-ok"></span>
-	OK
-      </span>
-      {% end %}
-    </span>
 
     <span class="help-block">
       {% module Markdown(field.get('description')) %}
