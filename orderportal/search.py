@@ -32,9 +32,19 @@ class Search(RequestHandler):
     def get(self):
         orig = self.get_argument('term', '')
         orders = {}
-        # Search order identifier; exact match
-        term = orig.strip().upper()
+        term = orig.strip()
         parts = term.split()
+        parts = [p for p in parts if p]
+        parts.extend([p.upper() for p in parts])
+        # Try order IUIDs
+        for iuid in parts:
+            try:
+                order = self.get_entity(iuid, doctype=constants.ORDER)
+            except tornado.web.HTTPError as err:
+                pass
+            else:
+                orders[order.get('identifier') or iuid] = order
+        # Search order identifier; exact match
         view = self.db.view('order/identifier')
         id_sets = []
         for part in parts:

@@ -56,7 +56,8 @@ ORDER_STATUSES_FILEPATH:    '{SITE_DIR}/order_statuses.yaml'
 ORDER_TRANSITIONS_FILEPATH: '{SITE_DIR}/order_transitions.yaml'
 ORDER_MESSAGES_FILEPATH:    '{SITE_DIR}/order_messages.yaml'
 
-# Define in order to use sequentially numbered order identifiers.
+# Must be defined for sequentially numbered order identifiers.
+# The prefix must be all upper-case characters.
 ORDER_IDENTIFIER_FORMAT: 'MY{0:=05d}'
 ORDER_IDENTIFIER_REGEXP: 'MY\d+'
 
