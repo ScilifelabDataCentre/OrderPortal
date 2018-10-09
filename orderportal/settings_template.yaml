@@ -20,12 +20,13 @@ DATABASE_NAME:     'orderportal'
 DATABASE_ACCOUNT:  'orderportal_account'
 DATABASE_PASSWORD: 'Change this to CouchDB account password'
 
-# Logging and debug
-TORNADO_DEBUG: true
+# tornado debug is useful only during software development
+TORNADO_DEBUG: false
+# Increaase the logging level; may be useful for settings debug
 LOGGING_DEBUG: true
 LOGGING_FILEPATH: '/var/log/orderportal/debug.log'
 
-# Login; these *must* be changed for your instance.
+# Login; these *MUST* be changed for your instance.
 COOKIE_SECRET: 'Change this to a long string of random characters.'
 PASSWORD_SALT: 'Change this to a long string of random characters.'
 
@@ -44,12 +45,19 @@ SITE_HOME_ICON:   'orderportal144.png'
 # Account setup; email message templates.
 ACCOUNT_MESSAGES_FILEPATH: '{SITE_DIR}/account_messages.yaml'
 
-# Account registration input flags.
+# Flags for which account registration input fields to ask for.
 ACCOUNT_PI_INFO: true
 ACCOUNT_POSTAL_INFO: true
 ACCOUNT_INVOICE_INFO: true
 ACCOUNT_FUNDER_INFO: true
+
+# Default country for registering account.
 ACCOUNT_DEFAULT_COUNTRY_CODES: 'SE'
+
+# Terminology: change key to value in various display labels and texts.
+# TERMINOLOGY:
+#   order: application
+#   orders: applications
 
 # Order status, transition, messages definition files
 ORDER_STATUSES_FILEPATH:    '{SITE_DIR}/order_statuses.yaml'
@@ -61,6 +69,15 @@ ORDER_MESSAGES_FILEPATH:    '{SITE_DIR}/order_messages.yaml'
 ORDER_IDENTIFIER_FORMAT: 'MY{0:=05d}'
 ORDER_IDENTIFIER_REGEXP: 'MY\d+'
 
+# Allow a report to be attached to orders.
+ORDER_REPORT: true
+
+# Allow links to be attached to orders.
+ORDER_LINKS: true
+
+# Allow tags to be set on orders.
+ORDER_TAGS: true
+
 # Allow users to set tags on orders.
 ORDER_USER_TAGS: true
 
@@ -71,6 +88,16 @@ ORDERS_LIST_STATUSES:
   - accepted
   - processing
   - closed
+
+# The order fields (identifiers) to show in the orders list.
+# Orders (forms) lacking the field will just show an empty slot.
+# The value is an example only; edit or comment out.
+ORDERS_LIST_FIELDS:
+  - project_pi
+
+# Fields of orders to use when doing search; scalar fields only!
+ORDER_SEARCH_FIELDS:
+  - project_pi
 
 # University symbols (abbreviations), names and rank in list.
 # Optional, may be set to null.
