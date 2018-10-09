@@ -212,6 +212,7 @@ class OrderSaver(saver.Saver):
                 (field['restrict_read'] or field['restrict_write']): continue
             if field['type'] == constants.GROUP: continue
             identifier = field['identifier']
+
             if field['type'] == constants.FILE:
                 # Files are uploaded by the normal form multi-part
                 # encoding approach, not by JSON data.
@@ -232,80 +233,76 @@ class OrderSaver(saver.Saver):
                     # Missing argument implies empty list.
                     # This is a special case for HTML form input.
                     value = self.rqh.get_arguments(identifier)
+
             elif field['type'] == constants.TABLE:
                 coldefs = [utils.parse_field_table_column(c) 
                            for c in field['table']]
-                n_columns = len(coldefs)
-                if n_columns == 0: continue
                 if data:        # JSON data: contains complete table.
                     try:
-                        value = data[identifier]
+                        table = data[identifier]
                     except KeyError:
                         continue
-                    # Check validity of table items.
-                    try:
-                        table = value
-                        value = []
-                        for row in table:
-                            for j in xrange(n_columns):
-                                coltype = coldefs[j].get('type')
-                                if coltype == constants.SELECT:
-                                    if row[j] not in coldefs[j]['options']:
-                                        row[j] = None
-                                elif coltype == constants.INT:
-                                    try:
-                                        row[j] = int(row[j])
-                                    except (ValueError, TypeError):
-                                        row[j] = None
-                                elif not row[j]:
-                                    row[j] = None
-                    except (ValueError, TypeError, AttributeError):
-                        value = []
-                else:         # HTML form input: individual cells.
+                else:           # HTML form data; collect table from fields.
                     try:
                         name = "_table_%s_count" % identifier
                         n_rows = int(self.rqh.get_argument(name, 0))
                     except (ValueError, TypeError):
                         n_rows = 0
-                    value = []
+                    table = []
                     for i in xrange(n_rows):
                         row = []
-                        for j in xrange(n_columns):
+                        for j, coldef in enumerate(coldefs):
                             name = "_table_%s_%i_%i" % (identifier, i, j)
-                            item = self.rqh.get_argument(name, None)
-                            coltype = coldefs[j].get('type')
+                            row.append(self.rqh.get_argument(name, None))
+                        table.append(row)
+                # Check validity of table content.
+                value = []
+                try:
+                    for row in table:
+                        # Check correct number of items in the row.
+                        if len(row) != len(coldefs): continue
+                        for j, coldef in enumerate(coldefs):
+                            coltype = coldef.get('type')
                             if coltype == constants.SELECT:
-                                if item not in coldefs[j]['options']:
-                                    item = None
+                                if row[j] not in coldef['options']:
+                                    row[j] = None
                             elif coltype == constants.INT:
                                 try:
-                                    item = int(item)
+                                    row[j] = int(row[j])
                                 except (ValueError, TypeError):
-                                    item = None
-                            elif not item:
-                                item = None
-                            row.append(item)
+                                    row[j] = None
+                            elif not row[j]:
+                                row[j] = None
+                        # Use row only if any non-None value in it.
                         for item in row:
                             if item is not None:
                                 value.append(row)
                                 break
-            elif data:          # JSON data.
-                try:
-                    value = data[identifier]
-                except KeyError:
-                    continue
-            else:               # HTML form input.
-                try:
-                    value = self.rqh.get_argument(identifier)
-                    if value == '': value = None
-                except tornado.web.MissingArgumentError:
-                    # Missing argument means no change,
-                    # which is not same as value None.
-                    # Except for boolean checkbox!
-                    if field['type'] == constants.BOOLEAN and field.get('checkbox'):
-                        value = False
-                    else:
+                # Something is badly wrong; just skip it.
+                except (ValueError, TypeError, AttributeError):
+                    value = []
+
+            # All other types of input fields.
+            else:
+                if data:          # JSON data.
+                    try:
+                        value = data[identifier]
+                    except KeyError:
                         continue
+                else:               # HTML form input.
+                    try:
+                        value = self.rqh.get_argument(identifier)
+                        if value == '': value = None
+                    except tornado.web.MissingArgumentError:
+                        # Missing argument means no change,
+                        # which is not the same as value None.
+                        # Except for boolean checkbox!
+                        if field['type'] == constants.BOOLEAN and \
+                           field.get('checkbox'):
+                            value = False
+                        else:
+                            continue
+            # Record any change to the value.
             if value != self.doc['fields'].get(identifier):
                 changed = self.changed.setdefault('fields', dict())
                 changed[identifier] = value
@@ -858,10 +855,11 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
                     saver.update_fields(data=data['fields'])
                 except KeyError:
                     pass
-                try:
-                    saver.set_history(data['history'])
-                except KeyError:
-                    pass
+                if self.is_admin():
+                    try:
+                        saver.set_history(data['history'])
+                    except KeyError:
+                        pass
         except ValueError, msg:
             raise tornado.web.HTTPError(400, reason=str(msg))
         else:
@@ -1274,6 +1272,7 @@ class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             raise tornado.web.HTTPError(400, reason=str(msg))
         else:
             self.write(self.get_order_json(saver.doc, full=True))
+
 
 class OrderEdit(OrderMixin, RequestHandler):
     "Page for editing an order."

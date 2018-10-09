@@ -2,13 +2,16 @@
 
 NOTE: You need to change several variables to make this work. See below.
 
-NOTE: This uses the third-party 'requests' module, which is much nicer than
+NOTE: This uses the third-party 'requests' module, which is better than
 the standard 'urllib' module.
 """
 
 from __future__ import print_function
+
 import json
-import requests # http://docs.python-requests.org/en/master/
+
+# Third-party package: http://docs.python-requests.org/en/master/
+import requests
 
 # Variables whose values must be changed for your site:
 BASE_URL = 'http://localhost:8886'  # Base URL for your OrderPortal instance.
@@ -19,7 +22,7 @@ FORM_IUID = 'dadd37b9e2644caa80eb358773cec00b'  # The IUID of the form.
 url = "{base}/api/v1/order".format(base=BASE_URL)
 headers = {'X-OrderPortal-API-key': API_KEY}
 
-data = {'title': 'The title for the new order',
+data = {'title': 'The title for a new order created by API call',
         'form': FORM_IUID}
 
 response = requests.post(url, headers=headers, json=data)
