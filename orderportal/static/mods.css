@@ -29,7 +29,7 @@
 
 /* Pre-formatted text variants. */
 .pre {white-space: pre; }
-.nobr {white-space:nowrap; }
+.nobr {white-space: nowrap; }
 .number {text-align: right; font-family: monospace; }
 
 /* Mark input field as required with a red star. */
@@ -37,15 +37,3 @@
 			     content: ' *';
 			     display: inline;
 			   }
-
-/* Kludge for editing wide tables */
-.table-scrolling-wrapper {
-    overflow-x: scroll;
-    overflow-y: hidden;
-    white-space: nowrap;
-    margin-bottom: 4px;
-}
-.table-scrolling {
-    display: inline-block;
-    margin-bottom: 4px;
-}

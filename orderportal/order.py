@@ -468,7 +468,7 @@ class OrderSaver(saver.Saver):
                         account = self.get_account(member)
                         if account and account['status'] == constants.ENABLED:
                             recipients.add(account['email'])
-        if 'admin' in template['recipients']:
+        if constants.ADMIN in template['recipients']:
             view = self.db.view('account/role', include_docs=True)
             admins = [r.doc for r in view[constants.ADMIN]]
             for admin in admins:

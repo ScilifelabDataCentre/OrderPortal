@@ -37,7 +37,7 @@ class Icon(tornado.web.UIModule):
 
 
 class ContentType(tornado.web.UIModule):
-    "HTML for an entity type icon."
+    "HTML for a content (MIME) type icon."
 
     def render(self, content_type):
         url = self.handler.static_url(
@@ -60,7 +60,7 @@ class Entity(tornado.web.UIModule):
             alt = 'order'
             url = self.handler.order_reverse_url(entity)
         elif doctype == constants.ACCOUNT:
-            icon_url = self.handler.static_url(entity['role'] + '.png')
+            icon_url = self.handler.static_url('account.png')
             title = entity['email']
             alt = entity['role']
             url = self.handler.reverse_url(doctype, entity['email'])
@@ -84,7 +84,7 @@ class Entity(tornado.web.UIModule):
                 url = self.handler.reverse_url(doctype, iuid)
             except KeyError, msg:
                 raise KeyError(str(msg) + ':', doctype)
-        if icon:
+        if icon and icon_url:
             icon = ICON_TEMPLATE.format(url=icon_url, alt=alt, title=alt)
             return u"""<a href="{url}">{icon} {title}</a>""".format(
                 url=url, icon=icon, title=title)

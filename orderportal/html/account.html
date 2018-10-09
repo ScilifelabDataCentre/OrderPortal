@@ -2,11 +2,9 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}Account: {{ account['email'] }}{% end %}
+{% block head_title %}Account {{ account['email'] }}{% end %}
 
-{% block body_title %}
-{% module Icon('account', label=True) %}: {{ account['email'] }}
-{% end %}
+{% block body_title %}Account {{ account['email'] }}{% end %}
 
 {% block body_header_alt_format %}
 <a href="{{ reverse_url('account_api', account['email']) }}">
@@ -157,7 +155,7 @@
   </tr>
   <tr>
     <th>Role</th>
-    <td>{% module Icon(account['role'], label=True) %}</td>
+    <td>{{ account['role'] }}</td>
   </tr>
   <tr>
     <th>Status</th>

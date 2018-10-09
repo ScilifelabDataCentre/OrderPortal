@@ -187,7 +187,7 @@
 	  <div>
 	    <ul class="nav navbar-nav navbar-right">
 	      {% if current_user %}
-	      <li>{% module Entity(current_user) %}</li>
+	      <li>{% module Entity(current_user, icon=False) %}</li>
 	      <li>
 		<form action="{{ reverse_url('logout') }}"
 		      role="form"
