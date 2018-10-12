@@ -195,30 +195,3 @@ class NoSuchEntityApiV1(RequestHandler):
     def check_xsrf_cookie(self):
         "Do not check for XSRF cookie when API."
         pass
-
-
-class Test(RequestHandler):
-    "Page to test some feature."
-
-    @tornado.web.authenticated
-    def get(self):
-        rowcode = ["<tr>"]
-        rowcode.append(
-            "<td>"
-            "<input type='text' class='form-control' name='rowid_0' id='rowid_0'>"
-            "</td>")
-        rowcode.append(
-            "<td>"
-            "<input type='text' class='form-control' name='rowid_1'>"
-            "</td>")
-        rowcode.append("</tr>")
-        self.render('test.html', rowcode=''.join(rowcode))
-
-    @tornado.web.authenticated
-    def post(self):
-        table_count = int(self.get_argument("table_count"))
-        logging.debug("table_count %s", table_count);
-        for i in xrange(table_count):
-            logging.debug("%s: %s",
-                          i, self.get_argument("table_%s_0" % i, None))
-        self.see_other('test')
