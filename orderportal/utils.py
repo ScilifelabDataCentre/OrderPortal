@@ -62,11 +62,15 @@ def load_settings(filepath):
     except KeyError:
         pass
     try:
-        kwargs['filename'] = settings['LOGGING_FILEPATH']
+        filepath = settings['LOGGING_FILEPATH']
+        if not filepath: raise KeyError
+        kwargs['filename'] = filepath
     except KeyError:
         pass
     try:
-        kwargs['filemode'] = settings['LOGGING_FILEMODE']
+        filemode = settings['LOGGING_FILEMODE']
+        if not filemode: raise KeyError
+        kwargs['filemode'] = filemode
     except KeyError:
         pass
     logging.basicConfig(**kwargs)
