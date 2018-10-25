@@ -31,6 +31,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 </div>
 
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
+      id="__order_edit__"
       class="allow_leaving_without_question"
       role="form"
       enctype="multipart/form-data"
@@ -175,6 +176,9 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 <script src="{{ static_url('field_visible_if.js') }}"></script>
 <script src="{{ static_url('quit_through_submit.js') }}"></script>
 <script src="{{ static_url('table_edit.js') }}"></script>
+<script>
+  $("#__order_edit__").find("a").attr("target", "_blank");
+</script>
 {% for tableid in tableinputs %}
 <script>
   $("#_table_{{ tableid }}_add_button").click({tableid: "{{ tableid }}", tableinput: "{% raw tableinputs[tableid] %}"}, table_add_row);
