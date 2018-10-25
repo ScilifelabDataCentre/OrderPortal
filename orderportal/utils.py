@@ -365,11 +365,10 @@ def log(db, rqh, entity, changed=dict()):
 
 def get_filename_extension(content_type):
     "Return filename extension, correcting for silliness in 'mimetypes'."
-    if content_type == 'text/plain':
-        return '.txt'
-    if content_type == 'image/jpeg':
-        return '.jpg'
-    return mimetypes.guess_extension(content_type)
+    try:
+        return constants.MIME_EXTENSIONS[content_type]
+    except KeyError:
+        return mimetypes.guess_extension(content_type)
 
 def parse_field_table_column(coldef):
     """Parse the input field table column definition.
