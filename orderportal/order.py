@@ -273,13 +273,11 @@ class OrderSaver(saver.Saver):
                                     row[j] = None
                             elif not row[j]:
                                 row[j] = None
-                        # Use row only if any non-None value in it.
-                        for item in row:
-                            if item is not None:
-                                value.append(row)
-                                break
+                        # Use row only if first value is not None.
+                        if row[0] is not None:
+                            value.append(row)
                 # Something is badly wrong; just skip it.
-                except (ValueError, TypeError, AttributeError):
+                except (ValueError, TypeError, AttributeError, IndexError):
                     value = []
 
             # All other types of input fields.

@@ -45,7 +45,10 @@
     <span class="help-block">
       The description is displayed in the order creation panel on the
       home page.
-      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a> format.
+      <br>
+      (Optional: 
+      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+      notation may be used to format the text.)
     </span>
   </div>
 
@@ -56,7 +59,10 @@
 	      >{{ form.get('instruction') or '' }}</textarea>
     <span class="help-block">
       The instruction is displayed at the top of the order edit page.
-      <a href="{{ settings['MARKDOWN_URL'] }}">Markdown</a> format.
+      <br>
+      (Optional: 
+      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+      notation may be used to format the text.)
     </span>
   </div>
 

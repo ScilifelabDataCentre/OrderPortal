@@ -224,23 +224,24 @@
 	   value="{{ value }}">
 
     {% elif field['type'] == constants.TABLE %}
+    {% set tableid = '_table_' + field['identifier'] %}
+    <table id="{{ tableid }}"
+           {% set ncols = len(field['table']) %}
+           {% if ncols > 5 %}
+           style="max-width:{{ 180*ncols }}px; width:{{ 180*ncols }}px"
+           {% end %}
+           class="table table-bordered table-condensed">
+      {% module TableRowsEdit(field, value) %}
+      {% set nrows = value and len(value) or 0 %}
+      {% if nrows == 0 %}
+      {% raw tableinputs[field['identifier']].replace('rowid', tableid + '_' + str(nrows)) %}
+      {% set nrows = nrows + 1 %}
+      {% end %}
+    </table>
     <input type="hidden"
            name="_table_{{ field['identifier'] }}_count"
            id="_table_{{ field['identifier'] }}_count"
-           value="{{ value and len(value) or 0 }}">
-    {% set ncols = len(field['table']) %}
-    {% if ncols > 5 %}
-    <table id="_table_{{ field['identifier'] }}"
-           style="max-width:{{ 180*ncols }}px; width:{{ 180*ncols }}px"
-           class="table table-bordered table-condensed">
-      {% module TableRowsEdit(field, value) %}
-    </table>
-    {% else %}
-    <table id="_table_{{ field['identifier'] }}"
-           class="table table-bordered table-condensed">
-      {% module TableRowsEdit(field, value) %}
-    </table>
-    {% end %}
+           value="{{ nrows }}">
     <div class="form-group">
       <button type="button" id="_table_{{ field['identifier'] }}_add_button" 
               class="btn btn-info"> 
@@ -291,8 +292,12 @@
     <span class="help-block">
       {% module Markdown(field.get('description')) %}
       {% if field['type'] == constants.TEXT %}
+      (Optional: 
       <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
-      notation may be used.
+      notation may be used to format the text.)
+      {% elif field['type'] == constants.TABLE %}
+      <strong>Note:</strong> Table rows with an empty first field will
+      be deleted.
       {% end %}
     </span>
   </div>
