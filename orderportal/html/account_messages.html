@@ -18,28 +18,28 @@ Messages to {% module Entity(account) %}
     </tr>
   </thead>
   <tbody>
-    {% for message in messages %}
+    {% for msg in messages %}
     <tr>
-      <td class="localtime">{{ message['modified'] }}</td>
+      <td class="localtime">{{ msg['modified'] }}</td>
       <td>
 	<table>
 	  <tr>
 	    <td>
 	      <button type="button" class="btn btn-default btn-xs"
-		      data-toggle="collapse" data-target="#{{ message['_id'] }}">
+		      data-toggle="collapse" data-target="#{{ msg['_id'] }}">
 		<span class="glyphicon glyphicon-chevron-down"></span>
 	      </button>
-	      {{ message['subject'] }}
+	      {{ msg['subject'] }}
 	    </td>
 	  </tr>
-	  <tr id="{{ message['_id'] }}" class="collapse">
+	  <tr id="{{ msg['_id'] }}" class="collapse">
 	    <td>
 	      <div class="panel panel-default">
 		<div class="panel-heading">
-		  Email sent to {{ ', '.join(message['recipients']) }}
+		  Email sent to {{ ', '.join(msg['recipients']) }}
 		</div>
 		<div class="panel-body pre">
-		  {{ message['text'] }}
+		  {{ msg['text'] }}
 		</div>
 	      </div>
 	    </td>

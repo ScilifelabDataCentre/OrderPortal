@@ -818,7 +818,6 @@ class Reset(RequestHandler):
                 return
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver.reset_password()
-            # Prepare message sent by cron job script 'script/messenger.py'
             try:
                 template = settings['ACCOUNT_MESSAGES'][constants.RESET]
             except KeyError:
@@ -1010,7 +1009,6 @@ class AccountEnable(RequestHandler):
         with AccountSaver(account, rqh=self) as saver:
             saver['status'] = constants.ENABLED
             saver.reset_password()
-        # Prepare message sent by cron job script 'script/messenger.py'
         try:
             template = settings['ACCOUNT_MESSAGES'][constants.ENABLED]
         except KeyError:
