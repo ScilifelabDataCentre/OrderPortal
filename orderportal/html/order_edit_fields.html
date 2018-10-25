@@ -62,7 +62,7 @@
     </div>
     <div class="panel-body">
       {# Recursion: 'include' cannot be used! #}
-      {% module Template('order_edit_fields.html', order=order, fields=field['fields'], is_staff=is_staff, hidden_fields=hidden_fields) %}
+      {% module Template('order_edit_fields.html', order=order, fields=field['fields'], is_staff=is_staff, hidden_fields=hidden_fields, tableinputs=tableinputs) %}
     </div>
   </div>
 </div>
