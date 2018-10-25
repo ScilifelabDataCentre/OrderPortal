@@ -72,6 +72,7 @@ Document {% module Icon('file') %} {{ file.get('title') or file['name'] }}
 	  </a>
 	</td>
       </tr>
+      {% if file['content_type'] in constants.VIEWABLE_CONTENT_TYPES %}
       <tr>
 	<th></th>
 	<td>
@@ -82,6 +83,7 @@ Document {% module Icon('file') %} {{ file.get('title') or file['name'] }}
 	  </a>
 	</td>
       </tr>
+      {% end %}
       <tr>
 	<th></th>
 	<td>

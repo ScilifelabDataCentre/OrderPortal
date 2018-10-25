@@ -18,6 +18,7 @@ CSV_MIME  = 'text/csv'
 ZIP_MIME  = 'application/zip'
 TEXT_MIME = 'text/plain'
 BIN_MIME  = 'application/octet-stream'
+PDF_MIME  = 'application/pdf'
 
 # CouchDB
 # For view ranges: CouchDB uses the Unicode Collation Algorithm,
@@ -120,16 +121,21 @@ CONTENT_TYPE_ICONS = {
     JSON_MIME: 'json.png',
     CSV_MIME: 'csv.png',
     HTML_MIME: 'html.png',
-    'application/pdf': 'pdf.png',
+    PDF_MIME: 'pdf.png',
     'image/png': 'image.png',
     'image/jpeg': 'image.png',
     'application/vnd.ms-excel': 'excel.png',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'excel.png',
     'application/vnd.ms-excel': 'excel.png',
+    'application/vnd.ms-excel.sheet.macroEnabled.12': 'excel.png',
     'application/msword': 'word.png',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'word.png',
     'application/vnd.ms-powerpoint': 'ppt.png',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'ppt.png',
-    'text/plain': 'text.png',
+    TEXT_MIME: 'text.png',
     }
 DEFAULT_CONTENT_TYPE_ICON = 'binary.png'
+VIEWABLE_CONTENT_TYPES = set([TEXT_MIME,
+                              JSON_MIME,
+                              CSV_MIME,
+                              PDF_MIME])
