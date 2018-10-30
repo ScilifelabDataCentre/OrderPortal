@@ -17,7 +17,8 @@ Clone the GitHub repo. The commands below use the base GitHub repo;
 substitute by whichever fork you are using.
 
     $ cd /var/www/apps
-    $ sudo -u nginx mkdir xyz
+    $ sudo mkdir xyz
+    $ sudo chown nginx.nginx xyz
     $ cd xyz
     $ sudo -u nginx git clone https://github.com/pekrau/OrderPortal.git
 
