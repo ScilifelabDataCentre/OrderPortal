@@ -840,8 +840,8 @@ class Reset(RequestHandler):
                     self.set_secure_cookie(constants.USER_COOKIE, '')
             self.see_other('home',
                            message="An email has been sent containing"
-                           " a reset code. Please wait a couple of"
-                           " minutes for it and use the link in it.")
+                           " a reset code. Use the link in the email."
+                           " (Check your spam filter!)")
 
 
 class Password(RequestHandler):
