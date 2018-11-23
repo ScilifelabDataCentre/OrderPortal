@@ -32,6 +32,7 @@ def main():
     parser = utils.get_command_line_parser(description='OrderPortal server.')
     (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings)
+    utils.initialize()
 
     url = tornado.web.url
     handlers = [url(r'/', Home, name='home')]

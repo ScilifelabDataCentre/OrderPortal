@@ -23,6 +23,7 @@ import yaml
 
 import orderportal
 from . import constants
+from . import designs
 from . import settings
 
 
@@ -212,6 +213,12 @@ def get_db():
     except couchdb.http.ResourceNotFound:
         raise KeyError("CouchDB database '%s' does not exist." % 
                        settings['DATABASE_NAME'])
+
+def initialize(db=None):
+    "Load the design documents, or update."
+    if db is None:
+        db = get_db()
+    designs.load_design_documents(db)
 
 def get_iuid():
     "Return a unique instance identifier."
