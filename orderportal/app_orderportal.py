@@ -50,6 +50,7 @@ def main():
         url(r'/order/([0-9a-f]{32})', Order, name='order'),
         url(r'/api/v1/order/([0-9a-f]{32})', OrderApiV1, name='order_api'),
         url(r'/order/([^/]+).csv', OrderCsv, name='order_csv'),
+        url(r'/order/([^/]+).xlsx', OrderXlsx, name='order_xlsx'),
         url(r'/order/([^/]+).zip', OrderZip, name='order_zip'),
         url(r'/order/([0-9a-f]{32})/logs', OrderLogs, name='order_logs'),
         url(r'/order', OrderCreate, name='order_create'),

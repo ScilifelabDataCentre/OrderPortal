@@ -3,8 +3,10 @@
 from __future__ import print_function, absolute_import
 
 import collections
+import csv
 import datetime
 import hashlib
+import io
 import logging
 import mimetypes
 import optparse
@@ -16,9 +18,11 @@ import unicodedata
 import urllib
 import urlparse
 import uuid
+from cStringIO import StringIO
 
 import couchdb
 import tornado.web
+import xlsxwriter
 import yaml
 
 import orderportal
@@ -258,11 +262,18 @@ def to_ascii(value):
     return unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
 
 def to_utf8(value):
-    "Convert value to UTF-8 representation."
+    "Convert string value to UTF-8 representation."
     if isinstance(value, basestring):
         if not isinstance(value, unicode):
             value = unicode(value, 'utf-8')
         return value.encode('utf-8')
+    else:
+        return value
+
+def to_unicode(value):
+    "Convert string value to unicode assuming UTF-8."
+    if isinstance(value, basestring) and not isinstance(value, unicode):
+        return unicode(value, 'utf-8')
     else:
         return value
 
@@ -389,3 +400,37 @@ def parse_field_table_column(coldef):
         if result['type'] == 'select':
             result['options'] = parts[2].split('|')
         return result
+
+
+class CsvWriter(object):
+    "Write rows serially to a CSV file."
+
+    def __init__(self):
+        self.csvbuffer = StringIO()
+        self.writer = csv.writer(self.csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
+
+    def writerow(self, row):
+        self.writer.writerow(csv_safe_row(row))
+
+    def getvalue(self):
+        return self.csvbuffer.getvalue()
+
+
+class XlsxWriter(object):
+    "Write rows serially to an XLSX file."
+
+    def __init__(self):
+        self.xlsxbuffer = io.BytesIO()
+        self.workbook = xlsxwriter.Workbook(self.xlsxbuffer, {'in_memory':True})
+        self.ws = self.workbook.add_worksheet('order')
+        self.x = 0
+
+    def writerow(self, row):
+        for y, item in enumerate(row):
+            self.ws.write(self.x, y, to_unicode(item))
+        self.x += 1
+
+    def getvalue(self):
+        self.workbook.close()
+        self.xlsxbuffer.seek(0)
+        return self.xlsxbuffer.getvalue()

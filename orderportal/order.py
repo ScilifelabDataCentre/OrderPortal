@@ -877,82 +877,94 @@ class OrderCsv(OrderMixin, RequestHandler):
             self.check_readable(order)
         except ValueError, msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        self.write(self.get_order_csv_stringio(order).getvalue())
+        URL = self.absolute_reverse_url
+        form = self.get_form(order['form'])
+        writer = self.get_writer()
+        writer.writerow((settings['SITE_NAME'], utils.timestamp()))
+        try:
+            writer.writerow(('Identifier', order['identifier']))
+        except KeyError:
+            pass
+        writer.writerow(('Title', order['title'] or '[no title]'))
+        writer.writerow(('URL', self.order_reverse_url(order)))
+        writer.writerow(('IUID', order['_id']))
+        writer.writerow(('Form', 'Title', form['title']))
+        writer.writerow(('', 'Version', form.get('version') or '-'))
+        writer.writerow(('', 'IUID', form['_id']))
+        account = self.get_account(order['owner'])
+        writer.writerow(('Owner', 'Name', utils.get_account_name(account)))
+        writer.writerow(('', 'URL', URL('account', account['email'])))
+        writer.writerow(('', 'Email', order['owner']))
+        writer.writerow(('', 'University', account.get('university') or '-'))
+        writer.writerow(('', 'Department', account.get('department') or '-'))
+        writer.writerow(('', 'PI', account.get('pi') and 'Yes' or 'No'))
+        if settings.get('ACCOUNT_FUNDER_INFO') and \
+           settings.get('ACCOUNT_FUNDER_INFO_GENDER'):
+            writer.writerow(('', 'Gender',
+                             account.get('gender', '-').capitalize()))
+        writer.writerow(('Status', order['status']))
+        for i, s in enumerate(settings['ORDER_STATUSES']):
+            key = s['identifier']
+            writer.writerow((i == 0 and 'History' or '',
+                             key,
+                             order['history'].get(key, '-')))
+        for t in order.get('tags', []):
+            writer.writerow(('Tag', t))
+        writer.writerow(('Modified', order['modified']))
+        writer.writerow(('Created', order['created']))
+        writer.writerow(('',))
+        writer.writerow(('Field', 'Label', 'Depth', 'Type', 'Value',
+                         'Restrict read', 'Restrict write', 'Invalid'))
+        for field in self.get_fields(order):
+            values = field.values()[:-1] # Skip help text
+            # Special case for table field; spans more than one row
+            if field['type'] == constants.TABLE:
+                table = values[4] # Column for 'Value'
+                values[4] = len(table) # Number of rows in table
+                values += [h.split(';')[0] for h in field._field['table']]
+                writer.writerow(values)
+                prefix = [''] * 9
+                for row in table:
+                    writer.writerow(prefix + row)
+            
+            elif field['type'] == constants.MULTISELECT:
+                values[4] = '|'.join(values[4])
+                writer.writerow(values)
+            else:
+                writer.writerow(values)
+        writer.writerow(('',))
+        writer.writerow(('File', 'Size', 'Content type', 'URL'))
+        for filename in sorted(order.get('_attachments', [])):
+            if filename.startswith(constants.SYSTEM): continue
+            stub = order['_attachments'][filename]
+            writer.writerow((filename,
+                             stub['length'],
+                             stub['content_type'],
+                             URL('order_file', order['_id'], filename)))
+        self.write(writer.getvalue())
+        self.write_finish(order)
+
+    def get_writer(self):
+        return utils.CsvWriter()
+
+    def write_finish(self, order):
         self.set_header('Content-Type', constants.CSV_MIME)
         filename = utils.to_ascii(order.get('identifier') or order['_id'])
         self.set_header('Content-Disposition',
                         'attachment; filename="%s.csv"' % filename)
+        
 
-    def get_order_csv_stringio(self, order):
-        "Return the content of the order as CSV-formatted data in StringIO."
-        URL = self.absolute_reverse_url
-        form = self.get_form(order['form'])
-        csvbuffer = StringIO()
-        writer = csv.writer(csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
-        safe = utils.csv_safe_row
-        writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
-        try:
-            writer.writerow(safe(('Identifier', order['identifier'])))
-        except KeyError:
-            pass
-        writer.writerow(safe(('Title', order['title'] or '[no title]')))
-        writer.writerow(safe(('URL', self.order_reverse_url(order))))
-        writer.writerow(safe(('IUID', order['_id'])))
-        writer.writerow(safe(('Form', 'Title', form['title'])))
-        writer.writerow(safe(('', 'Version', form.get('version') or '-')))
-        writer.writerow(safe(('', 'IUID', form['_id'])))
-        account = self.get_account(order['owner'])
-        writer.writerow(safe(('Owner', 'Name',
-                              utils.get_account_name(account))))
-        writer.writerow(safe(('', 'URL', URL('account', account['email']))))
-        writer.writerow(safe(('', 'Email', order['owner'])))
-        writer.writerow(safe(('', 'University',
-                         account.get('university') or '-')))
-        writer.writerow(safe(('', 'Department',
-                         account.get('department') or '-')))
-        writer.writerow(safe(('', 'PI',
-                         account.get('pi') and 'Yes' or 'No')))
-        if settings.get('ACCOUNT_FUNDER_INFO') and \
-           settings.get('ACCOUNT_FUNDER_INFO_GENDER'):
-            writer.writerow(safe(('', 'Gender',
-                                  account.get('gender', '-').capitalize())))
-        writer.writerow(safe(('Status', order['status'])))
-        for i, s in enumerate(settings['ORDER_STATUSES']):
-            key = s['identifier']
-            writer.writerow(safe((i == 0 and 'History' or '',
-                                  key,
-                                  order['history'].get(key, '-'))))
-        for t in order.get('tags', []):
-            writer.writerow(safe(('Tag', t)))
-        writer.writerow(safe(('Modified', order['modified'])))
-        writer.writerow(safe(('Created', order['created'])))
-        writer.writerow(safe(('',)))
-        writer.writerow(safe(('Field', 'Label', 'Depth', 'Type', 'Value',
-                              'Restrict read', 'Restrict write',
-                              'Invalid', 'Description')))
-        for field in self.get_fields(order):
-            # Special case for table field; spans more than one row
-            if field['type'] == constants.TABLE:
-                values = field.values()
-                table = values[4] # Column for 'Value'
-                values[4] = len(table) # Number of rows in table
-                values += [h.split(';')[0] for h in field._field['table']]
-                writer.writerow(safe(values))
-                prefix = [''] * 9
-                for row in table:
-                    writer.writerow(safe(prefix + row))
-            else:
-                writer.writerow(safe(field.values()))
-        writer.writerow(safe(('',)))
-        writer.writerow(safe(('File', 'Size', 'Content type', 'URL')))
-        for filename in sorted(order.get('_attachments', [])):
-            if filename.startswith(constants.SYSTEM): continue
-            stub = order['_attachments'][filename]
-            writer.writerow(safe((filename,
-                                  stub['length'],
-                                  stub['content_type'],
-                                  URL('order_file', order['_id'], filename))))
-        return csvbuffer
+class OrderXlsx(OrderCsv):
+    "Return an XLSX file containing the order data. Contains field definitions."
+
+    def get_writer(self):
+        return utils.XlsxWriter()
+
+    def write_finish(self, order):
+        self.set_header('Content-Type', constants.XLSX_MIME)
+        filename = utils.to_ascii(order.get('identifier') or order['_id'])
+        self.set_header('Content-Disposition',
+                        'attachment; filename="%s.xlsx"' % filename)
 
 
 class OrderZip(OrderApiV1Mixin, OrderCsv):

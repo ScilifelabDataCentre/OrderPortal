@@ -20,6 +20,10 @@
   {% module Icon('csv') %} CSV
 </a>
 <br>
+<a href="{{ absolute_reverse_url('order_xlsx', name) }}">
+  {% module Icon('excel') %} Excel
+</a>
+<br>
 <a href="{{ absolute_reverse_url('order_zip', name) }}">
   {% module Icon('zip') %} ZIP
 </a>

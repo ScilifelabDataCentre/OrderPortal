@@ -117,6 +117,7 @@ BIN_MIME  = 'application/octet-stream'
 PDF_MIME  = 'application/pdf'
 JPEG_MIME = 'image/jpeg'
 PNG_MIME  = 'image/png'
+XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 XLSM_MIME = 'application/vnd.ms-excel.sheet.macroEnabled.12'
 
 # Hard-wired mapping content type -> extension (overriding mimetypes module)
@@ -136,6 +137,7 @@ CONTENT_TYPE_ICONS = {
     'application/vnd.ms-excel': 'excel.png',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'excel.png',
     'application/vnd.ms-excel': 'excel.png',
+    XLSX_MIME: 'excel.png',
     XLSM_MIME: 'excel.png',
     'application/msword': 'word.png',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'word.png',
