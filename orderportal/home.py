@@ -3,6 +3,7 @@
 from __future__ import print_function, absolute_import
 
 import logging
+import sys
 from collections import OrderedDict as OD
 
 import couchdb
@@ -116,6 +117,8 @@ class Software(RequestHandler):
 
     def get(self):
         info = [
+            ('Python', 'https://www.python.org',
+             "%s.%s.%s" % sys.version_info[0:3], 'installed'),
             ('CouchDB server', 'http://couchdb.apache.org/',
              utils.get_dbserver().version(), 'installed'),
             ('CouchDB-Python', 'https://pypi.org/project/CouchDB/',
