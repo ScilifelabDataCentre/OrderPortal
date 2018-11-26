@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 "OrderPortal web application server."
 
 from __future__ import print_function, absolute_import
