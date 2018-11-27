@@ -412,6 +412,9 @@ class CsvWriter(object):
     def writerow(self, row):
         self.writer.writerow(csv_safe_row(row))
 
+    def create_worksheet(self, name):
+        pass
+
     def getvalue(self):
         return self.csvbuffer.getvalue()
 
@@ -422,7 +425,9 @@ class XlsxWriter(object):
     def __init__(self):
         self.xlsxbuffer = io.BytesIO()
         self.workbook = xlsxwriter.Workbook(self.xlsxbuffer, {'in_memory':True})
-        self.ws = self.workbook.add_worksheet('order')
+
+    def create_worksheet(self, name):
+        self.ws = self.workbook.add_worksheet(name)
         self.x = 0
 
     def writerow(self, row):

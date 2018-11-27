@@ -880,7 +880,8 @@ class OrderCsv(OrderMixin, RequestHandler):
         URL = self.absolute_reverse_url
         form = self.get_form(order['form'])
         writer = self.get_writer()
-        writer.writerow((settings['SITE_NAME'], utils.timestamp()))
+        writer.create_worksheet('Main')
+        writer.writerow((settings['SITE_NAME'], utils.today()))
         try:
             writer.writerow(('Identifier', order['identifier']))
         except KeyError:
@@ -913,6 +914,7 @@ class OrderCsv(OrderMixin, RequestHandler):
         writer.writerow(('Modified', order['modified']))
         writer.writerow(('Created', order['created']))
         writer.writerow(('',))
+        writer.create_worksheet('Fields')
         writer.writerow(('Field', 'Label', 'Depth', 'Type', 'Value',
                          'Restrict read', 'Restrict write', 'Invalid'))
         for field in self.get_fields(order):
@@ -933,6 +935,7 @@ class OrderCsv(OrderMixin, RequestHandler):
             else:
                 writer.writerow(values)
         writer.writerow(('',))
+        writer.create_worksheet('Files')
         writer.writerow(('File', 'Size', 'Content type', 'URL'))
         for filename in sorted(order.get('_attachments', [])):
             if filename.startswith(constants.SYSTEM): continue
