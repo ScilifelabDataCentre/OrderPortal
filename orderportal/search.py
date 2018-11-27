@@ -30,9 +30,8 @@ class Search(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
-        orig = self.get_argument('term', '')
+        orig = term = self.get_argument('term', '')
         orders = {}
-        term = orig.strip()
         parts = term.split()
         parts = [p for p in parts if p]
         parts.extend([p.upper() for p in parts])
@@ -78,6 +77,7 @@ class Search(RequestHandler):
             for id in reduce(lambda i,j: i.intersection(j), id_sets):
                 orders[id] = self.get_entity(id, doctype=constants.ORDER)
         # Search settings-defined indexes for order fields.
+        parts.append(orig)      # Entire original term.
         try:
             fields = self.db['_design/fields']['views'].keys()
         except (couchdb.ResourceNotFound, KeyError):
@@ -85,11 +85,10 @@ class Search(RequestHandler):
         for field in fields:
             view = self.db.view("fields/{0}".format(field))
             id_sets = []
-            for part in parts:
-                id_sets.append(set([r.id for r in
-                                    view[part : part+constants.CEILING]]))
+            id_sets.append(set([r.id for r in
+                                view[orig : orig+constants.CEILING]]))
             if id_sets:
-                for id in reduce(lambda i,j: i.intersection(j), id_sets):
+                for id in reduce(lambda i,j: i.union(j), id_sets):
                     orders[id] = self.get_entity(id, doctype=constants.ORDER)
         # Convert to list; keep orders readable by the user.
         if self.is_admin():

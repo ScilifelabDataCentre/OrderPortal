@@ -4,6 +4,8 @@ import logging
 
 import couchdb
 
+from . import constants
+from . import settings
 
 DESIGNS = dict(
 
@@ -207,9 +209,38 @@ var lint = {'an': 1, 'to': 1, 'in': 1, 'on': 1, 'of': 1,
 }""")))
 
 
+MAP_TEMPLATE = """function(doc) {{
+  if (doc.orderportal_doctype !== 'order') return;
+  var value = doc.fields.{fieldid};
+  if (!value) return;
+  var type = typeof(value);
+  if (type === 'string') {{
+    var words = value.replace(/[:,']/g, " ").toLowerCase().split(/\s+/);
+  }} else if (type === 'number') {{
+    var words = [value.toString()];
+  }} else {{
+    var words = value;
+  }};
+  if (words.length) {{
+    words.forEach(function(word) {{
+      if (word.length > 2 && !lint[word]) emit(word, null);
+    }});
+  }};
+}};
+var lint = {{'and': 1, 'the': 1, 'was': 1, 'not': 1}};"""
+
+
 def load_design_documents(db):
     "Load the design documents (view index definitions)."
-    for entity, designs in DESIGNS.items():
+    items = DESIGNS.items()
+    fields = dict()
+    for field in settings['ORDERS_SEARCH_FIELDS']:
+        if not constants.ID_RX.match(field):
+            logging.debug("IGNORED search field %s invalid identifier.", field)
+            continue
+        fields[field] = dict(map=MAP_TEMPLATE.format(fieldid=field))
+    items.append(('fields', fields))
+    for entity, designs in items:
          updated = update_design_document(db, entity, designs)
          if updated:
             for view in designs:
