@@ -877,9 +877,15 @@ class OrderCsv(OrderMixin, RequestHandler):
             self.check_readable(order)
         except ValueError, msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
+        writer = self.write_order(order)
+        self.write(writer.getvalue())
+        self.write_finish(order)
+
+    def write_order(self, order, writer=None):
+        if writer is None:
+            writer = self.get_writer()
         URL = self.absolute_reverse_url
         form = self.get_form(order['form'])
-        writer = self.get_writer()
         writer.create_worksheet('Main')
         writer.writerow((settings['SITE_NAME'], utils.today()))
         try:
@@ -944,8 +950,7 @@ class OrderCsv(OrderMixin, RequestHandler):
                              stub['length'],
                              stub['content_type'],
                              URL('order_file', order['_id'], filename)))
-        self.write(writer.getvalue())
-        self.write_finish(order)
+        return writer
 
     def get_writer(self):
         return utils.CsvWriter()
@@ -971,7 +976,7 @@ class OrderXlsx(OrderCsv):
 
 
 class OrderZip(OrderApiV1Mixin, OrderCsv):
-    "Return a ZIP file containing CSV, JSON and files for the order."
+    "Return a ZIP file containing CSV, XLSX, JSON and files for the order."
 
     def get(self, iuid):
         try:
@@ -986,8 +991,10 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
         # This should use a context, but it is not implemented in Python 2.6
         writer = zipfile.ZipFile(zip_stringio, 'w')
         name = order.get('identifier') or order['_id']
-        writer.writestr(name + '.csv',
-                        self.get_order_csv_stringio(order).getvalue())
+        csvwriter = self.write_order(order, writer=utils.CsvWriter())
+        writer.writestr(name + '.csv', csvwriter.getvalue())
+        xlsxwriter = self.write_order(order, writer=utils.XlsxWriter())
+        writer.writestr(name + '.xlsx', xlsxwriter.getvalue())
         writer.writestr(name + '.json',
                         json.dumps(self.get_order_json(order, full=True)))
         for filename in sorted(order.get('_attachments', [])):
