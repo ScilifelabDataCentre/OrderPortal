@@ -2,11 +2,9 @@
 
 from __future__ import print_function, absolute_import
 
-import csv
 import json
 import logging
 from collections import OrderedDict as OD
-from cStringIO import StringIO
 
 import tornado.web
 
@@ -535,9 +533,14 @@ class FormOrdersAggregate(RequestHandler):
             colids = [utils.parse_field_table_column(c)['identifier']
                        for c in table_field['table']]
 
-        csvbuffer = StringIO()
-        writer = csv.writer(csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
-        safe = utils.csv_safe_row
+        file_format = self.get_argument('file_format', 'xlsx').lower()
+        if file_format == 'xlsx':
+            writer = utils.XlsxWriter()
+        elif file_format == 'csv':
+            writer = utils.CsvWriter()
+        else:
+            raise tornado.web.HTTPError(404, reason='unknown file format')
+        writer.create_worksheet('Aggregate')
         header = [self.TITLES.get(f, f.capitalize()) for f in order_fields]
         header.extend(history_fields)
         header.extend([self.TITLES.get(f,f.capitalize()) for f in owner_fields])
@@ -566,18 +569,27 @@ class FormOrdersAggregate(RequestHandler):
                     account = self.get_account(order['owner'])
                     account_lookup[order['owner']] = account
                 row.extend([account.get(f) for f in owner_fields])
-            row.extend([order['fields'].get(df) for df in data_fields])
+            for data_field in data_fields:
+                value = order['fields'].get(data_field)
+                if isinstance(value, list):
+                    value = '|'.join(value)
+                row.append(value)
             if table_field:
                 table = order['fields'].get(table_field['identifier']) or []
                 for tr in table:
-                    writer.writerow(safe(row + tr))
+                    writer.writerow(row + tr)
             else:
-                writer.writerow(safe(row))
+                writer.writerow(row)
 
-        self.write(csvbuffer.getvalue())
-        self.set_header('Content-Type', constants.CSV_MIME)
+        self.write(writer.getvalue())
         filename = (form['title'] or form['_id']).replace(' ', '_')
         if table_field:
             filename += '_' + table_field['identifier']
+        if file_format == 'xlsx':
+            self.set_header('Content-Type', constants.XLSX_MIME)
+            filename = filename + '.xlsx'
+        elif file_format == 'csv':
+            self.set_header('Content-Type', constants.CSV_MIME)
+            filename = filename + '.csv'
         self.set_header('Content-Disposition', 
-                        'attachment; filename="orders_%s.csv"' % filename)
+                        'attachment; filename="orders_%s"' % filename)
