@@ -158,18 +158,16 @@ DESIGNS = dict(
     if (!doc.identifier) return;
     emit(doc.identifier, doc.title);
 }"""),
-        keyword=dict(map=       # order/keyword
-"""function(doc) {
+        keyword=dict(map=       # order/keyword; Special treatment below !!!
+"""function(doc) {{
     if (doc.orderportal_doctype !== 'order') return;
-    // Keep this in sync with Search.get in search.py
-    var cleaned = doc.title.replace(/[:,;']/g, " ").toLowerCase();
+    var cleaned = doc.title.replace(/[{delims_lint}]/g, " ").toLowerCase();
     var words = cleaned.split(/\s+/);
-    words.forEach(function(word) {
+    words.forEach(function(word) {{
 	if (word.length >= 2 && !lint[word]) emit(word, doc.title);
-    });
-};
-var lint = {'an': 1, 'to': 1, 'in': 1, 'on': 1, 'of': 1,
-	    'and': 1, 'the': 1, 'was': 1, 'not': 1};
+    }});
+}};
+var lint = {lint};
 """),
         modified=dict(map=      # order/modified
 """function(doc) {
@@ -209,13 +207,14 @@ var lint = {'an': 1, 'to': 1, 'in': 1, 'on': 1, 'of': 1,
 }""")))
 
 
-MAP_TEMPLATE = """function(doc) {{
+# Double {{ and }} are converted to single such by .format
+ORDERS_SEARCH_FIELDS_MAP = """function(doc) {{
   if (doc.orderportal_doctype !== 'order') return;
   var value = doc.fields.{fieldid};
   if (!value) return;
   var type = typeof(value);
   if (type === 'string') {{
-    var words = value.replace(/[:,']/g, " ").toLowerCase().split(/\s+/);
+    var words = value.replace(/[{delims_lint}]/g, " ").toLowerCase().split(/\s+/);
   }} else if (type === 'number') {{
     var words = [value.toString()];
   }} else {{
@@ -227,18 +226,28 @@ MAP_TEMPLATE = """function(doc) {{
     }});
   }};
 }};
-var lint = {{'and': 1, 'the': 1, 'was': 1, 'not': 1}};"""
+var lint = {lint};"""
 
 
 def load_design_documents(db):
     "Load the design documents (view index definitions)."
+    delims_lint = ''.join(settings['ORDERS_SEARCH_DELIMS_LINT'])
+    lint = "{%s}" % ', '.join(["'%s': 1" % w
+                               for w in settings['ORDERS_SEARCH_LINT']])
+    # Special treatment !!!
+    func = DESIGNS['order']['keyword']['map']
+    DESIGNS['order']['keyword']['map'] = func.format(delims_lint=delims_lint,
+                                                     lint=lint)
     items = DESIGNS.items()
     fields = dict()
     for field in settings['ORDERS_SEARCH_FIELDS']:
         if not constants.ID_RX.match(field):
             logging.debug("IGNORED search field %s invalid identifier.", field)
             continue
-        fields[field] = dict(map=MAP_TEMPLATE.format(fieldid=field))
+        fields[field] = dict(map=ORDERS_SEARCH_FIELDS_MAP.format(
+            fieldid=field,
+            delims_lint=delims_lint,
+            lint=lint))
     items.append(('fields', fields))
     for entity, designs in items:
          updated = update_design_document(db, entity, designs)

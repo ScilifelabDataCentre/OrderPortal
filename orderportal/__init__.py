@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.6.26'
+__version__ = '3.6.27'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -54,6 +54,9 @@ settings = dict(
     ORDERS_LIST_TAGS=True,
     ORDERS_LIST_FIELDS=[],
     ORDERS_LIST_STATUSES=[],
+    ORDERS_SEARCH_DELIMS_LINT=[':', ',', ';', "'"],
+    ORDERS_SEARCH_LINT=['an', 'to', 'in', 'on', 'of', 
+                        'and', 'the', 'is', 'was', 'not'],
     ORDERS_SEARCH_FIELDS=[],
     ACCOUNT_PI_INFO=True,
     ACCOUNT_POSTAL_INFO=True,
