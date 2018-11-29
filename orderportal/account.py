@@ -198,7 +198,7 @@ class AccountsApiV1(Accounts):
 
 
 class AccountsCsv(Accounts):
-    "Return a CSV file containing all data for all or filtered set of accounts."
+    "Return a CSV file containing all data for a set of accounts."
 
     @tornado.web.authenticated
     def get(self):
@@ -206,18 +206,15 @@ class AccountsCsv(Accounts):
         self.check_staff()
         self.set_filter()
         accounts = self.get_accounts()
-        csvfile = StringIO()
-        writer = csv.writer(csvfile, quoting=csv.QUOTE_NONNUMERIC)
-        safe = utils.csv_safe_row
-        writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
-        writer.writerow(safe(('Email', 'Last name', 'First name', 'Role',
-                              'Status', 'Order count', 'University',
-                              'Department', 'PI', 'Gender', 'Group size',
-                              'Subject', 'Address', 'Zip', 'City', 'Country',
-                              'Invoice ref', 'Invoice address', 'Invoice zip',
-                              'Invoice city', 'Invoice country', 'Phone',
-                              'Other data', 'Latest login', 'Modified',
-                              'Created')))
+        writer = self.get_writer()
+        writer.writerow((settings['SITE_NAME'], utils.today()))
+        writer.writerow(('Email', 'Last name', 'First name', 'Role',
+                         'Status', 'Order count', 'University',
+                         'Department', 'PI', 'Gender', 'Group size',
+                         'Subject', 'Address', 'Zip', 'City', 'Country',
+                         'Invoice ref', 'Invoice address', 'Invoice zip',
+                         'Invoice city', 'Invoice country', 'Phone',
+                         'Other data', 'Latest login', 'Modified', 'Created'))
         for account in accounts:
             addr = account.get('address') or dict()
             iaddr = account.get('invoice_address') or dict()
@@ -227,37 +224,55 @@ class AccountsCsv(Accounts):
                     settings['subjects_lookup'][account.get('subject')])
             except KeyError:
                 subject = ''
-            row = [utils.to_utf8(account['email']),
-                   utils.to_utf8(account.get('last_name') or ''),
-                   utils.to_utf8(account.get('first_name') or ''),
+            row = [account['email'],
+                   account.get('last_name') or '',
+                   account.get('first_name') or '',
                    account['role'],
                    account['status'],
                    account['order_count'],
-                   utils.to_utf8(account.get('university') or ''),
-                   utils.to_utf8(account.get('department') or ''),
+                   account.get('university') or '',
+                   account.get('department') or '',
                    account.get('pi') and 'yes' or 'no',
                    account.get('gender') or '',
                    account.get('group_size') or '',
                    subject,
-                   utils.to_utf8(addr.get('address') or ''),
-                   utils.to_utf8(addr.get('zip') or ''),
-                   utils.to_utf8(addr.get('city') or ''),
-                   utils.to_utf8(addr.get('country') or ''),
-                   utils.to_utf8(account.get('invoice_ref') or ''),
-                   utils.to_utf8(iaddr.get('address') or ''),
-                   utils.to_utf8(iaddr.get('zip') or ''),
-                   utils.to_utf8(iaddr.get('city') or ''),
-                   utils.to_utf8(iaddr.get('country') or ''),
-                   utils.to_utf8(account.get('phone') or ''),
-                   utils.to_utf8(account.get('other_data') or ''),
-                   utils.to_utf8(account.get('login') or ''),
-                   utils.to_utf8(account.get('modified') or ''),
-                   utils.to_utf8(account.get('created') or '')]
-            writer.writerow(safe(row))
-        self.write(csvfile.getvalue())
+                   addr.get('address') or '',
+                   addr.get('zip') or '',
+                   addr.get('city') or '',
+                   addr.get('country') or '',
+                   account.get('invoice_ref') or '',
+                   iaddr.get('address') or '',
+                   iaddr.get('zip') or '',
+                   iaddr.get('city') or '',
+                   iaddr.get('country') or '',
+                   account.get('phone') or '',
+                   account.get('other_data') or '',
+                   account.get('login') or '',
+                   account.get('modified') or '',
+                   account.get('created') or '']
+            writer.writerow(row)
+        self.write(writer.getvalue())
+        self.write_finish()
+
+    def get_writer(self):
+        return utils.CsvWriter()
+
+    def write_finish(self):
         self.set_header('Content-Type', constants.CSV_MIME)
-        self.set_header('Content-Disposition',
+        self.set_header('Content-Disposition', 
                         'attachment; filename="accounts.csv"')
+
+
+class AccountsXlsx(AccountsCsv):
+    "Return an XLSX file containing all data for a set of accounts."
+
+    def get_writer(self):
+        return utils.XlsxWriter()
+
+    def write_finish(self):
+        self.set_header('Content-Type', constants.XLSX_MIME)
+        self.set_header('Content-Disposition', 
+                        'attachment; filename="accounts.xlsx"')
 
 
 class AccountMixin(object):

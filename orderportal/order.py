@@ -1203,12 +1203,12 @@ class OrdersCsv(Orders):
             row.append(order['modified'])
             writer.writerow(row)
         self.write(writer.getvalue())
-        self.write_finish(order)
+        self.write_finish()
 
     def get_writer(self):
         return utils.CsvWriter()
 
-    def write_finish(self, order):
+    def write_finish(self):
         self.set_header('Content-Type', constants.CSV_MIME)
         self.set_header('Content-Disposition', 
                         'attachment; filename="orders.csv"')
@@ -1220,7 +1220,7 @@ class OrdersXlsx(OrdersCsv):
     def get_writer(self):
         return utils.XlsxWriter()
 
-    def write_finish(self, order):
+    def write_finish(self):
         self.set_header('Content-Type', constants.XLSX_MIME)
         self.set_header('Content-Disposition', 
                         'attachment; filename="orders.xlsx"')
