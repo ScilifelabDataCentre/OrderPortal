@@ -116,17 +116,22 @@
         <input type="checkbox" class="visible-if-source"
 	       id="{{ field['identifier'] }}" name="{{ field['identifier'] }}"
 	       {{ value == True and 'checked' or '' }} value="true">
-	Check box if "true".
+	Check box if "{{ field.get('selection') == 'yes_no' and 'yes' or 'true' }}".
       </label>
     </div>
     {% else %}
-    {# Simplifies a lot to use a Select element rather than Radio. #}
-    <select class="form-control visible-if-source"
-	    id="{{ field['identifier'] }}"
-	    name="{{ field['identifier'] }}">
-      <option value="false" {{ bool(value) and 'selected' or '' }}>False</option>
-      <option value="true" {{ bool(value) and 'selected' or '' }}>True</option>
-    </select>
+    <div class="visible-if-source" id="{{ field['identifier'] }}">
+      <label class="radio-inline">
+        <input type="radio" name="{{ field['identifier'] }}"
+               {{ value == True and 'checked' or '' }} value="true"
+               > {{ field.get('selection') == 'yes_no' and 'Yes' or 'True' }}
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="{{ field['identifier'] }}"
+               {{ value == False and 'checked' or '' }} value="false"
+               > {{ field.get('selection') == 'yes_no' and 'No' or 'False' }}
+      </label>
+    </div>
     {% end %} {# if field.get('checkbox') #}
 
     {% elif field['type'] == constants.SELECT %}

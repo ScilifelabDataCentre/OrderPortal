@@ -185,9 +185,10 @@ class Fields(object):
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new['table'] = values
-        # Represent the boolean by a checkbox or a menu.
+        # Represent the boolean by a checkbox or a selection.
         elif field['type'] == constants.BOOLEAN:
             new['checkbox'] = utils.to_bool(rqh.get_argument('checkbox', None))
+            new['selection'] = rqh.get_argument('selection', None)
         # Record the changes.
         old = field.copy()
         field.update(new)

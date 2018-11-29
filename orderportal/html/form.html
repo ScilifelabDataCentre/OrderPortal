@@ -237,6 +237,9 @@
 	  {% if field['type'] == constants.SELECT %}
 	  ({{ field.get('display') or 'menu' }})
           {% module ShortenedPre(field.get('select')) %}
+	  {% elif field['type'] == constants.BOOLEAN %}
+          ({{ field.get('checkbox') and 'checkbox' or 'selection' }};
+          {{ field.get('selection') == 'yes_no' and 'Yes/No' or 'True/False' }})
 	  {% elif field['type'] == constants.MULTISELECT %}
           {% module ShortenedPre(field.get('multiselect')) %}
 	  {% elif field['type'] == constants.TABLE %}
