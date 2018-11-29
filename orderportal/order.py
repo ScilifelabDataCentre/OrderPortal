@@ -2,7 +2,6 @@
 
 from __future__ import print_function, absolute_import
 
-import csv
 import json
 import logging
 import os.path
@@ -886,7 +885,6 @@ class OrderCsv(OrderMixin, RequestHandler):
             writer = self.get_writer()
         URL = self.absolute_reverse_url
         form = self.get_form(order['form'])
-        writer.create_worksheet('Main')
         writer.writerow((settings['SITE_NAME'], utils.today()))
         try:
             writer.writerow(('Identifier', order['identifier']))
@@ -919,8 +917,7 @@ class OrderCsv(OrderMixin, RequestHandler):
             writer.writerow(('Tag', t))
         writer.writerow(('Modified', order['modified']))
         writer.writerow(('Created', order['created']))
-        writer.writerow(('',))
-        writer.create_worksheet('Fields')
+        writer.new_worksheet('Fields')
         writer.writerow(('Field', 'Label', 'Depth', 'Type', 'Value',
                          'Restrict read', 'Restrict write', 'Invalid'))
         for field in self.get_fields(order):
@@ -940,8 +937,7 @@ class OrderCsv(OrderMixin, RequestHandler):
                 writer.writerow(values)
             else:
                 writer.writerow(values)
-        writer.writerow(('',))
-        writer.create_worksheet('Files')
+        writer.new_worksheet('Files')
         writer.writerow(('File', 'Size', 'Content type', 'URL'))
         for filename in sorted(order.get('_attachments', [])):
             if filename.startswith(constants.SYSTEM): continue
@@ -953,7 +949,7 @@ class OrderCsv(OrderMixin, RequestHandler):
         return writer
 
     def get_writer(self):
-        return utils.CsvWriter()
+        return utils.CsvWriter('Order')
 
     def write_finish(self, order):
         self.set_header('Content-Type', constants.CSV_MIME)
@@ -966,7 +962,7 @@ class OrderXlsx(OrderCsv):
     "Return an XLSX file containing the order data. Contains field definitions."
 
     def get_writer(self):
-        return utils.XlsxWriter()
+        return utils.XlsxWriter('Order')
 
     def write_finish(self, order):
         self.set_header('Content-Type', constants.XLSX_MIME)
@@ -991,9 +987,9 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
         # This should use a context, but it is not implemented in Python 2.6
         writer = zipfile.ZipFile(zip_stringio, 'w')
         name = order.get('identifier') or order['_id']
-        csvwriter = self.write_order(order, writer=utils.CsvWriter())
+        csvwriter = self.write_order(order, writer=utils.CsvWriter('Order'))
         writer.writestr(name + '.csv', csvwriter.getvalue())
-        xlsxwriter = self.write_order(order, writer=utils.XlsxWriter())
+        xlsxwriter = self.write_order(order, writer=utils.XlsxWriter('Order'))
         writer.writestr(name + '.xlsx', xlsxwriter.getvalue())
         writer.writestr(name + '.json',
                         json.dumps(self.get_order_json(order, full=True)))
@@ -1175,10 +1171,8 @@ class OrdersCsv(Orders):
             self.see_other('account_orders', self.current_user['email'])
             return
         self.set_filter()
-        csv_stringio = StringIO()
-        writer = csv.writer(csv_stringio, quoting=csv.QUOTE_NONNUMERIC)
-        safe = utils.csv_safe_row
-        writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
+        writer = self.get_writer()
+        writer.writerow((settings['SITE_NAME'], utils.today()))
         row = ['Identifier', 'Title', 'IUID', 'URL', 
                'Form', 'Form IUID', 'Form URL',
                'Owner', 'Owner name', 'Owner URL', 'Tags']
@@ -1186,32 +1180,50 @@ class OrdersCsv(Orders):
         row.append('Status')
         row.extend([s.capitalize() for s in settings['ORDERS_LIST_STATUSES']])
         row.append('Modified')
-        writer.writerow(safe(row))
+        writer.writerow(row)
         names = self.get_account_names()
         forms = self.get_forms_titles(all=True)
         for order in self.get_orders():
             row = [order.get('identifier') or '',
-                   utils.to_utf8(order['title'] or '[no title]'),
+                   order['title'] or '[no title]',
                    order['_id'],
                    self.order_reverse_url(order),
-                   utils.to_utf8(forms[order['form']]),
+                   forms[order['form']],
                    order['form'],
                    self.absolute_reverse_url('form', order['form']),
                    order['owner'],
-                   utils.to_utf8(names[order['owner']]),
+                   names[order['owner']],
                    self.absolute_reverse_url('account', order['owner']),
-                   utils.to_utf8(', '.join(order.get('tags', [])))]
+                   ', '.join(order.get('tags', []))]
             for f in settings['ORDERS_LIST_FIELDS']:
-                row.append(utils.to_utf8(order['fields'].get(f['identifier'])))
+                row.append(order['fields'].get(f['identifier']))
             row.append(order['status'])
             for s in settings['ORDERS_LIST_STATUSES']:
                 row.append(order['history'].get(s))
             row.append(order['modified'])
-            writer.writerow(safe(row))
-        self.write(csv_stringio.getvalue())
+            writer.writerow(row)
+        self.write(writer.getvalue())
+        self.write_finish(order)
+
+    def get_writer(self):
+        return utils.CsvWriter()
+
+    def write_finish(self, order):
         self.set_header('Content-Type', constants.CSV_MIME)
         self.set_header('Content-Disposition', 
                         'attachment; filename="orders.csv"')
+        
+
+class OrdersXlsx(OrdersCsv):
+    "Orders list as XLSX."
+
+    def get_writer(self):
+        return utils.XlsxWriter()
+
+    def write_finish(self, order):
+        self.set_header('Content-Type', constants.XLSX_MIME)
+        self.set_header('Content-Disposition', 
+                        'attachment; filename="orders.xlsx"')
 
 
 class OrderLogs(OrderMixin, RequestHandler):

@@ -71,6 +71,7 @@ def main():
         url(r'/orders', Orders, name='orders'),
         url(r'/api/v1/orders', OrdersApiV1, name='orders_api'),
         url(r'/orders.csv', OrdersCsv, name='orders_csv'),
+        url(r'/orders.xlsx', OrdersXlsx, name='orders_xlsx'),
         url(r'/accounts', Accounts, name='accounts'),
         url(r'/api/v1/accounts', AccountsApiV1, name='accounts_api'),
         url(r'/accounts.csv', AccountsCsv, name='accounts_csv'),

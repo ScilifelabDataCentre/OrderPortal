@@ -13,6 +13,10 @@
 <a href="{{ reverse_url('orders_csv', **filter) }}">
   {% module Icon('csv') %} CSV
 </a>
+<br>
+<a href="{{ reverse_url('orders_xlsx', **filter) }}">
+  {% module Icon('excel') %} Excel
+</a>
 {% end %}
 
 {% block container %}

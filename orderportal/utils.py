@@ -405,15 +405,15 @@ def parse_field_table_column(coldef):
 class CsvWriter(object):
     "Write rows serially to a CSV file."
 
-    def __init__(self):
+    def __init__(self, worksheet='Main'):
         self.csvbuffer = StringIO()
         self.writer = csv.writer(self.csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
 
     def writerow(self, row):
         self.writer.writerow(csv_safe_row(row))
 
-    def create_worksheet(self, name):
-        pass
+    def new_worksheet(self, name):
+        self.writer.writerow(('',))
 
     def getvalue(self):
         return self.csvbuffer.getvalue()
@@ -422,11 +422,13 @@ class CsvWriter(object):
 class XlsxWriter(object):
     "Write rows serially to an XLSX file."
 
-    def __init__(self):
+    def __init__(self, worksheet='Main'):
         self.xlsxbuffer = io.BytesIO()
         self.workbook = xlsxwriter.Workbook(self.xlsxbuffer, {'in_memory':True})
+        self.ws = self.workbook.add_worksheet(worksheet)
+        self.x = 0
 
-    def create_worksheet(self, name):
+    def new_worksheet(self, name):
         self.ws = self.workbook.add_worksheet(name)
         self.x = 0
 
