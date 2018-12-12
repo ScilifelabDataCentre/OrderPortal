@@ -535,12 +535,11 @@ class FormOrdersAggregate(RequestHandler):
 
         file_format = self.get_argument('file_format', 'xlsx').lower()
         if file_format == 'xlsx':
-            writer = utils.XlsxWriter()
+            writer = utils.XlsxWriter('Aggregate')
         elif file_format == 'csv':
             writer = utils.CsvWriter()
         else:
             raise tornado.web.HTTPError(404, reason='unknown file format')
-        writer.new_worksheet('Aggregate')
         header = [self.TITLES.get(f, f.capitalize()) for f in order_fields]
         header.extend(history_fields)
         header.extend([self.TITLES.get(f,f.capitalize()) for f in owner_fields])
