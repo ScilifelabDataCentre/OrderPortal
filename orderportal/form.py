@@ -540,7 +540,7 @@ class FormOrdersAggregate(RequestHandler):
             writer = utils.CsvWriter()
         else:
             raise tornado.web.HTTPError(404, reason='unknown file format')
-        writer.create_worksheet('Aggregate')
+        writer.new_worksheet('Aggregate')
         header = [self.TITLES.get(f, f.capitalize()) for f in order_fields]
         header.extend(history_fields)
         header.extend([self.TITLES.get(f,f.capitalize()) for f in owner_fields])
