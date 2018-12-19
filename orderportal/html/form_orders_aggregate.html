@@ -20,6 +20,24 @@ for form  {% module Entity(form, icon=False) %}
   {% module xsrf_form_html() %}
 
   <div class="form-group">
+    <label class="control-label col-sm-2" for="status">
+      {{ terminology('Order') }} status filter</label>
+    <div class="col-sm-10">
+      <select multiple size="4" class="form-control" name="status" id="status">
+        <option selected value="">[any]</option>
+        {% for s in settings['ORDER_STATUSES'] %}
+        <option value="{{ s['identifier'] }}">
+          {{ s['identifier'].capitalize() }}</option>
+        {% end %}
+      </select>
+      <span class="help-block">
+        Output only {{ terminology('orders') }} matching the specified status.
+        Multiple choice is allowed.
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
     <label class="control-label col-sm-2" for="order">
       {{ terminology('Order') }} metadata</label>
     <div class="col-sm-10">
