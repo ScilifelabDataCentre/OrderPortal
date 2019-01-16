@@ -1,14 +1,17 @@
 Installation
 ============
 
-This installation instruction is derived from the procedure used for
-the instances running on the data-office machine at SciLifeLab. It
-will have to be adapted for your site.
+This instruction is derived from the procedure used for the instances
+running on the data-office machine at SciLifeLab. It will have to be
+adapted for your site.
 
 The Linux account `nginx` is used to host the instance files. Change
 according to the policy at your site.
 
 The name **xyz** is used below as a placeholder for the name of your instance.
+
+Instructions for upgrading the OrderPortal software is given below
+under [Updates](#updates).
 
 Source code setup
 -----------------
@@ -72,8 +75,7 @@ It is assumed that you already have a CouchDB instance running.
     `["dummy"]` (a string in a list).
   - The Roles fields should not be changed.
 
-Initialize the database in CouchDB to load the design documents (index
-definitions). This requires a valid **settings** file.
+Initialize the database in CouchDB. This requires a valid **settings** file.
 
     $ cd /var/www/apps/xyz/OrderPortal/orderportal
     $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python2 init_database.py
@@ -88,16 +90,16 @@ Logging
 
 The settings file may define the file path of the log file (variable
 LOGGING_FILEPATH), if any. The log file must be located in a directory which
-the tornado server can write to. For example:
+the `tornado` server can write to. For example:
 
     $ cd /var/log
     $ sudo mkdir orderportal_xyz
     $ sudo chown nginx.nginx orderportal_xyz
 
-Tornado server
+`Tornado` server
 --------------
 
-The tornado server should be executed as a system service. The
+The `tornado` server should be executed as a system service. The
 mechanism for this depends on the operating system. For SELinux, a
 template systemd file is available at
 [orderportal/site/orderportal_xyz.service](orderportal/site/orderportal_xyz.service).
@@ -110,7 +112,7 @@ Copy, rename and edit it.
 HTTP nginx configuration
 ------------------------
 
-In our case, the tornado server is accessed through a reverse-proxy
+In our case, the `tornado` server is accessed through a reverse-proxy
 via nginx. The template nginx file is available at
 [orderportal/site/orderportal_xyz.conf](orderportal/site/orderportal_xyz.conf).
 Copy, rename and edit it. In particular, ensure that the URL and port is
@@ -141,10 +143,10 @@ Edit the crontab file:
 
 The line in the crontab file should look something like this:
 
-45 22 * * * /etc/scripts/dump_orderportal_xyz.bash
+    45 22 * * * /etc/scripts/dump_orderportal_xyz.bash
 
-Maintenance, updates
---------------------
+Updates
+-------
 
 To update the source code from the GitHub repo:
 
@@ -152,12 +154,14 @@ To update the source code from the GitHub repo:
     $ sudo -u nginx git pull
     $ sudo systemctl restart orderportal_xyz
 
-To load any new CouchDB design documents (i.e. index definitions):
+Since version 3.6.19, the design documents are automatically updated
+when the `tornado` server is restarted.
 
-    $ cd /var/www/apps/xyz/OrderPortal/orderportal
-    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python2 load_designs.py
-
-Unless the OrderPortal app is running in debug mode, the tornado server
+Unless the OrderPortal app is running in debug mode, the `tornado` server
 will have to be restarted.
 
     $ sudo systemctl restart orderportal_xyz.service
+
+Please note that if your installation uses a repo forked from the
+base, ensure that you have updated that repo first by making a pull
+request and executing it.

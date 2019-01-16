@@ -4,7 +4,7 @@ OrderPortal
 A portal for orders (requests, project applications, etc) to a
 facility from its users.
 
-Installation instructions: [INSTALLATION.md](INSTALLATION.md).
+Installation and update instructions: [INSTALLATION.md](INSTALLATION.md).
 
 The [GitHub wiki](https://github.com/pekrau/OrderPortal/wiki) contains
 some additional information.
@@ -46,18 +46,20 @@ Features
 Design outline
 --------------
 
-The system is a portal for orders (requests, project applications,
-etc) to a single facility from its users. A user is a researcher
+The system is a portal for **orders** (requests, project applications,
+etc) to a single facility from its users. A **user** is a researcher
 external to the service facility, and may or may not be the Principal
 Investigator (PI) for one or more projects.
 
-An order is created from a template which is called a form in this
+An order is created from a template which is called a **form** in this
 system. The facility administrators must set up and publish the order
 forms for a researcher to be able to create an order. Each form
 contains fields for data input by the researcher.
 
 The OrderPortal system is designed for only one facility, displaying
-up to about 8 different order forms. If an organization has different
+up to about 8 different order forms. There is no hard limit to the
+number of simultaneously published forms, but the current design does
+not work well with more than 8 forms. If an organization has different
 facilities requiring different sets of forms, then it is best to set
 up different instances of the OrderPortal system, with different
 back-end database instances.
