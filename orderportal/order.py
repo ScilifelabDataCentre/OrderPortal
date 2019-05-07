@@ -1020,7 +1020,7 @@ class Orders(RequestHandler):
         except IndexError:
             all_count = 0
         else:
-            all_count = count=r.value
+            all_count = r.value
         # Initial ordering by the 'modified' column.
         order_column = 5 + \
                        int(settings['ORDERS_LIST_TAGS']) + \
