@@ -928,7 +928,7 @@ class OrderCsv(OrderMixin, RequestHandler):
                 values[4] = len(table) # Number of rows in table
                 values += [h.split(';')[0] for h in field._field['table']]
                 writer.writerow(values)
-                prefix = [''] * 9
+                prefix = [''] * 8
                 for row in table:
                     writer.writerow(prefix + row)
             
