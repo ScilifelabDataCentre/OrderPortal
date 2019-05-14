@@ -114,7 +114,7 @@ class OrderSaver(saver.Saver):
 
     def add_file(self, infile):
         "Add the given file to the files. Return the unique filename."
-        filename = os.path.basename(infile.filename)
+        filename = utils.to_ascii(os.path.basename(infile.filename))
         if filename in self.filenames:
             count = 1
             while True:
@@ -203,8 +203,8 @@ class OrderSaver(saver.Saver):
         self.removed_files = []       # Due to field update
         # Loop over fields defined in the form document and get values.
         # Do not change values for a field if that argument is missing,
-        # except for checkbox: missing value means False,
-        # and except for multiselect: missing value means empty list.
+        # except for checkbox: there a missing value means False,
+        # and except for multiselect: there a missing value means empty list.
         for field in self.fields:
             # Field not displayed or not writeable must not be changed.
             if not self.rqh.is_staff() and \
@@ -433,7 +433,7 @@ class OrderSaver(saver.Saver):
                         self.db.delete_attachment(self.doc, filename)
             except AttributeError:
                 pass
-            # Using cStringIO here is a kludge.
+            # Using cStringIO.StringIO here is a kludge.
             # Don't ask me why this was required on a specific machine.
             # The problem appeared on a Python 2.6 system and involved
             # Unicode, but I was unable to isolate it.
@@ -1420,8 +1420,8 @@ class OrderEdit(OrderMixin, RequestHandler):
                 self.see_other('order_edit', order['_id'])
             else:
                 self.redirect(self.order_reverse_url(order))
-        except ValueError, msg:
-            self.set_error_flash(msg)
+        except ValueError as msg:
+            self.set_error_flash(str(msg))
             self.redirect(self.order_reverse_url(order))
 
 
@@ -1433,7 +1433,7 @@ class OrderClone(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
             self.check_readable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
         if not self.is_clonable(order):
