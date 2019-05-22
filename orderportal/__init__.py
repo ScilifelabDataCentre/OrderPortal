@@ -7,7 +7,7 @@ from __future__ import print_function, absolute_import
 import os
 
 
-__version__ = '3.6.33'
+__version__ = '3.6.34'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -23,6 +23,10 @@ settings = dict(
     MARKDOWN_URL='http://agea.github.io/tutorial.md/',
     SITE_DIR='{ROOT_DIR}/site',
     SITE_NAME='OrderPortal',
+    SITE_FAVICON='orderportal32.png',
+    SITE_HOST_ICON=None,
+    SITE_HOST_TITLE=None,
+    SITE_HOST_URL=None,
     ACCOUNT_MESSAGES_FILEPATH='{SITE_DIR}/account_messages.yaml',
     ORDER_STATUSES_FILEPATH='{SITE_DIR}/order_statuses.yaml',
     ORDER_TRANSITIONS_FILEPATH='{SITE_DIR}/order_transitions.yaml',

@@ -297,13 +297,17 @@
     <div class="container-fluid">
       <hr>
       <div class="row">
-	<div class="col-md-2">
-	  <a href="{{ reverse_url('home') }}">
-	    <span class="glyphicon glyphicon-home"></span>
-	    {{ settings['SITE_NAME'] }}
+	<div class="col-md-3">
+          <a href="{{ settings['SITE_HOST_URL'] or '#' }}" target="_blank">
+            {% if settings['SITE_HOST_ICON'] %}
+            <img src="{{ reverse_url('site', settings['SITE_HOST_ICON']) }}"
+                 title="{{ settings['SITE_HOST_TITLE'] or '' }}">
+            {% else %}
+            {{ settings['SITE_HOST_TITLE'] or '' }}
+            {% end %}
 	  </a>
 	</div>
-        <div class="col-md-8 text-center">
+        <div class="col-md-6 text-center">
           {% if current_user %}
           Privacy policy (GDPR, etc): See
           <a href="{{ reverse_url('account', current_user['email']) }}">
@@ -313,10 +317,9 @@
           Cookies are <b>not</b> used for anonymous users.
           {% end %}
         </div>
-	<div class="col-md-2">
-	  <a class="pull-right" href="{{ reverse_url('software') }}">
-	    Software version {{ version }}
-	  </a>
+	<div class="col-md-3">
+	  <a href="{{ reverse_url('software') }}" class="pull-right">
+            Software {{ version }}</a>
 	</div>
       </div>
     </div>
