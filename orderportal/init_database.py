@@ -19,7 +19,7 @@ from orderportal import settings
 from orderportal import utils
 from orderportal.dump import undump
 
-INIT_TEXTS_FILEPATH = 'init_texts.yaml'
+INIT_TEXTS_FILEPATH = utils.expand_filepath('{ROOT_DIR}/init_texts.yaml')
 
 def init_database(dumpfilepath=None):
     db = utils.get_db()
