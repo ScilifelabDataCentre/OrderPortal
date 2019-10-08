@@ -265,6 +265,8 @@ class OrderSaver(saver.Saver):
                             if coltype == constants.SELECT:
                                 if row[j] not in coldef['options']:
                                     row[j] = None
+                                elif row[j] == '[no value]':
+                                    row[j] = None
                             elif coltype == constants.INT:
                                 try:
                                     row[j] = int(row[j])

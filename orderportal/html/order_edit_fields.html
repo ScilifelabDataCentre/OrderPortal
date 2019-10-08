@@ -301,8 +301,8 @@
       <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
       notation may be used to format the text.)
       {% elif field['type'] == constants.TABLE %}
-      <strong>Note:</strong> Table rows with an empty first field will
-      be deleted.
+      <strong>Note:</strong> Table rows with an empty (or "[no value]")
+      first field will be deleted.
       {% end %}
     </span>
   </div>
