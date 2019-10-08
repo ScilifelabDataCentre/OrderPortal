@@ -257,6 +257,8 @@ def today(days=None):
 
 def to_ascii(value):
     "Convert any non-ASCII character to its closest ASCII equivalent."
+    if value is None:
+        return ''
     if not isinstance(value, unicode):
         value = unicode(value, 'utf-8')
     return unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
