@@ -247,9 +247,9 @@
            name="_table_{{ field['identifier'] }}_count"
            id="_table_{{ field['identifier'] }}_count"
            value="{{ nrows }}">
-    <div class="form-group">
+    <div class="form-group extra-indent">
       <button type="button" id="_table_{{ field['identifier'] }}_add_button" 
-              class="btn btn-info"> 
+              class="btn btn-info">
         Add row
       </button>
     </div>
@@ -294,7 +294,7 @@
     {% end %}
     {% end %} {# if field['required'] #}
 
-    <span class="help-block">
+    <span class="help-block extra-indent extra-spacing">
       {% module Markdown(field.get('description')) %}
       {% if field['type'] == constants.TEXT %}
       (Optional: 

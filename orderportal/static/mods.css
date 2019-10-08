@@ -37,3 +37,7 @@
 			     content: ' *';
 			     display: inline;
 			   }
+
+/* Indent using padding. */
+.extra-indent { padding-left: 2em; }
+.extra-spacing { padding-bottom: 1em; }

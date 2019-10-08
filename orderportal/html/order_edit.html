@@ -49,7 +49,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 	       value="{{ order['title'] or '' }}">
       </div>
     </div>
-    <span class="help-block">
+    <span class="help-block extra-indent">
       Brief, descriptive title for the {{ terminology('order') }},
       which will be displayed in your list of {{ terminology('orders') }}.
       It is not required to be unique, but it is a good idea to make
@@ -81,7 +81,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 		  >{{ ', '.join(tags) }}</textarea>
       </div>
     </div>
-    <span class="help-block">
+    <span class="help-block extra-indent">
       Optional keywords (tags) characterizing the {{ terminology('order') }},
       which are used in searches.
       <br>
@@ -106,7 +106,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 		  >{{ '\n'.join(links) }}</textarea>
       </div>
     </div>
-    <span class="help-block">
+    <span class="help-block extra-indent">
       Optional links to external resources for the {{ terminology('order') }}.
       <br>
       One line per link, with the URL as the first item. The
@@ -137,7 +137,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 	{% end %}
       </div>
     </div>
-    <span class="help-block">
+    <span class="help-block extra-indent">
       {% if is_admin %}
       The {{ terminology('order') }}'s owner specified by email address.
       May be changed to another account.
