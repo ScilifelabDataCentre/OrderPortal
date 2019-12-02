@@ -6,7 +6,7 @@ from __future__ import print_function, absolute_import
 
 import os
 
-__version__ = '3.6.36'
+__version__ = '3.6.37'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -23,6 +23,8 @@ settings = dict(
     SITE_DIR='{ROOT_DIR}/site',
     SITE_NAME='OrderPortal',
     SITE_FAVICON='orderportal32.png',
+    SITE_NAVBAR_ICON='orderportal32.png',
+    SITE_HOME_ICON='orderportal144.png',
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
     SITE_HOST_URL=None,
