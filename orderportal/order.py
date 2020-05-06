@@ -491,7 +491,9 @@ class OrderSaver(saver.Saver):
         except KeyError:
             identifier = order['_id']
         path = "/order/{0}".format(identifier)
-        return settings['BASE_URL'].rstrip('/') + path
+        if settings['BASE_URL_PATH_PREFIX']:
+            path = settings['BASE_URL_PATH_PREFIX'] + path
+        return settings['BASE_URL'] + path
 
     def get_account(self, email):
         "Get the account document for the given email."

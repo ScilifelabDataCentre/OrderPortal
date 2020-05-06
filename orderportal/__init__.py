@@ -6,12 +6,13 @@ from __future__ import print_function, absolute_import
 
 import os
 
-__version__ = '3.6.37'
+__version__ = '3.7.0'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
     ROOT_DIR=os.path.dirname(__file__),
     BASE_URL='http://localhost/',
+    BASE_URL_PATH_PREFIX=None,
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
     LOGGING_FORMAT='%(levelname)s [%(asctime)s] %(message)s',

@@ -171,8 +171,9 @@ def load_settings(filepath):
                                         for s in settings['subjects']])
     # Settings computable from others.
     settings['DATABASE_SERVER_VERSION'] = get_dbserver().version()
-    if 'PORT' not in settings:
-        parts = urlparse.urlparse(settings['BASE_URL'])
+    parts = urlparse.urlparse(settings['BASE_URL'])
+    settings['BASE_URL'] = "%s://%s" % (parts.scheme, parts.netloc)
+    if not settings.get('PORT'):
         items = parts.netloc.split(':')
         if len(items) == 2:
             settings['PORT'] = int(items[1])
@@ -182,6 +183,8 @@ def load_settings(filepath):
             settings['PORT'] =  443
         else:
             raise ValueError('Could not determine port from BASE_URL.')
+    if not settings.get('BASE_URL_PATH_PREFIX') and parts.path:
+        settings['BASE_URL_PATH_PREFIX'] = parts.path.rstrip('/') or None
 
 def terminology(word):
     "Return the display term for the given word. Use itself by default."

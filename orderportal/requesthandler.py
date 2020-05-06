@@ -74,15 +74,17 @@ class RequestHandler(tornado.web.RequestHandler):
     def absolute_reverse_url(self, name, *args, **query):
         "Get the absolute URL given the handler name, arguments and query."
         if name is None:
-            path = ''
+            path = settings['BASE_URL_PATH_PREFIX'] or ''
         else:
             path = self.reverse_url(name, *args, **query)
-        return settings['BASE_URL'].rstrip('/') + path
+        return settings['BASE_URL'] + path
 
     def reverse_url(self, name, *args, **query):
         "Allow adding query arguments to the URL."
         url = super(RequestHandler, self).reverse_url(name, *args)
         url = url.rstrip('?')   # tornado bug? left-over '?' sometimes
+        if settings['BASE_URL_PATH_PREFIX']:
+            url = settings['BASE_URL_PATH_PREFIX'] + url
         if query:
             query = dict([(k, utils.to_utf8(v)) for k,v in query.items()])
             url += '?' + urllib.urlencode(query)
