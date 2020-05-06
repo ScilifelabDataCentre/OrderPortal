@@ -93,7 +93,7 @@ class RequestHandler(tornado.web.RequestHandler):
     def static_url(self, path, include_host=None, **kwargs):
         "Returns the URL for a static resource."
         if settings['BASE_URL_PATH_PREFIX']:
-            path = settings['BASE_URL_PATH_PREFIX'] + path
+            path = settings['BASE_URL_PATH_PREFIX'] + '/' + path
         return super(RequestHandler, self).static_url(path,
                                                       include_host=include_host,
                                                       **kwargs)
