@@ -6,7 +6,7 @@ from __future__ import print_function, absolute_import
 
 import os
 
-__version__ = '3.7.0'
+__version__ = '3.7.1'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -50,6 +50,7 @@ settings = dict(
     DISPLAY_EVENTS=True,
     DISPLAY_MENU_INFORMATION=True,
     DISPLAY_MENU_DOCUMENTS=True,
+    DISPLAY_MENU_CONTACT=True,
     DISPLAY_MENU_ABOUT_US=True,
     ORDER_IDENTIFIER_FORMAT=None,
     ORDER_IDENTIFIER_REGEXP=None,
