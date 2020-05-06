@@ -16,6 +16,10 @@
     {% block css_page %}
     {% end %}
     <link rel="stylesheet" href="{{ static_url('mods.css') }}">
+    {% if settings['SITE_CSS_FILE'] %}
+    <link rel="stylesheet"
+          href="{{ reverse_url('site', settings['SITE_CSS_FILE']) }}">
+    {% end %}
     {# NOTE: jQuery JS has to be loaded before bootstrap JS! #}
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
@@ -173,7 +177,7 @@
 	    {% end %}
 	    {% end %} {# if is_admin #}
 
-            {% if settings['DISPLAY_MENU_ABOUT_US'] %}
+            {% if settings['DISPLAY_MENU_CONTACT'] %}
 	    <li>
 	      <a href="{{ reverse_url('contact') }}">Contact</a>
 	    </li>
