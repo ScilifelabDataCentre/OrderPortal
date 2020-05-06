@@ -30,7 +30,7 @@
   </head>
 
   <body>
-    <nav class="navbar navbar-inverse navbar-static-top">
+    <nav class="navbar navbar-static-top {{ settings['DISPLAY_MENU_LIGHT'] and 'navbar-default' or 'navbar-inverse' }}">
       <div class="container-fluid">
 	<div class="navbar-header">
 	  <button type="button" class="navbar-toggle"
@@ -181,6 +181,13 @@
             {% if settings['DISPLAY_MENU_ABOUT_US'] %}
 	    <li>
 	      <a href="{{ reverse_url('about') }}">About us</a>
+	    </li>
+            {% end %}
+            {% if settings['DISPLAY_MENU_ITEM_URL'] %}
+	    <li>
+	      <a href="{{ settings['DISPLAY_MENU_ITEM_URL'] }}">
+                {{ settings.get('DISPLAY_MENU_ITEM_TEXT') or 'Back to website' }}
+              </a>
 	    </li>
             {% end %}
 
