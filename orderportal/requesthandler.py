@@ -90,6 +90,14 @@ class RequestHandler(tornado.web.RequestHandler):
             url += '?' + urllib.urlencode(query)
         return url
 
+    def static_url(self, path, include_host=None, **kwargs):
+        "Returns the URL for a static resource."
+        if settings['BASE_URL_PATH_PREFIX']:
+            path = settings['BASE_URL_PATH_PREFIX'] + path
+        return super(RequestHandler, self).static_url(path,
+                                                      include_host=include_host,
+                                                      **kwargs)
+
     def order_reverse_url(self, order, api=False, **query):
         "URL for order; use identifier variant if available. Always absolute."
         URL = self.absolute_reverse_url
