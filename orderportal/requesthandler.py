@@ -7,6 +7,7 @@ import json
 import logging
 import traceback
 import urllib
+import urlparse
 
 import couchdb
 import markdown
@@ -92,11 +93,15 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def static_url(self, path, include_host=None, **kwargs):
         "Returns the URL for a static resource."
+        url = super(RequestHandler, self).static_url(path,
+                                                     include_host=include_host,
+                                                     **kwargs)
         if settings['BASE_URL_PATH_PREFIX']:
-            path = settings['BASE_URL_PATH_PREFIX'] + '/' + path
-        return super(RequestHandler, self).static_url(path,
-                                                      include_host=include_host,
-                                                      **kwargs)
+            parts = urlparse.urlparse(url)
+            path = settings['BASE_URL_PATH_PREFIX'] + parts.path
+            parts = (parts[0], parts[1], path, parts[3], parts[4], parts[5])
+            url = urlparse.urlunparse(parts)
+        return url
 
     def order_reverse_url(self, order, api=False, **query):
         "URL for order; use identifier variant if available. Always absolute."
