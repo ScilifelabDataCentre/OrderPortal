@@ -174,7 +174,7 @@ def main():
         ui_modules=uimodules,
         template_path=os.path.join(settings['ROOT_DIR'], 'html'),
         static_path=os.path.join(settings['ROOT_DIR'], 'static'),
-        login_url=r'/login')
+        login_url=(settings['BASE_URL_PATH_PREFIX'] or '') + '/login')
     # Add href URLs for the status icons.
     # This depends on order status setup.
     for key, value in settings['ORDER_STATUSES_LOOKUP'].iteritems():
