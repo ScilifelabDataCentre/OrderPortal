@@ -248,7 +248,7 @@ def load_design_documents(db):
 
 def get_all_items():
     "Get all design document items, including configured order search fields."
-    items = DESIGNS.items()
+    items = list(DESIGNS.items())
     fields = dict()
     for field in settings['ORDERS_SEARCH_FIELDS']:
         if not constants.ID_RX.match(field):

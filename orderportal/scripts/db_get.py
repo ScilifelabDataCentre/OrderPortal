@@ -1,6 +1,6 @@
 "Get document(s) from CouchDB and write to a JSON file."
 
-from __future__ import print_function, absolute_import
+
 
 import json
 import sys

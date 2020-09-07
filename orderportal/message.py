@@ -1,6 +1,6 @@
 "Message to account email address; store and send."
 
-from __future__ import print_function, absolute_import
+
 
 import email.mime.text
 import logging
@@ -25,8 +25,8 @@ class MessageSaver(saver.Saver):
         params = dict(site=settings['SITE_NAME'],
                       support=settings.get('SITE_SUPPORT_EMAIL','[undefined]'))
         params.update(kwargs)
-        self['subject'] = unicode(template['subject']).format(**params)
-        self['text'] = unicode(template['text']).format(**params)
+        self['subject'] = str(template['subject']).format(**params)
+        self['text'] = str(template['text']).format(**params)
 
     def send(self, recipients):
         "Send the message to the given recipient email addresses."

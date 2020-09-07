@@ -5,7 +5,7 @@ The database must exist, and the account for accessing it must have been set up.
 3) Load the initial texts from file, unless already loaded.
 """
 
-from __future__ import print_function, absolute_import
+
 
 import sys
 

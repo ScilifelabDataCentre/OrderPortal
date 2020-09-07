@@ -1,6 +1,6 @@
 "Context handler for saving an entity as a CouchDB document. "
 
-from __future__ import print_function, absolute_import
+
 
 import logging
 

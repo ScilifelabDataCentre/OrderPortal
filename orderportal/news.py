@@ -1,6 +1,6 @@
 "News item handling; news announcements for home page."
 
-from __future__ import print_function, absolute_import
+
 
 import logging
 import tornado.web

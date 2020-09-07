@@ -1,6 +1,6 @@
 " Get the previous version of the document and save it as new. "
 
-from __future__ import print_function, absolute_import
+
 
 import sys
 

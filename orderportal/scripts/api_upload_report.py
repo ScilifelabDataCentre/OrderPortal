@@ -9,7 +9,7 @@ NOTE: This uses the third-party 'requests' module, which is better than
 the standard 'urllib' module.
 """
 
-from __future__ import print_function
+
 
 import sys
 

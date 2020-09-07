@@ -1,6 +1,6 @@
 "Set the password for an account."
 
-from __future__ import print_function, absolute_import
+
 
 import sys
 import getpass
@@ -26,7 +26,7 @@ if __name__ == '__main__':
         description='Set the password for an account.')
     (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings)
-    email = raw_input('Email address (=account name) > ')
+    email = input('Email address (=account name) > ')
     if not email:
         sys.exit('no email address provided')
     password = getpass.getpass('Password > ')
@@ -34,7 +34,7 @@ if __name__ == '__main__':
         sys.exit('no password provided')
     try:
         utils.check_password(password)
-    except ValueError, msg:
+    except ValueError as msg:
         sys.exit(str(msg))
     again_password = getpass.getpass('Password again > ')
     if password != again_password:

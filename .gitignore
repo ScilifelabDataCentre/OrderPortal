@@ -1,5 +1,6 @@
 *~
 *.pyc
+*.bak
 *.yaml
 my-sites
 !orderportal/settings_template.yaml

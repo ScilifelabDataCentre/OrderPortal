@@ -1,6 +1,6 @@
 "Information pages; simplest possible CMS using Markdown."
 
-from __future__ import print_function, absolute_import
+
 
 import logging
 
@@ -50,7 +50,7 @@ class InfoLogs(RequestHandler):
         self.check_admin()
         info = self.get_entity_view('info/name', name)
         self.render('logs.html',
-                    title=u"Logs for info '{0}'".format(name),
+                    title="Logs for info '{0}'".format(name),
                     entity=info,
                     logs=self.get_logs(info['_id']))
 

@@ -1,10 +1,10 @@
 "File (a.k.a document) pages; uploaded files."
 
-from __future__ import print_function, absolute_import
+
 
 import logging
 import os.path
-from cStringIO import StringIO
+from io import StringIO
 
 import tornado.web
 
@@ -66,7 +66,7 @@ class File(RequestHandler):
 
     def get(self, name):
         self.doc = self.get_entity_view('file/name', name)
-        filename = self.doc['_attachments'].keys()[0]
+        filename = list(self.doc['_attachments'].keys())[0]
         outfile = self.db.get_attachment(self.doc, filename)
         if outfile is None:
             self.write('')
@@ -109,7 +109,7 @@ class FileCreate(RequestHandler):
                 saver['hidden'] = utils.to_bool(self.get_argument('hidden',
                                                                   False))
                 saver['description'] = self.get_argument('description', None)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('files', error=str(msg))
         else:
             self.see_other('files')
@@ -179,7 +179,7 @@ class FileLogs(RequestHandler):
     def get(self, iuid):
         file = self.get_entity(iuid, doctype=constants.FILE)
         self.render('logs.html',
-                    title=u"Logs for document '%s'" % (file.get('title') or 
+                    title="Logs for document '%s'" % (file.get('title') or 
                                                        file['name']),
                     entity=file,
                     logs=self.get_logs(file['_id']))

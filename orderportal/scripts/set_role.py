@@ -1,6 +1,6 @@
 "Set the password for an account."
 
-from __future__ import print_function, absolute_import
+
 
 import sys
 
@@ -26,10 +26,10 @@ if __name__ == '__main__':
         description='Set the role for an account.')
     (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings)
-    email = raw_input('Email address (=account name) > ')
+    email = input('Email address (=account name) > ')
     if not email:
         sys.exit('no email address provided')
-    role = raw_input("role [%s] > " % '|'.join(constants.ACCOUNT_ROLES))
+    role = input("role [%s] > " % '|'.join(constants.ACCOUNT_ROLES))
     if not role:
         sys.exit('no role provided')
     if role not in constants.ACCOUNT_ROLES:

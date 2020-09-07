@@ -1,6 +1,6 @@
 """OrderPortal: Count attached files for each order."""
 
-from __future__ import print_function, absolute_import
+
 
 from orderportal import constants
 from orderportal import settings

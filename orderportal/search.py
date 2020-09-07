@@ -1,10 +1,10 @@
 "Search orders page."
 
-from __future__ import print_function, absolute_import
+
 
 import logging
 import pprint
-import urlparse
+import urllib.parse
 
 import couchdb
 import tornado.web
@@ -15,6 +15,7 @@ from . import settings
 from . import utils
 from .fields import Fields
 from .requesthandler import RequestHandler
+from functools import reduce
 
 
 class Search(RequestHandler):
@@ -79,7 +80,7 @@ class Search(RequestHandler):
         # Search settings-defined indexes for order fields.
         parts.append(orig)      # Entire original term.
         try:
-            fields = self.db['_design/fields']['views'].keys()
+            fields = list(self.db['_design/fields']['views'].keys())
         except (couchdb.ResourceNotFound, KeyError):
             fields = []
         for field in fields:
@@ -92,9 +93,9 @@ class Search(RequestHandler):
                     orders[id] = self.get_entity(id, doctype=constants.ORDER)
         # Convert to list; keep orders readable by the user.
         if self.is_admin():
-            orders = orders.values()
+            orders = list(orders.values())
         else:
-            orders = [i for i in orders.values()
+            orders = [i for i in list(orders.values())
                       if self.is_owner(i) or self.is_colleague(i['owner'])]
         # Go directly to order if exactly one found.
         if len(orders) == 1:

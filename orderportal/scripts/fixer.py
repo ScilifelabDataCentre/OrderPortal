@@ -1,6 +1,6 @@
 "OrderPortal: Base class for fixing documents in the database."
 
-from __future__ import print_function, absolute_import
+
 
 from orderportal import constants
 from orderportal import settings

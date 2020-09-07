@@ -1,6 +1,6 @@
 "Load the order messages document into the database."
 
-from __future__ import print_function, absolute_import
+
 
 import os
 import sys
