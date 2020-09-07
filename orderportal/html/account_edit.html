@@ -2,11 +2,9 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}Edit {{ account['email'] }}{% end %}
+{% block head_title %}Edit account {{ account['email'] }}{% end %}
 
-{% block body_title %}
-Edit {% module Icon('account') %} {{ account['email'] }}
-{% end %}
+{% block body_title %}Edit account {{ account['email'] }}{% end %}
 
 {% block main_content %}
 <p>
@@ -58,9 +56,7 @@ administrator of the site can then change the ownership of your
 	<select class="form-control" name="role" id="role">
 	  {% for role in constants.ACCOUNT_ROLES %}
 	  {% set selected = role == account['role'] and 'selected' or '' %}
-	  <option {{ selected }} value="{{ role }}">
-	    {{ role.capitalize() }}
-	  </option>
+	  <option {{ selected }}>{{ role }}</option>
 	  {% end %}
 	</select>
       </div>

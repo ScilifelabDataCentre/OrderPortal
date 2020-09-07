@@ -13,23 +13,28 @@
 	  href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css"
 	  href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css">
+    {% block css_page %}
+    {% end %}
     <link rel="stylesheet" href="{{ static_url('mods.css') }}">
-    {# NOTE: jQuery has to be loaded before bootstrap JS! #}
+    {% if settings['SITE_CSS_FILE'] %}
+    <link rel="stylesheet"
+          href="{{ reverse_url('site', settings['SITE_CSS_FILE']) }}">
+    {% end %}
+    {# NOTE: jQuery JS has to be loaded before bootstrap JS! #}
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
     <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
-    <script defer src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script defer src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
-    <script defer src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js"></script>
     <script>
       $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
       $(function(){ $(".datepicker").datepicker(); });
     </script>
+    <script defer src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script defer src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+    <script defer src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js"></script>
   </head>
 
   <body>
-
-    <nav class="navbar navbar-inverse navbar-static-top">
+    <nav class="navbar navbar-static-top {{ settings['DISPLAY_MENU_LIGHT'] and 'navbar-default' or 'navbar-inverse' }}">
       <div class="container-fluid">
 	<div class="navbar-header">
 	  <button type="button" class="navbar-toggle"
@@ -101,6 +106,7 @@
 	    </li>
 	    {% end %} {# if is_staff #}
 
+            {% if settings['DISPLAY_MENU_INFORMATION'] %}
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">
 		Information
@@ -121,10 +127,13 @@
 		{% end %}
               </ul>
             </li>
+            {% end %}
 
+            {% if settings['DISPLAY_MENU_DOCUMENTS'] %}
 	    <li>
 	      <a href="{{ reverse_url('files') }}">Documents</a>
 	    </li>
+            {% end %}
 
 	    {% if is_admin %}
             <li class="dropdown">
@@ -142,10 +151,12 @@
 		  <a href="{{ reverse_url('texts') }}">Texts</a>
 		</li>
 		<li>
-		  <a href="{{ reverse_url('order_statuses') }}">Order statuses</a>
+		  <a href="{{ reverse_url('order_statuses') }}">
+                    {{ terminology('Order') }} statuses</a>
 		</li>
 		<li>
-		  <a href="{{ reverse_url('admin_order_messages') }}">Order messages</a>
+		  <a href="{{ reverse_url('admin_order_messages') }}">
+                    {{ terminology('Order') }} messages</a>
 		</li>
 		<li>
 		  <a href="{{ reverse_url('admin_account_messages') }}">Account messages</a>
@@ -166,19 +177,30 @@
 	    {% end %}
 	    {% end %} {# if is_admin #}
 
+            {% if settings['DISPLAY_MENU_CONTACT'] %}
 	    <li>
 	      <a href="{{ reverse_url('contact') }}">Contact</a>
 	    </li>
+            {% end %}
+            {% if settings['DISPLAY_MENU_ABOUT_US'] %}
 	    <li>
 	      <a href="{{ reverse_url('about') }}">About us</a>
 	    </li>
+            {% end %}
+            {% if settings['DISPLAY_MENU_ITEM_URL'] %}
+	    <li>
+	      <a href="{{ settings['DISPLAY_MENU_ITEM_URL'] }}">
+                {{ settings.get('DISPLAY_MENU_ITEM_TEXT') or 'Back to website' }}
+              </a>
+	    </li>
+            {% end %}
 
 	  </ul>
 
 	  <div>
 	    <ul class="nav navbar-nav navbar-right">
 	      {% if current_user %}
-	      <li>{% module Entity(current_user) %}</li>
+	      <li>{% module Entity(current_user, icon=False) %}</li>
 	      <li>
 		<form action="{{ reverse_url('logout') }}"
 		      role="form"
@@ -203,7 +225,7 @@
 		  <div class="form-group has-feedback">
 		    <input type="search" id="term" name="term"
 			   class="form-control"
-			   placeholder="Search orders">
+			   placeholder="Search {{ terminology('orders') }}">
 		    <span class="glyphicon glyphicon-search form-control-feedback"></span>
 		  </div>
 		</form>
@@ -216,7 +238,7 @@
       </div>
     </nav>
 
-    {% block container %}
+    {% block container %} {# container for body content #}
     <div class="container">
     {% end %}
 
@@ -235,18 +257,12 @@
       </div>
       {% end %} {# if alert #}
 
-      <div class="row">
-	<div class="col-md-12">
-	  &nbsp;
-	</div>
-      </div>
-
       {% block body_header %}
       <div class="row">
 	<div class="col-md-10">
 	  <h1>{% block body_title %}OrderPortal{% end %}</h1>
 	</div>
-	<div class="col-md-2 hidden-print">
+	<div class="col-md-2 hidden-print" style="margin-top: 20px">
 	  {% block body_header_alt_format %}
 	  {% end %}
 	</div>
@@ -281,8 +297,12 @@
 	  {% end %} {# block action_content #}
 	</div>
       </div>
-      {% block sub_main_content %}
-      {% end %} {# block sub_main_content #}
+      <div class="row">
+	<div class="col-md-12">
+          {% block sub_main_content %}
+          {% end %} {# block sub_main_content #}
+        </div>
+      </div>
       {% end %} {# block content #}
 
     </div> {# end of container for body content #}
@@ -290,15 +310,19 @@
     <div class="container-fluid">
       <hr>
       <div class="row">
-	<div class="col-md-2">
-	  <a href="{{ reverse_url('home') }}">
-	    <span class="glyphicon glyphicon-home"></span>
-	    {{ settings['SITE_NAME'] }}
+	<div class="col-md-3">
+          <a href="{{ settings['SITE_HOST_URL'] or '#' }}" target="_blank">
+            {% if settings['SITE_HOST_ICON'] %}
+            <img src="{{ reverse_url('site', settings['SITE_HOST_ICON']) }}"
+                 title="{{ settings['SITE_HOST_TITLE'] or '' }}">
+            {% else %}
+            {{ settings['SITE_HOST_TITLE'] or '' }}
+            {% end %}
 	  </a>
 	</div>
-        <div class="col-md-8 text-center">
+        <div class="col-md-6 text-center">
           {% if current_user %}
-          GDPR information: See
+          Privacy policy (GDPR, etc): See
           <a href="{{ reverse_url('account', current_user['email']) }}">
             your account page</a>.
           A cookie is used solely to handle your login session.
@@ -306,10 +330,9 @@
           Cookies are <b>not</b> used for anonymous users.
           {% end %}
         </div>
-	<div class="col-md-2">
-	  <a class="pull-right" href="{{ reverse_url('software') }}">
-	    Software version {{ version }}
-	  </a>
+	<div class="col-md-3">
+	  <a href="{{ reverse_url('software') }}" class="pull-right">
+            Version {{ version }}</a>
 	</div>
       </div>
     </div>

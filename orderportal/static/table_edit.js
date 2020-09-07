@@ -15,6 +15,8 @@ function table_add_row(event)
   $("#" + countid).attr('value', count);
   // Display the number of the created row.
   $("#" + rowid + "__").html(count);
+  // Attach datepicker, if any.
+  $(".datepicker").datepicker();
   // For ease of input, set focus to the first cell if the added row.
   $("#" + rowid + "_0").focus();
 }

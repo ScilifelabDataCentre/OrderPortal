@@ -55,10 +55,11 @@ class Settings(RequestHandler):
             url[match.start(1):match.end(1)] = 'password'
             mod_settings['DATABASE_SERVER'] = ''.join(url)
         params = ['ROOT_DIR', 'SETTINGS_FILEPATH',
-                  'BASE_URL', 'SITE_NAME', 'SITE_SUPPORT_EMAIL',
+                  'BASE_URL', 'BASE_URL_PATH_PREFIX',
+                  'SITE_NAME', 'SITE_SUPPORT_EMAIL',
                   'DATABASE_SERVER', 'DATABASE_NAME', 'DATABASE_ACCOUNT',
-                  'TORNADO_DEBUG', 'LOGGING_DEBUG', 'BACKUP_DIR',
-                  'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES',
+                  'TORNADO_DEBUG', 'LOGGING_FILEPATH', 'LOGGING_DEBUG',
+                  'BACKUP_DIR', 'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES',
                   'SITE_DIR', 'ACCOUNT_MESSAGES_FILEPATH',
                   'ORDER_STATUSES_FILEPATH', 'ORDER_TRANSITIONS_FILEPATH',
                   'ORDER_MESSAGES_FILEPATH', 'ORDER_USER_TAGS', 
@@ -119,7 +120,7 @@ class OrderStatuses(RequestHandler):
                             startkey=[''],
                             endkey=[constants.CEILING])
         counts = dict([(r.key[0], r.value) for r in view])
-        self.render('order_statuses.html', counts=counts)
+        self.render('admin_order_statuses.html', counts=counts)
 
 
 class AdminOrderMessages(RequestHandler):

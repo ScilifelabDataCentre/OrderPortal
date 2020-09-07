@@ -11,8 +11,8 @@ from __future__ import print_function, absolute_import
 
 import cStringIO
 import json
+import logging
 import os
-import sys
 import tarfile
 import time
 
@@ -57,8 +57,8 @@ def dump(db, filepath):
             outfile.addfile(info, cStringIO.StringIO(data))
             count_files += 1
     outfile.close()
-    print('dumped', count_items, 'items and',
-          count_files, 'files to', filepath, file=sys.stderr)
+    logging.info("dumped %s items and %s files to %s",
+                 count_items, count_files, filepath)
 
 def undump(db, filepath):
     """Reverse of dump; load all items from a tar file.
@@ -103,8 +103,9 @@ def undump(db, filepath):
                 attachments[key] = dict(filename=attname2,
                                         content_type=attinfo['content_type'])
     infile.close()
-    print('undumped', count_items, 'items and',
-          count_files, 'files from', filepath, file=sys.stderr)
+    # This will be executed on the command line, so output to console, not log.
+    print('undumped', count_items, 'items and', 
+          count_files, 'files from', filepath)
 
 
 if __name__ == '__main__':

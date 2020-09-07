@@ -2,7 +2,6 @@
 
 from __future__ import print_function, absolute_import
 
-import csv
 import json
 import logging
 import os.path
@@ -50,7 +49,7 @@ class OrderSaver(saver.Saver):
         "Create the order from the given form."
         self.fields = Fields(form)
         self['form'] = form['_id']
-        self['title'] = title or form['title']
+        self['title'] = title
         self['fields'] = dict([(f['identifier'], None) for f in self.fields])
         self.set_status(settings['ORDER_STATUS_INITIAL']['identifier'])
         # Set the order identifier if its format defined.
@@ -115,7 +114,7 @@ class OrderSaver(saver.Saver):
 
     def add_file(self, infile):
         "Add the given file to the files. Return the unique filename."
-        filename = os.path.basename(infile.filename)
+        filename = utils.to_ascii(os.path.basename(infile.filename))
         if filename in self.filenames:
             count = 1
             while True:
@@ -204,14 +203,15 @@ class OrderSaver(saver.Saver):
         self.removed_files = []       # Due to field update
         # Loop over fields defined in the form document and get values.
         # Do not change values for a field if that argument is missing,
-        # except for checkbox: missing value means False,
-        # and except for multiselect: missing value means empty list.
+        # except for checkbox: there a missing value means False,
+        # and except for multiselect: there a missing value means empty list.
         for field in self.fields:
             # Field not displayed or not writeable must not be changed.
             if not self.rqh.is_staff() and \
                 (field['restrict_read'] or field['restrict_write']): continue
             if field['type'] == constants.GROUP: continue
             identifier = field['identifier']
+
             if field['type'] == constants.FILE:
                 # Files are uploaded by the normal form multi-part
                 # encoding approach, not by JSON data.
@@ -232,80 +232,76 @@ class OrderSaver(saver.Saver):
                     # Missing argument implies empty list.
                     # This is a special case for HTML form input.
                     value = self.rqh.get_arguments(identifier)
+
             elif field['type'] == constants.TABLE:
                 coldefs = [utils.parse_field_table_column(c) 
                            for c in field['table']]
-                n_columns = len(coldefs)
-                if n_columns == 0: continue
                 if data:        # JSON data: contains complete table.
                     try:
-                        value = data[identifier]
+                        table = data[identifier]
                     except KeyError:
                         continue
-                    # Check validity of table items.
-                    try:
-                        table = value
-                        value = []
-                        for row in table:
-                            for j in xrange(n_columns):
-                                coltype = coldefs[j].get('type')
-                                if coltype == constants.SELECT:
-                                    if row[j] not in coldefs[j]['options']:
-                                        row[j] = None
-                                elif coltype == constants.INT:
-                                    try:
-                                        row[j] = int(row[j])
-                                    except (ValueError, TypeError):
-                                        row[j] = None
-                                elif not row[j]:
-                                    row[j] = None
-                    except (ValueError, TypeError, AttributeError):
-                        value = []
-                else:         # HTML form input: individual cells.
+                else:           # HTML form data; collect table from fields.
                     try:
                         name = "_table_%s_count" % identifier
                         n_rows = int(self.rqh.get_argument(name, 0))
                     except (ValueError, TypeError):
                         n_rows = 0
-                    value = []
+                    table = []
                     for i in xrange(n_rows):
                         row = []
-                        for j in xrange(n_columns):
+                        for j, coldef in enumerate(coldefs):
                             name = "_table_%s_%i_%i" % (identifier, i, j)
-                            item = self.rqh.get_argument(name, None)
-                            coltype = coldefs[j].get('type')
+                            row.append(self.rqh.get_argument(name, None))
+                        table.append(row)
+                # Check validity of table content.
+                value = []
+                try:
+                    for row in table:
+                        # Check correct number of items in the row.
+                        if len(row) != len(coldefs): continue
+                        for j, coldef in enumerate(coldefs):
+                            coltype = coldef.get('type')
                             if coltype == constants.SELECT:
-                                if item not in coldefs[j]['options']:
-                                    item = None
+                                if row[j] not in coldef['options']:
+                                    row[j] = None
+                                elif row[j] == '[no value]':
+                                    row[j] = None
                             elif coltype == constants.INT:
                                 try:
-                                    item = int(item)
+                                    row[j] = int(row[j])
                                 except (ValueError, TypeError):
-                                    item = None
-                            elif not item:
-                                item = None
-                            row.append(item)
-                        for item in row:
-                            if item is not None:
-                                value.append(row)
-                                break
-            elif data:          # JSON data.
-                try:
-                    value = data[identifier]
-                except KeyError:
-                    continue
-            else:               # HTML form input.
-                try:
-                    value = self.rqh.get_argument(identifier)
-                    if value == '': value = None
-                except tornado.web.MissingArgumentError:
-                    # Missing argument means no change,
-                    # which is not same as value None.
-                    # Except for boolean checkbox!
-                    if field['type'] == constants.BOOLEAN and field.get('checkbox'):
-                        value = False
-                    else:
+                                    row[j] = None
+                            elif not row[j]:
+                                row[j] = None
+                        # Use row only if first value is not None.
+                        if row[0] is not None:
+                            value.append(row)
+                # Something is badly wrong; just skip it.
+                except (ValueError, TypeError, AttributeError, IndexError):
+                    value = []
+
+            # All other types of input fields.
+            else:
+                if data:          # JSON data.
+                    try:
+                        value = data[identifier]
+                    except KeyError:
                         continue
+                else:               # HTML form input.
+                    try:
+                        value = self.rqh.get_argument(identifier)
+                        if value == '': value = None
+                    except tornado.web.MissingArgumentError:
+                        # Missing argument means no change,
+                        # which is not the same as value None.
+                        # Except for boolean checkbox!
+                        if field['type'] == constants.BOOLEAN and \
+                           field.get('checkbox'):
+                            value = False
+                        else:
+                            continue
+            # Record any change to the value.
             if value != self.doc['fields'].get(identifier):
                 changed = self.changed.setdefault('fields', dict())
                 changed[identifier] = value
@@ -392,10 +388,12 @@ class OrderSaver(saver.Saver):
                         raise ValueError('value is not a valid date')
                 elif field['type'] == constants.TABLE:
                     if not isinstance(value, list):
-                        raise ValueError('value is not a list')
+                        raise ValueError('table value is not a list')
+                    if field['required'] and len(value) == 0:
+                        raise ValueError('missing data')
                     for r in value:
                         if not isinstance(r, list):
-                            raise ValueError('value is not a list of lists')
+                            raise ValueError('table value is not a list of lists')
                 elif field['type'] == constants.FILE:
                     pass
         except ValueError, msg:
@@ -437,7 +435,7 @@ class OrderSaver(saver.Saver):
                         self.db.delete_attachment(self.doc, filename)
             except AttributeError:
                 pass
-            # Using cStringIO here is a kludge.
+            # Using cStringIO.StringIO here is a kludge.
             # Don't ask me why this was required on a specific machine.
             # The problem appeared on a Python 2.6 system and involved
             # Unicode, but I was unable to isolate it.
@@ -469,7 +467,7 @@ class OrderSaver(saver.Saver):
                         account = self.get_account(member)
                         if account and account['status'] == constants.ENABLED:
                             recipients.add(account['email'])
-        if 'admin' in template['recipients']:
+        if constants.ADMIN in template['recipients']:
             view = self.db.view('account/role', include_docs=True)
             admins = [r.doc for r in view[constants.ADMIN]]
             for admin in admins:
@@ -493,7 +491,9 @@ class OrderSaver(saver.Saver):
         except KeyError:
             identifier = order['_id']
         path = "/order/{0}".format(identifier)
-        return settings['BASE_URL'].rstrip('/') + path
+        if settings['BASE_URL_PATH_PREFIX']:
+            path = settings['BASE_URL_PATH_PREFIX'] + path
+        return settings['BASE_URL'] + path
 
     def get_account(self, email):
         "Get the account document for the given email."
@@ -617,6 +617,7 @@ class OrderMixin(object):
             item['restrict_write'] = field['restrict_write']
             item['invalid'] = order['invalid'].get(field['identifier'])
             item['description'] = field.get('description')
+            item._field = field
             result.append(item)
             if field['type'] == constants.GROUP:
                 result.extend(self.get_fields(order, depth+1, field['fields']))
@@ -855,10 +856,11 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
                     saver.update_fields(data=data['fields'])
                 except KeyError:
                     pass
-                try:
-                    saver.set_history(data['history'])
-                except KeyError:
-                    pass
+                if self.is_admin():
+                    try:
+                        saver.set_history(data['history'])
+                    except KeyError:
+                        pass
         except ValueError, msg:
             raise tornado.web.HTTPError(400, reason=str(msg))
         else:
@@ -878,75 +880,103 @@ class OrderCsv(OrderMixin, RequestHandler):
             self.check_readable(order)
         except ValueError, msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        self.write(self.get_order_csv_stringio(order).getvalue())
+        writer = self.write_order(order)
+        self.write(writer.getvalue())
+        self.write_finish(order)
+
+    def write_order(self, order, writer=None):
+        if writer is None:
+            writer = self.get_writer()
+        URL = self.absolute_reverse_url
+        form = self.get_form(order['form'])
+        writer.writerow((settings['SITE_NAME'], utils.today()))
+        try:
+            writer.writerow(('Identifier', order['identifier']))
+        except KeyError:
+            pass
+        writer.writerow(('Title', order['title'] or '[no title]'))
+        writer.writerow(('URL', self.order_reverse_url(order)))
+        writer.writerow(('IUID', order['_id']))
+        writer.writerow(('Form', 'Title', form['title']))
+        writer.writerow(('', 'Version', form.get('version') or '-'))
+        writer.writerow(('', 'IUID', form['_id']))
+        account = self.get_account(order['owner'])
+        writer.writerow(('Owner', 'Name', utils.get_account_name(account)))
+        writer.writerow(('', 'URL', URL('account', account['email'])))
+        writer.writerow(('', 'Email', order['owner']))
+        writer.writerow(('', 'University', account.get('university') or '-'))
+        writer.writerow(('', 'Department', account.get('department') or '-'))
+        writer.writerow(('', 'PI', account.get('pi') and 'Yes' or 'No'))
+        if settings.get('ACCOUNT_FUNDER_INFO') and \
+           settings.get('ACCOUNT_FUNDER_INFO_GENDER'):
+            writer.writerow(('', 'Gender',
+                             account.get('gender', '-').capitalize()))
+        writer.writerow(('Status', order['status']))
+        for i, s in enumerate(settings['ORDER_STATUSES']):
+            key = s['identifier']
+            writer.writerow((i == 0 and 'History' or '',
+                             key,
+                             order['history'].get(key, '-')))
+        for t in order.get('tags', []):
+            writer.writerow(('Tag', t))
+        writer.writerow(('Modified', order['modified']))
+        writer.writerow(('Created', order['created']))
+        writer.new_worksheet('Fields')
+        writer.writerow(('Field', 'Label', 'Depth', 'Type', 'Value',
+                         'Restrict read', 'Restrict write', 'Invalid'))
+        for field in self.get_fields(order):
+            values = field.values()[:-1] # Skip help text
+            # Special case for table field; spans more than one row
+            if field['type'] == constants.TABLE:
+                table = values[4] # Column for 'Value'
+                values[4] = len(table) # Number of rows in table
+                values += [h.split(';')[0] for h in field._field['table']]
+                writer.writerow(values)
+                prefix = [''] * 8
+                for row in table:
+                    writer.writerow(prefix + row)
+            
+            elif field['type'] == constants.MULTISELECT:
+                values[4] = '|'.join(values[4])
+                writer.writerow(values)
+            else:
+                writer.writerow(values)
+        writer.new_worksheet('Files')
+        writer.writerow(('File', 'Size', 'Content type', 'URL'))
+        for filename in sorted(order.get('_attachments', [])):
+            if filename.startswith(constants.SYSTEM): continue
+            stub = order['_attachments'][filename]
+            writer.writerow((filename,
+                             stub['length'],
+                             stub['content_type'],
+                             URL('order_file', order['_id'], filename)))
+        return writer
+
+    def get_writer(self):
+        return utils.CsvWriter('Order')
+
+    def write_finish(self, order):
         self.set_header('Content-Type', constants.CSV_MIME)
         filename = utils.to_ascii(order.get('identifier') or order['_id'])
         self.set_header('Content-Disposition',
                         'attachment; filename="%s.csv"' % filename)
+        
 
-    def get_order_csv_stringio(self, order):
-        "Return the content of the order as CSV-formatted data in StringIO."
-        URL = self.absolute_reverse_url
-        form = self.get_form(order['form'])
-        csvbuffer = StringIO()
-        writer = csv.writer(csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
-        safe = utils.csv_safe_row
-        writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
-        try:
-            writer.writerow(safe(('Identifier', order['identifier'])))
-        except KeyError:
-            pass
-        writer.writerow(safe(('Title', order.get('title') or '[no title]')))
-        writer.writerow(safe(('URL', self.order_reverse_url(order))))
-        writer.writerow(safe(('IUID', order['_id'])))
-        writer.writerow(safe(('Form', 'Title', form['title'])))
-        writer.writerow(safe(('', 'Version', form.get('version') or '-')))
-        writer.writerow(safe(('', 'IUID', form['_id'])))
-        account = self.get_account(order['owner'])
-        writer.writerow(safe(('Owner', 'Name',
-                              utils.get_account_name(account))))
-        writer.writerow(safe(('', 'URL', URL('account', account['email']))))
-        writer.writerow(safe(('', 'Email', order['owner'])))
-        writer.writerow(safe(('', 'University',
-                         account.get('university') or '-')))
-        writer.writerow(safe(('', 'Department',
-                         account.get('department') or '-')))
-        writer.writerow(safe(('', 'PI',
-                         account.get('pi') and 'Yes' or 'No')))
-        if settings.get('ACCOUNT_FUNDER_INFO') and \
-           settings.get('ACCOUNT_FUNDER_INFO_GENDER'):
-            writer.writerow(safe(('', 'Gender',
-                                  account.get('gender', '-').capitalize())))
-        writer.writerow(safe(('Status', order['status'])))
-        for i, s in enumerate(settings['ORDER_STATUSES']):
-            key = s['identifier']
-            writer.writerow(safe((i == 0 and 'History' or '',
-                                  key,
-                                  order['history'].get(key, '-'))))
-        for t in order.get('tags', []):
-            writer.writerow(safe(('Tag', t)))
-        writer.writerow(safe(('Modified', order['modified'])))
-        writer.writerow(safe(('Created', order['created'])))
-        writer.writerow(safe(('',)))
-        writer.writerow(safe(('Field', 'Label', 'Depth', 'Type', 'Value',
-                              'Restrict read', 'Restrict write',
-                              'Invalid', 'Description')))
-        for field in self.get_fields(order):
-            writer.writerow(safe(field.values()))
-        writer.writerow(safe(('',)))
-        writer.writerow(safe(('File', 'Size', 'Content type', 'URL')))
-        for filename in sorted(order.get('_attachments', [])):
-            if filename.startswith(constants.SYSTEM): continue
-            stub = order['_attachments'][filename]
-            writer.writerow(safe((filename,
-                                  stub['length'],
-                                  stub['content_type'],
-                                  URL('order_file', order['_id'], filename))))
-        return csvbuffer
+class OrderXlsx(OrderCsv):
+    "Return an XLSX file containing the order data. Contains field definitions."
+
+    def get_writer(self):
+        return utils.XlsxWriter('Order')
+
+    def write_finish(self, order):
+        self.set_header('Content-Type', constants.XLSX_MIME)
+        filename = utils.to_ascii(order.get('identifier') or order['_id'])
+        self.set_header('Content-Disposition',
+                        'attachment; filename="%s.xlsx"' % filename)
 
 
 class OrderZip(OrderApiV1Mixin, OrderCsv):
-    "Return a ZIP file containing CSV, JSON and files for the order."
+    "Return a ZIP file containing CSV, XLSX, JSON and files for the order."
 
     def get(self, iuid):
         try:
@@ -961,8 +991,10 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
         # This should use a context, but it is not implemented in Python 2.6
         writer = zipfile.ZipFile(zip_stringio, 'w')
         name = order.get('identifier') or order['_id']
-        writer.writestr(name + '.csv',
-                        self.get_order_csv_stringio(order).getvalue())
+        csvwriter = self.write_order(order, writer=utils.CsvWriter('Order'))
+        writer.writestr(name + '.csv', csvwriter.getvalue())
+        xlsxwriter = self.write_order(order, writer=utils.XlsxWriter('Order'))
+        writer.writestr(name + '.xlsx', xlsxwriter.getvalue())
         writer.writestr(name + '.json',
                         json.dumps(self.get_order_json(order, full=True)))
         for filename in sorted(order.get('_attachments', [])):
@@ -992,10 +1024,12 @@ class Orders(RequestHandler):
         except IndexError:
             all_count = 0
         else:
-            all_count = count=r.value
+            all_count = r.value
         # Initial ordering by the 'modified' column.
-        order_column = 5 + len(settings['ORDERS_LIST_STATUSES']) + \
-            len(settings['ORDERS_LIST_FIELDS'])
+        order_column = 5 + \
+                       int(settings['ORDERS_LIST_TAGS']) + \
+                       len(settings['ORDERS_LIST_FIELDS']) + \
+                       len(settings['ORDERS_LIST_STATUSES'])
         self.set_filter()
         self.render('orders.html',
                     all_forms=self.get_forms_titles(all=True),
@@ -1141,10 +1175,8 @@ class OrdersCsv(Orders):
             self.see_other('account_orders', self.current_user['email'])
             return
         self.set_filter()
-        csv_stringio = StringIO()
-        writer = csv.writer(csv_stringio, quoting=csv.QUOTE_NONNUMERIC)
-        safe = utils.csv_safe_row
-        writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
+        writer = self.get_writer()
+        writer.writerow((settings['SITE_NAME'], utils.today()))
         row = ['Identifier', 'Title', 'IUID', 'URL', 
                'Form', 'Form IUID', 'Form URL',
                'Owner', 'Owner name', 'Owner URL', 'Tags']
@@ -1152,32 +1184,50 @@ class OrdersCsv(Orders):
         row.append('Status')
         row.extend([s.capitalize() for s in settings['ORDERS_LIST_STATUSES']])
         row.append('Modified')
-        writer.writerow(safe(row))
+        writer.writerow(row)
         names = self.get_account_names()
         forms = self.get_forms_titles(all=True)
         for order in self.get_orders():
             row = [order.get('identifier') or '',
-                   utils.to_utf8(order.get('title') or '[no title]'),
+                   order['title'] or '[no title]',
                    order['_id'],
                    self.order_reverse_url(order),
-                   utils.to_utf8(forms[order['form']]),
+                   forms[order['form']],
                    order['form'],
                    self.absolute_reverse_url('form', order['form']),
                    order['owner'],
-                   utils.to_utf8(names[order['owner']]),
+                   names[order['owner']],
                    self.absolute_reverse_url('account', order['owner']),
-                   utils.to_utf8(', '.join(order.get('tags', [])))]
+                   ', '.join(order.get('tags', []))]
             for f in settings['ORDERS_LIST_FIELDS']:
-                row.append(utils.to_utf8(order['fields'].get(f['identifier'])))
+                row.append(order['fields'].get(f['identifier']))
             row.append(order['status'])
             for s in settings['ORDERS_LIST_STATUSES']:
                 row.append(order['history'].get(s))
             row.append(order['modified'])
-            writer.writerow(safe(row))
-        self.write(csv_stringio.getvalue())
+            writer.writerow(row)
+        self.write(writer.getvalue())
+        self.write_finish()
+
+    def get_writer(self):
+        return utils.CsvWriter()
+
+    def write_finish(self):
         self.set_header('Content-Type', constants.CSV_MIME)
         self.set_header('Content-Disposition', 
                         'attachment; filename="orders.csv"')
+        
+
+class OrdersXlsx(OrdersCsv):
+    "Orders list as XLSX."
+
+    def get_writer(self):
+        return utils.XlsxWriter()
+
+    def write_finish(self):
+        self.set_header('Content-Type', constants.XLSX_MIME)
+        self.set_header('Content-Disposition', 
+                        'attachment; filename="orders.xlsx"')
 
 
 class OrderLogs(OrderMixin, RequestHandler):
@@ -1196,7 +1246,7 @@ class OrderLogs(OrderMixin, RequestHandler):
             self.see_other('home', error=str(msg))
             return
         title = u"Logs for {0} '{1}'".format(utils.terminology('order'),
-                                             order['title'])
+                                             order['title'] or '[no title]')
         self.render('logs.html',
                     title=title,
                     entity=order,
@@ -1226,7 +1276,7 @@ class OrderCreate(OrderMixin, RequestHandler):
             self.check_creation_enabled()
             form = self.get_form(self.get_argument('form'), check=True)
             with OrderSaver(rqh=self) as saver:
-                saver.create(form, title=self.get_argument('title', None))
+                saver.create(form)
                 saver.autopopulate()
                 saver.check_fields_validity()
         except ValueError, msg:
@@ -1258,6 +1308,7 @@ class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             raise tornado.web.HTTPError(400, reason=str(msg))
         else:
             self.write(self.get_order_json(saver.doc, full=True))
+
 
 class OrderEdit(OrderMixin, RequestHandler):
     "Page for editing an order."
@@ -1309,7 +1360,10 @@ class OrderEdit(OrderMixin, RequestHandler):
                     inp = "<input type='number' step='%s'" \
                           " class='form-control' name='%s' id='%s'>" % \
                           (constants.FLOAT_STEP, rowid, rowid)
-                else:           # default type: 'string'
+                elif column['type'] == constants.DATE:
+                    inp = "<input type='text' class='form-control datepicker'" \
+                          " name='%s' id='%s'>" % (rowid, rowid)
+                else:           # Default type: 'string'
                     inp = "<input type='text' class='form-control'" \
                           " name='%s' id='%s'>" % (rowid, rowid)
                 tableinput.append("<td>%s</td>" % inp)
@@ -1317,7 +1371,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             tableinputs[field['identifier']] = ''.join(tableinput)
         self.render('order_edit.html',
                     title=u"Edit {0} '{1}'".format(utils.terminology('order'),
-                                                   order['title']),
+                                                   order['title'] or '[no title]'),
                     order=order,
                     tags=tags,
                     links=links,
@@ -1340,7 +1394,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             message = "{0} saved.".format(utils.terminology('Order'))
             error = None
             with OrderSaver(doc=order, rqh=self) as saver:
-                saver['title'] = self.get_argument('__title__', None) or '[no title]'
+                saver['title'] = self.get_argument('__title__', None)
                 saver.set_tags(self.get_argument('__tags__', '').\
                                replace(',', ' ').split())
                 saver.set_external(self.get_argument('__links__', '').\
@@ -1370,8 +1424,8 @@ class OrderEdit(OrderMixin, RequestHandler):
                 self.see_other('order_edit', order['_id'])
             else:
                 self.redirect(self.order_reverse_url(order))
-        except ValueError, msg:
-            self.set_error_flash(msg)
+        except ValueError as msg:
+            self.set_error_flash(str(msg))
             self.redirect(self.order_reverse_url(order))
 
 
@@ -1383,7 +1437,7 @@ class OrderClone(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
             self.check_readable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
         if not self.is_clonable(order):
@@ -1392,7 +1446,8 @@ class OrderClone(OrderMixin, RequestHandler):
         form = self.get_form(order['form'])
         erased_files = set()
         with OrderSaver(rqh=self) as saver:
-            saver.create(form, title=u"Clone of {0}".format(order['title']))
+            saver.create(form, title=u"Clone of {0}".format(
+                order['title'] or '[no title]'))
             for field in saver.fields:
                 id = field['identifier']
                 if field.get('erase_on_clone'):

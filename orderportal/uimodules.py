@@ -37,7 +37,7 @@ class Icon(tornado.web.UIModule):
 
 
 class ContentType(tornado.web.UIModule):
-    "HTML for an entity type icon."
+    "HTML for a content (MIME) type icon."
 
     def render(self, content_type):
         url = self.handler.static_url(
@@ -60,7 +60,7 @@ class Entity(tornado.web.UIModule):
             alt = 'order'
             url = self.handler.order_reverse_url(entity)
         elif doctype == constants.ACCOUNT:
-            icon_url = self.handler.static_url(entity['role'] + '.png')
+            icon_url = self.handler.static_url('account.png')
             title = entity['email']
             alt = entity['role']
             url = self.handler.reverse_url(doctype, entity['email'])
@@ -84,7 +84,7 @@ class Entity(tornado.web.UIModule):
                 url = self.handler.reverse_url(doctype, iuid)
             except KeyError, msg:
                 raise KeyError(str(msg) + ':', doctype)
-        if icon:
+        if icon and icon_url:
             icon = ICON_TEMPLATE.format(url=icon_url, alt=alt, title=alt)
             return u"""<a href="{url}">{icon} {title}</a>""".format(
                 url=url, icon=icon, title=title)
@@ -180,7 +180,7 @@ class TableRows(tornado.web.UIModule):
 
     def render(self, field, value):
         assert field['type'] == constants.TABLE
-        result = ['<tr>', '<th></th>']
+        result = ['<thead>', '<tr>', '<th></th>']
         for coldef in field['table']:
             column = utils.parse_field_table_column(coldef)
             header = column['identifier']
@@ -188,6 +188,8 @@ class TableRows(tornado.web.UIModule):
                 header += " (%s)" % column['type']
             result.append("<th>%s</th>" % header)
         result.append('</tr>')
+        result.append('</thead>')
+        result.append('<tbody>')
         if value:
             for i, row in enumerate(value):
                 result.append('<tr>')
@@ -195,7 +197,8 @@ class TableRows(tornado.web.UIModule):
                 for cell in row:
                     if cell is None: cell = ''
                     result.append("<td>%s</td>" % cell)
-        result.append('</tr>')
+                result.append('</tr>')
+        result.append('</tbody>')
         return '\n'.join(result)
 
 
@@ -204,7 +207,7 @@ class TableRowsEdit(tornado.web.UIModule):
 
     def render(self, field, value):
         assert field['type'] == constants.TABLE
-        result = ['<tr>', '<th></th>']
+        result = ['<thead>', '<tr>', '<th></th>']
         columns = []
         for coldef in field['table']:
             column = utils.parse_field_table_column(coldef)
@@ -214,7 +217,9 @@ class TableRowsEdit(tornado.web.UIModule):
                 header += " (%s)" % column['type']
             result.append("<th>%s</th>" % header)
         result.append('</tr>')
+        result.append('</thead>')
         if value:
+            result.append('<tbody>')
             for i, row in enumerate(value):
                 rowid = "_table_%s_%s" % (field['identifier'], i)
                 result.append('<tr id="%s">' % rowid)
@@ -227,7 +232,8 @@ class TableRowsEdit(tornado.web.UIModule):
                         cell = ''
                     result.append('<td>')
                     name = "_table_%s_%s_%s" % (field['identifier'], i, j)
-                    if columns[j]['type'] == constants.SELECT:
+                    coltype = columns[j]['type']
+                    if coltype == constants.SELECT:
                         result.append('<select class="form-control" name="%s">'
                                       % name)
                         for option in columns[j]['options']:
@@ -237,15 +243,19 @@ class TableRowsEdit(tornado.web.UIModule):
                             else:
                                 result.append('<option>%s</option>' % option)
                         result.append('</select>')
-                    elif columns[j]['type'] == constants.INT:
+                    elif coltype == constants.INT:
                         result.append('<input type="number" step="1"'
                                       ' class="form-control"'
                                       ' name="%s" value="%s">' % (name, cell))
-                    elif columns[j]['type'] == constants.FLOAT:
+                    elif coltype == constants.FLOAT:
                         result.append('<input type="number"'
                                       ' class="form-control"'
                                       ' name="%s" value="%s">' % (name, cell))
-                    else: # Default input type: text
+                    elif coltype == constants.DATE:
+                        result.append('<input type="text"'
+                                      ' class="form-control datepicker"'
+                                      ' name="%s" value="%s">' % (name, cell))
+                    else: # Input type for all other types: text
                         result.append('<input type="text" class="form-control"'
                                       ' name="%s" value="%s">' % (name, cell))
                 result.append('<td>'
@@ -254,4 +264,5 @@ class TableRowsEdit(tornado.web.UIModule):
                               '</button>'
                               '</td>' % rowid)
                 result.append('</tr>')
+            result.append('</tbody>')
         return '\n'.join(result)

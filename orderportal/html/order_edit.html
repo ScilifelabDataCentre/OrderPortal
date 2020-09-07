@@ -3,25 +3,17 @@
 {% extends "base.html" %}
 
 {% block head_title %}
-Edit {{ terminology('order') }} '{{ order['title'] }}'
+Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 {% end %}
 
 {% block body_title %}
-Edit  {% module Icon('order') %}
-{{ terminology('order') }} '{{ order['title'] }}'
+Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 {% end %}
 
 {% block content %}
-<h3>{{ form['title'] }}</h3>
-
 <div class="row">
   <div class="col-md-10">
-    <span class="help-block">
-      You may save an incomplete {{ terminology('order') }} and resume
-      work on it later.
-      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
-      notation can be used in multi-line text input fields.
-    </span>
+    {% module Markdown(form.get('instruction')) %}
   </div>
   <div class="col-md-2">
     <form action="{{ reverse_url('order', order['_id']) }}"
@@ -39,6 +31,7 @@ Edit  {% module Icon('order') %}
 </div>
 
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
+      id="__order_edit__"
       class="allow_leaving_without_question"
       role="form"
       enctype="multipart/form-data"
@@ -53,41 +46,55 @@ Edit  {% module Icon('order') %}
 	<label class="control-label" for="__title__">Title</label>
 	<input type="text" class="form-control"
 	       name="__title__" id="__title__"
-	       value="{{ order['title'] }}">
+	       value="{{ order['title'] or '' }}">
       </div>
     </div>
-    <span class="help-block">
-      Brief, descriptive title for the {{ terminology('order') }}.
-      It is not required to be unique, but it is a good idea
-      to make it so anyway.
+    <span class="help-block extra-indent">
+      Brief, descriptive title for the {{ terminology('order') }},
+      which will be displayed in your list of {{ terminology('orders') }}.
+      It is not required to be unique, but it is a good idea to make
+      it so anyway.
     </span>
   </div>
 
-  {% if is_staff or settings.get('ORDER_USER_TAGS') %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-9">
+	<label class="control-label" for="__form__">
+          {{ terminology('Order') }} form
+        </label>
+	<p id="__form__" class="form-control-static">
+	  {{ form['title'] }} {% module Version(form) %}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {% if settings['ORDER_TAGS'] and (is_staff or settings['ORDER_USER_TAGS']) %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
 	<label class="control-label" for="__tags__">Keywords (tags)</label>
-	{# Display terminology: keyword; Code terminology: tag #}
+	{# Terminology in display: keyword; in code: tag #}
 	<textarea class="form-control"
 		  name="__tags__" id="__tags__" rows="2"
 		  >{{ ', '.join(tags) }}</textarea>
       </div>
     </div>
-    <span class="help-block">
+    <span class="help-block extra-indent">
       Optional keywords (tags) characterizing the {{ terminology('order') }},
       which are used in searches.
       <br>
-      Format a keyword as an identifier: Start with a letter, continue
-      with letters, digits and/or underscore '_'. Use blank or comma
-      ',' as delimiter between keywords.
+      A keyword must look like an identifier: It begins with a letter and
+      continues with letters, digits and/or underscore '_'. Blank or comma
+      ',' separates keywords from one another.
       {% if is_staff %}
       <br>
       Staff may use namespace prefixes, e.g. "project_id:P12345".
       {% end %}
     </span>
   </div>
-  {% end %} {#if is_staff or settings.get('ORDER_USER_TAGS') #}
+  {% end %} {# if settings['ORDER_TAGS'] and ... #}
 
   {% if settings.get('ORDER_LINKS') %}
   <div class="form-group">
@@ -99,7 +106,7 @@ Edit  {% module Icon('order') %}
 		  >{{ '\n'.join(links) }}</textarea>
       </div>
     </div>
-    <span class="help-block">
+    <span class="help-block extra-indent">
       Optional links to external resources for the {{ terminology('order') }}.
       <br>
       One line per link, with the URL as the first item. The
@@ -130,11 +137,11 @@ Edit  {% module Icon('order') %}
 	{% end %}
       </div>
     </div>
-    <span class="help-block">
+    <span class="help-block extra-indent">
       {% if is_admin %}
       The {{ terminology('order') }}'s owner specified by email address.
       May be changed to another account.
-      {% else %}
+      {% elif colleagues %}
       The {{ terminology('order') }}'s owner may be changed to an account
       in your groups, if any.
       <strong>NOTE:</strong>
@@ -144,7 +151,7 @@ Edit  {% module Icon('order') %}
   </div>
 
   {# Recursion: 'include' cannot be used! #}
-  {% module Template('order_edit_fields.html', fields=fields, order=order, is_staff=is_staff, hidden_fields=hidden_fields) %}
+  {% module Template('order_edit_fields.html', fields=fields, order=order, is_staff=is_staff, hidden_fields=hidden_fields, tableinputs=tableinputs) %}
 
   <div>
     {# Fields must be allowed to influence others, even when hidden. #}
@@ -159,20 +166,22 @@ Edit  {% module Icon('order') %}
 </form>
 {% end %} {# block content #}
 
-{% block javascript_code %}
-<script src="{{ static_url('field_visible_if.js') }}"></script>
-<script src="{{ static_url('quit_through_submit.js') }}"></script>
-<script src="{{ static_url('table_edit.js') }}"></script>
-{% for tableid in tableinputs %}
-<script>
-  $("#_table_{{ tableid }}_add_button").click({tableid: "{{ tableid }}", tableinput: "{% raw tableinputs[tableid] %}"}, table_add_row);
-</script>
-
-{% end %}
-{% end %}
-
 {% block javascript_autofocus %}
 <script>
   $(function(){ $("#__title__").focus(); });
 </script>
+{% end %}
+
+{% block javascript_code %}
+<script src="{{ static_url('field_visible_if.js') }}"></script>
+<script src="{{ static_url('quit_through_submit.js') }}"></script>
+<script src="{{ static_url('table_edit.js') }}"></script>
+<script>
+  $("#__order_edit__").find("a").attr("target", "_blank");
+</script>
+{% for tableid in tableinputs %}
+<script>
+  $("#_table_{{ tableid }}_add_button").click({tableid: "{{ tableid }}", tableinput: "{% raw tableinputs[tableid] %}"}, table_add_row);
+</script>
+{% end %}
 {% end %}

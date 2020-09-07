@@ -20,10 +20,8 @@ register: |
   information for internal purposes.
 
   The information you provide will be processed in accordance with the
-  Swedish Personal Data Act (Personuppgiftslagen, SFS 1998:204) which
-  is based on Directive 95/46/EC of the European Parliament and of the
-  Council of 24 October 1995 on the protection of individuals with
-  regard to the processing of personal data.
+  Swedish law implementing the EU GDPR directive for the protection of
+  individuals with regard to the processing of personal data.
 
   By submitting you acknowledge that you have read and understood the
   foregoing and consent to the uses of your information as set out
@@ -37,7 +35,7 @@ reset: |
   Use this page to reset your password. 
 
   An email with a link to a page for setting a new password will be sent
-  to you. **This will take a couple of minutes!**
+  to you. **This may take a couple of minutes! Check your spam filter.**
 
   The email contains a one-time code for setting a new password, and a link
   to the relevant page. If you loose this code, simply do reset again.
@@ -58,3 +56,28 @@ contact: |
 
 about: |
   [This should contain information about the facility.]
+
+alert: |
+  **NOTE**: This site will be down for hardware maintenance on Monday
+  October 8th, 7:00-14:00
+
+privacy_policy: |
+  ### Privacy policy (GDPR)
+
+  The personal data you provide in this registration form is to enable
+  SciLifeLab to: register and contact you about submitted information;
+  carry out administrative tasks and evaluate your submitted
+  information; and allow the compilation and analysis of submitted
+  information for internal purposes.
+
+  The information you provide will be processed in accordance with the
+  Swedish law implementing the EU GDPR directive for the protection of
+  individuals with regard to the processing of personal data.
+
+  By registering your account, you have acknowledged that you have
+  read and understood the foregoing and consent to the uses of your
+  information as set out above.
+
+  All your personal data is reachable via links from this page and the
+  pages for all your orders (link below). The logs for your account
+  and orders contains the records of all changes to those items.

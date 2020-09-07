@@ -22,8 +22,6 @@
 .table-hierarchy {margin-bottom: 0px; }
 .table-hierarchy td.left {text-align: left; padding-left: 1em; }
 
-.table-width60 {width: 60%};
-
 .table-input-row-0 {vertical-align: middle !important;
                     text-align: right;
                     font-family: monospace;
@@ -31,7 +29,7 @@
 
 /* Pre-formatted text variants. */
 .pre {white-space: pre; }
-.nobr {white-space:nowrap; }
+.nobr {white-space: nowrap; }
 .number {text-align: right; font-family: monospace; }
 
 /* Mark input field as required with a red star. */
@@ -39,3 +37,7 @@
 			     content: ' *';
 			     display: inline;
 			   }
+
+/* Indent using padding. */
+.extra-indent { padding-left: 2em; }
+.extra-spacing { padding-bottom: 1em; }

@@ -62,14 +62,14 @@
     </div>
     <div class="panel-body">
       {# Recursion: 'include' cannot be used! #}
-      {% module Template('order_edit_fields.html', order=order, fields=field['fields'], is_staff=is_staff, hidden_fields=hidden_fields) %}
+      {% module Template('order_edit_fields.html', order=order, fields=field['fields'], is_staff=is_staff, hidden_fields=hidden_fields, tableinputs=tableinputs) %}
     </div>
   </div>
 </div>
 
 {% else %} {# if field['type'] == constants.GROUP #}
 
-<div class="col-md-10">
+<div class="col-md-12">
   <div class="form-group has-feedback">
 
     {% set value = order['fields'][field['identifier']] %}
@@ -87,6 +87,26 @@
 	    title="Writeable by admin only.">
       </span>
       {% end %}
+    <span style="margin-right: -3em;"
+	  class="form-control-feedback nobr">
+      {% if field['identifier'] in order['invalid'] %}
+      <span class="text-danger">
+	<span class="glyphicon glyphicon-remove"></span>
+	{{ order['invalid'][field['identifier']] }}
+      </span>
+      {% elif value in (None, '') %}
+      <span class="text-warning">
+	<span class="glyphicon glyphicon-question-sign"></span>
+	no value OK
+      </span>
+      {% else %}
+      <span class="text-success">
+	<span class="glyphicon glyphicon-ok"></span>
+	OK
+      </span>
+      {% end %}
+    </span>
+
     </label>
 
     {% if field['type'] == constants.BOOLEAN %}
@@ -96,17 +116,22 @@
         <input type="checkbox" class="visible-if-source"
 	       id="{{ field['identifier'] }}" name="{{ field['identifier'] }}"
 	       {{ value == True and 'checked' or '' }} value="true">
-	Check box if "true".
+	Check box if "{{ field.get('selection') == 'yes_no' and 'yes' or 'true' }}".
       </label>
     </div>
     {% else %}
-    {# Simplifies a lot to use a Select element rather than Radio. #}
-    <select class="form-control visible-if-source"
-	    id="{{ field['identifier'] }}"
-	    name="{{ field['identifier'] }}">
-      <option value="false" {{ bool(value) and 'selected' or '' }}>False</option>
-      <option value="true" {{ bool(value) and 'selected' or '' }}>True</option>
-    </select>
+    <div class="visible-if-source" id="{{ field['identifier'] }}">
+      <label class="radio-inline">
+        <input type="radio" name="{{ field['identifier'] }}"
+               {{ value == True and 'checked' or '' }} value="true"
+               > {{ field.get('selection') == 'yes_no' and 'Yes' or 'True' }}
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="{{ field['identifier'] }}"
+               {{ value == False and 'checked' or '' }} value="false"
+               > {{ field.get('selection') == 'yes_no' and 'No' or 'False' }}
+      </label>
+    </div>
     {% end %} {# if field.get('checkbox') #}
 
     {% elif field['type'] == constants.SELECT %}
@@ -198,23 +223,33 @@
     {% elif field['type'] == constants.DATE %}
     {# This requires jQuery datepicker! Loaded in calling HTML template. #}
     <input type="text"
-	   class="datepicker form-control visible-if-source"
+	   class="form-control datepicker visible-if-source"
 	   name="{{ field['identifier'] }}"
 	   id="{{ field['identifier'] }}"
 	   value="{{ value }}">
 
     {% elif field['type'] == constants.TABLE %}
+    {% set tableid = '_table_' + field['identifier'] %}
+    <table id="{{ tableid }}"
+           {% set ncols = len(field['table']) %}
+           {% if ncols > 5 %}
+           style="max-width:{{ 180*ncols }}px; width:{{ 180*ncols }}px"
+           {% end %}
+           class="table table-bordered table-condensed">
+      {% module TableRowsEdit(field, value) %}
+      {% set nrows = value and len(value) or 0 %}
+      {% if nrows == 0 %}
+      {% raw tableinputs[field['identifier']].replace("></td>", ">1</td>", 1).replace('rowid', tableid + '_' + str(nrows)) %}
+      {% set nrows = 1 %}
+      {% end %}
+    </table>
     <input type="hidden"
            name="_table_{{ field['identifier'] }}_count"
            id="_table_{{ field['identifier'] }}_count"
-           value="{{ value and len(value) or 0 }}">
-    <table id="_table_{{ field['identifier'] }}"
-           class="table table-bordered table-condensed">
-      {% module TableRowsEdit(field, value) %}
-    </table>
-    <div class="form-group">
+           value="{{ nrows }}">
+    <div class="form-group extra-indent">
       <button type="button" id="_table_{{ field['identifier'] }}_add_button" 
-              class="btn btn-info"> 
+              class="btn btn-info">
         Add row
       </button>
     </div>
@@ -259,28 +294,16 @@
     {% end %}
     {% end %} {# if field['required'] #}
 
-    <span style="margin-right: -3em;"
-	  class="form-control-feedback nobr">
-      {% if field['identifier'] in order['invalid'] %}
-      <span class="text-danger">
-	<span class="glyphicon glyphicon-remove"></span>
-	{{ order['invalid'][field['identifier']] }}
-      </span>
-      {% elif value in (None, '') %}
-      <span class="text-warning">
-	<span class="glyphicon glyphicon-question-sign"></span>
-	no value OK
-      </span>
-      {% else %}
-      <span class="text-success">
-	<span class="glyphicon glyphicon-ok"></span>
-	OK
-      </span>
-      {% end %}
-    </span>
-
-    <span class="help-block">
+    <span class="help-block extra-indent extra-spacing">
       {% module Markdown(field.get('description')) %}
+      {% if field['type'] == constants.TEXT %}
+      (Optional: 
+      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+      notation may be used to format the text.)
+      {% elif field['type'] == constants.TABLE %}
+      <strong>Note:</strong> Table rows with an empty (or "[no value]")
+      first field will be deleted.
+      {% end %}
     </span>
   </div>
 </div>

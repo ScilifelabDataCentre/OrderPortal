@@ -8,10 +8,7 @@
 <div class="container-fluid">
 {% end %}
 
-{% block body_title %}
-{% module Icon('form', label=True) %}:
-{{ form['title'] }}
-{% end %}
+{% block body_title %}Form: {{ form['title'] }}{% end %}
 
 {% block body_header_alt_format %}
 <a href="{{ reverse_url('form_api', form['_id']) }}">
@@ -49,7 +46,8 @@
 <p>
   <form action="{{ reverse_url('order_create') }}"
 	role="form"
-	method="GET">
+	method="POST">
+    {% module xsrf_form_html() %}
     <input type="hidden" name="form" value="{{ form['_id'] }}">
     <button type="submit" class="btn btn-success">
       <span class="glyphicon glyphicon-plus"></span>
@@ -73,7 +71,8 @@
 <p>
   <form action="{{ reverse_url('order_create') }}"
 	role="form"
-	method="GET">
+	method="POST">
+    {% module xsrf_form_html() %}
     <input type="hidden" name="form" value="{{ form['_id'] }}">
     <button type="submit" class="btn btn-success">
       <span class="glyphicon glyphicon-plus"></span>
@@ -123,6 +122,16 @@
     </button>
   </form>
 </p>
+<p>
+  <form action="{{ reverse_url('form_orders_aggregate', form['_id']) }}"
+	role="form"
+	method="GET">
+    <button type="submit" class="btn btn-info">
+      <span class="glyphicon glyphicon-th"></span>
+      Aggregate
+    </button>
+  </form>
+</p>
 {% end %} {# block action_content #}
 
 {% block main_content %}
@@ -137,12 +146,16 @@
     </form>
     <table class="table-condensed table-fields">
       <tr>
+	<th>Version</th>
+	<td>{{ form.get('version') or '-' }}</td>
+      </tr>
+      <tr>
 	<th>Description</th>
 	<td>{% module Markdown(form.get('description')) %}</td>
       </tr>
       <tr>
-	<th>Version</th>
-	<td>{{ form.get('version') or '-' }}</td>
+	<th>Instruction</th>
+	<td>{% module Markdown(form.get('instruction')) %}</td>
       </tr>
       <tr>
 	<th>{{ terminology('Orders') }}</th>
@@ -224,6 +237,9 @@
 	  {% if field['type'] == constants.SELECT %}
 	  ({{ field.get('display') or 'menu' }})
           {% module ShortenedPre(field.get('select')) %}
+	  {% elif field['type'] == constants.BOOLEAN %}
+          ({{ field.get('checkbox') and 'checkbox' or 'selection' }};
+          {{ field.get('selection') == 'yes_no' and 'Yes/No' or 'True/False' }})
 	  {% elif field['type'] == constants.MULTISELECT %}
           {% module ShortenedPre(field.get('multiselect')) %}
 	  {% elif field['type'] == constants.TABLE %}
@@ -280,6 +296,22 @@
       </tr>
       {% end %}
     </table>
+
+  </div> <!-- panel-body -->
+
+  <div class="panel-footer">
+    &nbsp;
+    {% if are_fields_editable %}
+    <form action="{{ reverse_url('field_create', form['_id']) }}"
+	  role="form"
+	  class="pull-right"
+	  method="GET">
+      <button type="submit" class="btn btn-primary btn-xs">
+	<span class="glyphicon glyphicon-plus"></span>
+	Create field
+      </button>
+    </form>
+    {% end %}
   </div>
 </div>
 

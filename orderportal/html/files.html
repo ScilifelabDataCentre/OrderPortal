@@ -32,6 +32,7 @@
 	{% module Markdown(file.get('description')) %}
       </td>
       <td>
+        {% if file['content_type'] in constants.VIEWABLE_CONTENT_TYPES %}
 	<p>
 	  <a class="btn btn-xs btn-primary"
 	     href="{{ reverse_url('file', file['name']) }}">
@@ -39,6 +40,7 @@
 	    View
 	  </a>
 	</p>
+        {% end %}
 	<p>
 	  <a class="btn btn-xs btn-primary"
 	     href="{{ reverse_url('file_download', file['name']) }}">

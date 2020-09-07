@@ -115,11 +115,10 @@ class Fields(object):
             new['multiselect'] = values
         # Set the column identifiers for a table field.
         elif type == constants.TABLE:
-            lines = rqh.get_argument('table', '').split('\n')
-            lines = [l.strip() for l in lines]
-            lines = [l for l in lines if l]
-            values
-            # %%%
+            values = rqh.get_argument('table', '').split('\n')
+            values = [v.strip() for v in values]
+            values = [v for v in values if v]
+            # XXX Should do sanity check of each line: "header|type|values"
             new['table'] = values
         # Set the group which the field is a member of.
         group = rqh.get_argument('group', None)
@@ -186,9 +185,10 @@ class Fields(object):
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new['table'] = values
-        # Represent the boolean by a checkbox or a menu.
+        # Represent the boolean by a checkbox or a selection.
         elif field['type'] == constants.BOOLEAN:
             new['checkbox'] = utils.to_bool(rqh.get_argument('checkbox', None))
+            new['selection'] = rqh.get_argument('selection', None)
         # Record the changes.
         old = field.copy()
         field.update(new)

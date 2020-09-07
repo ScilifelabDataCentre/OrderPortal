@@ -3,14 +3,14 @@
 from __future__ import print_function, absolute_import
 
 import sys
-import getpass
 
 from orderportal import constants
 from orderportal import utils
 from orderportal.account import AccountSaver
 
 
-def set_password(email, password):
+def set_role(email, role):
+    assert role in constants.ACCOUNT_ROLES
     db = utils.get_db()
     view = db.view('account/email', include_docs=True)
     rows = list(view[email])
@@ -18,26 +18,22 @@ def set_password(email, password):
         raise ValueError("no such account %s" % email)
     doc = rows[0].doc
     with AccountSaver(doc=doc, db=db) as saver:
-        saver.set_password(password)
+        saver['role'] = role
 
 
 if __name__ == '__main__':
     parser = utils.get_command_line_parser(
-        description='Set the password for an account.')
+        description='Set the role for an account.')
     (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings)
     email = raw_input('Email address (=account name) > ')
     if not email:
         sys.exit('no email address provided')
-    password = getpass.getpass('Password > ')
-    if not password:
-        sys.exit('no password provided')
-    try:
-        utils.check_password(password)
-    except ValueError, msg:
-        sys.exit(str(msg))
-    again_password = getpass.getpass('Password again > ')
-    if password != again_password:
-        sys.exit('passwords do not match')
-    set_password(email, password)
-    print('Set password for', email)
+    role = raw_input("role [%s] > " % '|'.join(constants.ACCOUNT_ROLES))
+    if not role:
+        sys.exit('no role provided')
+    if role not in constants.ACCOUNT_ROLES:
+        sys.exit("invalid role; must be one of %s" %
+                 ', '.join(constants.ACCOUNT_ROLES))
+    set_role(email, role)
+    print('Set role for', email)

@@ -1,0 +1,172 @@
+{# Select fields to aggregate for all orders for the form into a CSV file. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}
+Aggregate {{ terminology('orders') }}
+for form {{ form['title'] or form['_id'] }}
+{% end %}
+
+{% block body_title %}
+Aggregate {{ terminology('orders') }} 
+for form  {% module Entity(form, icon=False) %}
+{% end %}
+
+{% block main_content %}
+<form action="{{ reverse_url('form_orders_aggregate', form['_id']) }}"
+      class="form-horizontal"
+      role="form"
+      method="POST">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="status">
+      {{ terminology('Order') }} status filter</label>
+    <div class="col-sm-10">
+      <select multiple size="4" class="form-control" name="status" id="status">
+        <option selected value="">[any]</option>
+        {% for s in settings['ORDER_STATUSES'] %}
+        <option value="{{ s['identifier'] }}">
+          {{ s['identifier'].capitalize() }}</option>
+        {% end %}
+      </select>
+      <span class="help-block">
+        Output only {{ terminology('orders') }} matching the specified status.
+        Multiple choice is allowed.
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="order">
+      {{ terminology('Order') }} metadata</label>
+    <div class="col-sm-10">
+      <select multiple size="6" class="form-control" name="order" id="order">
+        <option value="_id">IUID</option>
+        <option selected>identifier</option>
+        <option>title</option>
+        <option>status</option>
+        <option>modified</option>
+        <option>created</option>
+      </select>
+      <span class="help-block">
+        Select {{ terminology('order') }} metadata to include.
+        Multiple choice is allowed.
+      </span>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="history">
+      {{ terminology('Order') }} history</label>
+    <div class="col-sm-10">
+      <select multiple size="{{ len(settings['ORDER_STATUSES']) }}"
+              class="form-control" name="history" id="history">
+        {% for status in settings['ORDER_STATUSES'] %}
+        <option>{{ status['identifier'] }}</option>
+        {% end %}
+      </select>
+      <span class="help-block">
+        Select status entries in the {{ terminology('order') }} history.
+        Multiple choice is allowed.
+      </span>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="owner">
+      {{ terminology('Order') }} owner</label>
+    <div class="col-sm-10">
+      <select multiple size="4" class="form-control" name="owner" id="owner">
+        <option value="email">Email</option>
+        <option value="last_name">Last name</option>
+        <option value="first_name">First name</option>
+        <option value="university">University</option>
+      </select>
+      <span class="help-block">
+        Select {{ terminology('order') }} owner data to include.
+        Multiple choice is allowed.
+      </span>
+    </div>
+  </div>
+  
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="fields">
+      {{ terminology('Order') }} fields</label>
+    <div class="col-sm-10">
+      <select multiple size="{{ len(fields) }}"
+              class="form-control" name="fields" id="fields">
+        {% for field in fields %}
+        <option>{{ field['identifier'] }}</option>
+        {% end %}
+      </select>
+      <span class="help-block">
+        Select {{ terminology('order') }} data fields.
+        Multiple choice is allowed.
+      </span>
+    </div>
+  </div>
+  
+  {% if table_fields %}
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="table_field">Table field</label>
+    <div class="col-sm-10">
+      <label class="radio-inline">
+        <input type="radio" name="table_field" id="table_field"
+               checked value="">
+        [none] &nbsp;
+      </label>
+      {% for field in table_fields %}
+      <label class="radio-inline">
+        <input type="radio" name="table_field" id="table_field"
+               value="{{ field['identifier']}}">
+        {{ field['identifier']}} &nbsp;
+      </label>
+      {% end %}
+      <span class="help-block">
+        Select the {{ terminology('order') }} table data field to
+        output, if any.  It is not possible to select specified
+        subfields of the table data field; all will be output.
+        <br>
+        <b>Note</b>: For each row in the field table all other data
+        specified above will be repeated. This amounts to an INNER
+        JOIN of two tables, where the first table is the order data,
+        and the second table is the field data. This means that no
+        rows will be produced if there is no data in the field table.
+      </span>
+    </div>
+  </div>
+  {% end %} {# if table_fields #}
+  
+  <div class="form-group">
+    <label class="control-label col-sm-2" for="file_format">File format</label>
+    <div class="col-sm-10">
+      <label class="radio-inline">
+        <input type="radio" name="file_format" id="file_format"
+               checked value="xlsx">
+        Excel (XLSX) &nbsp;
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="file_format" id="file_format_csv"
+               value="csv">
+        CSV &nbsp;
+      </label>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-sm-2">
+      <button type="submit" class="btn btn-lg btn-info">
+        <span class="glyphicon glyphicon-th"></span>
+        Aggregate
+      </button>
+    </div>
+    <div class="col-sm-10">
+      <span class="help-block">
+        A file containing data for the fields specified above will be
+        produced and returned.
+      </span>
+    </div>
+  </div>
+</form>
+{% end %} {# block main_content #}

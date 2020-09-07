@@ -222,10 +222,26 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
 		   name="checkbox"
 		   value="yes"
 		   {{ field.get('checkbox') and 'checked' or '' }}>
-	    Display the field as a checkbox: Otherwise a selection menu
-	    with the choices of '-----' (= none), 'True' or 'False' is shown.
+	    Display the field as a checkbox: Otherwise as a selection.
 	  </label>
 	</div>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="selection">Selection</label>
+        <select class="form-control" name="selection" id="selection">
+          <option value="boolean"
+		  {{ field.get('selection') == 'boolean' and 'selected' or '' }}>
+            Boolean values True/False
+          </option>
+          <option value="yes_no"
+		  {{ field.get('selection') == 'yes_no' and 'selected' or '' }}>
+            Values Yes/No
+          </option>
+        </select>
       </div>
     </div>
   </div>
@@ -378,7 +394,7 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
       Description to display in the {{ terminology('order') }} to help
       the user fill in the field correctly, using
       <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
-      format.
+      notation for formatting.
     </span>
   </div>
 

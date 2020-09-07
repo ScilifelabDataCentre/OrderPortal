@@ -1,36 +1,34 @@
-{# Order status display page. #}
+{# Order status admin page. #}
 
 {% extends "base.html" %}
 
 {% block head_title %}{{ terminology('Order') }} statuses{% end %}
 
-{% block body_title %}
-{{ terminology('Order') }} statuses
-<small>An order has one and only one status at any time.</small>
-{% end %}
+{% block body_title %}{{ terminology('Order') }} statuses{% end %}
 
 {% block main_content %}
 
 <div class="well">
   <p>
-    The order statuses are defined in the YAML file 
-    <code>{{ settings.get('ORDER_STATUSES_FILEPATH') }}</code> 
-    which is read on startup of the OrderPortal server.
+    All {{ terminology('orders') }} have a status at all times. The
+    status can assume only one of the values defined in the YAML file
+    <code>{{ settings.get('ORDER_STATUSES_FILEPATH') }}</code> which
+    is read on startup of the OrderPortal server.
   </p>
   <p>
-    To change the set of statuses, the YAML file must be edited and
-    the OrderPortal server restarted. Only the sysadmin for the server
-    machine can do this. A status can be added, <bold>but must never
-    be removed</bold>, since orders with that deleted status will
-    become undefined.
+    To change the set of possible status values, the YAML file must be
+    edited and the OrderPortal server restarted. Only the sysadmin for
+    the server machine can do this. A status can be added, <b>but must
+    never be removed</b>, since orders with that deleted status would
+    become invalid.
   </p>
   <p>
-    The possible transitions between statuses are defined in the YAML file 
+    The allowed transitions between statuses are defined in the YAML file 
     <code>{{ settings.get('ORDER_TRANSITIONS_FILEPATH') }}</code> 
     which is read on startup of the OrderPortal server.
   </p>
   <p>
-    To change the possible transitions, the YAML file must be edited and
+    To change the allowed transitions, the YAML file must be edited and
     the OrderPortal server restarted. Only the sysadmin for the server
     machine can do this. There are no hard restrictions on changing
     transitions.
@@ -93,14 +91,10 @@
       {{ none }}
     </td>
     <td>
-      {% set editable = ['admin'] %}
-      {% set editable.extend(status.get('edit', [])) %}
-      {{ ', '.join(editable) or 'none' }}
+      {{ ', '.join(sorted(set(['admin'] + status.get('edit', [])))) or '-' }}
     </td>
     <td>
-      {% set attachable = ['admin'] %}
-      {% set attachable.extend(status.get('attach', [])) %}
-      {{ ', '.join(attachable) or 'none' }}
+      {{ ', '.join(sorted(set(['admin'] + status.get('attach', [])))) or '-' }}
     </td>
     <td class="text-right">
       <a href="{{ reverse_url('orders', status=status['identifier']) }}"

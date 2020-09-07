@@ -1,11 +1,15 @@
 {# To be included in field_create.html and field_edit.html #}
 <ul>
   <li>The first item is the identifier of the column. It is required.
-    The identifier will displayed in the header of the table.</li>
-  <li> Items on a line are separated by semi-colon ';'.
+    The identifier will displayed in the header of the table.
+  </li>
+  <li> Items on a line are separated by semi-colon ';'.</li>
   <li>The second item is the type of value; currently 'string', 'int',
     'float' or 'select'. This item is optional; the default is
-    'string'.</li>
+    'string'.
+  </li>
   <li>If the type is 'select', the third item specifies the options,
-    one after the other separated by vertical bar '|'.</li>
+    one after the other separated by vertical bar '|'.
+    An option '[no value]' may be defined; it will give an empty field.
+  </li>
 </ul>

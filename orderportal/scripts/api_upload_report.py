@@ -5,13 +5,16 @@ NOTE: The upload operation URL requires the IUID for the order;
 
 NOTE: You need to change several variables to make this work. See below.
 
-NOTE: This uses the third-party 'requests' module, which is much nicer than
+NOTE: This uses the third-party 'requests' module, which is better than
 the standard 'urllib' module.
 """
 
 from __future__ import print_function
+
 import sys
-import requests # http://docs.python-requests.org/en/master/
+
+# Third-party package: http://docs.python-requests.org/en/master/
+import requests
 
 # Variables whose values must be changed for your site:
 BASE_URL = 'http://localhost:8886'  # Base URL for your OrderPortal instance.
@@ -24,7 +27,7 @@ headers = {'X-OrderPortal-API-key': API_KEY,
            'content-type': 'text/plain'}
 data = 'Some text in a report.\nAnd a second line.'
 
-# NOTE: The method PUT is used for this.
+# NOTE: The method PUT is used to upload a report to the order.
 response = requests.put(url, headers=headers, data=data)
 assert response.status_code == 200, (response.status_code, response.reason)
 

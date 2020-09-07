@@ -1,9 +1,11 @@
 {# Order page. #}
 
-{% block head_title %}{{ terminology('Order') }}: {{ order['title'] }}{% end %}
+{% block head_title %}
+{{ terminology('Order') }}: {{ order['title'] or '[no title]' }}
+{% end %}
 
 {% block body_title %}
-{% module Icon('order', label=True) %}: {{ order['title'] }}
+{{ terminology('Order') }}: {{ order['title']  or '[no title]'}}
 {% end %}
 
 {% extends "base.html" %}
@@ -16,6 +18,10 @@
 {% set name = order.get('identifier') or order['_id'] %}
 <a href="{{ absolute_reverse_url('order_csv', name) }}">
   {% module Icon('csv') %} CSV
+</a>
+<br>
+<a href="{{ absolute_reverse_url('order_xlsx', name) }}">
+  {% module Icon('excel') %} Excel
 </a>
 <br>
 <a href="{{ absolute_reverse_url('order_zip', name) }}">
@@ -118,9 +124,9 @@
 {% end %} {# block action_content #}
 
 {% block main_content %}
+{% module Markdown(form.get('description')) %}
 <div class="panel panel-default">
   <div class="panel-body">
-    <h3 style="padding-left: 4em;">{{ form['title'] }}</h3>
     <table class="table table-condensed table-fields table-noborder">
       {% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
       <tr>
@@ -129,16 +135,18 @@
       </tr>
       {% end %} {# if settings.get('ORDER_IDENTIFIER_FORMAT') #}
 
-      {% if is_admin %}
       <tr>
 	<th>{{ terminology('Order') }} form</th>
 	<td>
+          {% if is_admin %}
 	  <a href="{{ reverse_url('form', form['_id']) }}">
 	    {{ form['title'] }} {% module Version(form) %}
 	  </a>
+          {% else %}
+	  {{ form['title'] }} {% module Version(form) %}
+          {% end %}
 	</td>
       </tr>
-      {% end %}
 
       <tr>
 	<th>Owner</th>
@@ -149,12 +157,12 @@
           {{ order['owner'] }}
 	</td>
       </tr>
-      {% if is_staff or settings.get('ORDER_USER_TAGS') %}
+      {% if settings['ORDER_TAGS'] and (is_staff or settings['ORDER_USER_TAGS']) %}
       <tr>
 	<th>Keywords (tags)</th>
 	<td>{% module Tags(order.get('tags', [])) %}</td>
       </tr>
-      {% end %} {#if is_staff or settings.get('ORDER_USER_TAGS') #}
+      {% end %} {# if settings['ORDER_TAGS'] and ... #}
       {% if settings.get('ORDER_LINKS') %}
       <tr>
 	<th>Links</th>
@@ -173,6 +181,7 @@
 	  ({{ status['description'] }})
 	</td>
       </tr>
+      {% if settings['ORDER_REPORT'] %}
       <tr>
 	<th>Report</th>
 	<td>
@@ -198,6 +207,7 @@
 	  {% end %}
 	</td>
       </tr>
+      {% end %} {# if settings['ORDER_REPORT'] #}
       <tr>
 	<th>History</th>
 	<td>
@@ -283,9 +293,9 @@
 {% block sub_main_content %}
 <table class="table table-condensed table-noborder table-hierarchy">
   <colgroup>
-    <col>
-    <col class="table-width60 left">
-    <col>
+    <col style="width:20%">
+    <col> 
+    <col> 
   </colgroup>
 {# Recursion: 'include' cannot be used! #}
 {% module Template('order_fields.html', fields=fields, order=order, is_staff=is_staff) %}

@@ -2,11 +2,9 @@
 
 from __future__ import print_function, absolute_import
 
-import csv
 import json
 import logging
 from collections import OrderedDict as OD
-from cStringIO import StringIO
 
 import tornado.web
 
@@ -155,6 +153,7 @@ class FormApiV1(ApiV1Mixin, Form):
         data['title'] = form['title']
         data['version'] = form.get('version')
         data['description'] = form.get('description')
+        data['instruction'] = form.get('instruction')
         data['owner'] = dict(
             email=form['owner'],
             links=dict(api=dict(href=URL('account_api', form['owner'])),
@@ -201,8 +200,9 @@ class FormCreate(RequestHandler):
             if not saver['title']:
                 self.see_other('forms', error='No title given.')
                 return
-            saver['description'] = self.get_argument('description', None)
             saver['version'] = self.get_argument('version', None)
+            saver['description'] = self.get_argument('description', None)
+            saver['instruction'] = self.get_argument('instruction', None)
             saver['status'] = constants.PENDING
             try:
                 infile = self.request.files['import'][0]
@@ -217,16 +217,18 @@ class FormCreate(RequestHandler):
                 self.see_other('home', error="Error importing form: %s" % msg)
                 return
             else:
-                if not saver['description']:
-                    saver['description'] = data.get('description')
                 if not saver['version']:
                     saver['version'] = data.get('version')
+                if not saver['description']:
+                    saver['description'] = data.get('description')
+                if not saver['instruction']:
+                    saver['instruction'] = data.get('instruction')
                 saver['fields'] = data['fields']
         self.see_other('form', saver.doc['_id'])
 
 
 class FormEdit(FormMixin, RequestHandler):
-    "Page for editing an form; title, description, version."
+    "Page for editing an form; title, version, description, instruction."
 
     @tornado.web.authenticated
     def get(self, iuid):
@@ -242,8 +244,9 @@ class FormEdit(FormMixin, RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(doc=form, rqh=self) as saver:
             saver['title'] = self.get_argument('title')
-            saver['description'] = self.get_argument('description', None)
             saver['version'] = self.get_argument('version', None)
+            saver['description'] = self.get_argument('description', None)
+            saver['instruction'] = self.get_argument('instruction', None)
             try:
                 saver['ordinal'] = int(self.get_argument('ordinal', 0))
             except (ValueError, TypeError):
@@ -396,8 +399,9 @@ class FormClone(RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(rqh=self) as saver:
             saver['title'] = u"Clone of {0}".format(form['title'])
-            saver['description'] = form.get('description')
             saver['version'] = form.get('version')
+            saver['description'] = form.get('description')
+            saver['instruction'] = form.get('instruction')
             saver.clone_fields(form)
             saver['status'] = constants.PENDING
         self.see_other('form_edit', saver.doc['_id'])
@@ -491,15 +495,62 @@ class FormOrders(RequestHandler):
                     orders=orders,
                     account_names=account_names)
 
-class FormOrdersCsv(RequestHandler):
-    """Return a CSV file containing all orders for the form,
-    with some info on PI and values for all fields.
-    NOTE: field visibility is not checked; all fields are output."""
+class FormOrdersAggregate(RequestHandler):
+    "Aggregate data from all orders for the form into a CSV file."
+
+    TITLES = dict(_id='Order IUID',
+                  email= 'Owner email')
 
     @tornado.web.authenticated
     def get(self, iuid):
         self.check_staff()
         form = self.get_entity(iuid, doctype=constants.FORM)
+        fields = Fields(form).flatten()
+        # Remove group fields
+        fields = [f for f in fields if f['type'] != constants.GROUP]
+        # Split out table fields
+        table_fields = [f for f in fields if f['type'] == constants.TABLE]
+        fields = [f for f in fields if f['type'] != constants.TABLE]
+        self.render('form_orders_aggregate.html', form=form, 
+                    fields=fields, table_fields=table_fields)
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_staff()
+        form = self.get_entity(iuid, doctype=constants.FORM)
+
+        order_fields = self.get_arguments('order')
+        if not ('iuid' in order_fields or 'identifier' in order_fields):
+            self.see_other('form_orders_aggregate', form['_id'],
+                           error='IUID or identifier must be included.')
+            return
+        history_fields = self.get_arguments('history')
+        owner_fields = self.get_arguments('owner')
+        data_fields = self.get_arguments('fields')
+        table_field = self.get_argument('table_field', None)
+        if table_field:
+            table_field = Fields(form)[table_field]
+            colids = [utils.parse_field_table_column(c)['identifier']
+                       for c in table_field['table']]
+
+        file_format = self.get_argument('file_format', 'xlsx').lower()
+        if file_format == 'xlsx':
+            writer = utils.XlsxWriter('Aggregate')
+        elif file_format == 'csv':
+            writer = utils.CsvWriter()
+        else:
+            raise tornado.web.HTTPError(404, reason='unknown file format')
+        header = [self.TITLES.get(f, f.capitalize()) for f in order_fields]
+        header.extend(history_fields)
+        header.extend([self.TITLES.get(f,f.capitalize()) for f in owner_fields])
+        header.extend(data_fields)
+        if table_field:
+            header.extend(["%s: %s" % (table_field['identifier'], ci)
+                           for ci in colids])
+        writer.writerow(header)
+
+        account_lookup = {}
+        # Get all orders for the given form.
         view = self.db.view('order/form',
                             reduce=False,
                             include_docs=True,
@@ -507,33 +558,44 @@ class FormOrdersCsv(RequestHandler):
                             startkey=[iuid, constants.CEILING],
                             endkey=[iuid])
         orders = [r.doc for r in view]
-        csvbuffer = StringIO()
-        writer = csv.writer(csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
-        safe = utils.csv_safe_row
-        writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
-        header = ['Order IUID', 'Identifier', 'Title', 'Status',
-                  'Owner email', 'Last name', 'First name', 'University']
-        fields = Fields(form).flatten()
-        for field in fields:
-            header.append(field['identifier'])
-        writer.writerow(header)
+
+        # Filter by statuses, if any given
+        statuses = self.get_arguments('status')
+        if statuses and statuses != ['']:
+            statuses = set(statuses)
+            orders = [o for o in orders if o['status'] in statuses]
+
         for order in orders:
-            row = [order['_id'],
-                   order.get('identifier') or '-',
-                   order.get('title') or '-',
-                   order.get('status') or '-']
-            row.append(order['owner'])
-            account = self.get_account(order['owner'])
-            row.append(account.get('last_name') or '-')
-            row.append(account.get('first_name') or '-')
-            row.append(account.get('university') or '-')
-            for field in fields:
-                value = order['fields'].get(field['identifier'])
+            row = [order.get(f) for f in order_fields]
+            row.extend([order['history'].get(s) or '' for s in history_fields])
+            if owner_fields:
+                try:
+                    account = account_lookup[order['owner']]
+                except KeyError:
+                    account = self.get_account(order['owner'])
+                    account_lookup[order['owner']] = account
+                row.extend([account.get(f) for f in owner_fields])
+            for data_field in data_fields:
+                value = order['fields'].get(data_field)
                 if isinstance(value, list):
-                    value = u','.join(value)
+                    value = '|'.join(value)
                 row.append(value)
-            writer.writerow(safe(row))
-        self.write(csvbuffer.getvalue())
-        self.set_header('Content-Type', constants.CSV_MIME)
-        self.set_header('Content-Disposition',
-                        'attachment; filename="orders_form_%s.csv"' % iuid)
+            if table_field:
+                table = order['fields'].get(table_field['identifier']) or []
+                for tr in table:
+                    writer.writerow(row + tr)
+            else:
+                writer.writerow(row)
+
+        self.write(writer.getvalue())
+        filename = (form['title'] or form['_id']).replace(' ', '_')
+        if table_field:
+            filename += '_' + table_field['identifier']
+        if file_format == 'xlsx':
+            self.set_header('Content-Type', constants.XLSX_MIME)
+            filename = filename + '.xlsx'
+        elif file_format == 'csv':
+            self.set_header('Content-Type', constants.CSV_MIME)
+            filename = filename + '.csv'
+        self.set_header('Content-Disposition', 
+                        'attachment; filename="orders_%s"' % filename)

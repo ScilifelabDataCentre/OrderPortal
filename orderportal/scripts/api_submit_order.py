@@ -2,13 +2,17 @@
 
 NOTE: You need to change several variables to make this work. See below.
 
-NOTE: This uses the third-party 'requests' module, which is much nicer than
+NOTE: This uses the third-party 'requests' module, which is better than
 the standard 'urllib' module.
 """
 
 from __future__ import print_function
+
 import json
-import requests # http://docs.python-requests.org/en/master/
+import sys
+
+# Third-party package: http://docs.python-requests.org/en/master/
+import requests
 
 # Variables whose values must be changed for your site:
 BASE_URL = 'http://localhost:8886'  # Base URL for your OrderPortal instance.
@@ -26,7 +30,11 @@ assert response.status_code == 200, (response.status_code, response.reason)
 
 # Get the URL for the transition to status 'submitted'.
 data = response.json()
-url = data['links']['submitted']['href']
+try:
+    url = data['links']['submitted']['href']
+except KeyError:
+    print('Error: No href for submit; the order status does not allow it.')
+    sys.exit()
 
 # Actually do the transition by the POST method.
 response = requests.post(url, headers=headers)
@@ -36,4 +44,4 @@ data = response.json()
 if data['status'] == 'submitted':
     print('Order submitted.')
 else:
-    print('Order not submitted, something is wrong.')
+    print('Error: Order was not submitted.')

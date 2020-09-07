@@ -49,31 +49,25 @@
 	</tr>
       </thead>
       <tbody>
-	{% for item in orders %}
+	{% for order in orders %}
 	<tr>
-	  <td>{% module Entity(item) %}</td>
 	  <td>
-	    {% if item['orderportal_doctype'] == constants.ACCOUNT %}
-	    {{ get_account_name(account=item) }}
-	    {% else %}
-	    {{ item.get('title') or '-' }}
-	    {% end %}
+            <a href="{{ order_reverse_url(order) }}">
+              {{ order.get('identifier') or order['_id'] }}
+            </a>
+          </td>
+	  <td>
+	    {{ order.get('title') or '-' }}
 	  </td>
 	  <td class="nobr">
-	    {% if item['orderportal_doctype'] != constants.ACCOUNT %}
-	    <a href="{{ reverse_url('account', item['owner']) }}">
-	      {{ account_names.get(item['owner'], item['owner']) }}
+	    <a href="{{ reverse_url('account', order['owner']) }}">
+	      {{ account_names.get(order['owner'], order['owner']) }}
 	    </a>
-	    {% end %}
 	  </td>
-	  <td>
-	    {% if 'status' in item %}
-	    {% module Icon(item['status'], label=True) %}
-	    {% end %}
-	  </td>
-	  <td class="localtime nobr">{{ item['modified'] }}</td>
+	  <td>{% module Icon(order['status'], label=True) %}</td>
+	  <td class="localtime nobr">{{ order['modified'] }}</td>
 	</tr>
-	{% end %} {# for item in orders #}
+	{% end %} {# for order in orders #}
       </tbody>
     </table>
   </div>

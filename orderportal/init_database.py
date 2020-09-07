@@ -12,14 +12,14 @@ import sys
 import couchdb
 import yaml
 
+from orderportal import admin
 from orderportal import constants
+from orderportal import designs
 from orderportal import settings
 from orderportal import utils
-from orderportal import admin
 from orderportal.dump import undump
-from orderportal.load_designs import load_designs, regenerate_views
 
-INIT_TEXTS_FILEPATH = 'init_texts.yaml'
+INIT_TEXTS_FILEPATH = utils.expand_filepath('{ROOT_DIR}/init_texts.yaml')
 
 def init_database(dumpfilepath=None):
     db = utils.get_db()
@@ -29,7 +29,7 @@ def init_database(dumpfilepath=None):
         pass
     else:
         sys.exit('Error: database is not empty')
-    load_designs(db)
+    utils.initialize(db)
     # No specific items set here; done on-the-fly in e.g. get_next_number
     db.save(dict(_id='order',
                  orderportal_doctype=constants.META))
@@ -38,7 +38,7 @@ def init_database(dumpfilepath=None):
         try:
             print('reading dump file...')
             undump(db, dumpfilepath)
-            regenerate_views(db)
+            designs.regenerate_views_indexes(db)
         except IOError:
             print('Warning: could not load', dumpfilepath)
     else:

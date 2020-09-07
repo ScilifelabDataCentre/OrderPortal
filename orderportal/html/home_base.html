@@ -5,10 +5,9 @@
 {% block body_header %}
 <div class="row">
   <div class="col-md-4">
-    <img class="img-responsive"
-	 src="{{ reverse_url('site', settings['SITE_HOME_ICON']) }}"
-	 title="{{ settings['SITE_NAME'] }}"
-	 alt="{{ settings['SITE_NAME'] }}">
+    <img class="img-responsive" style="margin-top: 20px"
+         title="{{ settings['SITE_NAME'] }}"
+         src="{{ reverse_url('site', settings['SITE_HOME_ICON']) }}">
   </div>
   <div class="col-md-8">
     <h2>{{ settings['SITE_NAME'] }}</h2>
@@ -81,7 +80,7 @@
 	</div>
 	<br>
 	<div>
-	  <a href="{{ reverse_url('reset') }}" ole="button"
+	  <a href="{{ reverse_url('reset') }}" role="button"
 	     class="btn btn-warning btn-block">
 	    <span class="glyphicon glyphicon-step-backward"></span>
 	    Reset password
@@ -113,10 +112,15 @@
 	  <div class="form-group pull-right">
 	    <form action="{{ reverse_url('order_create') }}"
 		  role="form"
-		  method="GET">
-	      <button type="submit" class="btn btn-default btn-xs">
+		  method="POST">
+              {% module xsrf_form_html() %}
+	      <button type="submit" class="btn btn-default btn-xs"
+                      {% if not current_user %}
+                      disabled="disabled"
+                      {% end %}
+                      >
 		<span class="glyphicon glyphicon-plus"></span>
-		Create
+		Create {{ terminology('order') }}
 	      </button>
 	      <input type="hidden" name="form" value="{{ form['_id'] }}">
 	    </form>
@@ -126,7 +130,7 @@
 	  {% module Markdown(form.get('description')) %}
 	</div>
       </div>
-      {% end %} {# for form in forms[0::2] #}
+      {% end %} {# for form in forms #}
       {% else %}
       <i>No order forms have been enabled.</i>
       {% end %}
@@ -156,7 +160,7 @@
 	<button type="button" class="btn btn-info btn-xs"
 		data-toggle="modal" data-target="#news_create">
 	  <span class="glyphicon glyphicon-plus"></span>
-	  Create
+	  Create entry
 	</button>
 	{% end %} {# if is_admin #}
 	<a class="btn btn-info btn-xs pull-right" role="button"
@@ -181,7 +185,7 @@
 		class="btn btn-success btn-xs"
 		data-toggle="modal" data-target="#event_create">
 	  <span class="glyphicon glyphicon-plus"></span>
-	  Create
+	  Create entry
 	</button>
 	{% end %}{# if is_admin #}
 	<a class="btn btn-success btn-xs pull-right" role="button"

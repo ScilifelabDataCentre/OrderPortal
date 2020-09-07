@@ -3,8 +3,10 @@
 from __future__ import print_function, absolute_import
 
 import collections
+import csv
 import datetime
 import hashlib
+import io
 import logging
 import mimetypes
 import optparse
@@ -16,13 +18,16 @@ import unicodedata
 import urllib
 import urlparse
 import uuid
+from cStringIO import StringIO
 
 import couchdb
 import tornado.web
+import xlsxwriter
 import yaml
 
 import orderportal
 from . import constants
+from . import designs
 from . import settings
 
 
@@ -62,11 +67,15 @@ def load_settings(filepath):
     except KeyError:
         pass
     try:
-        kwargs['filename'] = settings['LOGGING_FILEPATH']
+        filepath = settings['LOGGING_FILEPATH']
+        if not filepath: raise KeyError
+        kwargs['filename'] = filepath
     except KeyError:
         pass
     try:
-        kwargs['filemode'] = settings['LOGGING_FILEMODE']
+        filemode = settings['LOGGING_FILEMODE']
+        if not filemode: raise KeyError
+        kwargs['filemode'] = filemode
     except KeyError:
         pass
     logging.basicConfig(**kwargs)
@@ -98,6 +107,13 @@ def load_settings(filepath):
         settings['ACCOUNT_MESSAGES'][constants.RESET]['recipients'] = ['account']
     except KeyError:
         raise ValueError('Account messages file: missing message for status')
+    # Check valid order identifier format; prefix all upper case characters
+    if settings['ORDER_IDENTIFIER_FORMAT']:
+        for c in settings['ORDER_IDENTIFIER_FORMAT']:
+            if not c.isalpha(): break
+            if not c.isupper():
+                raise ValueError('ORDER_IDENTIFIER_FORMAT prefix must be'
+                                 ' all upper-case characters')
     # Read order statuses definitions YAML file.
     logging.info("order statuses: %s", settings['ORDER_STATUSES_FILEPATH'])
     with open(expand_filepath(settings['ORDER_STATUSES_FILEPATH'])) as infile:
@@ -155,8 +171,9 @@ def load_settings(filepath):
                                         for s in settings['subjects']])
     # Settings computable from others.
     settings['DATABASE_SERVER_VERSION'] = get_dbserver().version()
-    if 'PORT' not in settings:
-        parts = urlparse.urlparse(settings['BASE_URL'])
+    parts = urlparse.urlparse(settings['BASE_URL'])
+    settings['BASE_URL'] = "%s://%s" % (parts.scheme, parts.netloc)
+    if not settings.get('PORT'):
         items = parts.netloc.split(':')
         if len(items) == 2:
             settings['PORT'] = int(items[1])
@@ -166,6 +183,8 @@ def load_settings(filepath):
             settings['PORT'] =  443
         else:
             raise ValueError('Could not determine port from BASE_URL.')
+    if not settings.get('BASE_URL_PATH_PREFIX') and parts.path:
+        settings['BASE_URL_PATH_PREFIX'] = parts.path.rstrip('/') or None
 
 def terminology(word):
     "Return the display term for the given word. Use itself by default."
@@ -202,6 +221,12 @@ def get_db():
         raise KeyError("CouchDB database '%s' does not exist." % 
                        settings['DATABASE_NAME'])
 
+def initialize(db=None):
+    "Load the design documents, or update."
+    if db is None:
+        db = get_db()
+    designs.load_design_documents(db)
+
 def get_iuid():
     "Return a unique instance identifier."
     return uuid.uuid4().hex
@@ -235,16 +260,25 @@ def today(days=None):
 
 def to_ascii(value):
     "Convert any non-ASCII character to its closest ASCII equivalent."
+    if value is None:
+        return ''
     if not isinstance(value, unicode):
         value = unicode(value, 'utf-8')
     return unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
 
 def to_utf8(value):
-    "Convert value to UTF-8 representation."
+    "Convert string value to UTF-8 representation."
     if isinstance(value, basestring):
         if not isinstance(value, unicode):
             value = unicode(value, 'utf-8')
         return value.encode('utf-8')
+    else:
+        return value
+
+def to_unicode(value):
+    "Convert string value to unicode assuming UTF-8."
+    if isinstance(value, basestring) and not isinstance(value, unicode):
+        return unicode(value, 'utf-8')
     else:
         return value
 
@@ -271,17 +305,24 @@ def convert(type, value):
         return value
 
 def csv_safe_row(row):
-    """Remove any beginning character '=-+@' from string values to output.
-    Also convert to UTF-8.
-    See http://georgemauer.net/2017/10/07/csv-injection.html
-    """
+    "Make all values in the row safe for CSV. See 'csv_safe'."
     row = list(row)
     for pos, value in enumerate(row):
-        if not isinstance(value, basestring): continue
+        row[pos] = csv_safe(value)
+    return row
+
+def csv_safe(value):
+    """Remove any beginning character '=-+@' from string value.
+    Also convert to UTF-8. Change None to empty string.
+    See http://georgemauer.net/2017/10/07/csv-injection.html
+    """
+    if isinstance(value, basestring):
         while len(value) and value[0] in '=-+@':
             value = value[1:]
-        row[pos] = to_utf8(value)
-    return row
+        value = to_utf8(value)
+    elif value is None:
+        value = ''
+    return value
 
 def get_json(id, type):
     "Return the initialized JSON dictionary with id and type."
@@ -320,7 +361,7 @@ def check_password(password):
 def hashed_password(password):
     "Return the password in hashed form."
     sha256 = hashlib.sha256(settings['PASSWORD_SALT'])
-    sha256.update(password)
+    sha256.update(to_utf8(password))
     return sha256.hexdigest()
 
 def log(db, rqh, entity, changed=dict()):
@@ -347,11 +388,10 @@ def log(db, rqh, entity, changed=dict()):
 
 def get_filename_extension(content_type):
     "Return filename extension, correcting for silliness in 'mimetypes'."
-    if content_type == 'text/plain':
-        return '.txt'
-    if content_type == 'image/jpeg':
-        return '.jpg'
-    return mimetypes.guess_extension(content_type)
+    try:
+        return constants.MIME_EXTENSIONS[content_type]
+    except KeyError:
+        return mimetypes.guess_extension(content_type)
 
 def parse_field_table_column(coldef):
     """Parse the input field table column definition.
@@ -365,3 +405,44 @@ def parse_field_table_column(coldef):
         if result['type'] == 'select':
             result['options'] = parts[2].split('|')
         return result
+
+
+class CsvWriter(object):
+    "Write rows serially to a CSV file."
+
+    def __init__(self, worksheet='Main'):
+        self.csvbuffer = StringIO()
+        self.writer = csv.writer(self.csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
+
+    def writerow(self, row):
+        self.writer.writerow(csv_safe_row(row))
+
+    def new_worksheet(self, name):
+        self.writer.writerow(('',))
+
+    def getvalue(self):
+        return self.csvbuffer.getvalue()
+
+
+class XlsxWriter(object):
+    "Write rows serially to an XLSX file."
+
+    def __init__(self, worksheet='Main'):
+        self.xlsxbuffer = io.BytesIO()
+        self.workbook = xlsxwriter.Workbook(self.xlsxbuffer, {'in_memory':True})
+        self.ws = self.workbook.add_worksheet(worksheet)
+        self.x = 0
+
+    def new_worksheet(self, name):
+        self.ws = self.workbook.add_worksheet(name)
+        self.x = 0
+
+    def writerow(self, row):
+        for y, item in enumerate(row):
+            self.ws.write(self.x, y, to_unicode(item))
+        self.x += 1
+
+    def getvalue(self):
+        self.workbook.close()
+        self.xlsxbuffer.seek(0)
+        return self.xlsxbuffer.getvalue()

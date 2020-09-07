@@ -3,7 +3,6 @@
 {% extends "home_base.html" %}
 
 {% block content_left %}
-
 <div class="panel panel-warning">
   <div class="panel-heading">
     <span class="glyphicon glyphicon-user"></span>
@@ -24,7 +23,6 @@
 	    {{ account['email'] }}
 	  </a>
 	</td>
-	<td>{% module Icon(account['role'], label=True) %}</td>
 	<td class="localtime nobr">{{ account['created'] }}</td>
       </tr>
       {% end %}
@@ -34,7 +32,6 @@
     {% end %}
   </div>
 </div>
-
 <div class="panel panel-default">
   <div class="panel-heading">
     <span class="glyphicon glyphicon-list-alt"></span>
@@ -67,5 +64,4 @@
     </table>
   </div>
 </div>
-
 {% end %} {# block content_left #}

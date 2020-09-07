@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python2
 "OrderPortal web application server."
 
 from __future__ import print_function, absolute_import
@@ -32,6 +32,7 @@ def main():
     parser = utils.get_command_line_parser(description='OrderPortal server.')
     (options, args) = parser.parse_args()
     utils.load_settings(filepath=options.settings)
+    utils.initialize()
 
     url = tornado.web.url
     handlers = [url(r'/', Home, name='home')]
@@ -49,6 +50,7 @@ def main():
         url(r'/order/([0-9a-f]{32})', Order, name='order'),
         url(r'/api/v1/order/([0-9a-f]{32})', OrderApiV1, name='order_api'),
         url(r'/order/([^/]+).csv', OrderCsv, name='order_csv'),
+        url(r'/order/([^/]+).xlsx', OrderXlsx, name='order_xlsx'),
         url(r'/order/([^/]+).zip', OrderZip, name='order_zip'),
         url(r'/order/([0-9a-f]{32})/logs', OrderLogs, name='order_logs'),
         url(r'/order', OrderCreate, name='order_create'),
@@ -69,9 +71,11 @@ def main():
         url(r'/orders', Orders, name='orders'),
         url(r'/api/v1/orders', OrdersApiV1, name='orders_api'),
         url(r'/orders.csv', OrdersCsv, name='orders_csv'),
+        url(r'/orders.xlsx', OrdersXlsx, name='orders_xlsx'),
         url(r'/accounts', Accounts, name='accounts'),
         url(r'/api/v1/accounts', AccountsApiV1, name='accounts_api'),
         url(r'/accounts.csv', AccountsCsv, name='accounts_csv'),
+        url(r'/accounts.xlsx', AccountsXlsx, name='accounts_xlsx'),
         url(r'/account/([^/]+)', Account, name='account'),
         url(r'/api/v1/account/([^/]+)', AccountApiV1, name='account_api'),
         url(r'/account/([^/]+)/orders', AccountOrders, name='account_orders'),
@@ -121,8 +125,8 @@ def main():
         url(r'/form/([0-9a-f]{32})/field/([a-zA-Z][_a-zA-Z0-9]*)/descr',
             FormFieldEditDescr, name='field_edit_descr'),
         url(r'/form/([0-9a-f]{32})/orders', FormOrders, name='form_orders'),
-        url(r'/form/([0-9a-f]{32})/orders.csv', 
-            FormOrdersCsv, name='form_orders_csv'),
+        url(r'/form/([0-9a-f]{32})/aggregate',
+            FormOrdersAggregate, name='form_orders_aggregate'),
         url(r'/news', News, name='news'),
         url(r'/new/([0-9a-f]{32})', NewsEdit, name='news_edit'),
         url(r'/new', NewsCreate, name='news_create'),
@@ -159,7 +163,6 @@ def main():
         url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
             {'path': utils.expand_filepath(settings['SITE_DIR'])},
             name='site'),
-        url(r'/test', Test, name='test'),
         ])
     handlers.append(url(r'/api/v1/(.*)', NoSuchEntityApiV1))
     handlers.append(url(r'/(.*)', NoSuchEntity))
@@ -171,14 +174,17 @@ def main():
         ui_modules=uimodules,
         template_path=os.path.join(settings['ROOT_DIR'], 'html'),
         static_path=os.path.join(settings['ROOT_DIR'], 'static'),
-        login_url=r'/login')
+        login_url=(settings['BASE_URL_PATH_PREFIX'] or '') + '/login')
     # Add href URLs for the status icons.
     # This depends on order status setup.
     for key, value in settings['ORDER_STATUSES_LOOKUP'].iteritems():
         value['href'] = application.reverse_url('site', key + '.png')
     application.listen(settings['PORT'], xheaders=True)
     pid = os.getpid()
-    logging.info("web server %s (PID %s)", settings['BASE_URL'], pid)
+    url = settings['BASE_URL']
+    if settings['BASE_URL_PATH_PREFIX']:
+        url += settings['BASE_URL_PATH_PREFIX']
+    logging.info("web server %s (PID %s)", url, pid)
     if options.pidfile:
         with open(options.pidfile, 'w') as pf:
             pf.write(str(pid))

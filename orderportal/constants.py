@@ -11,14 +11,6 @@ IUID_RX  = re.compile(r'^[0-9a-f]{32}$')
 DATE_RX  = re.compile(r'^[0-9]{4}-[0-9]{2}-[0-9]{2}$') # Safe until 9999 CE...
 EMAIL_RX = re.compile(r'^[^@]+@[^@]+\.[^@]+$')
 
-# Content types (MIME types)
-HTML_MIME = 'text/html'
-JSON_MIME = 'application/json'
-CSV_MIME  = 'text/csv'
-ZIP_MIME  = 'application/zip'
-TEXT_MIME = 'text/plain'
-BIN_MIME  = 'application/octet-stream'
-
 # CouchDB
 # For view ranges: CouchDB uses the Unicode Collation Algorithm,
 # which is not the same as the ASCII collation sequence.
@@ -76,7 +68,8 @@ TEXTS = dict(header='Header on portal home page.',
              general='General information on portal home page.',
              contact='Contact page.',
              about='About page.',
-             alert='Alert text at the top of every page.')
+             alert='Alert text at the top of every page.',
+             privacy_policy='Privacy policy statement; GDPR, etc.')
 
 # Boolean string values
 TRUE  = frozenset(['true', 'yes', 't', 'y', '1'])
@@ -114,21 +107,45 @@ SUBMITTED = 'submitted'
 TESTING = 'testing'
 FORM_STATUSES = [PENDING, TESTING, ENABLED, DISABLED]
 
+# Content types (MIME types)
+HTML_MIME = 'text/html'
+JSON_MIME = 'application/json'
+CSV_MIME  = 'text/csv'
+ZIP_MIME  = 'application/zip'
+TEXT_MIME = 'text/plain'
+BIN_MIME  = 'application/octet-stream'
+PDF_MIME  = 'application/pdf'
+JPEG_MIME = 'image/jpeg'
+PNG_MIME  = 'image/png'
+XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+XLSM_MIME = 'application/vnd.ms-excel.sheet.macroEnabled.12'
+
+# Hard-wired mapping content type -> extension (overriding mimetypes module)
+MIME_EXTENSIONS = {TEXT_MIME: '.txt',
+                   JPEG_MIME: '.jpg',
+                   XLSM_MIME: '.xlsm'}
+
 # Content-type to icon mapping
 CONTENT_TYPE_ICONS = {
     JSON_MIME: 'json.png',
     CSV_MIME: 'csv.png',
+    TEXT_MIME: 'text.png',
     HTML_MIME: 'html.png',
-    'application/pdf': 'pdf.png',
-    'image/png': 'image.png',
-    'image/jpeg': 'image.png',
+    PDF_MIME: 'pdf.png',
+    PNG_MIME: 'image.png',
+    JPEG_MIME: 'image.png',
     'application/vnd.ms-excel': 'excel.png',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'excel.png',
     'application/vnd.ms-excel': 'excel.png',
+    XLSX_MIME: 'excel.png',
+    XLSM_MIME: 'excel.png',
     'application/msword': 'word.png',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'word.png',
     'application/vnd.ms-powerpoint': 'ppt.png',
     'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'ppt.png',
-    'text/plain': 'text.png',
     }
 DEFAULT_CONTENT_TYPE_ICON = 'binary.png'
+VIEWABLE_CONTENT_TYPES = set([TEXT_MIME,
+                              JSON_MIME,
+                              CSV_MIME,
+                              PDF_MIME])

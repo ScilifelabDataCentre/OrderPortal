@@ -198,7 +198,7 @@ class AccountsApiV1(Accounts):
 
 
 class AccountsCsv(Accounts):
-    "Return a CSV file containing all data for all or filtered set of accounts."
+    "Return a CSV file containing all data for a set of accounts."
 
     @tornado.web.authenticated
     def get(self):
@@ -206,18 +206,15 @@ class AccountsCsv(Accounts):
         self.check_staff()
         self.set_filter()
         accounts = self.get_accounts()
-        csvfile = StringIO()
-        writer = csv.writer(csvfile, quoting=csv.QUOTE_NONNUMERIC)
-        safe = utils.csv_safe_row
-        writer.writerow(safe((settings['SITE_NAME'], utils.timestamp())))
-        writer.writerow(safe(('Email', 'Last name', 'First name', 'Role',
-                              'Status', 'Order count', 'University',
-                              'Department', 'PI', 'Gender', 'Group size',
-                              'Subject', 'Address', 'Zip', 'City', 'Country',
-                              'Invoice ref', 'Invoice address', 'Invoice zip',
-                              'Invoice city', 'Invoice country', 'Phone',
-                              'Other data', 'Latest login', 'Modified',
-                              'Created')))
+        writer = self.get_writer()
+        writer.writerow((settings['SITE_NAME'], utils.today()))
+        writer.writerow(('Email', 'Last name', 'First name', 'Role',
+                         'Status', 'Order count', 'University',
+                         'Department', 'PI', 'Gender', 'Group size',
+                         'Subject', 'Address', 'Zip', 'City', 'Country',
+                         'Invoice ref', 'Invoice address', 'Invoice zip',
+                         'Invoice city', 'Invoice country', 'Phone',
+                         'Other data', 'Latest login', 'Modified', 'Created'))
         for account in accounts:
             addr = account.get('address') or dict()
             iaddr = account.get('invoice_address') or dict()
@@ -227,37 +224,55 @@ class AccountsCsv(Accounts):
                     settings['subjects_lookup'][account.get('subject')])
             except KeyError:
                 subject = ''
-            row = [utils.to_utf8(account['email']),
-                   utils.to_utf8(account.get('last_name') or ''),
-                   utils.to_utf8(account.get('first_name') or ''),
+            row = [account['email'],
+                   account.get('last_name') or '',
+                   account.get('first_name') or '',
                    account['role'],
                    account['status'],
                    account['order_count'],
-                   utils.to_utf8(account.get('university') or ''),
-                   utils.to_utf8(account.get('department') or ''),
+                   account.get('university') or '',
+                   account.get('department') or '',
                    account.get('pi') and 'yes' or 'no',
                    account.get('gender') or '',
                    account.get('group_size') or '',
                    subject,
-                   utils.to_utf8(addr.get('address') or ''),
-                   utils.to_utf8(addr.get('zip') or ''),
-                   utils.to_utf8(addr.get('city') or ''),
-                   utils.to_utf8(addr.get('country') or ''),
-                   utils.to_utf8(account.get('invoice_ref') or ''),
-                   utils.to_utf8(iaddr.get('address') or ''),
-                   utils.to_utf8(iaddr.get('zip') or ''),
-                   utils.to_utf8(iaddr.get('city') or ''),
-                   utils.to_utf8(iaddr.get('country') or ''),
-                   utils.to_utf8(account.get('phone') or ''),
-                   utils.to_utf8(account.get('other_data') or ''),
-                   utils.to_utf8(account.get('login') or ''),
-                   utils.to_utf8(account.get('modified') or ''),
-                   utils.to_utf8(account.get('created') or '')]
-            writer.writerow(safe(row))
-        self.write(csvfile.getvalue())
+                   addr.get('address') or '',
+                   addr.get('zip') or '',
+                   addr.get('city') or '',
+                   addr.get('country') or '',
+                   account.get('invoice_ref') or '',
+                   iaddr.get('address') or '',
+                   iaddr.get('zip') or '',
+                   iaddr.get('city') or '',
+                   iaddr.get('country') or '',
+                   account.get('phone') or '',
+                   account.get('other_data') or '',
+                   account.get('login') or '',
+                   account.get('modified') or '',
+                   account.get('created') or '']
+            writer.writerow(row)
+        self.write(writer.getvalue())
+        self.write_finish()
+
+    def get_writer(self):
+        return utils.CsvWriter()
+
+    def write_finish(self):
         self.set_header('Content-Type', constants.CSV_MIME)
-        self.set_header('Content-Disposition',
+        self.set_header('Content-Disposition', 
                         'attachment; filename="accounts.csv"')
+
+
+class AccountsXlsx(AccountsCsv):
+    "Return an XLSX file containing all data for a set of accounts."
+
+    def get_writer(self):
+        return utils.XlsxWriter()
+
+    def write_finish(self):
+        self.set_header('Content-Type', constants.XLSX_MIME)
+        self.set_header('Content-Disposition', 
+                        'attachment; filename="accounts.xlsx"')
 
 
 class AccountMixin(object):
@@ -741,9 +756,9 @@ class Login(RequestHandler):
                     saver['status'] = constants.DISABLED
                     saver.erase_password()
                 msg = "Too many failed login attempts: Your account has been" \
-                      " disabled. Contact the site administrators %s." % \
+                      " disabled. Contact the site administrator %s." % \
                       settings.get('SITE_SUPPORT_EMAIL', '')
-                # Prepare message sent by cron job script 'script/messenger.py'
+                # Prepare email message
                 try:
                     template = settings['ACCOUNT_MESSAGES'][constants.DISABLED]
                 except KeyError:
@@ -759,7 +774,7 @@ class Login(RequestHandler):
             if not account.get('status') == constants.ENABLED:
                 raise ValueError
         except ValueError:
-            msg = "Account is disabled. Contact the site administrators %s." % \
+            msg = "Account is disabled. Contact the site administrator %s." % \
                   settings.get('SITE_SUPPORT_EMAIL', '')
             self.see_other('home', error=msg)
             return
@@ -770,6 +785,7 @@ class Login(RequestHandler):
         self.set_secure_cookie(constants.USER_COOKIE, 
                                account['email'],
                                expires_days=settings['LOGIN_MAX_AGE_DAYS'])
+        logging.info("Basic auth login: account %s", account['email'])
         with AccountSaver(doc=account, rqh=self) as saver:
             saver['login'] = utils.timestamp() # Set login timestamp.
         if account.get('update_info'):
@@ -817,7 +833,6 @@ class Reset(RequestHandler):
                 return
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver.reset_password()
-            # Prepare message sent by cron job script 'script/messenger.py'
             try:
                 template = settings['ACCOUNT_MESSAGES'][constants.RESET]
             except KeyError:
@@ -840,8 +855,8 @@ class Reset(RequestHandler):
                     self.set_secure_cookie(constants.USER_COOKIE, '')
             self.see_other('home',
                            message="An email has been sent containing"
-                           " a reset code. Please wait a couple of"
-                           " minutes for it and use the link in it.")
+                           " a reset code. Use the link in the email."
+                           " (Check your spam filter!)")
 
 
 class Password(RequestHandler):
@@ -1009,7 +1024,6 @@ class AccountEnable(RequestHandler):
         with AccountSaver(account, rqh=self) as saver:
             saver['status'] = constants.ENABLED
             saver.reset_password()
-        # Prepare message sent by cron job script 'script/messenger.py'
         try:
             template = settings['ACCOUNT_MESSAGES'][constants.ENABLED]
         except KeyError:

@@ -3,6 +3,7 @@
 from __future__ import print_function, absolute_import
 
 import logging
+import sys
 from collections import OrderedDict as OD
 
 import couchdb
@@ -116,6 +117,8 @@ class Software(RequestHandler):
 
     def get(self):
         info = [
+            ('Python', 'https://www.python.org',
+             "%s.%s.%s" % sys.version_info[0:3], 'installed'),
             ('CouchDB server', 'http://couchdb.apache.org/',
              utils.get_dbserver().version(), 'installed'),
             ('CouchDB-Python', 'https://pypi.org/project/CouchDB/',
@@ -195,30 +198,3 @@ class NoSuchEntityApiV1(RequestHandler):
     def check_xsrf_cookie(self):
         "Do not check for XSRF cookie when API."
         pass
-
-
-class Test(RequestHandler):
-    "Page to test some feature."
-
-    @tornado.web.authenticated
-    def get(self):
-        rowcode = ["<tr>"]
-        rowcode.append(
-            "<td>"
-            "<input type='text' class='form-control' name='rowid_0' id='rowid_0'>"
-            "</td>")
-        rowcode.append(
-            "<td>"
-            "<input type='text' class='form-control' name='rowid_1'>"
-            "</td>")
-        rowcode.append("</tr>")
-        self.render('test.html', rowcode=''.join(rowcode))
-
-    @tornado.web.authenticated
-    def post(self):
-        table_count = int(self.get_argument("table_count"))
-        logging.debug("table_count %s", table_count);
-        for i in xrange(table_count):
-            logging.debug("%s: %s",
-                          i, self.get_argument("table_%s_0" % i, None))
-        self.see_other('test')
