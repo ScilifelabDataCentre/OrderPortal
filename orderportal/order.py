@@ -1,8 +1,5 @@
 "Orders are the whole point of this app. The user fills in info for facility."
 
-
-
-import json
 import logging
 import os.path
 import re
@@ -13,6 +10,7 @@ from collections import OrderedDict as OD
 from io import StringIO
 
 import couchdb
+import simplejson as json       # XXX Python 3 kludge
 import tornado.web
 
 from . import constants
@@ -748,8 +746,18 @@ class OrderApiV1Mixin(ApiV1Mixin):
                     href=self.absolute_reverse_url('order_file',
                                                    order['_id'],
                                                    filename))
-        return data
+        # XXX Terrible kludge! Converts binary keys and values to string.
+        # XXX A Python3 issue, possible due to bad old CouchDB interface.
+        return json.loads(json.dumps(data))
 
+def convert_to_strings(doc):
+    items = list(doc.items())
+    for key, value in items:
+        if isinstance(key, bytes):
+            print(key)
+            doc[key.decode()] = doc.pop(key)
+        if isinstance(value, dict):
+            convert_to_strings(value)
 
 class Order(OrderMixin, RequestHandler):
     "Order page."

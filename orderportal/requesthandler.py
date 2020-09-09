@@ -2,7 +2,6 @@
 
 import base64
 import functools
-import json
 import logging
 import traceback
 import urllib.request, urllib.parse, urllib.error
@@ -10,6 +9,7 @@ import urllib.parse
 
 import couchdb
 import markdown
+import simplejson as json       # XXX Python 3 kludge
 import tornado.web
 
 import orderportal

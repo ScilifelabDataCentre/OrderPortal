@@ -6,10 +6,9 @@ NOTE: This uses the third-party 'requests' module, which is better than
 the standard 'urllib' module.
 """
 
-
-
-import json
 import sys
+
+import simplejson as json       # XXX Python 3 kludge
 
 # Third-party package: http://docs.python-requests.org/en/master/
 import requests

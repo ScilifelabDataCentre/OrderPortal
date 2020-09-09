@@ -7,16 +7,14 @@ or absolute), then the dump file is created in the directory specified
 by the BACKUP_DIR variable in the settings. 
 """
 
-
-
 import io
-import json
 import logging
 import os
 import tarfile
 import time
 
 import couchdb
+import simplejson as json       # XXX Python 3 kludge
 
 from orderportal import constants
 from orderportal import settings

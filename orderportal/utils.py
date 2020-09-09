@@ -1,7 +1,5 @@
 "Various utility functions."
 
-
-
 import collections
 import csv
 import datetime

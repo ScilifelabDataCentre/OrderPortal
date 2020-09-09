@@ -1,12 +1,10 @@
 "Forms are templates for orders."
 
-
-
-import json
 import logging
 from collections import OrderedDict as OD
 
 import tornado.web
+import simplejson as json       # XXX Python 3 kludge
 
 from . import constants
 from . import saver

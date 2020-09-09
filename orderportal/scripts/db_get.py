@@ -1,11 +1,9 @@
 "Get document(s) from CouchDB and write to a JSON file."
 
-
-
-import json
 import sys
 
 import couchdb
+import simplejson as json       # XXX Python 3 kludge
 
 from orderportal import constants
 from orderportal import settings
