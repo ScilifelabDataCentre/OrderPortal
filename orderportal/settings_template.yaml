@@ -90,10 +90,14 @@ ORDERS_LIST_STATUSES:
   - closed
 
 # The order fields (identifiers) to show in the orders list.
+# Given by list of dicts, where each dict has a required item 'identifier'
+# specifying the field identifier, and an optional item 'values'
+# specifying a list of values to allow filtering by.
 # Orders (forms) lacking the field will just show an empty slot.
 # The value is an example only; edit or comment out.
 ORDERS_LIST_FIELDS:
-  - project_pi
+  -
+    identifier: project_pi
 
 # Fields of orders to use when doing search; scalar fields only!
 ORDER_SEARCH_FIELDS:

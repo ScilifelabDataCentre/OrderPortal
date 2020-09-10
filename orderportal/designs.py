@@ -238,15 +238,15 @@ def load_design_documents(db):
     func = DESIGNS['order']['keyword']['map']
     DESIGNS['order']['keyword']['map'] = func.format(delims_lint=delims_lint,
                                                      lint=lint)
-    for entity, designs in get_all_items():
-         updated = update_design_document(db, entity, designs)
+    for entity, views in get_all_items(delims_lint, lint):
+         updated = update_design_document(db, entity, views)
          if updated:
             for view in designs:
                 name = "%s/%s" % (entity, view)
                 logging.info("regenerating index for view %s" % name)
                 list(db.view(name, limit=10))
 
-def get_all_items():
+def get_all_items(delims_lint, lint):
     "Get all design document items, including configured order search fields."
     items = list(DESIGNS.items())
     fields = dict()
@@ -261,9 +261,9 @@ def get_all_items():
     items.append(('fields', fields))
     return items
 
-def update_design_document(db, design, views):
+def update_design_document(db, entity, views):
     "Update the design document (view index definition)."
-    docid = "_design/%s" % design
+    docid = "_design/%s" % entity
     try:
         doc = db[docid]
     except couchdb.http.ResourceNotFound:
