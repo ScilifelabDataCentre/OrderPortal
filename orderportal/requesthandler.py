@@ -87,7 +87,7 @@ class RequestHandler(tornado.web.RequestHandler):
         if settings['BASE_URL_PATH_PREFIX']:
             url = settings['BASE_URL_PATH_PREFIX'] + url
         if query:
-            query = dict([(k, utils.to_utf8(v)) for k,v in list(query.items())])
+            query = dict([(k, str(v)) for k,v in list(query.items())])
             url += '?' + urllib.parse.urlencode(query)
         return url
 

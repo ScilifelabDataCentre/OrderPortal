@@ -1,10 +1,7 @@
 "File (a.k.a document) pages; uploaded files."
 
-
-
 import logging
 import os.path
-from io import StringIO
 
 import tornado.web
 
@@ -35,19 +32,15 @@ class FileSaver(saver.Saver):
         self.file = infile
         if name:
             self['name'] = name
-        self['size'] = len(infile.body)
+        self['size'] = len(self.file.body)
         self['content_type'] = infile.content_type or 'application/octet-stream'
 
     def post_process(self):
         "Save the file as an attachment to the document."
         # No new file uploaded, just skip out.
         if self.file is None: return
-        # Using cStringIO here is a kludge.
-        # Don't ask me why this was required on one machine, but not another.
-        # The problem appeared on a Python 2.6 system, and involved Unicode.
-        # But I was unable to isolate it. I tested this in desperation...
         self.db.put_attachment(self.doc,
-                               StringIO(self.file.body),
+                               self.file.body,
                                filename=self['name'],
                                content_type=self['content_type'])
         

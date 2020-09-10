@@ -1,5 +1,6 @@
 "Orders are the whole point of this app. The user fills in info for facility."
 
+import io
 import logging
 import os.path
 import re
@@ -7,7 +8,6 @@ import traceback
 import urllib.parse
 import zipfile
 from collections import OrderedDict as OD
-from io import StringIO
 
 import couchdb
 import simplejson as json       # XXX Python 3 kludge
@@ -112,7 +112,7 @@ class OrderSaver(saver.Saver):
 
     def add_file(self, infile):
         "Add the given file to the files. Return the unique filename."
-        filename = utils.to_ascii(os.path.basename(infile.filename))
+        filename = os.path.basename(infile.filename)
         if filename in self.filenames:
             count = 1
             while True:
@@ -433,14 +433,9 @@ class OrderSaver(saver.Saver):
                         self.db.delete_attachment(self.doc, filename)
             except AttributeError:
                 pass
-            # Using cStringIO.StringIO here is a kludge.
-            # Don't ask me why this was required on a specific machine.
-            # The problem appeared on a Python 2.6 system and involved
-            # Unicode, but I was unable to isolate it.
-            # I found this solution by chance...
             for file in self.files:
                 self.db.put_attachment(self.doc,
-                                       StringIO(file['body']),
+                                       file['body'],
                                        filename=file['filename'],
                                        content_type=file['content_type'])
 
@@ -619,9 +614,6 @@ class OrderMixin(object):
             result.append(item)
             if field['type'] == constants.GROUP:
                 result.extend(self.get_fields(order, depth+1, field['fields']))
-        for item in result:
-            for key, value in item.items():
-                item[key] = utils.to_utf8(value)
         return result
 
     def get_order_status(self, order):
@@ -965,7 +957,7 @@ class OrderCsv(OrderMixin, RequestHandler):
 
     def write_finish(self, order):
         self.set_header('Content-Type', constants.CSV_MIME)
-        filename = utils.to_ascii(order.get('identifier') or order['_id'])
+        filename = order.get('identifier') or order['_id']
         self.set_header('Content-Disposition',
                         'attachment; filename="%s.csv"' % filename)
         
@@ -978,7 +970,7 @@ class OrderXlsx(OrderCsv):
 
     def write_finish(self, order):
         self.set_header('Content-Type', constants.XLSX_MIME)
-        filename = utils.to_ascii(order.get('identifier') or order['_id'])
+        filename = order.get('identifier') or order['_id']
         self.set_header('Content-Disposition',
                         'attachment; filename="%s.xlsx"' % filename)
 
@@ -995,23 +987,22 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
             self.check_readable(order)
         except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        zip_stringio = StringIO()
-        # This should use a context, but it is not implemented in Python 2.6
-        writer = zipfile.ZipFile(zip_stringio, 'w')
-        name = order.get('identifier') or order['_id']
-        csvwriter = self.write_order(order, writer=utils.CsvWriter('Order'))
-        writer.writestr(name + '.csv', csvwriter.getvalue())
-        xlsxwriter = self.write_order(order, writer=utils.XlsxWriter('Order'))
-        writer.writestr(name + '.xlsx', xlsxwriter.getvalue())
-        writer.writestr(name + '.json',
-                        json.dumps(self.get_order_json(order, full=True)))
-        for filename in sorted(order.get('_attachments', [])):
-            outfile = self.db.get_attachment(order, filename)
-            writer.writestr(filename, outfile.read())
-        writer.close()
-        self.write(zip_stringio.getvalue())
+        zip_io = io.BytesIO()
+        with zipfile.ZipFile(zip_io, 'w') as writer:
+            name = order.get('identifier') or order['_id']
+            csvwriter = self.write_order(order, writer=utils.CsvWriter('Order'))
+            writer.writestr(name + '.csv', csvwriter.getvalue())
+            xlsxwriter = self.write_order(order,
+                                          writer=utils.XlsxWriter('Order'))
+            writer.writestr(name + '.xlsx', xlsxwriter.getvalue())
+            writer.writestr(name + '.json',
+                            json.dumps(self.get_order_json(order, full=True)))
+            for filename in sorted(order.get('_attachments', [])):
+                outfile = self.db.get_attachment(order, filename)
+                writer.writestr(filename, outfile.read())
+        self.write(zip_io.getvalue())
         self.set_header('Content-Type', constants.ZIP_MIME)
-        filename = utils.to_ascii(order.get('identifier')) or order['_id']
+        filename = order.get('identifier') or order['_id']
         self.set_header('Content-Disposition',
                         'attachment; filename="%s.zip"' % filename)
 
@@ -1532,7 +1523,6 @@ class OrderFile(OrderMixin, RequestHandler):
             outfile.close()
             self.set_header('Content-Type',
                             order['_attachments'][filename]['content_type'])
-            filename = utils.to_ascii(filename)
             self.set_header('Content-Disposition',
                             'attachment; filename="%s"' % filename)
 
@@ -1609,7 +1599,7 @@ class OrderReport(OrderMixin, RequestHandler):
             self.set_header('Content-Type', content_type)
             name = order.get('identifier') or order['_id']
             ext = utils.get_filename_extension(content_type)
-            filename = utils.to_ascii("%s_report%s" % (name, ext))
+            filename = "%s_report%s" % (name, ext)
             self.set_header('Content-Disposition',
                             'attachment; filename="%s"' % filename)
 
@@ -1666,7 +1656,7 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         self.set_header('Content-Type', content_type)
         name = order.get('identifier') or order['_id']
         ext = utils.get_filename_extension(content_type)
-        filename = utils.to_ascii("%s_report%s" % (name, ext))
+        filename = "%s_report%s" % (name, ext)
         self.set_header('Content-Disposition',
                         'attachment; filename="%s"' % filename)
 

@@ -1,7 +1,5 @@
 "Set the password for an account."
 
-
-
 import sys
 import getpass
 
@@ -10,7 +8,7 @@ from orderportal import utils
 from orderportal.account import AccountSaver
 
 
-def set_password(email, password):
+def set_password(email, password, verbose=False):
     db = utils.get_db()
     view = db.view('account/email', include_docs=True)
     rows = list(view[email])
@@ -19,7 +17,10 @@ def set_password(email, password):
     doc = rows[0].doc
     with AccountSaver(doc=doc, db=db) as saver:
         saver.set_password(password)
-
+        if verbose: print('Password was set for', email)
+        if saver['status'] != constants.ENABLED:
+            saver['status'] = constants.ENABLED
+            if verbose: print('Account was enabled.')
 
 if __name__ == '__main__':
     parser = utils.get_command_line_parser(
@@ -39,5 +40,4 @@ if __name__ == '__main__':
     again_password = getpass.getpass('Password again > ')
     if password != again_password:
         sys.exit('passwords do not match')
-    set_password(email, password)
-    print('Set password for', email)
+    set_password(email, password, verbose=True)

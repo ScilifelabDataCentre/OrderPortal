@@ -16,7 +16,6 @@ import unicodedata
 import urllib.request, urllib.parse, urllib.error
 import urllib.parse
 import uuid
-from io import StringIO
 
 import couchdb
 import tornado.web
@@ -256,30 +255,6 @@ def today(days=None):
     result = instant.isoformat()
     return result[:result.index('T')]
 
-def to_ascii(value):
-    "Convert any non-ASCII character to its closest ASCII equivalent."
-    if value is None:
-        return ''
-    if not isinstance(value, str):
-        value = str(value, 'utf-8')
-    return unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
-
-def to_utf8(value):
-    "Convert string value to UTF-8 representation."
-    if isinstance(value, str):
-        if not isinstance(value, str):
-            value = str(value, 'utf-8')
-        return value.encode('utf-8')
-    else:
-        return value
-
-def to_unicode(value):
-    "Convert string value to unicode assuming UTF-8."
-    if isinstance(value, str) and not isinstance(value, str):
-        return str(value, 'utf-8')
-    else:
-        return value
-
 def to_bool(value):
     "Convert the value into a boolean, interpreting various string values."
     if isinstance(value, bool): return value
@@ -311,13 +286,12 @@ def csv_safe_row(row):
 
 def csv_safe(value):
     """Remove any beginning character '=-+@' from string value.
-    Also convert to UTF-8. Change None to empty string.
+    Change None to empty string.
     See http://georgemauer.net/2017/10/07/csv-injection.html
     """
     if isinstance(value, str):
         while len(value) and value[0] in '=-+@':
             value = value[1:]
-        value = to_utf8(value)
     elif value is None:
         value = ''
     return value
@@ -358,8 +332,9 @@ def check_password(password):
 
 def hashed_password(password):
     "Return the password in hashed form."
-    sha256 = hashlib.sha256(settings['PASSWORD_SALT'].encode())
-    sha256.update(to_utf8(password))
+    sha256 = hashlib.sha256()
+    sha256.update(settings['PASSWORD_SALT'].encode())
+    sha256.update(password.encode())
     return sha256.hexdigest()
 
 def log(db, rqh, entity, changed=dict()):
@@ -409,7 +384,7 @@ class CsvWriter(object):
     "Write rows serially to a CSV file."
 
     def __init__(self, worksheet='Main'):
-        self.csvbuffer = StringIO()
+        self.csvbuffer = io.StringIO()
         self.writer = csv.writer(self.csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
 
     def writerow(self, row):
@@ -437,7 +412,7 @@ class XlsxWriter(object):
 
     def writerow(self, row):
         for y, item in enumerate(row):
-            self.ws.write(self.x, y, to_unicode(item))
+            self.ws.write(self.x, y, item)
         self.x += 1
 
     def getvalue(self):

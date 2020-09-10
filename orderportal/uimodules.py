@@ -146,8 +146,6 @@ class NoneStr(tornado.web.UIModule):
     def render(self, value, undef=''):
         if value is None:
             return undef
-        elif isinstance(value, str):
-            return utils.to_utf8(value)
         else:
             return str(value)
 
