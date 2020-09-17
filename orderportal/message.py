@@ -1,7 +1,5 @@
 "Message to account email address; store and send."
 
-
-
 import email.mime.text
 import logging
 import smtplib
@@ -36,14 +34,14 @@ class MessageSaver(saver.Saver):
                 host = settings['EMAIL']['HOST']
             except KeyError:
                 return
-            try:
-                port = settings['EMAIL']['PORT']
-            except KeyError:
-                server = smtplib.SMTP(host)
+            port = settings['EMAIL'].get('PORT', 0)
+            if settings['EMAIL'].get('SSL'):
+                server = smtplib.SMTP_SSL(host, port=port)
             else:
                 server = smtplib.SMTP(host, port=port)
-            if settings['EMAIL'].get('TLS'):
-                server.starttls()
+                if settings['EMAIL'].get('TLS'):
+                    server.starttls()
+            server.ehlo()
             try:
                 user = settings['EMAIL']['USER']
                 password = settings['EMAIL']['PASSWORD']

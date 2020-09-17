@@ -114,9 +114,17 @@ COUNTRY_CODES_FILEPATH: '{SITE_DIR}/country_codes.yaml'
 SUBJECT_TERMS_FILEPATH: '{SITE_DIR}/subject_terms.yaml'
 
 # Messages; email server info.
-MESSAGE_SENDER_EMAIL: '"OrderPortal Support" <support@my-domain.com>'
+MESSAGE_SENDER_EMAIL: '"OrderPortal Support" <support@your.domain>'
 EMAIL:
   HOST: 'localhost'
+
+# Email using Google server and an account with app password set.
+EMAIL:
+  HOST: 'smtp.gmail.com'
+  PORT: 465
+  SSL: true
+  USER: 'your.account@your.domain'
+  PASSWORD: 'your app password'
 
 # Display news items.
 DISPLAY_NEWS: true
