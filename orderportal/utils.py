@@ -12,7 +12,6 @@ import os
 import sys
 import time
 import traceback
-import unicodedata
 import urllib.request, urllib.parse, urllib.error
 import urllib.parse
 import uuid
