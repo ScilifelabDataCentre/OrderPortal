@@ -411,7 +411,10 @@ class XlsxWriter(object):
 
     def writerow(self, row):
         for y, item in enumerate(row):
-            self.ws.write(self.x, y, item)
+            if isinstance(item, str):
+                self.ws.write(self.x, y, item.replace('\r', ''))
+            else:
+                self.ws.write(self.x, y, item)
         self.x += 1
 
     def getvalue(self):

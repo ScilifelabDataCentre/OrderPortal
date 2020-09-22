@@ -4,7 +4,7 @@ An order can be a project application, a request, a report, etc.
 
 import os
 
-__version__ = '4.0.6'
+__version__ = '4.0.7'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
