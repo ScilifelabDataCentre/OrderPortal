@@ -4,6 +4,8 @@ OrderPortal
 A portal for orders (requests, project applications, etc) to a
 facility from its users.
 
+The current version requires Python 3.6 or higher.
+
 Installation and update instructions: [INSTALLATION.md](INSTALLATION.md).
 
 The [GitHub wiki](https://github.com/pekrau/OrderPortal/wiki) contains

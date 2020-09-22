@@ -1,6 +1,6 @@
 "Home page variants, and a few general resources."
 
-from __future__ import print_function, absolute_import
+
 
 import logging
 import sys
@@ -34,7 +34,7 @@ class Home(RequestHandler):
             events=self.get_events(upcoming=True))
         if self.current_user and self.get_invitations(self.current_user['email']):
             url = self.reverse_url('account', self.current_user['email'])
-            kwargs['message'] = u"""You have group invitations.
+            kwargs['message'] = """You have group invitations.
 See your <a href="{0}">account</a>.""".format(url)
         if not self.current_user:
             self.render('home.html', **kwargs)

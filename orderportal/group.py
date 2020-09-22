@@ -1,6 +1,6 @@
 "Group pages; accounts which are able to see all orders of each other."
 
-from __future__ import print_function, absolute_import
+
 
 import logging
 
@@ -61,7 +61,7 @@ class Group(GroupMixin, RequestHandler):
         group = self.get_entity(iuid, doctype=constants.GROUP)
         try:
             self.check_readable(group)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
         self.render('group.html',
@@ -161,7 +161,7 @@ class GroupLogs(GroupMixin, RequestHandler):
         group = self.get_entity(iuid, doctype=constants.GROUP)
         try:
             self.check_readable(group)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
         self.render('logs.html',

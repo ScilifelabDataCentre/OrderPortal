@@ -30,11 +30,21 @@
       <table class="table-condensed">
 	{% for key, value in sorted(log['changed'].items()) %}
 	<tr>
-	  <th class="key">{{ key }}</th>
+	  <th style="vertical-align: top;">{{ key }}</th>
 	  <td>
 	    {% if key == 'fields' %}
-	      {% for k, v in sorted(value.items()) %}
-	        {{ k }}: {{ repr(v) }}<br>
+              {# This is a kludge for a special case: imported forms. #}
+              {% if isinstance(value, list) %}
+                {% for field in value %}
+	          {% for k, v in sorted(field.items()) %}
+	            {{ k }}: {{ repr(v) }}<br>
+	          {% end %}
+                  <br>
+                {% end %}
+              {% else %}
+	        {% for k, v in sorted(value.items()) %}
+	          {{ k }}: {{ repr(v) }}<br>
+	        {% end %}
 	      {% end %}
 	    {% elif key == 'copied from' %}
 	      <a href="{{ reverse_url('entity', value) }}">{{ value }}</a>

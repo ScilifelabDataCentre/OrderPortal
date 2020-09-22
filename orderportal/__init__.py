@@ -2,11 +2,9 @@
 An order can be a project application, a request, a report, etc.
 """
 
-from __future__ import print_function, absolute_import
-
 import os
 
-__version__ = '3.7.6'
+__version__ = '4.0.6'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -32,6 +30,8 @@ settings = dict(
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
     SITE_HOST_URL=None,
+    EMAIL=None,                 # Must be defined for things to work.
+    MESSAGE_SENDER_EMAIL='"OrderPortal Support" <support@my-domain.com>',
     DISPLAY_MENU_LIGHT=False,
     DISPLAY_MENU_ITEM_URL=None,
     DISPLAY_MENU_ITEM_TEXT=None,

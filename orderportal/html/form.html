@@ -23,7 +23,7 @@
 	role="form"
 	method="POST">
     {% module xsrf_form_html() %}
-    <button type="submit" class="btn btn-default">
+    <button type="submit" class="btn btn-default btn-lg btn-block">
       Set to
       {% module Icon('testing', label=True) %}
     </button>
@@ -34,7 +34,7 @@
 	role="form"
 	method="POST">
     {% module xsrf_form_html() %}
-    <button type="submit" class="btn btn-default"
+    <button type="submit" class="btn btn-default btn-lg btn-block"
 	    onclick="return confirm('Cannot be undone! Really enable?');">
       Set to
       {% module Icon('enabled', label=True) %}
@@ -49,7 +49,7 @@
 	method="POST">
     {% module xsrf_form_html() %}
     <input type="hidden" name="form" value="{{ form['_id'] }}">
-    <button type="submit" class="btn btn-success">
+    <button type="submit" class="btn btn-success btn-block">
       <span class="glyphicon glyphicon-plus"></span>
       Create {{ terminology('order') }}
     </button>
@@ -60,7 +60,7 @@
 	role="form"
 	method="POST">
     {% module xsrf_form_html() %}
-    <button type="submit" class="btn btn-default">
+    <button type="submit" class="btn btn-default btn-block">
       Set to
       {% module Icon('pending', label=True) %}
     </button>
@@ -74,7 +74,7 @@
 	method="POST">
     {% module xsrf_form_html() %}
     <input type="hidden" name="form" value="{{ form['_id'] }}">
-    <button type="submit" class="btn btn-success">
+    <button type="submit" class="btn btn-success btn-block">
       <span class="glyphicon glyphicon-plus"></span>
       Create {{ terminology('order') }}
     </button>
@@ -85,8 +85,7 @@
 	role="form"
 	method="POST">
     {% module xsrf_form_html() %}
-    <button type="submit"
-	    class="btn btn-default"
+    <button type="submit" class="btn btn-default btn-block"
 	    onclick="return confirm('Cannot be undone! Really disable?');">
       {% module Icon('disabled') %}
       Disable
@@ -102,7 +101,7 @@
 	method="POST">
     {% module xsrf_form_html() %}
     <input type="hidden" name="_http_method" value="delete">
-    <button type="submit" class="btn btn-danger"
+    <button type="submit" class="btn btn-danger btn-block"
 	    onclick="return confirm('Cannot be undone! Really delete?');">
       <span class="glyphicon glyphicon-trash"></span>
       Delete
@@ -116,7 +115,7 @@
 	role="form"
 	method="POST">
     {% module xsrf_form_html() %}
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-primary btn-block">
       <span class="glyphicon glyphicon-plus-sign"></span>
       Clone
     </button>
@@ -126,7 +125,7 @@
   <form action="{{ reverse_url('form_orders_aggregate', form['_id']) }}"
 	role="form"
 	method="GET">
-    <button type="submit" class="btn btn-info">
+    <button type="submit" class="btn btn-info btn-block">
       <span class="glyphicon glyphicon-th"></span>
       Aggregate
     </button>

@@ -1,6 +1,8 @@
 Installation
 ============
 
+The current version requires Python 3.6 or higher.
+
 This instruction is derived from the procedure used for the instances
 running on the data-office machine at SciLifeLab. It will have to be
 adapted for your site.
@@ -78,12 +80,12 @@ It is assumed that you already have a CouchDB instance running.
 Initialize the database in CouchDB. This requires a valid **settings** file.
 
     $ cd /var/www/apps/xyz/OrderPortal/orderportal
-    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python2 init_database.py
+    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 init_database.py
 
 Create the first admin account in the database by running a script that
 will interactively ask for input:
 
-    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python2 create_admin.py
+    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 create_admin.py
 
 Logging
 -------

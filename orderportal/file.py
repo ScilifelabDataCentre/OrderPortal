@@ -1,10 +1,7 @@
 "File (a.k.a document) pages; uploaded files."
 
-from __future__ import print_function, absolute_import
-
 import logging
 import os.path
-from cStringIO import StringIO
 
 import tornado.web
 
@@ -35,19 +32,15 @@ class FileSaver(saver.Saver):
         self.file = infile
         if name:
             self['name'] = name
-        self['size'] = len(infile.body)
+        self['size'] = len(self.file.body)
         self['content_type'] = infile.content_type or 'application/octet-stream'
 
     def post_process(self):
         "Save the file as an attachment to the document."
         # No new file uploaded, just skip out.
         if self.file is None: return
-        # Using cStringIO here is a kludge.
-        # Don't ask me why this was required on one machine, but not another.
-        # The problem appeared on a Python 2.6 system, and involved Unicode.
-        # But I was unable to isolate it. I tested this in desperation...
         self.db.put_attachment(self.doc,
-                               StringIO(self.file.body),
+                               self.file.body,
                                filename=self['name'],
                                content_type=self['content_type'])
         
@@ -66,7 +59,7 @@ class File(RequestHandler):
 
     def get(self, name):
         self.doc = self.get_entity_view('file/name', name)
-        filename = self.doc['_attachments'].keys()[0]
+        filename = list(self.doc['_attachments'].keys())[0]
         outfile = self.db.get_attachment(self.doc, filename)
         if outfile is None:
             self.write('')
@@ -109,7 +102,7 @@ class FileCreate(RequestHandler):
                 saver['hidden'] = utils.to_bool(self.get_argument('hidden',
                                                                   False))
                 saver['description'] = self.get_argument('description', None)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('files', error=str(msg))
         else:
             self.see_other('files')
@@ -179,7 +172,7 @@ class FileLogs(RequestHandler):
     def get(self, iuid):
         file = self.get_entity(iuid, doctype=constants.FILE)
         self.render('logs.html',
-                    title=u"Logs for document '%s'" % (file.get('title') or 
+                    title="Logs for document '%s'" % (file.get('title') or 
                                                        file['name']),
                     entity=file,
                     logs=self.get_logs(file['_id']))

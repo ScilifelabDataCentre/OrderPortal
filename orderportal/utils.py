@@ -1,7 +1,5 @@
 "Various utility functions."
 
-from __future__ import print_function, absolute_import
-
 import collections
 import csv
 import datetime
@@ -14,11 +12,9 @@ import os
 import sys
 import time
 import traceback
-import unicodedata
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 import uuid
-from cStringIO import StringIO
 
 import couchdb
 import tornado.web
@@ -146,7 +142,7 @@ def load_settings(filepath):
         logging.info("universities lookup: %s", filepath)
         with open(expand_filepath(filepath)) as infile:
             unis = yaml.safe_load(infile)
-        unis = unis.items()
+        unis = list(unis.items())
         unis.sort(key=lambda i: (i[1].get('rank'), i[0]))
         settings['UNIVERSITIES'] = collections.OrderedDict(unis)
     # Read country codes YAML file
@@ -171,7 +167,7 @@ def load_settings(filepath):
                                         for s in settings['subjects']])
     # Settings computable from others.
     settings['DATABASE_SERVER_VERSION'] = get_dbserver().version()
-    parts = urlparse.urlparse(settings['BASE_URL'])
+    parts = urllib.parse.urlparse(settings['BASE_URL'])
     settings['BASE_URL'] = "%s://%s" % (parts.scheme, parts.netloc)
     if not settings.get('PORT'):
         items = parts.netloc.split(':')
@@ -258,30 +254,6 @@ def today(days=None):
     result = instant.isoformat()
     return result[:result.index('T')]
 
-def to_ascii(value):
-    "Convert any non-ASCII character to its closest ASCII equivalent."
-    if value is None:
-        return ''
-    if not isinstance(value, unicode):
-        value = unicode(value, 'utf-8')
-    return unicodedata.normalize('NFKD', value).encode('ascii', 'ignore')
-
-def to_utf8(value):
-    "Convert string value to UTF-8 representation."
-    if isinstance(value, basestring):
-        if not isinstance(value, unicode):
-            value = unicode(value, 'utf-8')
-        return value.encode('utf-8')
-    else:
-        return value
-
-def to_unicode(value):
-    "Convert string value to unicode assuming UTF-8."
-    if isinstance(value, basestring) and not isinstance(value, unicode):
-        return unicode(value, 'utf-8')
-    else:
-        return value
-
 def to_bool(value):
     "Convert the value into a boolean, interpreting various string values."
     if isinstance(value, bool): return value
@@ -289,7 +261,7 @@ def to_bool(value):
     lowvalue = value.lower()
     if lowvalue in constants.TRUE: return True
     if lowvalue in constants.FALSE: return False
-    raise ValueError(u"invalid boolean: '{0}'".format(value))
+    raise ValueError("invalid boolean: '{0}'".format(value))
 
 def convert(type, value):
     "Convert the string representation to the given type."
@@ -313,13 +285,12 @@ def csv_safe_row(row):
 
 def csv_safe(value):
     """Remove any beginning character '=-+@' from string value.
-    Also convert to UTF-8. Change None to empty string.
+    Change None to empty string.
     See http://georgemauer.net/2017/10/07/csv-injection.html
     """
-    if isinstance(value, basestring):
+    if isinstance(value, str):
         while len(value) and value[0] in '=-+@':
             value = value[1:]
-        value = to_utf8(value)
     elif value is None:
         value = ''
     return value
@@ -344,7 +315,7 @@ def get_account_name(account=None, value=None):
         first_name, last_name = value
     if last_name:
         if first_name:
-            name = u"{0}, {1}".format(last_name, first_name)
+            name = "{0}, {1}".format(last_name, first_name)
         else:
             name = last_name
     else:
@@ -360,8 +331,9 @@ def check_password(password):
 
 def hashed_password(password):
     "Return the password in hashed form."
-    sha256 = hashlib.sha256(settings['PASSWORD_SALT'])
-    sha256.update(to_utf8(password))
+    sha256 = hashlib.sha256()
+    sha256.update(settings['PASSWORD_SALT'].encode())
+    sha256.update(password.encode())
     return sha256.hexdigest()
 
 def log(db, rqh, entity, changed=dict()):
@@ -411,7 +383,7 @@ class CsvWriter(object):
     "Write rows serially to a CSV file."
 
     def __init__(self, worksheet='Main'):
-        self.csvbuffer = StringIO()
+        self.csvbuffer = io.StringIO()
         self.writer = csv.writer(self.csvbuffer, quoting=csv.QUOTE_NONNUMERIC)
 
     def writerow(self, row):
@@ -439,7 +411,7 @@ class XlsxWriter(object):
 
     def writerow(self, row):
         for y, item in enumerate(row):
-            self.ws.write(self.x, y, to_unicode(item))
+            self.ws.write(self.x, y, item)
         self.x += 1
 
     def getvalue(self):

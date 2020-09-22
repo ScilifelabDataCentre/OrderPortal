@@ -1,16 +1,15 @@
 "RequestHandler subclass for all pages."
 
-from __future__ import print_function, absolute_import
-
 import base64
-import json
+import functools
 import logging
 import traceback
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 
 import couchdb
 import markdown
+import simplejson as json       # XXX Python 3 kludge
 import tornado.web
 
 import orderportal
@@ -32,7 +31,7 @@ class RequestHandler(tornado.web.RequestHandler):
             pass
 
     def get_template_namespace(self):
-        "Set the variables accessible within the template."
+        "Set the items accessible within the template."
         result = super(RequestHandler, self).get_template_namespace()
         result['version'] = orderportal.__version__
         result['constants'] = constants
@@ -55,6 +54,7 @@ class RequestHandler(tornado.web.RequestHandler):
             result['alert'] = None
         else:
             result['alert'] = markdown.markdown(doc['text'], output_format='html5')
+        result['reduce'] = functools.reduce
         return result
 
     def see_other(self, name, *args, **kwargs):
@@ -87,8 +87,8 @@ class RequestHandler(tornado.web.RequestHandler):
         if settings['BASE_URL_PATH_PREFIX']:
             url = settings['BASE_URL_PATH_PREFIX'] + url
         if query:
-            query = dict([(k, utils.to_utf8(v)) for k,v in query.items()])
-            url += '?' + urllib.urlencode(query)
+            query = dict([(k, str(v)) for k,v in list(query.items())])
+            url += '?' + urllib.parse.urlencode(query)
         return url
 
     def static_url(self, path, include_host=None, **kwargs):
@@ -97,10 +97,10 @@ class RequestHandler(tornado.web.RequestHandler):
                                                      include_host=include_host,
                                                      **kwargs)
         if settings['BASE_URL_PATH_PREFIX']:
-            parts = urlparse.urlparse(url)
+            parts = urllib.parse.urlparse(url)
             path = settings['BASE_URL_PATH_PREFIX'] + parts.path
             parts = (parts[0], parts[1], path, parts[3], parts[4], parts[5])
-            url = urlparse.urlunparse(parts)
+            url = urllib.parse.urlunparse(parts)
         return url
 
     def order_reverse_url(self, order, api=False, **query):
@@ -257,7 +257,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 else:
                     if account['status'] == constants.ENABLED:
                         colleagues[account['email']] = account
-        return colleagues.values()
+        return list(colleagues.values())
 
     def get_next_counter(self, doctype):
         "Get the next counter number for the doctype."
@@ -299,6 +299,8 @@ class RequestHandler(tornado.web.RequestHandler):
         Raise HTTP 404 if no such entity.
         """
         view = self.db.view(viewname, include_docs=True)
+        if isinstance(key, bytes): # Py 2-to-3; ugly, but seems to be working...
+            key = key.decode()
         rows = list(view[key])
         if len(rows) == 1:
             return rows[0].doc
@@ -328,7 +330,7 @@ class RequestHandler(tornado.web.RequestHandler):
         """Return the filename of the attachment for the given entity.
         Raise KeyError if no attachment.
         """
-        return entity['_attachments'].keys()[0]
+        return list(entity['_attachments'].keys())[0]
 
     def get_entity_attachment_data(self, entity):
         """Return the data of the attachment for the given entity.

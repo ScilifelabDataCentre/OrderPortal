@@ -1,6 +1,6 @@
 "UI modules for tornado."
 
-from __future__ import print_function, absolute_import
+
 
 import markdown
 import tornado.web
@@ -20,7 +20,7 @@ class Icon(tornado.web.UIModule):
     def render(self, name, title=None, label=False):
         if not name:
             name = 'unknown'
-        elif not isinstance(name, basestring):
+        elif not isinstance(name, str):
             name = name[constants.DOCTYPE]
         # Order status icons are located in the site directory,
         # since they depend on the setup.
@@ -82,14 +82,14 @@ class Entity(tornado.web.UIModule):
             alt = doctype.capitalize()
             try:
                 url = self.handler.reverse_url(doctype, iuid)
-            except KeyError, msg:
+            except KeyError as msg:
                 raise KeyError(str(msg) + ':', doctype)
         if icon and icon_url:
             icon = ICON_TEMPLATE.format(url=icon_url, alt=alt, title=alt)
-            return u"""<a href="{url}">{icon} {title}</a>""".format(
+            return """<a href="{url}">{icon} {title}</a>""".format(
                 url=url, icon=icon, title=title)
         else:
-            return u"""<a href="{url}">{title}</a>""".format(
+            return """<a href="{url}">{title}</a>""".format(
                 url=url, title=title)
 
 
@@ -125,7 +125,7 @@ class Text(tornado.web.UIModule):
         except (tornado.web.HTTPError, KeyError):
             text = default
         if not text and self.handler.is_admin():
-            text = u"<i>No text defined.</i>"
+            text = "<i>No text defined.</i>"
         return markdown.markdown(text, output_format='html5')
 
 
@@ -146,8 +146,6 @@ class NoneStr(tornado.web.UIModule):
     def render(self, value, undef=''):
         if value is None:
             return undef
-        elif isinstance(value, basestring):
-            return utils.to_utf8(value)
         else:
             return str(value)
 

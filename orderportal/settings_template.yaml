@@ -90,10 +90,14 @@ ORDERS_LIST_STATUSES:
   - closed
 
 # The order fields (identifiers) to show in the orders list.
+# Given by list of dicts, where each dict has a required item 'identifier'
+# specifying the field identifier, and an optional item 'values'
+# specifying a list of values to allow filtering by.
 # Orders (forms) lacking the field will just show an empty slot.
 # The value is an example only; edit or comment out.
 ORDERS_LIST_FIELDS:
-  - project_pi
+  -
+    identifier: project_pi
 
 # Fields of orders to use when doing search; scalar fields only!
 ORDER_SEARCH_FIELDS:
@@ -110,9 +114,17 @@ COUNTRY_CODES_FILEPATH: '{SITE_DIR}/country_codes.yaml'
 SUBJECT_TERMS_FILEPATH: '{SITE_DIR}/subject_terms.yaml'
 
 # Messages; email server info.
-MESSAGE_SENDER_EMAIL: '"OrderPortal Support" <support@my-domain.com>'
+MESSAGE_SENDER_EMAIL: '"OrderPortal Support" <support@your.domain>'
 EMAIL:
   HOST: 'localhost'
+
+# Email using Google server and an account with app password set.
+EMAIL:
+  HOST: 'smtp.gmail.com'
+  PORT: 465
+  SSL: true
+  USER: 'your.account@your.domain'
+  PASSWORD: 'your app password'
 
 # Display news items.
 DISPLAY_NEWS: true

@@ -7,16 +7,14 @@ or absolute), then the dump file is created in the directory specified
 by the BACKUP_DIR variable in the settings. 
 """
 
-from __future__ import print_function, absolute_import
-
-import cStringIO
-import json
+import io
 import logging
 import os
 import tarfile
 import time
 
 import couchdb
+import simplejson as json       # XXX Python 3 kludge
 
 from orderportal import constants
 from orderportal import settings
@@ -42,11 +40,10 @@ def dump(db, filepath):
         info = tarfile.TarInfo(doc['_id'])
         data = json.dumps(doc)
         info.size = len(data)
-        outfile.addfile(info, cStringIO.StringIO(data))
+        outfile.addfile(info, io.StringIO(data))
         count_items += 1
         for attname in doc.get('_attachments', dict()):
-            info = tarfile.TarInfo("{0}_att/{1}".format(
-                doc['_id'], utils.to_ascii(attname)))
+            info = tarfile.TarInfo("{0}_att/{1}".format(doc['_id'], attname))
             attfile = db.get_attachment(doc, attname)
             if attfile is None:
                 data = ''
@@ -54,7 +51,7 @@ def dump(db, filepath):
                 data = attfile.read()
                 attfile.close()
             info.size = len(data)
-            outfile.addfile(info, cStringIO.StringIO(data))
+            outfile.addfile(info, io.StringIO(data))
             count_files += 1
     outfile.close()
     logging.info("dumped %s items and %s files to %s",
@@ -72,11 +69,9 @@ def undump(db, filepath):
         itemfile = infile.extractfile(item)
         itemdata = itemfile.read()
         itemfile.close()
-        # Handle problematic non-ASCII filenames
-        itemname2 = utils.to_ascii(item.name)
-        if itemname2 in attachments:
+        if item.name in attachments:
             # This relies on an attachment being after its item in the tarfile.
-            db.put_attachment(doc, itemdata, **attachments.pop(itemname2))
+            db.put_attachment(doc, itemdata, **attachments.pop(item.name))
             count_files += 1
         else:
             doc = json.loads(itemdata)
@@ -96,11 +91,9 @@ def undump(db, filepath):
                     doc = doc2
             db.save(doc)
             count_items += 1
-            for attname, attinfo in atts.items():
-                # Handle problematic non-ASCII filenames
-                attname2 = utils.to_ascii(attname)
-                key = "{0}_att/{1}".format(doc['_id'], attname2)
-                attachments[key] = dict(filename=attname2,
+            for attname, attinfo in list(atts.items()):
+                key = "{0}_att/{1}".format(doc['_id'], attname)
+                attachments[key] = dict(filename=attname,
                                         content_type=attinfo['content_type'])
     infile.close()
     # This will be executed on the command line, so output to console, not log.

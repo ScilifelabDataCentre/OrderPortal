@@ -1,6 +1,6 @@
 "Order form fields utility class."
 
-from __future__ import print_function, absolute_import
+
 
 import logging
 
@@ -193,7 +193,7 @@ class Fields(object):
         old = field.copy()
         field.update(new)
         diff = dict(identifier=field['identifier'])
-        for key, value in field.iteritems():
+        for key, value in field.items():
             if key == 'fields': continue
             if old.get(key) != value:
                 diff[key] = value

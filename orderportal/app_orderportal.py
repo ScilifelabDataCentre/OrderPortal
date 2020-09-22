@@ -1,7 +1,4 @@
-#!/usr/bin/env python2
 "OrderPortal web application server."
-
-from __future__ import print_function, absolute_import
 
 import logging
 import os
@@ -177,7 +174,7 @@ def main():
         login_url=(settings['BASE_URL_PATH_PREFIX'] or '') + '/login')
     # Add href URLs for the status icons.
     # This depends on order status setup.
-    for key, value in settings['ORDER_STATUSES_LOOKUP'].iteritems():
+    for key, value in settings['ORDER_STATUSES_LOOKUP'].items():
         value['href'] = application.reverse_url('site', key + '.png')
     application.listen(settings['PORT'], xheaders=True)
     pid = os.getpid()

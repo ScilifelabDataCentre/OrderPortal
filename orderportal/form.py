@@ -1,12 +1,10 @@
 "Forms are templates for orders."
 
-from __future__ import print_function, absolute_import
-
-import json
 import logging
 from collections import OrderedDict as OD
 
 import tornado.web
+import simplejson as json       # XXX Python 3 kludge
 
 from . import constants
 from . import saver
@@ -46,7 +44,7 @@ class FormSaver(saver.Saver):
         "Clone all fields from the given form."
         for field in form['fields']:
             self.fields.clone(field)
-        self.changed['copied'] = u"from {0}".format(form['_id'])
+        self.changed['copied'] = "from {0}".format(form['_id'])
 
     def delete_field(self, identifier):
         if identifier not in self.fields:
@@ -179,7 +177,7 @@ class FormLogs(RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.render('logs.html',
-                    title=u"Logs for form '{0}'".format(form['title']),
+                    title="Logs for form '{0}'".format(form['title']),
                     entity=form,
                     logs=self.get_logs(form['_id']))
 
@@ -213,7 +211,7 @@ class FormCreate(RequestHandler):
                     raise ValueError('Imported JSON is not a form.')
             except (KeyError, IndexError):
                 pass
-            except Exception, msg:
+            except Exception as msg:
                 self.see_other('home', error="Error importing form: %s" % msg)
                 return
             else:
@@ -235,7 +233,7 @@ class FormEdit(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.render('form_edit.html',
-                    title=u"Edit form '{0}'".format(form['title']),
+                    title="Edit form '{0}'".format(form['title']),
                     form=form)
 
     @tornado.web.authenticated
@@ -263,7 +261,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         try:
             self.check_fields_editable(form)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('form', form['_id'], error=str(msg))
             return
         # Get existing field identifiers
@@ -272,7 +270,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
             identifiers.update(self._get_identifiers(row.doc['fields']))
         identifiers.difference_update(self._get_identifiers(form['fields']))
         self.render('field_create.html',
-                    title=u"Create field in form '{0}'".format(form['title']),
+                    title="Create field in form '{0}'".format(form['title']),
                     form=form,
                     fields=Fields(form),
                     identifiers=identifiers)
@@ -293,13 +291,13 @@ class FormFieldCreate(FormMixin, RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         try:
             self.check_fields_editable(form)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('form', form['_id'], error=str(msg))
             return
         try:
             with FormSaver(doc=form, rqh=self) as saver:
                 saver.add_field()
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('form', form['_id'], error=str(msg))
         else:
             self.see_other('form', form['_id'])
@@ -314,7 +312,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         try:
             self.check_fields_editable(form)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('form', form['_id'], error=str(msg))
             return
         fields = Fields(form)
@@ -339,13 +337,13 @@ class FormFieldEdit(FormMixin, RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         try:
             self.check_fields_editable(form)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('form', form['_id'], error=str(msg))
             return
         try:
             with FormSaver(doc=form, rqh=self) as saver:
                 saver.update_field(identifier)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('form', form['_id'], error=str(msg))
         else:
             self.see_other('form', form['_id'])
@@ -356,13 +354,13 @@ class FormFieldEdit(FormMixin, RequestHandler):
         form = self.get_entity(iuid, doctype=constants.FORM)
         try:
             self.check_fields_editable(form)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('form', form['_id'], error=str(msg))
             return
         try:
             with FormSaver(doc=form, rqh=self) as saver:
                 saver.delete_field(identifier)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('form', form['_id'], error=str(msg))
         else:
             self.see_other('form', form['_id'])
@@ -398,7 +396,7 @@ class FormClone(RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(rqh=self) as saver:
-            saver['title'] = u"Clone of {0}".format(form['title'])
+            saver['title'] = "Clone of {0}".format(form['title'])
             saver['version'] = form.get('version')
             saver['description'] = form.get('description')
             saver['instruction'] = form.get('instruction')

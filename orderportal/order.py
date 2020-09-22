@@ -1,18 +1,16 @@
 "Orders are the whole point of this app. The user fills in info for facility."
 
-from __future__ import print_function, absolute_import
-
-import json
+import io
 import logging
 import os.path
 import re
 import traceback
-import urlparse
+import urllib.parse
 import zipfile
 from collections import OrderedDict as OD
-from cStringIO import StringIO
 
 import couchdb
+import simplejson as json       # XXX Python 3 kludge
 import tornado.web
 
 from . import constants
@@ -90,10 +88,10 @@ class OrderSaver(saver.Saver):
         # Next try to set the value of a field from the corresponding
         # value defined for the account. For use with e.g. invoice address.
         # Do this only if not done already from university data.
-        for target, source in autopop.items():
+        for target, source in list(autopop.items()):
             if target not in self.fields: continue
             value = self['fields'].get(target)
-            if isinstance(value, basestring):
+            if isinstance(value, str):
                 if value: continue
             elif value is not None: # Value 0 (zero) must be possible to set
                 continue
@@ -114,7 +112,7 @@ class OrderSaver(saver.Saver):
 
     def add_file(self, infile):
         "Add the given file to the files. Return the unique filename."
-        filename = utils.to_ascii(os.path.basename(infile.filename))
+        filename = os.path.basename(infile.filename)
         if filename in self.filenames:
             count = 1
             while True:
@@ -149,7 +147,7 @@ class OrderSaver(saver.Saver):
         if not isinstance(tags, list):
             raise ValueError('tags data is not a list')
         for s in tags:
-            if not isinstance(s, basestring):
+            if not isinstance(s, str):
                 raise ValueError('tags list item is not a string')
         # Allow staff to add prefixed tags.
         if self.rqh.is_staff():
@@ -182,11 +180,11 @@ class OrderSaver(saver.Saver):
                 except KeyError:
                     pass
                 else:
-                    if isinstance(href, basestring):
+                    if isinstance(href, str):
                         title = link.get('title') or href
                         external.append({'href': href,
                                          'title': title})
-            elif isinstance(link, basestring):
+            elif isinstance(link, str):
                 link = link.strip()
                 if link:
                     parts = link.split()
@@ -248,7 +246,7 @@ class OrderSaver(saver.Saver):
                     except (ValueError, TypeError):
                         n_rows = 0
                     table = []
-                    for i in xrange(n_rows):
+                    for i in range(n_rows):
                         row = []
                         for j, coldef in enumerate(coldefs):
                             name = "_table_%s_%i_%i" % (identifier, i, j)
@@ -325,7 +323,7 @@ class OrderSaver(saver.Saver):
             if select_id:
                 select_value = self.doc['fields'].get(select_id)
                 if select_value is not None:
-                    select_value = unicode(select_value).lower()
+                    select_value = str(select_value).lower()
                 if_value = field.get('visible_if_value')
                 if if_value:
                     if_value = if_value.lower()
@@ -366,7 +364,7 @@ class OrderSaver(saver.Saver):
                     except (TypeError, ValueError):
                         raise ValueError('not a boolean value')
                 elif field['type'] == constants.URL:
-                    parsed = urlparse.urlparse(value)
+                    parsed = urllib.parse.urlparse(value)
                     if not (parsed.scheme and parsed.netloc):
                         raise ValueError('incomplete URL')
                 elif field['type'] == constants.SELECT:
@@ -381,7 +379,7 @@ class OrderSaver(saver.Saver):
                         if v and v not in field['multiselect']:
                             raise ValueError('value not among alternatives')
                 elif field['type'] == constants.TEXT:
-                    if not isinstance(value, basestring):
+                    if not isinstance(value, str):
                         raise ValueError('value is not a text string')
                 elif field['type'] == constants.DATE:
                     if not constants.DATE_RX.match(value):
@@ -396,10 +394,10 @@ class OrderSaver(saver.Saver):
                             raise ValueError('table value is not a list of lists')
                 elif field['type'] == constants.FILE:
                     pass
-        except ValueError, msg:
+        except ValueError as msg:
             self.doc['invalid'][field['identifier']] = str(msg)
             return False
-        except Exception, msg:
+        except Exception as msg:
             self.doc['invalid'][field['identifier']] = "System error: %s" % msg
             return False
         else:
@@ -409,8 +407,8 @@ class OrderSaver(saver.Saver):
         "Set the history the JSON data (dict of status->date)"
         if not isinstance(history, dict):
             raise ValueError('history data is not a dictionary')
-        for status, date in history.items():
-            if not (date is None or (isinstance(date, basestring) and
+        for status, date in list(history.items()):
+            if not (date is None or (isinstance(date, str) and
                                      constants.DATE_RX.match(date))):
                 raise ValueError('invalid date in history data')
             if not status in settings['ORDER_STATUSES_LOOKUP']:
@@ -435,14 +433,9 @@ class OrderSaver(saver.Saver):
                         self.db.delete_attachment(self.doc, filename)
             except AttributeError:
                 pass
-            # Using cStringIO.StringIO here is a kludge.
-            # Don't ask me why this was required on a specific machine.
-            # The problem appeared on a Python 2.6 system and involved
-            # Unicode, but I was unable to isolate it.
-            # I found this solution by chance...
             for file in self.files:
                 self.db.put_attachment(self.doc,
-                                       StringIO(file['body']),
+                                       file['body'],
                                        filename=file['filename'],
                                        content_type=file['content_type'])
 
@@ -604,8 +597,8 @@ class OrderMixin(object):
             # Is there a visibility condition? If so, check it.
             fid = field.get('visible_if_field')
             if fid:
-                value = unicode(order['fields'].get(fid)).lower()
-                opt = unicode(field.get('visible_if_value')).lower().split('|')
+                value = str(order['fields'].get(fid)).lower()
+                opt = str(field.get('visible_if_value')).lower().split('|')
                 if value not in opt: continue
             item = OD(identifier=field['identifier'])
             item['label'] = field.get('label') or \
@@ -621,9 +614,6 @@ class OrderMixin(object):
             result.append(item)
             if field['type'] == constants.GROUP:
                 result.extend(self.get_fields(order, depth+1, field['fields']))
-        for item in result:
-            for key, value in item.iteritems():
-                item[key] = utils.to_utf8(value)
         return result
 
     def get_order_status(self, order):
@@ -748,8 +738,18 @@ class OrderApiV1Mixin(ApiV1Mixin):
                     href=self.absolute_reverse_url('order_file',
                                                    order['_id'],
                                                    filename))
-        return data
+        # XXX Terrible kludge! Converts binary keys and values to string.
+        # XXX A Python3 issue, possible due to bad old CouchDB interface.
+        return json.loads(json.dumps(data))
 
+def convert_to_strings(doc):
+    items = list(doc.items())
+    for key, value in items:
+        if isinstance(key, bytes):
+            print(key)
+            doc[key.decode()] = doc.pop(key)
+        if isinstance(value, dict):
+            convert_to_strings(value)
 
 class Order(OrderMixin, RequestHandler):
     "Order page."
@@ -758,12 +758,12 @@ class Order(OrderMixin, RequestHandler):
     def get(self, iuid):
         try:
             order = self.get_order(iuid)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
         try:
             self.check_readable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
         form = self.get_form(order['form'])
@@ -776,7 +776,7 @@ class Order(OrderMixin, RequestHandler):
                               content_type=stub['content_type']))
             files.sort(key=lambda i: i['filename'].lower())
         self.render('order.html',
-                    title=u"{0} '{1}'".format(utils.terminology('Order'),
+                    title="{0} '{1}'".format(utils.terminology('Order'),
                                               order['title']),
                     order=order,
                     account_names=self.get_account_names([order['owner']]),
@@ -802,7 +802,7 @@ class Order(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
             self.check_editable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
         self.delete_logs(order['_id'])
@@ -816,22 +816,22 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
     def get(self, iuid):
         try:
             order = self.get_order(iuid)
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(404, reason=str(msg))
         try:
             self.check_readable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
         self.write(self.get_order_json(order, full=True))
 
     def post(self, iuid):
         try:
             order = self.get_order(iuid)
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(404, reason=str(msg))
         try:
             self.check_editable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
         data = self.get_json_body()
         try:
@@ -861,7 +861,7 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
                         saver.set_history(data['history'])
                     except KeyError:
                         pass
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(400, reason=str(msg))
         else:
             self.write(self.get_order_json(order, full=True))
@@ -874,11 +874,11 @@ class OrderCsv(OrderMixin, RequestHandler):
     def get(self, iuid):
         try:
             order = self.get_order(iuid)
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(404, reason=str(msg))
         try:
             self.check_readable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
         writer = self.write_order(order)
         self.write(writer.getvalue())
@@ -925,7 +925,7 @@ class OrderCsv(OrderMixin, RequestHandler):
         writer.writerow(('Field', 'Label', 'Depth', 'Type', 'Value',
                          'Restrict read', 'Restrict write', 'Invalid'))
         for field in self.get_fields(order):
-            values = field.values()[:-1] # Skip help text
+            values = list(field.values())[:-1] # Skip help text
             # Special case for table field; spans more than one row
             if field['type'] == constants.TABLE:
                 table = values[4] # Column for 'Value'
@@ -957,7 +957,7 @@ class OrderCsv(OrderMixin, RequestHandler):
 
     def write_finish(self, order):
         self.set_header('Content-Type', constants.CSV_MIME)
-        filename = utils.to_ascii(order.get('identifier') or order['_id'])
+        filename = order.get('identifier') or order['_id']
         self.set_header('Content-Disposition',
                         'attachment; filename="%s.csv"' % filename)
         
@@ -970,7 +970,7 @@ class OrderXlsx(OrderCsv):
 
     def write_finish(self, order):
         self.set_header('Content-Type', constants.XLSX_MIME)
-        filename = utils.to_ascii(order.get('identifier') or order['_id'])
+        filename = order.get('identifier') or order['_id']
         self.set_header('Content-Disposition',
                         'attachment; filename="%s.xlsx"' % filename)
 
@@ -981,29 +981,28 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
     def get(self, iuid):
         try:
             order = self.get_order(iuid)
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(404, reason=str(msg))
         try:
             self.check_readable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        zip_stringio = StringIO()
-        # This should use a context, but it is not implemented in Python 2.6
-        writer = zipfile.ZipFile(zip_stringio, 'w')
-        name = order.get('identifier') or order['_id']
-        csvwriter = self.write_order(order, writer=utils.CsvWriter('Order'))
-        writer.writestr(name + '.csv', csvwriter.getvalue())
-        xlsxwriter = self.write_order(order, writer=utils.XlsxWriter('Order'))
-        writer.writestr(name + '.xlsx', xlsxwriter.getvalue())
-        writer.writestr(name + '.json',
-                        json.dumps(self.get_order_json(order, full=True)))
-        for filename in sorted(order.get('_attachments', [])):
-            outfile = self.db.get_attachment(order, filename)
-            writer.writestr(filename, outfile.read())
-        writer.close()
-        self.write(zip_stringio.getvalue())
+        zip_io = io.BytesIO()
+        with zipfile.ZipFile(zip_io, 'w') as writer:
+            name = order.get('identifier') or order['_id']
+            csvwriter = self.write_order(order, writer=utils.CsvWriter('Order'))
+            writer.writestr(name + '.csv', csvwriter.getvalue())
+            xlsxwriter = self.write_order(order,
+                                          writer=utils.XlsxWriter('Order'))
+            writer.writestr(name + '.xlsx', xlsxwriter.getvalue())
+            writer.writestr(name + '.json',
+                            json.dumps(self.get_order_json(order, full=True)))
+            for filename in sorted(order.get('_attachments', [])):
+                outfile = self.db.get_attachment(order, filename)
+                writer.writestr(filename, outfile.read())
+        self.write(zip_io.getvalue())
         self.set_header('Content-Type', constants.ZIP_MIME)
-        filename = utils.to_ascii(order.get('identifier')) or order['_id']
+        filename = order.get('identifier') or order['_id']
         self.set_header('Content-Disposition',
                         'attachment; filename="%s.zip"' % filename)
 
@@ -1111,7 +1110,7 @@ class Orders(RequestHandler):
     def filter_by_forms(self, form_title, forms, orders=None):
         "Return orders list if any form filter, or None if none."
         if form_title:
-            forms = set([f[0] for f in forms.items() if f[1] == form_title])
+            forms = set([f[0] for f in list(forms.items()) if f[1] == form_title])
             if orders is None:
                 orders = []
                 for form in forms:
@@ -1237,15 +1236,15 @@ class OrderLogs(OrderMixin, RequestHandler):
     def get(self, iuid):
         try:
             order = self.get_order(iuid)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
         try:
             self.check_readable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
-        title = u"Logs for {0} '{1}'".format(utils.terminology('order'),
+        title = "Logs for {0} '{1}'".format(utils.terminology('order'),
                                              order['title'] or '[no title]')
         self.render('logs.html',
                     title=title,
@@ -1265,7 +1264,7 @@ class OrderCreate(OrderMixin, RequestHandler):
                                  .format(utils.terminology('order')))
             self.check_creation_enabled()
             form = self.get_form(self.get_argument('form'), check=True)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
         else:
             self.render('order_create.html', form=form)
@@ -1279,7 +1278,7 @@ class OrderCreate(OrderMixin, RequestHandler):
                 saver.create(form)
                 saver.autopopulate()
                 saver.check_fields_validity()
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
         else:
             self.see_other('order_edit', saver.doc['_id'])
@@ -1292,7 +1291,7 @@ class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         "Form IUID and title in the JSON body of the request."
         try:
             self.check_login()
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
         try:
             self.check_creation_enabled()
@@ -1304,7 +1303,7 @@ class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
                 saver.create(form, title=data.get('title'))
                 saver.autopopulate()
                 saver.check_fields_validity()
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(400, reason=str(msg))
         else:
             self.write(self.get_order_json(saver.doc, full=True))
@@ -1318,7 +1317,7 @@ class OrderEdit(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
             self.check_editable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
         colleagues = sorted(self.get_account_colleagues(self.current_user['email']))
@@ -1370,7 +1369,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             tableinput.append("</tr>")
             tableinputs[field['identifier']] = ''.join(tableinput)
         self.render('order_edit.html',
-                    title=u"Edit {0} '{1}'".format(utils.terminology('order'),
+                    title="Edit {0} '{1}'".format(utils.terminology('order'),
                                                    order['title'] or '[no title]'),
                     order=order,
                     tags=tags,
@@ -1386,7 +1385,7 @@ class OrderEdit(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
             self.check_editable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
         flag = self.get_argument('__save__', None)
@@ -1446,7 +1445,7 @@ class OrderClone(OrderMixin, RequestHandler):
         form = self.get_form(order['form'])
         erased_files = set()
         with OrderSaver(rqh=self) as saver:
-            saver.create(form, title=u"Clone of {0}".format(
+            saver.create(form, title="Clone of {0}".format(
                 order['title'] or '[no title]'))
             for field in saver.fields:
                 id = field['identifier']
@@ -1484,7 +1483,7 @@ class OrderTransition(OrderMixin, RequestHandler):
                 raise ValueError('disallowed status transition')
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver.set_status(targetid)
-        except ValueError, msg:
+        except ValueError as msg:
             self.set_error_flash(msg)
         self.redirect(self.order_reverse_url(order))
 
@@ -1498,7 +1497,7 @@ class OrderTransitionApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             self.check_editable(order)
             with OrderSaver(doc=order, rqh=self) as saver:
                 saver.set_status(targetid)
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
         self.write(self.get_order_json(order, full=True))
 
@@ -1513,7 +1512,7 @@ class OrderFile(OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
             self.check_readable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
         outfile = self.db.get_attachment(order, filename)
@@ -1524,7 +1523,6 @@ class OrderFile(OrderMixin, RequestHandler):
             outfile.close()
             self.set_header('Content-Type',
                             order['_attachments'][filename]['content_type'])
-            filename = utils.to_ascii(filename)
             self.set_header('Content-Disposition',
                             'attachment; filename="%s"' % filename)
 
@@ -1601,7 +1599,7 @@ class OrderReport(OrderMixin, RequestHandler):
             self.set_header('Content-Type', content_type)
             name = order.get('identifier') or order['_id']
             ext = utils.get_filename_extension(content_type)
-            filename = utils.to_ascii("%s_report%s" % (name, ext))
+            filename = "%s_report%s" % (name, ext)
             self.set_header('Content-Disposition',
                             'attachment; filename="%s"' % filename)
 
@@ -1644,7 +1642,7 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         try:
             self.check_readable(order)
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
         try:
             report = order['report']
@@ -1658,14 +1656,14 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         self.set_header('Content-Type', content_type)
         name = order.get('identifier') or order['_id']
         ext = utils.get_filename_extension(content_type)
-        filename = utils.to_ascii("%s_report%s" % (name, ext))
+        filename = "%s_report%s" % (name, ext)
         self.set_header('Content-Disposition',
                         'attachment; filename="%s"' % filename)
 
     def put(self, iuid):
         try:
             self.check_admin()
-        except ValueError, msg:
+        except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
         order = self.get_entity(iuid, doctype=constants.ORDER)
         with OrderSaver(doc=order, rqh=self) as saver:
