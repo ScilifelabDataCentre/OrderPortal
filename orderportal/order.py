@@ -299,6 +299,9 @@ class OrderSaver(saver.Saver):
                             value = False
                         else:
                             continue
+                # Remove all carriage-returns from string.
+                if value is not None:
+                    value = value.replace('\r', '')
             # Record any change to the value.
             if value != self.doc['fields'].get(identifier):
                 changed = self.changed.setdefault('fields', dict())
@@ -314,7 +317,8 @@ class OrderSaver(saver.Saver):
                 self.check_validity(field)
 
     def check_validity(self, field):
-        """Check validity of field value. Convert for some field types.
+        """Check validity of field value.
+        Also convert the value for some field types.
         Skip field if not visible, else check recursively in postorder.
         Return True if valid, False otherwise.
         """
