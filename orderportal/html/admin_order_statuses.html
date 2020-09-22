@@ -10,13 +10,13 @@
 
 <div class="well">
   <p>
-    All {{ terminology('orders') }} have a status at all times. The
-    status can assume only one of the values defined in the YAML file
+    All {{ terminology('orders') }} have one and only one status at all times.
+    The status value is one of those defined in the YAML file
     <code>{{ settings.get('ORDER_STATUSES_FILEPATH') }}</code> which
     is read on startup of the OrderPortal server.
   </p>
   <p>
-    To change the set of possible status values, the YAML file must be
+    To change the set of allowed status values, the YAML file must be
     edited and the OrderPortal server restarted. Only the sysadmin for
     the server machine can do this. A status can be added, <b>but must
     never be removed</b>, since orders with that deleted status would

@@ -9,6 +9,11 @@
 {% block main_content %}
 <div class="well">
   <p>
+    A message is sent by email to a set of recipients when an order is
+    set to a given status. The currently defined messages are listed
+    below.
+  </p>
+  <p>
     The templates for {{ terminology('order') }} messages are defined
     in the YAML file
     <code>{{ settings.get('ORDER_MESSAGES_FILEPATH') }}</code> which
@@ -19,7 +24,7 @@
     OrderPortal server restarted. Only the sysadmin for the server
     machine can do this.
   </p>
-  <table class="table">
+  <table class="table table-small">
     <tr>
       <th>Variable</th>
       <th>Value</th>
