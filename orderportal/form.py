@@ -194,10 +194,7 @@ class FormCreate(RequestHandler):
     def post(self):
         self.check_admin()
         with FormSaver(rqh=self) as saver:
-            saver['title'] = self.get_argument('title')
-            if not saver['title']:
-                self.see_other('forms', error='No title given.')
-                return
+            saver['title'] = self.get_argument('title') or '[no title]'
             saver['version'] = self.get_argument('version', None)
             saver['description'] = self.get_argument('description', None)
             saver['instruction'] = self.get_argument('instruction', None)
@@ -241,7 +238,7 @@ class FormEdit(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         with FormSaver(doc=form, rqh=self) as saver:
-            saver['title'] = self.get_argument('title')
+            saver['title'] = self.get_argument('title') or '[no title]'
             saver['version'] = self.get_argument('version', None)
             saver['description'] = self.get_argument('description', None)
             saver['instruction'] = self.get_argument('instruction', None)
