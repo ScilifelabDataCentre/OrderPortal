@@ -267,6 +267,23 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
       </div>
     </span>
   </div>
+
+  {% elif field['type'] == constants.TEXT %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+	<label for="mexlength">Maxlength</label>
+	<input type="int" class="form-control"
+	       id="maxlength" name="maxlength"
+	       value="{{ field.get('maxlength') or ''}}">
+      </div>
+    </div>
+    <span class="help-block">
+      Maximum number of characters allowed in the text.
+    </span>
+  </div>
+
+
   {% end %} {# if field['type'] == ... #}
 
   {% if field['type'] != constants.GROUP %}
@@ -288,7 +305,7 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
       </div>
     </div>
   </div>
-  {% end %}
+  {% end %} {# if field['type'] != constants.GROUP #}
 
   <div class="form-group">
     <div class="row">

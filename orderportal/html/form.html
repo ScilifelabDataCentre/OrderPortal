@@ -243,6 +243,8 @@
           {% module ShortenedPre(field.get('multiselect')) %}
 	  {% elif field['type'] == constants.TABLE %}
           {% module ShortenedPre(field.get('table')) %}
+	  {% elif field['type'] == constants.TEXT %}
+          (maxlength {{ field.get('maxlength') or '-' }})
 	  {% end %}
 	</td>
 	<td>

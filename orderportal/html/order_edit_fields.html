@@ -218,6 +218,9 @@
     <textarea class="form-control"
 	      name="{{ field['identifier'] }}"
 	      id="{{ field['identifier'] }}"
+              {% if field.get('maxlength') %}
+              maxlength="{{ field['maxlength'] }}"
+              {% end %}
 	      >{{ value or '' }}</textarea>
 
     {% elif field['type'] == constants.DATE %}
@@ -297,9 +300,11 @@
     <span class="help-block extra-indent extra-spacing">
       {% module Markdown(field.get('description')) %}
       {% if field['type'] == constants.TEXT %}
-      (Optional: 
+      {% if field.get('maxlength') %}
+      Max {{ field['maxlength'] }} characters.
+      {% end %}
       <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
-      notation may be used to format the text.)
+      notation may optionally be used to format the text.
       {% elif field['type'] == constants.TABLE %}
       <strong>Note:</strong> Table rows with an empty (or "[no value]")
       first field will be deleted.
