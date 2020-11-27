@@ -8,13 +8,13 @@ by the BACKUP_DIR variable in the settings.
 """
 
 import io
+import json
 import logging
 import os
 import tarfile
 import time
 
 import couchdb
-import simplejson as json       # XXX Python 3 kludge
 
 from orderportal import constants
 from orderportal import settings
@@ -38,9 +38,9 @@ def dump(db, filepath):
         if doc.get(constants.DOCTYPE) is None: continue
         del doc['_rev']
         info = tarfile.TarInfo(doc['_id'])
-        data = json.dumps(doc)
+        data = json.dumps(doc).encode('utf-8')
         info.size = len(data)
-        outfile.addfile(info, io.StringIO(data))
+        outfile.addfile(info, io.BytesIO(data))
         count_items += 1
         for attname in doc.get('_attachments', dict()):
             info = tarfile.TarInfo("{0}_att/{1}".format(doc['_id'], attname))
@@ -51,7 +51,7 @@ def dump(db, filepath):
                 data = attfile.read()
                 attfile.close()
             info.size = len(data)
-            outfile.addfile(info, io.StringIO(data))
+            outfile.addfile(info, io.BytesIO(data))
             count_files += 1
     outfile.close()
     logging.info("dumped %s items and %s files to %s",
