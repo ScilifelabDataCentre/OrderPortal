@@ -1527,8 +1527,10 @@ class OrderFile(OrderMixin, RequestHandler):
             outfile.close()
             self.set_header('Content-Type',
                             order['_attachments'][filename]['content_type'])
-            self.set_header('Content-Disposition',
-                            'attachment; filename="%s"' % filename)
+            # Try to avoid strange latin-1 encoding issue with tornado.
+            b = 'attachment; filename="%s"' % filename
+            b = b.encode('utf-8')
+            self.set_header('Content-Disposition', b)
 
     @tornado.web.authenticated
     def post(self, iuid, filename=None):
