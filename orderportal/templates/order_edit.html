@@ -116,40 +116,6 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   </div>
   {% end %} {#if settings.get('ORDER_LINKS') #}
 
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-9">
-	<label class="control-label" for="__owner__">Owner</label>
-	{% if is_admin %}
-	<input type="text" class="form-control"
-	       name="__owner__" id="__owner__"
-	       value="{{ order['owner'] }}">
-	{% elif is_staff %}
-	<p id="__owner__" class="form-control-static">{{ order['owner'] }}</p>
-	{% elif colleagues %}
-	<select class="form-control" name="__owner__" id="__owner__">
-	  {% for colleague in colleagues %}
-	    <option {{ colleague == current_user['email'] and 'selected' or '' }}>{{ colleague }}</option>
-	  {% end %}
-	</select>
-        {% else %}
-	<p id="__owner__" class="form-control-static">{{ order['owner'] }}</p>
-	{% end %}
-      </div>
-    </div>
-    <span class="help-block extra-indent">
-      {% if is_admin %}
-      The {{ terminology('order') }}'s owner specified by email address.
-      May be changed to another account.
-      {% elif colleagues %}
-      The {{ terminology('order') }}'s owner may be changed to an account
-      in your groups, if any.
-      <strong>NOTE:</strong>
-      You will then no longer be able to edit the {{ terminology('order') }}.
-      {% end %}
-    </span>
-  </div>
-
   {# Recursion: 'include' cannot be used! #}
   {% module Template('order_edit_fields.html', fields=fields, order=order, is_staff=is_staff, hidden_fields=hidden_fields, tableinputs=tableinputs) %}
 
