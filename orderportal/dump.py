@@ -36,7 +36,7 @@ def dump(db, filepath):
         doc = db[key]
         # Only documents that explicitly belong to the application
         if doc.get(constants.DOCTYPE) is None: continue
-        del doc['_rev']
+        doc.pop('_rev')
         info = tarfile.TarInfo(doc['_id'])
         data = json.dumps(doc).encode('utf-8')
         info.size = len(data)

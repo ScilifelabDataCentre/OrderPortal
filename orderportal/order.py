@@ -1605,10 +1605,7 @@ class OrderFile(OrderMixin, RequestHandler):
                     if fields[key]['required']:
                         saver.doc['invalid'][key] = 'missing value'
                     else:
-                        try:
-                            del saver.doc['invalid'][key]
-                        except KeyError:
-                            pass
+                        saver.doc['invalid'].pop(key, None)
                     break
             saver.delete_filename = filename
             saver.changed['file_deleted'] = filename
