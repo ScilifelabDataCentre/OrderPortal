@@ -57,6 +57,7 @@ def main():
             OrderTransition, name='order_transition'),
         url(r'/api/v1/order/([0-9a-f]{32})/transition/(\w+)',
             OrderTransitionApiV1, name='order_transition_api'),
+        url(r'/order/([0-9a-f]{32})/owner', OrderOwner, name='order_owner'),
         url(r'/order/([0-9a-f]{32})/clone', OrderClone, name='order_clone'),
         url(r'/order/([0-9a-f]{32})/file', OrderFile, name='order_file_add'),
         url(r'/order/([0-9a-f]{32})/file/([^/]+)',OrderFile,name='order_file'),
@@ -169,7 +170,7 @@ def main():
         cookie_secret=settings['COOKIE_SECRET'],
         xsrf_cookies=True,
         ui_modules=uimodules,
-        template_path=os.path.join(settings['ROOT_DIR'], 'html'),
+        template_path=os.path.join(settings['ROOT_DIR'], 'templates'),
         static_path=os.path.join(settings['ROOT_DIR'], 'static'),
         login_url=(settings['BASE_URL_PATH_PREFIX'] or '') + '/login')
     # Add href URLs for the status icons.
