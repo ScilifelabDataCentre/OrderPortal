@@ -10,8 +10,14 @@ from . import settings
 DESIGNS = dict(
 
     account=dict(
-        api_key=dict(map=       # account/api_key
+        all=dict(reduce="_count", # account/all
+                 map=
 """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    emit(doc.modified, null);
+}"""),
+        api_key=dict(map=       # account/api_key
+"""function(doc) { 
     if (doc.orderportal_doctype !== 'account') return;
     if (!doc.api_key) return;
     emit(doc.api_key, doc.email);
@@ -52,6 +58,12 @@ DESIGNS = dict(
 }""")),
 
     form=dict(
+        all=dict(reduce="_count", # form/all
+                 map=
+"""function(doc) {
+    if (doc.orderportal_doctype !== 'form') return;
+    emit(doc.modified, null);
+}"""),
         enabled=dict(map=       # form/enabled
 """function(doc) {
     if (doc.orderportal_doctype !== 'form') return;

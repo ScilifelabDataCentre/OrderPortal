@@ -1,7 +1,5 @@
 "Set the password for an account."
 
-
-
 import sys
 
 from orderportal import constants

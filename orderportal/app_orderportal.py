@@ -32,7 +32,8 @@ def main():
     utils.initialize()
 
     url = tornado.web.url
-    handlers = [url(r'/', Home, name='home')]
+    handlers = [url(r'/', Home, name='home'),
+                url(r'/status', Status, name="status")]
     try:
         regexp = settings['ORDER_IDENTIFIER_REGEXP']
     except KeyError:
