@@ -298,7 +298,7 @@ class RequestHandler(tornado.web.RequestHandler):
         """Get the entity by the view name and the key.
         Raise HTTP 404 if no such entity.
         """
-        view = self.db.view(viewname, include_docs=True)
+        view = self.db.view(viewname, reduce=False, include_docs=True)
         if isinstance(key, bytes): # Py 2-to-3; ugly, but seems to be working...
             key = key.decode()
         rows = list(view[key])

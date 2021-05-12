@@ -198,3 +198,25 @@ class NoSuchEntityApiV1(RequestHandler):
     def check_xsrf_cookie(self):
         "Do not check for XSRF cookie when API."
         pass
+
+
+class Status(RequestHandler):
+    "Return JSON for the current status and some counts for the database."
+
+    def get(self):
+        try:
+            n_orders = list(self.db.view("order/status", reduce=True))[0].value
+        except IndexError:
+            n_orders = 0
+        try:
+            n_forms = list(self.db.view("form/all", reduce=True))[0].value
+        except IndexError:
+            n_forms = 0
+        try:
+            n_accounts = list(self.db.view("account/all", reduce=True))[0].value
+        except IndexError:
+            n_accounts = 0
+        self.write(dict(status="OK",
+                        n_orders=n_orders,
+                        n_forms=n_forms,
+                        n_accounts=n_accounts))
