@@ -65,8 +65,14 @@ class Settings(RequestHandler):
                   'ORDER_MESSAGES_FILEPATH', 'ORDER_USER_TAGS', 
                   'ORDERS_SEARCH_FIELDS', 'ORDERS_LIST_FIELDS',
                   'ORDERS_LIST_STATUSES', 'ORDER_AUTOPOPULATE',
-                  'UNIVERSITIES_FILEPATH', 'COUNTRY_CODES_FILEPATH',
-                  'SUBJECT_TERMS_FILEPATH']
+                  'ORDER_TAGS', 'UNIVERSITIES_FILEPATH',
+                  'COUNTRY_CODES_FILEPATH', 'SUBJECT_TERMS_FILEPATH',
+                  'ACCOUNT_PI_INFO', 'ACCOUNT_POSTAL_INFO',
+                  'ACCOUNT_INVOICE_INFO', 'ACCOUNT_FUNDER_INFO',
+                  'ACCOUNT_FUNDER_INFO_GENDER',
+                  'ACCOUNT_FUNDER_INFO_GROUP_SIZE',
+                  'ACCOUNT_FUNDER_INFO_SUBJECT',
+                  'ACCOUNT_DEFAULT_COUNTRY_CODE']
         self.render('settings.html', params=params, settings=mod_settings)
 
 

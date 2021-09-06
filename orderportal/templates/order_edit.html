@@ -12,10 +12,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 
 {% block content %}
 <div class="row">
-  <div class="col-md-10">
-    {% module Markdown(form.get('instruction')) %}
-  </div>
-  <div class="col-md-2">
+  <div class="col-md-2 col-md-offset-10">
     <form action="{{ reverse_url('order', order['_id']) }}"
 	  class="allow_leaving_without_question"
 	  role="form"
@@ -38,6 +35,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
       method="POST">
   {% module xsrf_form_html() %}
 
+  {% module Markdown(form.get('instruction')) %}
   {% include 'order_edit_save.html' %}
 
   <div class="form-group">
@@ -129,6 +127,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   </div>
 
   {% include 'order_edit_save.html' %}
+  {% module Markdown(form.get('instruction')) %}
 </form>
 {% end %} {# block content #}
 

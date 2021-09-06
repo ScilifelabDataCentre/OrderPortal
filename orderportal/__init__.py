@@ -4,7 +4,7 @@ An order can be a project application, a request, a report, etc.
 
 import os
 
-__version__ = '4.0.16'
+__version__ = '4.0.17'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -58,6 +58,7 @@ settings = dict(
     DISPLAY_MENU_DOCUMENTS=True,
     DISPLAY_MENU_CONTACT=True,
     DISPLAY_MENU_ABOUT_US=True,
+    DISPLAY_TEXT_MARKDOWN_NOTATION_INFO=True,
     ORDER_IDENTIFIER_FORMAT=None,
     ORDER_IDENTIFIER_REGEXP=None,
     ORDER_TAGS=True,

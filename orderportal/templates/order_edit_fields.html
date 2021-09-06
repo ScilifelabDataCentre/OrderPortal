@@ -303,8 +303,10 @@
       {% if field.get('maxlength') %}
       Max {{ field['maxlength'] }} characters.
       {% end %}
+      {% if settings['DISPLAY_TEXT_MARKDOWN_NOTATION_INFO'] %}
       <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
       notation may optionally be used to format the text.
+      {% end %}
       {% elif field['type'] == constants.TABLE %}
       <strong>Note:</strong> Table rows with an empty (or "[no value]")
       first field will be deleted.
