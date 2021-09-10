@@ -67,6 +67,21 @@
   </div>
 
   <div class="form-group">
+    <label for="disclaimer">Disclaimer</label>
+    <textarea rows="6" class="form-control"
+	      id="disclaimer" name="disclaimer"
+	      >{{ form.get('disclaimer') or '' }}</textarea>
+    <span class="help-block">
+      The disclaimer is displayed at the bottom of the order edit page,
+      and in the header part of the order view page.
+      <br>
+      (Optional: 
+      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+      notation may be used to format the text.)
+    </span>
+  </div>
+
+  <div class="form-group">
     <label for="ordinal">Ordinal</label>
     <input type="text" class="form-control" name="ordinal" id="ordinal"
 	   value="{{ form.get('ordinal') or 0 }}">
