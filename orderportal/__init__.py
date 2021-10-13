@@ -4,7 +4,7 @@ An order can be a project application, a request, a report, etc.
 
 import os
 
-__version__ = '4.0.19'
+__version__ = '4.0.20'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
@@ -25,8 +25,6 @@ settings = dict(
     SITE_NAVBAR_ICON='orderportal32.png',
     SITE_HOME_ICON='orderportal144.png',
     SITE_CSS_FILE=None,
-    SITE_HOME_URL=None,
-    SITE_HOME_NAME=None,
     SITE_HOST_URL=None,
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
