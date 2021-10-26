@@ -9,6 +9,7 @@ import logging
 import mimetypes
 import optparse
 import os
+import os.path
 import sys
 import time
 import traceback
@@ -29,12 +30,7 @@ from . import settings
 
 def get_command_line_parser(usage='usage: %prog [options]', description=None):
     "Get the base command line argument parser."
-    # optparse is used (rather than argparse) due to Python 2.6
     parser = optparse.OptionParser(usage=usage, description=description)
-    parser.add_option('-s', '--settings',
-                      action='store', dest='settings',
-                      default='{ROOT}/settings.yaml',
-                      metavar="FILE", help="filepath of settings YAML file")
     parser.add_option('-p', '--pidfile',
                       action='store', dest='pidfile', default=None,
                       metavar="FILE", help="filepath of file to contain PID")
@@ -43,16 +39,32 @@ def get_command_line_parser(usage='usage: %prog [options]', description=None):
                       help='force action, rather than ask for confirmation')
     return parser
 
-def load_settings(filepath):
+def load_settings():
     """Load and return the settings from the given file path.
+    1) The settings file path environment variable ORDERPORTAL_SETTINGS.
+    2) The file 'settings.yaml' in this directory.
+    3) The file '../site/settings.yaml' relative to this directory.
     Raise IOError if settings file could not be read.
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
     """
-    # Read the settings file, updating the defaults
-    with open(expand_filepath(filepath)) as infile:
-        settings.update(yaml.safe_load(infile))
-    settings['SETTINGS_FILEPATH'] = filepath
+    # Find and read the settings file, updating the defaults.
+    filepaths = []
+    try:
+        filepaths.append(os.environ["ORDERPORTAL_SETTINGS"])
+    except KeyError:
+        pass
+    for filepath in ["settings.yaml", "../site/settings.yaml"]:
+        filepaths.append(
+            os.path.normpath(os.path.join(settings["ROOT"], filepath)))
+    for filepath in filepaths:
+        try:
+            with open(filepath) as infile:
+                settings.update(yaml.safe_load(infile))
+        except FileNotFoundError:
+            pass
+        else:
+            settings["SETTINGS_FILE"] = filepath
     # Set logging state
     if settings.get('LOGGING_DEBUG'):
         kwargs = dict(level=logging.DEBUG)
@@ -78,7 +90,7 @@ def load_settings(filepath):
     logging.info("OrderPortal version %s", orderportal.__version__)
     logging.info("ROOT: %s", settings['ROOT'])
     logging.info("SITE_DIR: %s", settings['SITE_DIR'])
-    logging.info("settings: %s", settings['SETTINGS_FILEPATH'])
+    logging.info("settings: %s", settings['SETTINGS_FILE'])
     logging.info("logging debug: %s", settings['LOGGING_DEBUG'])
     logging.info("tornado debug: %s", settings['TORNADO_DEBUG'])
     # Check settings
@@ -91,8 +103,10 @@ def load_settings(filepath):
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short.")
     # Read account messages YAML file.
-    logging.info("account messages: %s", settings['ACCOUNT_MESSAGES_FILEPATH'])
-    with open(expand_filepath(settings['ACCOUNT_MESSAGES_FILEPATH'])) as infile:
+    filepath = os.path.join(settings["SITE_DIR"], 
+                            settings["ACCOUNT_MESSAGES_FILE"])
+    logging.info(f"account messages: {filepath}")
+    with open(filepath) as infile:
         settings['ACCOUNT_MESSAGES'] = yaml.safe_load(infile)
     # Set recipients, which are hardwired into the source code.
     # Also checks for missing message for a status.
@@ -111,8 +125,10 @@ def load_settings(filepath):
                 raise ValueError('ORDER_IDENTIFIER_FORMAT prefix must be'
                                  ' all upper-case characters')
     # Read order statuses definitions YAML file.
-    logging.info("order statuses: %s", settings['ORDER_STATUSES_FILEPATH'])
-    with open(expand_filepath(settings['ORDER_STATUSES_FILEPATH'])) as infile:
+    filepath = os.path.join(settings["SITE_DIR"],
+                            settings["ORDER_STATUSES_FILE"])
+    logging.info(f"order statuses: {filepath}")
+    with open(filepath) as infile:
         settings['ORDER_STATUSES'] = yaml.safe_load(infile)
     settings['ORDER_STATUSES_LOOKUP'] = lookup = dict()
     initial = None
@@ -126,42 +142,48 @@ def load_settings(filepath):
         raise ValueError('No initial order status defined.')
     settings['ORDER_STATUS_INITIAL'] = initial
     # Read order status transition definiton YAML file.
-    logging.info("order transitions: %s", 
-                 settings['ORDER_TRANSITIONS_FILEPATH'])
-    with open(expand_filepath(settings['ORDER_TRANSITIONS_FILEPATH'])) as infile:
+    filepath = os.path.join(settings["SITE_DIR"],
+                            settings["ORDER_TRANSITIONS_FILE"])
+    logging.info(f"order transitions: {filepath}")
+    with open(filepath) as infile:
         settings['ORDER_TRANSITIONS'] = yaml.safe_load(infile)
     # Read order messages YAML file.
-    logging.info("order messages: %s", settings['ORDER_MESSAGES_FILEPATH'])
-    with open(expand_filepath(settings['ORDER_MESSAGES_FILEPATH'])) as infile:
+    filepath = os.path.join(settings["SITE_DIR"],
+                            settings["ORDER_MESSAGES_FILE"])
+    logging.info(f"order messages: {filepath}")
+    with open(filepath) as infile:
         settings['ORDER_MESSAGES'] = yaml.safe_load(infile)
     # Read universities YAML file.
-    filepath = settings.get('UNIVERSITIES_FILEPATH')
+    filepath = settings.get("UNIVERSITIES_FILE")
     if not filepath:
         settings['UNIVERSITIES'] = dict()
     else:
-        logging.info("universities lookup: %s", filepath)
-        with open(expand_filepath(filepath)) as infile:
+        filepath = os.path.join(settings["SITE_DIR"], filepath)
+        logging.info(f"universities lookup: {filepath}")
+        with open(filepath) as infile:
             unis = yaml.safe_load(infile)
         unis = list(unis.items())
         unis.sort(key=lambda i: (i[1].get('rank'), i[0]))
         settings['UNIVERSITIES'] = collections.OrderedDict(unis)
     # Read country codes YAML file
-    filepath = settings.get('COUNTRY_CODES_FILEPATH')
+    filepath = settings.get("COUNTRY_CODES_FILE")
     if not filepath:
         settings['COUNTRIES'] = []
     else:
-        logging.info("country codes: %s", filepath)
-        with open(expand_filepath(filepath)) as infile:
+        filepath = os.path.join(settings["SITE_DIR"], filepath)
+        logging.info(f"country codes: {filepath}")
+        with open(filepath) as infile:
             settings['COUNTRIES'] = yaml.safe_load(infile)
         settings['COUNTRIES_LOOKUP'] = dict([(c['code'], c['name'])
                                              for c in settings['COUNTRIES']])
     # Read subject terms YAML file.
-    filepath = settings.get('SUBJECT_TERMS_FILEPATH')
+    filepath = settings.get("SUBJECT_TERMS_FILE")
     if not filepath:
         settings['subjects'] = []
     else:
-        logging.info("subject terms: %s", filepath)
-        with open(expand_filepath(filepath)) as infile:
+        filepath = os.path.join(settings["SITE_DIR"], filepath)
+        logging.info(f"subject terms: {filepath}")
+        with open(filepath) as infile:
             settings['subjects'] = yaml.safe_load(infile)
     settings['subjects_lookup'] = dict([(s['code'], s['term'])
                                         for s in settings['subjects']])
@@ -192,14 +214,6 @@ def terminology(word):
     else:
         if istitle: word = word.title()
     return word
-
-def expand_filepath(filepath):
-    "Expand variables (ROOT and SITE_DIR) in filepaths."
-    filepath = filepath.replace('{SITE_DIR}', settings['SITE_DIR'])
-    filepath = filepath.replace('{ROOT}', settings['ROOT'])
-    if not os.path.isabs(filepath):
-        filepath = os.path.join(settings['ROOT'], filepath)
-    return filepath
 
 def get_dbserver():
     server = couchdb.Server(settings['DATABASE_SERVER'])

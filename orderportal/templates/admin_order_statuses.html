@@ -10,10 +10,12 @@
 
 <div class="well">
   <p>
-    All {{ terminology('orders') }} have one and only one status at all times.
-    The status value is one of those defined in the YAML file
-    <code>{{ settings.get('ORDER_STATUSES_FILEPATH') }}</code> which
-    is read on startup of the OrderPortal server.
+    All {{ terminology('orders') }} have one and only one status at
+    all times.  The status value is one of those defined in the YAML
+    file
+    <code>{{ settings.get('ORDER_STATUSES_FILE') }}</code>
+    in <strong>SITE_DIR</strong> which is read on startup of the
+    OrderPortal server.
   </p>
   <p>
     To change the set of allowed status values, the YAML file must be
@@ -24,8 +26,9 @@
   </p>
   <p>
     The allowed transitions between statuses are defined in the YAML file 
-    <code>{{ settings.get('ORDER_TRANSITIONS_FILEPATH') }}</code> 
-    which is read on startup of the OrderPortal server.
+    <code>{{ settings.get('ORDER_TRANSITIONS_FILE') }}</code> 
+    in <strong>SITE_DIR</strong> which is read on startup of the
+    OrderPortal server.
   </p>
   <p>
     To change the allowed transitions, the YAML file must be edited and

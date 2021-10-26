@@ -16,8 +16,9 @@
   <p>
     The templates for {{ terminology('order') }} messages are defined
     in the YAML file
-    <code>{{ settings.get('ORDER_MESSAGES_FILEPATH') }}</code> which
-    is read on startup of the OrderPortal server.
+    <code>{{ settings.get('ORDER_MESSAGES_FILE') }}</code>
+    in <strong>SITE_DIR</strong> which is read on startup of the
+    OrderPortal server.
   </p>
   <p>
     To change the messages, the YAML file must be edited and the

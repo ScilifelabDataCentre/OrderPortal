@@ -1,8 +1,6 @@
 "Load the account messages document into the database."
 
-
-
-import os
+import os.path
 import sys
 
 import couchdb
@@ -15,12 +13,13 @@ from orderportal import utils
 
 def load_account_messages(db):
     "Load the account messages document."
-    for key in ['ACCOUNT_MESSAGES_FILEPATH', 
-                'INITIAL_ACCOUNT_MESSAGES_FILEPATH']:
+    for key in ['ACCOUNT_MESSAGES_FILE', 
+                'INITIAL_ACCOUNT_MESSAGES_FILE']:
         filepath = settings.get(key)
         if filepath: break
     else:
         raise KeyError('no account messages file specified')
+    filepath = os.path.join(settings["SITE_DIR"], filepath)
     print('Account messages from', filepath)
     with open(filepath) as infile:
         doc = yaml.safe_load(infile)
@@ -34,6 +33,6 @@ if __name__ == '__main__':
     parser = utils.get_command_line_parser(
         description='Load the account messages document.')
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings)
+    utils.load_settings()
     db = utils.get_db()
     load_account_messages(db)

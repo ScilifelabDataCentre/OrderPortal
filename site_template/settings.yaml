@@ -34,16 +34,13 @@ PASSWORD_SALT: 'Change this to a long string of random characters.'
 SITE_NAME:          'My Order Portal'
 SITE_SUPPORT_EMAIL: 'my.email@my-domain.com'
 
-# The site directory; contains status icons, logos, definition YAML files.
-SITE_DIR:           '{ROOT}/my-site'
-
-# The icon files must be in the SITE_DIR; absolute file path is not allowed.
+# The icon files must be in the SITE_STATIC_DIR; absolute file path not allowed.
 SITE_FAVICON:     'orderportal32.png'
-SITE_NAVBAR_ICON: 'orderportal32.png'
+SITE_NAVBAR_ICON: 'orderportal32.png'  # Set to 'false' for none.
 SITE_HOME_ICON:   'orderportal144.png'
 
-# Account setup; email message templates.
-ACCOUNT_MESSAGES_FILEPATH: '{SITE_DIR}/account_messages.yaml'
+# Account setup; email message templates; in SITE_DIR.
+ACCOUNT_MESSAGES_FILE: 'account_messages.yaml'
 
 # Flags for which account registration input fields to ask for.
 ACCOUNT_PI_INFO: true
@@ -59,10 +56,10 @@ ACCOUNT_DEFAULT_COUNTRY_CODES: 'SE'
 #   order: application
 #   orders: applications
 
-# Order status, transition, messages definition files; in site dir.
-ORDER_STATUSES_FILEPATH:    '{SITE_DIR}/order_statuses.yaml'
-ORDER_TRANSITIONS_FILEPATH: '{SITE_DIR}/order_transitions.yaml'
-ORDER_MESSAGES_FILEPATH:    '{SITE_DIR}/order_messages.yaml'
+# Order status, transition, messages definition files; in SITE_DIR.
+ORDER_STATUSES_FILE:    'order_statuses.yaml'
+ORDER_TRANSITIONS_FILE: 'order_transitions.yaml'
+ORDER_MESSAGES_FILE:    'order_messages.yaml'
 
 # Must be defined for sequentially numbered order identifiers.
 # The prefix must be all upper-case characters.
@@ -82,7 +79,7 @@ ORDER_TAGS: true
 ORDER_USER_TAGS: true
 
 # The statuses to show in the orders list.
-# The statuses must be defined in the ORDER_STATUSES_FILEPATH file.
+# The statuses must be defined in the ORDER_STATUSES_FILE file.
 ORDERS_LIST_STATUSES:
   - submitted
   - accepted
@@ -104,14 +101,16 @@ ORDER_SEARCH_FIELDS:
   - project_pi
 
 # University symbols (abbreviations), names and rank in list.
-# Optional, may be set to null.
-UNIVERSITIES_FILEPATH: '{SITE_DIR}/swedish_universities.yaml'
+# Optional, may be set to null; in SITE_DIR.
+UNIVERSITIES_FILE: 'swedish_universities.yaml'
 
-# Country names and codes. Optional, may be set to null.
-COUNTRY_CODES_FILEPATH: '{SITE_DIR}/country_codes.yaml'
+# Country names and codes.
+# Optional, may be set to null; in SITE_DIR.
+COUNTRY_CODES_FILE: 'country_codes.yaml'
 
-# Subject codes, terms in a hierarchy. Optional, may be set to null.
-SUBJECT_TERMS_FILEPATH: '{SITE_DIR}/subject_terms.yaml'
+# Subject codes, terms in a hierarchy.
+# Optional, may be set to null; in SITE_DIR.
+SUBJECT_TERMS_FILE: 'subject_terms.yaml'
 
 # Messages; email server info.
 MESSAGE_SENDER_EMAIL: '"OrderPortal Support" <support@your.domain>'

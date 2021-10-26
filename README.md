@@ -6,8 +6,6 @@ facility from its users.
 
 The current version requires Python 3.6 or higher.
 
-Installation and update instructions: [INSTALLATION.md](INSTALLATION.md).
-
 The [GitHub wiki](https://github.com/pekrau/OrderPortal/wiki) contains
 some additional information.
 
@@ -293,3 +291,172 @@ Log
 Each change of an order is logged, and the information "who, when,
 what" is stored. The log trace is written by the system automatically
 and cannot be edited by any user.
+
+Installation
+============
+
+The current version requires Python 3.6 or higher.
+
+This instruction is based on the procedure used for the instances
+running on the SciLifeLab server. It will have to be adapted for your
+site.
+
+The Linux account `nginx` is used to host the instance files. Change
+according to the policy at your site.
+
+The name **xyz** is used below as a placeholder for the name of your instance.
+
+Instructions for upgrading the OrderPortal software is given below
+under [Updates](#updates).
+
+Source code setup
+-----------------
+
+Clone the GitHub repo. The commands below use the base GitHub repo;
+substitute by whichever fork you are using.
+
+    $ cd /var/www/apps
+    $ sudo mkdir xyz
+    $ sudo chown nginx.nginx xyz
+    $ cd xyz
+    $ sudo -u nginx git clone https://github.com/pekrau/OrderPortal.git
+
+Create the `site` subdirectory for your instance using the `site_template`
+directory (changed from version 4.1):
+
+    $ cd OrderPortal
+    $ sudo -u nginx cp -r site_template site
+
+Some files in your `site` directory most likely need to be modified.
+In particular, the YAML files may need to be modified.
+
+Download and install the required third-party Python modules using the
+`requirements.txt` file as approprate for your environment.
+
+    $ sudo pip install -r requirements.txt
+
+Settings file
+-------------
+
+Edit the `site/settings.yaml` file according to your setup.
+Some of the settings depend on actions described below.
+
+    $ cd /var/www/apps/xyz/OrderPortal/site
+    $ sudo -u nginx chmod go-r settings.yaml
+    $ sudo -u nginx emacs settings.yaml
+
+See the comments in the settings file.
+
+CouchDB setup
+-------------
+
+It is assumed that you already have a CouchDB instance running. Follow
+the standard CouchDB procedures.
+
+- Go to the CouchDB web interface.
+- Create the CouchDB user **orderportal_xyz**.
+- Log in as CouchDB admin. Set the password for the user **orderportal_xyz**:
+  - Go to the database **_users** and open the document for the user
+    **orderportal_xyz**.
+  - Create a new field with the key "password", and set its value to the
+    secret password. This password must also be edited into the settings file.
+  - When you save the document, CouchDB will hash the password and remove
+    the password field.
+- Create the database **orderportal_xyz** in CouchDB.
+- Click on "Security..." and ensure that only the proper user can access it:
+  - In the Names field of Admins, add the user name like so:
+    `["orderportal_xyz"]` (a string in a list).
+  - In the Names field of Members, add a dummy user name like so:
+    `["dummy"]` (a string in a list).
+  - The Roles fields should not be changed.
+
+Initialize the database in CouchDB. This requires a valid **settings** file.
+
+    $ cd /var/www/apps/xyz/OrderPortal/orderportal
+    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 init_database.py
+
+Create the first admin account in the database by running a script that
+will interactively ask for input:
+
+    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 create_admin.py
+
+Logging
+-------
+
+The settings file may define the file path of the log file (variable
+LOGGING_FILEPATH), if any. The log file must be located in a directory which
+the `tornado` server can write to. For example:
+
+    $ cd /var/log
+    $ sudo mkdir orderportal_xyz
+    $ sudo chown nginx.nginx orderportal_xyz
+
+`Tornado` server
+--------------
+
+The `tornado` server should be executed as a system service. The
+mechanism for this depends on the operating system. For SELinux, a
+template systemd file is available at
+[orderportal/site/orderportal_xyz.service](orderportal/site/orderportal_xyz.service).
+Copy, rename and edit it.
+
+    $ cd /etc/systemd/system
+    $ sudo cp /var/www/apps/ddd/OrderPortal/orderportal/site/orderportal_xyz.service orderportal_ddd.service
+    $ sudo emacs orderportal_ddd.service
+
+HTTP nginx configuration
+------------------------
+
+In our case, the `tornado` server is accessed through a reverse-proxy
+via nginx. The template nginx file is available at
+[orderportal/site_template/orderportal_xyz.conf](orderportal/site_template/orderportal_xyz.conf).
+Copy, rename and edit it. In particular, ensure that the URL and port is
+specified correctly.
+
+    $ cd /etc/nginx/conf.d
+    $ sudo cp /var/www/apps/xyz/OrderPortal/orderportal/site_template/orderportal_xyz.conf orderportal_xyzconf
+    $ sudo emacs orderportal_xyz.conf
+
+Backup
+------
+
+Backup relies on running a script to dump all data in the CouchDB database
+to a tar file. Create a backup directory:
+
+    $ sudo mkdir /home/backup/backup_files/orderportal_xyz
+
+Copy, rename and edit the template bash backup script
+[orderportal/site_template/dump_orderportal_xyz.bash](orderportal/site_template/dump_orderportal_xyz.bash):
+
+    $ cd /etc/scripts
+    $ sudo cp /var/www/apps/xyz/OrderPortal/orderportal/site_template/dump_orderportal_xyz.bash dump_orderportal_xyz.bash
+
+Edit the crontab file:
+
+    $ export EDITOR=emacs
+    $ crontab -e
+
+The line in the crontab file should look something like this:
+
+    45 22 * * * /etc/scripts/dump_orderportal_xyz.bash
+
+Updates
+-------
+
+To update the source code from the GitHub repo:
+
+    $ cd /var/www/apps/xyz/OrderPortal
+    $ sudo -u nginx git pull
+    $ sudo systemctl restart orderportal_xyz
+
+Since version 3.6.19, the design documents are automatically updated
+when the `tornado` server is restarted.
+
+Unless the OrderPortal app is running in debug mode, the `tornado` server
+will have to be restarted.
+
+    $ sudo systemctl restart orderportal_xyz.service
+
+Please note that if your installation uses a repo forked from the
+base, ensure that you have updated that repo first by making a pull
+request and executing it.

@@ -1,7 +1,5 @@
 "OrderPortal: Base class for fixing documents in the database."
 
-
-
 from orderportal import constants
 from orderportal import settings
 from orderportal import utils
@@ -19,7 +17,7 @@ class BaseFixer(object):
                           action='store_true', dest='dry_run', default=False,
                           help='do not perform save; for debug')
         (options, args) = parser.parse_args()
-        utils.load_settings(filepath=options.settings)
+        utils.load_settings()
         self.dry_run = options.dry_run
         self.db = utils.get_db()
         self.args = args
