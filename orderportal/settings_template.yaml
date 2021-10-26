@@ -35,7 +35,7 @@ SITE_NAME:          'My Order Portal'
 SITE_SUPPORT_EMAIL: 'my.email@my-domain.com'
 
 # The site directory; contains status icons, logos, definition YAML files.
-SITE_DIR:           '{ROOT_DIR}/my-site'
+SITE_DIR:           '{ROOT}/my-site'
 
 # The icon files must be in the SITE_DIR; absolute file path is not allowed.
 SITE_FAVICON:     'orderportal32.png'
@@ -59,7 +59,7 @@ ACCOUNT_DEFAULT_COUNTRY_CODES: 'SE'
 #   order: application
 #   orders: applications
 
-# Order status, transition, messages definition files
+# Order status, transition, messages definition files; in site dir.
 ORDER_STATUSES_FILEPATH:    '{SITE_DIR}/order_statuses.yaml'
 ORDER_TRANSITIONS_FILEPATH: '{SITE_DIR}/order_transitions.yaml'
 ORDER_MESSAGES_FILEPATH:    '{SITE_DIR}/order_messages.yaml'

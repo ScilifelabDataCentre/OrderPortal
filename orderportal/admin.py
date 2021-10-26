@@ -1,7 +1,5 @@
 "Admin pages."
 
-
-
 import logging
 import re
 
@@ -54,7 +52,7 @@ class Settings(RequestHandler):
             url = list(url)
             url[match.start(1):match.end(1)] = 'password'
             mod_settings['DATABASE_SERVER'] = ''.join(url)
-        params = ['ROOT_DIR', 'SETTINGS_FILEPATH',
+        params = ['ROOT', 'SETTINGS_FILEPATH',
                   'BASE_URL', 'BASE_URL_PATH_PREFIX',
                   'SITE_NAME', 'SITE_SUPPORT_EMAIL',
                   'DATABASE_SERVER', 'DATABASE_NAME', 'DATABASE_ACCOUNT',

@@ -171,8 +171,8 @@ def main():
         cookie_secret=settings['COOKIE_SECRET'],
         xsrf_cookies=True,
         ui_modules=uimodules,
-        template_path=os.path.join(settings['ROOT_DIR'], 'templates'),
-        static_path=os.path.join(settings['ROOT_DIR'], 'static'),
+        template_path=os.path.join(settings['ROOT'], 'templates'),
+        static_path=os.path.join(settings['ROOT'], 'static'),
         login_url=(settings['BASE_URL_PATH_PREFIX'] or '') + '/login')
     # Add href URLs for the status icons.
     # This depends on order status setup.

@@ -4,11 +4,11 @@ An order can be a project application, a request, a report, etc.
 
 import os
 
-__version__ = '4.0.20'
+__version__ = '4.1.0'
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
-    ROOT_DIR=os.path.dirname(__file__),
+    ROOT=os.path.dirname(__file__),
     BASE_URL='http://localhost/',
     BASE_URL_PATH_PREFIX=None,
     TORNADO_DEBUG=False,
@@ -19,7 +19,7 @@ settings = dict(
     DATABASE_SERVER='http://localhost:5984/',
     DATABASE_NAME='orderportal',
     MARKDOWN_URL='http://agea.github.io/tutorial.md/',
-    SITE_DIR='{ROOT_DIR}/site',
+    SITE_DIR='{ROOT}/site',
     SITE_NAME='OrderPortal',
     SITE_FAVICON='orderportal32.png',
     SITE_NAVBAR_ICON='orderportal32.png',

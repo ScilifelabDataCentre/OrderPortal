@@ -33,7 +33,7 @@ def get_command_line_parser(usage='usage: %prog [options]', description=None):
     parser = optparse.OptionParser(usage=usage, description=description)
     parser.add_option('-s', '--settings',
                       action='store', dest='settings',
-                      default='{ROOT_DIR}/settings.yaml',
+                      default='{ROOT}/settings.yaml',
                       metavar="FILE", help="filepath of settings YAML file")
     parser.add_option('-p', '--pidfile',
                       action='store', dest='pidfile', default=None,
@@ -76,7 +76,7 @@ def load_settings(filepath):
         pass
     logging.basicConfig(**kwargs)
     logging.info("OrderPortal version %s", orderportal.__version__)
-    logging.info("ROOT_DIR: %s", settings['ROOT_DIR'])
+    logging.info("ROOT: %s", settings['ROOT'])
     logging.info("SITE_DIR: %s", settings['SITE_DIR'])
     logging.info("settings: %s", settings['SETTINGS_FILEPATH'])
     logging.info("logging debug: %s", settings['LOGGING_DEBUG'])
@@ -194,11 +194,11 @@ def terminology(word):
     return word
 
 def expand_filepath(filepath):
-    "Expand variables (ROOT_DIR and SITE_DIR) in filepaths."
+    "Expand variables (ROOT and SITE_DIR) in filepaths."
     filepath = filepath.replace('{SITE_DIR}', settings['SITE_DIR'])
-    filepath = filepath.replace('{ROOT_DIR}', settings['ROOT_DIR'])
+    filepath = filepath.replace('{ROOT}', settings['ROOT'])
     if not os.path.isabs(filepath):
-        filepath = os.path.join(settings['ROOT_DIR'], filepath)
+        filepath = os.path.join(settings['ROOT'], filepath)
     return filepath
 
 def get_dbserver():
