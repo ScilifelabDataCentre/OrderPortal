@@ -16,8 +16,9 @@
   <p>
     The templates for {{ terminology('order') }} messages are defined
     in the YAML file
-    <code>{{ settings.get('ORDER_MESSAGES_FILEPATH') }}</code> which
-    is read on startup of the OrderPortal server.
+    <code>{{ settings.get('ORDER_MESSAGES_FILE') }}</code>
+    in <strong>SITE_DIR</strong> which is read on startup of the
+    OrderPortal server.
   </p>
   <p>
     To change the messages, the YAML file must be edited and the
@@ -32,6 +33,10 @@
     <tr>
       <td><code>{site}</code></td>
       <td>The name of the OrderPortal site.</td>
+    </tr>
+    <tr>
+      <td><code>{site_url}</code></td>
+      <td>The URL of the OrderPortal site.</td>
     </tr>
     <tr>
       <td><code>{support}</code></td>
@@ -57,6 +62,14 @@
     <tr>
       <td><code>{tags}</code></td>
       <td>The tags set for the {{ terminology('order') }}, if any.</td>
+    </tr>
+    <tr>
+      <td><code>{host_title}</code></td>
+      <td>The name of the hosting site.</td>
+    </tr>
+    <tr>
+      <td><code>{host_url}</code></td>
+      <td>The URL of the hosting site.</td>
     </tr>
   </table>
 </div>

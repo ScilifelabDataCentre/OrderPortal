@@ -106,7 +106,7 @@ if __name__ == '__main__':
                       action='store', dest='dumpfile',
                       metavar='DUMPFILE', help='name of dump file')
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings)
+    utils.load_settings()
     db = utils.get_db()
     if options.dumpfile:
         filepath = options.dumpfile

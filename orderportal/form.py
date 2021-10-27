@@ -152,6 +152,7 @@ class FormApiV1(ApiV1Mixin, Form):
         data['version'] = form.get('version')
         data['description'] = form.get('description')
         data['instruction'] = form.get('instruction')
+        data['disclaimer']  = form.get('disclaimer')
         data['owner'] = dict(
             email=form['owner'],
             links=dict(api=dict(href=URL('account_api', form['owner'])),
@@ -198,6 +199,7 @@ class FormCreate(RequestHandler):
             saver['version'] = self.get_argument('version', None)
             saver['description'] = self.get_argument('description', None)
             saver['instruction'] = self.get_argument('instruction', None)
+            saver['disclaimer'] = self.get_argument('disclaimer', None)
             saver['status'] = constants.PENDING
             try:
                 infile = self.request.files['import'][0]
@@ -218,12 +220,15 @@ class FormCreate(RequestHandler):
                     saver['description'] = data.get('description')
                 if not saver['instruction']:
                     saver['instruction'] = data.get('instruction')
+                if not saver['disclaimer']:
+                    saver['disclaimer'] = data.get('disclaimer')
                 saver['fields'] = data['fields']
         self.see_other('form', saver.doc['_id'])
 
 
 class FormEdit(FormMixin, RequestHandler):
-    "Page for editing an form; title, version, description, instruction."
+    """Page for editing an form; title, version, description,
+    instruction, disclaimer."""
 
     @tornado.web.authenticated
     def get(self, iuid):
@@ -242,6 +247,7 @@ class FormEdit(FormMixin, RequestHandler):
             saver['version'] = self.get_argument('version', None)
             saver['description'] = self.get_argument('description', None)
             saver['instruction'] = self.get_argument('instruction', None)
+            saver['disclaimer'] = self.get_argument('disclaimer', None)
             try:
                 saver['ordinal'] = int(self.get_argument('ordinal', 0))
             except (ValueError, TypeError):
@@ -397,6 +403,7 @@ class FormClone(RequestHandler):
             saver['version'] = form.get('version')
             saver['description'] = form.get('description')
             saver['instruction'] = form.get('instruction')
+            saver['disclaimer'] = form.get('disclaimer')
             saver.clone_fields(form)
             saver['status'] = constants.PENDING
         self.see_other('form_edit', saver.doc['_id'])

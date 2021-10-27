@@ -941,7 +941,8 @@ class OrderCsv(OrderMixin, RequestHandler):
                     writer.writerow(prefix + row)
             
             elif field['type'] == constants.MULTISELECT:
-                values[4] = '|'.join(values[4])
+                if isinstance(values[4], list):
+                    values[4] = '|'.join(values[4])
                 writer.writerow(values)
             else:
                 writer.writerow(values)

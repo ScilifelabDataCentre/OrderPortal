@@ -145,18 +145,16 @@
       </tr>
       {% end %} {# if settings.get('ORDER_IDENTIFIER_FORMAT') #}
 
+      {% if is_admin %}
       <tr>
 	<th>{{ terminology('Order') }} form</th>
 	<td>
-          {% if is_admin %}
 	  <a href="{{ reverse_url('form', form['_id']) }}">
 	    {{ form['title'] }} {% module Version(form) %}
 	  </a>
-          {% else %}
-	  {{ form['title'] }} {% module Version(form) %}
-          {% end %}
 	</td>
       </tr>
+      {% end %}
 
       <tr>
 	<th>Owner</th>
@@ -295,6 +293,12 @@
 	  {% end %} {# if is_attachable #}
 	</td>
       </tr>
+      {% if form.get('disclaimer') %}
+      <tr>
+	<th>Disclaimer</th>
+	<td>{% module Markdown(form.get('disclaimer')) %}</td>
+      </tr>
+      {% end %}
     </table>
   </div>
 </div>

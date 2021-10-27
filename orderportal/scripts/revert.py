@@ -1,7 +1,5 @@
 " Get the previous version of the document and save it as new. "
 
-
-
 import sys
 
 from orderportal import utils
@@ -22,7 +20,7 @@ if __name__ == '__main__':
     parser = utils.get_command_line_parser(description=
          'Get the previous version of the document and save it as new.')
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings)
+    utils.load_settings()
     db = utils.get_db()
     for docid in args:
         revert(db, docid)

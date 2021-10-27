@@ -34,11 +34,13 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
 	  </button>
+          {% if settings['SITE_NAVBAR_ICON'] %}
 	  <a class="navbar-brand" href="{{ reverse_url('home') }}">
 	    <img src="{{ reverse_url('site', settings['SITE_NAVBAR_ICON']) }}"
 		 title="{{ settings['SITE_NAME'] }}"
 		 alt="{{ settings['SITE_NAME'] }}">
 	  </a>
+          {% end %}
 	</div>
 	<div class="collapse navbar-collapse" id="myNavbar">
 	  <ul class="nav navbar-nav">

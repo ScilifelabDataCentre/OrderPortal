@@ -26,7 +26,7 @@ if __name__ == '__main__':
     parser = utils.get_command_line_parser(
         description='Set the password for an account.')
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings)
+    utils.load_settings()
     email = input('Email address (=account name) > ')
     if not email:
         sys.exit('no email address provided')

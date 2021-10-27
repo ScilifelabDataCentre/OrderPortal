@@ -1,9 +1,9 @@
 "Get document(s) from CouchDB and write to a JSON file."
 
+import json
 import sys
 
 import couchdb
-import simplejson as json       # XXX Python 3 kludge
 
 from orderportal import constants
 from orderportal import settings
@@ -37,7 +37,7 @@ if __name__ == '__main__':
                       action='store', dest='FILE', default=None,
                       metavar="FILE", help="filepath of file to write")
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings)
+    utils.load_settings()
     get_documents(utils.get_db(),
                   docids=args,
                   filepath=options.FILE)

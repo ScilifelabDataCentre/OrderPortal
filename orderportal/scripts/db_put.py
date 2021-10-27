@@ -1,9 +1,9 @@
 "Put document(s) to CouchDB from a JSON file."
 
+import json
 import sys
 
 import couchdb
-import simplejson as json       # XXX Python 3 kludge
 
 from orderportal import constants
 from orderportal import settings
@@ -57,5 +57,5 @@ if __name__ == '__main__':
     parser = utils.get_command_line_parser(
         description='Put document(s) to CouchDB from JSON file.')
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings)
+    utils.load_settings()
     put_documents(utils.get_db(), filepaths=args)

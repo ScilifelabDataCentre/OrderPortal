@@ -12,15 +12,12 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 
 {% block content %}
 <div class="row">
-  <div class="col-md-10">
-    {% module Markdown(form.get('instruction')) %}
-  </div>
-  <div class="col-md-2">
+  <div class="col-md-2 col-md-offset-10" style="margin-bottom: 0;">
     <form action="{{ reverse_url('order', order['_id']) }}"
 	  class="allow_leaving_without_question"
 	  role="form"
 	  method="GET">
-      <div class="form-group">
+      <div class="form-group" style="margin-bottom: 0;">
 	<button type="submit" class="btn btn-default btn-block">
 	  <span class="glyphicon glyphicon-remove"></span>
 	  Cancel
@@ -38,9 +35,10 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
       method="POST">
   {% module xsrf_form_html() %}
 
+  {% module Markdown(form.get('instruction')) %}
   {% include 'order_edit_save.html' %}
 
-  <div class="form-group">
+  <div class="form-group" style="padding-top: 2em;">
     <div class="row">
       <div class="col-md-9">
 	<label class="control-label" for="__title__">Title</label>
@@ -57,6 +55,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
     </span>
   </div>
 
+  {% if is_admin %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
@@ -69,6 +68,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
       </div>
     </div>
   </div>
+  {% end %}
 
   {% if settings['ORDER_TAGS'] and (is_staff or settings['ORDER_USER_TAGS']) %}
   <div class="form-group">
@@ -129,6 +129,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   </div>
 
   {% include 'order_edit_save.html' %}
+  {% module Markdown(form.get('disclaimer')) %}
 </form>
 {% end %} {# block content #}
 
