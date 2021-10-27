@@ -1,7 +1,7 @@
 OrderPortal
 ===========
 
-A portal for orders (requests, project applications, etc) to a
+A portal for orders (requests, project proposals, etc) to a
 facility from its users.
 
 The current version requires Python 3.6 or higher.
@@ -14,7 +14,7 @@ Background
 
 The OrderPortal system allows basically any type of form-based
 submission of information. It was designed to work for any type of
-service facility that handles discrete orders or project applications,
+service facility that handles discrete orders or project proposals,
 reports, etc.
 
 The OrderPortal system was originally created to satisfy the needs of the
@@ -46,7 +46,7 @@ Features
 Design outline
 --------------
 
-The system is a portal for **orders** (requests, project applications,
+The system is a portal for **orders** (requests, project proposals,
 etc) to a single facility from its users. A **user** is a researcher
 external to the service facility, and may or may not be the Principal
 Investigator (PI) for one or more projects.
