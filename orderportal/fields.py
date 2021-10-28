@@ -158,6 +158,7 @@ class Fields(object):
                        rqh.get_argument('initial_display', False)),
                    description=rqh.get_argument('description', None))
         field = self._lookup[identifier]
+
         # Conditional field setup
         identifier = rqh.get_argument('visible_if_field', None)
         if identifier == '': identifier = None
@@ -166,6 +167,7 @@ class Fields(object):
         if value:
             value = '|'.join([s.strip() for s in value.split('|') if s.strip()])
         new['visible_if_value'] = value
+
         # Set the possible values for menu or radiobuttons field.
         if field['type'] == constants.SELECT:
             values = rqh.get_argument('select', '').split('\n')
@@ -173,22 +175,37 @@ class Fields(object):
             values = [v for v in values if v]
             new['select'] = values
             new['display'] = rqh.get_argument('display', None) or 'menu'
+
         # Set the possible values for a multiselect field.
         elif field['type'] == constants.MULTISELECT:
             values = rqh.get_argument('multiselect', '').split('\n')
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new['multiselect'] = values
+
         # Set the column identifiers for a table field.
         elif field['type'] == constants.TABLE:
             values = rqh.get_argument('table', '').split('\n')
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new['table'] = values
+
         # Represent the boolean by a checkbox or a selection.
         elif field['type'] == constants.BOOLEAN:
             new['checkbox'] = utils.to_bool(rqh.get_argument('checkbox', None))
             new['selection'] = rqh.get_argument('selection', None)
+
+        # Get the maxlength for a textarea, if given.
+        elif field['type'] == constants.TEXT:
+            try:
+                maxlength = rqh.get_argument('maxlength')
+                maxlength = int(maxlength)
+                if maxlength <= 0: raise ValueError
+            except (tornado.web.MissingArgumentError, ValueError):
+                new['maxlength'] = None
+            else:
+                new['maxlength'] = maxlength
+
         # Record the changes.
         old = field.copy()
         field.update(new)
@@ -197,6 +214,7 @@ class Fields(object):
             if key == 'fields': continue
             if old.get(key) != value:
                 diff[key] = value
+
         # Set a new parent; change the field's group.
         new_parent = rqh.get_argument('parent', '')
         if new_parent:

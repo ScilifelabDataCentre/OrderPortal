@@ -12,15 +12,12 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 
 {% block content %}
 <div class="row">
-  <div class="col-md-10">
-    {% module Markdown(form.get('instruction')) %}
-  </div>
-  <div class="col-md-2">
+  <div class="col-md-2 col-md-offset-10" style="margin-bottom: 0;">
     <form action="{{ reverse_url('order', order['_id']) }}"
 	  class="allow_leaving_without_question"
 	  role="form"
 	  method="GET">
-      <div class="form-group">
+      <div class="form-group" style="margin-bottom: 0;">
 	<button type="submit" class="btn btn-default btn-block">
 	  <span class="glyphicon glyphicon-remove"></span>
 	  Cancel
@@ -38,9 +35,10 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
       method="POST">
   {% module xsrf_form_html() %}
 
+  {% module Markdown(form.get('instruction')) %}
   {% include 'order_edit_save.html' %}
 
-  <div class="form-group">
+  <div class="form-group" style="padding-top: 2em;">
     <div class="row">
       <div class="col-md-9">
 	<label class="control-label" for="__title__">Title</label>
@@ -57,6 +55,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
     </span>
   </div>
 
+  {% if is_admin %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
@@ -69,6 +68,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
       </div>
     </div>
   </div>
+  {% end %}
 
   {% if settings['ORDER_TAGS'] and (is_staff or settings['ORDER_USER_TAGS']) %}
   <div class="form-group">
@@ -116,40 +116,6 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   </div>
   {% end %} {#if settings.get('ORDER_LINKS') #}
 
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-9">
-	<label class="control-label" for="__owner__">Owner</label>
-	{% if is_admin %}
-	<input type="text" class="form-control"
-	       name="__owner__" id="__owner__"
-	       value="{{ order['owner'] }}">
-	{% elif is_staff %}
-	<p id="__owner__" class="form-control-static">{{ order['owner'] }}</p>
-	{% elif colleagues %}
-	<select class="form-control" name="__owner__" id="__owner__">
-	  {% for colleague in colleagues %}
-	    <option {{ colleague == current_user['email'] and 'selected' or '' }}>{{ colleague }}</option>
-	  {% end %}
-	</select>
-        {% else %}
-	<p id="__owner__" class="form-control-static">{{ order['owner'] }}</p>
-	{% end %}
-      </div>
-    </div>
-    <span class="help-block extra-indent">
-      {% if is_admin %}
-      The {{ terminology('order') }}'s owner specified by email address.
-      May be changed to another account.
-      {% elif colleagues %}
-      The {{ terminology('order') }}'s owner may be changed to an account
-      in your groups, if any.
-      <strong>NOTE:</strong>
-      You will then no longer be able to edit the {{ terminology('order') }}.
-      {% end %}
-    </span>
-  </div>
-
   {# Recursion: 'include' cannot be used! #}
   {% module Template('order_edit_fields.html', fields=fields, order=order, is_staff=is_staff, hidden_fields=hidden_fields, tableinputs=tableinputs) %}
 
@@ -163,6 +129,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   </div>
 
   {% include 'order_edit_save.html' %}
+  {% module Markdown(form.get('disclaimer')) %}
 </form>
 {% end %} {# block content #}
 

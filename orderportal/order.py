@@ -299,6 +299,9 @@ class OrderSaver(saver.Saver):
                             value = False
                         else:
                             continue
+                # Remove all carriage-returns from string.
+                if value is not None:
+                    value = value.replace('\r', '')
             # Record any change to the value.
             if value != self.doc['fields'].get(identifier):
                 changed = self.changed.setdefault('fields', dict())
@@ -314,7 +317,8 @@ class OrderSaver(saver.Saver):
                 self.check_validity(field)
 
     def check_validity(self, field):
-        """Check validity of field value. Convert for some field types.
+        """Check validity of field value.
+        Also convert the value for some field types.
         Skip field if not visible, else check recursively in postorder.
         Return True if valid, False otherwise.
         """
@@ -937,7 +941,8 @@ class OrderCsv(OrderMixin, RequestHandler):
                     writer.writerow(prefix + row)
             
             elif field['type'] == constants.MULTISELECT:
-                values[4] = '|'.join(values[4])
+                if isinstance(values[4], list):
+                    values[4] = '|'.join(values[4])
                 writer.writerow(values)
             else:
                 writer.writerow(values)
@@ -1369,8 +1374,9 @@ class OrderEdit(OrderMixin, RequestHandler):
             tableinput.append("</tr>")
             tableinputs[field['identifier']] = ''.join(tableinput)
         self.render('order_edit.html',
-                    title="Edit {0} '{1}'".format(utils.terminology('order'),
-                                                   order['title'] or '[no title]'),
+                    title="Edit {0} '{1}'".format(
+                        utils.terminology('order'),
+                        order['title'] or '[no title]'),
                     order=order,
                     tags=tags,
                     links=links,
@@ -1398,15 +1404,6 @@ class OrderEdit(OrderMixin, RequestHandler):
                                replace(',', ' ').split())
                 saver.set_external(self.get_argument('__links__', '').\
                                    split('\n'))
-                try:
-                    owner = self.get_argument('__owner__')
-                    account = self.get_account(owner)
-                    if account.get('status') != constants.ENABLED:
-                        raise ValueError('Owner account is not enabled.')
-                except tornado.web.MissingArgumentError:
-                    pass
-                else:
-                    saver['owner'] = account['email']
                 saver.update_fields()
                 if flag == constants.SUBMIT: # Hard-wired status
                     if self.is_submittable(saver.doc):
@@ -1426,6 +1423,50 @@ class OrderEdit(OrderMixin, RequestHandler):
         except ValueError as msg:
             self.set_error_flash(str(msg))
             self.redirect(self.order_reverse_url(order))
+
+
+class OrderOwner(OrderMixin, RequestHandler):
+    "Change the owner of an order."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        try:
+            self.check_editable(order)
+        except ValueError as msg:
+            self.see_other('home', error=str(msg))
+            return
+        self.render('order_owner.html',
+                    title="Change owner of {0} '{1}'".format(
+                        utils.terminology('order'),
+                        order['title'] or '[no title]'),
+                    order=order)
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        try:
+            self.check_editable(order)
+        except ValueError as msg:
+            self.see_other('home', error=str(msg))
+            return
+        try:
+            owner = self.get_argument('owner')
+            account = self.get_account(owner)
+            if account.get('status') != constants.ENABLED:
+                raise ValueError('Owner account is not enabled.')
+            with OrderSaver(doc=order, rqh=self) as saver:
+                saver['owner'] = account['email']
+        except tornado.web.MissingArgumentError:
+            pass
+        except ValueError as msg:
+            self.set_error_flash(str(msg))
+        self.set_message_flash("Changed owner of {0}.".format(
+            utils.terminology('Order')))
+        if self.is_readable(order):
+            self.redirect(self.order_reverse_url(order))
+        else:
+            self.see_other('home')
 
 
 class OrderClone(OrderMixin, RequestHandler):
@@ -1523,8 +1564,10 @@ class OrderFile(OrderMixin, RequestHandler):
             outfile.close()
             self.set_header('Content-Type',
                             order['_attachments'][filename]['content_type'])
-            self.set_header('Content-Disposition',
-                            'attachment; filename="%s"' % filename)
+            # Try to avoid strange latin-1 encoding issue with tornado.
+            b = 'attachment; filename="%s"' % filename
+            b = b.encode('utf-8')
+            self.set_header('Content-Disposition', b)
 
     @tornado.web.authenticated
     def post(self, iuid, filename=None):
@@ -1563,10 +1606,7 @@ class OrderFile(OrderMixin, RequestHandler):
                     if fields[key]['required']:
                         saver.doc['invalid'][key] = 'missing value'
                     else:
-                        try:
-                            del saver.doc['invalid'][key]
-                        except KeyError:
-                            pass
+                        saver.doc['invalid'].pop(key, None)
                     break
             saver.delete_filename = filename
             saver.changed['file_deleted'] = filename

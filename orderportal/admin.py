@@ -1,7 +1,5 @@
 "Admin pages."
 
-
-
 import logging
 import re
 
@@ -54,19 +52,25 @@ class Settings(RequestHandler):
             url = list(url)
             url[match.start(1):match.end(1)] = 'password'
             mod_settings['DATABASE_SERVER'] = ''.join(url)
-        params = ['ROOT_DIR', 'SETTINGS_FILEPATH',
+        params = ['ROOT', 'SITE_DIR', 'SETTINGS_FILE',
                   'BASE_URL', 'BASE_URL_PATH_PREFIX',
                   'SITE_NAME', 'SITE_SUPPORT_EMAIL',
                   'DATABASE_SERVER', 'DATABASE_NAME', 'DATABASE_ACCOUNT',
                   'TORNADO_DEBUG', 'LOGGING_FILEPATH', 'LOGGING_DEBUG',
                   'BACKUP_DIR', 'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES',
-                  'SITE_DIR', 'ACCOUNT_MESSAGES_FILEPATH',
-                  'ORDER_STATUSES_FILEPATH', 'ORDER_TRANSITIONS_FILEPATH',
-                  'ORDER_MESSAGES_FILEPATH', 'ORDER_USER_TAGS', 
+                  'ORDER_STATUSES_FILE', 'ORDER_TRANSITIONS_FILE',
+                  'ORDER_MESSAGES_FILE', 'ORDER_USER_TAGS', 
                   'ORDERS_SEARCH_FIELDS', 'ORDERS_LIST_FIELDS',
                   'ORDERS_LIST_STATUSES', 'ORDER_AUTOPOPULATE',
-                  'UNIVERSITIES_FILEPATH', 'COUNTRY_CODES_FILEPATH',
-                  'SUBJECT_TERMS_FILEPATH']
+                  'ORDER_TAGS', 'UNIVERSITIES_FILE',
+                  'COUNTRY_CODES_FILE', 'SUBJECT_TERMS_FILE',
+                  'ACCOUNT_MESSAGES_FILE',
+                  'ACCOUNT_PI_INFO', 'ACCOUNT_POSTAL_INFO',
+                  'ACCOUNT_INVOICE_INFO', 'ACCOUNT_FUNDER_INFO',
+                  'ACCOUNT_FUNDER_INFO_GENDER',
+                  'ACCOUNT_FUNDER_INFO_GROUP_SIZE',
+                  'ACCOUNT_FUNDER_INFO_SUBJECT',
+                  'ACCOUNT_DEFAULT_COUNTRY_CODE']
         self.render('settings.html', params=params, settings=mod_settings)
 
 

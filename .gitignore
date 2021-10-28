@@ -2,7 +2,5 @@
 *.pyc
 *.bak
 *.yaml
-my-sites
-!orderportal/settings_template.yaml
-!orderportal/init_texts.yaml
-!orderportal/site/*yaml
+site
+!site_template/*.yaml

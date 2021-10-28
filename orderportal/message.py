@@ -21,7 +21,10 @@ class MessageSaver(saver.Saver):
     def create(self, template, **kwargs):
         "Create the message from the template and parameters for it."
         params = dict(site=settings['SITE_NAME'],
-                      support=settings.get('SITE_SUPPORT_EMAIL','[undefined]'))
+                      site_url=settings['BASE_URL'],
+                      support=settings.get('SITE_SUPPORT_EMAIL') or '[?]',
+                      host=settings.get('SITE_HOST_TITLE') or '[?]',
+                      host_url=settings.get('SITE_HOST_URL') or '[?]')
         params.update(kwargs)
         self['subject'] = str(template['subject']).format(**params)
         self['text'] = str(template['text']).format(**params)

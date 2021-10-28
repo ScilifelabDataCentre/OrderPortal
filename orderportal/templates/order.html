@@ -43,6 +43,16 @@
   </form>
 </p>
 <p>
+  <form action="{{ reverse_url('order_owner', order['_id']) }}"
+	role="form"
+	method="GET">
+    <button type="submit" class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-user"></span>
+      Change owner
+    </button>
+  </form>
+</p>
+<p>
   <form action="{{ reverse_url('order', order['_id']) }}"
 	role="form"
 	method="POST">
@@ -135,26 +145,24 @@
       </tr>
       {% end %} {# if settings.get('ORDER_IDENTIFIER_FORMAT') #}
 
+      {% if is_admin %}
       <tr>
 	<th>{{ terminology('Order') }} form</th>
 	<td>
-          {% if is_admin %}
 	  <a href="{{ reverse_url('form', form['_id']) }}">
 	    {{ form['title'] }} {% module Version(form) %}
 	  </a>
-          {% else %}
-	  {{ form['title'] }} {% module Version(form) %}
-          {% end %}
 	</td>
       </tr>
+      {% end %}
 
       <tr>
 	<th>Owner</th>
 	<td colspan="2">
 	  <a href="{{ reverse_url('account', order['owner']) }}">
 	    {{ account_names.get(order['owner'], order['owner']) }}
-	  </a>,
-          {{ order['owner'] }}
+	  </a>
+          ({{ order['owner'] }})
 	</td>
       </tr>
       {% if settings['ORDER_TAGS'] and (is_staff or settings['ORDER_USER_TAGS']) %}
@@ -285,6 +293,12 @@
 	  {% end %} {# if is_attachable #}
 	</td>
       </tr>
+      {% if form.get('disclaimer') %}
+      <tr>
+	<th>Disclaimer</th>
+	<td>{% module Markdown(form.get('disclaimer')) %}</td>
+      </tr>
+      {% end %}
     </table>
   </div>
 </div>

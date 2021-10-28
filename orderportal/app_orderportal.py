@@ -28,11 +28,12 @@ from orderportal.search import *
 def main():
     parser = utils.get_command_line_parser(description='OrderPortal server.')
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings)
+    utils.load_settings()
     utils.initialize()
 
     url = tornado.web.url
-    handlers = [url(r'/', Home, name='home')]
+    handlers = [url(r'/', Home, name='home'),
+                url(r'/status', Status, name="status")]
     try:
         regexp = settings['ORDER_IDENTIFIER_REGEXP']
     except KeyError:
@@ -57,6 +58,7 @@ def main():
             OrderTransition, name='order_transition'),
         url(r'/api/v1/order/([0-9a-f]{32})/transition/(\w+)',
             OrderTransitionApiV1, name='order_transition_api'),
+        url(r'/order/([0-9a-f]{32})/owner', OrderOwner, name='order_owner'),
         url(r'/order/([0-9a-f]{32})/clone', OrderClone, name='order_clone'),
         url(r'/order/([0-9a-f]{32})/file', OrderFile, name='order_file_add'),
         url(r'/order/([0-9a-f]{32})/file/([^/]+)',OrderFile,name='order_file'),
@@ -158,8 +160,7 @@ def main():
         url(r'/admin/account_messages',
             AdminAccountMessages, name='admin_account_messages'),
         url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
-            {'path': utils.expand_filepath(settings['SITE_DIR'])},
-            name='site'),
+            {'path': settings['SITE_STATIC_DIR']}, name='site'),
         ])
     handlers.append(url(r'/api/v1/(.*)', NoSuchEntityApiV1))
     handlers.append(url(r'/(.*)', NoSuchEntity))
@@ -169,8 +170,8 @@ def main():
         cookie_secret=settings['COOKIE_SECRET'],
         xsrf_cookies=True,
         ui_modules=uimodules,
-        template_path=os.path.join(settings['ROOT_DIR'], 'html'),
-        static_path=os.path.join(settings['ROOT_DIR'], 'static'),
+        template_path=os.path.join(settings['ROOT'], 'templates'),
+        static_path=os.path.join(settings['ROOT'], 'static'),
         login_url=(settings['BASE_URL_PATH_PREFIX'] or '') + '/login')
     # Add href URLs for the status icons.
     # This depends on order status setup.

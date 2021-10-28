@@ -157,6 +157,10 @@
 	<td>{% module Markdown(form.get('instruction')) %}</td>
       </tr>
       <tr>
+	<th>Disclaimer</th>
+	<td>{% module Markdown(form.get('disclaimer')) %}</td>
+      </tr>
+      <tr>
 	<th>{{ terminology('Orders') }}</th>
 	<td>
 	  <a class="badge"
@@ -243,6 +247,8 @@
           {% module ShortenedPre(field.get('multiselect')) %}
 	  {% elif field['type'] == constants.TABLE %}
           {% module ShortenedPre(field.get('table')) %}
+	  {% elif field['type'] == constants.TEXT %}
+          (maxlength {{ field.get('maxlength') or '-' }})
 	  {% end %}
 	</td>
 	<td>

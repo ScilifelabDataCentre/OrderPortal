@@ -5,8 +5,7 @@ The database must exist, and the account for accessing it must have been set up.
 3) Load the initial texts from file, unless already loaded.
 """
 
-
-
+import os.path
 import sys
 
 import couchdb
@@ -19,9 +18,9 @@ from orderportal import settings
 from orderportal import utils
 from orderportal.dump import undump
 
-INIT_TEXTS_FILEPATH = utils.expand_filepath('{ROOT_DIR}/init_texts.yaml')
 
 def init_database(dumpfilepath=None):
+    filepath = os.path.join(settings["SITE_DIR"], "init_texts.yaml")
     db = utils.get_db()
     try:
         db['order']
@@ -44,12 +43,12 @@ def init_database(dumpfilepath=None):
     else:
         print('no dump file loaded')
     # Load texts from the initial texts YAML file. Only if missing in db!
-    print('loading any missing texts from', INIT_TEXTS_FILEPATH)
+    print('loading any missing texts from', filepath)
     try:
-        with open(INIT_TEXTS_FILEPATH) as infile:
+        with open(filepath) as infile:
             texts = yaml.safe_load(infile)
     except IOError:
-        print('Warning: could not load', INIT_TEXTS_FILEPATH)
+        print('Warning: could not load', filepath)
         texts = dict()
     for name in constants.TEXTS:
         if len(list(db.view('text/name', key=name))) == 0:
@@ -65,5 +64,5 @@ if __name__ == '__main__':
                       action='store', dest='FILE', default=None,
                       metavar="FILE", help="filepath of dump file to load")
     (options, args) = parser.parse_args()
-    utils.load_settings(filepath=options.settings)
+    utils.load_settings()
     init_database(dumpfilepath=options.FILE)

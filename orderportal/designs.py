@@ -10,8 +10,14 @@ from . import settings
 DESIGNS = dict(
 
     account=dict(
-        api_key=dict(map=       # account/api_key
+        all=dict(reduce="_count", # account/all
+                 map=
 """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    emit(doc.modified, null);
+}"""),
+        api_key=dict(map=       # account/api_key
+"""function(doc) { 
     if (doc.orderportal_doctype !== 'account') return;
     if (!doc.api_key) return;
     emit(doc.api_key, doc.email);
@@ -52,6 +58,12 @@ DESIGNS = dict(
 }""")),
 
     form=dict(
+        all=dict(reduce="_count", # form/all
+                 map=
+"""function(doc) {
+    if (doc.orderportal_doctype !== 'form') return;
+    emit(doc.modified, null);
+}"""),
         enabled=dict(map=       # form/enabled
 """function(doc) {
     if (doc.orderportal_doctype !== 'form') return;
@@ -231,23 +243,26 @@ var lint = {lint};"""
 
 def load_design_documents(db):
     "Load the design documents (view index definitions)."
+    # Special treatment !!!
     delims_lint = ''.join(settings['ORDERS_SEARCH_DELIMS_LINT'])
     lint = "{%s}" % ', '.join(["'%s': 1" % w
                                for w in settings['ORDERS_SEARCH_LINT']])
-    # Special treatment !!!
     func = DESIGNS['order']['keyword']['map']
     DESIGNS['order']['keyword']['map'] = func.format(delims_lint=delims_lint,
                                                      lint=lint)
-    for entity, views in get_all_items(delims_lint, lint):
+    for entity, views in get_all_items():
          updated = update_design_document(db, entity, views)
          if updated:
-            for view in designs:
+            for view in views:
                 name = "%s/%s" % (entity, view)
                 logging.info("regenerating index for view %s" % name)
                 list(db.view(name, limit=10))
 
-def get_all_items(delims_lint, lint):
+def get_all_items():
     "Get all design document items, including configured order search fields."
+    delims_lint = ''.join(settings['ORDERS_SEARCH_DELIMS_LINT'])
+    lint = "{%s}" % ', '.join(["'%s': 1" % w
+                               for w in settings['ORDERS_SEARCH_LINT']])
     items = list(DESIGNS.items())
     fields = dict()
     for field in settings['ORDERS_SEARCH_FIELDS']:

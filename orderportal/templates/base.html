@@ -34,11 +34,13 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
 	  </button>
+          {% if settings['SITE_NAVBAR_ICON'] %}
 	  <a class="navbar-brand" href="{{ reverse_url('home') }}">
 	    <img src="{{ reverse_url('site', settings['SITE_NAVBAR_ICON']) }}"
 		 title="{{ settings['SITE_NAME'] }}"
 		 alt="{{ settings['SITE_NAME'] }}">
 	  </a>
+          {% end %}
 	</div>
 	<div class="collapse navbar-collapse" id="myNavbar">
 	  <ul class="nav navbar-nav">
@@ -144,6 +146,9 @@
 		<li>
 		  <a href="{{ reverse_url('order_statuses') }}">
                     {{ terminology('Order') }} statuses</a>
+		</li>
+                <li>
+	          <a href="{{ reverse_url('files') }}">Documents</a>
 		</li>
 		<li>
 		  <a href="{{ reverse_url('admin_order_messages') }}">
@@ -302,14 +307,16 @@
       <hr>
       <div class="row">
 	<div class="col-md-3">
+          {% if settings['SITE_HOST_URL'] %}
           <a href="{{ settings['SITE_HOST_URL'] or '#' }}" target="_blank">
             {% if settings['SITE_HOST_ICON'] %}
             <img src="{{ reverse_url('site', settings['SITE_HOST_ICON']) }}"
-                 title="{{ settings['SITE_HOST_TITLE'] or '' }}">
-            {% else %}
-            {{ settings['SITE_HOST_TITLE'] or '' }}
+                 title="Site host {{ settings['SITE_HOST_TITLE'] or '' }}">
+            &nbsp; 
             {% end %}
+            {{ settings['SITE_HOST_TITLE'] or 'Site host' }}
 	  </a>
+          {% end %}
 	</div>
         <div class="col-md-6 text-center">
           {% if current_user %}
