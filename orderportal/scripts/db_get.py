@@ -3,7 +3,7 @@
 import json
 import sys
 
-import couchdb
+import couchdb2
 
 from orderportal import constants
 from orderportal import settings
@@ -15,7 +15,7 @@ def get_documents(db, docids=[], filepath=None):
     for docid in docids:
         try:
             doc = db[docid]
-        except couchdb.ResourceNotFound:
+        except couchdb2.NotFoundError:
             print('no such document', docid, file=sys.stderr)
         else:
             docs.append(doc)

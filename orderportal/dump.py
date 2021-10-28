@@ -14,7 +14,7 @@ import os
 import tarfile
 import time
 
-import couchdb
+import couchdb2
 
 from orderportal import constants
 from orderportal import settings
@@ -32,8 +32,7 @@ def dump(db, filepath):
     else:
         mode = 'w'
     outfile = tarfile.open(filepath, mode=mode)
-    for key in db:
-        doc = db[key]
+    for doc in db:
         # Only documents that explicitly belong to the application
         if doc.get(constants.DOCTYPE) is None: continue
         doc.pop('_rev')
@@ -82,12 +81,12 @@ def undump(db, filepath):
             if doc[constants.DOCTYPE] == constants.META:
                 try:
                     doc2 = db[doc['_id']]
-                except couchdb.ResourceNotFound:
+                except couchdb2.NotFoundError:
                     pass
                 else:
                     doc2.update(doc)
                     doc = doc2
-            db.save(doc)
+            db.put(doc)
             count_items += 1
             for attname, attinfo in list(atts.items()):
                 key = "{0}_att/{1}".format(doc['_id'], attname)

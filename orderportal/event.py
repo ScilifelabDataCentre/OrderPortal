@@ -1,7 +1,5 @@
 "Event list handling; meeting and seminar announcements for home page."
 
-
-
 import logging
 import tornado.web
 

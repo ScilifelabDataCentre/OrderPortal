@@ -1,10 +1,10 @@
 "Forms are templates for orders."
 
+import json
 import logging
 from collections import OrderedDict as OD
 
 import tornado.web
-import simplejson as json       # XXX Python 3 kludge
 
 from . import constants
 from . import saver
@@ -67,7 +67,8 @@ class FormMixin(object):
 
     def get_order_count(self, form):
         "Return number of orders for the form."
-        view = self.db.view('order/form',
+        view = self.db.view("order", 
+                            "form",
                             startkey=[form['_id']],
                             endkey=[form['_id'], constants.CEILING])
         try:
@@ -82,7 +83,10 @@ class Forms(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        view = self.db.view('form/modified', descending=True, include_docs=True)
+        view = self.db.view("form",
+                            "modified",
+                            descending=True,
+                            include_docs=True)
         title = 'Recent forms'
         forms = [r.doc for r in view]
         names = self.get_account_names()
@@ -269,7 +273,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
             return
         # Get existing field identifiers
         identifiers = set()
-        for row in self.db.view('form/enabled', include_docs=True):
+        for row in self.db.view("form", "enabled", include_docs=True):
             identifiers.update(self._get_identifiers(row.doc['fields']))
         identifiers.difference_update(self._get_identifiers(form['fields']))
         self.render('field_create.html',
@@ -422,13 +426,14 @@ class FormPending(RequestHandler):
             raise ValueError('Form does not have status testing.')
         with FormSaver(doc=form, rqh=self) as saver:
             saver['status'] = constants.PENDING
-        view = self.db.view('order/form',
-                            reduce=False,
+        view = self.db.view("order",
+                            "form",
+                            include_docs=True,
                             startkey=[form['_id']],
                             endkey=[form['_id'], constants.CEILING])
         for row in view:
             self.delete_logs(row.id)
-            del self.db[row.id]
+            self.db.delete(row.doc)
         self.see_other('form', iuid)
 
 
@@ -484,7 +489,8 @@ class FormOrders(RequestHandler):
     def get(self, iuid):
         self.check_staff()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        view = self.db.view('order/form',
+        view = self.db.view("order", 
+                            "form",
                             reduce=False,
                             include_docs=True,
                             descending=True,
@@ -553,7 +559,8 @@ class FormOrdersAggregate(RequestHandler):
 
         account_lookup = {}
         # Get all orders for the given form.
-        view = self.db.view('order/form',
+        view = self.db.view("order",
+                            "form",
                             reduce=False,
                             include_docs=True,
                             descending=True,

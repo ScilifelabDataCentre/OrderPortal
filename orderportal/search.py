@@ -1,12 +1,10 @@
 "Search orders page."
 
-
-
 import logging
 import pprint
 import urllib.parse
 
-import couchdb
+import couchdb2
 import tornado.web
 
 from . import constants
@@ -45,7 +43,7 @@ class Search(RequestHandler):
             else:
                 orders[order.get('identifier') or iuid] = order
         # Search order identifier; exact match
-        view = self.db.view('order/identifier')
+        view = self.db.view("order", "identifier")
         id_sets = []
         for part in parts:
             id_sets.append(set([r.id for r in view[part]]))
@@ -55,7 +53,7 @@ class Search(RequestHandler):
         # Seach order tags; exact match
         term = ''.join([c in ",;'" and ' ' or c for c in orig]).strip().lower()
         parts = term.split()
-        view = self.db.view('order/tag')
+        view = self.db.view("order", "tag")
         id_sets = []
         for part in parts:
             id_sets.append(set([r.id for r in view[part]]))
@@ -67,7 +65,7 @@ class Search(RequestHandler):
         parts = [part for part in term.split()
                  if part and len(part) >= 2 and part not in self.LINT]
         # Search order titles for the parts extracted from search term.
-        view = self.db.view('order/keyword')
+        view = self.db.view("order", "keyword")
         id_sets = []
         for part in parts:
             id_sets.append(set([r.id for r in
@@ -81,10 +79,10 @@ class Search(RequestHandler):
         parts.append(orig)      # Entire original term.
         try:
             fields = list(self.db['_design/fields']['views'].keys())
-        except (couchdb.ResourceNotFound, KeyError):
+        except (couchdb2.NotFoundError, KeyError):
             fields = []
         for field in fields:
-            view = self.db.view("fields/{0}".format(field))
+            view = self.db.view("fields", field)
             id_sets = []
             id_sets.append(set([r.id for r in
                                 view[orig : orig+constants.CEILING]]))

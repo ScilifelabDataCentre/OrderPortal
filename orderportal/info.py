@@ -1,7 +1,5 @@
 "Information pages; simplest possible CMS using Markdown."
 
-
-
 import logging
 
 import tornado.web
@@ -22,7 +20,7 @@ class Info(RequestHandler):
     "Information page."
 
     def get(self, name):
-        info = self.get_entity_view('info/name', name)
+        info = self.get_entity_view("info", "name", name)
         self.render('info.html', info=info)
 
     @tornado.web.authenticated
@@ -36,7 +34,7 @@ class Info(RequestHandler):
     @tornado.web.authenticated
     def delete(self, name):
         self.check_admin()
-        info = self.get_entity_view('info/name', name)
+        info = self.get_entity_view("info", "name", name)
         self.delete_logs(info['_id'])
         self.db.delete(info)
         self.see_other('infos')
@@ -48,7 +46,7 @@ class InfoLogs(RequestHandler):
     @tornado.web.authenticated
     def get(self, name):
         self.check_admin()
-        info = self.get_entity_view('info/name', name)
+        info = self.get_entity_view("info", "name", name)
         self.render('logs.html',
                     title="Logs for info '{0}'".format(name),
                     entity=info,
@@ -61,9 +59,9 @@ class Infos(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        view = self.db.view('info/menu', include_docs=True)
+        view = self.db.view("info", "menu", include_docs=True)
         menu_infos = [r.doc for r in view]
-        view = self.db.view('info/name', include_docs=True)
+        view = self.db.view("info", "name", include_docs=True)
         rest_infos = [r.doc for r in view if r.doc.get('menu') is None]
         self.render('infos.html', all_infos=menu_infos + rest_infos)
 
@@ -84,7 +82,7 @@ class InfoCreate(RequestHandler):
             self.see_other('info_create', error='invalid info name')
             return
         try:
-            self.get_entity_view('info/name', name)
+            self.get_entity_view("info", "name", name)
         except tornado.web.HTTPError:
             pass
         else:
@@ -107,13 +105,13 @@ class InfoEdit(RequestHandler):
     @tornado.web.authenticated
     def get(self, name):
         self.check_admin()
-        info = self.get_entity_view('info/name', name)
+        info = self.get_entity_view("info", "name", name)
         self.render('info_edit.html', info=info)
 
     @tornado.web.authenticated
     def post(self, name):
         self.check_admin()
-        info = self.get_entity_view('info/name', name)
+        info = self.get_entity_view("info", "name", name)
         with InfoSaver(doc=info, rqh=self) as saver:
             saver['title'] = self.get_argument('title', None)
             try:

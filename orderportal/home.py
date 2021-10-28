@@ -1,12 +1,10 @@
 "Home page variants, and a few general resources."
 
-
-
 import logging
 import sys
 from collections import OrderedDict as OD
 
-import couchdb
+import couchdb2
 import markdown
 import tornado
 import tornado.web
@@ -24,7 +22,7 @@ class Home(RequestHandler):
     "Home page; dashboard. Contents according to role of logged-in account."
 
     def get(self):
-        forms = [r.doc for r in self.db.view('form/enabled', include_docs=True)]
+        forms = [r.doc for r in self.db.view("form", "enabled", include_docs=True)]
         for f in forms:
             if f.get('ordinal') is None: f['ordinal'] = 0
         forms.sort(key=lambda i: i['ordinal'])
@@ -47,14 +45,16 @@ See your <a href="{0}">account</a>.""".format(url)
 
     def home_admin(self, **kwargs):
         "Home page for a current user having role 'admin'."
-        view = self.db.view('account/status',
+        view = self.db.view("account",
+                            "status",
                             key=constants.PENDING,
                             include_docs=True)
         pending = [r.doc for r in view]
         pending.sort(key=lambda i: i['modified'], reverse=True)
         pending = pending[:settings['DISPLAY_MAX_PENDING_ACCOUNTS']]
         # XXX This status should not be hard-wired!
-        view = self.db.view('order/status',
+        view = self.db.view("order",
+                            "status",
                             descending=True,
                             startkey=['submitted', constants.CEILING],
                             endkey=['submitted'],
@@ -70,7 +70,8 @@ See your <a href="{0}">account</a>.""".format(url)
     def home_staff(self, **kwargs):
         "Home page for a current user having role 'staff'."
         # XXX This status should not be hard-wired!
-        view = self.db.view('order/status',
+        view = self.db.view("order",
+                            "status",
                             descending=True,
                             startkey=['accepted', constants.CEILING],
                             endkey=['accepted'],
@@ -84,7 +85,8 @@ See your <a href="{0}">account</a>.""".format(url)
 
     def home_user(self, **kwargs):
         "Home page for a current user having role 'user'."
-        view = self.db.view('order/owner',
+        view = self.db.view("order",
+                            "owner",
                             reduce=False,
                             include_docs=True,
                             descending=True,
@@ -120,9 +122,9 @@ class Software(RequestHandler):
             ('Python', 'https://www.python.org',
              "%s.%s.%s" % sys.version_info[0:3], 'installed'),
             ('CouchDB server', 'http://couchdb.apache.org/',
-             utils.get_dbserver().version(), 'installed'),
-            ('CouchDB-Python', 'https://pypi.org/project/CouchDB/',
-             couchdb.__version__, 'installed'),
+             utils.get_dbserver().version, 'installed'),
+            ('CouchDB2', 'https://pypi.org/project/CouchDB2/',
+             couchdb2.__version__, 'installed'),
             ('tornado', 'https://pypi.org/project/tornado/',
              tornado.version, 'installed'),
             ('PyYAML', 'https://pypi.org/project/PyYAML/',
@@ -205,15 +207,15 @@ class Status(RequestHandler):
 
     def get(self):
         try:
-            n_orders = list(self.db.view("order/status", reduce=True))[0].value
+            n_orders = list(self.db.view("order", "status", reduce=True))[0].value
         except IndexError:
             n_orders = 0
         try:
-            n_forms = list(self.db.view("form/all", reduce=True))[0].value
+            n_forms = list(self.db.view("form", "all", reduce=True))[0].value
         except IndexError:
             n_forms = 0
         try:
-            n_accounts = list(self.db.view("account/all", reduce=True))[0].value
+            n_accounts = list(self.db.view("account", "all", reduce=True))[0].value
         except IndexError:
             n_accounts = 0
         self.write(dict(status="OK",

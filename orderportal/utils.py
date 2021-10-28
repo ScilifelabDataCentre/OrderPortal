@@ -17,7 +17,7 @@ import urllib.request, urllib.parse, urllib.error
 import urllib.parse
 import uuid
 
-import couchdb
+import couchdb2
 import tornado.web
 import xlsxwriter
 import yaml
@@ -188,7 +188,7 @@ def load_settings():
     settings['subjects_lookup'] = dict([(s['code'], s['term'])
                                         for s in settings['subjects']])
     # Settings computable from others.
-    settings['DATABASE_SERVER_VERSION'] = get_dbserver().version()
+    settings['DATABASE_SERVER_VERSION'] = get_dbserver().version
     parts = urllib.parse.urlparse(settings['BASE_URL'])
     settings['BASE_URL'] = "%s://%s" % (parts.scheme, parts.netloc)
     if not settings.get('PORT'):
@@ -216,23 +216,24 @@ def terminology(word):
     return word
 
 def get_dbserver():
-    server = couchdb.Server(settings['DATABASE_SERVER'])
-    if settings.get('DATABASE_ACCOUNT') and settings.get('DATABASE_PASSWORD'):
-        server.resource.credentials = (settings.get('DATABASE_ACCOUNT'),
-                                       settings.get('DATABASE_PASSWORD'))
-    return server
+    "Return the CouchDB2 handle for the CouchDB server."
+    kwargs = dict(href=settings["DATABASE_SERVER"])
+    if settings.get("DATABASE_ACCOUNT") and settings.get("DATABASE_PASSWORD"):
+        kwargs["username"] = settings["DATABASE_ACCOUNT"]
+        kwargs["password"] = settings["DATABASE_PASSWORD"]
+    return couchdb2.Server(**kwargs)
 
 def get_db():
     "Return the handle for the CouchDB database."
     server = get_dbserver()
+    name = settings["DATABASE_NAME"]
     try:
-        return server[settings['DATABASE_NAME']]
-    except couchdb.http.ResourceNotFound:
-        raise KeyError("CouchDB database '%s' does not exist." % 
-                       settings['DATABASE_NAME'])
+        return server[name]
+    except couchdb2.NotFoundError:
+        raise KeyError(f"CouchDB database '{name}' does not exist.")
 
 def initialize(db=None):
-    "Load the design documents, or update."
+    "Load the design documents."
     if db is None:
         db = get_db()
     designs.load_design_documents(db)
@@ -310,7 +311,7 @@ def csv_safe(value):
     return value
 
 def get_json(id, type):
-    "Return the initialized JSON dictionary with id and type."
+    "Return a JSON dictionary initialized with with id and type."
     result = collections.OrderedDict()
     result['id'] = id
     result['type'] = type
@@ -319,9 +320,10 @@ def get_json(id, type):
     return result
 
 def get_account_name(account=None, value=None):
-    """Return person name of accountas 'lastname, firstname'.
+    """Return person name of account as 'lastname, firstname'.
     'account' is an account document.
-    'value' is a row value from a view."""
+    'value' is a row value from a view.
+    """
     if account is not None:
         last_name = account.get('last_name')
         first_name = account.get('first_name')
@@ -370,7 +372,7 @@ def log(db, rqh, entity, changed=dict()):
         entry['account'] = rqh.current_user['email']
     except (AttributeError, TypeError, KeyError):
         pass
-    db.save(entry)
+    db.put(entry)
 
 def get_filename_extension(content_type):
     "Return filename extension, correcting for silliness in 'mimetypes'."

@@ -3,8 +3,6 @@
 import json
 import sys
 
-import couchdb
-
 from orderportal import constants
 from orderportal import settings
 from orderportal import utils
@@ -31,10 +29,7 @@ def put_documents(db, filepaths=[]):
             print('document', doc['_id'], 'already exists; not overwritten',
                   file=sys.stderr)
         else:
-            try:
-                del doc['_rev']
-            except KeyError:
-                pass
+            doc.pop('_rev', None)
             db.save(doc)
             print('saved', doc['_id'])
 

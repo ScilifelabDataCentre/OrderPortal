@@ -8,7 +8,7 @@ the standard 'urllib' module.
 
 import sys
 
-import simplejson as json       # XXX Python 3 kludge
+import json
 
 # Third-party package: http://docs.python-requests.org/en/master/
 import requests

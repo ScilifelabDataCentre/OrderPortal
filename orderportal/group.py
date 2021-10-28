@@ -1,7 +1,5 @@
 "Group pages; accounts which are able to see all orders of each other."
 
-
-
 import logging
 
 import tornado.web
@@ -24,7 +22,8 @@ class Groups(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_staff()
-        view = self.db.view('group/modified',
+        view = self.db.view("group",
+                            "modified",
                             descending=True,
                             reduce=False,
                             include_docs=True)

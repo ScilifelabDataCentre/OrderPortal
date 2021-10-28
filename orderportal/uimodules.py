@@ -1,7 +1,5 @@
 "UI modules for tornado."
 
-
-
 import markdown
 import tornado.web
 from tornado.escape import xhtml_escape as escape
@@ -120,7 +118,7 @@ class Text(tornado.web.UIModule):
 
     def render(self, name, default=''):
         try:
-            doc = self.handler.get_entity_view('text/name', name)
+            doc = self.handler.get_entity_view("text", "name", name)
             text = doc['text']
         except (tornado.web.HTTPError, KeyError):
             text = default

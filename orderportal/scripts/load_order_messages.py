@@ -3,7 +3,6 @@
 import os.path
 import sys
 
-import couchdb
 import yaml
 
 from orderportal import constants

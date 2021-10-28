@@ -8,7 +8,7 @@ The database must exist, and the account for accessing it must have been set up.
 import os.path
 import sys
 
-import couchdb
+import couchdb2
 import yaml
 
 from orderportal import admin
@@ -24,20 +24,19 @@ def init_database(dumpfilepath=None):
     db = utils.get_db()
     try:
         db['order']
-    except couchdb.ResourceNotFound:
+    except couchdb2.NotFoundError:
         pass
     else:
         sys.exit('Error: database is not empty')
     utils.initialize(db)
     # No specific items set here; done on-the-fly in e.g. get_next_number
-    db.save(dict(_id='order',
-                 orderportal_doctype=constants.META))
+    db.put(dict(_id='order', orderportal_doctype=constants.META))
     print('created meta documents')
     if dumpfilepath:
         try:
             print('reading dump file...')
             undump(db, dumpfilepath)
-            designs.regenerate_views_indexes(db)
+            # designs.regenerate_views_indexes(db)
         except IOError:
             print('Warning: could not load', dumpfilepath)
     else:
@@ -51,7 +50,7 @@ def init_database(dumpfilepath=None):
         print('Warning: could not load', filepath)
         texts = dict()
     for name in constants.TEXTS:
-        if len(list(db.view('text/name', key=name))) == 0:
+        if len(list(db.view("text", "name", key=name))) == 0:
             with admin.TextSaver(db=db) as saver:
                 saver['name'] = name
                 saver['text'] = texts.get(name, '')

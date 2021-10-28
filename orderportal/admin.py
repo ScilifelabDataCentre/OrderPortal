@@ -34,7 +34,7 @@ class GlobalModes(RequestHandler):
             if '_id' not in self.global_modes:
                 self.global_modes['_id'] = 'global_modes'
                 self.global_modes[constants.DOCTYPE] = constants.META
-            self.db.save(self.global_modes)
+            self.db.put(self.global_modes)
         self.see_other('global_modes')
 
 
@@ -85,7 +85,7 @@ class Text(RequestHandler):
     def get(self, name):
         self.check_admin()
         try:
-            text = self.get_entity_view('text/name', name)
+            text = self.get_entity_view("text", "name", name)
         except tornado.web.HTTPError:
             text = dict(name=name)
         origin = self.get_argument('origin',self.absolute_reverse_url('texts'))
@@ -95,7 +95,7 @@ class Text(RequestHandler):
     def post(self, name):
         self.check_admin()
         try:
-            text = self.get_entity_view('text/name', name)
+            text = self.get_entity_view("text", "name", name)
         except tornado.web.HTTPError:
             text = dict(name=name)
         with TextSaver(doc=text, rqh=self) as saver:
@@ -119,7 +119,8 @@ class OrderStatuses(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        view = self.db.view('order/status',
+        view = self.db.view("order",
+                            "status",
                             group_level=1,
                             startkey=[''],
                             endkey=[constants.CEILING])

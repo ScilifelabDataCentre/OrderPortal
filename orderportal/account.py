@@ -1,7 +1,5 @@
 "Account and login pages."
 
-
-
 import csv
 import logging
 from collections import OrderedDict as OD
@@ -29,7 +27,7 @@ class AccountSaver(saver.Saver):
         if not email: raise ValueError('No email given.')
         if not constants.EMAIL_RX.match(email):
             raise ValueError('Malformed email value.')
-        if len(list(self.db.view('account/email', key=email))) > 0:
+        if len(list(self.db.view("account", "email", key=email))) > 0:
             raise ValueError('Email is already in use.'
                              " Use 'Reset password' if you have lost it.")
         self['email'] = email
@@ -90,11 +88,12 @@ class Accounts(RequestHandler):
                                          accounts=accounts)
         # No filter; all accounts
         if accounts is None:
-            view = self.db.view('account/email', include_docs=True)
+            view = self.db.view("account", "email", include_docs=True)
             accounts = [r.doc for r in view]
         # This is optimized for retrieval speed. The single-valued
         # function 'get_account_order_count' is not good enough here.
-        view = self.db.view('order/owner',
+        view = self.db.view("order",
+                            "owner",
                             group_level=1,
                             startkey=[''],
                             endkey=[constants.CEILING])
@@ -108,13 +107,14 @@ class Accounts(RequestHandler):
         "Return accounts list if any university filter, or None if none."
         if university == '[other]':
             if accounts is None:
-                view = self.db.view('account/email', include_docs=True)
+                view = self.db.view("account", "email", include_docs=True)
                 accounts = [r.doc for r in view]
             accounts = [a for a in accounts
                         if a['university'] not in settings['UNIVERSITIES']]
         elif university:
             if accounts is None:
-                view = self.db.view('account/university',
+                view = self.db.view("account",
+                                    "university",
                                     key=university,
                                     include_docs=True)
                 accounts = [r.doc for r in view]
@@ -127,7 +127,8 @@ class Accounts(RequestHandler):
         "Return accounts list if any role filter, or None if none."
         if role:
             if accounts is None:
-                view = self.db.view('account/role',
+                view = self.db.view("account",
+                                    "role",
                                     key=role,
                                     include_docs=True)
                 accounts = [r.doc for r in view]
@@ -139,7 +140,8 @@ class Accounts(RequestHandler):
         "Return accounts list if any status filter, or None if none."
         if status:
             if accounts is None:
-                view = self.db.view('account/status',
+                view = self.db.view("account",
+                                    "status",
                                     key=status,
                                     include_docs=True)
                 accounts = [r.doc for r in view]
@@ -314,7 +316,8 @@ class Account(AccountMixin, RequestHandler):
             self.see_other('home', error=str(msg))
             return
         account['order_count'] = self.get_account_order_count(account['email'])
-        view = self.db.view('log/account',
+        view = self.db.view("log",
+                            "account",
                             startkey=[account['email'], constants.CEILING],
                             lastkey=[account['email']],
                             descending=True,
@@ -354,7 +357,8 @@ class Account(AccountMixin, RequestHandler):
                            error='Account cannot be deleted.')
             return
         # Delete the groups this account owns.
-        view = self.db.view('group/owner',
+        view = self.db.view("group",
+                            "owner",
                             include_docs=True,
                             key=account['email'])
         for row in view:
@@ -362,7 +366,8 @@ class Account(AccountMixin, RequestHandler):
             self.delete_logs(group['_id'])
             self.db.delete(group)
         # Remove this account from groups it is a member of.
-        view = self.db.view('group/owner',
+        view = self.db.view("group",
+                            "owner",
                             include_docs=True,
                             key=account['email'])
         for row in view:
@@ -372,7 +377,8 @@ class Account(AccountMixin, RequestHandler):
                 members.discard(account['email'])
                 saver['members'] = sorted(members)
         # Delete the messages of the account.
-        view = self.db.view('message/recipient',
+        view = self.db.view("message",
+                            "recipient",
                             reduce=False,
                             include_docs=True,
                             startkey=[account['email']],
@@ -434,7 +440,8 @@ class AccountApiV1(AccountMixin, RequestHandler):
         data['invoice_address'] = account.get('invoice_address') or {}
         data['login'] = account.get('login', '-')
         data['modified'] = account['modified']
-        view = self.db.view('log/account',
+        view = self.db.view("log",
+                            "account",
                             startkey=[account['email'], constants.CEILING],
                             lastkey=[account['email']],
                             descending=True,
@@ -469,7 +476,8 @@ class AccountOrdersMixin(object):
         "Return all orders for the accounts in the account's group."
         orders = []
         for colleague in self.get_account_colleagues(account['email']):
-            view = self.db.view('order/owner',
+            view = self.db.view("order",
+                                "owner",
                                 reduce=False,
                                 include_docs=True,
                                 startkey=[colleague],
@@ -495,7 +503,8 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
             order_column = 3
         order_column += len(settings['ORDERS_LIST_STATUSES']) + \
             len(settings['ORDERS_LIST_FIELDS'])
-        view = self.db.view('order/owner',
+        view = self.db.view("order",
+                            "owner",
                             reduce=False,
                             include_docs=True,
                             startkey=[account['email']],
@@ -535,7 +544,8 @@ class AccountOrdersApiV1(AccountOrdersMixin,
         data['links'] = dict(
             api=dict(href=URL('account_orders_api', account['email'])),
             display=dict(href=URL('account_orders', account['email'])))
-        view = self.db.view('order/owner',
+        view = self.db.view("order",
+                            "owner",
                             reduce=False,
                             include_docs=True,
                             startkey=[account['email']],
@@ -626,10 +636,12 @@ class AccountMessages(AccountMixin, RequestHandler):
         except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
-        view = self.db.view('message/recipient',
+        view = self.db.view("message",
+                            "recipient",
                             startkey=[account['email']],
                             endkey=[account['email'], constants.CEILING])
-        view = self.db.view('message/recipient',
+        view = self.db.view("message",
+                            "recipient",
                             descending=True,
                             startkey=[account['email'], constants.CEILING],
                             endkey=[account['email']],
@@ -681,17 +693,11 @@ class AccountEdit(AccountMixin, RequestHandler):
                 try:
                     saver['gender'] = self.get_argument('gender').lower()
                 except tornado.web.MissingArgumentError:
-                    try:
-                        del saver['gender']
-                    except KeyError:
-                        pass
+                    saver.pop('gender', None)
                 try:
                     saver['group_size'] = self.get_argument('group_size')
                 except tornado.web.MissingArgumentError:
-                    try:
-                        del saver['group_size']
-                    except KeyError:
-                        pass
+                    saver.pop('group_size', None)
                 try:
                     saver['subject'] = int(self.get_argument('subject'))
                 except (tornado.web.MissingArgumentError, ValueError,TypeError):
@@ -745,7 +751,8 @@ class Login(RequestHandler):
         if utils.hashed_password(password) != account.get('password'):
             utils.log(self.db, self, account,
                       changed=dict(login_failure=account['email']))
-            view = self.db.view('log/login_failure',
+            view = self.db.view("log",
+                                "login_failure",
                                 startkey=[account['_id'], utils.timestamp(-1)],
                                 endkey=[account['_id'], utils.timestamp()])
             # Disable account if too many recent login failures.
