@@ -4,20 +4,22 @@ An order can be a project application, a request, a report, etc.
 
 import os.path
 
-__version__ = '5.0.0'
+__version__ = '5.1.0'
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
     ROOT = ROOT,
-    BASE_URL = 'http://localhost/',
+    BASE_URL = 'http://localhost:8881/',
     BASE_URL_PATH_PREFIX = None,
+    PORT = 8881,                # The port used by tornado.
     TORNADO_DEBUG = False,
     LOGGING_DEBUG = False,
     LOGGING_FORMAT = '%(levelname)s [%(asctime)s] %(message)s',
     LOGGING_FILEPATH = None,
     LOGGING_FILEMODE = None,
+    PIDFILE = None,
     DATABASE_SERVER = 'http://localhost:5984/',
     DATABASE_NAME = 'orderportal',
     MARKDOWN_URL = 'http://agea.github.io/tutorial.md/',
@@ -61,7 +63,6 @@ settings = dict(
     DISPLAY_MENU_ABOUT_US = True,
     DISPLAY_TEXT_MARKDOWN_NOTATION_INFO = True,
     ORDER_IDENTIFIER_FORMAT = None,
-    ORDER_IDENTIFIER_REGEXP = None,
     ORDER_TAGS = True,
     ORDER_USER_TAGS = True,
     ORDER_LINKS = True,

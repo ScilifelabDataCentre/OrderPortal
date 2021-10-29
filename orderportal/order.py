@@ -466,8 +466,11 @@ class OrderSaver(saver.Saver):
                         if account and account['status'] == constants.ENABLED:
                             recipients.add(account['email'])
         if constants.ADMIN in template['recipients']:
-            view = self.db.view("account", "role", include_docs=True)
-            admins = [r.doc for r in view[constants.ADMIN]]
+            result = self.db.view("account", 
+                                  "role",
+                                  key=constants.ADMIN, 
+                                  include_docs=True)
+            admins = [r.doc for r in result]
             for admin in admins:
                 if admin['status'] == constants.ENABLED:
                     recipients.add(admin['email'])
@@ -491,12 +494,12 @@ class OrderSaver(saver.Saver):
         path = "/order/{0}".format(identifier)
         if settings['BASE_URL_PATH_PREFIX']:
             path = settings['BASE_URL_PATH_PREFIX'] + path
-        return settings['BASE_URL'] + path
+        return settings['BASE_URL'].rstrip("/") + path
 
     def get_account(self, email):
         "Get the account document for the given email."
-        view = self.db.view("account", "email", include_docs=True)
-        rows = list(view[email])
+        result = self.db.view("account", "email", key=email, include_docs=True)
+        rows = list(result)
         if len(rows) == 1:
             return rows[0].doc
         else:
@@ -509,19 +512,11 @@ class OrderMixin(object):
     def get_order(self, iuid):
         """Get the order for the identifier or IUID.
         Raise ValueError if no such order."""
-        try:
-            regexp = settings['ORDER_IDENTIFIER_REGEXP']
-            if not regexp: raise KeyError
-            match = re.match(regexp, iuid)
-            if not match: raise KeyError
-        except KeyError:
-            try:
+        try:                    # First try order identifier.
+            order = self.get_entity_view("order", "identifier", iuid)
+        except tornado.web.HTTPError:
+            try:                # Next try order doc IUID.
                 order = self.get_entity(iuid, doctype=constants.ORDER)
-            except tornado.web.HTTPError:
-                raise ValueError('Sorry, no such order')
-        else:
-            try:
-                order = self.get_entity_view("order", "identifier", match.group())
             except tornado.web.HTTPError:
                 raise ValueError('Sorry, no such order')
         return order
@@ -1123,13 +1118,14 @@ class Orders(RequestHandler):
             if orders is None:
                 orders = []
                 for form in forms:
-                    view = self.db.view("order",
-                                        "form",
-                                        descending=True,
-                                        reduce=False,
-                                        include_docs=True)
-                    orders.extend([r.doc for r in
-                                   view[[form, constants.CEILING]:[form]]])
+                    result = self.db.view("order",
+                                          "form",
+                                          startkey=[form, constants.CEILING],
+                                          endkey=[form],
+                                          descending=True,
+                                          reduce=False,
+                                          include_docs=True)
+                    orders.extend([r.doc for r in result])
             else:
                 orders = [o for o in orders if o['form'] in forms]
         return orders

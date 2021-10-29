@@ -319,7 +319,7 @@ class Account(AccountMixin, RequestHandler):
         view = self.db.view("log",
                             "account",
                             startkey=[account['email'], constants.CEILING],
-                            lastkey=[account['email']],
+                            endkey=[account['email']],
                             descending=True,
                             limit=1)
         try:
@@ -443,7 +443,7 @@ class AccountApiV1(AccountMixin, RequestHandler):
         view = self.db.view("log",
                             "account",
                             startkey=[account['email'], constants.CEILING],
-                            lastkey=[account['email']],
+                            endkey=[account['email']],
                             descending=True,
                             limit=1)
         try:
@@ -693,11 +693,11 @@ class AccountEdit(AccountMixin, RequestHandler):
                 try:
                     saver['gender'] = self.get_argument('gender').lower()
                 except tornado.web.MissingArgumentError:
-                    saver.pop('gender', None)
+                    saver.doc.pop('gender', None)
                 try:
                     saver['group_size'] = self.get_argument('group_size')
                 except tornado.web.MissingArgumentError:
-                    saver.pop('group_size', None)
+                    saver.doc.pop('group_size', None)
                 try:
                     saver['subject'] = int(self.get_argument('subject'))
                 except (tornado.web.MissingArgumentError, ValueError,TypeError):

@@ -79,7 +79,7 @@ class RequestHandler(tornado.web.RequestHandler):
             path = settings['BASE_URL_PATH_PREFIX'] or ''
         else:
             path = self.reverse_url(name, *args, **query)
-        return settings['BASE_URL'] + path
+        return settings['BASE_URL'].rstrip("/") + path
 
     def reverse_url(self, name, *args, **query):
         "Allow adding query arguments to the URL."
@@ -238,8 +238,11 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_admins(self):
         "Get the list of enabled admin accounts."
-        view = self.db.view("account", "role", include_docs=True)
-        admins = [r.doc for r in view[constants.ADMIN]]
+        view = self.db.view("account",
+                            "role",
+                            key=constants.ADMIN,
+                            include_docs=True)
+        admins = [r.doc for r in view]
         return [a for a in admins if a['status'] == constants.ENABLED]
 
     def get_colleagues(self, email):
@@ -373,9 +376,11 @@ class RequestHandler(tornado.web.RequestHandler):
     def get_account_groups(self, email):
         "Get sorted list of all groups which the account is a member of."
         email = email.strip().lower()
-        view = self.db.view("group", "member", include_docs=True)
-        return sorted([r.doc for r in view[email]],
-                      key=lambda i: i['name'])
+        view = self.db.view("group",
+                            "member",
+                            key=email,
+                            include_docs=True)
+        return sorted([r.doc for r in view], key=lambda i: i['name'])
 
     def get_account_colleagues(self, email):
         """Return the set of all emails for colleagues of the account;

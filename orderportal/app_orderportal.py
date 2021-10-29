@@ -7,6 +7,7 @@ import sys
 import tornado.web
 import tornado.ioloop
 
+from orderportal import designs
 from orderportal import settings
 from orderportal import utils
 from orderportal import uimodules
@@ -26,10 +27,12 @@ from orderportal.search import *
 
 
 def main():
-    parser = utils.get_command_line_parser(description='OrderPortal server.')
-    (options, args) = parser.parse_args()
-    utils.load_settings()
-    utils.initialize()
+    if len(sys.argv) == 2:
+        filepath = sys.argv[1]
+    else:
+        filepath = None
+    utils.load_settings(filepath=filepath)
+    designs.load_design_documents(utils.get_db())
 
     url = tornado.web.url
     handlers = [url(r'/', Home, name='home'),
@@ -178,14 +181,14 @@ def main():
     for key, value in settings['ORDER_STATUSES_LOOKUP'].items():
         value['href'] = application.reverse_url('site', key + '.png')
     application.listen(settings['PORT'], xheaders=True)
-    pid = os.getpid()
     url = settings['BASE_URL']
     if settings['BASE_URL_PATH_PREFIX']:
         url += settings['BASE_URL_PATH_PREFIX']
-    logging.info("web server %s (PID %s)", url, pid)
-    if options.pidfile:
-        with open(options.pidfile, 'w') as pf:
+    pid = os.getpid()
+    if settings["PIDFILE"]:
+        with open(settings["PIDFILE"], "w") as pf:
             pf.write(str(pid))
+    logging.info(f"web server PID {pid} at {url}")
     tornado.ioloop.IOLoop.instance().start()
 
 

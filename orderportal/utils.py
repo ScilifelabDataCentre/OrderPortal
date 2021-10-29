@@ -39,32 +39,31 @@ def get_command_line_parser(usage='usage: %prog [options]', description=None):
                       help='force action, rather than ask for confirmation')
     return parser
 
-def load_settings():
-    """Load and return the settings from the given file path.
-    1) The settings file path environment variable ORDERPORTAL_SETTINGS.
-    2) The file 'settings.yaml' in this directory.
+def load_settings(filepath=None, log=True):
+    """Load the settings. The file path first specified is used.
+    1) The argument to this procedure (possibly from a command line argument).
+    2) The path environment variable ORDERPORTAL_SETTINGS.
     3) The file '../site/settings.yaml' relative to this directory.
+    If 'log' is True, activate logging according to DEBUG settings.
     Raise IOError if settings file could not be read.
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
     """
+    site_dir = settings["SITE_DIR"]
+    if not os.path.exists(site_dir):
+        raise IOError(f"The required site directory '{site_dir}' does not exist.")
+    if not os.path.isdir(site_dir):
+        raise IOError(f"The site directory path '{site_dir}' is not a directory.")
     # Find and read the settings file, updating the defaults.
-    filepaths = []
-    try:
-        filepaths.append(os.environ["ORDERPORTAL_SETTINGS"])
-    except KeyError:
-        pass
-    for filepath in ["settings.yaml", "../site/settings.yaml"]:
-        filepaths.append(
-            os.path.normpath(os.path.join(settings["ROOT"], filepath)))
-    for filepath in filepaths:
+    if not filepath:
         try:
-            with open(filepath) as infile:
-                settings.update(yaml.safe_load(infile))
-        except FileNotFoundError:
-            pass
-        else:
-            settings["SETTINGS_FILE"] = filepath
+            filepath = os.environ["ORDERPORTAL_SETTINGS"]
+        except KeyError:
+            filepath = os.path.join(site_dir, "settings.yaml")
+    with open(filepath) as infile:
+        settings.update(yaml.safe_load(infile))
+    settings["SETTINGS_FILE"] = filepath
+
     # Set logging state
     if settings.get('LOGGING_DEBUG'):
         kwargs = dict(level=logging.DEBUG)
@@ -86,20 +85,22 @@ def load_settings():
         kwargs['filemode'] = filemode
     except KeyError:
         pass
-    logging.basicConfig(**kwargs)
-    logging.info("OrderPortal version %s", orderportal.__version__)
-    logging.info("ROOT: %s", settings['ROOT'])
-    logging.info("SITE_DIR: %s", settings['SITE_DIR'])
-    logging.info("settings: %s", settings['SETTINGS_FILE'])
-    logging.info("logging debug: %s", settings['LOGGING_DEBUG'])
-    logging.info("tornado debug: %s", settings['TORNADO_DEBUG'])
-    # Check settings
+    settings["LOG"] = log
+    if log:
+        logging.basicConfig(**kwargs)
+        logging.info(f"OrderPortal version {orderportal.__version__}")
+        logging.info(f"ROOT: {settings['ROOT']}")
+        logging.info(f"SITE_DIR: {settings['SITE_DIR']}")
+        logging.info(f"settings: {settings['SETTINGS_FILE']}")
+        logging.info(f"logging debug: {settings['LOGGING_DEBUG']}")
+        logging.info(f"tornado debug: {settings['TORNADO_DEBUG']}")
+
+    # Check some settings.
     for key in ['BASE_URL','DATABASE_SERVER','DATABASE_NAME','COOKIE_SECRET']:
         if key not in settings:
-            raise KeyError("No settings['{0}'] item.".format(key))
+            raise KeyError(f"No settings['{key}'] item.")
         if not settings[key]:
-            raise ValueError("settings['{0}'] has invalid value.".format(key))
-    logging.info("CouchDB database name: %s", settings['DATABASE_NAME'])
+            raise ValueError(f"settings['{key}'] has invalid value.")
     if len(settings.get('COOKIE_SECRET', '')) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short.")
     # Read account messages YAML file.
@@ -117,6 +118,7 @@ def load_settings():
         settings['ACCOUNT_MESSAGES'][constants.RESET]['recipients'] = ['account']
     except KeyError:
         raise ValueError('Account messages file: missing message for status')
+
     # Check valid order identifier format; prefix all upper case characters
     if settings['ORDER_IDENTIFIER_FORMAT']:
         for c in settings['ORDER_IDENTIFIER_FORMAT']:
@@ -124,6 +126,7 @@ def load_settings():
             if not c.isupper():
                 raise ValueError('ORDER_IDENTIFIER_FORMAT prefix must be'
                                  ' all upper-case characters')
+
     # Read order statuses definitions YAML file.
     filepath = os.path.join(settings["SITE_DIR"],
                             settings["ORDER_STATUSES_FILE"])
@@ -141,18 +144,21 @@ def load_settings():
     if not initial:
         raise ValueError('No initial order status defined.')
     settings['ORDER_STATUS_INITIAL'] = initial
+
     # Read order status transition definiton YAML file.
     filepath = os.path.join(settings["SITE_DIR"],
                             settings["ORDER_TRANSITIONS_FILE"])
     logging.info(f"order transitions: {filepath}")
     with open(filepath) as infile:
         settings['ORDER_TRANSITIONS'] = yaml.safe_load(infile)
+
     # Read order messages YAML file.
     filepath = os.path.join(settings["SITE_DIR"],
                             settings["ORDER_MESSAGES_FILE"])
     logging.info(f"order messages: {filepath}")
     with open(filepath) as infile:
         settings['ORDER_MESSAGES'] = yaml.safe_load(infile)
+
     # Read universities YAML file.
     filepath = settings.get("UNIVERSITIES_FILE")
     if not filepath:
@@ -165,6 +171,7 @@ def load_settings():
         unis = list(unis.items())
         unis.sort(key=lambda i: (i[1].get('rank'), i[0]))
         settings['UNIVERSITIES'] = collections.OrderedDict(unis)
+
     # Read country codes YAML file
     filepath = settings.get("COUNTRY_CODES_FILE")
     if not filepath:
@@ -176,6 +183,7 @@ def load_settings():
             settings['COUNTRIES'] = yaml.safe_load(infile)
         settings['COUNTRIES_LOOKUP'] = dict([(c['code'], c['name'])
                                              for c in settings['COUNTRIES']])
+
     # Read subject terms YAML file.
     filepath = settings.get("SUBJECT_TERMS_FILE")
     if not filepath:
@@ -187,22 +195,13 @@ def load_settings():
             settings['subjects'] = yaml.safe_load(infile)
     settings['subjects_lookup'] = dict([(s['code'], s['term'])
                                         for s in settings['subjects']])
+
     # Settings computable from others.
-    settings['DATABASE_SERVER_VERSION'] = get_dbserver().version
     parts = urllib.parse.urlparse(settings['BASE_URL'])
-    settings['BASE_URL'] = "%s://%s" % (parts.scheme, parts.netloc)
-    if not settings.get('PORT'):
-        items = parts.netloc.split(':')
-        if len(items) == 2:
-            settings['PORT'] = int(items[1])
-        elif parts.scheme == 'http':
-            settings['PORT'] =  80
-        elif parts.scheme == 'https':
-            settings['PORT'] =  443
-        else:
-            raise ValueError('Could not determine port from BASE_URL.')
     if not settings.get('BASE_URL_PATH_PREFIX') and parts.path:
         settings['BASE_URL_PATH_PREFIX'] = parts.path.rstrip('/') or None
+    # BASE_URL should not contain any path part.
+    settings['BASE_URL'] = "%s://%s/" % (parts.scheme, parts.netloc)
 
 def terminology(word):
     "Return the display term for the given word. Use itself by default."
@@ -232,11 +231,16 @@ def get_db():
     except couchdb2.NotFoundError:
         raise KeyError(f"CouchDB database '{name}' does not exist.")
 
-def initialize(db=None):
-    "Load the design documents."
-    if db is None:
-        db = get_db()
-    designs.load_design_documents(db)
+def get_count(db, designname, viewname, key=None):
+    "Get the reduce value for the name view and the given key."
+    if key is None:
+        view = db.view(designname, viewname, reduce=True)
+    else:
+        view = db.view(designname, viewname, key=key, reduce=True)
+    try:
+        return list(view)[0].value
+    except IndexError:
+        return 0
 
 def get_iuid():
     "Return a unique instance identifier."

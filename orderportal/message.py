@@ -20,8 +20,11 @@ class MessageSaver(saver.Saver):
 
     def create(self, template, **kwargs):
         "Create the message from the template and parameters for it."
+        site_url = settings['BASE_URL']
+        if settings['BASE_URL_PATH_PREFIX']:
+            site_url = settings['BASE_URL_PATH_PREFIX'] + site_url
         params = dict(site=settings['SITE_NAME'],
-                      site_url=settings['BASE_URL'],
+                      site_url=site_url,
                       support=settings.get('SITE_SUPPORT_EMAIL') or '[?]',
                       host=settings.get('SITE_HOST_TITLE') or '[?]',
                       host_url=settings.get('SITE_HOST_URL') or '[?]')
