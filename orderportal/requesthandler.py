@@ -112,9 +112,9 @@ class RequestHandler(tornado.web.RequestHandler):
         except KeyError:
             identifier = order['_id']
         if api:
-            return URL('order_id_api', identifier, **query)
+            return URL('order_api', identifier, **query)
         else:
-            return URL('order_id', identifier, **query)
+            return URL('order', identifier, **query)
 
     def set_message_flash(self, message):
         "Set message flash cookie."

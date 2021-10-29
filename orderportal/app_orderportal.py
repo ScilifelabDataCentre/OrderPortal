@@ -35,21 +35,11 @@ def main():
     designs.load_design_documents(utils.get_db())
 
     url = tornado.web.url
-    handlers = [url(r'/', Home, name='home'),
-                url(r'/status', Status, name="status")]
-    try:
-        regexp = settings['ORDER_IDENTIFIER_REGEXP']
-    except KeyError:
-        pass
-    else:
-        handlers.append(url(r"/order/({0})".format(regexp),
-                            Order, name='order_id'))
-        handlers.append(url(r"/api/v1/order/({0})".format(regexp),
-                            OrderApiV1, name='order_id_api'))
-
-    handlers.extend([
-        url(r'/order/([0-9a-f]{32})', Order, name='order'),
-        url(r'/api/v1/order/([0-9a-f]{32})', OrderApiV1, name='order_api'),
+    handlers = [
+        url(r'/', Home, name='home'),
+        url(r'/status', Status, name="status"),
+        url(r'/order/([^/.]+)', Order, name='order'),
+        url(r'/api/v1/order/([^/.]+)', OrderApiV1, name='order_api'),
         url(r'/order/([^/]+).csv', OrderCsv, name='order_csv'),
         url(r'/order/([^/]+).xlsx', OrderXlsx, name='order_xlsx'),
         url(r'/order/([^/]+).zip', OrderZip, name='order_zip'),
@@ -164,9 +154,8 @@ def main():
             AdminAccountMessages, name='admin_account_messages'),
         url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
             {'path': settings['SITE_STATIC_DIR']}, name='site'),
-        ])
-    handlers.append(url(r'/api/v1/(.*)', NoSuchEntityApiV1))
-    handlers.append(url(r'/(.*)', NoSuchEntity))
+        url(r'/api/v1/(.*)', NoSuchEntityApiV1),
+        url(r'/(.*)', NoSuchEntity)]
     application = tornado.web.Application(
         handlers=handlers,
         debug=settings.get('TORNADO_DEBUG', False),

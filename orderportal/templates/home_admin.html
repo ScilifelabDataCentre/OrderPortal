@@ -48,7 +48,7 @@
       <tr>
 	<th>
 	  {% if order.get('identifier') %}
-	  <a href="{{ reverse_url('order_id', order['identifier']) }}">
+	  <a href="{{ reverse_url('order', order['identifier']) }}">
 	    {{ order['title'] }}
 	  </a>
 	  {% else %}
