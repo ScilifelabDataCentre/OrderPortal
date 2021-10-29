@@ -77,11 +77,14 @@ def counts():
 
 @cli.command()
 @click.option("-d", "--dumpfile", type=str,
-                help="The path of the Orderportal database dump file.")
+                help="The path of the Orderportal database dump file."
+              " NOTE: Environment variable BACKUP_DIR is no longer used.")
 @click.option("-D", "--dumpdir", type=str,
                 help="The directory to write the dump file in, using the standard name.")
 def dump(dumpfile, dumpdir):
-    "Dump all data in the database to a .tar.gz dump file."
+    """Dump all data in the database to a .tar.gz dump file.
+    NOTE: Environment variable BACKUP_DIR is no longer used.
+    """
     db = utils.get_db()
     if not dumpfile:
         dumpfile = "dump_{0}.tar.gz".format(time.strftime("%Y-%m-%d"))
