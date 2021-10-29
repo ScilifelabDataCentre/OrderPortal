@@ -57,7 +57,7 @@ class Settings(RequestHandler):
                   'SITE_NAME', 'SITE_SUPPORT_EMAIL',
                   'DATABASE_SERVER', 'DATABASE_NAME', 'DATABASE_ACCOUNT',
                   'TORNADO_DEBUG', 'LOGGING_FILEPATH', 'LOGGING_DEBUG',
-                  'BACKUP_DIR', 'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES',
+                  'LOGIN_MAX_AGE_DAYS', 'LOGIN_MAX_FAILURES',
                   'ORDER_STATUSES_FILE', 'ORDER_TRANSITIONS_FILE',
                   'ORDER_MESSAGES_FILE', 'ORDER_USER_TAGS', 
                   'ORDERS_SEARCH_FIELDS', 'ORDERS_LIST_FIELDS',
