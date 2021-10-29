@@ -156,6 +156,7 @@ def main():
             {'path': settings['SITE_STATIC_DIR']}, name='site'),
         url(r'/api/v1/(.*)', NoSuchEntityApiV1),
         url(r'/(.*)', NoSuchEntity)]
+
     application = tornado.web.Application(
         handlers=handlers,
         debug=settings.get('TORNADO_DEBUG', False),
@@ -165,10 +166,12 @@ def main():
         template_path=os.path.join(settings['ROOT'], 'templates'),
         static_path=os.path.join(settings['ROOT'], 'static'),
         login_url=(settings['BASE_URL_PATH_PREFIX'] or '') + '/login')
+
     # Add href URLs for the status icons data in settings.
     # This depends on order status setup.
     for key, value in settings['ORDER_STATUSES_LOOKUP'].items():
         value['href'] = application.reverse_url('site', key + '.png')
+
     application.listen(settings['PORT'], xheaders=True)
     url = settings['BASE_URL']
     if settings['BASE_URL_PATH_PREFIX']:
@@ -178,6 +181,7 @@ def main():
         with open(settings["PIDFILE"], "w") as pf:
             pf.write(str(pid))
     logging.info(f"web server PID {pid} at {url}")
+
     tornado.ioloop.IOLoop.instance().start()
 
 
