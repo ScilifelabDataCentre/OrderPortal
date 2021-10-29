@@ -165,7 +165,7 @@ def main():
         template_path=os.path.join(settings['ROOT'], 'templates'),
         static_path=os.path.join(settings['ROOT'], 'static'),
         login_url=(settings['BASE_URL_PATH_PREFIX'] or '') + '/login')
-    # Add href URLs for the status icons.
+    # Add href URLs for the status icons data in settings.
     # This depends on order status setup.
     for key, value in settings['ORDER_STATUSES_LOOKUP'].items():
         value['href'] = application.reverse_url('site', key + '.png')
