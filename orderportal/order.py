@@ -660,7 +660,7 @@ class OrderMixin(object):
 class OrderApiV1Mixin(ApiV1Mixin):
     "Mixin for order JSON data structure."
 
-    def get_order_json(self, order,
+    def get_order_json(self, order, 
                        account_names=None, forms_lookup=None, full=False):
         """Return a dictionary for JSON output for the order.
         Account names or forms lookup are computed if not given.
@@ -688,9 +688,11 @@ class OrderApiV1Mixin(ApiV1Mixin):
         else:
             if forms_lookup is None:
                 forms_lookup = self.get_forms_lookup()
+            form = forms_lookup[order['form']]
             data['form'] = OD(
                 [('iuid', order['form']),
-                 ('title', forms_lookup[order['form']]['title']),
+                 ('title', form['title']),
+                 ('version', form.get('version')),
                  ('links', dict(api=dict(href=URL('form', order['form']))))])
         if account_names is None:
             account_names = self.get_account_names([order['owner']])
@@ -1188,11 +1190,12 @@ class OrdersCsv(Orders):
         account_names = self.get_account_names()
         forms_lookup = self.get_forms_lookup()
         for order in self.get_orders():
+            form = forms_lookup[order['form']]
             row = [order.get('identifier') or '',
                    order['title'] or '[no title]',
                    order['_id'],
                    self.order_reverse_url(order),
-                   forms_lookup[order['form']['title']],
+                   f"{form['title']} ({form.get('version') or '-'})",
                    order['form'],
                    self.absolute_reverse_url('form', order['form']),
                    order['owner'],
