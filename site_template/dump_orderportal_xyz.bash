@@ -4,11 +4,12 @@ datum=`date +"%Y-%m-%d"`
 dirpath=/home/bupp/bupp_filez/orderportal_xyz
 filename=orderportal_xyz_dump_$datum.tar.gz
 
-cd /var/www/apps/xyz/OrderPortal/orderportal
-PYTHONPATH=/var/www/apps/xyz/OrderPortal /bin/python2 dump.py -d $filename
+cd /home/per.kraulis/OrderPortal/orderportal
+PYTHONPATH=/home/per.kraulis/OrderPortal /usr/bin/scl enable rh-python36 -- pyth
+on cli.py dump -d $dirpath/$filename
 
-# CHANGE! This line is local to SciLifeLab
+# Copy to homer for taping.
 scp -i /root/.ssh/dbbupp $dirpath/$filename bupp@homer.scilifelab.se:~/
 
-# remove old dumps
-/bin/find $dirpath -type f -ctime +40 -name '*dump*' -delete
+# Remove old dumps.
+/bin/find $dirpath -type f -ctime +40 -name 'orderportal_xyz_dump*' -delete

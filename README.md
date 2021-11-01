@@ -4,8 +4,6 @@ OrderPortal
 A portal for orders (requests, project proposals, etc) to a
 facility from its users.
 
-The current version requires Python 3.6 or higher.
-
 The [GitHub wiki](https://github.com/pekrau/OrderPortal/wiki) contains
 some additional information.
 
@@ -322,7 +320,7 @@ substitute by whichever fork you are using.
     $ sudo -u nginx git clone https://github.com/pekrau/OrderPortal.git
 
 Create the `site` subdirectory for your instance using the `site_template`
-directory (changed from version 4.1):
+directory (since version 4.1):
 
     $ cd OrderPortal
     $ sudo -u nginx cp -r site_template site
@@ -425,8 +423,8 @@ to a tar file. Create a backup directory:
 
     $ sudo mkdir /home/backup/backup_files/orderportal_xyz
 
-Copy, rename and edit the template bash backup script
-[orderportal/site_template/dump_orderportal_xyz.bash](orderportal/site_template/dump_orderportal_xyz.bash):
+Copy and rename the template bash backup script
+[orderportal/site_template/dump_orderportal_xyz.bash](orderportal/site_template/dump_orderportal_xyz.bash). It will also need editing, since it uses a SciLifeLab-specific tape-backup setup:
 
     $ cd /etc/scripts
     $ sudo cp /var/www/apps/xyz/OrderPortal/orderportal/site_template/dump_orderportal_xyz.bash dump_orderportal_xyz.bash
@@ -451,11 +449,6 @@ To update the source code from the GitHub repo:
 
 Since version 3.6.19, the design documents are automatically updated
 when the `tornado` server is restarted.
-
-Unless the OrderPortal app is running in debug mode, the `tornado` server
-will have to be restarted.
-
-    $ sudo systemctl restart orderportal_xyz.service
 
 Please note that if your installation uses a repo forked from the
 base, ensure that you have updated that repo first by making a pull
