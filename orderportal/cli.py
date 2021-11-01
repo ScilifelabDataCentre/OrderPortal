@@ -166,15 +166,18 @@ def undump(dumpfile):
 
 @cli.command()
 @click.option("--email", prompt=True, help="Email address = account name")
-def admin(email):
+@click.option("--password")     # Get password after account existence check.
+def admin(email, password):
     "Create a user account having the admin role."
     db = utils.get_db()
     try:
         with AccountSaver(db=db) as saver:
             saver.set_email(email)
-            saver.set_password(click.prompt("Password", 
-                                            hide_input=True,
-                                            confirmation_prompt=True))
+            if not password:
+                password = click.prompt("Password", 
+                                        hide_input=True,
+                                        confirmation_prompt=True)
+            saver.set_password(password)
             saver["first_name"] = click.prompt("First name")
             saver["last_name"] = click.prompt("Last name")
             saver['address'] = dict()
@@ -187,28 +190,7 @@ def admin(email):
             saver['labels'] = []
     except ValueError as error:
         raise click.ClickException(str(error))
-    click.echo(f"Created 'admin' role account {email}")
-
-# @cli.command()
-# @click.option("--email", prompt=True)
-# @click.option("--password")     # Get password after account existence check.
-# def curator(email, password):
-#     "Create a user account having the curator role."
-#     db = utils.get_db()
-#     try:
-#         with AccountSaver(db=db) as saver:
-#             saver.set_email(email)
-#             saver['owner'] = email
-#             if not password:
-#                 password = click.prompt("Password", 
-#                                         hide_input=True,
-#                                         confirmation_prompt=True)
-#             saver.set_password(password)
-#             saver['role'] = constants.CURATOR
-#             saver['labels'] = []
-#     except ValueError as error:
-#         raise click.ClickException(str(error))
-#     click.echo(f"Created 'curator' role account {email}")
+    click.echo(f"Created 'admin' role account '{email}'.")
 
 @cli.command()
 @click.option("--email", prompt=True)
@@ -217,11 +199,11 @@ def password(email, password):
     "Set the password for the given account."
     db = utils.get_db()
     try:
-        user = utils.get_account(db, email)
+        account = _get_account(db, email)
     except KeyError as error:
         raise click.ClickException(str(error))
     try:
-        with AccountSaver(doc=user, db=db) as saver:
+        with AccountSaver(doc=account, db=db) as saver:
             if not password:
                 password = click.prompt("Password", 
                                         hide_input=True,
@@ -229,43 +211,73 @@ def password(email, password):
             saver.set_password(password)
     except ValueError as error:
         raise click.ClickException(str(error))
-    click.echo(f"Password set for account {email}")
+    click.echo(f"Password set for account '{email}'.")
 
-# @cli.command()
-# @click.argument("identifier")
-# def show(identifier):
-#     """Display the JSON for the single item in the database.
-#     The identifier may be a PMID, DOI, email, API key, label, ISSN, ISSN-L,
-#     ORCID, or IUID of the document.
-#     """
-#     db = utils.get_db()
-#     for designname, viewname, operation in [("publication", "pmid", asis),
-#                                             ("publication", "doi", asis),
-#                                             ("account", "email", asis),
-#                                             ("account", "api_key", asis),
-#                                             ("label", "normalized_value", normalized),
-#                                             ("journal", "issn", asis),
-#                                             ("journal", "issn_l", asis),
-#                                             ("researcher", "orcid", asis),
-#                                             ("blacklist", "doi", asis),
-#                                             ("blacklist", "pmid", asis)]:
-#         try:
-#             doc = utils.get_doc(db, designname, viewname, operation(identifier))
-#             break
-#         except KeyError:
-#             pass
-#     else:
-#         try:
-#             doc = db[identifier]
-#         except couchdb2.NotFoundError:
-#             raise click.ClickException("No such item in the database.")
-#     click.echo(json_dumps(doc))
+def _get_account(db, email):
+    "Get the account for the given email."
+    view = db.view("account",
+                   "email",
+                   key=email.lower(),
+                   reduce=False,
+                   include_docs=True)
+    result = list(view)
+    if len(result) == 1:
+        return result[0].doc
+    else:
+        raise KeyError(f"No such account '{email}'.")
 
-# def json_dumps(doc): return json.dumps(doc, ensure_ascii=False, indent=2)
+@cli.command()
+@click.option("--email", prompt=True)
+@click.option("--role",
+              type=click.Choice(constants.ACCOUNT_ROLES, case_sensitive=False),
+              default=constants.USER)
+def role(email, role):
+    "Set the role for the given account."
+    db = utils.get_db()
+    try:
+        account = _get_account(db, email)
+    except KeyError as error:
+        raise click.ClickException(str(error))
+    try:
+        with AccountSaver(doc=account, db=db) as saver:
+            saver["role"] = role
+    except ValueError as error:
+        raise click.ClickException(str(error))
+    click.echo(f"Role '{role}' set for account '{email}'.")
 
-# def asis(value): return value
+@cli.command()
+@click.argument("identifier")
+def show(identifier):
+    """Display the JSON for the single item in the database.
+    The identifier may be an email, API key, file name, info name,
+    order identifier, or IUID of the document.
+    """
+    db = utils.get_db()
+    for designname, viewname in [("account", "email"),
+                                 ("account", "api_key"),
+                                 ("file", "name"),
+                                 ("info", "name"),
+                                 ("order", "identifier")]:
+        try:
+            view = db.view(designname,
+                           viewname,
+                           key=identifier,
+                           reduce=False,
+                           include_docs=True)
+            result = list(view)
+            if len(result) == 1:
+                doc = result[0].doc
+                break
+        except KeyError:
+            pass
+    else:
+        try:
+            doc = db[identifier]
+        except couchdb2.NotFoundError:
+            raise click.ClickException("No such item in the database.")
+    click.echo(json_dumps(doc))
 
-# def normalized(value): return utils.to_ascii(value).lower()
+def json_dumps(doc): return json.dumps(doc, ensure_ascii=False, indent=2)
 
 
 if __name__ == "__main__":
