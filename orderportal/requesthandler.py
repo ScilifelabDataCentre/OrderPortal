@@ -422,15 +422,13 @@ class RequestHandler(tornado.web.RequestHandler):
                 result[row.key] = utils.get_account_name(value=row.value)
         return result
 
-    def get_forms_titles(self, all=False):
-        "Get form titles lookup for iuid, all or only the enabled+disabled."
-        view = self.db.view("form", "modified", include_docs=not all)
-        if all:
-            return dict([(r.id, r.value) for r in view])
-        else:
-            return dict([(r.id, r.value) for r in view
-                         if r.doc['status'] in 
-                         (constants.ENABLED, constants.DISABLED)])
+    def get_forms_lookup(self):
+        "Get all forms as a lookup with form iuid as key, form doc as value."
+        view = self.db.view("form",
+                            "modified",
+                            descending=True,
+                            include_docs=True)
+        return dict([(r.id, r.doc) for r in view])
 
     def get_logs(self, iuid, limit=settings['DISPLAY_DEFAULT_MAX_LOG']+1):
         "Return the event log documents for the given entity iuid."

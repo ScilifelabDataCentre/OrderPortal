@@ -511,8 +511,7 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
                             endkey=[account['email'], constants.CEILING])
         orders = [r.doc for r in view]
         self.render('account_orders.html',
-                    all_forms=self.get_forms_titles(all=True),
-                    form_titles=sorted(self.get_forms_titles().values()),
+                    forms_lookup=self.get_forms_lookup(),
                     orders=orders,
                     account=account,
                     order_column=order_column,
@@ -536,9 +535,8 @@ class AccountOrdersApiV1(AccountOrdersMixin,
             self.check_readable(account)
         except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        # Get names and forms lookups
-        names = self.get_account_names()
-        forms = self.get_forms_titles(all=True)
+        account_names = self.get_account_names()
+        forms_lookup = self.get_forms_lookup()
         data = utils.get_json(URL('account_orders', account['email']),
                               'account orders')
         data['links'] = dict(
@@ -550,7 +548,9 @@ class AccountOrdersApiV1(AccountOrdersMixin,
                             include_docs=True,
                             startkey=[account['email']],
                             endkey=[account['email'], constants.CEILING])
-        data['orders'] = [self.get_order_json(r.doc, names, forms)
+        data['orders'] = [self.get_order_json(r.doc,
+                                              account_names=account_names,
+                                              forms_lookup=forms_lookup)
                           for r in view]
         self.write(data)
 
@@ -574,7 +574,7 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
             len(settings['ORDERS_LIST_FIELDS'])
         self.render('account_groups_orders.html',
                     account=account,
-                    all_forms=self.get_forms_titles(all=True),
+                    forms_lookup=self.get_forms_lookup(),
                     orders=self.get_group_orders(account),
                     order_column=order_column)
 
@@ -595,15 +595,16 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
             self.check_readable(account)
         except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        # Get names and forms lookups
-        names = self.get_account_names()
-        forms = self.get_forms_titles(all=True)
-        data =utils.get_json(URL('account_groups_orders_api',account['email']),
-                             'account groups orders')
+        account_names = self.get_account_names()
+        forms_lookup = self.get_forms_lookup()
+        data = utils.get_json(URL('account_groups_orders_api',account['email']),
+                              'account groups orders')
         data['links'] = dict(
             api=dict(href=URL('account_groups_orders_api', account['email'])),
             display=dict(href=URL('account_groups_orders', account['email'])))
-        data['orders'] = [self.get_order_json(o, names, forms)
+        data['orders'] = [self.get_order_json(o,
+                                              account_names=account_names,
+                                              forms_lookup=forms_lookup)
                           for o in self.get_group_orders(account)]
         self.write(data)
 

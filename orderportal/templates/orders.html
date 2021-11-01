@@ -33,12 +33,14 @@
 	  method="GET">
       <span class="glyphicon glyphicon-filter"></span>
       <div class="form-group">
-	<label for="form_title">Filter by</label>
-	<select name="form_title" id="form_title" class="form-control refresh">
+	<label for="form_id">Filter by</label>
+	<select name="form_id" id="form_id" class="form-control refresh">
 	  <option value="">[any form]</option>
-	  {% for title in form_titles %}
-	  {% set sel = title == filter.get('form_title') and 'selected' or '' %}
-	  <option {{ sel }}>{{ title }}</option>
+	  {% for form_id, form in forms_lookup.items() %}
+	  {% set sel = form_id == filter.get('form_id') and 'selected' or '' %}
+	  <option {{ sel }} value="{{ form_id }}">
+            {{ form['title'] }} ({{form.get('version') or '-' }})
+          </option>
 	  {% end %}
 	</select>
       </div>
@@ -118,7 +120,8 @@
 	  <td>{{ order.get('title') or '[no title]' }}</td>
 	  <td>
 	    <a href="{{ reverse_url('form', order['form']) }}">
-	      {{ all_forms[order['form']] }}
+	      {{ forms_lookup[order['form']]['title'] }}
+              ({{ forms_lookup[order['form']].get('version') or '-' }})
 	    </a>
 	  </td>
 	  <td>

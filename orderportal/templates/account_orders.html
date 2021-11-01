@@ -65,7 +65,7 @@
 	  {% if is_staff %}
 	  <td>
 	    <a href="{{ reverse_url('form', order['form']) }}">
-	      {{ all_forms[order['form']] }}
+	      {{ forms_lookup[order['form']]['title'] }}
 	    </a>
 	  </td>
 	  {% end %} {# if is_staff #}
