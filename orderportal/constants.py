@@ -1,7 +1,5 @@
 "Various constants."
 
-
-
 import re
 
 # Patterns

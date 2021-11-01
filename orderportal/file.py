@@ -20,7 +20,7 @@ class FileSaver(saver.Saver):
         if not constants.NAME_RX.match(value):
             raise tornado.web.HTTPError(400, reason='invalid file name')
         try:
-            doc = self.rqh.get_entity_view('file/name', value)
+            doc = self.rqh.get_entity_view("file", "name", value)
         except tornado.web.HTTPError:
             pass
         else:
@@ -49,7 +49,7 @@ class Files(RequestHandler):
     "List of files page."
 
     def get(self):
-        files = [r.doc for r in self.db.view('file/name', include_docs=True)]
+        files = [r.doc for r in self.db.view("file", "name", include_docs=True)]
         files.sort(key=lambda i: i['modified'], reverse=True)
         self.render('files.html', files=files)
 
@@ -58,7 +58,7 @@ class File(RequestHandler):
     "Return the file data."
 
     def get(self, name):
-        self.doc = self.get_entity_view('file/name', name)
+        self.doc = self.get_entity_view("file", "name", name)
         filename = list(self.doc['_attachments'].keys())[0]
         outfile = self.db.get_attachment(self.doc, filename)
         if outfile is None:
@@ -73,7 +73,7 @@ class FileMeta(RequestHandler):
     "Display meta page for a file with buttons."
 
     def get(self, name):
-        file = self.get_entity_view('file/name', name)
+        file = self.get_entity_view("file", "name", name)
         self.render('file_meta.html', file=file)
 
 
@@ -114,7 +114,7 @@ class FileEdit(RequestHandler):
     @tornado.web.authenticated
     def get(self, name):
         self.check_admin()
-        file = self.get_entity_view('file/name', name)
+        file = self.get_entity_view("file", "name", name)
         self.render('file_edit.html', file=file)
 
     @tornado.web.authenticated
@@ -123,7 +123,7 @@ class FileEdit(RequestHandler):
         if self.get_argument('_http_method', None) == 'delete':
             self.delete(name)
             return
-        file = self.get_entity_view('file/name', name)
+        file = self.get_entity_view("file", "name", name)
         with FileSaver(doc=file, rqh=self) as saver:
             try:
                 infile = self.request.files['file'][0]
@@ -140,7 +140,7 @@ class FileEdit(RequestHandler):
     @tornado.web.authenticated
     def delete(self, name):
         self.check_admin()
-        file = self.get_entity_view('file/name', name)
+        file = self.get_entity_view("file", "name", name)
         self.delete_logs(file['_id'])
         self.db.delete(file)
         self.see_other('files')

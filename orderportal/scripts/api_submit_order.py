@@ -8,7 +8,7 @@ the standard 'urllib' module.
 
 import sys
 
-import simplejson as json       # XXX Python 3 kludge
+import json
 
 # Third-party package: http://docs.python-requests.org/en/master/
 import requests
@@ -19,8 +19,7 @@ API_KEY = '7f075a4c5b324e3ca63f22d8dc0929c4'  # API key for the user account.
 ORDER_ID = 'NMI00603'  # The ID for the order. The IUID can also be used.
 
 
-url = "{base}/api/v1/order/{id}".format(base=BASE_URL,
-                                        id=ORDER_ID)
+url = "{base}/api/v1/order/{id}".format(base=BASE_URL, id=ORDER_ID)
 headers = {'X-OrderPortal-API-key': API_KEY}
 
 # First just get the order data as JSON. It contains all allowed transitions.

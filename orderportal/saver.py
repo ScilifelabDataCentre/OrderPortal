@@ -1,10 +1,8 @@
 "Context handler for saving an entity as a CouchDB document. "
 
-
-
 import logging
 
-import couchdb
+import couchdb2
 import tornado.web
 
 from orderportal import constants
@@ -43,8 +41,8 @@ class Saver(object):
         if type is not None: return False # No exceptions handled here.
         self.finalize()
         try:
-            self.db.save(self.doc)
-        except couchdb.http.ResourceConflict:
+            self.db.put(self.doc)
+        except couchdb2.RevisionError:
             raise IOError('document revision update conflict')
         self.post_process()
         self.log()
@@ -75,7 +73,7 @@ class Saver(object):
 
     def __delitem__(self, key):
         try:
-            del self.doc[key]
+            self.doc.pop(key, None)
         except AttributeError:
             pass
         else:

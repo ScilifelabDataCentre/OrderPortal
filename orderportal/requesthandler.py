@@ -2,14 +2,15 @@
 
 import base64
 import functools
+import json
 import logging
 import traceback
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.error
 import urllib.parse
 
-import couchdb
+import couchdb2
 import markdown
-import simplejson as json       # XXX Python 3 kludge
 import tornado.web
 
 import orderportal
@@ -27,7 +28,7 @@ class RequestHandler(tornado.web.RequestHandler):
         self.global_modes = constants.DEFAULT_GLOBAL_MODES.copy()
         try:
             self.global_modes.update(self.db['global_modes'])
-        except couchdb.ResourceNotFound:
+        except couchdb2.NotFoundError:
             pass
 
     def get_template_namespace(self):
@@ -43,13 +44,13 @@ class RequestHandler(tornado.web.RequestHandler):
         result['order_reverse_url'] = self.order_reverse_url
         result['is_staff'] = self.is_staff()
         result['is_admin'] = self.is_admin()
-        result['error'] = self.get_cookie('error', '').replace('_', ' ')
-        self.clear_cookie('error')
-        result['message'] = self.get_cookie('message', '').replace('_', ' ')
-        self.clear_cookie('message')
-        result['infos'] = [r.value for r in self.db.view('info/menu')]
+        result["error"] = urllib.parse.unquote_plus(self.get_cookie("error", ""))
+        self.clear_cookie("error")
+        result["message"] = urllib.parse.unquote_plus(self.get_cookie("message", ""))
+        self.clear_cookie("message")
+        result['infos'] = [r.value for r in self.db.view("info", "menu")]
         try:
-            doc = self.get_entity_view('text/name', 'alert')
+            doc = self.get_entity_view("text", "name", "alert")
         except tornado.web.HTTPError:
             result['alert'] = None
         else:
@@ -78,7 +79,7 @@ class RequestHandler(tornado.web.RequestHandler):
             path = settings['BASE_URL_PATH_PREFIX'] or ''
         else:
             path = self.reverse_url(name, *args, **query)
-        return settings['BASE_URL'] + path
+        return settings['BASE_URL'].rstrip("/") + path
 
     def reverse_url(self, name, *args, **query):
         "Allow adding query arguments to the URL."
@@ -111,9 +112,9 @@ class RequestHandler(tornado.web.RequestHandler):
         except KeyError:
             identifier = order['_id']
         if api:
-            return URL('order_id_api', identifier, **query)
+            return URL('order_api', identifier, **query)
         else:
-            return URL('order_id', identifier, **query)
+            return URL('order', identifier, **query)
 
     def set_message_flash(self, message):
         "Set message flash cookie."
@@ -126,10 +127,7 @@ class RequestHandler(tornado.web.RequestHandler):
             self.set_flash('error', str(message))
 
     def set_flash(self, name, message):
-        message = message.replace(' ', '_')
-        message = message.replace(';', '_')
-        message = message.replace(',', '_')
-        message = message.replace('\n', '_')
+        message = urllib.parse.quote_plus(message)
         self.set_cookie(name, message)
 
     def get_current_user(self):
@@ -162,7 +160,7 @@ class RequestHandler(tornado.web.RequestHandler):
             raise ValueError
         else:
             try:
-                account = self.get_entity_view('account/api_key', api_key)
+                account = self.get_entity_view("account", "api_key", api_key)
             except tornado.web.HTTPError:
                 raise ValueError
             logging.info("API key login: account %s", account['email'])
@@ -176,6 +174,7 @@ class RequestHandler(tornado.web.RequestHandler):
             constants.USER_COOKIE,
             max_age_days=settings['LOGIN_MAX_AGE_DAYS'])
         if not email: raise ValueError
+        email = email.decode("utf-8")
         account = self.get_account(email)
         # Check if login session is invalidated.
         if account.get('login') is None: raise ValueError
@@ -239,14 +238,18 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_admins(self):
         "Get the list of enabled admin accounts."
-        view = self.db.view('account/role', include_docs=True)
-        admins = [r.doc for r in view[constants.ADMIN]]
+        view = self.db.view("account",
+                            "role",
+                            key=constants.ADMIN,
+                            include_docs=True)
+        admins = [r.doc for r in view]
         return [a for a in admins if a['status'] == constants.ENABLED]
 
     def get_colleagues(self, email):
         "Get list of accounts in same groups as the account given by email."
         colleagues = dict()
-        for row in self.db.view('group/member',
+        for row in self.db.view("group",
+                                "member",
                                 include_docs=True,
                                 key=email.strip().lower()):
             for member in row.doc['members']:
@@ -264,7 +267,7 @@ class RequestHandler(tornado.web.RequestHandler):
         while True:
             try:
                 doc = self.db[doctype] # Doc must be reloaded each iteration
-            except couchdb.ResourceNotFound:
+            except couchdb2.NotFoundError:
                 doc = dict(_id=doctype)
                 doc[constants.DOCTYPE] = constants.META
             try:
@@ -273,9 +276,9 @@ class RequestHandler(tornado.web.RequestHandler):
                 number = 1
             doc['counter'] = number
             try:
-                self.db.save(doc)
+                self.db.put(doc)
                 return number
-            except couchdb.ResourceConflict:
+            except couchdb2.RevisionError:
                 pass
 
     def get_entity(self, iuid, doctype=None):
@@ -284,26 +287,25 @@ class RequestHandler(tornado.web.RequestHandler):
         """
         try:
             entity = self.db[iuid]
-        except couchdb.ResourceNotFound:
-            raise tornado.web.HTTPError(404, reason='Sorry, no such entity.')
-        try:
             if doctype is not None and entity[constants.DOCTYPE] != doctype:
                 raise KeyError
-        except KeyError:
-            raise tornado.web.HTTPError(
-                404, reason='Internal problem: invalid entity doctype.')
+        except (couchdb2.NotFoundError, KeyError):
+            raise tornado.web.HTTPError(404, reason='Sorry, no such entity.')
         return entity
 
-    def get_entity_view(self, viewname, key, reason='Sorry, no such entity.'):
+    def get_entity_view(self, designname, viewname, key,
+                        reason="Sorry, no such entity."):
         """Get the entity by the view name and the key.
         Raise HTTP 404 if no such entity.
         """
-        view = self.db.view(viewname, reduce=False, include_docs=True)
-        if isinstance(key, bytes): # Py 2-to-3; ugly, but seems to be working...
-            key = key.decode()
-        rows = list(view[key])
-        if len(rows) == 1:
-            return rows[0].doc
+        view = self.db.view(designname,
+                            viewname,
+                            key=key,
+                            reduce=False,
+                            include_docs=True)
+        result = list(view)
+        if len(result) == 1:
+            return result[0].doc
         else:
             raise tornado.web.HTTPError(404, reason=reason)
 
@@ -312,7 +314,7 @@ class RequestHandler(tornado.web.RequestHandler):
         kwargs = dict(include_docs=True, descending=True)
         if limit is not None:
             kwargs['limit'] = limit
-        view = self.db.view('news/modified', **kwargs)
+        view = self.db.view("news", "modified", **kwargs)
         return [r.doc for r in view]
 
     def get_events(self, upcoming=False):
@@ -323,7 +325,7 @@ class RequestHandler(tornado.web.RequestHandler):
             kwargs['endkey'] = constants.CEILING
         else:
             kwargs['descending'] = True
-        view = self.db.view('event/date', **kwargs)
+        view = self.db.view("event", "date", **kwargs)
         return [r.doc for r in view]
 
     def get_entity_attachment_filename(self, entity):
@@ -353,14 +355,17 @@ class RequestHandler(tornado.web.RequestHandler):
         Raise ValueError if no such account.
         """
         try:
-            return self.get_entity_view('account/email', email.strip().lower())
+            return self.get_entity_view("account",
+                                        "email",
+                                        email.strip().lower())
         except tornado.web.HTTPError:
-            raise ValueError("Sorry, no such account: '%s'" % email)
+            raise ValueError(f"Sorry, no such account: '{email}'")
 
     def get_account_order_count(self, email):
         "Get the number of orders for the account."
         email = email.strip().lower()
-        view = self.db.view('order/owner',
+        view = self.db.view("order",
+                            "owner",
                             startkey=[email],
                             endkey=[email, constants.CEILING])
         try:
@@ -371,9 +376,11 @@ class RequestHandler(tornado.web.RequestHandler):
     def get_account_groups(self, email):
         "Get sorted list of all groups which the account is a member of."
         email = email.strip().lower()
-        view = self.db.view('group/member', include_docs=True)
-        return sorted([r.doc for r in view[email]],
-                      key=lambda i: i['name'])
+        view = self.db.view("group",
+                            "member",
+                            key=email,
+                            include_docs=True)
+        return sorted([r.doc for r in view], key=lambda i: i['name'])
 
     def get_account_colleagues(self, email):
         """Return the set of all emails for colleagues of the account;
@@ -385,9 +392,9 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_invitations(self, email):
         "Get the groups the account with the given email has been invited to."
-        view = self.db.view('group/invited', include_docs=True)
         email = email.strip().lower()
-        return [r.doc for r in view[email]]
+        view = self.db.view("group", "invited", key=email, include_docs=True)
+        return [r.doc for r in view]
 
     def is_colleague(self, email):
         """Is the user with the given email address
@@ -399,24 +406,25 @@ class RequestHandler(tornado.web.RequestHandler):
         """Get dictionary with emails as key and names (last, first) as value.
         If emails is None, then for all accounts."""
         result = {}
-        view = self.db.view('account/email')
         if emails:
             for email in emails:
+                email = email.strip().lower()
                 try:
-                    value = list(view[email.strip().lower()])[0].value
+                    rows = self.db.view("account", "email", key=email)
+                    value = list(rows)[0].value
                 except IndexError:
                     name = '[unknown]'
                 else:
                     name = utils.get_account_name(value=value)
                 result[email] = name
         else:
-            for row in view:
+            for row in self.db.view("account", "email"):
                 result[row.key] = utils.get_account_name(value=row.value)
         return result
 
     def get_forms_titles(self, all=False):
         "Get form titles lookup for iuid, all or only the enabled+disabled."
-        view = self.db.view('form/modified', include_docs=not all)
+        view = self.db.view("form", "modified", include_docs=not all)
         if all:
             return dict([(r.id, r.value) for r in view])
         else:
@@ -432,7 +440,7 @@ class RequestHandler(tornado.web.RequestHandler):
                       descending=True)
         if limit > 0:
             kwargs['limit'] = limit
-        view = self.db.view('log/entity', **kwargs)
+        view = self.db.view("log", "entity", **kwargs)
         logs = [r.doc for r in view]
         # Ref to entity in DB is not needed in each log entry.
         for log in logs:
@@ -444,11 +452,13 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def delete_logs(self, iuid):
         "Delete the event log documents for the given entity iuid."
-        view = self.db.view('log/entity',
+        view = self.db.view("log",
+                            "entity",
                             startkey=[iuid],
-                            endkey=[iuid, constants.CEILING])
+                            endkey=[iuid, constants.CEILING],
+                            include_docs=True)
         for row in view:
-            del self.db[row.id]
+            self.db.delete(row.doc)
 
 
 class ApiV1Mixin(object):
@@ -456,12 +466,12 @@ class ApiV1Mixin(object):
 
     def cleanup(self, doc):
         "Change _id to iuid and remove _id."
-        doc['iuid'] = doc.pop('_id')
-        del doc['_rev']
+        doc["iuid"] = doc.pop("_id")
+        doc.pop("_rev", None)
 
     def get_json_body(self):
         "Return the body of the request interpreted as JSON."
-        content_type = self.request.headers.get('Content-Type', '')
+        content_type = self.request.headers.get("Content-Type", "")
         if content_type.startswith(constants.JSON_MIME):
             return json.loads(self.request.body)
         else:

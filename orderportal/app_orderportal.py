@@ -7,6 +7,7 @@ import sys
 import tornado.web
 import tornado.ioloop
 
+from orderportal import designs
 from orderportal import settings
 from orderportal import utils
 from orderportal import uimodules
@@ -26,27 +27,19 @@ from orderportal.search import *
 
 
 def main():
-    parser = utils.get_command_line_parser(description='OrderPortal server.')
-    (options, args) = parser.parse_args()
-    utils.load_settings()
-    utils.initialize()
+    if len(sys.argv) == 2:
+        filepath = sys.argv[1]
+    else:
+        filepath = None
+    utils.load_settings(filepath=filepath)
+    designs.load_design_documents(utils.get_db())
 
     url = tornado.web.url
-    handlers = [url(r'/', Home, name='home'),
-                url(r'/status', Status, name="status")]
-    try:
-        regexp = settings['ORDER_IDENTIFIER_REGEXP']
-    except KeyError:
-        pass
-    else:
-        handlers.append(url(r"/order/({0})".format(regexp),
-                            Order, name='order_id'))
-        handlers.append(url(r"/api/v1/order/({0})".format(regexp),
-                            OrderApiV1, name='order_id_api'))
-
-    handlers.extend([
-        url(r'/order/([0-9a-f]{32})', Order, name='order'),
-        url(r'/api/v1/order/([0-9a-f]{32})', OrderApiV1, name='order_api'),
+    handlers = [
+        url(r'/', Home, name='home'),
+        url(r'/status', Status, name="status"),
+        url(r'/order/([^/.]+)', Order, name='order'),
+        url(r'/api/v1/order/([^/.]+)', OrderApiV1, name='order_api'),
         url(r'/order/([^/]+).csv', OrderCsv, name='order_csv'),
         url(r'/order/([^/]+).xlsx', OrderXlsx, name='order_xlsx'),
         url(r'/order/([^/]+).zip', OrderZip, name='order_zip'),
@@ -161,9 +154,9 @@ def main():
             AdminAccountMessages, name='admin_account_messages'),
         url(r'/site/([^/]+)', tornado.web.StaticFileHandler,
             {'path': settings['SITE_STATIC_DIR']}, name='site'),
-        ])
-    handlers.append(url(r'/api/v1/(.*)', NoSuchEntityApiV1))
-    handlers.append(url(r'/(.*)', NoSuchEntity))
+        url(r'/api/v1/(.*)', NoSuchEntityApiV1),
+        url(r'/(.*)', NoSuchEntity)]
+
     application = tornado.web.Application(
         handlers=handlers,
         debug=settings.get('TORNADO_DEBUG', False),
@@ -173,19 +166,22 @@ def main():
         template_path=os.path.join(settings['ROOT'], 'templates'),
         static_path=os.path.join(settings['ROOT'], 'static'),
         login_url=(settings['BASE_URL_PATH_PREFIX'] or '') + '/login')
-    # Add href URLs for the status icons.
+
+    # Add href URLs for the status icons data in settings.
     # This depends on order status setup.
     for key, value in settings['ORDER_STATUSES_LOOKUP'].items():
         value['href'] = application.reverse_url('site', key + '.png')
+
     application.listen(settings['PORT'], xheaders=True)
-    pid = os.getpid()
     url = settings['BASE_URL']
     if settings['BASE_URL_PATH_PREFIX']:
         url += settings['BASE_URL_PATH_PREFIX']
-    logging.info("web server %s (PID %s)", url, pid)
-    if options.pidfile:
-        with open(options.pidfile, 'w') as pf:
+    pid = os.getpid()
+    if settings["PIDFILE"]:
+        with open(settings["PIDFILE"], "w") as pf:
             pf.write(str(pid))
+    logging.info(f"web server PID {pid} at {url}")
+
     tornado.ioloop.IOLoop.instance().start()
 
 

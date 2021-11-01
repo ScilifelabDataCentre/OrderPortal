@@ -1,6 +1,7 @@
 "Orders are the whole point of this app. The user fills in info for facility."
 
 import io
+import json
 import logging
 import os.path
 import re
@@ -9,8 +10,7 @@ import urllib.parse
 import zipfile
 from collections import OrderedDict as OD
 
-import couchdb
-import simplejson as json       # XXX Python 3 kludge
+import couchdb2
 import tornado.web
 
 from . import constants
@@ -447,7 +447,7 @@ class OrderSaver(saver.Saver):
         "Send a message after status change."
         try:
             template = settings['ORDER_MESSAGES'][self.doc['status']]
-        except (couchdb.ResourceNotFound, KeyError):
+        except (couchdb2.NotFoundError, KeyError):
             return
         recipients = set()
         owner = self.get_account(self.doc['owner'])
@@ -457,7 +457,8 @@ class OrderSaver(saver.Saver):
             if 'owner' in template['recipients']:
                 recipients = set([owner['email']])
             if 'group' in template['recipients']:
-                for row in self.db.view('group/member',
+                for row in self.db.view("group",
+                                        "member",
                                         include_docs=True,
                                         key=email):
                     for member in row.doc['members']:
@@ -465,8 +466,11 @@ class OrderSaver(saver.Saver):
                         if account and account['status'] == constants.ENABLED:
                             recipients.add(account['email'])
         if constants.ADMIN in template['recipients']:
-            view = self.db.view('account/role', include_docs=True)
-            admins = [r.doc for r in view[constants.ADMIN]]
+            result = self.db.view("account", 
+                                  "role",
+                                  key=constants.ADMIN, 
+                                  include_docs=True)
+            admins = [r.doc for r in result]
             for admin in admins:
                 if admin['status'] == constants.ENABLED:
                     recipients.add(admin['email'])
@@ -490,12 +494,12 @@ class OrderSaver(saver.Saver):
         path = "/order/{0}".format(identifier)
         if settings['BASE_URL_PATH_PREFIX']:
             path = settings['BASE_URL_PATH_PREFIX'] + path
-        return settings['BASE_URL'] + path
+        return settings['BASE_URL'].rstrip("/") + path
 
     def get_account(self, email):
         "Get the account document for the given email."
-        view = self.db.view('account/email', include_docs=True)
-        rows = list(view[email])
+        result = self.db.view("account", "email", key=email, include_docs=True)
+        rows = list(result)
         if len(rows) == 1:
             return rows[0].doc
         else:
@@ -508,19 +512,11 @@ class OrderMixin(object):
     def get_order(self, iuid):
         """Get the order for the identifier or IUID.
         Raise ValueError if no such order."""
-        try:
-            regexp = settings['ORDER_IDENTIFIER_REGEXP']
-            if not regexp: raise KeyError
-            match = re.match(regexp, iuid)
-            if not match: raise KeyError
-        except KeyError:
-            try:
+        try:                    # First try order identifier.
+            order = self.get_entity_view("order", "identifier", iuid)
+        except tornado.web.HTTPError:
+            try:                # Next try order doc IUID.
                 order = self.get_entity(iuid, doctype=constants.ORDER)
-            except tornado.web.HTTPError:
-                raise ValueError('Sorry, no such order')
-        else:
-            try:
-                order = self.get_entity_view('order/identifier', match.group())
             except tornado.web.HTTPError:
                 raise ValueError('Sorry, no such order')
         return order
@@ -1022,7 +1018,7 @@ class Orders(RequestHandler):
             self.see_other('account_orders', self.current_user['email'])
             return
         # Count of all orders
-        view = self.db.view('order/status', reduce=True)
+        view = self.db.view("order", "status", reduce=True)
         try:
             r = list(view)[0]
         except IndexError:
@@ -1084,12 +1080,14 @@ class Orders(RequestHandler):
         # No filter; all orders
         if orders is None:
             if limit > 0 and self.filter.get('recent', True):
-                view = self.db.view('order/modified',
+                view = self.db.view("order",
+                                    "modified",
                                     include_docs=True,
                                     descending=True,
                                     limit=limit)
             else:
-                view = self.db.view('order/modified',
+                view = self.db.view("order",
+                                    "modified",
                                     include_docs=True,
                                     descending=True)
             orders = [r.doc for r in view]
@@ -1101,7 +1099,8 @@ class Orders(RequestHandler):
         "Return orders list if any status filter, or None if none."
         if status:
             if orders is None:
-                view = self.db.view('order/status',
+                view = self.db.view("order",
+                                    "status",
                                     descending=True,
                                     startkey=[status, constants.CEILING],
                                     endkey=[status],
@@ -1119,12 +1118,14 @@ class Orders(RequestHandler):
             if orders is None:
                 orders = []
                 for form in forms:
-                    view = self.db.view('order/form',
-                                        descending=True,
-                                        reduce=False,
-                                        include_docs=True)
-                    orders.extend([r.doc for r in
-                                   view[[form, constants.CEILING]:[form]]])
+                    result = self.db.view("order",
+                                          "form",
+                                          startkey=[form, constants.CEILING],
+                                          endkey=[form],
+                                          descending=True,
+                                          reduce=False,
+                                          include_docs=True)
+                    orders.extend([r.doc for r in result])
             else:
                 orders = [o for o in orders if o['form'] in forms]
         return orders
@@ -1133,7 +1134,8 @@ class Orders(RequestHandler):
         "Return orders list if any field filter, or None if none."
         if value:
             if orders is None:
-                view = self.db.view('order/modified',
+                view = self.db.view("order",
+                                    "modified",
                                     include_docs=True,
                                     descending=True)
                 orders = [r.doc for r in view]
@@ -1641,7 +1643,7 @@ class OrderReport(OrderMixin, RequestHandler):
             ext = utils.get_filename_extension(content_type)
             filename = "%s_report%s" % (name, ext)
             self.set_header('Content-Disposition',
-                            'attachment; filename="%s"' % filename)
+                            f'attachment; filename="{filename}"')
 
 
 class OrderReportEdit(OrderMixin, RequestHandler):
@@ -1698,7 +1700,7 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         ext = utils.get_filename_extension(content_type)
         filename = "%s_report%s" % (name, ext)
         self.set_header('Content-Disposition',
-                        'attachment; filename="%s"' % filename)
+                        f'attachment; filename="{filename}"')
 
     def put(self, iuid):
         try:
