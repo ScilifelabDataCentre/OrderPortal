@@ -6,6 +6,20 @@
 
 {% block body_title %}Edit form {{ form['title'] }}{% end %}
 
+{% block action_content %}
+<form action="{{ reverse_url('form', form['_id']) }}"
+      role="form"
+      method="GET">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit" class="btn btn-default">
+      <span class="glyphicon glyphicon-remove"></span>
+      Cancel
+    </button>
+  </div>
+</form>
+{% end %} {# block action_content #}
+
 {% block main_content %}
 <form action="{{ reverse_url('form_edit', form['_id']) }}"
       role="form"
@@ -32,8 +46,7 @@
     <input type="text" class="form-control" name="version" id="version"
 	   value="{{ form.get('version') or '' }}">
     <span class="help-block">
-      The version is visible for administrators only. It is intended
-      to help with the maintenance of forms.
+      The version denotes a minor update of a form. It is optional.
     </span>
   </div>
 
@@ -100,8 +113,8 @@
 
 </form>
 
-<br>
 <form action="{{ reverse_url('form', form['_id']) }}"
+      style="margin-top: 20px;"
       role="form"
       method="GET">
   <div class="form-group">

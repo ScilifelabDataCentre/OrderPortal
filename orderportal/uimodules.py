@@ -91,18 +91,6 @@ class Entity(tornado.web.UIModule):
                 url=url, title=title)
 
 
-class Address(tornado.web.UIModule):
-    "Format user account address."
-
-    def render(self, address):
-        result = []
-        for key in ['address', 'postal_code', 'city', 'country']:
-            value = address.get(key)
-            if value:
-                result.append(value)
-        return '\n'.join(result)
-
-
 class Markdown(tornado.web.UIModule):
     "Process the text as Markdown."
 
@@ -156,7 +144,7 @@ class Version(tornado.web.UIModule):
         if version is None:
             return ''
         else:
-            return "(version %s)" % version
+            return f"({version})"
 
 
 class ShortenedPre(tornado.web.UIModule):

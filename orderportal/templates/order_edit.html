@@ -131,6 +131,22 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   {% include 'order_edit_save.html' %}
   {% module Markdown(form.get('disclaimer')) %}
 </form>
+
+<div class="row">
+  <div class="col-md-2" style="margin-top: 20px;">
+    <form action="{{ reverse_url('order', order['_id']) }}"
+	  class="allow_leaving_without_question"
+	  role="form"
+	  method="GET">
+      <div class="form-group">
+	<button type="submit" class="btn btn-default btn-block">
+	  <span class="glyphicon glyphicon-remove"></span>
+	  Cancel
+	</button>
+      </div>
+    </form>
+  </div>
+</div>
 {% end %} {# block content #}
 
 {% block javascript_autofocus %}

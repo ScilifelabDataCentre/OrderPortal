@@ -39,7 +39,7 @@
 	  {% for form_id, form in forms_lookup.items() %}
 	  {% set sel = form_id == filter.get('form_id') and 'selected' or '' %}
 	  <option {{ sel }} value="{{ form_id }}">
-            {{ form['title'] }} ({{form.get('version') or '-' }})
+            {{ form['title'] }} {% module Version(form) %}
           </option>
 	  {% end %}
 	</select>
@@ -119,9 +119,9 @@
 	  <td>{% module Entity(order, icon=False) %}</td>
 	  <td>{{ order.get('title') or '[no title]' }}</td>
 	  <td>
+            {% set form = forms_lookup[order['form']] %}
 	    <a href="{{ reverse_url('form', order['form']) }}">
-	      {{ forms_lookup[order['form']]['title'] }}
-              ({{ forms_lookup[order['form']].get('version') or '-' }})
+	      {{ form['title'] }} {% module Version(form) %}
 	    </a>
 	  </td>
 	  <td>
