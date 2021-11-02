@@ -262,9 +262,17 @@
            class="form-control"
            name="{{ field['identifier'] }}"
            id="{{ field['identifier'] }}">
-      {% if value %}
-      Currently loaded file: {{ value }}
-      {% end %}
+    {% if value %}
+    <div class="checkbox">
+      <label>
+        <input type="checkbox"
+               id="{{ field['identifier'] }}__remove__"
+               name="{{ field['identifier'] }}__remove__"
+               {{ value == True and 'checked' or '' }} value="true">
+        Remove current file <b>{{ value }}</b>
+      </label>
+    </div>
+    {% end %}
 
     {% elif field['type'] == constants.FLOAT %}
     <input type="number" step="{{ constants.FLOAT_STEP }}"
@@ -285,13 +293,11 @@
     {% if field.get('display') == 'menu' %} {# field type SELECT #}
     <span style="color:red; margin-right: 2em;"
           class="glyphicon glyphicon-star form-control-feedback"
-          title="Required"
           aria-hidden="true">
     </span>
     {% else %}
     <span style="color:red; margin-right: 1em;"
           class="glyphicon glyphicon-star form-control-feedback"
-          title="Required"
           aria-hidden="true">
     </span>
     {% end %}

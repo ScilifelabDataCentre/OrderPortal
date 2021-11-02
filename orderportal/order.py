@@ -198,7 +198,7 @@ class OrderSaver(saver.Saver):
     def update_fields(self, data=None):
         "Update all fields from JSON data if given, else HTML form input."
         assert self.rqh is not None
-        self.removed_files = []       # Due to field update
+        self.removed_files = []       # Names of old files to remove.
         # Loop over fields defined in the form document and get values.
         # Do not change values for a field if that argument is missing,
         # except for checkbox: there a missing value means False,
@@ -211,15 +211,21 @@ class OrderSaver(saver.Saver):
             identifier = field['identifier']
 
             if field['type'] == constants.FILE:
+                value = self.doc['fields'].get(identifier)
                 # Files are uploaded by the normal form multi-part
                 # encoding approach, not by JSON data.
                 try:
                     infile = self.rqh.request.files[identifier][0]
                 except (KeyError, IndexError):
-                    continue
+                    # No new file given; check if old should be removed.
+                    if utils.to_bool(self.rqh.get_argument(f"{identifier}__remove__", False)) and value:
+                        self.removed_files.append(value)
+                        value = None
                 else:
+                    if value:
+                        self.removed_files.append(value)
                     value = self.add_file(infile)
-                    self.removed_files.append(self.doc['fields'].get(identifier))
+
             elif field['type'] == constants.MULTISELECT:
                 if data:
                     try:
@@ -431,10 +437,9 @@ class OrderSaver(saver.Saver):
         except AttributeError:
             # Else add any new attached files.
             try:
-                # First remove files due to field update
+                # First remove files due to field update.
                 for filename in self.removed_files:
-                    if filename:
-                        self.db.delete_attachment(self.doc, filename)
+                    self.db.delete_attachment(self.doc, filename)
             except AttributeError:
                 pass
             for file in self.files:
