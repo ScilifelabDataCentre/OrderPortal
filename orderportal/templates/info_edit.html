@@ -8,17 +8,16 @@
 {% block main_content %}
 
 <form action="{{ reverse_url('info_edit', info['name']) }}"
-      role="form"
-      method="POST">
+      method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <div class="form-group has-feedback">
     <div class="row">
       <div class="col-md-10">
-	<label for="title">Title</label>
-	<input type="text" class="form-control"
-	       id="title" name="title"
-	       value="{{ info.get('title') or ''}}">
+        <label for="title">Title</label>
+        <input type="text" class="form-control"
+               id="title" name="title"
+               value="{{ info.get('title') or ''}}">
       </div>
     </div>
     <span class="help-block">
@@ -29,10 +28,10 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-2">
-	<label for="menu">Menu</label>
-	<input type="number" class="form-control"
-	       id="menu" name="menu"
-	       value="{{ info.get('menu') or ''}}">
+        <label for="menu">Menu</label>
+        <input type="number" class="form-control"
+               id="menu" name="menu"
+               value="{{ info.get('menu') or ''}}">
       </div>
     </div>
     <span class="help-block">
@@ -47,8 +46,8 @@
   <div class="form-group">
     <label for="text">Text</label>
     <textarea rows="16" class="form-control"
-	      id="text" name="text"
-	      >{% raw info.get('text') or '' %}</textarea>
+              id="text" name="text"
+              >{% raw info.get('text') or '' %}</textarea>
     <span class="help-block">
       This text will be formatted using
       <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>.
@@ -64,10 +63,8 @@
   </div>
 </form>
 
-<br>
 <form action="{{ reverse_url('info', info['name']) }}"
-      role="form"
-      method="GET">
+      method="GET" role="form" style="margin-top: 20px;">
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit" class="btn btn-default">

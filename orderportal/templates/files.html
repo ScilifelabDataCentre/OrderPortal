@@ -19,35 +19,35 @@
     {% if is_admin or not file.get('hidden') %}
     <tr>
       <td>
-	<h4>
-	  <a href="{{ reverse_url('file_meta', file['name']) }}">
-	    {% module ContentType(file['content_type']) %}
-	    {{ file.get('title') or file['name'] }}
-	  </a>
-	  {% if file.get('hidden') %}
-	  <span class="glyphicon glyphicon-eye-close"></span>
-	  Hidden
-	  {% end %}
-	</h4>
-	{% module Markdown(file.get('description')) %}
+        <h4>
+          <a href="{{ reverse_url('file_meta', file['name']) }}">
+            {% module ContentType(file['content_type']) %}
+            {{ file.get('title') or file['name'] }}
+          </a>
+          {% if file.get('hidden') %}
+          <span class="glyphicon glyphicon-eye-close"></span>
+          Hidden
+          {% end %}
+        </h4>
+        {% module Markdown(file.get('description')) %}
       </td>
       <td>
         {% if file['content_type'] in constants.VIEWABLE_CONTENT_TYPES %}
-	<p>
-	  <a class="btn btn-xs btn-primary"
-	     href="{{ reverse_url('file', file['name']) }}">
-	    <span class="glyphicon glyphicon-eye-open"></span>
-	    View
-	  </a>
-	</p>
+        <p>
+          <a class="btn btn-xs btn-primary"
+             href="{{ reverse_url('file', file['name']) }}">
+            <span class="glyphicon glyphicon-eye-open"></span>
+            View
+          </a>
+        </p>
         {% end %}
-	<p>
-	  <a class="btn btn-xs btn-primary"
-	     href="{{ reverse_url('file_download', file['name']) }}">
-	    <span class="glyphicon glyphicon-download"></span>
-	    Download
-	  </a>
-	</p>
+        <p>
+          <a class="btn btn-xs btn-primary"
+             href="{{ reverse_url('file_download', file['name']) }}">
+            <span class="glyphicon glyphicon-download"></span>
+            Download
+          </a>
+        </p>
       </td>
       <td class="localtime nobr">{{ file['modified'] }}</td>
     </tr>
@@ -61,8 +61,7 @@
 {% block action_content %}
 {% if is_admin %}
 <form action="{{ reverse_url('file_create') }}"
-      role="form"
-      method="GET">
+      method="GET" role="form">
   <button type="submit" class="btn btn-primary">
     <span class="glyphicon glyphicon-plus"></span>
     Create

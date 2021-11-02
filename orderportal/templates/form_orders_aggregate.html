@@ -14,9 +14,7 @@ for form  {% module Entity(form, icon=False) %}
 
 {% block main_content %}
 <form action="{{ reverse_url('form_orders_aggregate', form['_id']) }}"
-      class="form-horizontal"
-      role="form"
-      method="POST">
+      method="POST" role="form" class="form-horizontal">
   {% module xsrf_form_html() %}
 
   <div class="form-group">

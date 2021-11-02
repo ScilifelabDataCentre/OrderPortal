@@ -28,49 +28,48 @@
   <div class="col-md-6">
     <table class="table">
       <tr>
-	<th>Mode</th>
-	<th>Current setting</th>
-	<th>Change</th>
+        <th>Mode</th>
+        <th>Current setting</th>
+        <th>Change</th>
       </tr>
       {% for key in sorted([k for k in global_modes if k.startswith('allow')]) %}
       {% set value = global_modes[key] %}
       <tr>
-	<td>{{ key }}</td>
-	<td>
-	  {% if value %}
-	  <span class="text-success">
-	    <span class="glyphicon glyphicon-ok"></span>
-	    True
-	  </span>
-	  {% else %}
-	  <span class="text-danger">
-	    <span class="glyphicon glyphicon-remove"></span>
-	    False
-	  </span>
-	  {% end %}
-	</td>
-	<td>
-	  <form action="{{ reverse_url('global_modes') }}"
-		role="form"
-		method="POST">
-	    {% module xsrf_form_html() %}
-	    <input type="hidden" name="mode" value="{{ key }}">
-	    {% if value %}
-	    <input type="hidden" name="value" value="false">
-	    <button type="submit" class="btn btn-danger btn-xs"
-		    onclick="return confirm('May affect currently logged-in users! Really change?');">
-	      <span class="glyphicon glyphicon-remove-circle"></span>
-	      Off
-	    </button>
-	    {% else %}
-	    <input type="hidden" name="value" value="true">
-	    <button type="submit" class="btn btn-success btn-xs">
-	      <span class="glyphicon glyphicon-on-circle"></span>
-	      On
-	    </button>
-	    {% end %}
-	  </form>
-	</td>
+        <td>{{ key }}</td>
+        <td>
+          {% if value %}
+          <span class="text-success">
+            <span class="glyphicon glyphicon-ok"></span>
+            True
+          </span>
+          {% else %}
+          <span class="text-danger">
+            <span class="glyphicon glyphicon-remove"></span>
+            False
+          </span>
+          {% end %}
+        </td>
+        <td>
+          <form action="{{ reverse_url('global_modes') }}"
+                method="POST" role="form">
+            {% module xsrf_form_html() %}
+            <input type="hidden" name="mode" value="{{ key }}">
+            {% if value %}
+            <input type="hidden" name="value" value="false">
+            <button type="submit" class="btn btn-danger btn-xs"
+                    onclick="return confirm('May affect currently logged-in users! Really change?');">
+              <span class="glyphicon glyphicon-remove-circle"></span>
+              Off
+            </button>
+            {% else %}
+            <input type="hidden" name="value" value="true">
+            <button type="submit" class="btn btn-success btn-xs">
+              <span class="glyphicon glyphicon-on-circle"></span>
+              On
+            </button>
+            {% end %}
+          </form>
+        </td>
       </tr>
       {% end %}
     </table>

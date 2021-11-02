@@ -38,12 +38,12 @@ Universities
     <td>{{ value.get('rank') }}</td>
     <td>
       <table class="table table-condensed table-striped table-noborder">
-	{% for k, v in sorted(value.get('fields', {}).items()) %}
-	<tr>
-	  <td width="40%">{{ k }}</td>
-	  <td class="pre">{{ v }}</td>
-	</tr>
-	{% end %}
+        {% for k, v in sorted(value.get('fields', {}).items()) %}
+        <tr>
+          <td width="40%">{{ k }}</td>
+          <td class="pre">{{ v }}</td>
+        </tr>
+        {% end %}
       </table>
     </td>
   </tr>

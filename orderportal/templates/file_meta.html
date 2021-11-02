@@ -14,8 +14,7 @@ Document {% module Icon('file') %} {{ file.get('title') or file['name'] }}
 {% if is_admin %}
 <p>
   <form action="{{ reverse_url('file_edit', file['name']) }}"
-	role="form"
-	method="GET">
+        method="GET" role="form">
     <button type="submit" class="btn btn-md btn-primary">
       <span class="glyphicon glyphicon-edit"></span>
       Edit
@@ -24,12 +23,11 @@ Document {% module Icon('file') %} {{ file.get('title') or file['name'] }}
 </p>
 <p>
   <form action="{{ reverse_url('file_edit', file['name']) }}"
-	role="form"
-	method="POST">
+        method="POST" role="form">
     {% module xsrf_form_html() %}
     <input type="hidden" name="_http_method" value="delete">
     <button type="submit" class="btn btn-danger"
-	    onclick="return confirm('Cannot be undone! Really delete?');">
+            onclick="return confirm('Cannot be undone! Really delete?');">
       <span class="glyphicon glyphicon-floppy-trash"></span>
       Delete
     </button>
@@ -43,56 +41,56 @@ Document {% module Icon('file') %} {{ file.get('title') or file['name'] }}
   <div class="panel-body">
     <table class="table table-condensed table-fields table-noborder">
       <tr>
-	<th width="20%">Description</th>
-	<td>{% module Markdown(file.get('description')) %}</td>
+        <th width="20%">Description</th>
+        <td>{% module Markdown(file.get('description')) %}</td>
       </tr>
       <tr>
-	<th>Content type</th>
-	<td>
-	  {% module ContentType(file['content_type']) %}
-	  {{ file['content_type'] }}
-	</td>
+        <th>Content type</th>
+        <td>
+          {% module ContentType(file['content_type']) %}
+          {{ file['content_type'] }}
+        </td>
       </tr>
       <tr>
-	<th>Size</th>
-	<td>
-	  {% if file['size'] < 2000 %}
-	  {{ file['size'] }} B
-	  {% else %}
-	  {{ int(0.5 + file['size'] / 1000.0) }} kB
-	  {% end %}
-	</td>
+        <th>Size</th>
+        <td>
+          {% if file['size'] < 2000 %}
+          {{ file['size'] }} B
+          {% else %}
+          {{ int(0.5 + file['size'] / 1000.0) }} kB
+          {% end %}
+        </td>
       </tr>
       <tr>
-	<th>Modified</th>
-	<td>
-	  <span class="localtime">{{ file['modified'] }}</span>
-	  <a href="{{ reverse_url('file_logs', file['_id']) }}">
-	    {% module Icon('logs', label=True) %}
-	  </a>
-	</td>
+        <th>Modified</th>
+        <td>
+          <span class="localtime">{{ file['modified'] }}</span>
+          <a href="{{ reverse_url('file_logs', file['_id']) }}">
+            {% module Icon('logs', label=True) %}
+          </a>
+        </td>
       </tr>
       {% if file['content_type'] in constants.VIEWABLE_CONTENT_TYPES %}
       <tr>
-	<th></th>
-	<td>
-	  <a class="btn btn-primary"
-	     href="{{ reverse_url('file', file['name']) }}">
-	    <span class="glyphicon glyphicon-eye-open"></span>
-	    View
-	  </a>
-	</td>
+        <th></th>
+        <td>
+          <a class="btn btn-primary"
+             href="{{ reverse_url('file', file['name']) }}">
+            <span class="glyphicon glyphicon-eye-open"></span>
+            View
+          </a>
+        </td>
       </tr>
       {% end %}
       <tr>
-	<th></th>
-	<td>
-	  <a class="btn btn-primary"
-	     href="{{ reverse_url('file_download', file['name']) }}">
-	    <span class="glyphicon glyphicon-download"></span>
-	    Download
-	  </a>
-	</td>
+        <th></th>
+        <td>
+          <a class="btn btn-primary"
+             href="{{ reverse_url('file_download', file['name']) }}">
+            <span class="glyphicon glyphicon-download"></span>
+            Download
+          </a>
+        </td>
       </tr>
     </table>
   </div>

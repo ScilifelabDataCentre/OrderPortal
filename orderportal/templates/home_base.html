@@ -33,67 +33,69 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <span class="glyphicon glyphicon-user"></span>
-	Login
+        Login
       </div>
       <div class="panel-body">
-	{% if not global_modes['allow_login'] %}
-	<div class="alert alert-danger" role="alert">
+        {% if not global_modes['allow_login'] %}
+        <div class="alert alert-danger" role="alert">
           <strong>Login is currently disabled (except for administrators).</strong>
-	  Please try again later.
-	</div>
-	{% end %}
-	<form action="{{ reverse_url('login') }}" role="form" method="POST">
-	  {% module xsrf_form_html() %}
-	  <div class="form-group">
-	    <label for="email">Email</label>
-	    <input type="text" class="form-control" name="email" id="email"
-		   placeholder="Email address of account">
-	  </div>
-	  <div class="form-group">
-	    <label for="password">Password</label>
-	    <input type="password" class="form-control" name="password">
-	  </div>
-	  <div class="form-group"> 
-	    <button type="submit" class="btn btn-info btn-block">
-	      <span class="glyphicon glyphicon-log-in"></span>
-	      Login
-	    </button>
-	  </div>
-	</form>
+          Please try again later.
+        </div>
+        {% end %}
+        <form action="{{ reverse_url('login') }}"
+              method="POST" role="form">
+          {% module xsrf_form_html() %}
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="text" class="form-control" name="email" id="email"
+                   placeholder="Email address of account">
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" name="password">
+          </div>
+          <div class="form-group"> 
+            <button type="submit" id="login-form-submit"
+                    class="btn btn-info btn-block">
+              <span class="glyphicon glyphicon-log-in"></span>
+              Login
+            </button>
+          </div>
+        </form>
       </div>
     </div>
     <div class="panel panel-default">
       <div class="panel-body">
-	<div>
-	  {% if global_modes['allow_registration'] %}
-	  <a href="{{ reverse_url('register') }}" role="button"
-	     class="btn btn-success btn-block">
-	    <span class="glyphicon glyphicon-user"></span>
-	    Register account
-	  </a>
-	  {% else %}
-	  <div class="alert alert-danger" role="alert">
+        <div>
+          {% if global_modes['allow_registration'] %}
+          <a href="{{ reverse_url('register') }}" role="button"
+             class="btn btn-success btn-block">
+            <span class="glyphicon glyphicon-user"></span>
+            Register account
+          </a>
+          {% else %}
+          <div class="alert alert-danger" role="alert">
             <strong>Registration is currently disabled.</strong>
-	    Please try again later.
-	  </div>
-	  {% end %} {# if global_modes['allow_registration'] #}
-	</div>
-	<br>
-	<div>
-	  <a href="{{ reverse_url('reset') }}" role="button"
-	     class="btn btn-warning btn-block">
-	    <span class="glyphicon glyphicon-step-backward"></span>
-	    Reset password
-	  </a>
-	</div>
-	<br>
-	<div>
-	  <a href="{{ reverse_url('password') }}" role="button"
-	     class="btn btn-danger btn-block">
-	    <span class="glyphicon glyphicon-lock"></span>
-	    Set password
-	  </a>
-	</div>
+            Please try again later.
+          </div>
+          {% end %} {# if global_modes['allow_registration'] #}
+        </div>
+        <br>
+        <div>
+          <a href="{{ reverse_url('reset') }}" role="button"
+             class="btn btn-warning btn-block">
+            <span class="glyphicon glyphicon-step-backward"></span>
+            Reset password
+          </a>
+        </div>
+        <br>
+        <div>
+          <a href="{{ reverse_url('password') }}" role="button"
+             class="btn btn-danger btn-block">
+            <span class="glyphicon glyphicon-lock"></span>
+            Set password
+          </a>
+        </div>
       </div>
     </div>
     {% end %} {# block content_left #}
@@ -107,28 +109,28 @@
       {% if forms %}
       {% for form in forms %}
       <div class="panel panel-primary">
-	<div class="panel-heading">
-	  {{ form['title'] }}
-	  <div class="form-group pull-right">
-	    <form action="{{ reverse_url('order_create') }}"
-		  role="form"
-		  method="POST">
+        <div class="panel-heading">
+          {{ form['title'] }}
+          <div class="form-group pull-right">
+            <form action="{{ reverse_url('order_create') }}"
+                  method="POST" role="form">
               {% module xsrf_form_html() %}
-	      <button type="submit" class="btn btn-default btn-xs"
+              <button type="submit" class="btn btn-default btn-xs"
                       {% if not current_user %}
                       disabled="disabled"
+                      title="You must be logged in to create {{ terminology('order') }}."
                       {% end %}
                       >
-		<span class="glyphicon glyphicon-plus"></span>
-		Create {{ terminology('order') }}
-	      </button>
-	      <input type="hidden" name="form" value="{{ form['_id'] }}">
-	    </form>
-	  </div>
-	</div>
-	<div class="panel-body">
-	  {% module Markdown(form.get('description')) %}
-	</div>
+                <span class="glyphicon glyphicon-plus"></span>
+                Create {{ terminology('order') }}
+              </button>
+              <input type="hidden" name="form" value="{{ form['_id'] }}">
+            </form>
+          </div>
+        </div>
+        <div class="panel-body">
+          {% module Markdown(form.get('description')) %}
+        </div>
       </div>
       {% end %} {# for form in forms #}
       {% else %}
@@ -153,21 +155,21 @@
   <div class="{{ settings['DISPLAY_EVENTS'] and 'col-md-6' or 'col-md-12' }}">
     <div class="panel panel-info">
       <div class="panel-heading">
-	<span class="glyphicon glyphicon-info-sign"></span>
-	Recent news
-	{% if is_admin %}
-	&nbsp;
-	<button type="button" class="btn btn-info btn-xs"
-		data-toggle="modal" data-target="#news_create">
-	  <span class="glyphicon glyphicon-plus"></span>
-	  Create entry
-	</button>
-	{% end %} {# if is_admin #}
-	<a class="btn btn-info btn-xs pull-right" role="button"
-	   href="{{ reverse_url('news') }}">All news</a>
+        <span class="glyphicon glyphicon-info-sign"></span>
+        Recent news
+        {% if is_admin %}
+        &nbsp;
+        <button type="button" class="btn btn-info btn-xs"
+                data-toggle="modal" data-target="#news_create">
+          <span class="glyphicon glyphicon-plus"></span>
+          Create entry
+        </button>
+        {% end %} {# if is_admin #}
+        <a class="btn btn-info btn-xs pull-right" role="button"
+           href="{{ reverse_url('news') }}">All news</a>
       </div>
       <div class="panel-body">
-	{% include 'news_list.html' %}
+        {% include 'news_list.html' %}
       </div>
     </div>
   </div>
@@ -177,22 +179,22 @@
   <div class="{{ settings['DISPLAY_NEWS'] and 'col-md-6' or 'col-md-12' }}">
     <div class="panel panel-success">
       <div class="panel-heading">
-	<span class="glyphicon glyphicon-calendar"></span>
-	Upcoming events
-	{% if is_admin %}
-	&nbsp;
-	<button type="button"
-		class="btn btn-success btn-xs"
-		data-toggle="modal" data-target="#event_create">
-	  <span class="glyphicon glyphicon-plus"></span>
-	  Create entry
-	</button>
-	{% end %}{# if is_admin #}
-	<a class="btn btn-success btn-xs pull-right" role="button"
-	   href="{{ reverse_url('events') }}">All events</a>
+        <span class="glyphicon glyphicon-calendar"></span>
+        Upcoming events
+        {% if is_admin %}
+        &nbsp;
+        <button type="button"
+                class="btn btn-success btn-xs"
+                data-toggle="modal" data-target="#event_create">
+          <span class="glyphicon glyphicon-plus"></span>
+          Create entry
+        </button>
+        {% end %}{# if is_admin #}
+        <a class="btn btn-success btn-xs pull-right" role="button"
+           href="{{ reverse_url('events') }}">All events</a>
       </div>
       <div class="panel-body">
-	{% include 'events_list.html' %}
+        {% include 'events_list.html' %}
       </div>
     </div>
   </div>
@@ -205,9 +207,9 @@
     <div class="panel-body">
       {% if is_admin %}
       <a href="{{ reverse_url('text','general', origin=reverse_url('home')) }}"
-	 class="btn btn-primary btn-xs pull-right" role="button">
-	<span class="glyphicon glyphicon-edit"></span>
-	Edit
+         class="btn btn-primary btn-xs pull-right" role="button">
+        <span class="glyphicon glyphicon-edit"></span>
+        Edit
       </a>
       {% end %}
       {% module Text('general') %}

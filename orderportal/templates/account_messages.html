@@ -22,29 +22,29 @@ Messages to {% module Entity(account) %}
     <tr>
       <td class="localtime">{{ msg['modified'] }}</td>
       <td>
-	<table>
-	  <tr>
-	    <td>
-	      <button type="button" class="btn btn-default btn-xs"
-		      data-toggle="collapse" data-target="#{{ msg['_id'] }}">
-		<span class="glyphicon glyphicon-chevron-down"></span>
-	      </button>
-	      {{ msg['subject'] }}
-	    </td>
-	  </tr>
-	  <tr id="{{ msg['_id'] }}" class="collapse">
-	    <td>
-	      <div class="panel panel-default">
-		<div class="panel-heading">
-		  Email sent to {{ ', '.join(msg['recipients']) }}
-		</div>
-		<div class="panel-body pre">
-		  {{ msg['text'] }}
-		</div>
-	      </div>
-	    </td>
-	  </tr>
-	</table>
+        <table>
+          <tr>
+            <td>
+              <button type="button" class="btn btn-default btn-xs"
+                      data-toggle="collapse" data-target="#{{ msg['_id'] }}">
+                <span class="glyphicon glyphicon-chevron-down"></span>
+              </button>
+              {{ msg['subject'] }}
+            </td>
+          </tr>
+          <tr id="{{ msg['_id'] }}" class="collapse">
+            <td>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  Email sent to {{ ', '.join(msg['recipients']) }}
+                </div>
+                <div class="panel-body pre">
+                  {{ msg['text'] }}
+                </div>
+              </div>
+            </td>
+          </tr>
+        </table>
       </td>
     </tr>
     {% end %}

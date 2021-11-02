@@ -10,13 +10,12 @@ import urllib.error
 import urllib.parse
 
 import couchdb2
-import markdown
 import tornado.web
 
 import orderportal
-from . import constants
-from . import settings
-from . import utils
+from orderportal import constants
+from orderportal import settings
+from orderportal import utils
 
 
 class RequestHandler(tornado.web.RequestHandler):
@@ -54,7 +53,7 @@ class RequestHandler(tornado.web.RequestHandler):
         except tornado.web.HTTPError:
             result['alert'] = None
         else:
-            result['alert'] = markdown.markdown(doc['text'], output_format='html5')
+            result['alert'] = utils.markdown2html(doc['text'])
         result['reduce'] = functools.reduce
         return result
 

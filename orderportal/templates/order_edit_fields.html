@@ -29,35 +29,35 @@
   <div class="panel panel-default">
     <div class="panel-heading">
       <h4>
-	{{ label }}
-	{% if field['restrict_read'] %}
-	&nbsp;
-	<span class="glyphicon glyphicon-eye-open"
-	      title="Readable by staff only.">
-	</span>
-	{% end %}
-	{% if field['restrict_write'] %}
-	&nbsp;
-	<span class="glyphicon glyphicon-pencil"
-	      title="Writeable by admin only.">
-	</span>
-	{% end %}
-	<div class="pull-right">
-	  {% if field['identifier'] in order['invalid'] %}
-	  <span class="text-danger">
-	    <span class="glyphicon glyphicon-remove"></span>
-	    {{ order['invalid'][field['identifier']] }}
-	  </span>
-	  {% else %}
-	  <span class="text-success">
-	    <span class="glyphicon glyphicon-ok"></span>
-	    OK
-	  </span>
-	  {% end %}
-	</div>
+        {{ label }}
+        {% if field['restrict_read'] %}
+        &nbsp;
+        <span class="glyphicon glyphicon-eye-open"
+              title="Readable by staff only.">
+        </span>
+        {% end %}
+        {% if field['restrict_write'] %}
+        &nbsp;
+        <span class="glyphicon glyphicon-pencil"
+              title="Writeable by admin only.">
+        </span>
+        {% end %}
+        <div class="pull-right">
+          {% if field['identifier'] in order['invalid'] %}
+          <span class="text-danger">
+            <span class="glyphicon glyphicon-remove"></span>
+            {{ order['invalid'][field['identifier']] }}
+          </span>
+          {% else %}
+          <span class="text-success">
+            <span class="glyphicon glyphicon-ok"></span>
+            OK
+          </span>
+          {% end %}
+        </div>
       </h4>
       <div>
-	{% module Markdown(field.get('description')) %}
+        {% module Markdown(field.get('description')) %}
       </div>
     </div>
     <div class="panel-body">
@@ -78,31 +78,31 @@
       {% if field['restrict_read'] %}
       &nbsp;
       <span class="glyphicon glyphicon-eye-open"
-	    title="Readable by staff only.">
+            title="Readable by staff only.">
       </span>
       {% end %}
       {% if field['restrict_write'] %}
       &nbsp;
       <span class="glyphicon glyphicon-pencil"
-	    title="Writeable by admin only.">
+            title="Writeable by admin only.">
       </span>
       {% end %}
     <span style="margin-right: -3em;"
-	  class="form-control-feedback nobr">
+          class="form-control-feedback nobr">
       {% if field['identifier'] in order['invalid'] %}
       <span class="text-danger">
-	<span class="glyphicon glyphicon-remove"></span>
-	{{ order['invalid'][field['identifier']] }}
+        <span class="glyphicon glyphicon-remove"></span>
+        {{ order['invalid'][field['identifier']] }}
       </span>
       {% elif value in (None, '') %}
       <span class="text-warning">
-	<span class="glyphicon glyphicon-question-sign"></span>
-	no value OK
+        <span class="glyphicon glyphicon-question-sign"></span>
+        no value OK
       </span>
       {% else %}
       <span class="text-success">
-	<span class="glyphicon glyphicon-ok"></span>
-	OK
+        <span class="glyphicon glyphicon-ok"></span>
+        OK
       </span>
       {% end %}
     </span>
@@ -114,9 +114,9 @@
     <div class="checkbox">
       <label>
         <input type="checkbox" class="visible-if-source"
-	       id="{{ field['identifier'] }}" name="{{ field['identifier'] }}"
-	       {{ value == True and 'checked' or '' }} value="true">
-	Check box if "{{ field.get('selection') == 'yes_no' and 'yes' or 'true' }}".
+               id="{{ field['identifier'] }}" name="{{ field['identifier'] }}"
+               {{ value == True and 'checked' or '' }} value="true">
+        Check box if "{{ field.get('selection') == 'yes_no' and 'yes' or 'true' }}".
       </label>
     </div>
     {% else %}
@@ -140,11 +140,11 @@
     <div>
       {% for v in field['select'] %}
       <label class="radio-inline">
-	<input type="radio" class="visible-if-source"
-	       name="{{ field['identifier'] }}"
-	       {# XXX This is not proper HTML. But it works... #}
-	       id="{{ field['identifier'] }}"
-	       value="{{ v }}" {{ v == value and 'checked' or '' }}>{{ v }}
+        <input type="radio" class="visible-if-source"
+               name="{{ field['identifier'] }}"
+               {# XXX This is not proper HTML. But it works... #}
+               id="{{ field['identifier'] }}"
+               value="{{ v }}" {{ v == value and 'checked' or '' }}>{{ v }}
       </label>
       {% end %}
     </div>
@@ -153,19 +153,19 @@
     {% for v in field['select'] %}
     <div class="radio">
       <label>
-	<input type="radio" class="visible-if-source"
-	       name="{{ field['identifier'] }}"
-	       {# XXX This is not proper HTML. But it works... #}
-	       id="{{ field['identifier'] }}"
-	       value="{{ v }}" {{ v == value and 'checked' or '' }}>{{ v }}
+        <input type="radio" class="visible-if-source"
+               name="{{ field['identifier'] }}"
+               {# XXX This is not proper HTML. But it works... #}
+               id="{{ field['identifier'] }}"
+               value="{{ v }}" {{ v == value and 'checked' or '' }}>{{ v }}
       </label>
     </div>
     {% end %}
         
     {% else %} {# default 'menu' #}
     <select class="form-control visible-if-source"
-	    name="{{ field['identifier'] }}"
-	    id="{{ field['identifier'] }}">
+            name="{{ field['identifier'] }}"
+            id="{{ field['identifier'] }}">
       {% if value is None %}
       <option selected value="">[none]</option>
       {% else %}
@@ -192,9 +192,9 @@
 
     {% elif field['type'] == constants.MULTISELECT %}
     <select class="form-control visible-if-source"
-	    multiple size="{{ min(8, len(field['multiselect']) + 1) }}"
-	    name="{{ field['identifier'] }}"
-	    id="{{ field['identifier'] }}">
+            multiple size="{{ min(8, len(field['multiselect']) + 1) }}"
+            name="{{ field['identifier'] }}"
+            id="{{ field['identifier'] }}">
       {% set in_optgroup = False %}
       {% set value = value or [] %}
       {% for v in field['multiselect'] %}
@@ -216,20 +216,20 @@
 
     {% elif field['type'] == constants.TEXT %}
     <textarea class="form-control"
-	      name="{{ field['identifier'] }}"
-	      id="{{ field['identifier'] }}"
+              name="{{ field['identifier'] }}"
+              id="{{ field['identifier'] }}"
               {% if field.get('maxlength') %}
               maxlength="{{ field['maxlength'] }}"
               {% end %}
-	      >{{ value or '' }}</textarea>
+              >{{ value or '' }}</textarea>
 
     {% elif field['type'] == constants.DATE %}
     {# This requires jQuery datepicker! Loaded in calling HTML template. #}
     <input type="text"
-	   class="form-control datepicker visible-if-source"
-	   name="{{ field['identifier'] }}"
-	   id="{{ field['identifier'] }}"
-	   value="{{ value }}">
+           class="form-control datepicker visible-if-source"
+           name="{{ field['identifier'] }}"
+           id="{{ field['identifier'] }}"
+           value="{{ value }}">
 
     {% elif field['type'] == constants.TABLE %}
     {% set tableid = '_table_' + field['identifier'] %}
@@ -259,40 +259,40 @@
 
     {% elif field['type'] == constants.FILE %}
     <input type="file"
-	   class="form-control"
-	   name="{{ field['identifier'] }}"
-	   id="{{ field['identifier'] }}">
+           class="form-control"
+           name="{{ field['identifier'] }}"
+           id="{{ field['identifier'] }}">
       {% if value %}
       Currently loaded file: {{ value }}
       {% end %}
 
     {% elif field['type'] == constants.FLOAT %}
     <input type="number" step="{{ constants.FLOAT_STEP }}"
-	   class="form-control visible-if-source"
-	   name="{{ field['identifier'] }}"
-	   id="{{ field['identifier'] }}"
-	   value="{{ '' if value is None else value  }}">
+           class="form-control visible-if-source"
+           name="{{ field['identifier'] }}"
+           id="{{ field['identifier'] }}"
+           value="{{ '' if value is None else value  }}">
 
     {% else %} {# All other field types: STRING, EMAIL, INT, URL #}
     <input type="{{ constants.TYPE_HTML.get(field['type'], 'text') }}"
-	   class="form-control visible-if-source"
-	   name="{{ field['identifier'] }}"
-	   id="{{ field['identifier'] }}"
-	   value="{{ '' if value is None else value  }}">
+           class="form-control visible-if-source"
+           name="{{ field['identifier'] }}"
+           id="{{ field['identifier'] }}"
+           value="{{ '' if value is None else value  }}">
     {% end %} {# elif field['type'] == #}
     
     {% if field['required'] %}
     {% if field.get('display') == 'menu' %} {# field type SELECT #}
     <span style="color:red; margin-right: 2em;"
-	  class="glyphicon glyphicon-star form-control-feedback"
-	  title="Required"
-	  aria-hidden="true">
+          class="glyphicon glyphicon-star form-control-feedback"
+          title="Required"
+          aria-hidden="true">
     </span>
     {% else %}
     <span style="color:red; margin-right: 1em;"
-	  class="glyphicon glyphicon-star form-control-feedback"
-	  title="Required"
-	  aria-hidden="true">
+          class="glyphicon glyphicon-star form-control-feedback"
+          title="Required"
+          aria-hidden="true">
     </span>
     {% end %}
     {% end %} {# if field['required'] #}

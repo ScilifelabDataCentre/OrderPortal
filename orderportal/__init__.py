@@ -4,7 +4,7 @@ An order can be a project application, a request, a report, etc.
 
 import os.path
 
-__version__ = '5.1.5'
+__version__ = '5.2.0'
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 

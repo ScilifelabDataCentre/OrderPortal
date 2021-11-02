@@ -9,24 +9,20 @@
 {% block action_content %}
 
 {% if is_editable %}
-<br>
 <form action="{{ reverse_url('group_edit', group['_id']) }}"
-      role="form"
-      method="GET">
+      method="GET" role="form" style="margin-top: 20px;">
   <button type="submit" class="btn btn-primary btn-block">
     <span class="glyphicon glyphicon-edit"></span>
     Edit
   </button>
 </form>
 
-<br>
 <form action="{{ reverse_url('group', group['_id']) }}"
-      role="form"
-      method="POST">
+      method="POST" role="form" style="margin-top: 20px;">
   {% module xsrf_form_html() %}
   <input type="hidden" name="_http_method" value="delete">
   <button type="submit" class="btn btn-danger btn-block"
-	  onclick="return confirm('Cannot be undone! Really delete?');">
+          onclick="return confirm('Cannot be undone! Really delete?');">
     <span class="glyphicon glyphicon-trash"></span>
     Delete
   </button>
@@ -35,14 +31,12 @@
 
 {% if is_editable %}
 {#
-<br>
 <form action="{{ reverse_url('group', group['_id']) }}"
-      role="form"
-      method="POST">
+      method="POST" role="form" style="margin-top: 20px;">
   {% module xsrf_form_html() %}
   <input type="hidden" name="_http_method" value="delete">
   <button type="submit" class="btn btn-danger btn-block"
-	  onclick="return confirm('Cannot be undone! Really delete?');">
+          onclick="return confirm('Cannot be undone! Really delete?');">
     <span class="glyphicon glyphicon-trash"></span>
     Delete
   </button>
@@ -65,58 +59,58 @@
 
     <table class="table table-condensed table-fields table-noborder">
       <tr>
-	<th>Owner</th>
-	<td>
-	  <a href="{{ reverse_url('account', group['owner']) }}">
-	    {% module Icon('account') %}
-	    {{ group['owner'] }}
-	  </a>
-	</td>
+        <th>Owner</th>
+        <td>
+          <a href="{{ reverse_url('account', group['owner']) }}">
+            {% module Icon('account') %}
+            {{ group['owner'] }}
+          </a>
+        </td>
       </tr>
       <tr>
-	<th>Members</th>
-	<td>
-	  {% for email in group['members'] %}
-	  <a href="{{ reverse_url('account', email) }}">
-	    {% module Icon('account') %}
-	    {{ email }}
-	  </a>
-	  <br>
-	  {% end %}
-	</td>
+        <th>Members</th>
+        <td>
+          {% for email in group['members'] %}
+          <a href="{{ reverse_url('account', email) }}">
+            {% module Icon('account') %}
+            {{ email }}
+          </a>
+          <br>
+          {% end %}
+        </td>
       </tr>
       <tr>
-	<th>Invited</th>
-	<td>
-	  {% for email in group['invited'] %}
-	    {% if is_staff %}
-	    <a href="{{ reverse_url('account', email) }}">
-	      {% module Icon('account') %}
-	      {{ email }}
-	    </a>
-	    {% else %}
-	    {{ email }}
-	    {% end %}
-	    <br>
-	  {% end %}
-	</td>
+        <th>Invited</th>
+        <td>
+          {% for email in group['invited'] %}
+            {% if is_staff %}
+            <a href="{{ reverse_url('account', email) }}">
+              {% module Icon('account') %}
+              {{ email }}
+            </a>
+            {% else %}
+            {{ email }}
+            {% end %}
+            <br>
+          {% end %}
+        </td>
       </tr>
       <tr>
-	<th>Modified</th>
-	<td>
-	  <span class="localtime">{{ group['modified'] }}</span>
-	  <a href="{{ reverse_url('group_logs', group['_id']) }}">
-	    {% module Icon('logs', label=True) %}
-	  </a>
-	</td>
+        <th>Modified</th>
+        <td>
+          <span class="localtime">{{ group['modified'] }}</span>
+          <a href="{{ reverse_url('group_logs', group['_id']) }}">
+            {% module Icon('logs', label=True) %}
+          </a>
+        </td>
       </tr>
       <tr>
-	<th>Created</th>
-	<td class="localtime">{{ group['created'] }}</td>
+        <th>Created</th>
+        <td class="localtime">{{ group['created'] }}</td>
       </tr>
       <tr>
-	<th>IUID</th>
-	<td>{{ group['_id'] }}</td>
+        <th>IUID</th>
+        <td>{{ group['_id'] }}</td>
       </tr>
     </table>
   </div>

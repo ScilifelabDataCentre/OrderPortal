@@ -7,7 +7,6 @@ import hashlib
 import io
 import logging
 import mimetypes
-import optparse
 import os
 import os.path
 import sys
@@ -18,26 +17,17 @@ import urllib.parse
 import uuid
 
 import couchdb2
+import markdown
 import tornado.web
+import tornado.escape
 import xlsxwriter
 import yaml
 
 import orderportal
-from . import constants
-from . import designs
-from . import settings
+from orderportal import constants
+from orderportal import designs
+from orderportal import settings
 
-
-def get_command_line_parser(usage='usage: %prog [options]', description=None):
-    "Get the base command line argument parser."
-    parser = optparse.OptionParser(usage=usage, description=description)
-    parser.add_option('-p', '--pidfile',
-                      action='store', dest='pidfile', default=None,
-                      metavar="FILE", help="filepath of file to contain PID")
-    parser.add_option('-f', '--force',
-                      action="store_true", dest="force", default=False,
-                      help='force action, rather than ask for confirmation')
-    return parser
 
 def load_settings(filepath=None, log=True):
     """Load the settings. The file path first specified is used.
@@ -294,6 +284,13 @@ def convert(type, value):
         return to_bool(value)
     else:
         return value
+
+def markdown2html(text, safe=False):
+    "Process the text from Markdown to HTML."
+    text = text or ''
+    if not safe:
+        text = tornado.escape.xhtml_escape(text)
+    return markdown.markdown(text, output_format='html5')
 
 def csv_safe_row(row):
     "Make all values in the row safe for CSV. See 'csv_safe'."

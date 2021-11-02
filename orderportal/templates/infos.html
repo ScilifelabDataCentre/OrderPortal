@@ -24,7 +24,7 @@
     <td>
       <span  class="localtime">{{ info['modified'] }}</span>
       <a href="{{ reverse_url('info_logs', info['name']) }}">
-	{% module Icon('logs', label=True) %}
+        {% module Icon('logs', label=True) %}
       </a>
     </td>
     <td class="localtime">{{ info['created'] }}</td>
@@ -36,8 +36,7 @@
 {% if is_admin %}
 {% block action_content %}
 <form action="{{ reverse_url('info_create') }}"
-      role="form"
-      method="GET">
+      method="GET" role="form">
   <button type="submit" class="btn btn-primary btn-block">
     <span class="glyphicon glyphicon-plus"></span>
     Create

@@ -209,6 +209,7 @@ def password(email, password):
                                         hide_input=True,
                                         confirmation_prompt=True)
             saver.set_password(password)
+            saver['status'] = constants.ENABLED
     except ValueError as error:
         raise click.ClickException(str(error))
     click.echo(f"Password set for account '{email}'.")

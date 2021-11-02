@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block head_title %}{{ settings['SITE_NAME'] }}{% end %}</title>
     <link rel="shortcut icon" type="image/png"
-	  href="{{ reverse_url('site', settings['SITE_FAVICON']) }}">
+          href="{{ reverse_url('site', settings['SITE_FAVICON']) }}">
     {# Versions here and in home.py must be kept in sync! #}
     <link rel="stylesheet" type="text/css"
-	  href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+          href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" 
           integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" 
           crossorigin="anonymous">
     <link rel="stylesheet" type="text/css"
-	  href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css">
+          href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css">
     {% block css_page %}
     {% end %}
     <link rel="stylesheet" href="{{ static_url('mods.css') }}">
@@ -27,210 +27,206 @@
   <body>
     <nav class="navbar navbar-static-top {{ settings['DISPLAY_MENU_LIGHT'] and 'navbar-default' or 'navbar-inverse' }}">
       <div class="container-fluid">
-	<div class="navbar-header">
-	  <button type="button" class="navbar-toggle"
-		  data-toggle="collapse" data-target="#myNavbar">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle"
+                  data-toggle="collapse" data-target="#myNavbar">
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
-	  </button>
+          </button>
           {% if settings['SITE_NAVBAR_ICON'] %}
-	  <a class="navbar-brand" href="{{ reverse_url('home') }}">
-	    <img src="{{ reverse_url('site', settings['SITE_NAVBAR_ICON']) }}"
-		 title="{{ settings['SITE_NAME'] }}"
-		 alt="{{ settings['SITE_NAME'] }}">
-	  </a>
+          <a class="navbar-brand" href="{{ reverse_url('home') }}">
+            <img src="{{ reverse_url('site', settings['SITE_NAVBAR_ICON']) }}"
+                 title="{{ settings['SITE_NAME'] }}"
+                 alt="{{ settings['SITE_NAME'] }}">
+          </a>
           {% end %}
-	</div>
-	<div class="collapse navbar-collapse" id="myNavbar">
-	  <ul class="nav navbar-nav">
-	    <li>
-	      <a href="{{ reverse_url('home') }}">
-		<span class="glyphicon glyphicon-home"></span>
-	      </a>
-	    </li>
-	    {% if current_user %}
-	    {% if is_staff %}
+        </div>
+        <div class="collapse navbar-collapse" id="myNavbar">
+          <ul class="nav navbar-nav">
             <li>
-	      <a href="{{ reverse_url('orders') }}">
-		{{ terminology('Orders') }}
-	      </a>
-	    </li>
-	    {% else %}
-	    <li>
-	      <a href="{{ reverse_url('account_orders', current_user['email']) }}">
-		My {{ terminology('orders') }}
-	      </a>
-	    </li>
-	    {% end %} {# if is_staff #}
-	    {% end %} {# if current_user #}
+              <a href="{{ reverse_url('home') }}">
+                <span class="glyphicon glyphicon-home"></span>
+              </a>
+            </li>
+            {% if current_user %}
+            {% if is_staff %}
+            <li>
+              <a href="{{ reverse_url('orders') }}">
+                {{ terminology('Orders') }}
+              </a>
+            </li>
+            {% else %}
+            <li>
+              <a href="{{ reverse_url('account_orders', current_user['email']) }}">
+                My {{ terminology('orders') }}
+              </a>
+            </li>
+            {% end %} {# if is_staff #}
+            {% end %} {# if current_user #}
 
-	    {% if is_admin %}
+            {% if is_admin %}
             <li><a href="{{ reverse_url('forms') }}">Forms</a></li>
-	    {% end %} {# if is_admin #}
+            {% end %} {# if is_admin #}
 
-	    {% if is_staff %}
+            {% if is_staff %}
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-		Accounts
-		<span class="caret"></span>
-	      </a>
+                Accounts
+                <span class="caret"></span>
+              </a>
               <ul class="dropdown-menu">
-		<li>
-		  <a href="{{ reverse_url('accounts') }}">All accounts</a>
-		</li>
-		<li>
-		  <a href="{{ reverse_url('groups') }}">All groups</a>
-		</li>
-		{% if is_admin %}
-		<li>
-		  <a href="{{ reverse_url('register') }}">
-		    Register new account
-		  </a>
-		</li>
-		<li>
-		  <a href="{{ reverse_url('reset') }}">Reset password</a>
-		</li>
-		<li>
-		  <a href="{{ reverse_url('password') }}">Set password</a>
-		</li>
-		{% end %} {# if is_admin #}
-	      </ul>
-	    </li>
-	    {% end %} {# if is_staff #}
+                <li>
+                  <a href="{{ reverse_url('accounts') }}">All accounts</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('groups') }}">All groups</a>
+                </li>
+                {% if is_admin %}
+                <li>
+                  <a href="{{ reverse_url('register') }}">
+                    Register new account
+                  </a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('reset') }}">Reset password</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('password') }}">Set password</a>
+                </li>
+                {% end %} {# if is_admin #}
+              </ul>
+            </li>
+            {% end %} {# if is_staff #}
 
             {% if settings['DISPLAY_MENU_INFORMATION'] %}
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-		Information
-		<span class="caret"></span>
-	      </a>
+                Information
+                <span class="caret"></span>
+              </a>
               <ul class="dropdown-menu">
-		{% if is_admin %}
-		<li>
-		  <a href="{{ reverse_url('infos') }}">All info pages</a>
-		</li>
-		{% end %} {# if is_admin #}
-		{% for n, t in infos %}
-		<li>
-		  <a href="{{ reverse_url('info', n) }}">
-		    {{ t or n }}
-		  </a>
-		</li>
-		{% end %}
+                {% if is_admin %}
+                <li>
+                  <a href="{{ reverse_url('infos') }}">All info pages</a>
+                </li>
+                {% end %} {# if is_admin #}
+                {% for n, t in infos %}
+                <li>
+                  <a href="{{ reverse_url('info', n) }}">
+                    {{ t or n }}
+                  </a>
+                </li>
+                {% end %}
               </ul>
             </li>
             {% end %}
 
             {% if settings['DISPLAY_MENU_DOCUMENTS'] %}
-	    <li>
-	      <a href="{{ reverse_url('files') }}">Documents</a>
-	    </li>
+            <li>
+              <a href="{{ reverse_url('files') }}">Documents</a>
+            </li>
             {% end %}
 
-	    {% if is_admin %}
+            {% if is_admin %}
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">Admin
-		<span class="caret"></span>
-	      </a>
+                <span class="caret"></span>
+              </a>
               <ul class="dropdown-menu">
-		<li>
-		  <a href="{{ reverse_url('global_modes') }}">Global modes</a>
-		</li>
-		<li>
-		  <a href="{{ reverse_url('settings') }}">Settings</a>
-		</li>
-		<li>
-		  <a href="{{ reverse_url('texts') }}">Texts</a>
-		</li>
-		<li>
-		  <a href="{{ reverse_url('order_statuses') }}">
-                    {{ terminology('Order') }} statuses</a>
-		</li>
                 <li>
-	          <a href="{{ reverse_url('files') }}">Documents</a>
-		</li>
-		<li>
-		  <a href="{{ reverse_url('admin_order_messages') }}">
+                  <a href="{{ reverse_url('global_modes') }}">Global modes</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('settings') }}">Settings</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('texts') }}">Texts</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('order_statuses') }}">
+                    {{ terminology('Order') }} statuses</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('files') }}">Documents</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('admin_order_messages') }}">
                     {{ terminology('Order') }} messages</a>
-		</li>
-		<li>
-		  <a href="{{ reverse_url('admin_account_messages') }}">Account messages</a>
-		</li>
-		<li>
-		  <a href="{{ reverse_url('software') }}">Software info</a>
-		</li>
-	      </ul>
-	    </li>
-	    {% if not reduce(lambda i,j: i and j, [global_modes[k] for k in global_modes.keys() if k.startswith('allow')]) %}
-	    <li>
-	      <a href="{{ reverse_url('global_modes') }}"
-		 class="btn btn-danger">
-		<span class="glyphicon glyphicon-exclamation-sign"></span>
-		Global modes
-	      </a>
-	    </li>
-	    {% end %}
-	    {% end %} {# if is_admin #}
+                </li>
+                <li>
+                  <a href="{{ reverse_url('admin_account_messages') }}">Account messages</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('software') }}">Software info</a>
+                </li>
+              </ul>
+            </li>
+            {% if not reduce(lambda i,j: i and j, [global_modes[k] for k in global_modes.keys() if k.startswith('allow')]) %}
+            <li>
+              <a href="{{ reverse_url('global_modes') }}"
+                 class="btn btn-danger">
+                <span class="glyphicon glyphicon-exclamation-sign"></span>
+                Global modes
+              </a>
+            </li>
+            {% end %}
+            {% end %} {# if is_admin #}
 
             {% if settings['DISPLAY_MENU_CONTACT'] %}
-	    <li>
-	      <a href="{{ reverse_url('contact') }}">Contact</a>
-	    </li>
+            <li>
+              <a href="{{ reverse_url('contact') }}">Contact</a>
+            </li>
             {% end %}
             {% if settings['DISPLAY_MENU_ABOUT_US'] %}
-	    <li>
-	      <a href="{{ reverse_url('about') }}">About us</a>
-	    </li>
+            <li>
+              <a href="{{ reverse_url('about') }}">About us</a>
+            </li>
             {% end %}
             {% if settings['DISPLAY_MENU_ITEM_URL'] %}
-	    <li>
-	      <a href="{{ settings['DISPLAY_MENU_ITEM_URL'] }}">
+            <li>
+              <a href="{{ settings['DISPLAY_MENU_ITEM_URL'] }}">
                 {{ settings.get('DISPLAY_MENU_ITEM_TEXT') or 'Back to website' }}
               </a>
-	    </li>
+            </li>
             {% end %}
 
-	  </ul>
+          </ul>
 
-	  <div>
-	    <ul class="nav navbar-nav navbar-right">
-	      {% if current_user %}
-	      <li>{% module Entity(current_user, icon=False) %}</li>
-	      <li>
-		<form action="{{ reverse_url('logout') }}"
-		      role="form"
-		      class="navbar-form"
-		      method="POST">
-		  {% module xsrf_form_html() %}
-		  <button type="submit"
-			  title="Logout"
-			  class="btn btn-default btn-sm">
-		    <span class="glyphicon glyphicon-log-out"></span>
-		  </button>
-		</form>
-	      </li>
-	      {% end %} {# if current_user #}
-	      {% block search_field %}
-	      {% if current_user %}
-	      <li>
-		<form action="{{ reverse_url('search') }}"
-		      role="form"
-		      class="navbar-form form-inline"
-		      method="GET">
-		  <div class="form-group has-feedback">
-		    <input type="search" id="term" name="term"
-			   class="form-control"
-			   placeholder="Search {{ terminology('orders') }}">
-		    <span class="glyphicon glyphicon-search form-control-feedback"></span>
-		  </div>
-		</form>
-	      </li>
-	      {% end %} {# if current_user #}
-	      {% end %} {# block search_field #}
-	    </ul>
-	  </div>
-	</div>
+          <div>
+            <ul class="nav navbar-nav navbar-right">
+              {% if current_user %}
+              <li>{% module Entity(current_user, icon=False) %}</li>
+              <li>
+                <form action="{{ reverse_url('logout') }}"
+                      method="POST" role="form" class="navbar-form">
+                  {% module xsrf_form_html() %}
+                  <button type="submit"
+                          title="Logout"
+                          class="btn btn-default btn-sm">
+                    <span class="glyphicon glyphicon-log-out"></span>
+                  </button>
+                </form>
+              </li>
+              {% end %} {# if current_user #}
+              {% block search_field %}
+              {% if current_user %}
+              <li>
+                <form action="{{ reverse_url('search') }}"
+                      method="GET" role="form" class="navbar-form form-inline">
+                  <div class="form-group has-feedback">
+                    <input type="search" id="term" name="term"
+                           class="form-control"
+                           placeholder="Search {{ terminology('orders') }}">
+                    <span class="glyphicon glyphicon-search form-control-feedback"></span>
+                  </div>
+                </form>
+              </li>
+              {% end %} {# if current_user #}
+              {% end %} {# block search_field #}
+            </ul>
+          </div>
+        </div>
       </div>
     </nav>
 
@@ -240,61 +236,61 @@
 
       {% if alert %}
       <div class="row">
-	<div class="col-md-12 lead alert alert-danger">
+        <div class="col-md-12 lead alert alert-danger">
           {% if is_admin %}
           <a href="{{ reverse_url('text','alert',origin=reverse_url('home')) }}"
-	     class="btn btn-primary btn-xs pull-right" role="button">
-	    <span class="glyphicon glyphicon-edit"></span>
-	    Edit
+             class="btn btn-primary btn-xs pull-right" role="button">
+            <span class="glyphicon glyphicon-edit"></span>
+            Edit
           </a>
           {% end %}
-	  {% raw alert %}
-	</div>
+          {% raw alert %}
+        </div>
       </div>
       {% end %} {# if alert #}
 
       {% block body_header %}
       <div class="row">
-	<div class="col-md-10">
-	  <h1>{% block body_title %}OrderPortal{% end %}</h1>
-	</div>
-	<div class="col-md-2 hidden-print" style="margin-top: 20px">
-	  {% block body_header_alt_format %}
-	  {% end %}
-	</div>
+        <div class="col-md-10">
+          <h1>{% block body_title %}OrderPortal{% end %}</h1>
+        </div>
+        <div class="col-md-2 hidden-print" style="margin-top: 20px">
+          {% block body_header_alt_format %}
+          {% end %}
+        </div>
       </div>
       {% end %} {# block body_header #}
 
       {% if error %}
       <div class="row">
-	<div class="col-md-12 lead alert alert-danger">
-	  <strong>Error:</strong> {{ error }}
-	</div>
+        <div class="col-md-12 lead alert alert-danger">
+          <strong>Error:</strong> {{ error }}
+        </div>
       </div>
       {% end %} {# if error #}
 
       {% if message %}
       <div class="row">
-	<div class="col-md-12 lead alert alert-warning">
-	  {# Allow links in message #}
-	  <strong>Message:</strong> {% raw message %}
-	</div>
+        <div class="col-md-12 lead alert alert-warning">
+          {# Allow links in message #}
+          <strong>Message:</strong> {% raw message %}
+        </div>
       </div>
       {% end %} {# if message #}
 
       {% block content %}
       <div class="row">
-	<div class="col-md-10">
-	  {% block main_content %}
-	  {% end %} {# block main_content #}
-	</div>
-	<div class="col-md-2 hidden-print">
-	  {% block action_content %}
-	  {% end %} {# block action_content #}
-	</div>
+        <div class="col-md-10">
+          {% block main_content %}
+          {% end %} {# block main_content #}
+        </div>
+        <div class="col-md-2 hidden-print">
+          {% block action_content %}
+          {% end %} {# block action_content #}
+        </div>
       </div>
       <div class="row">
-	<div class="col-md-12">
+        <div class="col-md-12">
           {% block sub_main_content %}
           {% end %} {# block sub_main_content #}
         </div>
@@ -306,7 +302,7 @@
     <div class="container-fluid">
       <hr>
       <div class="row">
-	<div class="col-md-3">
+        <div class="col-md-3">
           {% if settings['SITE_HOST_URL'] %}
           <a href="{{ settings['SITE_HOST_URL'] or '#' }}" target="_blank">
             {% if settings['SITE_HOST_ICON'] %}
@@ -315,9 +311,9 @@
             &nbsp; 
             {% end %}
             {{ settings['SITE_HOST_TITLE'] or 'Site host' }}
-	  </a>
+          </a>
           {% end %}
-	</div>
+        </div>
         <div class="col-md-6 text-center">
           {% if current_user %}
           Privacy policy (GDPR, etc): See
@@ -328,10 +324,12 @@
           Session cookies are <b>not</b> used for anonymous users.
           {% end %}
         </div>
-	<div class="col-md-3">
-	  <a href="{{ reverse_url('software') }}" class="pull-right">
-            Version {{ version }}</a>
-	</div>
+        <div class="col-md-3">
+          <a href="{{ reverse_url('software') }}" class="pull-right">
+            Version
+            <span id="version">{{ version }}</span>
+          </a>
+        </div>
       </div>
     </div>
 

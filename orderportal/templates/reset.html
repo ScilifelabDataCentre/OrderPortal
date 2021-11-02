@@ -11,9 +11,7 @@
   {% module Text('reset') %}
   {% if is_admin %}
   <form action="{{ reverse_url('text', 'reset') }}"
-	class="pull-right"
-	role="form"
-	method="GET">
+        method="GET" role="form" class="pull-right">
     <input type="hidden" name="origin" value="{{ reverse_url('reset') }}">
     <button type="submit" class="btn btn-primary btn-xs">
       <span class="glyphicon glyphicon-edit"></span>
@@ -24,20 +22,19 @@
 </div>
 
 <form action="{{ reverse_url('reset') }}"
-      role="form"
-      method="POST">
+      method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <div class="form-group has-feedback">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="email">Email</label>
-	<input type="email" class="form-control"
-	       name="email" id="email"
-	       value="{{ email or ''}}">
-	<span style="color:red; margin-right: 1em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
+        <label class="control-label" for="email">Email</label>
+        <input type="email" class="form-control"
+               name="email" id="email"
+               value="{{ email or ''}}">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
       </div>
     </div>
     <span class="help-block">
@@ -57,8 +54,7 @@
 
 <br>
 <form action="{{ reverse_url('home') }}"
-      role="form"
-      method="GET">
+      method="GET" role="form">
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit" class="btn btn-default">
