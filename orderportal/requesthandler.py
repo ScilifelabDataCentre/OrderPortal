@@ -267,8 +267,7 @@ class RequestHandler(tornado.web.RequestHandler):
             try:
                 doc = self.db[doctype] # Doc must be reloaded each iteration
             except couchdb2.NotFoundError:
-                doc = dict(_id=doctype)
-                doc[constants.DOCTYPE] = constants.META
+                doc = {"_id": doctype, constants.DOCTYPE: constants.META}
             try:
                 number = doc['counter'] + 1
             except KeyError:
