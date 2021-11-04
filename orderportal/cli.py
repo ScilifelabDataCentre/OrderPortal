@@ -105,6 +105,23 @@ def undump(dumpfile, progressbar):
         raise click.ClickException(
             f"The database '{settings['DATABASE_NAME']}' contains data.")
     nitems, nfiles = db.undump(dumpfile, progressbar=progressbar)
+    # Cleanup.
+    # Remove old, obsolete meta documents.
+    for name in ["account_messages", "order_messages"]:
+        doc = db.get(name)
+        if doc:
+            db.delete(doc)
+    # Text docs are doubled; youngest copy is from initialize.
+    # Keep only oldest version (from dump) of text docs.
+    lookup = {}
+    for row in db.view("text", "name", include_docs=True):
+        if not row.doc["name"] in lookup:
+            lookup[row.doc["name"]] = row.doc
+        elif lookup[row.doc["name"]]["modified"] <= row.doc["modified"]:
+            db.delete(row.doc)
+        else:
+            db.delete(lookup.pop(row.doc["name"]))
+            lookup[row.doc["name"]] = row.doc
     click.echo(f"Loaded {nitems} items and {nfiles} files.")
 
 @cli.command()
