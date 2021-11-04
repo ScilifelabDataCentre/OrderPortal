@@ -306,7 +306,7 @@
   </div>
 </div>
 
-{# Allow edit of label, clone erase, description when not really editable. #}
+{# Allow edit of label, clone erase, description, even when form is enabled. #}
 {% if not are_fields_editable %}
 {% for field in fields %}
 <div id="{{ field['identifier'] }}" class="modal fade" role="dialog">
@@ -341,6 +341,7 @@
             </span>
           </div>
 
+          {% if field['type'] != constants.GROUP %}
           <div class="form-group">
             <label class="control-label"
                    for="{{ field['identifier'] }}/erase_on_clone">
@@ -358,6 +359,27 @@
               </label>
             </div>
           </div>
+          {% end %} {# if field['type'] != constants.GROUP #}
+
+          {% if settings['ORDER_TAGS'] and field['type'] in [constants.STRING, constants.SELECT] %}
+          <div class="form-group">
+            <label class="control-label"
+                   for="{{ field['identifier'] }}/auto_tag">
+              Erase on clone
+            </label>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox"
+                       name="{{ field['identifier'] }}/auto_tag"
+                       id="{{ field['identifier'] }}/auto_tag"
+                       value="true"
+                       {{ field.get('auto_tag') and 'checked' or ''}}>
+                Automatically include the value of the field in the
+                tags of the {{ terminology('order') }}.
+              </label>
+            </div>
+          </div>
+          {% end %} {# if settings['ORDER_TAGS'] and field['type'] in [constants.STRING, constants.SELECT] #}
 
           {% if field['type'] == constants.GROUP %}
           <div class="form-group">

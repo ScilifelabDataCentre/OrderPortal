@@ -292,10 +292,34 @@
     </div>
     <span class="help-block">
       Erase the value of the field in a new {{ terminology('order') }}
-      when cloning. This has no effect on fields of type 'group'.
+      when cloning. This has no effect on fields of type <b>group</b>.
     </span>
   </div>
 
+  {% if settings['ORDER_TAGS'] %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+        <label class="control-label" for="auto_tag">
+          Automatically include in tags
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="auto_tag"
+                   id="auto_tags"
+                   value="true"
+                   {{ field.get('auto_tag') and 'checked' or '' }}>
+            Automatically include the value of the field in the tags
+            of the {{ terminology('order') }}. This affects only
+            fields of type <b>string</b> and <b>select</b>.
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% end %} {# if settings['ORDER_TAGS'] #}
+  
   <div class="form-group">
     <div class="row">
       <div class="col-md-8">

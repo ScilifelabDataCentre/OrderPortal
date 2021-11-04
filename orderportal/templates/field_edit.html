@@ -347,7 +347,7 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
       </div>
     </div>
     <span class="help-block">
-      The fields of the grouå are shown already when the page is
+      The fields of the group are shown already when the page is
       opened. This is used only for groups at the top level.
     </span>
   </div>
@@ -397,6 +397,29 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
 
   {% end %} {# if field['type'] == constants.GROUP #}
 
+  {% if settings['ORDER_TAGS'] and field['type'] in [constants.STRING, constants.SELECT] %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+        <label class="control-label" for="auto_tag">
+          Automatically include in tags
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="auto_tag"
+                   id="auto_tags"
+                   value="true"
+                   {{ field.get('auto_tag') and 'checked' or '' }}>
+            Automatically include the value of the field in the tags
+            of the {{ terminology('order') }}.
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% end %} {# if settings['ORDER_TAGS'] and field['type'] in [constants.STRING, constants.SELECT] #}
+  
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">

@@ -375,7 +375,8 @@ class FormFieldEdit(FormMixin, RequestHandler):
 
 class FormFieldEditDescr(FormMixin, RequestHandler):
     """Edit the label, clone erase, description of a form field.
-    This is allowed also for enabled forms."""
+    This is allowed even for enabled forms.
+    """
 
     @tornado.web.authenticated
     def post(self, iuid, identifier):
@@ -389,6 +390,9 @@ class FormFieldEditDescr(FormMixin, RequestHandler):
                 utils.to_bool(self.get_argument(name, False))
             name = "{0}/erase_on_clone".format(identifier)
             saver.fields[identifier]['erase_on_clone'] = \
+                utils.to_bool(self.get_argument(name, False))
+            name = "{0}/auto_tag".format(identifier)
+            saver.fields[identifier]['auto_tag'] = \
                 utils.to_bool(self.get_argument(name, False))
             name = "{0}/descr".format(identifier)
             saver.fields[identifier]['description'] = self.get_argument(name,'')
