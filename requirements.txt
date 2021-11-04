@@ -1,7 +1,7 @@
 certifi==2021.10.8
 charset-normalizer==2.0.7
 click==8.0.3
-CouchDB2==1.12.0
+CouchDB2==1.13.0
 idna==3.3
 Markdown==3.3.4
 PyYAML==6.0
