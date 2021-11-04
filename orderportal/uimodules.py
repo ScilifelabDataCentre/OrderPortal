@@ -106,7 +106,7 @@ class Text(tornado.web.UIModule):
             text = default
         if not text and self.handler.is_admin():
             text = "*No text defined.*"
-        return utils.markdown2html(text)
+        return utils.markdown2html(text, safe=True)
 
 
 class Tags(tornado.web.UIModule):
