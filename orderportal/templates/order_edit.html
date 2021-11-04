@@ -14,25 +14,20 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 <div class="row">
   <div class="col-md-2 col-md-offset-10" style="margin-bottom: 0;">
     <form action="{{ reverse_url('order', order['_id']) }}"
-	  class="allow_leaving_without_question"
-	  role="form"
-	  method="GET">
+          method="GET" role="form" class="allow_leaving_without_question">
       <div class="form-group" style="margin-bottom: 0;">
-	<button type="submit" class="btn btn-default btn-block">
-	  <span class="glyphicon glyphicon-remove"></span>
-	  Cancel
-	</button>
+        <button type="submit" class="btn btn-default btn-block">
+          <span class="glyphicon glyphicon-remove"></span>
+          Cancel
+        </button>
       </div>
     </form>
   </div>
 </div>
 
 <form action="{{ reverse_url('order_edit', order['_id']) }}"
-      id="__order_edit__"
-      class="allow_leaving_without_question"
-      role="form"
-      enctype="multipart/form-data"
-      method="POST">
+      id="__order_edit__" class="allow_leaving_without_question"
+      method="POST" role="form" enctype="multipart/form-data">
   {% module xsrf_form_html() %}
 
   {% module Markdown(form.get('instruction')) %}
@@ -41,10 +36,10 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   <div class="form-group" style="padding-top: 2em;">
     <div class="row">
       <div class="col-md-9">
-	<label class="control-label" for="__title__">Title</label>
-	<input type="text" class="form-control"
-	       name="__title__" id="__title__"
-	       value="{{ order['title'] or '' }}">
+        <label class="control-label" for="__title__">Title</label>
+        <input type="text" class="form-control"
+               name="__title__" id="__title__"
+               value="{{ order['title'] or '' }}">
       </div>
     </div>
     <span class="help-block extra-indent">
@@ -59,11 +54,11 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
-	<label class="control-label" for="__form__">
+        <label class="control-label" for="__form__">
           {{ terminology('Order') }} form
         </label>
-	<p id="__form__" class="form-control-static">
-	  {{ form['title'] }} {% module Version(form) %}
+        <p id="__form__" class="form-control-static">
+          {{ form['title'] }} {% module Version(form) %}
         </p>
       </div>
     </div>
@@ -74,11 +69,11 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
-	<label class="control-label" for="__tags__">Keywords (tags)</label>
-	{# Terminology in display: keyword; in code: tag #}
-	<textarea class="form-control"
-		  name="__tags__" id="__tags__" rows="2"
-		  >{{ ', '.join(tags) }}</textarea>
+        <label class="control-label" for="__tags__">Keywords (tags)</label>
+        {# Terminology in display: keyword; in code: tag #}
+        <textarea class="form-control"
+                  name="__tags__" id="__tags__" rows="2"
+                  >{{ ', '.join(tags) }}</textarea>
       </div>
     </div>
     <span class="help-block extra-indent">
@@ -100,10 +95,10 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
-	<label class="control-label" for="__links__">Links</label>
-	<textarea class="form-control"
-		  name="__links__" id="__links__" rows="2"
-		  >{{ '\n'.join(links) }}</textarea>
+        <label class="control-label" for="__links__">Links</label>
+        <textarea class="form-control"
+                  name="__links__" id="__links__" rows="2"
+                  >{{ '\n'.join(links) }}</textarea>
       </div>
     </div>
     <span class="help-block extra-indent">
@@ -123,14 +118,28 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
     {# Fields must be allowed to influence others, even when hidden. #}
     {% for f in hidden_fields %}
     <input type="hidden" class="visible-if-source"
-	   name="{{ f }}" id="{{ f }}" 
-	   value="{% module NoneStr(order['fields'].get(f)) %}">
+           name="{{ f }}" id="{{ f }}" 
+           value="{% module NoneStr(order['fields'].get(f)) %}">
     {% end %}
   </div>
 
   {% include 'order_edit_save.html' %}
   {% module Markdown(form.get('disclaimer')) %}
 </form>
+
+<div class="row">
+  <div class="col-md-2" style="margin-top: 20px;">
+    <form action="{{ reverse_url('order', order['_id']) }}"
+          method="GET" role="form" class="allow_leaving_without_question">
+      <div class="form-group">
+        <button type="submit" class="btn btn-default btn-block">
+          <span class="glyphicon glyphicon-remove"></span>
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 {% end %} {# block content #}
 
 {% block javascript_autofocus %}

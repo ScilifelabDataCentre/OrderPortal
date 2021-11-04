@@ -17,13 +17,11 @@
 {% if current_user['email'] == account['email'] %}
 <p>
   <form action="{{ reverse_url('logout') }}"
-	role="form"
-	class="form"
-	method="POST">
+        method="POST" role="form">
     {% module xsrf_form_html() %}
     <button type="submit"
-	    title="Logout"
-	    class="btn btn-default btn-block">
+            title="Logout"
+            class="btn btn-default btn-block">
       <span class="glyphicon glyphicon-log-out"></span>
       Logout
     </button>
@@ -74,15 +72,14 @@
 
 <p>
   <form action="{{ reverse_url('account_update_info', account['email']) }}"
-	role="form"
-	method="POST">
+        method="POST" role="form">
     {% module xsrf_form_html() %}
     <div class="form-group">
       <button type="submit"
-	      class="btn btn-warning btn-block"
-	      {{ account.get('update_info') and 'disabled' or ''}}>
-	<span class="glyphicon glyphicon-exclamation-sign"></span>
-	Request update
+              class="btn btn-warning btn-block"
+              {{ account.get('update_info') and 'disabled' or ''}}>
+        <span class="glyphicon glyphicon-exclamation-sign"></span>
+        Request update
       </button>
     </div>
   </form>
@@ -91,13 +88,12 @@
 {% if account['status'] != constants.ENABLED %}
 <p>
   <form action="{{ reverse_url('account_enable', account['email']) }}"
-	role="form"
-	method="POST">
+        method="POST" role="form">
     {% module xsrf_form_html() %}
     <div class="form-group">
       <button type="submit" class="btn btn-success btn-block">
-	<span class="glyphicon glyphicon-ok"></span>
-	Enable
+        <span class="glyphicon glyphicon-ok"></span>
+        Enable
       </button>
     </div>
   </form>
@@ -107,14 +103,13 @@
 {% if account['status'] != constants.DISABLED %}
 <p>
   <form action="{{ reverse_url('account_disable', account['email']) }}"
-	role="form"
-	method="POST">
+        method="POST" role="form">
     {% module xsrf_form_html() %}
     <div class="form-group">
       <button type="submit" class="btn btn-danger btn-block"
-	      onclick="return confirm('Really disable?');">
-	<span class="glyphicon glyphicon-ban-circle"></span>
-	Disable
+              onclick="return confirm('Really disable?');">
+        <span class="glyphicon glyphicon-ban-circle"></span>
+        Disable
       </button>
     </div>
   </form>
@@ -124,15 +119,14 @@
 {% if is_deletable %}
 <p>
   <form action="{{ reverse_url('account', account['email']) }}"
-	role="form"
-	method="POST">
+        method="POST" role="form">
     {% module xsrf_form_html() %}
     <div class="form-group">
       <input type="hidden" name="_http_method" value="delete">
       <button type="submit" class="btn btn-danger btn-block"
-	      onclick="return confirm('Cannot be undone! Really delete?');">
-	<span class="glyphicon glyphicon-trash"></span>
-	Delete
+              onclick="return confirm('Cannot be undone! Really delete?');">
+        <span class="glyphicon glyphicon-trash"></span>
+        Delete
       </button>
     </div>
   </form>
@@ -165,34 +159,32 @@
     <th>Groups</th>
     <td>
       <table>
-	{% for group in groups %}
-	<tr>
-	  <td>
-	    {% module Entity(group) %}
+        {% for group in groups %}
+        <tr>
+          <td>
+            {% module Entity(group) %}
             {% if group['owner'] == account['email'] %}
             (owner)
-	    {% end %}
-	  </td>
-	  {% if current_user['email'] == account['email'] and account['email'] != group['owner'] %}
-	  <td>
+            {% end %}
+          </td>
+          {% if current_user['email'] == account['email'] and account['email'] != group['owner'] %}
+          <td>
             <form action="{{ reverse_url('group_decline', group['_id']) }}"
-		  role="form"
-		  class="form-inline"
-		  method="POST">
-	      {% module xsrf_form_html() %}
-	      <div class="form-group">
-		&nbsp;
-		<button type="submit" class="btn btn-danger btn-xs"
-			onclick="return confirm('Cannot be undone! Really decline?');">
-		  <span class="glyphicon glyphicon-remove"></span>
-		  Decline
-		</button>
-	      </div>
-	    </form>
-	  </td>
-	  {% end %}
-	</tr>
-	{% end %}
+                  method="POST" role="form" class="form-inline">
+              {% module xsrf_form_html() %}
+              <div class="form-group">
+                &nbsp;
+                <button type="submit" class="btn btn-danger btn-xs"
+                        onclick="return confirm('Cannot be undone! Really decline?');">
+                  <span class="glyphicon glyphicon-remove"></span>
+                  Decline
+                </button>
+              </div>
+            </form>
+          </td>
+          {% end %}
+        </tr>
+        {% end %}
       </table>
     </td>
   </tr>
@@ -202,44 +194,40 @@
       <table>
       {% for group in invitations %}
         <tr>
-	  <td>
-	    {{ group['name'] }}
+          <td>
+            {{ group['name'] }}
             (owner {% module Icon('account') %} {{ group['owner'] }})
-	  </td>
-	  {% if current_user['email'] == account['email'] %}
-	  <td>
+          </td>
+          {% if current_user['email'] == account['email'] %}
+          <td>
             <form action="{{ reverse_url('group_accept', group['_id']) }}"
-		  role="form"
-		  class="form-inline"
-		  method="POST">
-	      {% module xsrf_form_html() %}
-	      <div class="form-group">
-		&nbsp;
-		<button type="submit" class="btn btn-success btn-xs"
-			onclick="return confirm('All members of this group will be able to see all your data. Really accept?');">
-		  <span class="glyphicon glyphicon-ok"></span>
-		  Accept
-		</button>
-	      </div>
-	    </form>
-	  </td>
-	  <td>
+                  method="POST" role="form" class="form-inline">
+              {% module xsrf_form_html() %}
+              <div class="form-group">
+                &nbsp;
+                <button type="submit" class="btn btn-success btn-xs"
+                        onclick="return confirm('All members of this group will be able to see all your data. Really accept?');">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  Accept
+                </button>
+              </div>
+            </form>
+          </td>
+          <td>
             <form action="{{ reverse_url('group_decline', group['_id']) }}"
-		  role="form"
-		  class="form-inline"
-		  method="POST">
-	      {% module xsrf_form_html() %}
-	      <div class="form-group">
-		&nbsp;
-		<button type="submit" class="btn btn-danger btn-xs">
-		  <span class="glyphicon glyphicon-remove"></span>
-		  Decline
-		</button>
-	      </div>
-	    </form>
-	  </td>
-	  {% end %}
-	</tr>
+                  method="POST" role="form" class="form-inline">
+              {% module xsrf_form_html() %}
+              <div class="form-group">
+                &nbsp;
+                <button type="submit" class="btn btn-danger btn-xs">
+                  <span class="glyphicon glyphicon-remove"></span>
+                  Decline
+                </button>
+              </div>
+            </form>
+          </td>
+          {% end %}
+        </tr>
       {% end %}
       </table>
     </td>
@@ -248,8 +236,8 @@
     <th>{{ terminology('Orders') }}</th>
     <td>
       <a class="badge"
-	 href="{{ reverse_url('account_orders', account['email']) }}">
-	{{ account['order_count'] }}
+         href="{{ reverse_url('account_orders', account['email']) }}">
+        {{ account['order_count'] }}
       </a>
     </td>
   </tr>
@@ -302,22 +290,22 @@
     <td>
       {% set address = account.get('address') or dict() %}
       <table class="table table-condensed table-noborder">
-	<tr>
-	  <th>Address</th>
-	  <td class="pre">{{ address.get('address') or '-' }}</td>
-	</tr>
-	<tr>
-	  <th>Zip code</th>
-	  <td>{{ address.get('zip') or '-' }}</td>
-	</tr>
-	<tr>
-	  <th>City</th>
-	  <td>{{ address.get('city') or '-' }}</td>
-	</tr>
-	<tr>
-	  <th>Country</th>
-	  <td>{{ settings['COUNTRIES_LOOKUP'].get(address.get('country')) or '-' }}</td>
-	</tr>
+        <tr>
+          <th>Address</th>
+          <td class="pre">{{ address.get('address') or '-' }}</td>
+        </tr>
+        <tr>
+          <th>Zip code</th>
+          <td>{{ address.get('zip') or '-' }}</td>
+        </tr>
+        <tr>
+          <th>City</th>
+          <td>{{ address.get('city') or '-' }}</td>
+        </tr>
+        <tr>
+          <th>Country</th>
+          <td>{{ settings['COUNTRIES_LOOKUP'].get(address.get('country')) or '-' }}</td>
+        </tr>
       </table>
     </td>
   </tr>
@@ -330,22 +318,22 @@
     <td>
       {% set address = account.get('invoice_address') or dict() %}
       <table class="table table-condensed table-noborder">
-	<tr>
-	  <th>Address</th>
-	  <td class="pre">{{ address.get('address') or '-' }}</td>
-	</tr>
-	<tr>
-	  <th>Zip code</th>
-	  <td>{{ address.get('zip') or '-' }}</td>
-	</tr>
-	<tr>
-	  <th>City</th>
-	  <td>{{ address.get('city') or '-' }}</td>
-	</tr>
-	<tr>
-	  <th>Country</th>
-	  <td>{{ settings['COUNTRIES_LOOKUP'].get(address.get('country')) or '-' }}</td>
-	</tr>
+        <tr>
+          <th>Address</th>
+          <td class="pre">{{ address.get('address') or '-' }}</td>
+        </tr>
+        <tr>
+          <th>Zip code</th>
+          <td>{{ address.get('zip') or '-' }}</td>
+        </tr>
+        <tr>
+          <th>City</th>
+          <td>{{ address.get('city') or '-' }}</td>
+        </tr>
+        <tr>
+          <th>Country</th>
+          <td>{{ settings['COUNTRIES_LOOKUP'].get(address.get('country')) or '-' }}</td>
+        </tr>
       </table>
     </td>
   </tr>
@@ -387,7 +375,7 @@
     <th>Messages</th>
     <td>
       <a href="{{ reverse_url('account_messages', account['email']) }}">
-	{% module Icon('message', label=True, title='Messages') %}
+        {% module Icon('message', label=True, title='Messages') %}
       </a>
     </td>
   </tr>
@@ -396,7 +384,7 @@
     <td>
       <span class="localtime">{{ account['modified'] }}</span>
       <a href="{{ reverse_url('account_logs', account['email']) }}">
-	{% module Icon('logs', label=True) %}
+        {% module Icon('logs', label=True) %}
       </a>
     </td>
   </tr>

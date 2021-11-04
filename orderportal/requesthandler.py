@@ -10,13 +10,12 @@ import urllib.error
 import urllib.parse
 
 import couchdb2
-import markdown
 import tornado.web
 
 import orderportal
-from . import constants
-from . import settings
-from . import utils
+from orderportal import constants
+from orderportal import settings
+from orderportal import utils
 
 
 class RequestHandler(tornado.web.RequestHandler):
@@ -54,7 +53,7 @@ class RequestHandler(tornado.web.RequestHandler):
         except tornado.web.HTTPError:
             result['alert'] = None
         else:
-            result['alert'] = markdown.markdown(doc['text'], output_format='html5')
+            result['alert'] = utils.markdown2html(doc['text'])
         result['reduce'] = functools.reduce
         return result
 
@@ -268,8 +267,7 @@ class RequestHandler(tornado.web.RequestHandler):
             try:
                 doc = self.db[doctype] # Doc must be reloaded each iteration
             except couchdb2.NotFoundError:
-                doc = dict(_id=doctype)
-                doc[constants.DOCTYPE] = constants.META
+                doc = {"_id": doctype, constants.DOCTYPE: constants.META}
             try:
                 number = doc['counter'] + 1
             except KeyError:
@@ -422,15 +420,13 @@ class RequestHandler(tornado.web.RequestHandler):
                 result[row.key] = utils.get_account_name(value=row.value)
         return result
 
-    def get_forms_titles(self, all=False):
-        "Get form titles lookup for iuid, all or only the enabled+disabled."
-        view = self.db.view("form", "modified", include_docs=not all)
-        if all:
-            return dict([(r.id, r.value) for r in view])
-        else:
-            return dict([(r.id, r.value) for r in view
-                         if r.doc['status'] in 
-                         (constants.ENABLED, constants.DISABLED)])
+    def get_forms_lookup(self):
+        "Get all forms as a lookup with form iuid as key, form doc as value."
+        view = self.db.view("form",
+                            "modified",
+                            descending=True,
+                            include_docs=True)
+        return dict([(r.id, r.doc) for r in view])
 
     def get_logs(self, iuid, limit=settings['DISPLAY_DEFAULT_MAX_LOG']+1):
         "Return the event log documents for the given entity iuid."

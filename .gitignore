@@ -2,5 +2,6 @@
 *.pyc
 *.bak
 *.yaml
+*.json
 site
 !site_template/*.yaml

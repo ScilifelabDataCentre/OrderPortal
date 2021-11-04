@@ -1,13 +1,10 @@
 "UI modules for tornado."
 
-import markdown
 import tornado.web
-from tornado.escape import xhtml_escape as escape
 
-from . import constants
-from . import settings
-from . import utils
-
+from orderportal import constants
+from orderportal import settings
+from orderportal import utils
 
 ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""
 
@@ -91,26 +88,11 @@ class Entity(tornado.web.UIModule):
                 url=url, title=title)
 
 
-class Address(tornado.web.UIModule):
-    "Format user account address."
-
-    def render(self, address):
-        result = []
-        for key in ['address', 'postal_code', 'city', 'country']:
-            value = address.get(key)
-            if value:
-                result.append(value)
-        return '\n'.join(result)
-
-
 class Markdown(tornado.web.UIModule):
     "Process the text as Markdown."
 
     def render(self, text, safe=False):
-        text = text or ''
-        if not safe:
-            text = escape(text)
-        return markdown.markdown(text, output_format='html5')
+        return utils.markdown2html(text, safe=safe)
 
 
 class Text(tornado.web.UIModule):
@@ -123,8 +105,8 @@ class Text(tornado.web.UIModule):
         except (tornado.web.HTTPError, KeyError):
             text = default
         if not text and self.handler.is_admin():
-            text = "<i>No text defined.</i>"
-        return markdown.markdown(text, output_format='html5')
+            text = "*No text defined.*"
+        return utils.markdown2html(text)
 
 
 class Tags(tornado.web.UIModule):
@@ -156,7 +138,7 @@ class Version(tornado.web.UIModule):
         if version is None:
             return ''
         else:
-            return "(version %s)" % version
+            return f"({version})"
 
 
 class ShortenedPre(tornado.web.UIModule):

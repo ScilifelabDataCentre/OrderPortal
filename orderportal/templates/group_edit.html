@@ -17,21 +17,20 @@ Edit {% module Icon('group') %} {{ group['name'] }}
 </div>
 
 <form action="{{ reverse_url('group_edit', group['_id']) }}"
-      role="form"
-      method="POST">
+      method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <div class="form-group">
     <div class="row">
       <div class="col-md-8">
-	<label class="control-label" for="owner">Owner</label>
-	<select name="owner" id="owner" class="form-control">
-	  {% for member in group['members'] %}
-	  <option {{ member == group['owner'] and 'selected' or ''}}>
-	    {{ member }}
-	  </option>
-	  {% end %}
-	</select>
+        <label class="control-label" for="owner">Owner</label>
+        <select name="owner" id="owner" class="form-control">
+          {% for member in group['members'] %}
+          <option {{ member == group['owner'] and 'selected' or ''}}>
+            {{ member }}
+          </option>
+          {% end %}
+        </select>
       </div>
     </div>
   </div>
@@ -39,13 +38,13 @@ Edit {% module Icon('group') %} {{ group['name'] }}
   <div class="form-group has-feedback">
     <div class="row">
       <div class="col-md-8">
-	<label class="control-label" for="name">Name</label>
-	<input type="text" class="form-control"
-	       name="name" id="name" value="{{ group['name'] }}">
-	<span style="color:red; margin-right: 1em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true">
-	</span>
+        <label class="control-label" for="name">Name</label>
+        <input type="text" class="form-control"
+               name="name" id="name" value="{{ group['name'] }}">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true">
+        </span>
       </div>
     </div>
     <span class="help-block">
@@ -57,9 +56,9 @@ Edit {% module Icon('group') %} {{ group['name'] }}
   <div class="form-group">
     <div class="row">
       <div class="col-md-8">
-	<label class="control-label" for="members">Members</label>
-	<textarea class="form-control" name="members" id="members"
-		  >{{ '\n'.join(group['members'] + group['invited']) }}</textarea>
+        <label class="control-label" for="members">Members</label>
+        <textarea class="form-control" name="members" id="members"
+                  >{{ '\n'.join(group['members'] + group['invited']) }}</textarea>
       </div>
     </div>
     <span class="help-block">
@@ -82,8 +81,7 @@ Edit {% module Icon('group') %} {{ group['name'] }}
 
 <br>
 <form action="{{ reverse_url('group', group['_id']) }}"
-      role="form"
-      method="GET">
+      method="GET" role="form">
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit" class="btn btn-default">

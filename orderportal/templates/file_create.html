@@ -8,20 +8,18 @@
 {% block main_content %}
 
 <form action="{{ reverse_url('file_create') }}"
-      role="form"
-      enctype="multipart/form-data"
-      method="POST">
+      method="POST" role="form" enctype="multipart/form-data">
   {% module xsrf_form_html() %}
 
   <div class="form-group has-feedback">
     <div class="row">
       <div class="col-md-6">
-	<label for="name">Name</label>
-	<input type="text" class="form-control"
-	       id="name" name="name">
-	<span style="color:red; margin-right: 1em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
+        <label for="name">Name</label>
+        <input type="text" class="form-control"
+               id="name" name="name">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
       </div>
     </div>
     <span class="help-block">
@@ -34,8 +32,8 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label for="title">Title</label>
-	<input type="text" class="form-control" id="title" name="title">
+        <label for="title">Title</label>
+        <input type="text" class="form-control" id="title" name="title">
       </div>
     </div>
     <span class="help-block">
@@ -46,15 +44,15 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-	<label class="control-label" for="hidden">Hidden</label>
-	<div class="checkbox">
-	  <label>
-	    <input type="checkbox" value="yes" id="hidden" name="hidden">
-	    Do not show the file as a document in the list viewed by users.
-	    The file is still accessible to all users using an explicit link,
-	    meaning that it can be referenced from other pages.
-	  </label>
-	</div>
+        <label class="control-label" for="hidden">Hidden</label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" value="yes" id="hidden" name="hidden">
+            Do not show the file as a document in the list viewed by users.
+            The file is still accessible to all users using an explicit link,
+            meaning that it can be referenced from other pages.
+          </label>
+        </div>
       </div>
     </div>
   </div>
@@ -62,14 +60,14 @@
   <div class="form-group has-feedback">
     <div class="row">
       <div class="col-md-8">
-	<label for="text">File upload</label>
-	<input type="file" name="file" class="form-control">
-	<span style="color:red; margin-right: 1em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
-	<span class="help-block">
-	  The file to upload.
-	</span>
+        <label for="text">File upload</label>
+        <input type="file" name="file" class="form-control">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
+        <span class="help-block">
+          The file to upload.
+        </span>
       </div>
     </div>
   </div>
@@ -96,8 +94,7 @@
 
 <br>
 <form action="{{ reverse_url('files') }}"
-      role="form"
-      method="GET">
+      method="GET" role="form">
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit" class="btn btn-default">

@@ -12,14 +12,13 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
 
 {% block main_content %}
 <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
-      role="form"
-      method="POST">
+      method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label for="type">Field type</label>
+        <label for="type">Field type</label>
         <p id="type" class="form-control-static">{{ field['type'] }}</p>
       </div>
     </div>
@@ -31,17 +30,17 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label for="parent">Parent group field</label>
-	<select class="form-control" name="parent" id="parent">
-	  <option value="">[no change]</option>
-	  {% for parent in alt_parents %}
-	  {% if parent is None %}
-	  <option>[top level]</option>
-	  {% else %}
-	  <option>{{ parent['identifier'] }}</option>
-	  {% end %}
-	  {% end %}
-	</select>
+        <label for="parent">Parent group field</label>
+        <select class="form-control" name="parent" id="parent">
+          <option value="">[no change]</option>
+          {% for parent in alt_parents %}
+          {% if parent is None %}
+          <option>[top level]</option>
+          {% else %}
+          <option>{{ parent['identifier'] }}</option>
+          {% end %}
+          {% end %}
+        </select>
       </div>
     </div>
     <span class="help-block">
@@ -53,28 +52,28 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label for="position">Position within group</label>
-	<select class="form-control" name="position" id="position">
-	  {% if siblings and field['identifier'] == siblings[0]['identifier'] %}
-	    <option selected value="__first__">[first]</option>
-	    {% set selected = True %}
-	  {% else %}
-	    <option value="__first__">[first]</option>
-	    {% set selected = False %}
-	  {% end %}
-	  {% for pos, sib in enumerate(siblings) %}
-	  {% if field['identifier'] != sib['identifier'] %}
-	    {% if selected %}
-	      <option>{{ sib['identifier'] }}</option>
-	    {% elif field['identifier'] == siblings[pos+1]['identifier'] %}
-	      <option selected>{{ sib['identifier'] }}</option>
-	      {% set selected = True %}
-	    {% else  %}
-	      <option>{{ sib['identifier'] }}</option>
-	    {% end %} {# if selected #}
-	  {% end %} {# if field['identifier'] != sib['identifier'] #}
-	  {% end %} {# for sib in siblings #}
-	</select>
+        <label for="position">Position within group</label>
+        <select class="form-control" name="position" id="position">
+          {% if siblings and field['identifier'] == siblings[0]['identifier'] %}
+            <option selected value="__first__">[first]</option>
+            {% set selected = True %}
+          {% else %}
+            <option value="__first__">[first]</option>
+            {% set selected = False %}
+          {% end %}
+          {% for pos, sib in enumerate(siblings) %}
+          {% if field['identifier'] != sib['identifier'] %}
+            {% if selected %}
+              <option>{{ sib['identifier'] }}</option>
+            {% elif field['identifier'] == siblings[pos+1]['identifier'] %}
+              <option selected>{{ sib['identifier'] }}</option>
+              {% set selected = True %}
+            {% else  %}
+              <option>{{ sib['identifier'] }}</option>
+            {% end %} {# if selected #}
+          {% end %} {# if field['identifier'] != sib['identifier'] #}
+          {% end %} {# for sib in siblings #}
+        </select>
       </div>
     </div>
     <span class="help-block">
@@ -87,10 +86,10 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-	<label for="label">Label</label>
-	<input type="text" class="form-control"
-	       id="label" name="label"
-	       value="{{ field.get('label') or ''}}">
+        <label for="label">Label</label>
+        <input type="text" class="form-control"
+               id="label" name="label"
+               value="{{ field.get('label') or ''}}">
       </div>
     </div>
     <span class="help-block">
@@ -102,18 +101,18 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label for="visible_if_field">Visible if: Field identifier</label>
-	<select class="form-control"
-		name="visible_if_field" id="visible_if_field">
-	  <option value="">[none]</option>
-	  {% for other in fields %}
-	    {# XXX Multiselect fields currently not allowed; too complicated #}
-	    {% if other is not field and other['depth'] <= field['depth'] and other['type'] != 'multiselect' %}
-	      {% set sel = field.get('visible_if_field') == other['identifier'] and 'selected' or '' %}
-	      <option {{ sel }}>{{ other['identifier'] }}</option>
-	    {% end %}
-	  {% end %}
-	</select>
+        <label for="visible_if_field">Visible if: Field identifier</label>
+        <select class="form-control"
+                name="visible_if_field" id="visible_if_field">
+          <option value="">[none]</option>
+          {% for other in fields %}
+            {# XXX Multiselect fields currently not allowed; too complicated #}
+            {% if other is not field and other['depth'] <= field['depth'] and other['type'] != 'multiselect' %}
+              {% set sel = field.get('visible_if_field') == other['identifier'] and 'selected' or '' %}
+              <option {{ sel }}>{{ other['identifier'] }}</option>
+            {% end %}
+          {% end %}
+        </select>
       </div>
     </div>
     <span class="help-block">
@@ -125,11 +124,11 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label for="visible_if_value">Visible if: Field value</label>
-	<input type="text" class="form-control"
-	       name="visible_if_value" id="visible_if_value"
-	       value="{{ field.get('visible_if_value') or '' }}">
-	</input>
+        <label for="visible_if_value">Visible if: Field value</label>
+        <input type="text" class="form-control"
+               name="visible_if_value" id="visible_if_value"
+               value="{{ field.get('visible_if_value') or '' }}">
+        </input>
       </div>
     </div>
     <span class="help-block">
@@ -145,9 +144,9 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-3">
-	<label class="control-label" for="select">Select values</label>
-	<textarea class="form-control" name="select" rows="4"
-		  >{{ '\n'.join(field.get('select') or []) }}</textarea>
+        <label class="control-label" for="select">Select values</label>
+        <textarea class="form-control" name="select" rows="4"
+                  >{{ '\n'.join(field.get('select') or []) }}</textarea>
       </div>
     </div>
     <span class="help-block">
@@ -159,34 +158,34 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-4">
-	<label class="control-label" for="display">Display</label>
-	<div class="radio">
-	  <label>
-	    <input type="radio"
-		   name="display"
-		   value="menu"
-		   {{ field.get('display', 'menu') == 'menu' and 'checked' }}>
-	    Menu
-	  </label>
-	</div>
-	<div class="radio">
-	  <label>
-	    <input type="radio"
-		   name="display"
-		   value="radio"
-		   {{ field.get('display') == 'radio' and 'checked' }}>
-	    Radio buttons, on the same line
-	  </label>
-	</div>
-	<div class="radio">
-	  <label>
-	    <input type="radio"
-		   name="display"
-		   value="radio-newline"
-		   {{ field.get('display') == 'radio-newline' and 'checked' }}>
-	    Radio buttons, one per line
-	  </label>
-	</div>
+        <label class="control-label" for="display">Display</label>
+        <div class="radio">
+          <label>
+            <input type="radio"
+                   name="display"
+                   value="menu"
+                   {{ field.get('display', 'menu') == 'menu' and 'checked' }}>
+            Menu
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio"
+                   name="display"
+                   value="radio"
+                   {{ field.get('display') == 'radio' and 'checked' }}>
+            Radio buttons, on the same line
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio"
+                   name="display"
+                   value="radio-newline"
+                   {{ field.get('display') == 'radio-newline' and 'checked' }}>
+            Radio buttons, one per line
+          </label>
+        </div>
       </div>
     </div>
     <span class="help-block">
@@ -198,9 +197,9 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-3">
-	<label class="control-label" for="multiselect">Multiselect values</label>
-	<textarea class="form-control" name="multiselect" rows="4"
-		  >{{ '\n'.join(field.get('multiselect') or []) }}</textarea>
+        <label class="control-label" for="multiselect">Multiselect values</label>
+        <textarea class="form-control" name="multiselect" rows="4"
+                  >{{ '\n'.join(field.get('multiselect') or []) }}</textarea>
       </div>
     </div>
     <span class="help-block">
@@ -214,31 +213,31 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-	<label class="control-label" for="checkbox">Checkbox</label>
-	<div class="checkbox">
-	  <label>
-	    <input type="checkbox"
-		   id="checkbox"
-		   name="checkbox"
-		   value="yes"
-		   {{ field.get('checkbox') and 'checked' or '' }}>
-	    Display the field as a checkbox: Otherwise as a selection.
-	  </label>
-	</div>
+        <label class="control-label" for="checkbox">Checkbox</label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   id="checkbox"
+                   name="checkbox"
+                   value="yes"
+                   {{ field.get('checkbox') and 'checked' or '' }}>
+            Display the field as a checkbox: Otherwise as a selection.
+          </label>
+        </div>
       </div>
     </div>
   </div>
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="selection">Selection</label>
+        <label class="control-label" for="selection">Selection</label>
         <select class="form-control" name="selection" id="selection">
           <option value="boolean"
-		  {{ field.get('selection') == 'boolean' and 'selected' or '' }}>
+                  {{ field.get('selection') == 'boolean' and 'selected' or '' }}>
             Boolean values True/False
           </option>
           <option value="yes_no"
-		  {{ field.get('selection') == 'yes_no' and 'selected' or '' }}>
+                  {{ field.get('selection') == 'yes_no' and 'selected' or '' }}>
             Values Yes/No
           </option>
         </select>
@@ -250,9 +249,9 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-8">
-	<label class="control-label" for="table">Table columns</label>
-	<textarea class="form-control" name="table" rows="4"
-		  >{{ '\n'.join(field.get('table') or []) }}</textarea>
+        <label class="control-label" for="table">Table columns</label>
+        <textarea class="form-control" name="table" rows="4"
+                  >{{ '\n'.join(field.get('table') or []) }}</textarea>
       </div>
     </div>
     <span class="help-block">
@@ -272,10 +271,10 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-	<label for="mexlength">Maxlength</label>
-	<input type="int" class="form-control"
-	       id="maxlength" name="maxlength"
-	       value="{{ field.get('maxlength') or ''}}">
+        <label for="mexlength">Maxlength</label>
+        <input type="int" class="form-control"
+               id="maxlength" name="maxlength"
+               value="{{ field.get('maxlength') or ''}}">
       </div>
     </div>
     <span class="help-block">
@@ -290,18 +289,18 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-	<label class="control-label" for="required">Required</label>
-	<div class="checkbox">
-	  <label>
-	    <input type="checkbox"
-		   id="required"
-		   name="required"
-		   value="yes"
-		   {{ field['required'] and 'checked' or '' }}>
-	    Require the field to have a defined value for the
-	    {{ terminology('order') }} to be submittable.
-	  </label>
-	</div>
+        <label class="control-label" for="required">Required</label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   id="required"
+                   name="required"
+                   value="yes"
+                   {{ field['required'] and 'checked' or '' }}>
+            Require the field to have a defined value for the
+            {{ terminology('order') }} to be submittable.
+          </label>
+        </div>
       </div>
     </div>
   </div>
@@ -310,20 +309,20 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-	<label class="control-label" for="restrict_read">
-	  Restricted read
-	</label>
-	<div class="checkbox">
-	  <label>
-	    <input type="checkbox"
-		   id="restrict_read"
-		   name="restrict_read"
-		   value="yes"
-		   {{ field['restrict_read'] and 'checked' or '' }}>
-	    The field in the form is visible only to admin and staff,
-	    not the user.
-	  </label>
-	</div>
+        <label class="control-label" for="restrict_read">
+          Restricted read
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   id="restrict_read"
+                   name="restrict_read"
+                   value="yes"
+                   {{ field['restrict_read'] and 'checked' or '' }}>
+            The field in the form is visible only to admin and staff,
+            not the user.
+          </label>
+        </div>
       </div>
     </div>
   </div>
@@ -332,23 +331,23 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="initial_display">
-	  Initial display
-	</label>
-	<div class="checkbox">
-	  <label>
-	    <input type="checkbox"
-		   name="initial_display"
-		   id="initial_display"
-		   value="yes"
-		   {{ field.get('initial_display') and 'checked' or '' }}>
-	    Yes
-	  </label>
-	</div>
+        <label class="control-label" for="initial_display">
+          Initial display
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="initial_display"
+                   id="initial_display"
+                   value="yes"
+                   {{ field.get('initial_display') and 'checked' or '' }}>
+            Yes
+          </label>
+        </div>
       </div>
     </div>
     <span class="help-block">
-      The fields of the grouå are shown already when the page is
+      The fields of the group are shown already when the page is
       opened. This is used only for groups at the top level.
     </span>
   </div>
@@ -357,20 +356,20 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-	<label class="control-label" for="restrict_write">
-	  Restricted write
-	</label>
-	<div class="checkbox">
-	  <label>
-	    <input type="checkbox"
-		   id="restrict_write"
-		   name="restrict_write"
-		   value="yes"
-		   {{ field['restrict_write'] and 'checked' or '' }}>
-	    The field is visible to all, but can be edited only
-	    by admin and staff.
-	  </label>
-	</div>
+        <label class="control-label" for="restrict_write">
+          Restricted write
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   id="restrict_write"
+                   name="restrict_write"
+                   value="yes"
+                   {{ field['restrict_write'] and 'checked' or '' }}>
+            The field is visible to all, but can be edited only
+            by admin and staff.
+          </label>
+        </div>
       </div>
     </div>
   </div>
@@ -378,33 +377,56 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-	<label class="control-label" for="erase_on_clone">
-	  Erase on clone
-	</label>
-	<div class="checkbox">
-	  <label>
-	    <input type="checkbox"
-		   name="erase_on_clone"
-		   id="erase_on_clone"
-		   value="true"
-		   {{ field.get('erase_on_clone') and 'checked' or '' }}>
-	    Erase the value of the field in a new {{ terminology('order') }}
-	    when cloning.
-	  </label>
-	</div>
+        <label class="control-label" for="erase_on_clone">
+          Erase on clone
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="erase_on_clone"
+                   id="erase_on_clone"
+                   value="true"
+                   {{ field.get('erase_on_clone') and 'checked' or '' }}>
+            Erase the value of the field in a new {{ terminology('order') }}
+            when cloning.
+          </label>
+        </div>
       </div>
     </div>
   </div>
 
   {% end %} {# if field['type'] == constants.GROUP #}
 
+  {% if settings['ORDER_TAGS'] and field['type'] in [constants.STRING, constants.SELECT] %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-	<label class="control-label" for="description">Description</label>
-	<textarea class="form-control"
-		  id="description" name="description"
-		  >{{ field.get('description') or '' }}</textarea>
+        <label class="control-label" for="auto_tag">
+          Automatically include in tags
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="auto_tag"
+                   id="auto_tags"
+                   value="true"
+                   {{ field.get('auto_tag') and 'checked' or '' }}>
+            Automatically include the value of the field in the tags
+            of the {{ terminology('order') }}.
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% end %} {# if settings['ORDER_TAGS'] and field['type'] in [constants.STRING, constants.SELECT] #}
+  
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+        <label class="control-label" for="description">Description</label>
+        <textarea class="form-control"
+                  id="description" name="description"
+                  >{{ field.get('description') or '' }}</textarea>
       </div>
     </div>
     <span class="help-block">
@@ -425,10 +447,8 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
 
 </form>
 
-<br>
 <form action="{{ reverse_url('form', form['_id']) }}"
-      role="form"
-      method="GET">
+      method="GET" role="form" style="margin-top: 20px;">
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit" class="btn btn-default">
@@ -438,16 +458,14 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   </div>
 </form>
 
-<br>
 <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
-      role="form"
-      method="POST">
+      method="POST" role="form" style="margin-top: 20px;">
   {% module xsrf_form_html() %}
   <div class="form-group">
     <label class="control-label"></label>
     <input type="hidden" name="_http_method" value="delete">
     <button type="submit" class="btn btn-danger"
-	    onclick="return confirm('Cannot be undone! Really delete?');">
+            onclick="return confirm('Cannot be undone! Really delete?');">
       <span class="glyphicon glyphicon-trash"></span>
       Delete
     </button>

@@ -22,17 +22,17 @@
       {% if field['depth'] == 0 %}
       <button type="button" class="btn btn-default btn-lg"
               data-toggle="collapse" data-target="#{{ field['identifier'] }}">
-	<span class="glyphicon glyphicon-triangle-bottom"></span>
-	{{ label }}
+        <span class="glyphicon glyphicon-triangle-bottom"></span>
+        {{ label }}
       </button>
       {% else %}
       {{ label }}
       {% end %}
       {% if field.get('description') %}
       <href data-toggle="collapse"
-	    data-target="#_collapsible_{{ field['identifier'] }}"
-	    style="padding-left:1em;">
-	<span class="glyphicon glyphicon-info-sign"></span>
+            data-target="#_collapsible_{{ field['identifier'] }}"
+            style="padding-left:1em;">
+        <span class="glyphicon glyphicon-info-sign"></span>
       </href>
       {% end %}
     </div>
@@ -48,12 +48,12 @@
   <td>
     {% if field['restrict_read'] %}
     <span class="glyphicon glyphicon-eye-open"
-	  title="Readable by admin and staff only.">
+          title="Readable by admin and staff only.">
     </span>
     {% end %}
     {% if field['restrict_write'] %}
     <span class="glyphicon glyphicon-pencil"
-	  title="Writeable by admin only.">
+          title="Writeable by admin only.">
     </span>
     {% end %}
     {% if field['identifier'] in order['invalid'] %}
@@ -94,9 +94,9 @@
       {{ label }}
       {% if field.get('description') %}
       <href data-toggle="collapse"
-	    data-target="#_collapsible_{{ field['identifier'] }}"
-	    style="padding-left:1em;">
-	<span class="glyphicon glyphicon-info-sign"></span>
+            data-target="#_collapsible_{{ field['identifier'] }}"
+            style="padding-left:1em;">
+        <span class="glyphicon glyphicon-info-sign"></span>
       </href>
       {% end %}
     </div>
@@ -140,12 +140,12 @@
   <td>
     {% if field['restrict_read'] %}
     <span class="glyphicon glyphicon-eye-open"
-	  title="Readable by admin and staff only.">
+          title="Readable by admin and staff only.">
     </span>
     {% end %}
     {% if field['restrict_write'] %}
     <span class="glyphicon glyphicon-pencil"
-	  title="Writeable by admin only.">
+          title="Writeable by admin only.">
     </span>
     {% end %}
     {% if field['identifier'] in order['invalid'] %}

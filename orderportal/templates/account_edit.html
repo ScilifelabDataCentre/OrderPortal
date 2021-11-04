@@ -6,6 +6,19 @@
 
 {% block body_title %}Edit account {{ account['email'] }}{% end %}
 
+{% block action_content %}
+<form action="{{ reverse_url('account', account['email']) }}"
+      method="GET" role="form">
+  <div class="form-group">
+    <label class="control-label"></label>
+    <button type="submit" class="btn btn-default">
+      <span class="glyphicon glyphicon-remove"></span>
+      Cancel
+    </button>
+  </div>
+</form>
+{% end %} {# block action_content #}
+
 {% block main_content %}
 <p>
 The email address of your account cannot be changed, since it is the
@@ -16,20 +29,19 @@ administrator of the site can then change the ownership of your
 </p>
 
 <form action="{{ reverse_url('account_edit', account['email']) }}"
-      role="form"
-      method="POST">
+      method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <div class="form-group has-feedback">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="first_name">First name</label>
-	<input type="text" class="form-control"
-	       name="first_name" id="first_name"
-	       value="{{ account.get('first_name') or '' }}">
-	<span style="color:red; margin-right: 1em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
+        <label class="control-label" for="first_name">First name</label>
+        <input type="text" class="form-control"
+               name="first_name" id="first_name"
+               value="{{ account.get('first_name') or '' }}">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
       </div>
     </div>
   </div>
@@ -37,13 +49,13 @@ administrator of the site can then change the ownership of your
   <div class="form-group has-feedback">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="last_name">Last name</label>
-	<input type="text" class="form-control"
-	       name="last_name" id="last_name"
-	       value="{{ account.get('last_name') or '' }}">
-	<span style="color:red; margin-right: 1em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
+        <label class="control-label" for="last_name">Last name</label>
+        <input type="text" class="form-control"
+               name="last_name" id="last_name"
+               value="{{ account.get('last_name') or '' }}">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
       </div>
     </div>
   </div>
@@ -52,13 +64,13 @@ administrator of the site can then change the ownership of your
   <div class="form-group">
     <div class="row">
       <div class="col-md-3">
-	<label class="control-label" for="role">Role</label>
-	<select class="form-control" name="role" id="role">
-	  {% for role in constants.ACCOUNT_ROLES %}
-	  {% set selected = role == account['role'] and 'selected' or '' %}
-	  <option {{ selected }}>{{ role }}</option>
-	  {% end %}
-	</select>
+        <label class="control-label" for="role">Role</label>
+        <select class="form-control" name="role" id="role">
+          {% for role in constants.ACCOUNT_ROLES %}
+          {% set selected = role == account['role'] and 'selected' or '' %}
+          <option {{ selected }}>{{ role }}</option>
+          {% end %}
+        </select>
       </div>
     </div>
   </div>
@@ -70,45 +82,45 @@ administrator of the site can then change the ownership of your
       {% if settings['UNIVERSITIES'] %}
       {% set other = True %}
       <div class="col-md-6">
-	<select class="form-control" name="university" id="university">
-	  {# OrderedDict ! #}
-	  {% for abbrev, data in settings['UNIVERSITIES'].items() %}
-	  {% if account.get('university') == abbrev %}
-	  {% set other = False %}
-	  {% set selected = 'selected' %}
-	  {% else %}
-	  {% set selected = '' %}
-	  {% end %}
-	  <option {{selected}} value="{{ abbrev }}">{{ abbrev }}
-	    {% if data.get('name') %}
-	    ({{ data.get('name') }})
-	    {% end %}
-	  </option>
-	  {% end %}
-	  {% if other %}
-	  <option selected value="">[not available in list]</option>
-	  {% else %}
-	  <option value="">[not available in list]</option>
-	  {% end %}
-	</select>
-	<span style="color:red; margin-right: 2em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
+        <select class="form-control" name="university" id="university">
+          {# OrderedDict ! #}
+          {% for abbrev, data in settings['UNIVERSITIES'].items() %}
+          {% if account.get('university') == abbrev %}
+          {% set other = False %}
+          {% set selected = 'selected' %}
+          {% else %}
+          {% set selected = '' %}
+          {% end %}
+          <option {{selected}} value="{{ abbrev }}">{{ abbrev }}
+            {% if data.get('name') %}
+            ({{ data.get('name') }})
+            {% end %}
+          </option>
+          {% end %}
+          {% if other %}
+          <option selected value="">[not available in list]</option>
+          {% else %}
+          <option value="">[not available in list]</option>
+          {% end %}
+        </select>
+        <span style="color:red; margin-right: 2em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
       </div>
       <div class="col-md-6">
-	<input type="text" class="form-control"
-	       name="university_other" id="university_other"
-	       placeholder="Provide full name if not available in the list."
-	       value="{{ other and account.get('university') or '' }}">
+        <input type="text" class="form-control"
+               name="university_other" id="university_other"
+               placeholder="Provide full name if not available in the list."
+               value="{{ other and account.get('university') or '' }}">
       </div>
       {% else %}
       <div class="col-md-6">
-	<input type="text" class="form-control"
-	       name="university" id="university"
-	       value="{{ account.get('university') or '' }}">
-	<span style="color:red; margin-right: 1em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
+        <input type="text" class="form-control"
+               name="university" id="university"
+               value="{{ account.get('university') or '' }}">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
       </div>
       {% end %}
     </div>
@@ -121,10 +133,10 @@ administrator of the site can then change the ownership of your
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="department">Department</label>
-	<input type="text" class="form-control"
-	       name="department" id="department"
-	       value="{{ account.get('department') or '' }}">
+        <label class="control-label" for="department">Department</label>
+        <input type="text" class="form-control"
+               name="department" id="department"
+               value="{{ account.get('department') or '' }}">
       </div>
     </div>
     <span class="help-block">
@@ -135,11 +147,11 @@ administrator of the site can then change the ownership of your
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="pi">Principal Investigator</label>
-	<div  class="form-control">
-	  <input type="checkbox" name="pi" id="pi" value="true"
-		 {{ account.get('pi') and 'checked' or '' }}> Yes
-	</div>
+        <label class="control-label" for="pi">Principal Investigator</label>
+        <div  class="form-control">
+          <input type="checkbox" name="pi" id="pi" value="true"
+                 {{ account.get('pi') and 'checked' or '' }}> Yes
+        </div>
       </div>
     </div>
   </div>
@@ -153,61 +165,61 @@ administrator of the site can then change the ownership of your
 
       {% if settings.get('ACCOUNT_FUNDER_INFO_GENDER') %}
       <div class="form-group has-feedback">
-	<div class="row">
-	  <div class="col-md-3">
-	    <label class="control-label" for="gender">Gender</label>
-	    <select class="form-control" size="3" name="gender" id="gender">
-	      {% set gender = account.get('gender') %}
-	      <option {{ gender == 'male' and 'selected' or '' }}>Male</option>
-	      <option {{ gender == 'female' and 'selected' or '' }}>Female</option>
-	      <option {{ gender == 'other' and 'selected' or '' }}>Other</option>
-	    </select>
-	    <span style="color:red; margin-right: 2em;"
-		  class="glyphicon glyphicon-star form-control-feedback"
-		  aria-hidden="true"></span>
-	  </div>
-	</div>
+        <div class="row">
+          <div class="col-md-3">
+            <label class="control-label" for="gender">Gender</label>
+            <select class="form-control" size="3" name="gender" id="gender">
+              {% set gender = account.get('gender') %}
+              <option {{ gender == 'male' and 'selected' or '' }}>Male</option>
+              <option {{ gender == 'female' and 'selected' or '' }}>Female</option>
+              <option {{ gender == 'other' and 'selected' or '' }}>Other</option>
+            </select>
+            <span style="color:red; margin-right: 2em;"
+                  class="glyphicon glyphicon-star form-control-feedback"
+                  aria-hidden="true"></span>
+          </div>
+        </div>
       </div>
       {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GENDER') #}
 
       {% if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') %}
       <div class="form-group has-feedback">
-	<div class="row">
-	  <div class="col-md-3">
-	    <label class="control-label" for="gender">Group size</label>
-	    <input type="number" class="form-control"
-		   name="group_size", id="group_size"
-		   value="{{ account.get('group_size') or '' }}">
-	  </div>
-	</div>
-	<span class="help-block">
-	  If you are a Principal Investigator (PI), specify the
-	  approximate number of members in your group.
-	</span>
+        <div class="row">
+          <div class="col-md-3">
+            <label class="control-label" for="gender">Group size</label>
+            <input type="number" class="form-control"
+                   name="group_size", id="group_size"
+                   value="{{ account.get('group_size') or '' }}">
+          </div>
+        </div>
+        <span class="help-block">
+          If you are a Principal Investigator (PI), specify the
+          approximate number of members in your group.
+        </span>
       </div>
       {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') #}
 
       {% if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['subjects'] %}
       <div class="form-group has-feedback">
-	<div class="row">
-	  <div class="col-md-6">
-	    <label class="control-label" for="subject">Subject</label>
-	    <select class="form-control" name="subject" id="subject">
-	      {% for subject in settings['subjects'] %}
-	      <option value="{{ subject['code'] }}"
-		      {{ subject['code'] == account.get('subject') and 'selected' or '' }}>
-		{{ '- ' * subject['level'] + subject['term'] }}
-	      </option>
-	      {% end %}
-	    </select>
-	    <span style="color:red; margin-right: 2em;"
-		  class="glyphicon glyphicon-star form-control-feedback"
-		  aria-hidden="true"></span>
-	  </div>
-	</div>
-	<span class="help-block">
-	  Select the subject term that best characterizes your field.
-	</span>
+        <div class="row">
+          <div class="col-md-6">
+            <label class="control-label" for="subject">Subject</label>
+            <select class="form-control" name="subject" id="subject">
+              {% for subject in settings['subjects'] %}
+              <option value="{{ subject['code'] }}"
+                      {{ subject['code'] == account.get('subject') and 'selected' or '' }}>
+                {{ '- ' * subject['level'] + subject['term'] }}
+              </option>
+              {% end %}
+            </select>
+            <span style="color:red; margin-right: 2em;"
+                  class="glyphicon glyphicon-star form-control-feedback"
+                  aria-hidden="true"></span>
+          </div>
+        </div>
+        <span class="help-block">
+          Select the subject term that best characterizes your field.
+        </span>
       </div>
       {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['subjects'] #}
 
@@ -223,54 +235,54 @@ administrator of the site can then change the ownership of your
 
     <div class="panel-body">
       <div class="form-group">
-	<div class="row">
-	  <div class="col-md-8">
-	    <label class="control-label" for="address">Address</label>
-	    <textarea class="form-control" rownum="2"
-		      id="address" name="address"
-		      >{{ account['address'].get('address') or '' }}</textarea>
-	  </div>
-	</div>
-	<span class="help-block">
-	  Institution, building, street, number, post box, etc.
-	</span>
+        <div class="row">
+          <div class="col-md-8">
+            <label class="control-label" for="address">Address</label>
+            <textarea class="form-control" rownum="2"
+                      id="address" name="address"
+                      >{{ account['address'].get('address') or '' }}</textarea>
+          </div>
+        </div>
+        <span class="help-block">
+          Institution, building, street, number, post box, etc.
+        </span>
       </div>
       <div class="form-group">
-	<div class="row">
-	  <div class="col-md-8">
-	    <label class="control-label" for="zip">Zip code</label>
-	    <input type="text" class="form-control" id="zip" name="zip"
-		   value="{{ account['address'].get('zip') or '' }}">
-	  </div>
-	</div>
-	<span class="help-block">
-	  Postal code.
-	</span>
+        <div class="row">
+          <div class="col-md-8">
+            <label class="control-label" for="zip">Zip code</label>
+            <input type="text" class="form-control" id="zip" name="zip"
+                   value="{{ account['address'].get('zip') or '' }}">
+          </div>
+        </div>
+        <span class="help-block">
+          Postal code.
+        </span>
       </div>
       <div class="form-group">
-	<div class="row">
-	  <div class="col-md-8">
-	    <label class="control-label" for="city">City</label>
-	    <input type="text" class="form-control"
-		   id="city" name="city"
-		   value="{{ account['address'].get('city') or '' }}">
-	  </div>
-	</div>
+        <div class="row">
+          <div class="col-md-8">
+            <label class="control-label" for="city">City</label>
+            <input type="text" class="form-control"
+                   id="city" name="city"
+                   value="{{ account['address'].get('city') or '' }}">
+          </div>
+        </div>
       </div>
       <div class="form-group">
-	<div class="row">
-	  <div class="col-md-8">
-	    <label class="control-label" for="country">Country</label>
-	    <select class="form-control" name="country" id="country">
-	      <option value="">[none]</option>
+        <div class="row">
+          <div class="col-md-8">
+            <label class="control-label" for="country">Country</label>
+            <select class="form-control" name="country" id="country">
+              <option value="">[none]</option>
               {% set country = account['address'].get('country') %}
-	      {% for c in settings['COUNTRIES'] %}
-	      {% set sel = country == c['code'] and 'selected' or '' %}
-	      <option {{ sel }} value="{{ c['code'] }}">{{ c['name'] }}</option>
-	      {% end %}
-	    </select>
-	  </div>
-	</div>
+              {% for c in settings['COUNTRIES'] %}
+              {% set sel = country == c['code'] and 'selected' or '' %}
+              <option {{ sel }} value="{{ c['code'] }}">{{ c['name'] }}</option>
+              {% end %}
+            </select>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -278,10 +290,10 @@ administrator of the site can then change the ownership of your
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="invoice_ref">Invoice reference</label>
-	<input type="text" class="form-control"
-	       name="invoice_ref" id="invoice_ref"
-	       value="{{ account.get('invoice_ref') or '' }}">
+        <label class="control-label" for="invoice_ref">Invoice reference</label>
+        <input type="text" class="form-control"
+               name="invoice_ref" id="invoice_ref"
+               value="{{ account.get('invoice_ref') or '' }}">
       </div>
     </div>
     <span class="help-block">
@@ -296,55 +308,55 @@ administrator of the site can then change the ownership of your
     </div>
     <div class="panel-body">
       <div class="form-group">
-	<div class="row">
-	  <div class="col-md-8">
-	    <label class="control-label" for="invoice_address">Address</label>
-	    <textarea class="form-control" rownum="2"
-		      id="invoice_address" name="invoice_address"
-		      >{{ account['invoice_address'].get('address') or '' }}</textarea>
-	  </div>
-	</div>
-	<span class="help-block">
-	  Institution, building, street, number, post box, etc.
-	</span>
+        <div class="row">
+          <div class="col-md-8">
+            <label class="control-label" for="invoice_address">Address</label>
+            <textarea class="form-control" rownum="2"
+                      id="invoice_address" name="invoice_address"
+                      >{{ account['invoice_address'].get('address') or '' }}</textarea>
+          </div>
+        </div>
+        <span class="help-block">
+          Institution, building, street, number, post box, etc.
+        </span>
       </div>
       <div class="form-group">
-	<div class="row">
-	  <div class="col-md-8">
-	    <label class="control-label" for="invoice_zip">Zip code</label>
-	    <input type="text" class="form-control"
-		   id="invoice_zip" name="invoice_zip"
-		   value="{{ account['invoice_address'].get('zip') or '' }}">
-	  </div>
-	</div>
-	<span class="help-block">
-	  Postal code.
-	</span>
+        <div class="row">
+          <div class="col-md-8">
+            <label class="control-label" for="invoice_zip">Zip code</label>
+            <input type="text" class="form-control"
+                   id="invoice_zip" name="invoice_zip"
+                   value="{{ account['invoice_address'].get('zip') or '' }}">
+          </div>
+        </div>
+        <span class="help-block">
+          Postal code.
+        </span>
       </div>
       <div class="form-group">
-	<div class="row">
-	  <div class="col-md-8">
-	    <label class="control-label" for="invoice_city">City</label>
-	    <input type="text" class="form-control"
-		   id="invoice_city" name="invoice_city"
-		   value="{{ account['invoice_address'].get('city') or '' }}">
-	  </div>
-	</div>
+        <div class="row">
+          <div class="col-md-8">
+            <label class="control-label" for="invoice_city">City</label>
+            <input type="text" class="form-control"
+                   id="invoice_city" name="invoice_city"
+                   value="{{ account['invoice_address'].get('city') or '' }}">
+          </div>
+        </div>
       </div>
       <div class="form-group">
-	<div class="row">
-	  <div class="col-md-8">
-	    <label class="control-label" for="invoice_country">Country</label>
-	    <select class="form-control"
-		    name="invoice_country" id="invoice_country">
-	      <option value="">[none]</option>
-	      {% for c in settings['COUNTRIES'] %}
-	      {% set sel = account['invoice_address'].get('country') == c['code'] and 'selected' or '' %}
-	      <option {{ sel }} value="{{ c['code'] }}">{{ c['name'] }}</option>
-	      {% end %}
-	    </select>
-	  </div>
-	</div>
+        <div class="row">
+          <div class="col-md-8">
+            <label class="control-label" for="invoice_country">Country</label>
+            <select class="form-control"
+                    name="invoice_country" id="invoice_country">
+              <option value="">[none]</option>
+              {% for c in settings['COUNTRIES'] %}
+              {% set sel = account['invoice_address'].get('country') == c['code'] and 'selected' or '' %}
+              <option {{ sel }} value="{{ c['code'] }}">{{ c['name'] }}</option>
+              {% end %}
+            </select>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -352,10 +364,10 @@ administrator of the site can then change the ownership of your
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="phone">Phone</label>
-	<textarea rows="3" class="form-control"
-		  name="phone" id="phone"
-		  >{{ account.get('phone') or '' }}</textarea>
+        <label class="control-label" for="phone">Phone</label>
+        <textarea rows="3" class="form-control"
+                  name="phone" id="phone"
+                  >{{ account.get('phone') or '' }}</textarea>
       </div>
     </div>
     <span class="help-block">
@@ -366,10 +378,10 @@ administrator of the site can then change the ownership of your
   <div class="form-group">
     <div class="row">
       <div class="col-md-8">
-	<label class="control-label" for="other_data">Other data</label>
-	<textarea rows="3" class="form-control"
-		  id="other_data" name="other_data"
-		  >{{ account.get('other_data') or '' }}</textarea>
+        <label class="control-label" for="other_data">Other data</label>
+        <textarea rows="3" class="form-control"
+                  id="other_data" name="other_data"
+                  >{{ account.get('other_data') or '' }}</textarea>
       </div>
     </div>
     <span class="help-block">
@@ -381,11 +393,11 @@ administrator of the site can then change the ownership of your
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="api_key">API key</label>
-	<div  class="form-control">
-	  <input type="checkbox" name="api_key" id="api_key" value="true">
-	  Set new API key
-	</div>
+        <label class="control-label" for="api_key">API key</label>
+        <div  class="form-control">
+          <input type="checkbox" name="api_key" id="api_key" value="true">
+          Set new API key
+        </div>
       </div>
     </div>
   </div>
@@ -401,10 +413,8 @@ administrator of the site can then change the ownership of your
 
 </form>
 
-<br>
 <form action="{{ reverse_url('account', account['email']) }}"
-      role="form"
-      method="GET">
+      method="GET" role="form" style="margin-top: 20px;">
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit" class="btn btn-default">

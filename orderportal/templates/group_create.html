@@ -14,15 +14,14 @@
 </div>
 
 <form action="{{ reverse_url('group_create') }}"
-      role="form"
-      method="POST">
+      method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <div class="form-group">
     <div class="row">
       <div class="col-md-8">
-	<label class="control-label" for="owner">Owner</label>
-	<p class="form-control-static">{{ current_user['email'] }}</p>
+        <label class="control-label" for="owner">Owner</label>
+        <p class="form-control-static">{{ current_user['email'] }}</p>
       </div>
     </div>
   </div>
@@ -30,12 +29,12 @@
   <div class="form-group has-feedback">
     <div class="row">
       <div class="col-md-8">
-	<label class="control-label" for="name">Name</label>
-	<input type="text" class="form-control" name="name" id="name">
-	<span style="color:red; margin-right: 1em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true">
-	</span>
+        <label class="control-label" for="name">Name</label>
+        <input type="text" class="form-control" name="name" id="name">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true">
+        </span>
       </div>
     </div>
     <span class="help-block">
@@ -47,8 +46,8 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-8">
-	<label class="control-label" for="invited">Member invitations</label>
-	<textarea class="form-control" name="invited" id="invited"></textarea>
+        <label class="control-label" for="invited">Member invitations</label>
+        <textarea class="form-control" name="invited" id="invited"></textarea>
       </div>
     </div>
     <span class="help-block">

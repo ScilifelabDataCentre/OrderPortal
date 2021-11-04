@@ -4,9 +4,9 @@
   <tr>
     <td>
       <h4>
-	<a href="{{ reverse_url('file_meta', file['name']) }}">
-	  {{ file.get('title') or file['name'] }}
-	</a>
+        <a href="{{ reverse_url('file_meta', file['name']) }}">
+          {{ file.get('title') or file['name'] }}
+        </a>
       </h4>
       {% module Markdown(file.get('description')) %}
     </td>
@@ -19,39 +19,37 @@
     </td>
     <td>
       <a href="{{ reverse_url('file', file['name']) }}">
-	{% module ContentType(file['content_type']) %}
+        {% module ContentType(file['content_type']) %}
       </a>
     </td>
     <td>
       <span class="nobr localtime">{{ file['modified'] }}</span>
       {% if is_admin %}
       <a href="{{ reverse_url('file_logs', file['name']) }}">
-	{% module Icon('logs', label=True) %}
+        {% module Icon('logs', label=True) %}
       </a>
       {% end %}
     </td>
     {% if is_admin %}
     <td>
       <form action="{{ reverse_url('file_edit', file['name']) }}"
-	    role="form"
-	    method="GET">
-	<button type="submit" class="btn btn-md btn-primary">
-	  <span class="glyphicon glyphicon-edit"></span>
-	  Edit
-	</button>
+            method="GET" role="form">
+        <button type="submit" class="btn btn-md btn-primary">
+          <span class="glyphicon glyphicon-edit"></span>
+          Edit
+        </button>
       </form>
     </td>
     <td>
       <form action="{{ reverse_url('file_edit', file['name']) }}"
-	    role="form"
-	    method="POST">
-	{% module xsrf_form_html() %}
-	<input type="hidden" name="_http_method" value="delete">
-	<button type="submit" class="btn btn-danger"
-		onclick="return confirm('Cannot be undone! Really delete?');">
-	  <span class="glyphicon glyphicon-floppy-trash"></span>
-	  Delete
-	</button>
+            method="POST" role="form">
+        {% module xsrf_form_html() %}
+        <input type="hidden" name="_http_method" value="delete">
+        <button type="submit" class="btn btn-danger"
+                onclick="return confirm('Cannot be undone! Really delete?');">
+          <span class="glyphicon glyphicon-floppy-trash"></span>
+          Delete
+        </button>
       </form>
     </td>
     {% end %}

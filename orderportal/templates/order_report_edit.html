@@ -13,9 +13,7 @@ Edit {% module Icon('order') %}
 
 {% block main_content %}
 <form action="{{ reverse_url('order_report_edit', order['_id']) }}"
-      role="form"
-      enctype="multipart/form-data"
-      method="POST">
+      method="POST" role="form" enctype="multipart/form-data">
   {% module xsrf_form_html() %}
 
   <div class="form-group">
@@ -40,8 +38,7 @@ Edit {% module Icon('order') %}
 
 {% block action_content %}
 <form action="{{ reverse_url('order', order['_id']) }}"
-      role="form"
-      method="GET">
+      method="GET" role="form">
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit" class="btn btn-default">

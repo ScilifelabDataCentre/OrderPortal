@@ -8,25 +8,24 @@
 {% block main_content %}
 
 <form action="{{ reverse_url('field_create', form['_id']) }}"
-      role="form"
-      method="POST">
+      method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <div class="form-group has-feedback">
     <div class="row">
       <div class="col-md-4">
-	<label class="control-label" for="group">Group</label>
-	<select class="form-control" name="group" id="group">
-	  <option value="">[top level]</option>
-	  {% for field in fields %}
-	    {% if field['type'] == constants.GROUP %}
-	      <option>{{ field['identifier'] }}</option>
-	    {% end %}
-	  {% end %}
-	</select>
-	<span style="color:red; margin-right: 2em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
+        <label class="control-label" for="group">Group</label>
+        <select class="form-control" name="group" id="group">
+          <option value="">[top level]</option>
+          {% for field in fields %}
+            {% if field['type'] == constants.GROUP %}
+              <option>{{ field['identifier'] }}</option>
+            {% end %}
+          {% end %}
+        </select>
+        <span style="color:red; margin-right: 2em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
       </div>
     </div>
     <span class="help-block">
@@ -38,19 +37,19 @@
     <label class="control-label" for="identifier">Identifier</label>
     <div class="row">
       <div class="col-md-4">
-	<input type="text" class="form-control"
-	       name="identifier" id="identifier">
-	<span style="color:red; margin-right: 1em;"
-	      class="glyphicon glyphicon-star form-control-feedback"
-	      aria-hidden="true"></span>
+        <input type="text" class="form-control"
+               name="identifier" id="identifier">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
       </div>
       <div class="col-md-4">
-	<select class="form-control" id="_identifier">
-	  <option value="" disabled selected>[identifiers in other forms]</option>
-	  {% for identifier in identifiers %}
-	  <option>{{ identifier }}</option>
-	  {% end %}
-	</select>
+        <select class="form-control" id="_identifier">
+          <option value="" disabled selected>[identifiers in other forms]</option>
+          {% for identifier in identifiers %}
+          <option>{{ identifier }}</option>
+          {% end %}
+        </select>
       </div>
     </div>
     <span class="help-block">
@@ -67,8 +66,8 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="label">Label</label>
-	<input type="text" class="form-control" name="label" id="label">
+        <label class="control-label" for="label">Label</label>
+        <input type="text" class="form-control" name="label" id="label">
       </div>
     </div>
     <span class="help-block">
@@ -80,13 +79,13 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-3">
-	<label class="control-label" for="type">Type</label>
-	<select class="form-control visible-if-source"
-		name="type" id="type">
-	  {% for type in constants.TYPES %}
-	  <option value="{{ type }}">{{ type }}</option>
-	  {% end %}
-	</select>
+        <label class="control-label" for="type">Type</label>
+        <select class="form-control visible-if-source"
+                name="type" id="type">
+          {% for type in constants.TYPES %}
+          <option value="{{ type }}">{{ type }}</option>
+          {% end %}
+        </select>
       </div>
     </div>
     <span class="help-block">
@@ -107,23 +106,23 @@
        data-if-val="group">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="initial_display">
-	  Initial display
-	</label>
-	<div class="checkbox">
-	  <label>
-	    <input type="checkbox"
-		   name="initial_display"
-		   id="initial_display"
-		   value="yes">
-	    Yes
-	  </label>
-	</div>
+        <label class="control-label" for="initial_display">
+          Initial display
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="initial_display"
+                   id="initial_display"
+                   value="yes">
+            Yes
+          </label>
+        </div>
       </div>
     </div>
     <span class="help-block">
-      The group's fields are shown already when the page is
-      opened. This is used only for groups at the top level.
+      The fields of the group are shown already when the page is
+      opened. This works only for groups at the top level.
     </span>
   </div>
 
@@ -132,8 +131,8 @@
        data-if-val="select">
     <div class="row">
       <div class="col-md-3">
-	<label class="control-label" for="select">Select values</label>
-	<textarea class="form-control" name="select" rows="4"></textarea>
+        <label class="control-label" for="select">Select values</label>
+        <textarea class="form-control" name="select" rows="4"></textarea>
       </div>
     </div>
     <span class="help-block">
@@ -148,24 +147,24 @@
        data-if-val="select">
     <div class="row">
       <div class="col-md-4">
-	<label class="control-label" for="display">Display</label>
-	<div class="radio">
-	  <label>
-	    <input type="radio" name="display" value="menu" checked>Menu
-	  </label>
-	</div>
-	<div class="radio">
-	  <label>
-	    <input type="radio" name="display" value="radio">
-	    Radio buttons, on the same line
-	  </label>
-	</div>
-	<div class="radio">
-	  <label>
-	    <input type="radio" name="display" value="radio-newline">
-	    Radio buttons, one per line
-	  </label>
-	</div>
+        <label class="control-label" for="display">Display</label>
+        <div class="radio">
+          <label>
+            <input type="radio" name="display" value="menu" checked>Menu
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="display" value="radio">
+            Radio buttons, on the same line
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="display" value="radio-newline">
+            Radio buttons, one per line
+          </label>
+        </div>
       </div>
     </div>
     <span class="help-block">
@@ -178,8 +177,8 @@
        data-if-val="multiselect">
     <div class="row">
       <div class="col-md-3">
-	<label class="control-label" for="multiselect">Multiselect values</label>
-	<textarea class="form-control" name="multiselect" rows="4"></textarea>
+        <label class="control-label" for="multiselect">Multiselect values</label>
+        <textarea class="form-control" name="multiselect" rows="4"></textarea>
       </div>
     </div>
     <span class="help-block">
@@ -194,8 +193,8 @@
        data-if-val="table">
     <div class="row">
       <div class="col-md-8">
-	<label class="control-label" for="table">Table columns</label>
-	<textarea class="form-control" name="table" rows="4"></textarea>
+        <label class="control-label" for="table">Table columns</label>
+        <textarea class="form-control" name="table" rows="4"></textarea>
       </div>
     </div>
     <span class="help-block">
@@ -214,12 +213,12 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="required">Required</label>
-	<div class="checkbox">
-	  <label>
-	    <input type="checkbox" name="required" id="required" value="yes">Yes
-	  </label>
-	</div>
+        <label class="control-label" for="required">Required</label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="required" id="required" value="yes">Yes
+          </label>
+        </div>
       </div>
     </div>
     <span class="help-block">
@@ -233,18 +232,18 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="restrict_read">
-	  Restricted read
-	</label>
-	<div class="checkbox">
-	  <label>
-	    <input type="checkbox"
-		   name="restrict_read"
-		   id="restrict_read"
-		   value="yes">
-	    Yes
-	  </label>
-	</div>
+        <label class="control-label" for="restrict_read">
+          Restricted read
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="restrict_read"
+                   id="restrict_read"
+                   value="yes">
+            Yes
+          </label>
+        </div>
       </div>
     </div>
     <span class="help-block">
@@ -255,18 +254,18 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-	<label class="control-label" for="restrict_write">
-	  Restricted write
-	</label>
-	<div class="checkbox">
-	  <label>
-	    <input type="checkbox"
-		   name="restrict_write"
-		   id="restrict_write"
-		   value="yes">
-	    Yes
-	  </label>
-	</div>
+        <label class="control-label" for="restrict_write">
+          Restricted write
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="restrict_write"
+                   id="restrict_write"
+                   value="yes">
+            Yes
+          </label>
+        </div>
       </div>
     </div>
     <span class="help-block">
@@ -277,31 +276,55 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-8">
-	<label class="control-label" for="erase_on_clone">
-	  Erase on clone
-	</label>
-	<div class="checkbox">
-	  <label>
-	    <input type="checkbox"
-		   name="erase_on_clone"
-		   id="erase_on_clone"
-		   value="true">
-	    Yes
-	  </label>
-	</div>
+        <label class="control-label" for="erase_on_clone">
+          Erase on clone
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="erase_on_clone"
+                   id="erase_on_clone"
+                   value="true">
+            Yes
+          </label>
+        </div>
       </div>
     </div>
     <span class="help-block">
       Erase the value of the field in a new {{ terminology('order') }}
-      when cloning. This has no effect on fields of type 'group'.
+      when cloning. This has no effect on fields of type <b>group</b>.
     </span>
   </div>
 
+  {% if settings['ORDER_TAGS'] %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+        <label class="control-label" for="auto_tag">
+          Automatically include in tags
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="auto_tag"
+                   id="auto_tags"
+                   value="true"
+                   {{ field.get('auto_tag') and 'checked' or '' }}>
+            Automatically include the value of the field in the tags
+            of the {{ terminology('order') }}. This affects only
+            fields of type <b>string</b> and <b>select</b>.
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% end %} {# if settings['ORDER_TAGS'] #}
+  
   <div class="form-group">
     <div class="row">
       <div class="col-md-8">
-	<label class="control-label" for="description">Description</label>
-	<textarea class="form-control" name="description" id="description"></textarea>
+        <label class="control-label" for="description">Description</label>
+        <textarea class="form-control" name="description" id="description"></textarea>
       </div>
     </div>
     <span class="help-block">
@@ -322,10 +345,8 @@
 
 </form>
 
-<br>
 <form action="{{ reverse_url('form', form['_id']) }}"
-      role="form"
-      method="GET">
+      method="GET" role="form" style="margin-top: 20px;">
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit" class="btn btn-default">

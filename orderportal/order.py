@@ -198,7 +198,7 @@ class OrderSaver(saver.Saver):
     def update_fields(self, data=None):
         "Update all fields from JSON data if given, else HTML form input."
         assert self.rqh is not None
-        self.removed_files = []       # Due to field update
+        self.removed_files = []       # Names of old files to remove.
         # Loop over fields defined in the form document and get values.
         # Do not change values for a field if that argument is missing,
         # except for checkbox: there a missing value means False,
@@ -211,15 +211,21 @@ class OrderSaver(saver.Saver):
             identifier = field['identifier']
 
             if field['type'] == constants.FILE:
+                value = self.doc['fields'].get(identifier)
                 # Files are uploaded by the normal form multi-part
                 # encoding approach, not by JSON data.
                 try:
                     infile = self.rqh.request.files[identifier][0]
                 except (KeyError, IndexError):
-                    continue
+                    # No new file given; check if old should be removed.
+                    if utils.to_bool(self.rqh.get_argument(f"{identifier}__remove__", False)) and value:
+                        self.removed_files.append(value)
+                        value = None
                 else:
+                    if value:
+                        self.removed_files.append(value)
                     value = self.add_file(infile)
-                    self.removed_files.append(self.doc['fields'].get(identifier))
+
             elif field['type'] == constants.MULTISELECT:
                 if data:
                     try:
@@ -431,10 +437,9 @@ class OrderSaver(saver.Saver):
         except AttributeError:
             # Else add any new attached files.
             try:
-                # First remove files due to field update
+                # First remove files due to field update.
                 for filename in self.removed_files:
-                    if filename:
-                        self.db.delete_attachment(self.doc, filename)
+                    self.db.delete_attachment(self.doc, filename)
             except AttributeError:
                 pass
             for file in self.files:
@@ -660,9 +665,10 @@ class OrderMixin(object):
 class OrderApiV1Mixin(ApiV1Mixin):
     "Mixin for order JSON data structure."
 
-    def get_order_json(self, order, names={}, forms={}, full=False):
+    def get_order_json(self, order, 
+                       account_names=None, forms_lookup=None, full=False):
         """Return a dictionary for JSON output for the order.
-        Account names or forms title lookup are computed if not given.
+        Account names or forms lookup are computed if not given.
         If 'full' then add all fields, else only for orders list.
         NOTE: Only the values of the fields are included, not
         the full definition of the fields. To obtain that,
@@ -685,17 +691,19 @@ class OrderApiV1Mixin(ApiV1Mixin):
                  ('links', dict(api=dict(href=URL('form_api', form['_id'])),
                                 display=dict(href=URL('form', form['_id']))))])
         else:
-            if not forms:
-                forms = self.get_forms_titles(all=True)
+            if forms_lookup is None:
+                forms_lookup = self.get_forms_lookup()
+            form = forms_lookup[order['form']]
             data['form'] = OD(
                 [('iuid', order['form']),
-                 ('title', forms[order['form']]),
+                 ('title', form['title']),
+                 ('version', form.get('version')),
                  ('links', dict(api=dict(href=URL('form', order['form']))))])
-        if not names:
-            names = self.get_account_names([order['owner']])
+        if account_names is None:
+            account_names = self.get_account_names([order['owner']])
         data['owner'] = dict(
             email=order['owner'],
-            name=names.get(order['owner']),
+            name=account_names.get(order['owner']),
             links=dict(api=dict(href=URL('account_api', order['owner'])),
                        display=dict(href=URL('account', order['owner']))))
         data['status'] = order['status']
@@ -1032,8 +1040,7 @@ class Orders(RequestHandler):
                        len(settings['ORDERS_LIST_STATUSES'])
         self.set_filter()
         self.render('orders.html',
-                    all_forms=self.get_forms_titles(all=True),
-                    form_titles=sorted(self.get_forms_titles().values()),
+                    forms_lookup=self.get_forms_lookup(),
                     filter=self.filter,
                     orders=self.get_orders(),
                     order_column=order_column,
@@ -1043,7 +1050,7 @@ class Orders(RequestHandler):
     def set_filter(self):
         "Set the filter parameters dictionary."
         self.filter = dict()
-        for key in ['status', 'form_title'] + \
+        for key in ['status', 'form_id'] + \
                    [f['identifier'] for f in settings['ORDERS_LIST_FIELDS']]:
             try:
                 value = self.get_argument(key)
@@ -1063,11 +1070,8 @@ class Orders(RequestHandler):
 
     def get_orders(self):
         "Get all orders according to current filter."
-        forms = self.get_forms_titles(all=True)
         orders = self.filter_by_status(self.filter.get('status'))
-        orders = self.filter_by_forms(self.filter.get('form_title'),
-                                      forms=forms,
-                                      orders=orders)
+        orders = self.filter_by_form(self.filter.get('form_id'), orders=orders)
         for f in settings['ORDERS_LIST_FIELDS']:
             orders = self.filter_by_field(f['identifier'],
                                           self.filter.get(f['identifier']),
@@ -1104,30 +1108,25 @@ class Orders(RequestHandler):
                                     descending=True,
                                     startkey=[status, constants.CEILING],
                                     endkey=[status],
-                                    reduce=False,
                                     include_docs=True)
                 orders = [r.doc for r in view]
             else:
                 orders = [o for o in orders if o['status'] == status]
         return orders
 
-    def filter_by_forms(self, form_title, forms, orders=None):
-        "Return orders list if any form filter, or None if none."
-        if form_title:
-            forms = set([f[0] for f in list(forms.items()) if f[1] == form_title])
+    def filter_by_form(self, form_id, orders=None):
+        "Return orders list after applying any form filter, or None if none."
+        if form_id:
             if orders is None:
-                orders = []
-                for form in forms:
-                    result = self.db.view("order",
-                                          "form",
-                                          startkey=[form, constants.CEILING],
-                                          endkey=[form],
-                                          descending=True,
-                                          reduce=False,
-                                          include_docs=True)
-                    orders.extend([r.doc for r in result])
+                view = self.db.view("order",
+                                    "form",
+                                    descending=True,
+                                    startkey=[form_id, constants.CEILING],
+                                    endkey=[form_id],
+                                    include_docs=True)
+                orders = [r.doc for r in view]
             else:
-                orders = [o for o in orders if o['form'] in forms]
+                orders = [o for o in orders if o['form'] == form_id]
         return orders
 
     def filter_by_field(self, identifier, value, orders=None):
@@ -1156,13 +1155,15 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
         result['filter'] = self.filter
         result['links'] = dict(api=dict(href=URL('orders_api')),
                                display=dict(href=URL('orders')))
-        # Get names and forms lookups once only
-        names = self.get_account_names()
-        forms = self.get_forms_titles(all=True)
+        # Get account names and forms lookups once only.
+        account_names = self.get_account_names()
+        forms_lookup = self.get_forms_lookup()
         result['items'] = []
         keys = [f['identifier'] for f in settings['ORDERS_LIST_FIELDS']]
         for order in self.get_orders():
-            data = self.get_order_json(order, names, forms)
+            data = self.get_order_json(order,
+                                       account_names=account_names,
+                                       forms_lookup=forms_lookup)
             data['fields'] = OD()
             for key in keys:
                 data['fields'][key] = order['fields'].get(key)
@@ -1191,18 +1192,19 @@ class OrdersCsv(Orders):
         row.extend([s.capitalize() for s in settings['ORDERS_LIST_STATUSES']])
         row.append('Modified')
         writer.writerow(row)
-        names = self.get_account_names()
-        forms = self.get_forms_titles(all=True)
+        account_names = self.get_account_names()
+        forms_lookup = self.get_forms_lookup()
         for order in self.get_orders():
+            form = forms_lookup[order['form']]
             row = [order.get('identifier') or '',
                    order['title'] or '[no title]',
                    order['_id'],
                    self.order_reverse_url(order),
-                   forms[order['form']],
+                   f"{form['title']} ({form.get('version') or '-'})",
                    order['form'],
                    self.absolute_reverse_url('form', order['form']),
                    order['owner'],
-                   names[order['owner']],
+                   account_names[order['owner']],
                    self.absolute_reverse_url('account', order['owner']),
                    ', '.join(order.get('tags', []))]
             for f in settings['ORDERS_LIST_FIELDS']:
