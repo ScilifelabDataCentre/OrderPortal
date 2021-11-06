@@ -1,9 +1,7 @@
 "Command line interface to the OrderPortal database."
 
-import io
 import json
 import os.path
-import tarfile
 import time
 
 import click
@@ -88,8 +86,10 @@ def dump(dumpfile, dumpdir, progressbar):
         dumpfile = "dump_{0}.tar.gz".format(time.strftime("%Y-%m-%d"))
         if dumpdir:
             dumpfile = os.path.join(dumpdir, dumpfile)
-    nitems, nfiles = db.dump(dumpfile, exclude_designs=True, progressbar=progressbar)
-    click.echo(f"Dumped {nitems} items and {nfiles} files to '{dumpfile}'.")
+    ndocs, nfiles = db.dump(dumpfile,
+                            exclude_designs=True,
+                            progressbar=progressbar)
+    click.echo(f"Dumped {ndocs} documents and {nfiles} files to '{dumpfile}'.")
 
 @cli.command()
 @click.argument("dumpfile", type=click.Path(exists=True))
@@ -104,7 +104,7 @@ def undump(dumpfile, progressbar):
         utils.get_count(db, "order", "form") != 0):
         raise click.ClickException(
             f"The database '{settings['DATABASE_NAME']}' contains data.")
-    nitems, nfiles = db.undump(dumpfile, progressbar=progressbar)
+    ndocs, nfiles = db.undump(dumpfile, progressbar=progressbar)
     # Cleanup.
     # Remove old, obsolete meta documents.
     for name in ["account_messages", "order_messages"]:
@@ -122,7 +122,7 @@ def undump(dumpfile, progressbar):
         else:
             db.delete(lookup.pop(row.doc["name"]))
             lookup[row.doc["name"]] = row.doc
-    click.echo(f"Loaded {nitems} items and {nfiles} files.")
+    click.echo(f"Loaded {ndocs} documents and {nfiles} files.")
 
 @cli.command()
 @click.option("--email", prompt=True, help="Email address = account name")
