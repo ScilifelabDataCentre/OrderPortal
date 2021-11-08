@@ -308,6 +308,17 @@ class OrderSaver(saver.Saver):
                 # Remove all carriage-returns from string.
                 if value is not None:
                     value = value.replace('\r', '')
+
+            # Set tag, if auto_tags for field.
+            if settings['ORDER_TAGS'] and \
+               field['type'] in [constants.STRING, constants.SELECT] and \
+               field.get("auto_tag"):
+                tags = [t for t in self.doc.get("tags", [])
+                        if not t.startswith(identifier + ":")]
+                if value:
+                    tags.append(f"{identifier}:{value}")
+                self["tags"] = tags
+
             # Record any change to the value.
             if value != self.doc['fields'].get(identifier):
                 changed = self.changed.setdefault('fields', dict())
