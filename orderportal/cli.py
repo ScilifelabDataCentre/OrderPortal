@@ -1,9 +1,7 @@
 "Command line interface to the OrderPortal database."
 
-import io
 import json
 import os.path
-import tarfile
 import time
 
 import click
@@ -88,8 +86,10 @@ def dump(dumpfile, dumpdir, progressbar):
         dumpfile = "dump_{0}.tar.gz".format(time.strftime("%Y-%m-%d"))
         if dumpdir:
             dumpfile = os.path.join(dumpdir, dumpfile)
-    nitems, nfiles = db.dump(dumpfile, exclude_designs=True, progressbar=progressbar)
-    click.echo(f"Dumped {nitems} items and {nfiles} files to '{dumpfile}'.")
+    ndocs, nfiles = db.dump(dumpfile,
+                            exclude_designs=True,
+                            progressbar=progressbar)
+    click.echo(f"Dumped {ndocs} documents and {nfiles} files to '{dumpfile}'.")
 
 @cli.command()
 @click.argument("dumpfile", type=click.Path(exists=True))
@@ -104,8 +104,25 @@ def undump(dumpfile, progressbar):
         utils.get_count(db, "order", "form") != 0):
         raise click.ClickException(
             f"The database '{settings['DATABASE_NAME']}' contains data.")
-    nitems, nfiles = db.undump(dumpfile, progressbar=progressbar)
-    click.echo(f"Loaded {nitems} items and {nfiles} files.")
+    ndocs, nfiles = db.undump(dumpfile, progressbar=progressbar)
+    # Cleanup.
+    # Remove old, obsolete meta documents.
+    for name in ["account_messages", "order_messages"]:
+        doc = db.get(name)
+        if doc:
+            db.delete(doc)
+    # Text docs are doubled; youngest copy is from initialize.
+    # Keep only oldest version (from dump) of text docs.
+    lookup = {}
+    for row in db.view("text", "name", include_docs=True):
+        if not row.doc["name"] in lookup:
+            lookup[row.doc["name"]] = row.doc
+        elif lookup[row.doc["name"]]["modified"] <= row.doc["modified"]:
+            db.delete(row.doc)
+        else:
+            db.delete(lookup.pop(row.doc["name"]))
+            lookup[row.doc["name"]] = row.doc
+    click.echo(f"Loaded {ndocs} documents and {nfiles} files.")
 
 @cli.command()
 @click.option("--email", prompt=True, help="Email address = account name")
