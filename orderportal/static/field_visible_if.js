@@ -50,6 +50,10 @@ $(function() {
 	    };
 	});
     };
+
+    /* Set the initial state for source input elements. */
+    $('.visible-if-source').each(set_visible_if_initial);
+
     var set_visible_if = function() {
 	var field = $(this);
 	var fieldId = $(this).attr('id');
@@ -84,9 +88,6 @@ $(function() {
 	    };
 	});
     };
-
-    /* Set the initial state for source input elements. */
-    $('.visible-if-source').each(set_visible_if_initial);
 
     /* Change-of-state callback for source input element. */
     $('.visible-if-source').change(set_visible_if);

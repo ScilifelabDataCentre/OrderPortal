@@ -1357,7 +1357,7 @@ class OrderEdit(OrderMixin, RequestHandler):
         #     Too much effort; leave as is for the time being.
         hidden_fields = set([f['identifier'] for f in fields.flatten()
                              if f['type'] != 'multiselect'])
-        # For each table input field, create code for use in bespoke JavaScript
+        # For each table input field, create code for use in bespoke JavaScript.
         tableinputs = {}
         for field in fields.flatten():
             if field['type'] != 'table': continue
