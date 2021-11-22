@@ -368,15 +368,15 @@ the standard CouchDB procedures.
     `["dummy"]` (a string in a list).
   - The Roles fields should not be changed.
 
-Initialize the database in CouchDB. This requires a valid **settings** file.
+Initialize the database in CouchDB using the CLI. This requires a
+valid **settings** file.
 
     $ cd /var/www/apps/xyz/OrderPortal/orderportal
-    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 init_database.py
+    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py initialize
 
-Create the first admin account in the database by running a script that
-will interactively ask for input:
+Create the first admin account in the database using the CLI:
 
-    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 create_admin.py
+    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py create-admin
 
 Logging
 -------
@@ -418,7 +418,7 @@ specified correctly.
 Backup
 ------
 
-Backup relies on running a script to dump all data in the CouchDB database
+Backup relies on running the CLI to dump all data in the CouchDB database
 to a tar file. Create a backup directory:
 
     $ sudo mkdir /home/backup/backup_files/orderportal_xyz
