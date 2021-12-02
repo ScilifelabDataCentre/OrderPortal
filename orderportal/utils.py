@@ -23,7 +23,6 @@ import tornado.escape
 import xlsxwriter
 import yaml
 
-import orderportal
 from orderportal import constants
 from orderportal import designs
 from orderportal import settings
@@ -78,8 +77,8 @@ def load_settings(filepath=None, log=True):
     settings["LOG"] = log
     if log:
         logging.basicConfig(**kwargs)
-        logging.info(f"OrderPortal version {orderportal.__version__}")
-        logging.info(f"ROOT: {settings['ROOT']}")
+        logging.info(f"OrderPortal version {constants.VERSION}")
+        logging.info(f"ROOT: {constants.ROOT}")
         logging.info(f"SITE_DIR: {settings['SITE_DIR']}")
         logging.info(f"settings: {settings['SETTINGS_FILE']}")
         logging.info(f"logging debug: {settings['LOGGING_DEBUG']}")

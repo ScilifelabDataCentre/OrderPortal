@@ -12,7 +12,6 @@ import urllib.parse
 import couchdb2
 import tornado.web
 
-import orderportal
 from orderportal import constants
 from orderportal import settings
 from orderportal import utils
@@ -33,7 +32,6 @@ class RequestHandler(tornado.web.RequestHandler):
     def get_template_namespace(self):
         "Set the items accessible within the template."
         result = super(RequestHandler, self).get_template_namespace()
-        result['version'] = orderportal.__version__
         result['constants'] = constants
         result['settings'] = settings
         result['terminology'] = utils.terminology

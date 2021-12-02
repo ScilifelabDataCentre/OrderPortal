@@ -271,4 +271,3 @@ def fixup_design_documents():
             delims_lint=delims_lint,
             lint=lint))
     DESIGNS["fields"] = fields
-    logging.debug("fields design document %s" % json.dumps(fields, indent=2))

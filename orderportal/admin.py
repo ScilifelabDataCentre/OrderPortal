@@ -45,6 +45,8 @@ class Settings(RequestHandler):
     def get(self):
         self.check_admin()
         mod_settings = settings.copy()
+        # Add the root dir
+        mod_settings['ROOT'] = constants.ROOT
         # Don't show the password in the CouchDB URL
         url = settings['DATABASE_SERVER']
         match = re.search(r':([^/].+)@', url)
