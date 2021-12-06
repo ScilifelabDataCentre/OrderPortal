@@ -41,7 +41,7 @@
         <div class="collapse navbar-collapse" id="myNavbar">
           <ul class="nav navbar-nav">
             <li>
-              <a href="{{ reverse_url('home') }}">
+              <a id="home" href="{{ reverse_url('home') }}">
                 <span class="glyphicon glyphicon-home"></span>
               </a>
             </li>
@@ -192,13 +192,14 @@
           <div>
             <ul class="nav navbar-nav navbar-right">
               {% if current_user %}
-              <li>{% module Entity(current_user, icon=False) %}</li>
+              <li id="logged-in">
+                {% module Entity(current_user, icon=False) %}
+              </li>
               <li>
                 <form action="{{ reverse_url('logout') }}"
                       method="POST" role="form" class="navbar-form">
                   {% module xsrf_form_html() %}
-                  <button type="submit"
-                          title="Logout"
+                  <button type="submit" title="Logout"
                           class="btn btn-default btn-sm">
                     <span class="glyphicon glyphicon-log-out"></span>
                   </button>

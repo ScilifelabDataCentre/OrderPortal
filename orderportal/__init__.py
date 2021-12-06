@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = '5.2.7'
+__version__ = '5.2.8'
 
 
 class Constants:

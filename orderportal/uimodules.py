@@ -27,7 +27,7 @@ class Icon(tornado.web.UIModule):
         title = utils.terminology(title or name)
         value = ICON_TEMPLATE.format(url=url, alt=name, title=title)
         if label:
-            value = '<span class="nobr">{0} {1}</span>'.format(value, title)
+            value = f"""<span class="nobr">{value} {title}</span>"""
         return value
 
 
@@ -81,11 +81,9 @@ class Entity(tornado.web.UIModule):
                 raise KeyError(str(msg) + ':', doctype)
         if icon and icon_url:
             icon = ICON_TEMPLATE.format(url=icon_url, alt=alt, title=alt)
-            return """<a href="{url}">{icon} {title}</a>""".format(
-                url=url, icon=icon, title=title)
+            return f"""<a href="{url}">{icon} {title}</a>"""
         else:
-            return """<a href="{url}">{title}</a>""".format(
-                url=url, title=title)
+            return f"""<a href="{url}">{title}</a>"""
 
 
 class Markdown(tornado.web.UIModule):
