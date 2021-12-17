@@ -7,6 +7,7 @@ import sys
 import tornado.web
 import tornado.ioloop
 
+from orderportal import constants
 from orderportal import designs
 from orderportal import settings
 from orderportal import utils
@@ -163,8 +164,8 @@ def main():
         cookie_secret=settings['COOKIE_SECRET'],
         xsrf_cookies=True,
         ui_modules=uimodules,
-        template_path=os.path.join(settings['ROOT'], 'templates'),
-        static_path=os.path.join(settings['ROOT'], 'static'),
+        template_path=os.path.join(constants.ROOT, 'templates'),
+        static_path=os.path.join(constants.ROOT, 'static'),
         login_url=(settings['BASE_URL_PATH_PREFIX'] or '') + '/login')
 
     # Add href URLs for the status icons data in settings.

@@ -3,18 +3,6 @@
 # This file is read on server startup, so a restart is required 
 # whenever it has been modified.
 
-KI:
-  name: Karolinska institutet
-  rank: 1
-SU:
-  name: Stockholms universitet
-  rank: 1
-KTH:
-  name: Kungl. Tekniska högskolan
-  rank: 1
-UU:
-  name: Uppsala universitet
-  rank: 1
 BTH:
   name: Blekinge tekniska högskola
   rank: 2
@@ -34,7 +22,7 @@ HB:
   name: Högskolan i Borås
   rank: 3
 HDA:
-  name: Högskolan Dalarna
+  name: Högskolan i Dalarna
   rank: 3
 HH:
   name: Högskolan i Halmstad
@@ -60,6 +48,12 @@ HV:
 KAU:
   name: Karlstads universitet
   rank: 2
+KI:
+  name: Karolinska institutet
+  rank: 1
+KTH:
+  name: Kungliga Tekniska högskolan
+  rank: 1
 LIU:
   name: Linköpings universitet
   rank: 2
@@ -72,8 +66,8 @@ LTU:
 LU:
   name: Lunds universitet
   rank: 2
-MAH:
-  name: Malmö högskola
+MAU:
+  name: Malmö universitet
   rank: 2
 MDH:
   name: Mälardalens högskola
@@ -93,6 +87,12 @@ SH:
 SLU:
   name: Sveriges lantbruksuniversitet
   rank: 2
+SU:
+  name: Stockholms universitet
+  rank: 1
 UMU:
   name: Umeå universitet
   rank: 2
+UU:
+  name: Uppsala universitet
+  rank: 1

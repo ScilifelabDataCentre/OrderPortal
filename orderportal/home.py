@@ -6,8 +6,10 @@ from collections import OrderedDict as OD
 
 import couchdb2
 import markdown
+import requests
 import tornado
 import tornado.web
+import xlsxwriter
 import yaml
 
 import orderportal
@@ -118,32 +120,23 @@ class Software(RequestHandler):
     "Display software information for the web site."
 
     def get(self):
-        info = [
-            ('Python', 'https://www.python.org',
-             "%s.%s.%s" % sys.version_info[0:3], 'installed'),
-            ('CouchDB server', 'http://couchdb.apache.org/',
-             utils.get_dbserver().version, 'installed'),
-            ('CouchDB2', 'https://pypi.org/project/CouchDB2/',
-             couchdb2.__version__, 'installed'),
-            ('tornado', 'https://pypi.org/project/tornado/',
-             tornado.version, 'installed'),
-            ('PyYAML', 'https://pypi.org/project/PyYAML/',
-             yaml.__version__, 'installed'),
-            ('markdown', 'https://pypi.org/project/Markdown/',
-             markdown.version, 'installed'),
-            ('bootstrap', 'https://getbootstrap.com/docs/3.3/', 
-             '3.3.7', 'CDN'),
-            ('jQuery', 'https://jquery.com/', '1.12.4', 'CDN'),
-            ('jQuery-UI', 'https://jqueryui.com/', '1.11.4', 'CDN'),
-            ('jQuery localtime', 
-             'https://github.com/GregDThomas/jquery-localtime',
-             '0.9.1', 'in distro'),
-            ('jQuery DataTables', 'https://www.datatables.net/',
-             '1.10.11', 'CDN')
-            ]
-        self.render('software.html',
-                    version=orderportal.__version__,
-                    info=info)
+        software = [
+            ('OrderPortal', orderportal.__version__, constants.SOURCE_URL),
+            ('Python', constants.PYTHON_VERSION, constants.PYTHON_URL),
+            ('tornado', tornado.version, constants.TORNADO_URL),
+            ('CouchDB server', self.db.server.version, constants.COUCHDB_URL),
+            ('CouchDB2 interface', couchdb2.__version__, constants.COUCHDB2_URL),
+            ('XslxWriter', xlsxwriter.__version__, constants.XLSXWRITER_URL),
+            ('Markdown', markdown.version, constants.MARKDOWN_URL),
+            ('requests', requests.__version__, constants.REQUESTS_URL),
+            ('PyYAML', yaml.__version__, constants.PYYAML_URL),
+            ('Bootstrap', constants.BOOTSTRAP_VERSION, constants.BOOTSTRAP_URL),
+            ('jQuery', constants.JQUERY_VERSION, constants.JQUERY_URL),
+            ('jQuery.UI', constants.JQUERY_UI_VERSION, constants.JQUERY_URL),
+            ('jQuery.localtime', constants.JQUERY_LOCALTIME_VERSION, constants.JQUERY_LOCALTIME_URL),
+            ('DataTables', constants.DATATABLES_VERSION, constants.DATATABLES_URL),
+    ]
+        self.render('software.html', software=software)
 
 
 class Log(RequestHandler):

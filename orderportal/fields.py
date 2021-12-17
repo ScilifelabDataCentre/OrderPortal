@@ -93,8 +93,6 @@ class Fields(object):
                        rqh.get_argument('restrict_write', False)),
                    erase_on_clone=utils.to_bool(
                        rqh.get_argument('erase_on_clone', False)),
-                   auto_tag=utils.to_bool(
-                       rqh.get_argument('auto_tag', False)),
                    initial_display=utils.to_bool(
                        rqh.get_argument('initial_display', False)),
                    description=rqh.get_argument('description', None))

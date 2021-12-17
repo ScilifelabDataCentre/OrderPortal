@@ -33,7 +33,7 @@
 .number {text-align: right; font-family: monospace; }
 
 /* Mark input field as required with a red star. */
-.form-required label:after { color: red;
+.form-required label:after { color: "red";
 			     content: ' *';
 			     display: inline;
 			   }

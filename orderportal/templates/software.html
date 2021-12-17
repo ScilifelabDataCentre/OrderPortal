@@ -2,62 +2,26 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}Software information{% end %}
-{% block body_title %}Software information{% end %}
+{% block head_title %}Software{% end %}
+{% block body_title %}Software{% end %}
 
 {% block main_content %}
 <div class="row">
-  <div class="col-md-6">
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <strong>OrderPortal version {{ version }}</strong>
-      </div>
-      <div class="panel-body">
-        <p>
-          <b>
-            The source code is available at GitHub:
-            <a href="https://github.com/pekrau/OrderPortal">pekrau/OrderPortal</a>
-          </b>
-        </p>
-        <p>
-          The system is written in
-          <a href="https://www.python.org/">Python</a> (version 3.8).
-        </p>
-        <p>
-          It is built on top of
-          the <a href="http://www.tornadoweb.org/en/stable/">tornado</a>
-          web server and template system using
-          <a href="http://getbootstrap.com/docs/3.3/">Bootstrap 3</a>
-          for display.
-        </p>
-        <p>
-          The <a href="http://couchdb.apache.org/">CouchDB</a>
-          database system is the back-end storage.
-        </p>
-        <p>
-          The technical documentation is at GitHub:
-          <a href="https://github.com/pekrau/OrderPortal/wiki">pekrau/OrderPortal/wiki</a>.
-        </p>
-      </div>
-    </div>
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        Software and systems used in this instance.
-      </div>
-      <div class="panel-body">
-        <table class="table table-noborder">
-          {% for label, url, ver, rem in info %}
-          <tr>
-            <th width="50%">
-              <a href="{{ url }}">{{ label }}</a>
-            </th>
-            <td width="25%">{{ ver }}</td>
-            <td width="25%">{{ rem }}</td>
-          </tr>
-          {% end %}
-        </table>
-      </div>
-    </div>
+  <div class="col-md-10 offset-md-1">
+    <table class="table table-sm">
+      <tr>
+        <th>Software</th>
+        <th>Version</th>
+        <th>Link</th>
+      </tr>
+      {% for name, version, url in software %}
+      <tr>
+        <td>{{ name }}</td>
+        <td>{{ version }}</td>
+        <td><a href="{{ url }}">{{ url }}</a></td>
+      </tr>
+      {% end %}
+    </table>
   </div>
 </div>
 {% end %} {# block main_content #}

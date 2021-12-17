@@ -127,7 +127,7 @@ def undump(dumpfile, progressbar):
 @cli.command()
 @click.option("--email", prompt=True, help="Email address = account name")
 @click.option("--password")     # Get password after account existence check.
-def admin(email, password):
+def create_admin(email, password):
     "Create a user account having the admin role."
     db = utils.get_db()
     try:

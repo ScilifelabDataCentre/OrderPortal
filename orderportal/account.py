@@ -750,6 +750,7 @@ class Login(RequestHandler):
             self.see_other('home', error=str(msg))
             return
         if utils.hashed_password(password) != account.get('password'):
+            print('wrong password')
             utils.log(self.db, self, account,
                       changed=dict(login_failure=account['email']))
             view = self.db.view("log",
