@@ -981,6 +981,7 @@ class Register(RequestHandler):
                 saver['owner'] = saver['email']
                 saver['role'] = constants.USER
                 saver['status'] = constants.PENDING
+                saver['api_key'] = utils.get_iuid()
                 saver.check_required()
                 saver.erase_password()
         except ValueError as msg:
@@ -994,19 +995,21 @@ class Register(RequestHandler):
                     get(key) or ''
             self.see_other('register', error=str(msg), **kwargs)
             return
-        try:
-            template = settings['ACCOUNT_MESSAGES'][constants.PENDING]
-        except KeyError:
-            pass
-        else:
-            account = saver.doc
-            with MessageSaver(rqh=self) as saver:
-                saver.create(template,
-                             account=account['email'],
-                             url=self.absolute_reverse_url(
-                                 'account', account['email']))
-                # Recipients are hardwired here.
-                saver.send([a['email'] for a in self.get_admins()])
+
+        if utils.to_bool(self.get_argument("send_mail")):
+            try:
+                template = settings['ACCOUNT_MESSAGES'][constants.PENDING]
+            except KeyError:
+                pass
+            else:
+                account = saver.doc
+                with MessageSaver(rqh=self) as saver:
+                    saver.create(template,
+                                 account=account['email'],
+                                 url=self.absolute_reverse_url(
+                                     'account', account['email']))
+                    # Recipients are hardwired here.
+                    saver.send([a['email'] for a in self.get_admins()])
         self.see_other('registered')
 
 

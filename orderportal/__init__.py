@@ -4,7 +4,7 @@ An order can be a project application, a request, a report, etc.
 
 import os.path
 
-__version__ = '5.1.0'
+__version__ = '5.1.1'
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -22,7 +22,7 @@ settings = dict(
     PIDFILE = None,
     DATABASE_SERVER = 'http://localhost:5984/',
     DATABASE_NAME = 'orderportal',
-    MARKDOWN_URL = 'http://agea.github.io/tutorial.md/',
+    MARKDOWN_URL = 'https://www.markdownguide.org/basic-syntax/',
     SITE_DIR = os.path.normpath(os.path.join(ROOT, "../site")),
     SITE_STATIC_DIR = os.path.normpath(os.path.join(ROOT, "../site/static")),
     SITE_NAME = 'OrderPortal',

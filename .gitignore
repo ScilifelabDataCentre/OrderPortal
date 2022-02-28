@@ -4,3 +4,5 @@
 *.yaml
 site
 !site_template/*.yaml
+__pycache__
+.pytest_cache

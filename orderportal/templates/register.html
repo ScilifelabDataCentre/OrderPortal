@@ -385,6 +385,20 @@
     </span>
   </div>
 
+  {% if is_admin %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+	<label class="control-label" for="send_email">Send email to user</label>
+	<div  class="form-control">
+	  <input type="checkbox" name="send_email" id="send_email"
+                 value="true" checked> Yes
+	</div>
+      </div>
+    </div>
+  </div>
+  {% end %} {# if is_admin #}
+
   <div class="form-group">
     <label class="control-label"></label>
     <button type="submit" class="btn btn-success">
