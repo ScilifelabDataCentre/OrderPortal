@@ -60,10 +60,9 @@ def test_login(settings, page): # 'page' fixture from 'pytest-playwright'
     url = f"{settings['BASE_URL']}"
     page.goto(url)
     # page.click("""[placeholder="Email address of account"]""")
-    page.fill("""[placeholder="Email address of account"]""",
-              "per.kraulis@scilifelab.se")
+    page.fill("""[placeholder="Email address of account"]""",settings["USERNAME"])
     page.press("""[placeholder="Email address of account"]""", "Tab")
-    page.fill("""input[name="password"]""", "Vasterby 5:256")
+    page.fill("""input[name="password"]""", settings["PASSWORD"])
     page.click("""button:has-text("Login")""")
 
     assert page.url == url

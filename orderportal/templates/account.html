@@ -58,7 +58,7 @@
 {% if is_admin or current_user['email'] == account['email'] %}
 <p>
   <div>
-    <a href="{{ reverse_url('reset', account=account['email']) }}"
+    <a href="{{ reverse_url('reset', email=account['email']) }}"
        role="button"
        class="btn btn-warning btn-block">
       <span class="glyphicon glyphicon-step-backward"></span>
@@ -67,6 +67,19 @@
   </div>
 </p>
 {% end %} {# if is_admin or current_user['email'] == account['email'] #}
+
+{% if is_admin %}
+<p>
+  <div>
+    <a href="{{ reverse_url('password', email=account['email']) }}"
+       role="button"
+       class="btn btn-warning btn-block">
+      <span class="glyphicon glyphicon-eye-open"></span>
+      Set password
+    </a>
+  </div>
+</p>
+{% end %} {# if is_admin #}
 
 {% if is_admin and current_user['email'] != account['email'] %}
 
