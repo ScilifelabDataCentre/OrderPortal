@@ -13,16 +13,16 @@ FHS:
   name: Försvarshögskolan
   rank: 3
 GIH:
-  name: Gymnastik och -idrottshögskolan
+  name: Gymnastik- och idrottshögskolan
   rank: 3
 GU:
   name: Göteborgs universitet
   rank: 2
+HD:
+  name: Högskolan Dalarna
+  rank: 3
 HB:
   name: Högskolan i Borås
-  rank: 3
-HDA:
-  name: Högskolan i Dalarna
   rank: 3
 HH:
   name: Högskolan i Halmstad
@@ -33,7 +33,7 @@ HHS:
 HIG:
   name: Högskolan i Gävle
   rank: 3
-HJ:
+JU:
   name: Högskolan i Jönköping
   rank: 3
 HKR:
@@ -69,8 +69,8 @@ LU:
 MAU:
   name: Malmö universitet
   rank: 2
-MDH:
-  name: Mälardalens högskola
+MDU:
+  name: Mälardalens universitet
   rank: 2
 MIU:
   name: Mittuniversitetet
