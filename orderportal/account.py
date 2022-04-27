@@ -833,7 +833,7 @@ class Reset(RequestHandler):
         else:
             if account.get('status') == constants.PENDING:
                 self.see_other('home',
-                               error='Cannot reset password.Account has not been enabled.')
+                               error='Cannot reset password. Account has not been enabled.')
                 return
             elif account.get('status') == constants.DISABLED:
                 self.see_other('home',
@@ -982,6 +982,7 @@ class Register(RequestHandler):
                 saver['owner'] = saver['email']
                 saver['role'] = constants.USER
                 saver['status'] = constants.PENDING
+                saver['api_key'] = utils.get_iuid()
                 saver.check_required()
                 saver.erase_password()
         except ValueError as msg:
