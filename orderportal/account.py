@@ -750,7 +750,6 @@ class Login(RequestHandler):
             self.see_other('home', error=str(msg))
             return
         if utils.hashed_password(password) != account.get('password'):
-            print('wrong password')
             utils.log(self.db, self, account,
                       changed=dict(login_failure=account['email']))
             view = self.db.view("log",
@@ -823,7 +822,7 @@ class Reset(RequestHandler):
     "Reset the password of a account account."
 
     def get(self):
-        self.render('reset.html', email=self.get_argument('account', ''))
+        self.render('reset.html', email=self.get_argument('email', ''))
 
     def post(self):
         URL = self.absolute_reverse_url
@@ -833,12 +832,12 @@ class Reset(RequestHandler):
             self.see_other('home') # Silent error! Should not show existence.
         else:
             if account.get('status') == constants.PENDING:
-                self.see_other('home', error='Cannot reset password.'
-                               ' Account has not been enabled.')
+                self.see_other('home',
+                               error='Cannot reset password. Account has not been enabled.')
                 return
             elif account.get('status') == constants.DISABLED:
-                self.see_other('home', error='Cannot reset password.'
-                               ' Account is disabled; contact the site admin.')
+                self.see_other('home',
+                               error='Cannot reset password. Account is disabled; contact the site admin.')
                 return
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver.reset_password()
@@ -883,7 +882,7 @@ class Password(RequestHandler):
         except ValueError as msg:
             self.see_other('home', error=str(msg))
             return
-        if account.get('code') != self.get_argument('code'):
+        if not self.is_admin() and (account.get('code') != self.get_argument('code')):
             self.see_other('home',
                            error="Either the email address or the code" +
                            " for setting password was wrong." +
@@ -983,6 +982,7 @@ class Register(RequestHandler):
                 saver['owner'] = saver['email']
                 saver['role'] = constants.USER
                 saver['status'] = constants.PENDING
+                saver['api_key'] = utils.get_iuid()
                 saver.check_required()
                 saver.erase_password()
         except ValueError as msg:

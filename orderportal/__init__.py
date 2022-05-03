@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = '5.2.8'
+__version__ = '5.2.10'
 
 
 class Constants:
@@ -219,7 +219,7 @@ settings = dict(
     PIDFILE = None,
     DATABASE_SERVER = 'http://localhost:5984/',
     DATABASE_NAME = 'orderportal',
-    MARKDOWN_URL = 'http://agea.github.io/tutorial.md/',
+    MARKDOWN_URL = 'https://www.markdownguide.org/basic-syntax/',
     SITE_DIR = os.path.normpath(os.path.join(constants.ROOT, "../site")),
     SITE_STATIC_DIR = os.path.normpath(os.path.join(constants.ROOT, "../site/static")),
     SITE_NAME = 'OrderPortal',

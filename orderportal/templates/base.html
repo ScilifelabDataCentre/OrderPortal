@@ -76,6 +76,9 @@
                   <a href="{{ reverse_url('accounts') }}">All accounts</a>
                 </li>
                 <li>
+                  <a href="{{ reverse_url('accounts', role='admin') }}">All admin accounts</a>
+                </li>
+                <li>
                   <a href="{{ reverse_url('groups') }}">All groups</a>
                 </li>
                 {% if is_admin %}
