@@ -1,4 +1,4 @@
-name: Publish Docker Image
+name: Publish Docker image
 
 on:
   release:
@@ -7,7 +7,7 @@ on:
 jobs:
   push_to_registry:
     if: github.repository == 'pekrau/orderportal'
-    name: Publish Docker Image
+    name: Publish Docker image
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -23,10 +23,10 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ghcr.io/pekrau/orderportal
-      - name: Build and Publish Backend
+      - name: Build and publish backend
         uses: docker/build-push-action@v2
         with:
-          file: Dockerfile
+          file: docker/Dockerfile-prod
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}

@@ -1,8 +1,8 @@
 "Home page variants, and a few general resources."
 
 import logging
+import os.path
 import sys
-from collections import OrderedDict as OD
 
 import couchdb2
 import markdown

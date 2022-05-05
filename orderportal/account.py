@@ -2,8 +2,6 @@
 
 import csv
 import logging
-from collections import OrderedDict as OD
-from io import StringIO
 
 import tornado.web
 
@@ -165,7 +163,7 @@ class AccountsApiV1(Accounts):
                              display=dict(href=URL('accounts')))
         data['items'] = []
         for account in accounts:
-            item = OD()
+            item = dict()
             item['email'] = account['email']
             item['links'] = dict(
                 api=dict(href=URL('account_api',account['email'])),
@@ -930,7 +928,7 @@ class Register(RequestHandler):
         if not self.global_modes['allow_registration']:
             self.see_other('home', error='Registration is currently disabled.')
             return
-        values = OD()
+        values = dict()
         for key in self.KEYS:
             values[key] = self.get_argument(key, None)
         for key in self.ADDRESS_KEYS:
@@ -986,7 +984,7 @@ class Register(RequestHandler):
                 saver.check_required()
                 saver.erase_password()
         except ValueError as msg:
-            kwargs = OD()
+            kwargs = dict()
             for key in self.KEYS:
                 kwargs[key] = saver.get(key) or ''
             for key in self.ADDRESS_KEYS:

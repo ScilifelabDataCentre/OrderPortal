@@ -2,7 +2,6 @@
 
 import json
 import logging
-from collections import OrderedDict as OD
 
 import tornado.web
 
@@ -149,7 +148,7 @@ class FormApiV1(ApiV1Mixin, Form):
     def render(self, templatefilename, **kwargs):
         URL = self.absolute_reverse_url
         form = kwargs['form']
-        data = OD()
+        data = dict()
         data['type'] = 'form'
         data['iuid'] = form['_id']
         data['title'] = form['title']
