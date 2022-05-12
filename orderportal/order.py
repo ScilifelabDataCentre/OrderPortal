@@ -8,7 +8,6 @@ import re
 import traceback
 import urllib.parse
 import zipfile
-from collections import OrderedDict as OD
 
 import couchdb2
 import tornado.web
@@ -616,7 +615,7 @@ class OrderMixin(object):
                 value = str(order['fields'].get(fid)).lower()
                 opt = str(field.get('visible_if_value')).lower().split('|')
                 if value not in opt: continue
-            item = OD(identifier=field['identifier'])
+            item = dict(identifier=field['identifier'])
             item['label'] = field.get('label') or \
                             field['identifier'].capitalize().replace('_', ' ')
             item['depth'] = depth
@@ -689,13 +688,13 @@ class OrderApiV1Mixin(ApiV1Mixin):
             data = utils.get_json(self.order_reverse_url(order, api=True),
                                   'order')
         else:
-            data = OD()
+            data = dict()
         data['identifier'] = order.get('identifier')
         data['title'] = order.get('title') or '[no title]'
         data['iuid'] = order['_id']
         if full:
             form = self.get_form(order['form'])
-            data['form'] = OD(
+            data['form'] = dict(
                 [('title', form['title']),
                  ('version', form.get('version')),
                  ('iuid', form['_id']),
@@ -705,7 +704,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
             if forms_lookup is None:
                 forms_lookup = self.get_forms_lookup()
             form = forms_lookup[order['form']]
-            data['form'] = OD(
+            data['form'] = dict(
                 [('iuid', order['form']),
                  ('title', form['title']),
                  ('version', form.get('version')),
@@ -718,13 +717,13 @@ class OrderApiV1Mixin(ApiV1Mixin):
             links=dict(api=dict(href=URL('account_api', order['owner'])),
                        display=dict(href=URL('account', order['owner']))))
         data['status'] = order['status']
-        data['report'] = OD()
+        data['report'] = dict()
         if order.get('report'):
             data['report']['content_type'] = order['_attachments'][constants.SYSTEM_REPORT]['content_type']
             data['report']['timestamp'] = order['report']['timestamp']
             data['report']['link'] = dict(href=URL('order_report_api',
                                                    order['_id']))
-        data['history'] = OD()
+        data['history'] = dict()
         for s in settings['ORDER_STATUSES']:
             key = s['identifier']
             data['history'][key] = order['history'].get(key)
@@ -742,12 +741,12 @@ class OrderApiV1Mixin(ApiV1Mixin):
                              status['identifier']),
                     name='transition')
             data['links']['external'] = order.get('links', {}).get('external', [])
-            data['fields'] = OD()
+            data['fields'] = dict()
             # A bit roundabout, but the fields will come out in correct order
             for field in self.get_fields(order):
                 data['fields'][field['identifier']] = field['value']
             data['invalid'] = order.get('invalid', {})
-            data['files'] = OD()
+            data['files'] = dict()
             for filename in sorted(order.get('_attachments', [])):
                 if filename.startswith(constants.SYSTEM): continue
                 stub = order['_attachments'][filename]
@@ -1175,7 +1174,7 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
             data = self.get_order_json(order,
                                        account_names=account_names,
                                        forms_lookup=forms_lookup)
-            data['fields'] = OD()
+            data['fields'] = dict()
             for key in keys:
                 data['fields'][key] = order['fields'].get(key)
             result['items'].append(data)

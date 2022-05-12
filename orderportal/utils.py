@@ -1,6 +1,5 @@
 "Various utility functions."
 
-import collections
 import csv
 import datetime
 import hashlib
@@ -159,7 +158,7 @@ def load_settings(filepath=None, log=True):
             unis = yaml.safe_load(infile)
         unis = list(unis.items())
         unis.sort(key=lambda i: (i[1].get('rank'), i[0]))
-        settings['UNIVERSITIES'] = collections.OrderedDict(unis)
+        settings['UNIVERSITIES'] = dict(unis)
 
     # Read country codes YAML file
     filepath = settings.get("COUNTRY_CODES_FILE")
@@ -312,7 +311,7 @@ def csv_safe(value):
 
 def get_json(id, type):
     "Return a JSON dictionary initialized with with id and type."
-    result = collections.OrderedDict()
+    result = dict()
     result['id'] = id
     result['type'] = type
     result['site'] = settings['SITE_NAME']
