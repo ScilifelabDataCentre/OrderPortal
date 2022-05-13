@@ -23,14 +23,14 @@ class Saver(object):
             self.rqh = None
             self.db = db
         else:
-            raise AttributeError('neither db nor rqh given')
+            raise AttributeError("neither db nor rqh given")
         self.doc = doc or dict()
         self.changed = dict()
-        if '_id' in self.doc:
+        if "_id" in self.doc:
             assert self.doctype == self.doc[constants.DOCTYPE]
         else:
             self.doc[constants.DOCTYPE] = self.doctype
-            self.doc['_id'] = utils.get_iuid()
+            self.doc["_id"] = utils.get_iuid()
             self.initialize()
         self.setup()
 
@@ -38,12 +38,13 @@ class Saver(object):
         return self
 
     def __exit__(self, type, value, tb):
-        if type is not None: return False # No exceptions handled here.
+        if type is not None:
+            return False  # No exceptions handled here.
         self.finalize()
         try:
             self.db.put(self.doc)
         except couchdb2.RevisionError:
-            raise IOError('document revision update conflict')
+            raise IOError("document revision update conflict")
         self.post_process()
         self.log()
 
@@ -62,7 +63,8 @@ class Saver(object):
         else:
             value = converter(value)
         try:
-            if self.doc[key] == value: return
+            if self.doc[key] == value:
+                return
         except KeyError:
             pass
         self.doc[key] = value
@@ -77,7 +79,7 @@ class Saver(object):
         except AttributeError:
             pass
         else:
-            self.changed[key] == '__del__'
+            self.changed[key] == "__del__"
 
     def get(self, key, default=None):
         try:
@@ -88,10 +90,10 @@ class Saver(object):
     def initialize(self):
         "Set the initial values for the new document."
         try:
-            self.doc['owner'] = self.rqh.current_user['email']
+            self.doc["owner"] = self.rqh.current_user["email"]
         except (TypeError, AttributeError, KeyError):
-            self.doc['owner'] = None
-        self.doc['created'] = utils.timestamp()
+            self.doc["owner"] = None
+        self.doc["created"] = utils.timestamp()
 
     def setup(self):
         "Any additional setup. To be redefined."
@@ -99,7 +101,7 @@ class Saver(object):
 
     def finalize(self):
         "Perform any final modifications before saving the document."
-        self.doc['modified'] = utils.timestamp()
+        self.doc["modified"] = utils.timestamp()
 
     def post_process(self):
         "Perform any actions after having saved the document."
