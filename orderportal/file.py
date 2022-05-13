@@ -18,40 +18,43 @@ class FileSaver(saver.Saver):
 
     def check_name(self, value):
         if not constants.NAME_RX.match(value):
-            raise tornado.web.HTTPError(400, reason='invalid file name')
+            raise tornado.web.HTTPError(400, reason="invalid file name")
         try:
             doc = self.rqh.get_entity_view("file", "name", value)
         except tornado.web.HTTPError:
             pass
         else:
             # Error if same name as file of another doc
-            if doc['_id'] != self.doc.get('_id'):
-                raise ValueError('file name already exists')
+            if doc["_id"] != self.doc.get("_id"):
+                raise ValueError("file name already exists")
 
     def set_file(self, infile, name=None):
         self.file = infile
         if name:
-            self['name'] = name
-        self['size'] = len(self.file.body)
-        self['content_type'] = infile.content_type or 'application/octet-stream'
+            self["name"] = name
+        self["size"] = len(self.file.body)
+        self["content_type"] = infile.content_type or "application/octet-stream"
 
     def post_process(self):
         "Save the file as an attachment to the document."
         # No new file uploaded, just skip out.
-        if self.file is None: return
-        self.db.put_attachment(self.doc,
-                               self.file.body,
-                               filename=self['name'],
-                               content_type=self['content_type'])
-        
+        if self.file is None:
+            return
+        self.db.put_attachment(
+            self.doc,
+            self.file.body,
+            filename=self["name"],
+            content_type=self["content_type"],
+        )
+
 
 class Files(RequestHandler):
     "List of files page."
 
     def get(self):
         files = [r.doc for r in self.db.view("file", "name", include_docs=True)]
-        files.sort(key=lambda i: i['modified'], reverse=True)
-        self.render('files.html', files=files)
+        files.sort(key=lambda i: i["modified"], reverse=True)
+        self.render("files.html", files=files)
 
 
 class File(RequestHandler):
@@ -59,14 +62,14 @@ class File(RequestHandler):
 
     def get(self, name):
         self.doc = self.get_entity_view("file", "name", name)
-        filename = list(self.doc['_attachments'].keys())[0]
+        filename = list(self.doc["_attachments"].keys())[0]
         outfile = self.db.get_attachment(self.doc, filename)
         if outfile is None:
-            self.write('')
+            self.write("")
         else:
             self.write(outfile.read())
             outfile.close()
-        self.set_header('Content-Type', self.doc['content_type'])
+        self.set_header("Content-Type", self.doc["content_type"])
 
 
 class FileMeta(RequestHandler):
@@ -74,7 +77,7 @@ class FileMeta(RequestHandler):
 
     def get(self, name):
         file = self.get_entity_view("file", "name", name)
-        self.render('file_meta.html', file=file)
+        self.render("file_meta.html", file=file)
 
 
 class FileCreate(RequestHandler):
@@ -83,7 +86,7 @@ class FileCreate(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render('file_create.html')
+        self.render("file_create.html")
 
     @tornado.web.authenticated
     def post(self):
@@ -91,21 +94,22 @@ class FileCreate(RequestHandler):
         try:
             with FileSaver(rqh=self) as saver:
                 try:
-                    infile = self.request.files['file'][0]
+                    infile = self.request.files["file"][0]
                 except (KeyError, IndexError):
-                    raise ValueError('No file uploaded.')
-                name = self.get_argument('name', None) or \
-                       os.path.splitext(infile.filename)[0]
+                    raise ValueError("No file uploaded.")
+                name = (
+                    self.get_argument("name", None)
+                    or os.path.splitext(infile.filename)[0]
+                )
                 saver.check_name(name)
                 saver.set_file(infile, name)
-                saver['title'] = self.get_argument('title', None)
-                saver['hidden'] = utils.to_bool(self.get_argument('hidden',
-                                                                  False))
-                saver['description'] = self.get_argument('description', None)
+                saver["title"] = self.get_argument("title", None)
+                saver["hidden"] = utils.to_bool(self.get_argument("hidden", False))
+                saver["description"] = self.get_argument("description", None)
         except ValueError as msg:
-            self.see_other('files', error=str(msg))
+            self.see_other("files", error=str(msg))
         else:
-            self.see_other('files')
+            self.see_other("files")
 
 
 class FileEdit(RequestHandler):
@@ -115,35 +119,35 @@ class FileEdit(RequestHandler):
     def get(self, name):
         self.check_admin()
         file = self.get_entity_view("file", "name", name)
-        self.render('file_edit.html', file=file)
+        self.render("file_edit.html", file=file)
 
     @tornado.web.authenticated
     def post(self, name):
         self.check_admin()
-        if self.get_argument('_http_method', None) == 'delete':
+        if self.get_argument("_http_method", None) == "delete":
             self.delete(name)
             return
         file = self.get_entity_view("file", "name", name)
         with FileSaver(doc=file, rqh=self) as saver:
             try:
-                infile = self.request.files['file'][0]
+                infile = self.request.files["file"][0]
             except (KeyError, IndexError):
                 # No new file upload, just leave it alone.
                 saver.file = None
             else:
                 saver.set_file(infile)
-            saver['title'] = self.get_argument('title', None)
-            saver['hidden'] = utils.to_bool(self.get_argument('hidden', False))
-            saver['description'] = self.get_argument('description', None)
-        self.see_other('files')
+            saver["title"] = self.get_argument("title", None)
+            saver["hidden"] = utils.to_bool(self.get_argument("hidden", False))
+            saver["description"] = self.get_argument("description", None)
+        self.see_other("files")
 
     @tornado.web.authenticated
     def delete(self, name):
         self.check_admin()
         file = self.get_entity_view("file", "name", name)
-        self.delete_logs(file['_id'])
+        self.delete_logs(file["_id"])
         self.db.delete(file)
-        self.see_other('files')
+        self.see_other("files")
 
 
 class FileEditApiV1(FileEdit):
@@ -152,18 +156,19 @@ class FileEditApiV1(FileEdit):
     def check_xsrf_cookie(self):
         "Do not check for XSRF cookie when script is calling."
         pass
-    
+
 
 class FileDownload(File):
     "Download the file."
 
     def get(self, name):
         super(FileDownload, self).get(name)
-        ext = utils.get_filename_extension(self.doc['content_type'])
+        ext = utils.get_filename_extension(self.doc["content_type"])
         if ext:
-            name += ext 
-        self.set_header('Content-Disposition',
-                        'attachment; filename="{0}"'.format(name))
+            name += ext
+        self.set_header(
+            "Content-Disposition", 'attachment; filename="{0}"'.format(name)
+        )
 
 
 class FileLogs(RequestHandler):
@@ -171,8 +176,9 @@ class FileLogs(RequestHandler):
 
     def get(self, iuid):
         file = self.get_entity(iuid, doctype=constants.FILE)
-        self.render('logs.html',
-                    title="Logs for document '%s'" % (file.get('title') or 
-                                                       file['name']),
-                    entity=file,
-                    logs=self.get_logs(file['_id']))
+        self.render(
+            "logs.html",
+            title="Logs for document '%s'" % (file.get("title") or file["name"]),
+            entity=file,
+            logs=self.get_logs(file["_id"]),
+        )

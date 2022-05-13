@@ -26,94 +26,97 @@ class Home(RequestHandler):
     def get(self):
         forms = [r.doc for r in self.db.view("form", "enabled", include_docs=True)]
         for f in forms:
-            if f.get('ordinal') is None: f['ordinal'] = 0
-        forms.sort(key=lambda i: i['ordinal'])
+            if f.get("ordinal") is None:
+                f["ordinal"] = 0
+        forms.sort(key=lambda i: i["ordinal"])
         kwargs = dict(
             forms=forms,
-            news_items=self.get_news(limit=settings['DISPLAY_MAX_NEWS']),
-            events=self.get_events(upcoming=True))
-        if self.current_user and self.get_invitations(self.current_user['email']):
-            url = self.reverse_url('account', self.current_user['email'])
-            kwargs['message'] = """You have group invitations.
-See your <a href="{0}">account</a>.""".format(url)
+            news_items=self.get_news(limit=settings["DISPLAY_MAX_NEWS"]),
+            events=self.get_events(upcoming=True),
+        )
+        if self.current_user and self.get_invitations(self.current_user["email"]):
+            url = self.reverse_url("account", self.current_user["email"])
+            kwargs[
+                "message"
+            ] = """You have group invitations.
+See your <a href="{0}">account</a>.""".format(
+                url
+            )
         if not self.current_user:
-            self.render('home.html', **kwargs)
-        elif self.current_user['role'] == constants.ADMIN:
+            self.render("home.html", **kwargs)
+        elif self.current_user["role"] == constants.ADMIN:
             self.home_admin(**kwargs)
-        elif self.current_user['role'] == constants.STAFF:
+        elif self.current_user["role"] == constants.STAFF:
             self.home_staff(**kwargs)
         else:
             self.home_user(**kwargs)
 
     def home_admin(self, **kwargs):
         "Home page for a current user having role 'admin'."
-        view = self.db.view("account",
-                            "status",
-                            key=constants.PENDING,
-                            include_docs=True)
+        view = self.db.view(
+            "account", "status", key=constants.PENDING, include_docs=True
+        )
         pending = [r.doc for r in view]
-        pending.sort(key=lambda i: i['modified'], reverse=True)
-        pending = pending[:settings['DISPLAY_MAX_PENDING_ACCOUNTS']]
+        pending.sort(key=lambda i: i["modified"], reverse=True)
+        pending = pending[: settings["DISPLAY_MAX_PENDING_ACCOUNTS"]]
         # XXX This status should not be hard-wired!
-        view = self.db.view("order",
-                            "status",
-                            descending=True,
-                            startkey=['submitted', constants.CEILING],
-                            endkey=['submitted'],
-                            limit=settings['DISPLAY_MAX_RECENT_ORDERS'],
-                            reduce=False,
-                            include_docs=True)
+        view = self.db.view(
+            "order",
+            "status",
+            descending=True,
+            startkey=["submitted", constants.CEILING],
+            endkey=["submitted"],
+            limit=settings["DISPLAY_MAX_RECENT_ORDERS"],
+            reduce=False,
+            include_docs=True,
+        )
         orders = [r.doc for r in view]
-        self.render('home_admin.html',
-                    pending=pending,
-                    orders=orders,
-                    **kwargs)
+        self.render("home_admin.html", pending=pending, orders=orders, **kwargs)
 
     def home_staff(self, **kwargs):
         "Home page for a current user having role 'staff'."
         # XXX This status should not be hard-wired!
-        view = self.db.view("order",
-                            "status",
-                            descending=True,
-                            startkey=['accepted', constants.CEILING],
-                            endkey=['accepted'],
-                            limit=settings['DISPLAY_MAX_RECENT_ORDERS'],
-                            reduce=False,
-                            include_docs=True)
+        view = self.db.view(
+            "order",
+            "status",
+            descending=True,
+            startkey=["accepted", constants.CEILING],
+            endkey=["accepted"],
+            limit=settings["DISPLAY_MAX_RECENT_ORDERS"],
+            reduce=False,
+            include_docs=True,
+        )
         orders = [r.doc for r in view]
-        self.render('home_staff.html',
-                    orders=orders,
-                    **kwargs)
+        self.render("home_staff.html", orders=orders, **kwargs)
 
     def home_user(self, **kwargs):
         "Home page for a current user having role 'user'."
-        view = self.db.view("order",
-                            "owner",
-                            reduce=False,
-                            include_docs=True,
-                            descending=True,
-                            startkey=[self.current_user['email'],
-                                      constants.CEILING],
-                            endkey=[self.current_user['email']],
-                            limit=settings['DISPLAY_MAX_RECENT_ORDERS'])
+        view = self.db.view(
+            "order",
+            "owner",
+            reduce=False,
+            include_docs=True,
+            descending=True,
+            startkey=[self.current_user["email"], constants.CEILING],
+            endkey=[self.current_user["email"]],
+            limit=settings["DISPLAY_MAX_RECENT_ORDERS"],
+        )
         orders = [r.doc for r in view]
-        self.render('home_user.html',
-                    orders=orders,
-                    **kwargs)
+        self.render("home_user.html", orders=orders, **kwargs)
 
 
 class Contact(RequestHandler):
     "Display contact information."
 
     def get(self):
-        self.render('contact.html')
+        self.render("contact.html")
 
 
 class About(RequestHandler):
     "Display 'About us' information."
 
     def get(self):
-        self.render('about.html')
+        self.render("about.html")
 
 
 class Software(RequestHandler):
@@ -121,22 +124,26 @@ class Software(RequestHandler):
 
     def get(self):
         software = [
-            ('OrderPortal', orderportal.__version__, constants.SOURCE_URL),
-            ('Python', constants.PYTHON_VERSION, constants.PYTHON_URL),
-            ('tornado', tornado.version, constants.TORNADO_URL),
-            ('CouchDB server', self.db.server.version, constants.COUCHDB_URL),
-            ('CouchDB2 interface', couchdb2.__version__, constants.COUCHDB2_URL),
-            ('XslxWriter', xlsxwriter.__version__, constants.XLSXWRITER_URL),
-            ('Markdown', markdown.version, constants.MARKDOWN_URL),
-            ('requests', requests.__version__, constants.REQUESTS_URL),
-            ('PyYAML', yaml.__version__, constants.PYYAML_URL),
-            ('Bootstrap', constants.BOOTSTRAP_VERSION, constants.BOOTSTRAP_URL),
-            ('jQuery', constants.JQUERY_VERSION, constants.JQUERY_URL),
-            ('jQuery.UI', constants.JQUERY_UI_VERSION, constants.JQUERY_URL),
-            ('jQuery.localtime', constants.JQUERY_LOCALTIME_VERSION, constants.JQUERY_LOCALTIME_URL),
-            ('DataTables', constants.DATATABLES_VERSION, constants.DATATABLES_URL),
-    ]
-        self.render('software.html', software=software)
+            ("OrderPortal", orderportal.__version__, constants.SOURCE_URL),
+            ("Python", constants.PYTHON_VERSION, constants.PYTHON_URL),
+            ("tornado", tornado.version, constants.TORNADO_URL),
+            ("CouchDB server", self.db.server.version, constants.COUCHDB_URL),
+            ("CouchDB2 interface", couchdb2.__version__, constants.COUCHDB2_URL),
+            ("XslxWriter", xlsxwriter.__version__, constants.XLSXWRITER_URL),
+            ("Markdown", markdown.version, constants.MARKDOWN_URL),
+            ("requests", requests.__version__, constants.REQUESTS_URL),
+            ("PyYAML", yaml.__version__, constants.PYYAML_URL),
+            ("Bootstrap", constants.BOOTSTRAP_VERSION, constants.BOOTSTRAP_URL),
+            ("jQuery", constants.JQUERY_VERSION, constants.JQUERY_URL),
+            ("jQuery.UI", constants.JQUERY_UI_VERSION, constants.JQUERY_URL),
+            (
+                "jQuery.localtime",
+                constants.JQUERY_LOCALTIME_VERSION,
+                constants.JQUERY_LOCALTIME_URL,
+            ),
+            ("DataTables", constants.DATATABLES_VERSION, constants.DATATABLES_URL),
+        ]
+        self.render("software.html", software=software)
 
 
 class Log(RequestHandler):
@@ -144,11 +151,11 @@ class Log(RequestHandler):
 
     def get(self, iuid):
         log = self.get_entity(iuid, doctype=constants.LOG)
-        log['iuid'] = log.pop('_id')
-        log.pop('_rev')
-        log.pop('orderportal_doctype')
+        log["iuid"] = log.pop("_id")
+        log.pop("_rev")
+        log.pop("orderportal_doctype")
         self.write(log)
-        self.set_header('Content-Type', constants.JSON_MIME)
+        self.set_header("Content-Type", constants.JSON_MIME)
 
 
 class Entity(RequestHandler):
@@ -160,11 +167,11 @@ class Entity(RequestHandler):
         if doc[constants.DOCTYPE] == constants.ORDER:
             self.redirect(self.order_reverse_url(doc))
         elif doc[constants.DOCTYPE] == constants.FORM:
-            self.see_other('form', doc['_id'])
+            self.see_other("form", doc["_id"])
         elif doc[constants.DOCTYPE] == constants.ACCOUNT:
-            self.see_other('account', doc['email'])
+            self.see_other("account", doc["email"])
         else:
-            self.see_other('home', error='Sorry, no such entity found.')
+            self.see_other("home", error="Sorry, no such entity found.")
 
 
 class NoSuchEntity(RequestHandler):
@@ -172,7 +179,7 @@ class NoSuchEntity(RequestHandler):
 
     def get(self, path=None):
         logging.debug("No such entity: %s", path)
-        self.see_other('home', error='Sorry, no such entity found.')
+        self.see_other("home", error="Sorry, no such entity found.")
 
 
 class NoSuchEntityApiV1(RequestHandler):
@@ -211,7 +218,6 @@ class Status(RequestHandler):
             n_accounts = list(self.db.view("account", "all", reduce=True))[0].value
         except IndexError:
             n_accounts = 0
-        self.write(dict(status="OK",
-                        n_orders=n_orders,
-                        n_forms=n_forms,
-                        n_accounts=n_accounts))
+        self.write(
+            dict(status="OK", n_orders=n_orders, n_forms=n_forms, n_accounts=n_accounts)
+        )

@@ -19,14 +19,18 @@ import orderportal.app_orderportal
 
 @click.group()
 @click.option("-s", "--settings", help="Path of settings YAML file.")
-@click.option("--log", flag_value=True, default=False,
-              help="Enable logging output.")
+@click.option("--log", flag_value=True, default=False, help="Enable logging output.")
 def cli(settings, log):
     utils.load_settings(settings, log=log)
 
+
 @cli.command()
-@click.option("--textfile", type=str, default="../site/init_texts.yaml",
-                help="The path of the initial texts YAML file.")
+@click.option(
+    "--textfile",
+    type=str,
+    default="../site/init_texts.yaml",
+    help="The path of the initial texts YAML file.",
+)
 def initialize(textfile):
     """Initialize the database, which must exist and be empty.
 
@@ -39,7 +43,8 @@ def initialize(textfile):
         raise click.ClickException(str(error))
     if len(db) != 0:
         raise click.ClickException(
-            f"The database '{settings['DATABASE_NAME']}' is not empty.")
+            f"The database '{settings['DATABASE_NAME']}' is not empty."
+        )
     # Read the text file, if any. Check for errors before loading designs.
     if textfile:
         try:
@@ -56,9 +61,10 @@ def initialize(textfile):
         for name in constants.TEXTS:
             if len(list(db.view("text", "name", key=name))) == 0:
                 with TextSaver(db=db) as saver:
-                    saver['name'] = name
-                    saver['text'] = texts.get(name, '')
+                    saver["name"] = name
+                    saver["text"] = texts.get(name, "")
         click.echo(f"Loaded texts from '{textfile}'.")
+
 
 @cli.command()
 def counts():
@@ -69,14 +75,24 @@ def counts():
     click.echo(f"{utils.get_count(db, 'form', 'all'):>5} forms")
     click.echo(f"{utils.get_count(db, 'account', 'all'):>5} accounts")
 
+
 @cli.command()
-@click.option("-d", "--dumpfile", type=str,
-                help="The path of the Orderportal database dump file."
-              " NOTE: Environment variable BACKUP_DIR is no longer used.")
-@click.option("-D", "--dumpdir", type=str,
-                help="The directory to write the dump file in, using the standard name.")
-@click.option("--progressbar/--no-progressbar", default=True,
-              help="Display a progressbar.")
+@click.option(
+    "-d",
+    "--dumpfile",
+    type=str,
+    help="The path of the Orderportal database dump file."
+    " NOTE: Environment variable BACKUP_DIR is no longer used.",
+)
+@click.option(
+    "-D",
+    "--dumpdir",
+    type=str,
+    help="The directory to write the dump file in, using the standard name.",
+)
+@click.option(
+    "--progressbar/--no-progressbar", default=True, help="Display a progressbar."
+)
 def dump(dumpfile, dumpdir, progressbar):
     """Dump all data in the database to a .tar.gz dump file.
     NOTE: Environment variable BACKUP_DIR is no longer used.
@@ -86,24 +102,27 @@ def dump(dumpfile, dumpdir, progressbar):
         dumpfile = "dump_{0}.tar.gz".format(time.strftime("%Y-%m-%d"))
         if dumpdir:
             dumpfile = os.path.join(dumpdir, dumpfile)
-    ndocs, nfiles = db.dump(dumpfile,
-                            exclude_designs=True,
-                            progressbar=progressbar)
+    ndocs, nfiles = db.dump(dumpfile, exclude_designs=True, progressbar=progressbar)
     click.echo(f"Dumped {ndocs} documents and {nfiles} files to '{dumpfile}'.")
+
 
 @cli.command()
 @click.argument("dumpfile", type=click.Path(exists=True))
-@click.option("--progressbar/--no-progressbar", default=True,
-              help="Display a progressbar.")
+@click.option(
+    "--progressbar/--no-progressbar", default=True, help="Display a progressbar."
+)
 def undump(dumpfile, progressbar):
     "Load a Orderportal database .tar.gz dump file. The database must be empty."
     db = utils.get_db()
     designs.load_design_documents(db)
-    if (utils.get_count(db, "account", "all") != 0 or
-        utils.get_count(db, "form", "all") != 0 or
-        utils.get_count(db, "order", "form") != 0):
+    if (
+        utils.get_count(db, "account", "all") != 0
+        or utils.get_count(db, "form", "all") != 0
+        or utils.get_count(db, "order", "form") != 0
+    ):
         raise click.ClickException(
-            f"The database '{settings['DATABASE_NAME']}' contains data.")
+            f"The database '{settings['DATABASE_NAME']}' contains data."
+        )
     ndocs, nfiles = db.undump(dumpfile, progressbar=progressbar)
     # Cleanup.
     # Remove old, obsolete meta documents.
@@ -124,9 +143,10 @@ def undump(dumpfile, progressbar):
             lookup[row.doc["name"]] = row.doc
     click.echo(f"Loaded {ndocs} documents and {nfiles} files.")
 
+
 @cli.command()
 @click.option("--email", prompt=True, help="Email address = account name")
-@click.option("--password")     # Get password after account existence check.
+@click.option("--password")  # Get password after account existence check.
 def create_admin(email, password):
     "Create a user account having the admin role."
     db = utils.get_db()
@@ -134,27 +154,28 @@ def create_admin(email, password):
         with AccountSaver(db=db) as saver:
             saver.set_email(email)
             if not password:
-                password = click.prompt("Password", 
-                                        hide_input=True,
-                                        confirmation_prompt=True)
+                password = click.prompt(
+                    "Password", hide_input=True, confirmation_prompt=True
+                )
             saver.set_password(password)
             saver["first_name"] = click.prompt("First name")
             saver["last_name"] = click.prompt("Last name")
-            saver['address'] = dict()
-            saver['invoice_address'] = dict()
+            saver["address"] = dict()
+            saver["invoice_address"] = dict()
             saver["university"] = click.prompt("University")
-            saver['department'] = None
-            saver['owner'] = email
-            saver['role'] = constants.ADMIN
-            saver['status'] = constants.ENABLED
-            saver['labels'] = []
+            saver["department"] = None
+            saver["owner"] = email
+            saver["role"] = constants.ADMIN
+            saver["status"] = constants.ENABLED
+            saver["labels"] = []
     except ValueError as error:
         raise click.ClickException(str(error))
     click.echo(f"Created 'admin' role account '{email}'.")
 
+
 @cli.command()
 @click.option("--email", prompt=True)
-@click.option("--password")     # Get password after account existence check.
+@click.option("--password")  # Get password after account existence check.
 def password(email, password):
     "Set the password for the given account."
     db = utils.get_db()
@@ -165,33 +186,35 @@ def password(email, password):
     try:
         with AccountSaver(doc=account, db=db) as saver:
             if not password:
-                password = click.prompt("Password", 
-                                        hide_input=True,
-                                        confirmation_prompt=True)
+                password = click.prompt(
+                    "Password", hide_input=True, confirmation_prompt=True
+                )
             saver.set_password(password)
-            saver['status'] = constants.ENABLED
+            saver["status"] = constants.ENABLED
     except ValueError as error:
         raise click.ClickException(str(error))
     click.echo(f"Password set for account '{email}'.")
 
+
 def _get_account(db, email):
     "Get the account for the given email."
-    view = db.view("account",
-                   "email",
-                   key=email.lower(),
-                   reduce=False,
-                   include_docs=True)
+    view = db.view(
+        "account", "email", key=email.lower(), reduce=False, include_docs=True
+    )
     result = list(view)
     if len(result) == 1:
         return result[0].doc
     else:
         raise KeyError(f"No such account '{email}'.")
 
+
 @cli.command()
 @click.option("--email", prompt=True)
-@click.option("--role",
-              type=click.Choice(constants.ACCOUNT_ROLES, case_sensitive=False),
-              default=constants.USER)
+@click.option(
+    "--role",
+    type=click.Choice(constants.ACCOUNT_ROLES, case_sensitive=False),
+    default=constants.USER,
+)
 def role(email, role):
     "Set the role for the given account."
     db = utils.get_db()
@@ -206,6 +229,7 @@ def role(email, role):
         raise click.ClickException(str(error))
     click.echo(f"Role '{role}' set for account '{email}'.")
 
+
 @cli.command()
 @click.argument("identifier")
 def show(identifier):
@@ -214,17 +238,17 @@ def show(identifier):
     order identifier, or IUID of the document.
     """
     db = utils.get_db()
-    for designname, viewname in [("account", "email"),
-                                 ("account", "api_key"),
-                                 ("file", "name"),
-                                 ("info", "name"),
-                                 ("order", "identifier")]:
+    for designname, viewname in [
+        ("account", "email"),
+        ("account", "api_key"),
+        ("file", "name"),
+        ("info", "name"),
+        ("order", "identifier"),
+    ]:
         try:
-            view = db.view(designname,
-                           viewname,
-                           key=identifier,
-                           reduce=False,
-                           include_docs=True)
+            view = db.view(
+                designname, viewname, key=identifier, reduce=False, include_docs=True
+            )
             result = list(view)
             if len(result) == 1:
                 doc = result[0].doc

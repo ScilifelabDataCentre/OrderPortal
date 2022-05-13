@@ -12,16 +12,15 @@ import json
 import requests
 
 # Variables whose values must be changed for your site:
-BASE_URL = 'http://localhost:8886'  # Base URL for your OrderPortal instance.
-API_KEY = '7f075a4c5b324e3ca63f22d8dc0929c4'  # API key for the user account.
-FORM_IUID = 'dadd37b9e2644caa80eb358773cec00b'  # The IUID of the form.
+BASE_URL = "http://localhost:8886"  # Base URL for your OrderPortal instance.
+API_KEY = "7f075a4c5b324e3ca63f22d8dc0929c4"  # API key for the user account.
+FORM_IUID = "dadd37b9e2644caa80eb358773cec00b"  # The IUID of the form.
 
 
 url = "{base}/api/v1/order".format(base=BASE_URL)
-headers = {'X-OrderPortal-API-key': API_KEY}
+headers = {"X-OrderPortal-API-key": API_KEY}
 
-data = {'title': 'The title for a new order created by API call',
-        'form': FORM_IUID}
+data = {"title": "The title for a new order created by API call", "form": FORM_IUID}
 
 response = requests.post(url, headers=headers, json=data)
 assert response.status_code == 200, (response.status_code, response.reason)
