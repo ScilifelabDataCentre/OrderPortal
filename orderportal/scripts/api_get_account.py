@@ -14,18 +14,17 @@ import requests
 # Variables whose values must be changed for your site:
 
 # Base URL for the OrderPortal instance.
-BASE_URL = 'https://ngisweden.scilifelab.se/orders'
+BASE_URL = "https://ngisweden.scilifelab.se/orders"
 
 # API key for the user account. Must be changed (this is a dummy).
-API_KEY = '7f075a4c5b324e3ca63f22d8dc0929c4'
+API_KEY = "7f075a4c5b324e3ca63f22d8dc0929c4"
 
 # The identifier for the account; an email address.
-ACCOUNT_ID = 'ngi_portal_api@scilifelab.se'
+ACCOUNT_ID = "ngi_portal_api@scilifelab.se"
 
 
-url = "{base}/api/v1/account/{id}".format(base=BASE_URL,
-                                          id=ACCOUNT_ID)
-headers = {'X-OrderPortal-API-key': API_KEY}
+url = "{base}/api/v1/account/{id}".format(base=BASE_URL, id=ACCOUNT_ID)
+headers = {"X-OrderPortal-API-key": API_KEY}
 
 response = requests.get(url, headers=headers)
 assert response.status_code == 200, (response.status_code, response.reason)

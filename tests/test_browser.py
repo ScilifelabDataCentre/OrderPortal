@@ -33,7 +33,7 @@ def settings():
     return result
 
 
-def test_no_login(settings, page): # 'page' fixture from 'pytest-playwright'
+def test_no_login(settings, page):  # 'page' fixture from 'pytest-playwright'
     "Actions without logging in."
     url = f"{settings['BASE_URL']}"
     page.goto(url)
@@ -55,12 +55,12 @@ def test_no_login(settings, page): # 'page' fixture from 'pytest-playwright'
     assert page.url == "http://localhost:8881/"
 
 
-def test_login(settings, page): # 'page' fixture from 'pytest-playwright'
+def test_login(settings, page):  # 'page' fixture from 'pytest-playwright'
     "Login to a user account."
     url = f"{settings['BASE_URL']}"
     page.goto(url)
     # page.click("""[placeholder="Email address of account"]""")
-    page.fill("""[placeholder="Email address of account"]""",settings["USERNAME"])
+    page.fill("""[placeholder="Email address of account"]""", settings["USERNAME"])
     page.press("""[placeholder="Email address of account"]""", "Tab")
     page.fill("""input[name="password"]""", settings["PASSWORD"])
     page.click("""button:has-text("Login")""")

@@ -1,0 +1,14 @@
+FROM python:alpine
+
+RUN apk update && apk upgrade
+
+COPY ./requirements.txt /requirements.txt
+RUN pip install -r /requirements.txt
+COPY ./orderportal /code/orderportal
+RUN mkdir /code/site
+WORKDIR /code/orderportal
+ENV PYTHONPATH /code
+
+CMD ["python3", "orderportal/app_orderportal.py"]
+
+VOLUME ["/code/site"]

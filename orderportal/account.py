@@ -2,8 +2,6 @@
 
 import csv
 import logging
-from collections import OrderedDict as OD
-from io import StringIO
 
 import tornado.web
 
@@ -22,39 +20,41 @@ class AccountSaver(saver.Saver):
     doctype = constants.ACCOUNT
 
     def set_email(self, email):
-        assert self.get('email') is None # Email must not have been set.
+        assert self.get("email") is None  # Email must not have been set.
         email = email.strip().lower()
-        if not email: raise ValueError('No email given.')
+        if not email:
+            raise ValueError("No email given.")
         if not constants.EMAIL_RX.match(email):
-            raise ValueError('Malformed email value.')
+            raise ValueError("Malformed email value.")
         if len(list(self.db.view("account", "email", key=email))) > 0:
-            raise ValueError('Email is already in use.'
-                             " Use 'Reset password' if you have lost it.")
-        self['email'] = email
+            raise ValueError(
+                "Email is already in use." " Use 'Reset password' if you have lost it."
+            )
+        self["email"] = email
 
     def erase_password(self):
-        self['password'] = None
+        self["password"] = None
 
     def set_password(self, new):
         utils.check_password(new)
-        self['code'] = None
+        self["code"] = None
         # Bypass ordinary 'set'; avoid logging password, even if hashed.
-        self.doc['password'] = utils.hashed_password(new)
-        self.changed['password'] = '******'
+        self.doc["password"] = utils.hashed_password(new)
+        self.changed["password"] = "******"
 
     def reset_password(self):
         "Invalidate any previous password and set activation code."
         self.erase_password()
-        self['code'] = utils.get_iuid()
+        self["code"] = utils.get_iuid()
 
     def check_required(self):
         "Check that required data is present. Raise ValueError otherwise."
-        if not self['first_name']:
-            raise ValueError('First name is required.')
-        if not self['last_name']:
-            raise ValueError('Last name is required.')
-        if not self['university']:
-            raise ValueError('University is required.')
+        if not self["first_name"]:
+            raise ValueError("First name is required.")
+        if not self["last_name"]:
+            raise ValueError("Last name is required.")
+        if not self["university"]:
+            raise ValueError("University is required.")
 
 
 class Accounts(RequestHandler):
@@ -64,89 +64,77 @@ class Accounts(RequestHandler):
     def get(self):
         self.check_staff()
         self.set_filter()
-        self.render('accounts.html', 
-                    accounts=self.get_accounts(),
-                    filter=self.filter)
+        self.render("accounts.html", accounts=self.get_accounts(), filter=self.filter)
 
     def set_filter(self):
         "Set the filter parameters dictionary."
         self.filter = dict()
-        for key in ['university', 'status', 'role']:
+        for key in ["university", "status", "role"]:
             try:
                 value = self.get_argument(key)
-                if not value: raise KeyError
+                if not value:
+                    raise KeyError
                 self.filter[key] = value
             except (tornado.web.MissingArgumentError, KeyError):
                 pass
 
     def get_accounts(self):
         "Get the accounts."
-        accounts = self.filter_by_university(self.filter.get('university'))
-        accounts = self.filter_by_role(self.filter.get('role'),
-                                       accounts=accounts)
-        accounts = self.filter_by_status(self.filter.get('status'),
-                                         accounts=accounts)
+        accounts = self.filter_by_university(self.filter.get("university"))
+        accounts = self.filter_by_role(self.filter.get("role"), accounts=accounts)
+        accounts = self.filter_by_status(self.filter.get("status"), accounts=accounts)
         # No filter; all accounts
         if accounts is None:
             view = self.db.view("account", "email", include_docs=True)
             accounts = [r.doc for r in view]
         # This is optimized for retrieval speed. The single-valued
         # function 'get_account_order_count' is not good enough here.
-        view = self.db.view("order",
-                            "owner",
-                            group_level=1,
-                            startkey=[''],
-                            endkey=[constants.CEILING])
+        view = self.db.view(
+            "order", "owner", group_level=1, startkey=[""], endkey=[constants.CEILING]
+        )
         counts = dict([(r.key[0], r.value) for r in view])
         for account in accounts:
-            account['order_count'] = counts.get(account['email'], 0)
-            account['name'] = utils.get_account_name(account=account)
+            account["order_count"] = counts.get(account["email"], 0)
+            account["name"] = utils.get_account_name(account=account)
         return accounts
 
     def filter_by_university(self, university, accounts=None):
         "Return accounts list if any university filter, or None if none."
-        if university == '[other]':
+        if university == "[other]":
             if accounts is None:
                 view = self.db.view("account", "email", include_docs=True)
                 accounts = [r.doc for r in view]
-            accounts = [a for a in accounts
-                        if a['university'] not in settings['UNIVERSITIES']]
+            accounts = [
+                a for a in accounts if a["university"] not in settings["UNIVERSITIES"]
+            ]
         elif university:
             if accounts is None:
-                view = self.db.view("account",
-                                    "university",
-                                    key=university,
-                                    include_docs=True)
+                view = self.db.view(
+                    "account", "university", key=university, include_docs=True
+                )
                 accounts = [r.doc for r in view]
             else:
-                account = [a for a in accounts
-                           if a['university'] == university]
+                account = [a for a in accounts if a["university"] == university]
         return accounts
 
     def filter_by_role(self, role, accounts=None):
         "Return accounts list if any role filter, or None if none."
         if role:
             if accounts is None:
-                view = self.db.view("account",
-                                    "role",
-                                    key=role,
-                                    include_docs=True)
+                view = self.db.view("account", "role", key=role, include_docs=True)
                 accounts = [r.doc for r in view]
             else:
-                accounts = [a for a in accounts if a['role'] == role]
+                accounts = [a for a in accounts if a["role"] == role]
         return accounts
 
     def filter_by_status(self, status, accounts=None):
         "Return accounts list if any status filter, or None if none."
         if status:
             if accounts is None:
-                view = self.db.view("account",
-                                    "status",
-                                    key=status,
-                                    include_docs=True)
+                view = self.db.view("account", "status", key=status, include_docs=True)
                 accounts = [r.doc for r in view]
             else:
-                accounts = [a for a in accounts if a['status'] == status]
+                accounts = [a for a in accounts if a["status"] == status]
         return accounts
 
 
@@ -159,43 +147,47 @@ class AccountsApiV1(Accounts):
         self.check_staff()
         self.set_filter()
         accounts = self.get_accounts()
-        data = utils.get_json(URL('accounts_api', **self.filter), 'accounts')
-        data['filter'] = self.filter
-        data['links'] = dict(api=dict(href=URL('accounts_api')),
-                             display=dict(href=URL('accounts')))
-        data['items'] = []
+        data = utils.get_json(URL("accounts_api", **self.filter), "accounts")
+        data["filter"] = self.filter
+        data["links"] = dict(
+            api=dict(href=URL("accounts_api")), display=dict(href=URL("accounts"))
+        )
+        data["items"] = []
         for account in accounts:
-            item = OD()
-            item['email'] = account['email']
-            item['links'] = dict(
-                api=dict(href=URL('account_api',account['email'])),
-                display=dict(href=URL('account',account['email'])))
-            name = last_name = account.get('last_name')
-            first_name = account.get('first_name')
+            item = dict()
+            item["email"] = account["email"]
+            item["links"] = dict(
+                api=dict(href=URL("account_api", account["email"])),
+                display=dict(href=URL("account", account["email"])),
+            )
+            name = last_name = account.get("last_name")
+            first_name = account.get("first_name")
             if name:
                 if first_name:
-                    name += ', ' + first_name
+                    name += ", " + first_name
             else:
                 name = first_name
-            item['name'] = name
-            item['first_name'] = first_name
-            item['last_name'] = last_name
-            item['pi'] = bool(account.get('pi'))
-            item['gender'] = account.get('gender')
-            item['university'] = account.get('university')
-            item['role'] = account['role']
-            item['status'] = account['status']
-            item['address'] = account.get('address') or {}
-            item['invoice_ref'] = account.get('invoice_ref')
-            item['invoice_address'] = account.get('invoice_address') or {}
-            item['login'] = account.get('login', '-')
-            item['modified'] = account['modified']
-            item['orders'] = dict(
-                count=account['order_count'],
+            item["name"] = name
+            item["first_name"] = first_name
+            item["last_name"] = last_name
+            item["pi"] = bool(account.get("pi"))
+            item["gender"] = account.get("gender")
+            item["university"] = account.get("university")
+            item["role"] = account["role"]
+            item["status"] = account["status"]
+            item["address"] = account.get("address") or {}
+            item["invoice_ref"] = account.get("invoice_ref")
+            item["invoice_address"] = account.get("invoice_address") or {}
+            item["login"] = account.get("login", "-")
+            item["modified"] = account["modified"]
+            item["orders"] = dict(
+                count=account["order_count"],
                 links=dict(
-                    display=dict(href=URL('account_orders', account['email'])),
-                    api=dict(href=URL('account_orders_api', account['email']))))
-            data['items'].append(item)
+                    display=dict(href=URL("account_orders", account["email"])),
+                    api=dict(href=URL("account_orders_api", account["email"])),
+                ),
+            )
+            data["items"].append(item)
         self.write(data)
 
 
@@ -209,49 +201,75 @@ class AccountsCsv(Accounts):
         self.set_filter()
         accounts = self.get_accounts()
         writer = self.get_writer()
-        writer.writerow((settings['SITE_NAME'], utils.today()))
-        writer.writerow(('Email', 'Last name', 'First name', 'Role',
-                         'Status', 'Order count', 'University',
-                         'Department', 'PI', 'Gender', 'Group size',
-                         'Subject', 'Address', 'Zip', 'City', 'Country',
-                         'Invoice ref', 'Invoice address', 'Invoice zip',
-                         'Invoice city', 'Invoice country', 'Phone',
-                         'Other data', 'Latest login', 'Modified', 'Created'))
+        writer.writerow((settings["SITE_NAME"], utils.today()))
+        writer.writerow(
+            (
+                "Email",
+                "Last name",
+                "First name",
+                "Role",
+                "Status",
+                "Order count",
+                "University",
+                "Department",
+                "PI",
+                "Gender",
+                "Group size",
+                "Subject",
+                "Address",
+                "Zip",
+                "City",
+                "Country",
+                "Invoice ref",
+                "Invoice address",
+                "Invoice zip",
+                "Invoice city",
+                "Invoice country",
+                "Phone",
+                "Other data",
+                "Latest login",
+                "Modified",
+                "Created",
+            )
+        )
         for account in accounts:
-            addr = account.get('address') or dict()
-            iaddr = account.get('invoice_address') or dict()
+            addr = account.get("address") or dict()
+            iaddr = account.get("invoice_address") or dict()
             try:
                 subject = "{0}: {1}".format(
-                    account.get('subject'),
-                    settings['subjects_lookup'][account.get('subject')])
+                    account.get("subject"),
+                    settings["subjects_lookup"][account.get("subject")],
+                )
             except KeyError:
-                subject = ''
-            row = [account['email'],
-                   account.get('last_name') or '',
-                   account.get('first_name') or '',
-                   account['role'],
-                   account['status'],
-                   account['order_count'],
-                   account.get('university') or '',
-                   account.get('department') or '',
-                   account.get('pi') and 'yes' or 'no',
-                   account.get('gender') or '',
-                   account.get('group_size') or '',
-                   subject,
-                   addr.get('address') or '',
-                   addr.get('zip') or '',
-                   addr.get('city') or '',
-                   addr.get('country') or '',
-                   account.get('invoice_ref') or '',
-                   iaddr.get('address') or '',
-                   iaddr.get('zip') or '',
-                   iaddr.get('city') or '',
-                   iaddr.get('country') or '',
-                   account.get('phone') or '',
-                   account.get('other_data') or '',
-                   account.get('login') or '',
-                   account.get('modified') or '',
-                   account.get('created') or '']
+                subject = ""
+            row = [
+                account["email"],
+                account.get("last_name") or "",
+                account.get("first_name") or "",
+                account["role"],
+                account["status"],
+                account["order_count"],
+                account.get("university") or "",
+                account.get("department") or "",
+                account.get("pi") and "yes" or "no",
+                account.get("gender") or "",
+                account.get("group_size") or "",
+                subject,
+                addr.get("address") or "",
+                addr.get("zip") or "",
+                addr.get("city") or "",
+                addr.get("country") or "",
+                account.get("invoice_ref") or "",
+                iaddr.get("address") or "",
+                iaddr.get("zip") or "",
+                iaddr.get("city") or "",
+                iaddr.get("country") or "",
+                account.get("phone") or "",
+                account.get("other_data") or "",
+                account.get("login") or "",
+                account.get("modified") or "",
+                account.get("created") or "",
+            ]
             writer.writerow(row)
         self.write(writer.getvalue())
         self.write_finish()
@@ -260,9 +278,8 @@ class AccountsCsv(Accounts):
         return utils.CsvWriter()
 
     def write_finish(self):
-        self.set_header('Content-Type', constants.CSV_MIME)
-        self.set_header('Content-Disposition', 
-                        'attachment; filename="accounts.csv"')
+        self.set_header("Content-Type", constants.CSV_MIME)
+        self.set_header("Content-Disposition", 'attachment; filename="accounts.csv"')
 
 
 class AccountsXlsx(AccountsCsv):
@@ -272,9 +289,8 @@ class AccountsXlsx(AccountsCsv):
         return utils.XlsxWriter()
 
     def write_finish(self):
-        self.set_header('Content-Type', constants.XLSX_MIME)
-        self.set_header('Content-Disposition', 
-                        'attachment; filename="accounts.xlsx"')
+        self.set_header("Content-Type", constants.XLSX_MIME)
+        self.set_header("Content-Disposition", 'attachment; filename="accounts.xlsx"')
 
 
 class AccountMixin(object):
@@ -282,26 +298,33 @@ class AccountMixin(object):
 
     def is_readable(self, account):
         "Is the account readable by the current user?"
-        if self.is_owner(account): return True
-        if self.is_staff(): return True
-        if self.is_colleague(account['email']): return True
+        if self.is_owner(account):
+            return True
+        if self.is_staff():
+            return True
+        if self.is_colleague(account["email"]):
+            return True
         return False
 
     def check_readable(self, account):
         "Check that the account is readable by the current user."
-        if self.is_readable(account): return
-        raise ValueError('You may not read the account.')
+        if self.is_readable(account):
+            return
+        raise ValueError("You may not read the account.")
 
     def is_editable(self, account):
         "Is the account editable by the current user?"
-        if self.is_owner(account): return True
-        if self.is_staff(): return True
+        if self.is_owner(account):
+            return True
+        if self.is_staff():
+            return True
         return False
 
     def check_editable(self, account):
         "Check that the account is editable by the current user."
-        if self.is_readable(account): return
-        raise ValueError('You may not edit the account.')
+        if self.is_readable(account):
+            return
+        raise ValueError("You may not edit the account.")
 
 
 class Account(AccountMixin, RequestHandler):
@@ -313,39 +336,45 @@ class Account(AccountMixin, RequestHandler):
             account = self.get_account(email)
             self.check_readable(account)
         except ValueError as msg:
-            self.see_other('home', error=str(msg))
+            self.see_other("home", error=str(msg))
             return
-        account['order_count'] = self.get_account_order_count(account['email'])
-        view = self.db.view("log",
-                            "account",
-                            startkey=[account['email'], constants.CEILING],
-                            endkey=[account['email']],
-                            descending=True,
-                            limit=1)
+        account["order_count"] = self.get_account_order_count(account["email"])
+        view = self.db.view(
+            "log",
+            "account",
+            startkey=[account["email"], constants.CEILING],
+            endkey=[account["email"]],
+            descending=True,
+            limit=1,
+        )
         try:
             key = list(view)[0].key
-            if key[0] != account['email']: raise IndexError
+            if key[0] != account["email"]:
+                raise IndexError
             latest_activity = key[1]
         except IndexError:
             latest_activity = None
-        if self.is_staff() or self.current_user['email'] == account['email']:
-            invitations = self.get_invitations(account['email'])
+        if self.is_staff() or self.current_user["email"] == account["email"]:
+            invitations = self.get_invitations(account["email"])
         else:
             invitations = []
-        self.render('account.html',
-                    account=account,
-                    groups=self.get_account_groups(account['email']),
-                    latest_activity=latest_activity,
-                    invitations=invitations,
-                    is_deletable=self.is_deletable(account))
+        self.render(
+            "account.html",
+            account=account,
+            groups=self.get_account_groups(account["email"]),
+            latest_activity=latest_activity,
+            invitations=invitations,
+            is_deletable=self.is_deletable(account),
+        )
 
     @tornado.web.authenticated
     def post(self, email):
-        if self.get_argument('_http_method', None) == 'delete':
+        if self.get_argument("_http_method", None) == "delete":
             self.delete(email)
             return
         raise tornado.web.HTTPError(
-            405, reason='Internal problem; POST only allowed for DELETE.')
+            405, reason="Internal problem; POST only allowed for DELETE."
+        )
 
     @tornado.web.authenticated
     def delete(self, email):
@@ -353,51 +382,51 @@ class Account(AccountMixin, RequestHandler):
         account = self.get_account(email)
         self.check_admin()
         if not self.is_deletable(account):
-            self.see_other('account', account['email'],
-                           error='Account cannot be deleted.')
+            self.see_other(
+                "account", account["email"], error="Account cannot be deleted."
+            )
             return
         # Delete the groups this account owns.
-        view = self.db.view("group",
-                            "owner",
-                            include_docs=True,
-                            key=account['email'])
+        view = self.db.view("group", "owner", include_docs=True, key=account["email"])
         for row in view:
             group = row.doc
-            self.delete_logs(group['_id'])
+            self.delete_logs(group["_id"])
             self.db.delete(group)
         # Remove this account from groups it is a member of.
-        view = self.db.view("group",
-                            "owner",
-                            include_docs=True,
-                            key=account['email'])
+        view = self.db.view("group", "owner", include_docs=True, key=account["email"])
         for row in view:
             group = row.doc
             with GroupSaver(doc=row, rqh=self) as saver:
-                members = set(group['members'])
-                members.discard(account['email'])
-                saver['members'] = sorted(members)
+                members = set(group["members"])
+                members.discard(account["email"])
+                saver["members"] = sorted(members)
         # Delete the messages of the account.
-        view = self.db.view("message",
-                            "recipient",
-                            reduce=False,
-                            include_docs=True,
-                            startkey=[account['email']],
-                            endkey=[account['email'], constants.CEILING])
+        view = self.db.view(
+            "message",
+            "recipient",
+            reduce=False,
+            include_docs=True,
+            startkey=[account["email"]],
+            endkey=[account["email"], constants.CEILING],
+        )
         for row in view:
             message = row.doc
-            self.delete_logs(message['_id'])
+            self.delete_logs(message["_id"])
             self.db.delete(message)
         # Delete the logs of the account.
-        self.delete_logs(account['_id'])
+        self.delete_logs(account["_id"])
         # Delete the account itself.
         self.db.delete(account)
-        self.see_other('accounts')
+        self.see_other("accounts")
 
     def is_deletable(self, account):
         "Can the account be deleted? Pending, or disabled and no orders."
-        if account['status'] == constants.PENDING: return True
-        if account['status'] == constants.ENABLED: return False
-        if self.get_account_order_count(account['email']) == 0: return True
+        if account["status"] == constants.PENDING:
+            return True
+        if account["status"] == constants.ENABLED:
+            return False
+        if self.get_account_order_count(account["email"]) == 0:
+            return True
         return False
 
 
@@ -414,46 +443,50 @@ class AccountApiV1(AccountMixin, RequestHandler):
             self.check_readable(account)
         except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        data = utils.get_json(URL('account', email), 'account')
-        data['email'] = account['email']
-        name = last_name = account.get('last_name')
-        first_name = account.get('first_name')
+        data = utils.get_json(URL("account", email), "account")
+        data["email"] = account["email"]
+        name = last_name = account.get("last_name")
+        first_name = account.get("first_name")
         if name:
             if first_name:
-                name += ', ' + first_name
+                name += ", " + first_name
         else:
             name = first_name
-        data['links'] = dict(
-            api=dict(href=URL('account_api', account['email'])),
-            display=dict(href=URL('account', account['email'])))
-        data['name'] = name
-        data['first_name'] = first_name
-        data['last_name'] = last_name
-        data['pi'] = bool(account.get('pi'))
-        data['university'] = account['university']
-        data['role'] = account['role']
-        data['gender'] = account.get('gender')
-        data['group_size'] = account.get('group_size')
-        data['status'] = account['status']
-        data['address'] = account.get('address') or {}
-        data['invoice_ref'] = account.get('invoice_ref')
-        data['invoice_address'] = account.get('invoice_address') or {}
-        data['login'] = account.get('login', '-')
-        data['modified'] = account['modified']
-        view = self.db.view("log",
-                            "account",
-                            startkey=[account['email'], constants.CEILING],
-                            endkey=[account['email']],
-                            descending=True,
-                            limit=1)
+        data["links"] = dict(
+            api=dict(href=URL("account_api", account["email"])),
+            display=dict(href=URL("account", account["email"])),
+        )
+        data["name"] = name
+        data["first_name"] = first_name
+        data["last_name"] = last_name
+        data["pi"] = bool(account.get("pi"))
+        data["university"] = account["university"]
+        data["role"] = account["role"]
+        data["gender"] = account.get("gender")
+        data["group_size"] = account.get("group_size")
+        data["status"] = account["status"]
+        data["address"] = account.get("address") or {}
+        data["invoice_ref"] = account.get("invoice_ref")
+        data["invoice_address"] = account.get("invoice_address") or {}
+        data["login"] = account.get("login", "-")
+        data["modified"] = account["modified"]
+        view = self.db.view(
+            "log",
+            "account",
+            startkey=[account["email"], constants.CEILING],
+            endkey=[account["email"]],
+            descending=True,
+            limit=1,
+        )
         try:
-            data['latest_activity'] = list(view)[0].key[1]
+            data["latest_activity"] = list(view)[0].key[1]
         except IndexError:
-            data['latest_activity'] = None
-        data['orders'] = dict(
-            count=self.get_account_order_count(account['email']),
-            display=dict(href=URL('account_orders', account['email'])),
-            api=dict(href=URL('account_orders_api', account['email'])))
+            data["latest_activity"] = None
+        data["orders"] = dict(
+            count=self.get_account_order_count(account["email"]),
+            display=dict(href=URL("account_orders", account["email"])),
+            api=dict(href=URL("account_orders_api", account["email"])),
+        )
         self.write(data)
 
 
@@ -462,26 +495,32 @@ class AccountOrdersMixin(object):
 
     def is_readable(self, account):
         "Is the account readable by the current user?"
-        if account['email'] == self.current_user['email']: return True
-        if self.is_staff(): return True
-        if self.is_colleague(account['email']): return True
+        if account["email"] == self.current_user["email"]:
+            return True
+        if self.is_staff():
+            return True
+        if self.is_colleague(account["email"]):
+            return True
         return False
 
     def check_readable(self, account):
         "Check that the account is readable by the current user."
-        if self.is_readable(account): return
-        raise ValueError('You may not view these orders.')
+        if self.is_readable(account):
+            return
+        raise ValueError("You may not view these orders.")
 
     def get_group_orders(self, account):
         "Return all orders for the accounts in the account's group."
         orders = []
-        for colleague in self.get_account_colleagues(account['email']):
-            view = self.db.view("order",
-                                "owner",
-                                reduce=False,
-                                include_docs=True,
-                                startkey=[colleague],
-                                endkey=[colleague, constants.CEILING])
+        for colleague in self.get_account_colleagues(account["email"]):
+            view = self.db.view(
+                "order",
+                "owner",
+                reduce=False,
+                include_docs=True,
+                startkey=[colleague],
+                endkey=[colleague, constants.CEILING],
+            )
             orders.extend([r.doc for r in view])
         return orders
 
@@ -495,33 +534,36 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
             account = self.get_account(email)
             self.check_readable(account)
         except ValueError as msg:
-            self.see_other('home', error=str(msg))
+            self.see_other("home", error=str(msg))
             return
         if self.is_staff():
             order_column = 4
         else:
             order_column = 3
-        order_column += len(settings['ORDERS_LIST_STATUSES']) + \
-            len(settings['ORDERS_LIST_FIELDS'])
-        view = self.db.view("order",
-                            "owner",
-                            reduce=False,
-                            include_docs=True,
-                            startkey=[account['email']],
-                            endkey=[account['email'], constants.CEILING])
+        order_column += len(settings["ORDERS_LIST_STATUSES"]) + len(
+            settings["ORDERS_LIST_FIELDS"]
+        )
+        view = self.db.view(
+            "order",
+            "owner",
+            reduce=False,
+            include_docs=True,
+            startkey=[account["email"]],
+            endkey=[account["email"], constants.CEILING],
+        )
         orders = [r.doc for r in view]
-        self.render('account_orders.html',
-                    forms_lookup=self.get_forms_lookup(),
-                    orders=orders,
-                    account=account,
-                    order_column=order_column,
-                    account_names=self.get_account_names(),
-                    any_groups=bool(self.get_account_groups(account['email'])))
+        self.render(
+            "account_orders.html",
+            forms_lookup=self.get_forms_lookup(),
+            orders=orders,
+            account=account,
+            order_column=order_column,
+            account_names=self.get_account_names(),
+            any_groups=bool(self.get_account_groups(account["email"])),
+        )
 
 
-class AccountOrdersApiV1(AccountOrdersMixin,
-                         OrderApiV1Mixin,
-                         RequestHandler):
+class AccountOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandler):
     "Account orders API; JSON output."
 
     def get(self, email):
@@ -537,21 +579,25 @@ class AccountOrdersApiV1(AccountOrdersMixin,
             raise tornado.web.HTTPError(403, reason=str(msg))
         account_names = self.get_account_names()
         forms_lookup = self.get_forms_lookup()
-        data = utils.get_json(URL('account_orders', account['email']),
-                              'account orders')
-        data['links'] = dict(
-            api=dict(href=URL('account_orders_api', account['email'])),
-            display=dict(href=URL('account_orders', account['email'])))
-        view = self.db.view("order",
-                            "owner",
-                            reduce=False,
-                            include_docs=True,
-                            startkey=[account['email']],
-                            endkey=[account['email'], constants.CEILING])
-        data['orders'] = [self.get_order_json(r.doc,
-                                              account_names=account_names,
-                                              forms_lookup=forms_lookup)
-                          for r in view]
+        data = utils.get_json(URL("account_orders", account["email"]), "account orders")
+        data["links"] = dict(
+            api=dict(href=URL("account_orders_api", account["email"])),
+            display=dict(href=URL("account_orders", account["email"])),
+        )
+        view = self.db.view(
+            "order",
+            "owner",
+            reduce=False,
+            include_docs=True,
+            startkey=[account["email"]],
+            endkey=[account["email"], constants.CEILING],
+        )
+        data["orders"] = [
+            self.get_order_json(
+                r.doc, account_names=account_names, forms_lookup=forms_lookup
+            )
+            for r in view
+        ]
         self.write(data)
 
 
@@ -564,24 +610,25 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
             account = self.get_account(email)
             self.check_readable(account)
         except ValueError as msg:
-            self.see_other('home', error=str(msg))
+            self.see_other("home", error=str(msg))
             return
         if self.is_staff():
             order_column = 5
         else:
             order_column = 4
-        order_column += len(settings['ORDERS_LIST_STATUSES']) + \
-            len(settings['ORDERS_LIST_FIELDS'])
-        self.render('account_groups_orders.html',
-                    account=account,
-                    forms_lookup=self.get_forms_lookup(),
-                    orders=self.get_group_orders(account),
-                    order_column=order_column)
+        order_column += len(settings["ORDERS_LIST_STATUSES"]) + len(
+            settings["ORDERS_LIST_FIELDS"]
+        )
+        self.render(
+            "account_groups_orders.html",
+            account=account,
+            forms_lookup=self.get_forms_lookup(),
+            orders=self.get_group_orders(account),
+            order_column=order_column,
+        )
 
 
-class AccountGroupsOrdersApiV1(AccountOrdersMixin, 
-                               OrderApiV1Mixin,
-                               RequestHandler):
+class AccountGroupsOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandler):
     "Account group orders API; JSON output."
 
     def get(self, email):
@@ -597,15 +644,19 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin,
             raise tornado.web.HTTPError(403, reason=str(msg))
         account_names = self.get_account_names()
         forms_lookup = self.get_forms_lookup()
-        data = utils.get_json(URL('account_groups_orders_api',account['email']),
-                              'account groups orders')
-        data['links'] = dict(
-            api=dict(href=URL('account_groups_orders_api', account['email'])),
-            display=dict(href=URL('account_groups_orders', account['email'])))
-        data['orders'] = [self.get_order_json(o,
-                                              account_names=account_names,
-                                              forms_lookup=forms_lookup)
-                          for o in self.get_group_orders(account)]
+        data = utils.get_json(
+            URL("account_groups_orders_api", account["email"]), "account groups orders"
+        )
+        data["links"] = dict(
+            api=dict(href=URL("account_groups_orders_api", account["email"])),
+            display=dict(href=URL("account_groups_orders", account["email"])),
+        )
+        data["orders"] = [
+            self.get_order_json(
+                o, account_names=account_names, forms_lookup=forms_lookup
+            )
+            for o in self.get_group_orders(account)
+        ]
         self.write(data)
 
 
@@ -618,11 +669,9 @@ class AccountLogs(AccountMixin, RequestHandler):
             account = self.get_account(email)
             self.check_readable(account)
         except ValueError as msg:
-            self.see_other('home', error=str(msg))
+            self.see_other("home", error=str(msg))
             return
-        self.render('logs.html',
-                    entity=account,
-                    logs=self.get_logs(account['_id']))
+        self.render("logs.html", entity=account, logs=self.get_logs(account["_id"]))
 
 
 class AccountMessages(AccountMixin, RequestHandler):
@@ -635,23 +684,25 @@ class AccountMessages(AccountMixin, RequestHandler):
             account = self.get_account(email)
             self.check_readable(account)
         except ValueError as msg:
-            self.see_other('home', error=str(msg))
+            self.see_other("home", error=str(msg))
             return
-        view = self.db.view("message",
-                            "recipient",
-                            startkey=[account['email']],
-                            endkey=[account['email'], constants.CEILING])
-        view = self.db.view("message",
-                            "recipient",
-                            descending=True,
-                            startkey=[account['email'], constants.CEILING],
-                            endkey=[account['email']],
-                            reduce=False,
-                            include_docs=True)
+        view = self.db.view(
+            "message",
+            "recipient",
+            startkey=[account["email"]],
+            endkey=[account["email"], constants.CEILING],
+        )
+        view = self.db.view(
+            "message",
+            "recipient",
+            descending=True,
+            startkey=[account["email"], constants.CEILING],
+            endkey=[account["email"]],
+            reduce=False,
+            include_docs=True,
+        )
         messages = [r.doc for r in view]
-        self.render('account_messages.html',
-                    account=account,
-                    messages=messages)
+        self.render("account_messages.html", account=account, messages=messages)
 
 
 class AccountEdit(AccountMixin, RequestHandler):
@@ -663,9 +714,9 @@ class AccountEdit(AccountMixin, RequestHandler):
             account = self.get_account(email)
             self.check_editable(account)
         except ValueError as msg:
-            self.see_other('account', account['email'], error=str(msg))
+            self.see_other("account", account["email"], error=str(msg))
             return
-        self.render('account_edit.html', account=account)
+        self.render("account_edit.html", account=account)
 
     @tornado.web.authenticated
     def post(self, email):
@@ -673,64 +724,66 @@ class AccountEdit(AccountMixin, RequestHandler):
             account = self.get_account(email)
             self.check_editable(account)
         except ValueError as msg:
-            self.see_other('account_edit', account['email'], error=str(msg))
+            self.see_other("account_edit", account["email"], error=str(msg))
             return
         try:
             with AccountSaver(doc=account, rqh=self) as saver:
                 # Only admin may change role of an account.
                 if self.is_admin():
-                    role = self.get_argument('role')
+                    role = self.get_argument("role")
                     if role not in constants.ACCOUNT_ROLES:
-                        raise ValueError('Invalid role.')
-                    saver['role'] = role
-                saver['first_name'] = self.get_argument('first_name')
-                saver['last_name'] = self.get_argument('last_name')
-                university = self.get_argument('university', None)
+                        raise ValueError("Invalid role.")
+                    saver["role"] = role
+                saver["first_name"] = self.get_argument("first_name")
+                saver["last_name"] = self.get_argument("last_name")
+                university = self.get_argument("university", None)
                 if not university:
-                    university = self.get_argument('university_other', None)
-                saver['university'] = university
-                saver['department'] = self.get_argument('department', None)
-                saver['pi'] = utils.to_bool(self.get_argument('pi', False))
+                    university = self.get_argument("university_other", None)
+                saver["university"] = university
+                saver["department"] = self.get_argument("department", None)
+                saver["pi"] = utils.to_bool(self.get_argument("pi", False))
                 try:
-                    saver['gender'] = self.get_argument('gender').lower()
+                    saver["gender"] = self.get_argument("gender").lower()
                 except tornado.web.MissingArgumentError:
-                    saver.doc.pop('gender', None)
+                    saver.doc.pop("gender", None)
                 try:
-                    saver['group_size'] = self.get_argument('group_size')
+                    saver["group_size"] = self.get_argument("group_size")
                 except tornado.web.MissingArgumentError:
-                    saver.doc.pop('group_size', None)
+                    saver.doc.pop("group_size", None)
                 try:
-                    saver['subject'] = int(self.get_argument('subject'))
-                except (tornado.web.MissingArgumentError, ValueError,TypeError):
-                    saver['subject'] = None
-                saver['address'] = dict(
-                    address=self.get_argument('address', None),
-                    zip=self.get_argument('zip', None),
-                    city=self.get_argument('city', None),
-                    country=self.get_argument('country', None))
-                saver['invoice_ref'] = self.get_argument('invoice_ref', None)
-                saver['invoice_address'] = dict(
-                    address=self.get_argument('invoice_address', None),
-                    zip=self.get_argument('invoice_zip', None),
-                    city=self.get_argument('invoice_city', None),
-                    country=self.get_argument('invoice_country', None))
-                saver['phone'] = self.get_argument('phone', None)
-                saver['other_data'] = self.get_argument('other_data', None)
-                if utils.to_bool(self.get_argument('api_key', False)):
-                    saver['api_key'] = utils.get_iuid()
-                saver['update_info'] = False
+                    saver["subject"] = int(self.get_argument("subject"))
+                except (tornado.web.MissingArgumentError, ValueError, TypeError):
+                    saver["subject"] = None
+                saver["address"] = dict(
+                    address=self.get_argument("address", None),
+                    zip=self.get_argument("zip", None),
+                    city=self.get_argument("city", None),
+                    country=self.get_argument("country", None),
+                )
+                saver["invoice_ref"] = self.get_argument("invoice_ref", None)
+                saver["invoice_address"] = dict(
+                    address=self.get_argument("invoice_address", None),
+                    zip=self.get_argument("invoice_zip", None),
+                    city=self.get_argument("invoice_city", None),
+                    country=self.get_argument("invoice_country", None),
+                )
+                saver["phone"] = self.get_argument("phone", None)
+                saver["other_data"] = self.get_argument("other_data", None)
+                if utils.to_bool(self.get_argument("api_key", False)):
+                    saver["api_key"] = utils.get_iuid()
+                saver["update_info"] = False
                 saver.check_required()
         except ValueError as msg:
-            self.see_other('account_edit', account['email'], error=str(msg))
+            self.see_other("account_edit", account["email"], error=str(msg))
         else:
-            self.see_other('account', account['email'])
+            self.see_other("account", account["email"])
 
 
 class Login(RequestHandler):
     "Login to a account account. Set a secure cookie."
 
     def get(self):
-        self.render('login.html', next=self.get_argument('next', None))
+        self.render("login.html", next=self.get_argument("next", None))
 
     def post(self):
         """Login to a account account. Set a secure cookie.
@@ -738,71 +791,84 @@ class Login(RequestHandler):
         Log failed login attempt. Disable account if too many recent.
         """
         try:
-            email = self.get_argument('email')
-            password = self.get_argument('password')
+            email = self.get_argument("email")
+            password = self.get_argument("password")
         except tornado.web.MissingArgumentError:
-            self.see_other('home', error='Missing email or password argument.')
+            self.see_other("home", error="Missing email or password argument.")
             return
-        msg = 'Sorry, no such account or invalid password.'
+        msg = "Sorry, no such account or invalid password."
         try:
             account = self.get_account(email)
         except ValueError as msg:
-            self.see_other('home', error=str(msg))
+            self.see_other("home", error=str(msg))
             return
-        if utils.hashed_password(password) != account.get('password'):
-            utils.log(self.db, self, account,
-                      changed=dict(login_failure=account['email']))
-            view = self.db.view("log",
-                                "login_failure",
-                                startkey=[account['_id'], utils.timestamp(-1)],
-                                endkey=[account['_id'], utils.timestamp()])
+        if utils.hashed_password(password) != account.get("password"):
+            utils.log(
+                self.db, self, account, changed=dict(login_failure=account["email"])
+            )
+            view = self.db.view(
+                "log",
+                "login_failure",
+                startkey=[account["_id"], utils.timestamp(-1)],
+                endkey=[account["_id"], utils.timestamp()],
+            )
             # Disable account if too many recent login failures.
-            if len(list(view)) > settings['LOGIN_MAX_FAILURES']:
-                logging.warning("account %s has been disabled due to"
-                                " too many login failures", account['email'])
+            if len(list(view)) > settings["LOGIN_MAX_FAILURES"]:
+                logging.warning(
+                    "account %s has been disabled due to" " too many login failures",
+                    account["email"],
+                )
                 with AccountSaver(doc=account, rqh=self) as saver:
-                    saver['status'] = constants.DISABLED
+                    saver["status"] = constants.DISABLED
                     saver.erase_password()
-                msg = "Too many failed login attempts: Your account has been" \
-                      " disabled. Contact the site administrator %s." % \
-                      settings.get('SITE_SUPPORT_EMAIL', '')
+                msg = (
+                    "Too many failed login attempts: Your account has been"
+                    " disabled. Contact the site administrator %s."
+                    % settings.get("SITE_SUPPORT_EMAIL", "")
+                )
                 # Prepare email message
                 try:
-                    template = settings['ACCOUNT_MESSAGES'][constants.DISABLED]
+                    template = settings["ACCOUNT_MESSAGES"][constants.DISABLED]
                 except KeyError:
                     pass
                 else:
                     with MessageSaver(rqh=self) as saver:
                         saver.create(template)
                         # Recipient is hardwired here.
-                        saver.send([account['email']])
-            self.see_other('home', error=msg)
+                        saver.send([account["email"]])
+            self.see_other("home", error=msg)
             return
         try:
-            if not account.get('status') == constants.ENABLED:
+            if not account.get("status") == constants.ENABLED:
                 raise ValueError
         except ValueError:
-            msg = "Account is disabled. Contact the site administrator %s." % \
-                  settings.get('SITE_SUPPORT_EMAIL', '')
-            self.see_other('home', error=msg)
+            msg = (
+                "Account is disabled. Contact the site administrator %s."
+                % settings.get("SITE_SUPPORT_EMAIL", "")
+            )
+            self.see_other("home", error=msg)
             return
-        if not self.global_modes['allow_login'] \
-           and account['role'] != constants.ADMIN:
-            self.see_other('home', error='Login is currently disabled.')
+        if not self.global_modes["allow_login"] and account["role"] != constants.ADMIN:
+            self.see_other("home", error="Login is currently disabled.")
             return
-        self.set_secure_cookie(constants.USER_COOKIE, 
-                               account['email'],
-                               expires_days=settings['LOGIN_MAX_AGE_DAYS'])
-        logging.info("Basic auth login: account %s", account['email'])
+        self.set_secure_cookie(
+            constants.USER_COOKIE,
+            account["email"],
+            expires_days=settings["LOGIN_MAX_AGE_DAYS"],
+        )
+        logging.info("Basic auth login: account %s", account["email"])
         with AccountSaver(doc=account, rqh=self) as saver:
-            saver['login'] = utils.timestamp() # Set login timestamp.
-        if account.get('update_info'):
-            self.see_other('account_edit', account['email'],
-                           message='Please review and update your account information.')
+            saver["login"] = utils.timestamp()  # Set login timestamp.
+        if account.get("update_info"):
+            self.see_other(
+                "account_edit",
+                account["email"],
+                message="Please review and update your account information.",
+            )
             return
-        next = self.get_argument('next', None)
+        next = self.get_argument("next", None)
         if next is None:
-            self.see_other('home')
+            self.see_other("home")
         else:
             # Not quite right: should be an absolute URL to redirect.
             # But seems to work anyway.
@@ -814,209 +880,242 @@ class Logout(RequestHandler):
 
     @tornado.web.authenticated
     def post(self):
-        self.set_secure_cookie(constants.USER_COOKIE, '')
-        self.see_other('home')
+        self.set_secure_cookie(constants.USER_COOKIE, "")
+        self.see_other("home")
 
 
 class Reset(RequestHandler):
     "Reset the password of a account account."
 
     def get(self):
-        self.render('reset.html', email=self.get_argument('email', ''))
+        self.render("reset.html", email=self.get_argument("email", ""))
 
     def post(self):
         URL = self.absolute_reverse_url
         try:
-            account = self.get_account(self.get_argument('email'))
+            account = self.get_account(self.get_argument("email"))
         except (tornado.web.MissingArgumentError, ValueError):
-            self.see_other('home') # Silent error! Should not show existence.
+            self.see_other("home")  # Silent error! Should not show existence.
         else:
-            if account.get('status') == constants.PENDING:
-                self.see_other('home',
-                               error='Cannot reset password. Account has not been enabled.')
+            if account.get("status") == constants.PENDING:
+                self.see_other(
+                    "home", error="Cannot reset password. Account has not been enabled."
+                )
                 return
-            elif account.get('status') == constants.DISABLED:
-                self.see_other('home',
-                               error='Cannot reset password. Account is disabled; contact the site admin.')
+            elif account.get("status") == constants.DISABLED:
+                self.see_other(
+                    "home",
+                    error="Cannot reset password. Account is disabled; contact the site admin.",
+                )
                 return
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver.reset_password()
             try:
-                template = settings['ACCOUNT_MESSAGES'][constants.RESET]
+                template = settings["ACCOUNT_MESSAGES"][constants.RESET]
             except KeyError:
                 pass
             else:
                 with MessageSaver(rqh=self) as saver:
-                    saver.create(template,
-                                 account=account['email'],
-                                 url=URL('password'),
-                                 password_url=URL('password'),
-                                 password_code_url=URL('password',
-                                                       email=account['email'],
-                                                       code=account['code']),
-                                 code=account['code'])
+                    saver.create(
+                        template,
+                        account=account["email"],
+                        url=URL("password"),
+                        password_url=URL("password"),
+                        password_code_url=URL(
+                            "password", email=account["email"], code=account["code"]
+                        ),
+                        code=account["code"],
+                    )
                     # Recipient is hardwired here.
-                    saver.send([account['email']])
+                    saver.send([account["email"]])
             if self.current_user:
                 if not self.is_admin():
                     # Log out the user
-                    self.set_secure_cookie(constants.USER_COOKIE, '')
-            self.see_other('home',
-                           message="An email has been sent containing"
-                           " a reset code. Use the link in the email."
-                           " (Check your spam filter!)")
+                    self.set_secure_cookie(constants.USER_COOKIE, "")
+            self.see_other(
+                "home",
+                message="An email has been sent containing"
+                " a reset code. Use the link in the email."
+                " (Check your spam filter!)",
+            )
 
 
 class Password(RequestHandler):
     "Set the password of a account account; requires a code."
 
     def get(self):
-        self.render('password.html',
-                    title='Set your password',
-                    email=self.get_argument('email', default=''),
-                    code=self.get_argument('code', default=''))
+        self.render(
+            "password.html",
+            title="Set your password",
+            email=self.get_argument("email", default=""),
+            code=self.get_argument("code", default=""),
+        )
 
     def post(self):
         try:
-            account = self.get_account(self.get_argument('email', ''))
+            account = self.get_account(self.get_argument("email", ""))
         except ValueError as msg:
-            self.see_other('home', error=str(msg))
+            self.see_other("home", error=str(msg))
             return
-        if not self.is_admin() and (account.get('code') != self.get_argument('code')):
-            self.see_other('home',
-                           error="Either the email address or the code" +
-                           " for setting password was wrong." +
-                           " Try to request a new code using the" +
-                           " 'Reset password' button.")
+        if not self.is_admin() and (account.get("code") != self.get_argument("code")):
+            self.see_other(
+                "home",
+                error="Either the email address or the code"
+                + " for setting password was wrong."
+                + " Try to request a new code using the"
+                + " 'Reset password' button.",
+            )
             return
-        password = self.get_argument('password', '')
+        password = self.get_argument("password", "")
         try:
             utils.check_password(password)
         except ValueError as msg:
-            self.see_other('password',
-                           email=self.get_argument('email') or '',
-                           code=self.get_argument('code') or '',
-                           error=str(msg))
-            return 
-        if password != self.get_argument('confirm_password'):
-            self.see_other('password',
-                           email=self.get_argument('email') or '',
-                           code=self.get_argument('code') or '',
-                           error='password confirmation failed. Not the same!')
+            self.see_other(
+                "password",
+                email=self.get_argument("email") or "",
+                code=self.get_argument("code") or "",
+                error=str(msg),
+            )
+            return
+        if password != self.get_argument("confirm_password"):
+            self.see_other(
+                "password",
+                email=self.get_argument("email") or "",
+                code=self.get_argument("code") or "",
+                error="password confirmation failed. Not the same!",
+            )
             return
         with AccountSaver(doc=account, rqh=self) as saver:
             saver.set_password(password)
-            saver['login'] = utils.timestamp() # Set login session.
-        self.set_secure_cookie(constants.USER_COOKIE,
-                               account['email'],
-                               expires_days=settings['LOGIN_MAX_AGE_DAYS'])
-        if account.get('update_info'):
-            self.see_other('account_edit', account['email'],
-                           message='Please review and update your account information.')
+            saver["login"] = utils.timestamp()  # Set login session.
+        self.set_secure_cookie(
+            constants.USER_COOKIE,
+            account["email"],
+            expires_days=settings["LOGIN_MAX_AGE_DAYS"],
+        )
+        if account.get("update_info"):
+            self.see_other(
+                "account_edit",
+                account["email"],
+                message="Please review and update your account information.",
+            )
         else:
-            self.see_other('home')
+            self.see_other("home")
 
 
 class Register(RequestHandler):
     "Register a new account account."
 
-    KEYS = ['email', 'first_name', 'last_name',
-            'university', 'department', 'pi',
-            'gender', 'group_size', 'subject',
-            'invoice_ref', 'phone']
-    ADDRESS_KEYS = ['address', 'zip', 'city', 'country']
+    KEYS = [
+        "email",
+        "first_name",
+        "last_name",
+        "university",
+        "department",
+        "pi",
+        "gender",
+        "group_size",
+        "subject",
+        "invoice_ref",
+        "phone",
+    ]
+    ADDRESS_KEYS = ["address", "zip", "city", "country"]
 
     def get(self):
-        if not self.global_modes['allow_registration']:
-            self.see_other('home', error='Registration is currently disabled.')
+        if not self.global_modes["allow_registration"]:
+            self.see_other("home", error="Registration is currently disabled.")
             return
-        values = OD()
+        values = dict()
         for key in self.KEYS:
             values[key] = self.get_argument(key, None)
         for key in self.ADDRESS_KEYS:
             values[key] = self.get_argument(key, None)
         for key in self.ADDRESS_KEYS:
-            values['invoice_' + key] = self.get_argument('invoice_' + key, None)
-        self.render('register.html', values=values)
+            values["invoice_" + key] = self.get_argument("invoice_" + key, None)
+        self.render("register.html", values=values)
 
     def post(self):
-        if not self.global_modes['allow_registration']:
-            self.see_other('home', error='Registration is currently disabled.')
+        if not self.global_modes["allow_registration"]:
+            self.see_other("home", error="Registration is currently disabled.")
             return
         try:
             with AccountSaver(rqh=self) as saver:
-                email = self.get_argument('email', None)
-                saver['first_name'] = self.get_argument('first_name', None)
-                saver['last_name'] = self.get_argument('last_name', None)
-                university = self.get_argument('university', None)
+                email = self.get_argument("email", None)
+                saver["first_name"] = self.get_argument("first_name", None)
+                saver["last_name"] = self.get_argument("last_name", None)
+                university = self.get_argument("university", None)
                 if not university:
-                    university = self.get_argument('university_other', None)
-                saver['university'] = university
-                saver['department'] = self.get_argument('department', None)
-                saver['pi'] = utils.to_bool(self.get_argument('pi', False))
-                gender = self.get_argument('gender', None)
+                    university = self.get_argument("university_other", None)
+                saver["university"] = university
+                saver["department"] = self.get_argument("department", None)
+                saver["pi"] = utils.to_bool(self.get_argument("pi", False))
+                gender = self.get_argument("gender", None)
                 if gender:
-                    saver['gender'] = gender.lower()
-                group_size = self.get_argument('group_size', None)
+                    saver["gender"] = gender.lower()
+                group_size = self.get_argument("group_size", None)
                 if group_size:
-                    saver['group_size'] = group_size
+                    saver["group_size"] = group_size
                 try:
-                    saver['subject'] = int(self.get_argument('subject'))
-                except (tornado.web.MissingArgumentError,ValueError,TypeError):
-                    saver['subject'] = None
-                saver['address'] = dict(
-                    address=self.get_argument('address', None),
-                    zip=self.get_argument('zip', None),
-                    city=self.get_argument('city', None),
-                    country=self.get_argument('country', None))
-                saver['invoice_ref'] = self.get_argument('invoice_ref', None)
-                saver['invoice_address'] = dict(
-                    address=self.get_argument('invoice_address', None),
-                    zip=self.get_argument('invoice_zip', None),
-                    city=self.get_argument('invoice_city', None),
-                    country=self.get_argument('invoice_country', None))
-                saver['phone'] = self.get_argument('phone', None)
+                    saver["subject"] = int(self.get_argument("subject"))
+                except (tornado.web.MissingArgumentError, ValueError, TypeError):
+                    saver["subject"] = None
+                saver["address"] = dict(
+                    address=self.get_argument("address", None),
+                    zip=self.get_argument("zip", None),
+                    city=self.get_argument("city", None),
+                    country=self.get_argument("country", None),
+                )
+                saver["invoice_ref"] = self.get_argument("invoice_ref", None)
+                saver["invoice_address"] = dict(
+                    address=self.get_argument("invoice_address", None),
+                    zip=self.get_argument("invoice_zip", None),
+                    city=self.get_argument("invoice_city", None),
+                    country=self.get_argument("invoice_country", None),
+                )
+                saver["phone"] = self.get_argument("phone", None)
                 if not email:
-                    raise ValueError('Email is required.')
+                    raise ValueError("Email is required.")
                 saver.set_email(email)
-                saver['owner'] = saver['email']
-                saver['role'] = constants.USER
-                saver['status'] = constants.PENDING
-                saver['api_key'] = utils.get_iuid()
+                saver["owner"] = saver["email"]
+                saver["role"] = constants.USER
+                saver["status"] = constants.PENDING
+                saver["api_key"] = utils.get_iuid()
                 saver.check_required()
                 saver.erase_password()
         except ValueError as msg:
-            kwargs = OD()
+            kwargs = dict()
             for key in self.KEYS:
-                kwargs[key] = saver.get(key) or ''
+                kwargs[key] = saver.get(key) or ""
             for key in self.ADDRESS_KEYS:
-                kwargs[key] = saver.get('address', {}).get(key) or ''
+                kwargs[key] = saver.get("address", {}).get(key) or ""
             for key in self.ADDRESS_KEYS:
-                kwargs['invoice_' + key] = saver.get('invoice_address', {}).\
-                    get(key) or ''
-            self.see_other('register', error=str(msg), **kwargs)
+                kwargs["invoice_" + key] = (
+                    saver.get("invoice_address", {}).get(key) or ""
+                )
+            self.see_other("register", error=str(msg), **kwargs)
             return
         try:
-            template = settings['ACCOUNT_MESSAGES'][constants.PENDING]
+            template = settings["ACCOUNT_MESSAGES"][constants.PENDING]
         except KeyError:
             pass
         else:
             account = saver.doc
             with MessageSaver(rqh=self) as saver:
-                saver.create(template,
-                             account=account['email'],
-                             url=self.absolute_reverse_url(
-                                 'account', account['email']))
+                saver.create(
+                    template,
+                    account=account["email"],
+                    url=self.absolute_reverse_url("account", account["email"]),
+                )
                 # Recipients are hardwired here.
-                saver.send([a['email'] for a in self.get_admins()])
-        self.see_other('registered')
+                saver.send([a["email"] for a in self.get_admins()])
+        self.see_other("registered")
 
 
 class Registered(RequestHandler):
     "Successful registration. Display message."
 
     def get(self):
-        self.render('registered.html')
+        self.render("registered.html")
 
 
 class AccountEnable(RequestHandler):
@@ -1027,29 +1126,30 @@ class AccountEnable(RequestHandler):
         try:
             account = self.get_account(email)
         except ValueError as msg:
-            self.see_other('home', error=str(msg))
+            self.see_other("home", error=str(msg))
             return
         self.check_admin()
         with AccountSaver(account, rqh=self) as saver:
-            saver['status'] = constants.ENABLED
+            saver["status"] = constants.ENABLED
             saver.reset_password()
         try:
-            template = settings['ACCOUNT_MESSAGES'][constants.ENABLED]
+            template = settings["ACCOUNT_MESSAGES"][constants.ENABLED]
         except KeyError:
             pass
         else:
             with MessageSaver(rqh=self) as saver:
-                saver.create(template,
-                             account=account['email'],
-                             password_url=self.absolute_reverse_url('password'),
-                             password_code_url=self.absolute_reverse_url(
-                                 'password',
-                                 email=account['email'],
-                                 code=account['code']),
-                             code=account['code'])
+                saver.create(
+                    template,
+                    account=account["email"],
+                    password_url=self.absolute_reverse_url("password"),
+                    password_code_url=self.absolute_reverse_url(
+                        "password", email=account["email"], code=account["code"]
+                    ),
+                    code=account["code"],
+                )
                 # Recipient is hardwired here.
-                saver.send([account['email']])
-        self.see_other('account', account['email'])
+                saver.send([account["email"]])
+        self.see_other("account", account["email"])
 
 
 class AccountDisable(RequestHandler):
@@ -1060,13 +1160,13 @@ class AccountDisable(RequestHandler):
         try:
             account = self.get_account(email)
         except ValueError as msg:
-            self.see_other('home', error=str(msg))
+            self.see_other("home", error=str(msg))
             return
         self.check_admin()
         with AccountSaver(account, rqh=self) as saver:
-            saver['status'] = constants.DISABLED
+            saver["status"] = constants.DISABLED
             saver.erase_password()
-        self.see_other('account', account['email'])
+        self.see_other("account", account["email"])
 
 
 class AccountUpdateInfo(RequestHandler):
@@ -1077,10 +1177,10 @@ class AccountUpdateInfo(RequestHandler):
         try:
             account = self.get_account(email)
         except ValueError as msg:
-            self.see_other('home', error=str(msg))
+            self.see_other("home", error=str(msg))
             return
         self.check_admin()
-        if not account.get('update_info'):
+        if not account.get("update_info"):
             with AccountSaver(account, rqh=self) as saver:
-                saver['update_info'] = True
-        self.see_other('account', account['email'])
+                saver["update_info"] = True
+        self.see_other("account", account["email"])
