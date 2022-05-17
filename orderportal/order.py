@@ -666,7 +666,7 @@ class OrderMixin(object):
             item["restrict_write"] = field["restrict_write"]
             item["invalid"] = order["invalid"].get(field["identifier"])
             item["description"] = field.get("description")
-            item._field = field
+            item["__field__"] = field
             result.append(item)
             if field["type"] == constants.GROUP:
                 result.extend(self.get_fields(order, depth + 1, field["fields"]))
@@ -1030,7 +1030,7 @@ class OrderCsv(OrderMixin, RequestHandler):
             if field["type"] == constants.TABLE:
                 table = values[4]  # Column for 'Value'
                 values[4] = len(table)  # Number of rows in table
-                values += [h.split(";")[0] for h in field._field["table"]]
+                values += [h.split(";")[0] for h in field["__field__"]["table"]]
                 writer.writerow(values)
                 prefix = [""] * 8
                 for row in table:

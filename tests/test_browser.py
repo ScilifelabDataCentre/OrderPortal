@@ -39,20 +39,20 @@ def test_no_login(settings, page):  # 'page' fixture from 'pytest-playwright'
     page.goto(url)
 
     page.click("text=About us")
-    assert page.url == "http://localhost:8881/about"
+    assert page.url == f"{settings['BASE_URL']}about"
 
     page.click("text=Contact")
-    assert page.url == "http://localhost:8881/contact"
+    assert page.url == f"{settings['BASE_URL']}contact"
 
     page.click("text=Documents")
-    assert page.url == "http://localhost:8881/files"
+    assert page.url == f"{settings['BASE_URL']}files"
 
     page.click("text=Information")
     page.click("text=How to place an order")
-    assert page.url == "http://localhost:8881/info/how_to_place_an_order"
+    assert page.url == f"{settings['BASE_URL']}info/how_to_place_an_order"
 
     page.click("#home >> span")
-    assert page.url == "http://localhost:8881/"
+    assert page.url == f"{settings['BASE_URL']}"
 
 
 def test_login(settings, page):  # 'page' fixture from 'pytest-playwright'
