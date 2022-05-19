@@ -828,7 +828,6 @@ def convert_to_strings(doc):
     items = list(doc.items())
     for key, value in items:
         if isinstance(key, bytes):
-            print(key)
             doc[key.decode()] = doc.pop(key)
         if isinstance(value, dict):
             convert_to_strings(value)
@@ -1012,27 +1011,29 @@ class OrderCsv(OrderMixin, RequestHandler):
         writer.writerow(("Modified", order["modified"]))
         writer.writerow(("Created", order["created"]))
         writer.new_worksheet("Fields")
-        writer.writerow(
-            (
-                "Field",
-                "Label",
-                "Depth",
-                "Type",
-                "Value",
-                "Restrict read",
-                "Restrict write",
-                "Invalid",
-            )
+        column_headers = (
+            "Field",
+            "Label",
+            "Depth",
+            "Type",
+            "Value",
+            "Restrict read",
+            "Restrict write",
+            "Invalid",
         )
+        n_column_headers = len(column_headers)
+        writer.writerow(column_headers)
         for field in self.get_fields(order):
-            values = list(field.values())[:-1]  # Skip help text
+            field.pop("description") # Must not be in the values list.
+            field_ref = field.pop("__field__") # Must not be in the values list.
+            values = list(field.values())
             # Special case for table field; spans more than one row
             if field["type"] == constants.TABLE:
                 table = values[4]  # Column for 'Value'
                 values[4] = len(table)  # Number of rows in table
-                values += [h.split(";")[0] for h in field["__field__"]["table"]]
+                values += [h.split(";")[0] for h in field_ref["table"]]
                 writer.writerow(values)
-                prefix = [""] * 8
+                prefix = [""] * n_column_headers
                 for row in table:
                     writer.writerow(prefix + row)
 
