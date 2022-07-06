@@ -48,6 +48,9 @@ class Settings(RequestHandler):
         mod_settings = settings.copy()
         # Add the root dir
         mod_settings["ROOT"] = constants.ROOT
+        # Do not show the email password
+        if mod_settings["EMAIL"].get("PASSWORD"):
+            mod_settings["EMAIL"]["PASSWORD"] = "*** hidden ***"
         # Don't show the password in the CouchDB URL
         url = settings["DATABASE_SERVER"]
         match = re.search(r":([^/].+)@", url)
@@ -61,6 +64,7 @@ class Settings(RequestHandler):
             "SETTINGS_FILE",
             "BASE_URL",
             "BASE_URL_PATH_PREFIX",
+            "PORT",
             "SITE_NAME",
             "SITE_SUPPORT_EMAIL",
             "DATABASE_SERVER",
@@ -69,6 +73,9 @@ class Settings(RequestHandler):
             "TORNADO_DEBUG",
             "LOGGING_FILEPATH",
             "LOGGING_DEBUG",
+            "LOGGING_FILEPATH",
+            "EMAIL",
+            "MESSAGE_SENDER_EMAIL",
             "LOGIN_MAX_AGE_DAYS",
             "LOGIN_MAX_FAILURES",
             "ORDER_STATUSES_FILE",

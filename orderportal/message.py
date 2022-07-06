@@ -52,7 +52,9 @@ class MessageSaver(saver.Saver):
             server.ehlo()
             try:
                 user = settings["EMAIL"]["USER"]
+                if not user: raise KeyError
                 password = settings["EMAIL"]["PASSWORD"]
+                if not password: raise KeyError
             except KeyError:
                 pass
             else:
