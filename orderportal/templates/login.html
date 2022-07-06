@@ -7,16 +7,6 @@
 
 {% block content %}
 
-{% if next %}
-<div class="row">
-  <div class="col-md-6 lead alert alert-danger">
-    You need to login to access the requested page.
-  </div>
-  <div class="col-md-6">
-  </div>
-</div>
-{% end %} {# if next #}
-
 <div class="row">
   <div class="col-md-5">
     {% if not global_modes['allow_login'] %}
@@ -37,9 +27,6 @@
         <label for="password">Password</label>
         <input type="password" class="form-control" name="password">
       </div>
-      {% if next %}
-      <input type="hidden" name="next" value="{{ next }}">
-      {% end %} {# if next #}
       <div class="form-group"> 
         <button type="submit" class="btn btn-info btn-block">
           <span class="glyphicon glyphicon-log-in"></span>

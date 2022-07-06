@@ -783,7 +783,7 @@ class Login(RequestHandler):
     "Login to a account account. Set a secure cookie."
 
     def get(self):
-        self.render("login.html", next=self.get_argument("next", None))
+        self.render("login.html")
 
     def post(self):
         """Login to a account account. Set a secure cookie.
@@ -866,13 +866,9 @@ class Login(RequestHandler):
                 message="Please review and update your account information.",
             )
             return
-        next = self.get_argument("next", None)
-        if next is None:
-            self.see_other("home")
-        else:
-            # Not quite right: should be an absolute URL to redirect.
-            # But seems to work anyway.
-            self.redirect(next)
+        # Not quite right: should be an absolute URL to redirect.
+        # But seems to work anyway.
+        self.see_other("home")
 
 
 class Logout(RequestHandler):
