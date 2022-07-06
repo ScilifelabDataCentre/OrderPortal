@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "5.2.15"
+__version__ = "5.2.16"
 
 
 class Constants:
@@ -264,7 +264,12 @@ settings = dict(
     SITE_HOST_URL=None,
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
-    EMAIL=None,  # Must be defined for things to work.
+    EMAIL=dict(HOST=None,  # Domain name. Must be defined for email to work,
+               PORT=0,     # which is required for proper execution.
+               SSL=False,
+               TLS=False,
+               USER=None,
+               PASSWORD=None),
     MESSAGE_SENDER_EMAIL='"OrderPortal Support" <support@my-domain.com>',
     DISPLAY_MENU_LIGHT=False,
     DISPLAY_MENU_ITEM_URL=None,
