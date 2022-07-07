@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "5.2.16"
+__version__ = "5.2.17"
 
 
 class Constants:
@@ -271,6 +271,7 @@ settings = dict(
                USER=None,
                PASSWORD=None),
     MESSAGE_SENDER_EMAIL='"OrderPortal Support" <support@my-domain.com>',
+    MESSAGE_REPLY_TO_EMAIL=None, # If not defined, MESSAGE_SENDER_EMAIL is used.
     DISPLAY_MENU_LIGHT=False,
     DISPLAY_MENU_ITEM_URL=None,
     DISPLAY_MENU_ITEM_TEXT=None,
