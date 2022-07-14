@@ -67,24 +67,16 @@
           {% end %}
         </select>
       </div>
-      {% if settings['DISPLAY_ORDERS_MOST_RECENT'] > 0 and settings['DISPLAY_ORDERS_MOST_RECENT'] < all_count %}
       <div class="form-group">
-        <div class="control-label refresh" for="recent">
-          &nbsp;
-          <label class="radio">
-            {% set checked = not filter.get('recent', False) and 'checked' or '' %}
-            <input type="radio" name="recent" value="false" {{ checked }}>
-            All {{ all_count }} orders
-          </label>
-          &nbsp;
-          <label class="radio">
-            {% set checked = not checked and 'checked' or '' %}
-            <input type="radio" name="recent" value="true" {{ checked }}>
-            Only {{ settings['DISPLAY_ORDERS_MOST_RECENT'] }} most recent
-          </label>
-        </div>
+        <select name="year" class="form-control refresh">
+          <option value="" {{ not filter.get('year') and 'selected' or '' }}>{{ settings['DISPLAY_ORDERS_MOST_RECENT'] }} most recent
+          </option>
+          {% for year, count in years %}
+          <option value="{{ year }}"{{ filter.get('year') == year and 'selected' or '' }}>{{ year }} ({{ count }})</option>
+          {% end %}
+          <option value="all" {{ filter.get('year') == 'all' and 'selected' or '' }}>All ({{ all_count }})</option>
+        </select>
       </div>
-      {% end %} {# if settings['DISPLAY_ORDERS_MOST_RECENT'] > 0 #}
     </form>
   </div>
 </div>
