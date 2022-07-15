@@ -10,152 +10,152 @@ from . import settings
 
 DESIGNS = dict(
     account=dict(
-        all=dict(
-            reduce="_count",  # account/all
+        all=dict(               # account/all
+            reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.modified, null);
 }""",
         ),
-        api_key=dict(
+        api_key=dict(           # account/api_key
             map="""function(doc) { 
     if (doc.orderportal_doctype !== 'account') return;
     if (!doc.api_key) return;
     emit(doc.api_key, doc.email);
-}"""  # account/api_key
+}"""
         ),
-        email=dict(
+        email=dict(             # account/email
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.email, [doc.first_name, doc.last_name]);
-}"""  # account/email
+}"""
         ),
-        role=dict(
+        role=dict(              # account/role
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.role, doc.email);
-}"""  # account/role
+}"""
         ),
-        status=dict(
+        status=dict(            # account/status
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.status, doc.email);
-}"""  # account/status
+}"""
         ),
-        university=dict(
+        university=dict(        # account/university
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.university, doc.email);
-}"""  # account/university
+}"""
         ),
     ),
-    event=dict(
+    event=dict(                 # event/date
         date=dict(
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'event') return;
     emit(doc.date, doc.title);
-}"""  # event/date
+}"""
         )
     ),
-    file=dict(
+    file=dict(                  # file/name
         name=dict(
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'file') return;
     emit(doc.name, null);
-}"""  # file/name
+}"""
         )
     ),
     form=dict(
-        all=dict(
-            reduce="_count",  # form/all
+        all=dict(               # form/all
+            reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'form') return;
     emit(doc.modified, null);
 }""",
         ),
-        enabled=dict(
+        enabled=dict(           # form/enabled
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'form') return;
     if (doc.status === 'enabled') emit(doc.modified, doc.title);
-}"""  # form/enabled
+}"""
         ),
-        modified=dict(
+        modified=dict(          # form/modified
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'form') return;
     emit(doc.modified, doc.title);
-}"""  # form/modified
+}"""
         ),
     ),
     group=dict(
-        invited=dict(
+        invited=dict(           # group/invited
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'group') return;
     for (var i=0; i<doc.invited.length; i++) {
 	emit(doc.invited[i], doc.name);
     };
-}"""  # group/invited
+}"""
         ),
-        member=dict(
+        member=dict(            # group/member
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'group') return;
     for (var i=0; i<doc.members.length; i++) {
 	emit(doc.members[i], doc.name);
     };
-}"""  # group/member
+}"""
         ),
-        modified=dict(
-            reduce="_count",  # group/modified
+        modified=dict(          # group/modified
+            reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'group') return;
     emit(doc.modified, 1);
 }""",
         ),
-        owner=dict(
+        owner=dict(             # group/owner
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'group') return;
     emit(doc.owner, doc.name);
-}"""  # group/owner
+}"""
         ),
     ),
     info=dict(
-        menu=dict(
+        menu=dict(              # info/menu
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'info') return;
     if (doc.menu) emit(doc.menu, [doc.name, doc.title]);
-}"""  # info/menu
+}"""
         ),
-        name=dict(
+        name=dict(              # info/name
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'info') return;
     emit(doc.name, null);
-}"""  # info/name
+}"""
         ),
     ),
     log=dict(
-        account=dict(
+        account=dict(           # log/account
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'log') return;
     if (!doc.account) return;
     emit([doc.account, doc.modified], null);
-}"""  # log/account
+}"""
         ),
-        entity=dict(
+        entity=dict(            # log/entity
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'log') return;
     emit([doc.entity, doc.modified], null);
-}"""  # log/entity
+}"""
         ),
-        login_failure=dict(
+        login_failure=dict(     # log/login_failure
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'log') return;
     if (!doc.changed.login_failure) return;
     emit([doc.entity, doc.modified], doc.changed.login_failure);
-}"""  # log/login_failure
+}"""
         ),
     ),
     message=dict(
-        recipient=dict(
-            reduce="_count",  # message/recipient
+        recipient=dict(         # message/recipient
+            reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'message') return;
     for (var i=0; i<doc.recipients.length; i++) {
@@ -172,30 +172,30 @@ DESIGNS = dict(
 }"""  # meta/id
         )
     ),
-    news=dict(
+    news=dict(                  # news/modified
         modified=dict(
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'news') return;
     emit(doc.modified, null);
-}"""  # news/modified
+}"""
         )
     ),
     order=dict(
-        form=dict(
-            reduce="_count",  # order/form
+        form=dict(              # order/form
+            reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     emit([doc.form, doc.modified], 1);
 }""",
         ),
-        identifier=dict(
+        identifier=dict(        # order/identifier
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     if (!doc.identifier) return;
     emit(doc.identifier, doc.title);
-}"""  # order/identifier
+}"""
         ),
-        keyword=dict(
+        keyword=dict(           # order/keyword; see 'fix_design_documents'!
             map="""function(doc) {{
     if (doc.orderportal_doctype !== 'order') return;
     var cleaned = doc.title.replace(/[{delims_lint}]/g, " ").toLowerCase();
@@ -205,29 +205,29 @@ DESIGNS = dict(
     }});
 }};
 var lint = {lint};
-"""  # order/keyword; see 'fix_design_documents'!
+"""
         ),
-        modified=dict(
+        modified=dict(          # order/modified
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     emit(doc.modified, doc.title);
-}"""  # order/modified
+}"""
         ),
-        owner=dict(
-            reduce="_count",  # order/owner
+        owner=dict(             # order/owner
+            reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     emit([doc.owner, doc.modified], 1);
 }""",
         ),
-        status=dict(
-            reduce="_count",  # order/status
+        status=dict(            # order/status
+            reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     emit([doc.status, doc.modified], 1);
 }""",
         ),
-        tag=dict(
+        tag=dict(               # order/tag
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     if (!doc.tags) return;
@@ -238,22 +238,30 @@ var lint = {lint};
 	    emit(parts[1].toLowerCase(), doc.title);
 	};
     });
-}"""  # order/tag
+}"""
+        ),
+        year_submitted=dict(    # order/year_submitted
+            reduce="_count",
+            map="""function(doc) {
+    if (doc.orderportal_doctype !== 'order') return;
+    if (!doc.history.submitted) return;
+    emit(doc.history.submitted.split('-')[0], 1);
+}"""
         ),
     ),
-    text=dict(
+    text=dict(                  # text/map
         name=dict(
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'text') return;
     emit(doc.name, doc.modified);
-}"""  # text/map
+}"""
         )
     ),
 )
 
 
 # This will be added to DESIGNS as 'order/fields'. See 'fix_design_documents'.
-# Double {{ and }} are converted to single such by .format.
+# Double {{ and }} are converted to single such by '.format'.
 ORDERS_SEARCH_FIELDS_MAP = """function(doc) {{
   if (doc.orderportal_doctype !== 'order') return;
   var value = doc.fields.{fieldid};

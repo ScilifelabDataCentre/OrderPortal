@@ -1126,7 +1126,11 @@ class Orders(RequestHandler):
         if not self.is_staff():
             self.see_other("account_orders", self.current_user["email"])
             return
-        # Count of all orders
+        # Count orders per year submitted.
+        view =self.db.view("order", "year_submitted", reduce=True, group_level=1)
+        years = [(r.key, r.value) for r in view]
+        years.reverse()
+        # Count all orders.
         view = self.db.view("order", "status", reduce=True)
         try:
             r = list(view)[0]
@@ -1145,6 +1149,7 @@ class Orders(RequestHandler):
         self.render(
             "orders.html",
             forms_lookup=self.get_forms_lookup(),
+            years=years,
             filter=self.filter,
             orders=self.get_orders(),
             order_column=order_column,
@@ -1165,15 +1170,7 @@ class Orders(RequestHandler):
                 self.filter[key] = value
             except (tornado.web.MissingArgumentError, KeyError):
                 pass
-        recent = self.get_argument("recent", None)
-        if recent is None:
-            recent = True
-        else:
-            try:
-                recent = utils.to_bool(recent)
-            except ValueError:
-                recent = True
-        self.filter["recent"] = recent
+        self.filter["year"] = self.get_argument("year", None) or "recent"
 
     def get_orders(self):
         "Get all orders according to current filter."
@@ -1183,25 +1180,7 @@ class Orders(RequestHandler):
             orders = self.filter_by_field(
                 f["identifier"], self.filter.get(f["identifier"]), orders=orders
             )
-        try:
-            limit = settings["DISPLAY_ORDERS_MOST_RECENT"]
-            if not isinstance(limit, int):
-                raise ValueError
-        except (ValueError, KeyError):
-            limit = 0
-        # No filter; all orders
-        if orders is None:
-            if limit > 0 and self.filter.get("recent", True):
-                view = self.db.view(
-                    "order", "modified", include_docs=True, descending=True, limit=limit
-                )
-            else:
-                view = self.db.view(
-                    "order", "modified", include_docs=True, descending=True
-                )
-            orders = [r.doc for r in view]
-        elif limit > 0 and self.filter.get("recent", True):
-            orders = orders[:limit]
+        orders = self.filter_by_year(self.filter["year"], orders=orders)
         return orders
 
     def filter_by_status(self, status, orders=None):
@@ -1249,6 +1228,37 @@ class Orders(RequestHandler):
             if value == "__none__":
                 value = None
             orders = [o for o in orders if o["fields"].get(identifier) == value]
+        return orders
+
+    def filter_by_year(self, year, orders=None):
+        "Return orders list by year filter, most recent if none, or all if specified."
+        if year == "recent":
+            if orders is None:
+                view = self.db.view(
+                    "order", "modified", include_docs=True, descending=True, limit=settings["DISPLAY_ORDERS_MOST_RECENT"]
+                )
+                orders = [r.doc for r in view]
+            else:
+                orders = orders[:settings["DISPLAY_ORDERS_MOST_RECENT"]]
+
+        elif year == "all":
+            if orders is None:
+                view = self.db.view(
+                    "order", "modified", include_docs=True, descending=True
+                )
+                orders = [r.doc for r in view]
+            else:
+                pass            # "all" means no filter by year.
+
+        else:                   # Specific year
+            if orders is None:
+                view = self.db.view(
+                    "order", "year_submitted", include_docs=True, key=year
+                )
+                orders = [r.doc for r in view]
+            else:
+                orders = [o for o in orders
+                          if o["history"].get("submitted", "X").split("-")[0] == year]
         return orders
 
 
