@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "5.3.0"
+__version__ = "5.3.1"
 
 
 class Constants:
@@ -305,7 +305,7 @@ settings = dict(
     ORDER_USER_TAGS=True,
     ORDER_LINKS=True,
     ORDER_REPORT=True,
-    ORDERS_LIST_TAGS=True,
+    ORDERS_LIST_TAGS=False,
     ORDERS_LIST_FIELDS=[],
     ORDERS_LIST_STATUSES=[],
     ORDERS_SEARCH_DELIMS_LINT=[":", ",", ";", "'"],

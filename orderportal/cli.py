@@ -167,6 +167,7 @@ def create_admin(email, password):
             saver["owner"] = email
             saver["role"] = constants.ADMIN
             saver["status"] = constants.ENABLED
+            saver["api_key"] = utils.get_iuid()
             saver["labels"] = []
     except ValueError as error:
         raise click.ClickException(str(error))
