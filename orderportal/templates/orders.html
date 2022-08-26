@@ -98,7 +98,7 @@
           {% end %}
           <th>Status</th>
           {% for s in settings['ORDERS_LIST_STATUSES'] %}
-          <th>{% module Icon(s, label=True) %}</th>
+          <th>{{ s.capitalize() }}</th>
           {% end %}
           <th>Modified</th>
         </tr>
@@ -127,7 +127,7 @@
           {% end %}
           <td>{% module Icon(order['status'], label=True) %}</td>
           {% for s in settings['ORDERS_LIST_STATUSES'] %}
-          <td>{% module NoneStr(order['history'].get(s)) %}</td>
+          <td class="nobr">{% module NoneStr(order['history'].get(s)) %}</td>
           {% end %}
           <td class="localtime nobr">{{ order['modified'] }}</td>
         </tr>
