@@ -72,7 +72,7 @@
 <div class="col-md-12">
   <div class="form-group has-feedback">
 
-    {% set value = order['fields'][field['identifier']] %}
+    {% set value = order['fields'].get(field['identifier']) %}
     <label class="control-label" for="{{ field['identifier'] }}">
       {{ label }}
       {% if field['restrict_read'] %}
@@ -97,7 +97,7 @@
       {% elif value in (None, '') %}
       <span class="text-warning">
         <span class="glyphicon glyphicon-question-sign"></span>
-        no value OK
+        No value is OK
       </span>
       {% else %}
       <span class="text-success">
@@ -229,7 +229,7 @@
            class="form-control datepicker visible-if-source"
            name="{{ field['identifier'] }}"
            id="{{ field['identifier'] }}"
-           value="{{ value }}">
+           value="{{ value or '' }}">
 
     {% elif field['type'] == constants.TABLE %}
     {% set tableid = '_table_' + field['identifier'] %}
@@ -279,14 +279,14 @@
            class="form-control visible-if-source"
            name="{{ field['identifier'] }}"
            id="{{ field['identifier'] }}"
-           value="{{ '' if value is None else value  }}">
+           value="{{ '' if value is None else value  }}"> {# Must show 0.0 ! #}
 
     {% else %} {# All other field types: STRING, EMAIL, INT, URL #}
     <input type="{{ constants.TYPE_HTML.get(field['type'], 'text') }}"
            class="form-control visible-if-source"
            name="{{ field['identifier'] }}"
            id="{{ field['identifier'] }}"
-           value="{{ '' if value is None else value  }}">
+           value="{{ '' if value is None else value  }}"> {# Must show 0 ! #}
     {% end %} {# elif field['type'] == #}
     
     {% if field['required'] %}
