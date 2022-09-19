@@ -1,6 +1,6 @@
 "Message to account email address; store and send."
 
-import email.mime.text
+import email.message
 import logging
 import smtplib
 
@@ -60,17 +60,18 @@ class MessageSaver(saver.Saver):
                 pass
             else:
                 server.login(user, password)
-            mail = email.mime.text.MIMEText(self["text"], "plain", "utf-8")
-            mail["Subject"] = self["subject"]
-            mail["From"] = self["sender"]
-            mail["Reply-To"] = self["reply-to"]
-            for recipient in self["recipients"]:
-                mail["To"] = recipient
-            server.sendmail(self["sender"], self["recipients"], mail.as_string())
+            message = email.message.EmailMessage()
+            message["From"] = self["sender"]
+            message["Subject"] = self["subject"]
+            message["Reply-To"] = self["reply-to"]
+            for recipient in set(self["recipients"]):
+                message["To"] = recipient
+            message.set_content(self["text"])
+            server.send_message(message)
             self["sent"] = utils.timestamp()
-        except Exception as msg:
-            self["error"] = str(msg)
-            logging.error("email failed to %s: %s", self["recipients"], msg)
+        except Exception as error:
+            self["error"] = str(error)
+            logging.error("email failed to %s: %s", self["recipients"], error)
             raise
 
     def post_process(self):
