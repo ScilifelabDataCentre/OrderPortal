@@ -1102,8 +1102,10 @@ class Register(RequestHandler):
                     account=account["email"],
                     url=self.absolute_reverse_url("account", account["email"]),
                 )
-                # Recipients are hardwired here.
-                saver.send([a["email"] for a in self.get_admins()])
+                # Recipients are hardwired to be admins.
+                recipients = [a["email"] for a in self.get_admins()]
+                logging.warning(f"account recipients > {recipients}")
+                saver.send(recipients)
         self.see_other("registered")
 
 
