@@ -64,8 +64,7 @@ class MessageSaver(saver.Saver):
             message["From"] = self["sender"]
             message["Subject"] = self["subject"]
             message["Reply-To"] = self["reply-to"]
-            for recipient in set(self["recipients"]):
-                message["To"] = recipient
+            message["To"] = ", ".join(set(self["recipients"]))
             message.set_content(self["text"])
             server.send_message(message)
             self["sent"] = utils.timestamp()
