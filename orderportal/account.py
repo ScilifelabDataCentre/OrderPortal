@@ -1104,7 +1104,6 @@ class Register(RequestHandler):
                 )
                 # Recipients are hardwired to be admins.
                 recipients = [a["email"] for a in self.get_admins()]
-                logging.warning(f"account recipients > {recipients}")
                 saver.send(recipients)
         self.see_other("registered")
 

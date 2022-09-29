@@ -508,7 +508,6 @@ class OrderSaver(saver.Saver):
             for admin in admins:
                 if admin["status"] == constants.ENABLED:
                     recipients.add(admin["email"])
-        logging.warning(f"order recipients > {recipients}")
         with MessageSaver(rqh=self) as saver:
             saver.create(
                 template,
