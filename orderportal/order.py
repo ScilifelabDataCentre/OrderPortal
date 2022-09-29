@@ -500,14 +500,14 @@ class OrderSaver(saver.Saver):
                         if account and account["status"] == constants.ENABLED:
                             recipients.add(account["email"])
         if constants.ADMIN in template["recipients"]:
-            recipients.update([a["email"] for a in self.get_admins()])
-            # result = self.db.view(
-            #     "account", "role", key=constants.ADMIN, include_docs=True
-            # )
-            # admins = [r.doc for r in result]
-            # for admin in admins:
-            #     if admin["status"] == constants.ENABLED:
-            #         recipients.add(admin["email"])
+            # Can't use 'get_admins', not available here.
+            result = self.db.view(
+                "account", "role", key=constants.ADMIN, include_docs=True
+            )
+            admins = [r.doc for r in result]
+            for admin in admins:
+                if admin["status"] == constants.ENABLED:
+                    recipients.add(admin["email"])
         logging.warning(f"order recipients > {recipients}")
         with MessageSaver(rqh=self) as saver:
             saver.create(
