@@ -453,3 +453,5 @@ when the `tornado` server is restarted.
 Please note that if your installation uses a repo forked from the
 base, ensure that you have updated that repo first by making a pull
 request and executing it.
+
+Set up git commit signing.
