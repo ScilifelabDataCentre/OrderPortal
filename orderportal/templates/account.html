@@ -168,6 +168,20 @@
     <th>Status</th>
     <td>{% module Icon(account['status'], label=True) %}</td>
   </tr>
+  {% if is_admin %}
+  <tr>
+    <th>Code for setting password</th>
+    <td>
+      {% if account.get('code') %}
+      {{ account['code'] }}
+      <br>
+      URL: {{ absolute_reverse_url('password', email=account['email'], code=account['code']) }}
+      {% else %}
+      -
+      {% end %}
+    </td>
+  </tr>
+  {% end %} {# if is_admin #}
   <tr>
     <th>Groups</th>
     <td>
