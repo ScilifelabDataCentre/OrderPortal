@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "5.3.6"
+__version__ = "5.4.0"
 
 
 class Constants:
@@ -314,6 +314,7 @@ settings = dict(
     ACCOUNT_PI_INFO=True,
     ACCOUNT_POSTAL_INFO=True,
     ACCOUNT_INVOICE_INFO=True,
+    ACCOUNT_INVOICE_REF_REQUIRED=False,
     ACCOUNT_FUNDER_INFO=True,
     ACCOUNT_FUNDER_INFO_GENDER=True,
     ACCOUNT_FUNDER_INFO_GROUP_SIZE=True,
