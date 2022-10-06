@@ -14,8 +14,7 @@
         method="GET" role="form" class="pull-right">
     <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
     <button type="submit" class="btn btn-primary btn-xs">
-      <span class="glyphicon glyphicon-edit"></span>
-      Edit
+      <span class="glyphicon glyphicon-edit"></span> Edit
     </button>
   </form>
   {% end %}
@@ -293,7 +292,7 @@
     </div>
   </div>
   {% end %} {# if settings['ACCOUNT_POSTAL_INFO'] #}
-
+  
   {% if settings['ACCOUNT_INVOICE_INFO'] %}
   <div class="form-group has-feedback">
     <div class="row">
@@ -316,7 +315,7 @@
       Some services may be free of charge.
     </span>
   </div>
-
+  
   <div class="panel panel-default">
     <div class="panel-heading">
       Invoice address.
@@ -375,7 +374,7 @@
     </div>
   </div>
   {% end %} {# if settings['ACCOUNT_INVOICE_INFO'] #}
-
+  
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
@@ -389,7 +388,7 @@
       One or more telephone numbers, one per line.
     </span>
   </div>
-
+  
   {% if is_admin %}
   <div class="form-group">
     <div class="row">
@@ -404,29 +403,36 @@
     </div>
   </div>
   {% end %} {# if is_admin #}
-
+  
   <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit" class="btn btn-success">
-      <span class="glyphicon glyphicon-floppy-disk"></span>
-      Register
-    </button>
-    <span class="help-block">
-      {% module Text('privacy_policy') %}
-    </span>
+    <div class="row">
+      <div class="col-md-3">
+        <div class="form-group">
+          <label class="control-label"></label>
+          <button type="submit" class="btn btn-success btn-block">
+            <span class="glyphicon glyphicon-floppy-disk"></span> Register
+          </button>
+          <span class="help-block">
+            {% module Text('privacy_policy') %}
+          </span>
+        </div>
+      </div>
+    </div>
   </div>
-
+  
 </form>
 
-<br>
 <form action="{{ reverse_url('home') }}"
       method="GET" role="form">
-  <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit" class="btn btn-default">
-      <span class="glyphicon glyphicon-remove"></span>
-      Cancel
-    </button>
+  <div class="row">
+    <div class="col-md-3">
+      <div class="form-group">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-default btn-block">
+          <span class="glyphicon glyphicon-remove"></span> Cancel
+        </button>
+      </div>
+    </div>
   </div>
 </form>
 
