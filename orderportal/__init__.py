@@ -31,47 +31,16 @@ class Constants:
     BOOTSTRAP_VERSION = "3.4.1"
     BOOTSTRAP_URL = "https://getbootstrap.com/docs/3.4/"
 
-    BOOTSTRAP_CSS_URL = (
-        "https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
-    )
-    BOOTSTRAP_CSS_INTEGRITY = (
-        "sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu"
-    )
-    BOOTSTRAP_JS_URL = (
-        "https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
-    )
-    BOOTSTRAP_JS_INTEGRITY = (
-        "sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
-    )
-
     JQUERY_VERSION = "1.12.4"
     JQUERY_URL = "https://jquery.com/"
-    JQUERY_JS_URL = "https://code.jquery.com/jquery-1.12.4.min.js"
-    JQUERY_JS_INTEGRITY = (
-        "sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ"
-    )
 
     JQUERY_UI_VERSION = "1.11.4"
-    JQUERY_UI_CSS_URL = (
-        "https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"
-    )
-    JQUERY_UI_JS_URL = "https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"
 
-    JQUERY_LOCALTIME_URL = "https://plugins.jquery.com/jquery.localtime/"
     JQUERY_LOCALTIME_VERSION = "0.9.1"
-    JQUERY_LOCALTIME_FILENAME = "jquery.localtime-0.9.1.min.js"
+    JQUERY_LOCALTIME_URL = "https://plugins.jquery.com/jquery.localtime/"
 
     DATATABLES_VERSION = "1.10.11"
     DATATABLES_URL = "https://datatables.net/"
-    DATATABLES_CSS_URL = (
-        "https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css"
-    )
-    DATATABLES_JQUERY_JS_URL = (
-        "https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"
-    )
-    DATATABLES_BOOTSTRAP_JS_URL = (
-        "https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js"
-    )
 
     # Patterns
     ID_RX = re.compile(r"^[a-z][_a-z0-9]*$", re.IGNORECASE)
