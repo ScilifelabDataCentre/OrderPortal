@@ -11,9 +11,8 @@
       method="GET" role="form">
   <div class="form-group">
     <label class="control-label"></label>
-    <button type="submit" class="btn btn-default">
-      <span class="glyphicon glyphicon-remove"></span>
-      Cancel
+    <button type="submit" class="btn btn-default btn-block">
+      <span class="glyphicon glyphicon-remove"></span> Cancel
     </button>
   </div>
 </form>
@@ -144,6 +143,7 @@ administrator of the site can then change the ownership of your
     </span>
   </div>
 
+  {% if settings['ACCOUNT_PI_INFO'] %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
@@ -155,8 +155,9 @@ administrator of the site can then change the ownership of your
       </div>
     </div>
   </div>
+  {% end %} {# if settings['ACCOUNT_PI_INFO'] #}
 
-  {% if settings.get('ACCOUNT_FUNDER_INFO_GENDER') %}
+  {% if settings.get('ACCOUNT_FUNDER_INFO') %}
   <div class="panel panel-default">
     <div class="panel-heading">
       Information required by our funders for reporting purposes.
@@ -227,6 +228,7 @@ administrator of the site can then change the ownership of your
   </div>
   {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO') #}
 
+  {% if settings['ACCOUNT_POSTAL_INFO'] %}
   <div class="panel panel-default">
     <div class="panel-heading">
       Postal address; for delivery of paper documents, returned
@@ -286,17 +288,27 @@ administrator of the site can then change the ownership of your
       </div>
     </div>
   </div>
+  {% end %} {# if settings['ACCOUNT_POSTAL_INFO'] #}
 
-  <div class="form-group">
+  {% if settings['ACCOUNT_INVOICE_INFO'] %}
+  <div class="form-group has-feedback">
     <div class="row">
       <div class="col-md-6">
         <label class="control-label" for="invoice_ref">Invoice reference</label>
         <input type="text" class="form-control"
                name="invoice_ref" id="invoice_ref"
                value="{{ account.get('invoice_ref') or '' }}">
+        {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
+        {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
       </div>
     </div>
     <span class="help-block">
+      {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
+      <strong>NOTE: Required!</strong>
+      {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
       Invoice reference code that may be required on your invoices for
       your accounting.
     </span>
@@ -360,6 +372,7 @@ administrator of the site can then change the ownership of your
       </div>
     </div>
   </div>
+  {% end %} {# if settings['ACCOUNT_INVOICE_INFO'] #}
 
   <div class="form-group">
     <div class="row">
@@ -404,23 +417,29 @@ administrator of the site can then change the ownership of your
   {% end %}
 
   <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit" class="btn btn-success">
-      <span class="glyphicon glyphicon-floppy-disk"></span>
-      Save
-    </button>
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-success btn-block">
+          <span class="glyphicon glyphicon-floppy-disk"></span> Save
+        </button>
+      </div>
+    </div>
   </div>
 
 </form>
 
 <form action="{{ reverse_url('account', account['email']) }}"
       method="GET" role="form" style="margin-top: 20px;">
-  <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit" class="btn btn-default">
-      <span class="glyphicon glyphicon-remove"></span>
-      Cancel
-    </button>
+  <div class="row">
+    <div class="col-md-3">
+      <div class="form-group">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-default btn-block">
+          <span class="glyphicon glyphicon-remove"></span> Cancel
+        </button>
+      </div>
+    </div>
   </div>
 </form>
 

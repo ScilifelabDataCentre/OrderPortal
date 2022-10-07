@@ -55,6 +55,9 @@ class AccountSaver(saver.Saver):
             raise ValueError("Last name is required.")
         if not self["university"]:
             raise ValueError("University is required.")
+        if settings["ACCOUNT_INVOICE_REF_REQUIRED"]:
+            if not self["invoice_ref"]:
+                raise ValueError("Invoice reference is required.")
 
 
 class Accounts(RequestHandler):
@@ -1072,11 +1075,11 @@ class Register(RequestHandler):
                 if not email:
                     raise ValueError("Email is required.")
                 saver.set_email(email)
+                saver.check_required()
                 saver["owner"] = saver["email"]
                 saver["role"] = constants.USER
                 saver["status"] = constants.PENDING
                 saver["api_key"] = utils.get_iuid()
-                saver.check_required()
                 saver.erase_password()
         except ValueError as msg:
             kwargs = dict()
@@ -1096,15 +1099,18 @@ class Register(RequestHandler):
             pass
         else:
             account = saver.doc
-            with MessageSaver(rqh=self) as saver:
-                saver.create(
-                    template,
-                    account=account["email"],
-                    url=self.absolute_reverse_url("account", account["email"]),
-                )
-                # Recipients are hardwired to be admins.
-                recipients = [a["email"] for a in self.get_admins()]
-                saver.send(recipients)
+            # Allow admin to register an account without sending an email to the person.
+            if not (self.is_admin() and
+                    not utils.to_bool(self.get_argument("send_email", False))):
+                with MessageSaver(rqh=self) as saver:
+                    saver.create(
+                        template,
+                        account=account["email"],
+                        url=self.absolute_reverse_url("account", account["email"]),
+                    )
+                    # Recipients are hardwired to be admins.
+                    recipients = [a["email"] for a in self.get_admins()]
+                    saver.send(recipients)
         self.see_other("registered")
 
 
