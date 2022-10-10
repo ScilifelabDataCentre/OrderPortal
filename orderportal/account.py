@@ -317,6 +317,8 @@ class AccountMixin(object):
 
     def is_editable(self, account):
         "Is the account editable by the current user?"
+        if settings.get("READONLY"):
+            return False
         if self.is_owner(account):
             return True
         if self.is_staff():
@@ -424,6 +426,8 @@ class Account(AccountMixin, RequestHandler):
 
     def is_deletable(self, account):
         "Can the account be deleted? Pending, or disabled and no orders."
+        if settings.get("READONLY"):
+            return False
         if account["status"] == constants.PENDING:
             return True
         if account["status"] == constants.ENABLED:
@@ -786,6 +790,7 @@ class Login(RequestHandler):
     "Login to a account account. Set a secure cookie."
 
     def get(self):
+        if self.readonly("Login disallowed."): return
         self.render("login.html")
 
     def post(self):
@@ -793,6 +798,7 @@ class Login(RequestHandler):
         Forward to account edit page if first login.
         Log failed login attempt. Disable account if too many recent.
         """
+        if self.readonly("Login disallowed."): return
         try:
             email = self.get_argument("email")
             password = self.get_argument("password")
@@ -818,17 +824,12 @@ class Login(RequestHandler):
             # Disable account if too many recent login failures.
             if len(list(view)) > settings["LOGIN_MAX_FAILURES"]:
                 logging.warning(
-                    "account %s has been disabled due to" " too many login failures",
-                    account["email"],
+                    f"account {account['email']} has been disabled due to too many login failures"
                 )
                 with AccountSaver(doc=account, rqh=self) as saver:
                     saver["status"] = constants.DISABLED
                     saver.erase_password()
-                msg = (
-                    "Too many failed login attempts: Your account has been"
-                    " disabled. Contact the site administrator %s."
-                    % settings.get("SITE_SUPPORT_EMAIL", "")
-                )
+                msg = f"Too many failed login attempts: Your account has been disabled. Contact the site admin {settings.get('SITE_SUPPORT_EMAIL')}"
                 # Prepare email message
                 try:
                     template = settings["ACCOUNT_MESSAGES"][constants.DISABLED]
@@ -845,21 +846,15 @@ class Login(RequestHandler):
             if not account.get("status") == constants.ENABLED:
                 raise ValueError
         except ValueError:
-            msg = (
-                "Account is disabled. Contact the site administrator %s."
-                % settings.get("SITE_SUPPORT_EMAIL", "")
-            )
+            msg = f"Account is disabled. Contact the site admin {settings.get('SITE_SUPPORT_EMAIL')}"
             self.see_other("home", error=msg)
-            return
-        if not self.global_modes["allow_login"] and account["role"] != constants.ADMIN:
-            self.see_other("home", error="Login is currently disabled.")
             return
         self.set_secure_cookie(
             constants.USER_COOKIE,
             account["email"],
             expires_days=settings["LOGIN_MAX_AGE_DAYS"],
         )
-        logging.info("Basic auth login: account %s", account["email"])
+        logging.info(f"Basic auth login: account {account['email']}")
         with AccountSaver(doc=account, rqh=self) as saver:
             saver["login"] = utils.timestamp()  # Set login timestamp.
         if account.get("update_info"):
@@ -887,9 +882,11 @@ class Reset(RequestHandler):
     "Reset the password of a account account."
 
     def get(self):
+        if self.readonly("Password reset not possible."): return
         self.render("reset.html", email=self.get_argument("email", ""))
 
     def post(self):
+        if self.readonly("Password reset not possible."): return
         URL = self.absolute_reverse_url
         try:
             account = self.get_account(self.get_argument("email"))
@@ -943,6 +940,7 @@ class Password(RequestHandler):
     "Set the password of a account account; requires a code."
 
     def get(self):
+        if self.readonly("Password set not possible."): return
         self.render(
             "password.html",
             title="Set your password",
@@ -951,6 +949,7 @@ class Password(RequestHandler):
         )
 
     def post(self):
+        if self.readonly("Password set not possible."): return
         try:
             account = self.get_account(self.get_argument("email", ""))
         except ValueError as msg:
@@ -1021,9 +1020,7 @@ class Register(RequestHandler):
     ADDRESS_KEYS = ["address", "zip", "city", "country"]
 
     def get(self):
-        if not self.global_modes["allow_registration"]:
-            self.see_other("home", error="Registration is currently disabled.")
-            return
+        if self.readonly("Registration not possible."): return
         values = dict()
         for key in self.KEYS:
             values[key] = self.get_argument(key, None)
@@ -1034,9 +1031,7 @@ class Register(RequestHandler):
         self.render("register.html", values=values)
 
     def post(self):
-        if not self.global_modes["allow_registration"]:
-            self.see_other("home", error="Registration is currently disabled.")
-            return
+        if self.readonly("Registration not possible."): return
         try:
             with AccountSaver(rqh=self) as saver:
                 email = self.get_argument("email", None)
@@ -1126,6 +1121,7 @@ class AccountEnable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
+        if self.readonly(): return
         try:
             account = self.get_account(email)
         except ValueError as msg:
@@ -1160,6 +1156,7 @@ class AccountDisable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
+        if self.readonly(): return
         try:
             account = self.get_account(email)
         except ValueError as msg:
@@ -1177,6 +1174,7 @@ class AccountUpdateInfo(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
+        if self.readonly(): return
         try:
             account = self.get_account(email)
         except ValueError as msg:

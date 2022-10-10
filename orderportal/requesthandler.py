@@ -23,9 +23,8 @@ class RequestHandler(tornado.web.RequestHandler):
     def prepare(self):
         "Get the database connection and global modes."
         self.db = utils.get_db()
-        self.global_modes = constants.DEFAULT_GLOBAL_MODES.copy()
-        try:
-            self.global_modes.update(self.db["global_modes"])
+        try:                    # Remove obsolete doc from db.
+            self.db.delete("global_modes")
         except couchdb2.NotFoundError:
             pass
 
@@ -36,7 +35,6 @@ class RequestHandler(tornado.web.RequestHandler):
         result["settings"] = settings
         result["terminology"] = utils.terminology
         result["get_account_name"] = utils.get_account_name
-        result["global_modes"] = self.global_modes
         result["absolute_reverse_url"] = self.absolute_reverse_url
         result["order_reverse_url"] = self.order_reverse_url
         result["is_staff"] = self.is_staff()
@@ -236,6 +234,13 @@ class RequestHandler(tornado.web.RequestHandler):
         "Check if logged in."
         if not self.current_user:
             raise tornado.web.HTTPError(403, reason="Must be logged in.")
+
+    def readonly(self, msg=""):
+        "If site is readonly, redirect to home page with a message and return True."
+        if settings.get("READONLY"):
+            self.see_other("home", error=f"Site is currently read-only. {msg}")
+            return True
+        return False
 
     def get_admins(self):
         "Get the list of enabled admin accounts."

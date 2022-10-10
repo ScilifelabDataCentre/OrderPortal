@@ -129,7 +129,7 @@ class OrderSaver(saver.Saver):
         if self.get("status") == new:
             return
         if new not in settings["ORDER_STATUSES_LOOKUP"]:
-            raise ValueError("invalid status '%s'" % new)
+            raise ValueError(f"invalid status '{new}'")
         if "status" in self.doc:
             targets = self.rqh.get_targets(self.doc)
             if new not in [t["identifier"] for t in targets]:
@@ -255,7 +255,7 @@ class OrderSaver(saver.Saver):
                         continue
                 else:  # HTML form data; collect table from fields.
                     try:
-                        name = "_table_%s_count" % identifier
+                        name = f"_table_{identifier}_count"
                         n_rows = int(self.rqh.get_argument(name, 0))
                     except (ValueError, TypeError):
                         n_rows = 0
@@ -263,7 +263,7 @@ class OrderSaver(saver.Saver):
                     for i in range(n_rows):
                         row = []
                         for j, coldef in enumerate(coldefs):
-                            name = "_table_%s_%i_%i" % (identifier, i, j)
+                            name = f"_table_{identifier}_{i}_{j}"
                             row.append(self.rqh.get_argument(name, None))
                         table.append(row)
                 # Check validity of table content.
@@ -434,7 +434,7 @@ class OrderSaver(saver.Saver):
             self.doc["invalid"][field["identifier"]] = str(msg)
             return False
         except Exception as msg:
-            self.doc["invalid"][field["identifier"]] = "System error: %s" % msg
+            self.doc["invalid"][field["identifier"]] = f"System error: {msg}"
             return False
         else:
             return True
@@ -575,10 +575,10 @@ class OrderMixin(object):
 
     def is_editable(self, order):
         "Is the order editable by the current user?"
+        if settings.get("READONLY"):
+            return False
         if self.is_admin():
             return True
-        if not self.global_modes["allow_order_editing"]:
-            return False
         status = self.get_order_status(order)
         edit = status.get("edit", [])
         if self.is_staff() and constants.STAFF in edit:
@@ -591,7 +591,7 @@ class OrderMixin(object):
         "Check if current user may edit the order."
         if self.is_editable(order):
             return
-        if not self.global_modes["allow_order_editing"]:
+        if settings.get("READONLY"):
             msg = "{0} editing is currently disabled."
         else:
             msg = "You may not edit the {0}."
@@ -622,10 +622,7 @@ class OrderMixin(object):
 
     def check_creation_enabled(self):
         "If order creation is disabled, raise ValueError."
-        if (
-            not self.global_modes["allow_order_creation"]
-            and self.current_user["role"] != constants.ADMIN
-        ):
+        if settings.get("READONLY"):
             raise ValueError(
                 "{0} creation is currently disabled.".format(utils.terminology("Order"))
             )
@@ -694,7 +691,7 @@ class OrderMixin(object):
         else:
             return []
         result = [settings["ORDER_STATUSES_LOOKUP"][t] for t in targets]
-        if not self.global_modes["allow_order_submission"]:
+        if settings.get("READONLY"):
             result = [r for r in result if r["identifier"] != constants.SUBMITTED]
         return result
 
@@ -707,6 +704,8 @@ class OrderMixin(object):
         """Can the given order be cloned? Its form must be enabled.
         Special case: Admin can clone an order even if its form is disabled.
         """
+        if settings.get("READONLY"):
+            return False
         form = self.get_form(order["form"])
         if self.is_admin():
             return form["status"] in (
@@ -714,8 +713,6 @@ class OrderMixin(object):
                 constants.TESTING,
                 constants.DISABLED,
             )
-        if not self.global_modes["allow_order_creation"]:
-            return False
         return form["status"] in (constants.ENABLED, constants.TESTING)
 
 
@@ -1067,7 +1064,7 @@ class OrderCsv(OrderMixin, RequestHandler):
         self.set_header("Content-Type", constants.CSV_MIME)
         filename = order.get("identifier") or order["_id"]
         self.set_header(
-            "Content-Disposition", 'attachment; filename="%s.csv"' % filename
+            f"Content-Disposition", 'attachment; filename="{filename}.csv"'
         )
 
 
@@ -1081,7 +1078,7 @@ class OrderXlsx(OrderCsv):
         self.set_header("Content-Type", constants.XLSX_MIME)
         filename = order.get("identifier") or order["_id"]
         self.set_header(
-            "Content-Disposition", 'attachment; filename="%s.xlsx"' % filename
+            f"Content-Disposition", 'attachment; filename="{filename}.xlsx"'
         )
 
 
@@ -1114,7 +1111,7 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
         self.set_header("Content-Type", constants.ZIP_MIME)
         filename = order.get("identifier") or order["_id"]
         self.set_header(
-            "Content-Disposition", 'attachment; filename="%s.zip"' % filename
+            f"Content-Disposition", 'attachment; filename="{filename}.zip"'
         )
 
 
@@ -1476,7 +1473,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             if link["href"] == link["title"]:
                 links.append(link["href"])
             else:
-                links.append("%s %s" % (link["href"], link["title"]))
+                links.append(f"{link['href']} {link['title']}")
         # XXX Currently, multiselect fields are not handled correctly.
         #     Too much effort; leave as is for the time being.
         hidden_fields = set(
@@ -1490,34 +1487,29 @@ class OrderEdit(OrderMixin, RequestHandler):
             tableinput = ["<tr>" "<td id='rowid__' class='table-input-row-0'></td>"]
             for i, coldef in enumerate(field["table"]):
                 column = utils.parse_field_table_column(coldef)
-                rowid = "rowid_%s" % i
+                rowid = f"rowid_{i}"
                 if column["type"] == constants.SELECT:
                     inp = [
-                        "<select class='form-control' name='%s' id='%s'>"
-                        % (rowid, rowid)
+                        f"<select class='form-control' name='{rowid}' id='{rowid}'>"
                     ]
                     inp.extend(["<option>%s</option>" % o for o in column["options"]])
                     inp = "".join(inp)
                 elif column["type"] == constants.INT:
                     inp = (
-                        "<input type='number' step='1' class='form-control'"
-                        " name='%s' id='%s'>" % (rowid, rowid)
+                        f"<input type='number' step='1' class='form-control' name='{rowid}' id='{rowid}'>"
                     )
                 elif column["type"] == constants.FLOAT:
                     inp = (
-                        "<input type='number' step='%s'"
-                        " class='form-control' name='%s' id='%s'>"
-                        % (constants.FLOAT_STEP, rowid, rowid)
+                        f"<input type='number' step='{constants.FLOAT_STEP}'"
+                        f" class='form-control' name='{rowid}' id='{rowid}'>"
                     )
                 elif column["type"] == constants.DATE:
                     inp = (
-                        "<input type='text' class='form-control datepicker'"
-                        " name='%s' id='%s'>" % (rowid, rowid)
+                        f"<input type='text' class='form-control datepicker' name='{rowid}' id='{rowid}'>"
                     )
                 else:  # Default type: 'string'
                     inp = (
-                        "<input type='text' class='form-control'"
-                        " name='%s' id='%s'>" % (rowid, rowid)
+                        f"<input type='text' class='form-control' name='{rowid}' id='{rowid}'>"
                     )
                 tableinput.append("<td>%s</td>" % inp)
             tableinput.append("</tr>")
@@ -1730,7 +1722,7 @@ class OrderFile(OrderMixin, RequestHandler):
                 "Content-Type", order["_attachments"][filename]["content_type"]
             )
             # Try to avoid strange latin-1 encoding issue with tornado.
-            b = 'attachment; filename="%s"' % filename
+            b = f'attachment; filename="{filename}"'
             b = b.encode("utf-8")
             self.set_header("Content-Disposition", b)
 
@@ -1807,8 +1799,8 @@ class OrderReport(OrderMixin, RequestHandler):
             self.set_header("Content-Type", content_type)
             name = order.get("identifier") or order["_id"]
             ext = utils.get_filename_extension(content_type)
-            filename = "%s_report%s" % (name, ext)
-            self.set_header("Content-Disposition", f'attachment; filename="{filename}"')
+            self.set_header("Content-Disposition",
+                            f'attachment; filename="{name}_report{ext}"')
 
 
 class OrderReportEdit(OrderMixin, RequestHandler):
@@ -1869,8 +1861,8 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         self.set_header("Content-Type", content_type)
         name = order.get("identifier") or order["_id"]
         ext = utils.get_filename_extension(content_type)
-        filename = "%s_report%s" % (name, ext)
-        self.set_header("Content-Disposition", f'attachment; filename="{filename}"')
+        self.set_header("Content-Disposition", 
+                        f'attachment; filename="{name}_report{ext}"')
 
     def put(self, iuid):
         try:

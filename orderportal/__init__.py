@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "5.4.2"
+__version__ = "5.5.0"
 
 
 class Constants:
@@ -133,15 +133,6 @@ class Constants:
     TRUE = frozenset(["true", "yes", "t", "y", "1"])
     FALSE = frozenset(["false", "no", "f", "n", "0"])
 
-    # Default global modes for database initialization
-    DEFAULT_GLOBAL_MODES = dict(
-        allow_registration=True,
-        allow_login=True,
-        allow_order_creation=True,
-        allow_order_editing=True,
-        allow_order_submission=True,
-    )
-
     # User login account
     USER_COOKIE = "orderportal_user"
     API_KEY_HEADER = "X-OrderPortal-API-key"
@@ -222,6 +213,7 @@ settings = dict(
     PIDFILE=None,
     DATABASE_SERVER="http://localhost:5984/",
     DATABASE_NAME="orderportal",
+    READONLY=False,
     MARKDOWN_URL="https://www.markdownguide.org/basic-syntax/",
     SITE_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site")),
     SITE_STATIC_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site/static")),

@@ -138,6 +138,8 @@ class Form(FormMixin, RequestHandler):
 
     def is_deletable(self, form):
         "Can the form be deleted?."
+        if settings.get("READONLY"):
+            raise False
         if form["status"] == constants.PENDING:
             return True
         if form["status"] == constants.ENABLED:
@@ -204,11 +206,13 @@ class FormCreate(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
+        if self.readonly(): return
         self.check_admin()
         self.render("form_create.html")
 
     @tornado.web.authenticated
     def post(self):
+        if self.readonly(): return
         self.check_admin()
         with FormSaver(rqh=self) as saver:
             saver["title"] = self.get_argument("title") or "[no title]"

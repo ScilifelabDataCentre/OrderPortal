@@ -62,12 +62,6 @@
     </button>
   </form>
 </p>
-{% elif not global_modes['allow_order_editing'] %}
-<p>
-  <div class="well text-danger">
-    {{ terminology('Order') }} editing is currently disabled.
-  </div>
-</p>
 {% end %} {# if is_editable #}
 
 {% if is_clonable %}
@@ -80,12 +74,6 @@
       Clone
     </button>
   </form>
-</p>
-{% elif not global_modes['allow_order_creation'] %}
-<p>
-  <div class="well text-danger">
-    {{ terminology('Order') }} creation is currently disabled.
-  </div>
 </p>
 {% else %}
 <p>
@@ -120,11 +108,6 @@
   </div>
   {% end %}
   {% end %} {# if targets #}
-  {% if not global_modes['allow_order_submission'] %}
-  <div class="well well-lg text-danger">
-    {{ terminology('Order') }} submission is currently disabled.
-  </div>
-  {% end %} {# if not global_modes... #}
 </p>
 {% end %} {# block action_content #}
 

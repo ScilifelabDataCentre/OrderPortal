@@ -13,32 +13,6 @@ from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 
 
-class GlobalModes(RequestHandler):
-    "Page for display and change of global modes."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        self.render("global_modes.html")
-
-    def post(self):
-        self.check_admin()
-        try:
-            mode = self.get_argument("mode")
-            if mode not in self.global_modes:
-                raise ValueError
-            self.global_modes[mode] = utils.to_bool(self.get_argument("value"))
-        except (tornado.web.MissingArgumentError, ValueError, TypeError):
-            pass
-        else:
-            # Create global_modes meta document if it does not exist.
-            if "_id" not in self.global_modes:
-                self.global_modes["_id"] = "global_modes"
-                self.global_modes[constants.DOCTYPE] = constants.META
-            self.db.put(self.global_modes)
-        self.see_other("global_modes")
-
-
 class Settings(RequestHandler):
     "Page displaying settings info."
 
@@ -74,6 +48,7 @@ class Settings(RequestHandler):
             "LOGGING_FILEPATH",
             "LOGGING_DEBUG",
             "LOGGING_FILEPATH",
+            "READONLY",
             "EMAIL",
             "MESSAGE_SENDER_EMAIL",
             "LOGIN_MAX_AGE_DAYS",
