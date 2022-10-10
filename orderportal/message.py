@@ -68,9 +68,11 @@ class MessageSaver(saver.Saver):
             message.set_content(self["text"])
             server.send_message(message)
             self["sent"] = utils.timestamp()
+            # Additional logging info to help sorting out issue with Google server.
+            logging.info(f"""Email "{message['Subject']}" from {message['From']} to {message['To']}""")
         except Exception as error:
             self["error"] = str(error)
-            logging.error("email failed to %s: %s", self["recipients"], error)
+            logging.error(f"email failed to {self['recipients']}: {error}")
             raise
 
     def post_process(self):
