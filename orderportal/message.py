@@ -36,13 +36,18 @@ class MessageSaver(saver.Saver):
         self["text"] = str(template["text"]).format(**params)
 
     def send(self, recipients):
-        "Send the message to the given recipient email addresses."
+        """Send the message to the given recipient email addresses.
+        Raises KeyError if no email server defined.
+        Raises ValueError if some other error.
+        """
+        try:
+            if not settings["EMAIL"]: raise KeyError
+            host = settings["EMAIL"]["HOST"]
+            if not host: raise KeyError
+        except KeyError:
+            raise KeyError("Could not send email; no email server defined. Contact the admin.")
         try:
             self["recipients"] = recipients
-            try:
-                host = settings["EMAIL"]["HOST"]
-            except KeyError:
-                return
             port = settings["EMAIL"].get("PORT", 0)
             if settings["EMAIL"].get("SSL"):
                 server = smtplib.SMTP_SSL(host, port=port)
@@ -68,12 +73,11 @@ class MessageSaver(saver.Saver):
             message.set_content(self["text"])
             server.send_message(message)
             self["sent"] = utils.timestamp()
-            # Additional logging info to help sorting out issue with Google server.
+            # Additional logging info to help sorting out issue with email server.
             logging.info(f"""Email "{message['Subject']}" from {message['From']} to {message['To']}""")
         except Exception as error:
-            self["error"] = str(error)
-            logging.error(f"email failed to {self['recipients']}: {error}")
-            raise
+            logging.error(f"""Email "{message['Subject']}" failed to {self['recipients']}: {error}""")
+            raise ValueError(str(error))
 
     def post_process(self):
         try:

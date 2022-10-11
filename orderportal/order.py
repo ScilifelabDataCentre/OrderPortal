@@ -508,16 +508,21 @@ class OrderSaver(saver.Saver):
             for admin in admins:
                 if admin["status"] == constants.ENABLED:
                     recipients.add(admin["email"])
-        with MessageSaver(rqh=self) as saver:
-            saver.create(
-                template,
-                owner=self.doc["owner"],
-                title=self.doc["title"],
-                identifier=self.doc.get("identifier") or self.doc["_id"],
-                url=self.get_order_url(self.doc),
-                tags=", ".join(self.doc.get("tags", [])),
-            )
-            saver.send(list(recipients))
+        try:
+            with MessageSaver(rqh=self) as saver:
+                saver.create(
+                    template,
+                    owner=self.doc["owner"],
+                    title=self.doc["title"],
+                    identifier=self.doc.get("identifier") or self.doc["_id"],
+                    url=self.get_order_url(self.doc),
+                    tags=", ".join(self.doc.get("tags", [])),
+                )
+                saver.send(list(recipients))
+        except KeyError as error:
+            self.set_message_flash(str(error))
+        except ValueError as error:
+            self.set_error_flash(str(error))
 
     def get_order_url(self, order):
         """Member rqh is not available when used from a stand-alone script,
@@ -622,10 +627,11 @@ class OrderMixin(object):
 
     def check_creation_enabled(self):
         "If order creation is disabled, raise ValueError."
+        term = utils.terminology("Order")
         if settings.get("READONLY"):
-            raise ValueError(
-                "{0} creation is currently disabled.".format(utils.terminology("Order"))
-            )
+            raise ValueError(f"{term} creation is currently disabled.")
+        if self.current_user["role"] == constants.USER and not settings["ORDER_CREATE_USER"]:
+            raise ValueError(f"{term} creation is not allowed for account with role 'user'.")
 
     def get_form(self, iuid, check=False):
         "Get the form given by its IUID. Optionally check that it is enabled."

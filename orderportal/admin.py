@@ -22,9 +22,13 @@ class Settings(RequestHandler):
         mod_settings = settings.copy()
         # Add the root dir
         mod_settings["ROOT"] = constants.ROOT
-        # Do not show the email password
+        # Hide sensitive data.
+        for key in settings:
+            if "PASSWORD" in key or "SECRET" in key:
+                mod_settings[key] = "<hidden>"
+        # Do not show the email password.
         if mod_settings["EMAIL"].get("PASSWORD"):
-            mod_settings["EMAIL"]["PASSWORD"] = "*** hidden ***"
+            mod_settings["EMAIL"]["PASSWORD"] = "<hidden>"
         # Don't show the password in the CouchDB URL
         url = settings["DATABASE_SERVER"]
         match = re.search(r":([^/].+)@", url)
@@ -32,50 +36,15 @@ class Settings(RequestHandler):
             url = list(url)
             url[match.start(1) : match.end(1)] = "password"
             mod_settings["DATABASE_SERVER"] = "".join(url)
-        params = [
-            "ROOT",
-            "SITE_DIR",
-            "SETTINGS_FILE",
-            "BASE_URL",
-            "BASE_URL_PATH_PREFIX",
-            "PORT",
-            "SITE_NAME",
-            "SITE_SUPPORT_EMAIL",
-            "DATABASE_SERVER",
-            "DATABASE_NAME",
-            "DATABASE_ACCOUNT",
-            "TORNADO_DEBUG",
-            "LOGGING_FILEPATH",
-            "LOGGING_DEBUG",
-            "LOGGING_FILEPATH",
-            "READONLY",
-            "EMAIL",
-            "MESSAGE_SENDER_EMAIL",
-            "LOGIN_MAX_AGE_DAYS",
-            "LOGIN_MAX_FAILURES",
-            "ORDER_STATUSES_FILE",
-            "ORDER_TRANSITIONS_FILE",
-            "ORDER_MESSAGES_FILE",
-            "ORDER_USER_TAGS",
-            "ORDERS_SEARCH_FIELDS",
-            "ORDERS_LIST_FIELDS",
-            "ORDERS_LIST_STATUSES",
-            "ORDER_AUTOPOPULATE",
-            "ORDER_TAGS",
-            "UNIVERSITIES_FILE",
-            "COUNTRY_CODES_FILE",
-            "SUBJECT_TERMS_FILE",
-            "ACCOUNT_MESSAGES_FILE",
-            "ACCOUNT_PI_INFO",
-            "ACCOUNT_POSTAL_INFO",
-            "ACCOUNT_INVOICE_INFO",
-            "ACCOUNT_FUNDER_INFO",
-            "ACCOUNT_FUNDER_INFO_GENDER",
-            "ACCOUNT_FUNDER_INFO_GROUP_SIZE",
-            "ACCOUNT_FUNDER_INFO_SUBJECT",
-            "ACCOUNT_DEFAULT_COUNTRY_CODE",
-        ]
-        self.render("settings.html", params=params, settings=mod_settings)
+        mod_settings["ACCOUNT_MESSAGES"] = f"<see file {mod_settings['ACCOUNT_MESSAGES_FILE']}>"
+        mod_settings["COUNTRIES"] = f"<see file {mod_settings['COUNTRY_CODES_FILE']}>"
+        mod_settings["COUNTRIES_LOOKUP"] = f"<computed from file {mod_settings['COUNTRY_CODES_FILE']}>"
+        mod_settings["ORDER_MESSAGES"] = f"<see file {mod_settings['ORDER_MESSAGES_FILE']}>"
+        mod_settings["ORDER_MESSAGES"] = f"<see file {mod_settings['ORDER_MESSAGES_FILE']}>"
+        mod_settings["ORDER_STATUSES"] = f"<see file {mod_settings['ORDER_STATUSES_FILE']}>"
+        mod_settings["ORDER_STATUSES_LOOKUP"] = f"<computed from file {mod_settings['ORDER_STATUSES_FILE']}>"
+        mod_settings["ORDER_TRANSITIONS"] = f"<computed from file {mod_settings['ORDER_TRANSITIONS_FILE']}>"
+        self.render("settings.html", settings=mod_settings)
 
 
 class TextSaver(saver.Saver):

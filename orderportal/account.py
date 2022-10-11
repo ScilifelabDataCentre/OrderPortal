@@ -829,7 +829,7 @@ class Login(RequestHandler):
                 with AccountSaver(doc=account, rqh=self) as saver:
                     saver["status"] = constants.DISABLED
                     saver.erase_password()
-                msg = f"Too many failed login attempts: Your account has been disabled. Contact the site admin {settings.get('SITE_SUPPORT_EMAIL')}"
+                msg = "Too many failed login attempts: Your account has been disabled. Contact the admin"
                 # Prepare email message
                 try:
                     template = settings["ACCOUNT_MESSAGES"][constants.DISABLED]
@@ -911,29 +911,29 @@ class Reset(RequestHandler):
             except KeyError:
                 pass
             else:
-                with MessageSaver(rqh=self) as saver:
-                    saver.create(
-                        template,
-                        account=account["email"],
-                        url=URL("password"),
-                        password_url=URL("password"),
-                        password_code_url=URL(
-                            "password", email=account["email"], code=account["code"]
-                        ),
-                        code=account["code"],
-                    )
-                    # Recipient is hardwired here.
-                    saver.send([account["email"]])
-            if self.current_user:
-                if not self.is_admin():
-                    # Log out the user
-                    self.set_secure_cookie(constants.USER_COOKIE, "")
-            self.see_other(
-                "home",
-                message="An email has been sent containing"
-                " a reset code. Use the link in the email."
-                " (Check your spam filter!)",
-            )
+                try:
+                    with MessageSaver(rqh=self) as saver:
+                        saver.create(
+                            template,
+                            account=account["email"],
+                            url=URL("password"),
+                            password_url=URL("password"),
+                            password_code_url=URL(
+                                "password", email=account["email"], code=account["code"]
+                            ),
+                            code=account["code"],
+                        )
+                        # Recipient is hardwired here.
+                        saver.send([account["email"]])
+                        if self.current_user and not self.is_admin():
+                            # Log out the user
+                            self.set_secure_cookie(constants.USER_COOKIE, "")
+                except KeyError as error:
+                    self.see_other("home", message=str(error))
+                except ValueError as error:
+                    self.see_other("home", error=str(error))
+                else:
+                    self.see_other("home", message="An email has been sent containing a reset code. Use the link in the email.")
 
 
 class Password(RequestHandler):
@@ -980,25 +980,12 @@ class Password(RequestHandler):
                 "password",
                 email=self.get_argument("email") or "",
                 code=self.get_argument("code") or "",
-                error="password confirmation failed. Not the same!",
+                error="Password confirmation failed. Not the same!",
             )
             return
         with AccountSaver(doc=account, rqh=self) as saver:
             saver.set_password(password)
-            saver["login"] = utils.timestamp()  # Set login session.
-        self.set_secure_cookie(
-            constants.USER_COOKIE,
-            account["email"],
-            expires_days=settings["LOGIN_MAX_AGE_DAYS"],
-        )
-        if account.get("update_info"):
-            self.see_other(
-                "account_edit",
-                account["email"],
-                message="Please review and update your account information.",
-            )
-        else:
-            self.see_other("home")
+        self.see_other("home", message="Password set; use it to login.")
 
 
 class Register(RequestHandler):
@@ -1073,9 +1060,13 @@ class Register(RequestHandler):
                 saver.check_required()
                 saver["owner"] = saver["email"]
                 saver["role"] = constants.USER
-                saver["status"] = constants.PENDING
                 saver["api_key"] = utils.get_iuid()
-                saver.erase_password()
+                if self.is_admin():
+                    saver["status"] = constants.ENABLED
+                    saver.reset_password()
+                else:
+                    saver["status"] = constants.PENDING
+                    saver.erase_password()
         except ValueError as msg:
             kwargs = dict()
             for key in self.KEYS:
@@ -1097,15 +1088,20 @@ class Register(RequestHandler):
             # Allow admin to register an account without sending an email to the person.
             if not (self.is_admin() and
                     not utils.to_bool(self.get_argument("send_email", False))):
-                with MessageSaver(rqh=self) as saver:
-                    saver.create(
-                        template,
-                        account=account["email"],
-                        url=self.absolute_reverse_url("account", account["email"]),
-                    )
-                    # Recipients are hardwired to be admins.
-                    recipients = [a["email"] for a in self.get_admins()]
-                    saver.send(recipients)
+                try:
+                    with MessageSaver(rqh=self) as saver:
+                        saver.create(
+                            template,
+                            account=account["email"],
+                            url=self.absolute_reverse_url("account", account["email"]),
+                        )
+                        # Recipients are hardwired to be admins.
+                        recipients = [a["email"] for a in self.get_admins()]
+                        saver.send(recipients)
+                except KeyError as error:
+                    self.set_message_flash(str(error))
+                except ValueError as error:
+                    self.set_error_flash(str(error))
         self.see_other("registered")
 
 

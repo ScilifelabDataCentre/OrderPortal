@@ -128,8 +128,10 @@
         </div>
       </div>
       {% end %} {# for form in forms #}
+      {% elif forms is None %}
+      <i>{{ terminology('Order') }} creation is not allowed for account with role 'user'.</i>
       {% else %}
-      <i>No order forms have been enabled.</i>
+      <i>No {{ terminology('order') }} forms have been enabled.</i>
       {% end %} {# if forms #}
       {% end %} {# if not settings['READONLY'] #}
     </div>
