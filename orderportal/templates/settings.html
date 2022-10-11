@@ -29,10 +29,10 @@ Settings
 </div>
 
 <table class="table">
-  {% for param in params %}
+  {% for key in sorted(settings) %}
   <tr>
-    <th>{{ param }}</th>
-    <td>{{ settings.get(param) }}</td>
+    <th>{{ key }}</th>
+    <td>{{ settings.get(key) }}</td>
   </tr>
   {% end %}
 </table>

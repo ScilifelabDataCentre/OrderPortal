@@ -10,6 +10,12 @@
          src="{{ reverse_url('site', settings['SITE_HOME_ICON']) }}">
   </div>
   <div class="col-md-8">
+    {% if current_user and settings['READONLY'] %}
+    <div class="alert alert-danger" role="alert">
+      <strong>This service is currently read-only:</strong>
+      {{ settings['READONLY'] }}
+    </div>
+    {% end %}
     <h2>{{ settings['SITE_NAME'] }}</h2>
     {% if is_admin %}
     <a href="{{ reverse_url('text', 'header', origin=reverse_url('home')) }}"
@@ -36,12 +42,6 @@
         Login
       </div>
       <div class="panel-body">
-        {% if not global_modes['allow_login'] %}
-        <div class="alert alert-danger" role="alert">
-          <strong>Login is currently disabled (except for administrators).</strong>
-          Please try again later.
-        </div>
-        {% end %}
         <form action="{{ reverse_url('login') }}"
               method="POST" role="form">
           {% module xsrf_form_html() %}
@@ -69,18 +69,11 @@
     <div class="panel panel-default">
       <div class="panel-body">
         <div>
-          {% if global_modes['allow_registration'] %}
           <a href="{{ reverse_url('register') }}" role="button"
              class="btn btn-success btn-block">
             <span class="glyphicon glyphicon-user"></span>
             Register account
           </a>
-          {% else %}
-          <div class="alert alert-danger" role="alert">
-            <strong>Registration is currently disabled.</strong>
-            Please try again later.
-          </div>
-          {% end %} {# if global_modes['allow_registration'] #}
         </div>
         <br>
         <div>
@@ -106,8 +99,8 @@
   <div class="col-md-6">
     {% block content_right %}
 
-    {% if global_modes['allow_order_creation'] %}
     <div class="panel-group">
+      {% if not settings['READONLY'] %}
       {% if forms %}
       {% for form in forms %}
       <div class="panel panel-primary">
@@ -135,16 +128,13 @@
         </div>
       </div>
       {% end %} {# for form in forms #}
+      {% elif forms is None %}
+      <i>{{ terminology('Order') }} creation is not allowed for account with role 'user'.</i>
       {% else %}
-      <i>No order forms have been enabled.</i>
-      {% end %}
+      <i>No {{ terminology('order') }} forms have been enabled.</i>
+      {% end %} {# if forms #}
+      {% end %} {# if not settings['READONLY'] #}
     </div>
-    {% else %}
-    <div class="alert alert-danger">
-      <strong>Order creation is currently disabled.</strong>
-      Please try again later.
-    </div>
-    {% end %} {# if global_modes['allow_order_creation'] #}
 
     {% end %} {# block content_right #}
   </div>

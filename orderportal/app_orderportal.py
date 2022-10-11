@@ -175,7 +175,6 @@ def main():
         url(r"/file/([0-9a-f]{32})/logs", FileLogs, name="file_logs"),
         url(r"/log/([0-9a-f]{32})", Log, name="log"),
         url(r"/([0-9a-f]{32})", Entity, name="entity"),
-        url(r"/admin/global_modes", GlobalModes, name="global_modes"),
         url(r"/admin/settings", Settings, name="settings"),
         url(r"/admin/text/([^/]+)", Text, name="text"),
         url(r"/admin/texts", Texts, name="texts"),

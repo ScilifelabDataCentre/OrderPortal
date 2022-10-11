@@ -9,12 +9,6 @@
 
 <div class="row">
   <div class="col-md-5">
-    {% if not global_modes['allow_login'] %}
-    <div class="well text-danger">
-      Login is currently disabled (except for administrators).
-      Try again later.
-    </div>
-    {% end %}
     <form action="{{ reverse_url('login') }}"
           method="POST" role="form">
       {% module xsrf_form_html() %}

@@ -30,6 +30,7 @@ class Groups(RequestHandler):
 
 
 class GroupMixin(object):
+
     def check_readable(self, group):
         "Check if current user may read the group."
         if self.is_owner(group):
@@ -40,8 +41,10 @@ class GroupMixin(object):
             return
         raise ValueError("you may not read the group")
 
-    def is_editable(self, group):
+    def allow_edit(self, group):
         "Is the group editable by the current user?"
+        if settings.get("READONLY"):
+            return False
         if self.is_admin():
             return True
         if self.is_owner(group):
@@ -50,7 +53,7 @@ class GroupMixin(object):
 
     def check_editable(self, group):
         "Check if current user may edit the group."
-        if not self.is_editable(group):
+        if not self.allow_edit(group):
             raise ValueError("you may not edit the group")
 
 
@@ -65,7 +68,7 @@ class Group(GroupMixin, RequestHandler):
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        self.render("group.html", group=group, is_editable=self.is_editable(group))
+        self.render("group.html", group=group, allow_edit=self.allow_edit(group))
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -90,10 +93,12 @@ class GroupCreate(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
+        if self.readonly(): return
         self.render("group_create.html")
 
     @tornado.web.authenticated
     def post(self):
+        if self.readonly(): return
         with GroupSaver(rqh=self) as saver:
             saver["name"] = self.get_argument("name", "") or "[no name]"
             saver["owner"] = self.current_user["email"]
@@ -177,6 +182,7 @@ class GroupAccept(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
+        if self.readonly(): return
         group = self.get_entity(iuid, doctype=constants.GROUP)
         with GroupSaver(doc=group, rqh=self) as saver:
             invited = set(group["invited"])
@@ -198,6 +204,7 @@ class GroupDecline(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
+        if self.readonly(): return
         group = self.get_entity(iuid, doctype=constants.GROUP)
         with GroupSaver(doc=group, rqh=self) as saver:
             invited = set(group["invited"])

@@ -129,7 +129,7 @@
 </p>
 {% end %} {# if  account['status'] != constants.DISABLED #}
 
-{% if is_deletable %}
+{% if allow_delete %}
 <p>
   <form action="{{ reverse_url('account', account['email']) }}"
         method="POST" role="form">
@@ -144,7 +144,7 @@
     </div>
   </form>
 </p>
-{% end %} {# if is_deletable #}
+{% end %} {# if allow_delete #}
 
 {% end %} {# if is_admin and current_user['email'] != account['email'] #}
 {% end %} {# block action_content #}

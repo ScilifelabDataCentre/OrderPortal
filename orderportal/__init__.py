@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "5.4.2"
+__version__ = "5.5.1"
 
 
 class Constants:
@@ -46,7 +46,7 @@ class Constants:
     ID_RX = re.compile(r"^[a-z][_a-z0-9]*$", re.IGNORECASE)
     NAME_RX = re.compile(r"^[^/]+$")
     IUID_RX = re.compile(r"^[0-9a-f]{32}$")
-    DATE_RX = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")  # Safe until 9999 CE...
+    DATE_RX = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")  # Works until 9999 CE...
     EMAIL_RX = re.compile(r"^[^@]+@[^@]+\.[^@]+$")
 
     # CouchDB
@@ -133,15 +133,6 @@ class Constants:
     TRUE = frozenset(["true", "yes", "t", "y", "1"])
     FALSE = frozenset(["false", "no", "f", "n", "0"])
 
-    # Default global modes for database initialization
-    DEFAULT_GLOBAL_MODES = dict(
-        allow_registration=True,
-        allow_login=True,
-        allow_order_creation=True,
-        allow_order_editing=True,
-        allow_order_submission=True,
-    )
-
     # User login account
     USER_COOKIE = "orderportal_user"
     API_KEY_HEADER = "X-OrderPortal-API-key"
@@ -222,6 +213,9 @@ settings = dict(
     PIDFILE=None,
     DATABASE_SERVER="http://localhost:5984/",
     DATABASE_NAME="orderportal",
+    PASSWORD_SALT="must-be-changed-to-be-unique-for-your-instance",
+    MIN_PASSWORD_LENGTH=8,
+    READONLY=False,
     MARKDOWN_URL="https://www.markdownguide.org/basic-syntax/",
     SITE_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site")),
     SITE_STATIC_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site/static")),
@@ -252,7 +246,6 @@ settings = dict(
     COUNTRY_CODES_FILE="country_codes.yaml",
     SUBJECT_TERMS_FILE="subject_terms.yaml",
     TERMINOLOGY=dict(),  # Terms translation lookup.
-    MIN_PASSWORD_LENGTH=8,
     LOGIN_MAX_AGE_DAYS=14,
     LOGIN_MAX_FAILURES=6,
     DISPLAY_DEFAULT_PAGE_SIZE=25,
@@ -268,6 +261,7 @@ settings = dict(
     DISPLAY_MENU_CONTACT=True,
     DISPLAY_MENU_ABOUT_US=True,
     DISPLAY_TEXT_MARKDOWN_NOTATION_INFO=True,
+    ORDER_CREATE_USER=True,
     ORDER_IDENTIFIER_FORMAT="OD{0:=05d}",
     ORDER_IDENTIFIER_FIRST=1,
     ORDER_TAGS=True,

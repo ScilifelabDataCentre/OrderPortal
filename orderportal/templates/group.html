@@ -8,7 +8,7 @@
 
 {% block action_content %}
 
-{% if is_editable %}
+{% if allow_edit %}
 <form action="{{ reverse_url('group_edit', group['_id']) }}"
       method="GET" role="form" style="margin-top: 20px;">
   <button type="submit" class="btn btn-primary btn-block">
@@ -27,9 +27,9 @@
     Delete
   </button>
 </form>
-{% end %} {# if is_editable #}
+{% end %} {# if allow_edit #}
 
-{% if is_editable %}
+{% if allow_edit %}
 {#
 <form action="{{ reverse_url('group', group['_id']) }}"
       method="POST" role="form" style="margin-top: 20px;">
@@ -42,7 +42,7 @@
   </button>
 </form>
 #}
-{% end %} {# if is_editable #}
+{% end %} {# if allow_edit #}
 
 {% end %} {# block action_content #}
 
