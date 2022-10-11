@@ -74,9 +74,9 @@ class MessageSaver(saver.Saver):
             server.send_message(message)
             self["sent"] = utils.timestamp()
             # Additional logging info to help sorting out issue with email server.
-            logging.info(f"""Email "{message['Subject']}" from {message['From']} to {message['To']}""")
+            logging.info(f"""Email "{self['subject']}" from {self['sender']} to {self['recipients']}""")
         except Exception as error:
-            logging.error(f"""Email "{message['Subject']}" failed to {self['recipients']}: {error}""")
+            logging.error(f"""Email "{self['subject']}" failed to {self['recipients']}: {error}""")
             raise ValueError(str(error))
 
     def post_process(self):
