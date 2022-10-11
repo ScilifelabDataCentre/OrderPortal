@@ -299,7 +299,7 @@ class AccountsXlsx(AccountsCsv):
 class AccountMixin(object):
     "Mixin for various useful methods."
 
-    def is_readable(self, account):
+    def allow_read(self, account):
         "Is the account readable by the current user?"
         if self.is_owner(account):
             return True
@@ -311,11 +311,11 @@ class AccountMixin(object):
 
     def check_readable(self, account):
         "Check that the account is readable by the current user."
-        if self.is_readable(account):
+        if self.allow_read(account):
             return
         raise ValueError("You may not read the account.")
 
-    def is_editable(self, account):
+    def allow_edit(self, account):
         "Is the account editable by the current user?"
         if settings.get("READONLY"):
             return False
@@ -327,7 +327,7 @@ class AccountMixin(object):
 
     def check_editable(self, account):
         "Check that the account is editable by the current user."
-        if self.is_readable(account):
+        if self.allow_read(account):
             return
         raise ValueError("You may not edit the account.")
 
@@ -369,7 +369,7 @@ class Account(AccountMixin, RequestHandler):
             groups=self.get_account_groups(account["email"]),
             latest_activity=latest_activity,
             invitations=invitations,
-            is_deletable=self.is_deletable(account),
+            allow_delete=self.allow_delete(account),
         )
 
     @tornado.web.authenticated
@@ -386,7 +386,7 @@ class Account(AccountMixin, RequestHandler):
         "Delete a account that is pending; to get rid of spam application."
         account = self.get_account(email)
         self.check_admin()
-        if not self.is_deletable(account):
+        if not self.allow_delete(account):
             self.see_other(
                 "account", account["email"], error="Account cannot be deleted."
             )
@@ -424,7 +424,7 @@ class Account(AccountMixin, RequestHandler):
         self.db.delete(account)
         self.see_other("accounts")
 
-    def is_deletable(self, account):
+    def allow_delete(self, account):
         "Can the account be deleted? Pending, or disabled and no orders."
         if settings.get("READONLY"):
             return False
@@ -500,7 +500,7 @@ class AccountApiV1(AccountMixin, RequestHandler):
 class AccountOrdersMixin(object):
     "Mixin containing access tests."
 
-    def is_readable(self, account):
+    def allow_read(self, account):
         "Is the account readable by the current user?"
         if account["email"] == self.current_user["email"]:
             return True
@@ -512,7 +512,7 @@ class AccountOrdersMixin(object):
 
     def check_readable(self, account):
         "Check that the account is readable by the current user."
-        if self.is_readable(account):
+        if self.allow_read(account):
             return
         raise ValueError("You may not view these orders.")
 

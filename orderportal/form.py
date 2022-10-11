@@ -110,7 +110,7 @@ class Form(FormMixin, RequestHandler):
             form=form,
             order_count=self.get_order_count(form),
             fields=Fields(form),
-            is_deletable=self.is_deletable(form),
+            allow_delete=self.allow_delete(form),
             are_fields_editable=self.are_fields_editable(form),
             logs=self.get_logs(form["_id"]),
         )
@@ -129,14 +129,14 @@ class Form(FormMixin, RequestHandler):
     def delete(self, iuid):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
-        if not self.is_deletable(form):
+        if not self.allow_delete(form):
             self.see_other("form", form["_id"], error="Form cannot be deleted.")
             return
         self.delete_logs(form["_id"])
         self.db.delete(form)
         self.see_other("forms")
 
-    def is_deletable(self, form):
+    def allow_delete(self, form):
         "Can the form be deleted?."
         if settings.get("READONLY"):
             raise False

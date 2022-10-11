@@ -31,7 +31,7 @@
 
 {% block action_content %}
 
-{% if is_editable %}
+{% if allow_edit %}
 <p>
   <form action="{{ reverse_url('order_edit', order['_id']) }}"
         method="GET" role="form">
@@ -62,9 +62,9 @@
     </button>
   </form>
 </p>
-{% end %} {# if is_editable #}
+{% end %} {# if allow_edit #}
 
-{% if is_clonable %}
+{% if allow_clone %}
 <p>
   <form action="{{ reverse_url('order_clone', order['_id']) }}"
         method="POST" role="form">
@@ -81,7 +81,7 @@
     This {{ terminology('order') }} cannot be cloned.
   </div>
 <p>
-{% end %} {# if is_clonable #}
+{% end %} {# if allow_clone #}
 
 <br>
 <br>
@@ -244,7 +244,7 @@
                 {% else %}
                   {{ int(0.5 + file['size'] / 1000.0) }} kB</td>
                 {% end %}
-              {% if is_attachable %}
+              {% if allow_attach %}
               <td>
                 <form action="{{ reverse_url('order_file', order['_id'], file['filename']) }}"
                       method="POST" role="form">
@@ -257,17 +257,17 @@
                   </button>
                 </form>
               </td>
-              {% end %} {# if is_attachable #}
+              {% end %} {# if allow_attach #}
             </tr>
             {% end %} {# for file in attached_files #}
           </table>
-          {% if is_attachable %}
+          {% if allow_attach %}
           <button type="button" class="btn btn-primary"
                   data-toggle="modal" data-target="#attach">
             <span class="glyphicon glyphicon-paperclip"></span>
             Attach
           </button>
-          {% end %} {# if is_attachable #}
+          {% end %} {# if allow_attach #}
         </td>
       </tr>
       {% if form.get('disclaimer') %}
@@ -292,7 +292,7 @@
 {% module Template('order_fields.html', fields=fields, order=order, is_staff=is_staff) %}
 </table>
 
-{% if is_attachable %}
+{% if allow_attach %}
 {# Modal for attaching a file. #}
 <div id="attach" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">
@@ -331,6 +331,6 @@
 
   </div>
 </div>
-{% end %}{# if is_attachable #}
+{% end %}{# if allow_attach #}
 
 {% end %} {# block sub_main_content #}

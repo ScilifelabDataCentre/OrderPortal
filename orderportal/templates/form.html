@@ -88,7 +88,7 @@
 </p>
 {% end %} {# if form['status'] == ... #}
 
-{% if is_deletable %}
+{% if allow_delete %}
 <p>
   <form action="{{ reverse_url('form', form['_id']) }}"
         method="POST" role="form">
@@ -101,7 +101,7 @@
     </button>
   </form>
 </p>
-{% end %} {# if is_deletable #}
+{% end %} {# if allow_delete #}
 
 <p>
   <form action="{{ reverse_url('form_clone', form['_id']) }}"

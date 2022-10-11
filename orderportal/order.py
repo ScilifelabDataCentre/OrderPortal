@@ -562,7 +562,7 @@ class OrderMixin(object):
                 raise ValueError("Sorry, no such order")
         return order
 
-    def is_readable(self, order):
+    def allow_read(self, order):
         "Is the order readable by the current user?"
         if self.is_owner(order):
             return True
@@ -574,11 +574,11 @@ class OrderMixin(object):
 
     def check_readable(self, order):
         "Check if current user may read the order."
-        if self.is_readable(order):
+        if self.allow_read(order):
             return
         raise ValueError("You may not read the order.")
 
-    def is_editable(self, order):
+    def allow_edit(self, order):
         "Is the order editable by the current user?"
         if settings.get("READONLY"):
             return False
@@ -594,7 +594,7 @@ class OrderMixin(object):
 
     def check_editable(self, order):
         "Check if current user may edit the order."
-        if self.is_editable(order):
+        if self.allow_edit(order):
             return
         if settings.get("READONLY"):
             msg = "{0} editing is currently disabled."
@@ -602,7 +602,7 @@ class OrderMixin(object):
             msg = "You may not edit the {0}."
         raise ValueError(msg.format(utils.terminology("order")))
 
-    def is_attachable(self, order):
+    def allow_attach(self, order):
         "May the current user may attach a file to the order?"
         if self.is_admin():
             return True
@@ -616,7 +616,7 @@ class OrderMixin(object):
 
     def check_attachable(self, order):
         "Check if current user may attach a file to the order."
-        if self.is_attachable(order):
+        if self.allow_attach(order):
             return
         raise tornado.web.HTTPError(
             403,
@@ -701,12 +701,12 @@ class OrderMixin(object):
             result = [r for r in result if r["identifier"] != constants.SUBMITTED]
         return result
 
-    def is_submittable(self, order, check_valid=True):
+    def allow_submit(self, order, check_valid=True):
         "Is the order submittable? Special hard-wired status."
         targets = self.get_targets(order)
         return constants.SUBMITTED in [t["identifier"] for t in targets]
 
-    def is_clonable(self, order):
+    def allow_clone(self, order):
         """Can the given order be cloned? Its form must be enabled.
         Special case: Admin can clone an order even if its form is disabled.
         """
@@ -875,9 +875,9 @@ class Order(OrderMixin, RequestHandler):
             form=form,
             fields=form["fields"],
             attached_files=files,
-            is_editable=self.is_admin() or self.is_editable(order),
-            is_clonable=self.is_clonable(order),
-            is_attachable=self.is_attachable(order),
+            allow_edit=self.is_admin() or self.allow_edit(order),
+            allow_clone=self.allow_clone(order),
+            allow_attach=self.allow_attach(order),
             targets=self.get_targets(order),
         )
 
@@ -1555,7 +1555,7 @@ class OrderEdit(OrderMixin, RequestHandler):
                 saver.set_external(self.get_argument("__links__", "").split("\n"))
                 saver.update_fields()
                 if flag == constants.SUBMIT:  # Hard-wired status
-                    if self.is_submittable(saver.doc):
+                    if self.allow_submit(saver.doc):
                         saver.set_status(constants.SUBMITTED)
                         message = "{0} saved and submitted.".format(
                             utils.terminology("Order")
@@ -1619,7 +1619,7 @@ class OrderOwner(OrderMixin, RequestHandler):
         self.set_message_flash(
             "Changed owner of {0}.".format(utils.terminology("Order"))
         )
-        if self.is_readable(order):
+        if self.allow_read(order):
             self.redirect(self.order_reverse_url(order))
         else:
             self.see_other("home")
@@ -1636,7 +1636,7 @@ class OrderClone(OrderMixin, RequestHandler):
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        if not self.is_clonable(order):
+        if not self.allow_clone(order):
             raise ValueError(
                 "This {0} is outdated; its form has been disabled.".format(
                     utils.terminology("order")

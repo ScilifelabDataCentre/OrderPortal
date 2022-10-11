@@ -41,7 +41,7 @@ class GroupMixin(object):
             return
         raise ValueError("you may not read the group")
 
-    def is_editable(self, group):
+    def allow_edit(self, group):
         "Is the group editable by the current user?"
         if settings.get("READONLY"):
             return False
@@ -53,7 +53,7 @@ class GroupMixin(object):
 
     def check_editable(self, group):
         "Check if current user may edit the group."
-        if not self.is_editable(group):
+        if not self.allow_edit(group):
             raise ValueError("you may not edit the group")
 
 
@@ -68,7 +68,7 @@ class Group(GroupMixin, RequestHandler):
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        self.render("group.html", group=group, is_editable=self.is_editable(group))
+        self.render("group.html", group=group, allow_edit=self.allow_edit(group))
 
     @tornado.web.authenticated
     def post(self, iuid):
