@@ -5,46 +5,40 @@
 {% block head_title %}{{ info.get('title') or info['name'] }}{% end %}
 {% block body_title %}{{ info.get('title') or info['name'] }}{% end %}
 
-{% block content %}
-<div class="row">
+{% block main_content %}
+{% module Markdown(info.get('text'), safe=True) %}
+{% end %} 
 
-  <div class="col-md-8">
-    {% module Markdown(info.get('text'), safe=True) %}
-  </div>
-
-  <div class="col-md-3 col-md-offset-1">
-    {% if is_admin %}
-    <div class="pull-right">
-      <form action="{{ reverse_url('info_edit', info['name']) }}"
-            method="GET" role="form">
-        <button type="submit" class="btn btn-primary">
-          <span class="glyphicon glyphicon-edit"></span>
-          Edit
-        </button>
+{% block action_content %}
+{% if is_admin %}
+<p>
+  <form action="{{ reverse_url('info_edit', info['name']) }}"
+        method="GET" role="form">
+    <button type="submit" class="btn btn-primary btn-block">
+          <span class="glyphicon glyphicon-edit"></span> Edit</button>
       </form>
+</p>
+<p>
+  <form action="{{ reverse_url('info', info['name']) }}"
+        method="POST" role="form" style="margin-top: 20px;">
+    {% module xsrf_form_html() %}
+    <input type="hidden" name="_http_method" value="delete">
+    <button type="submit" class="btn btn-danger btn-block"
+            onclick="return confirm('Cannot be undone! Really delete?');">
+      <span class="glyphicon glyphicon-trash"></span> Delete</button>
+  </form>
+</p>
+{% end %} {# if is_admin #}
 
-      <form action="{{ reverse_url('info', info['name']) }}"
-            method="POST" role="form" style="margin-top: 20px;">
-        {% module xsrf_form_html() %}
-        <input type="hidden" name="_http_method" value="delete">
-        <button type="submit" class="btn btn-danger"
-                onclick="return confirm('Cannot be undone! Really delete?');">
-          <span class="glyphicon glyphicon-trash"></span>
-          Delete
-        </button>
-      </form>
-    </div>
-    {% end %} {# if is_admin #}
-    <div>
-      {% for n, t in infos %}
-      <li>
-    <a href="{{ reverse_url('info', n) }}">
-      {{ t or n }}
-    </a>
-      </li>
-      {% end %}
-    </div>
+<p>
+  <div>
+    {% for n, t in infos %}
+    <li>
+      <a href="{{ reverse_url('info', n) }}">
+        {{ t or n }}
+      </a>
+    </li>
+    {% end %}
   </div>
-
-</div>
-{% end %} {# block content #}
+</p>
+{% end %} {# action_block content #}

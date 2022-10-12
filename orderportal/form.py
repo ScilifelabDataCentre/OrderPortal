@@ -55,13 +55,13 @@ class FormSaver(saver.Saver):
 class FormMixin(object):
     "Mixin providing various methods."
 
-    def are_fields_editable(self, form):
+    def allow_edit_fields(self, form):
         "Are the form fields editable? Checks status only."
         return form["status"] == constants.PENDING
 
-    def check_fields_editable(self, form):
+    def check_edit_fields(self, form):
         "Check if the form fields can be edited. Checks status only."
-        if not self.are_fields_editable(form):
+        if not self.allow_edit_fields(form):
             raise ValueError("Form is not editable.")
 
     def get_order_count(self, form):
@@ -111,7 +111,7 @@ class Form(FormMixin, RequestHandler):
             order_count=self.get_order_count(form),
             fields=Fields(form),
             allow_delete=self.allow_delete(form),
-            are_fields_editable=self.are_fields_editable(form),
+            allow_edit_fields=self.allow_edit_fields(form),
             logs=self.get_logs(form["_id"]),
         )
 
@@ -285,7 +285,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         try:
-            self.check_fields_editable(form)
+            self.check_edit_fields(form)
         except ValueError as msg:
             self.see_other("form", form["_id"], error=str(msg))
             return
@@ -317,7 +317,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         try:
-            self.check_fields_editable(form)
+            self.check_edit_fields(form)
         except ValueError as msg:
             self.see_other("form", form["_id"], error=str(msg))
             return
@@ -338,7 +338,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         try:
-            self.check_fields_editable(form)
+            self.check_edit_fields(form)
         except ValueError as msg:
             self.see_other("form", form["_id"], error=str(msg))
             return
@@ -365,7 +365,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         try:
-            self.check_fields_editable(form)
+            self.check_edit_fields(form)
         except ValueError as msg:
             self.see_other("form", form["_id"], error=str(msg))
             return
@@ -382,7 +382,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         try:
-            self.check_fields_editable(form)
+            self.check_edit_fields(form)
         except ValueError as msg:
             self.see_other("form", form["_id"], error=str(msg))
             return

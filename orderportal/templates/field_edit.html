@@ -18,18 +18,6 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-6">
-        <label for="type">Field type</label>
-        <p id="type" class="form-control-static">{{ field['type'] }}</p>
-      </div>
-    </div>
-    <span class="help-block">
-      Data type for the field. Cannot be edited.
-    </span>
-  </div>
-
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-6">
         <label for="parent">Parent group field</label>
         <select class="form-control" name="parent" id="parent">
           <option value="">[no change]</option>
@@ -43,10 +31,12 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
         </select>
       </div>
     </div>
-    <span class="help-block">
-      Change parent group for this field. If this field is a group,
-      all its fields will follow along.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Change parent group for this field. If this field is a group,
+        all its fields will follow along.
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
@@ -76,11 +66,13 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
         </select>
       </div>
     </div>
-    <span class="help-block">
-      Specify the position of this field within its group. Select the
-      field immediately before this field. If the group is changed
-      (option above) this option will be overridden.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Specify the position of this field within its group. Select
+        the field immediately before this field. If the group is
+        changed (option above) this option will be overridden.
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
@@ -92,10 +84,12 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
                value="{{ field.get('label') or ''}}">
       </div>
     </div>
-    <span class="help-block">
-      Label to display for the field in the {{ terminology('order') }} form.
-      The identifier will be used if no label is provided.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Label to display for the field in the {{ terminology('order') }}
+        form. The identifier will be used if no label is provided.
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
@@ -106,8 +100,8 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
                 name="visible_if_field" id="visible_if_field">
           <option value="">[none]</option>
           {% for other in fields %}
-            {# XXX Multiselect fields currently not allowed; too complicated #}
-            {% if other is not field and other['depth'] <= field['depth'] and other['type'] != 'multiselect' %}
+            {# NOTE: Currently only select fields are allowed; unclear if other work. #}
+            {% if other is not field and other['depth'] >= field['depth'] and other['type'] == 'select' %}
               {% set sel = field.get('visible_if_field') == other['identifier'] and 'selected' or '' %}
               <option {{ sel }}>{{ other['identifier'] }}</option>
             {% end %}
@@ -115,10 +109,12 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
         </select>
       </div>
     </div>
-    <span class="help-block">
-      Field is visible if another field with the given identifier has
-      a specific value.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Field is visible if another field with the given identifier
+        has a specific value. The other field must a field of type select.
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
@@ -131,30 +127,35 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
         </input>
       </div>
     </div>
-    <span class="help-block">
-      Field is visible if the other field (defined above) has the
-      given value.  Multiple values are given by using the vertical
-      bar '|' as delimiter. If the other field is a checkbox, then
-      only the values "true" and "false" are allowed. Any other value
-      is ignored.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Field is visible if the other field (defined above) has the
+        given value.  Multiple values are given by using the vertical
+        bar '|' as delimiter. If the other field is a checkbox, then
+        only the values "true" and "false" are allowed. Any other
+        value is ignored.
+      </div>
+    </div>
   </div>
 
   {% if field['type'] == constants.SELECT %}
   <div class="form-group">
     <div class="row">
-      <div class="col-md-3">
+      <div class="col-md-4">
         <label class="control-label" for="select">Select values</label>
         <textarea class="form-control" name="select" rows="4"
                   >{{ '\n'.join(field.get('select') or []) }}</textarea>
       </div>
     </div>
-    <span class="help-block">
-      One value per line. A label for a group of options is denoted
-      by a leading dash '-'; this is just a group label, and not an
-      option in itself.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        One value per line. A label for a group of options is denoted
+        by a leading dash '-'; this is just a group label, and not an
+        option in itself.
+      </div>
+    </div>
   </div>
+
   <div class="form-group">
     <div class="row">
       <div class="col-md-4">
@@ -188,9 +189,11 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
         </div>
       </div>
     </div>
-    <span class="help-block">
-      Display type to use for the field.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Display type to use for the field.
+      </div>
+    </div>
   </div>
 
   {% elif field['type'] == constants.MULTISELECT %}
@@ -202,11 +205,13 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
                   >{{ '\n'.join(field.get('multiselect') or []) }}</textarea>
       </div>
     </div>
-    <span class="help-block">
-      One value per line. A label for a group of options is denoted
-      by a leading dash '-'; this is just a group label, and not an
-      option in itself.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        One value per line. A label for a group of options is denoted
+        by a leading dash '-'; this is just a group label, and not an
+        option in itself.
+      </div>
+    </div>
   </div>
 
   {% elif field['type'] == constants.BOOLEAN %}
@@ -254,17 +259,19 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
                   >{{ '\n'.join(field.get('table') or []) }}</textarea>
       </div>
     </div>
-    <span class="help-block">
-      One line defines one column in the table.
-      <button type="button" class="btn btn-default btn-sm"
-              data-toggle="collapse" data-target="#_details_table">
-        <span class="glyphicon glyphicon-triangle-bottom"></span>
-        Details
-      </button>
-      <div id="_details_table" class="collapse">
-        {% include 'details_table.html' %}
+    <div class="row">
+      <div class="col-md-12 help-block">
+        One line defines one column in the table.
+        <button type="button" class="btn btn-default btn-sm"
+                data-toggle="collapse" data-target="#_details_table">
+          <span class="glyphicon glyphicon-triangle-bottom"></span>
+          Details
+        </button>
+        <div id="_details_table" class="collapse">
+          {% include 'details_table.html' %}
+        </div>
       </div>
-    </span>
+    </div>
   </div>
 
   {% elif field['type'] == constants.TEXT %}
@@ -277,11 +284,12 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
                value="{{ field.get('maxlength') or ''}}">
       </div>
     </div>
-    <span class="help-block">
-      Maximum number of characters allowed in the text.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Maximum number of characters allowed in the text.
+      </div>
+    </div>
   </div>
-
 
   {% end %} {# if field['type'] == ... #}
 
@@ -346,10 +354,12 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
         </div>
       </div>
     </div>
-    <span class="help-block">
-      The fields of the group are shown already when the page is
-      opened. This is used only for groups at the top level.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        The fields of the group are shown already when the page is
+        opened. This is used only for groups at the top level.
+      </div>
+    </div>
   </div>
 
   {% else %} {# if field['type'] == constants.GROUP #}
@@ -429,20 +439,24 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
                   >{{ field.get('description') or '' }}</textarea>
       </div>
     </div>
-    <span class="help-block">
-      Description to display in the {{ terminology('order') }} to help
-      the user fill in the field correctly, using
-      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
-      notation for formatting.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Description to display in the {{ terminology('order') }} to help
+        the user fill in the field correctly, using
+        <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+        notation for formatting.
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit" class="btn btn-success">
-      <span class="glyphicon glyphicon-floppy-disk"></span>
-      Save
-    </button>
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-success btn-block">
+          <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+      </div>
+    </div>
   </div>
 
 </form>
@@ -450,11 +464,13 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
 <form action="{{ reverse_url('form', form['_id']) }}"
       method="GET" role="form" style="margin-top: 20px;">
   <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit" class="btn btn-default">
-      <span class="glyphicon glyphicon-remove"></span>
-      Cancel
-    </button>
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-default btn-block">
+          <span class="glyphicon glyphicon-remove"></span> Cancel</button>
+      </div>
+    </div>
   </div>
 </form>
 
@@ -462,13 +478,17 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
       method="POST" role="form" style="margin-top: 20px;">
   {% module xsrf_form_html() %}
   <div class="form-group">
-    <label class="control-label"></label>
-    <input type="hidden" name="_http_method" value="delete">
-    <button type="submit" class="btn btn-danger"
-            onclick="return confirm('Cannot be undone! Really delete?');">
-      <span class="glyphicon glyphicon-trash"></span>
-      Delete
-    </button>
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <input type="hidden" name="_http_method" value="delete">
+        <button type="submit" class="btn btn-danger btn-block"
+                onclick="return confirm('Cannot be undone! Really delete?');">
+          <span class="glyphicon glyphicon-trash"></span>
+          Delete
+        </button>
+      </div>
+    </div>
   </div>
 </form>
 {% end %} {# block main_content #}

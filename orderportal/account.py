@@ -846,7 +846,7 @@ class Login(RequestHandler):
             if not account.get("status") == constants.ENABLED:
                 raise ValueError
         except ValueError:
-            msg = f"Account is disabled. Contact the site admin {settings.get('SITE_SUPPORT_EMAIL')}"
+            msg = "Account is disabled. Contact the admin."
             self.see_other("home", error=msg)
             return
         self.set_secure_cookie(
@@ -901,7 +901,7 @@ class Reset(RequestHandler):
             elif account.get("status") == constants.DISABLED:
                 self.see_other(
                     "home",
-                    error="Cannot reset password. Account is disabled; contact the site admin.",
+                    error="Cannot reset password. Account is disabled; contact the admin.",
                 )
                 return
             with AccountSaver(doc=account, rqh=self) as saver:
@@ -985,7 +985,7 @@ class Password(RequestHandler):
             return
         with AccountSaver(doc=account, rqh=self) as saver:
             saver.set_password(password)
-        self.see_other("home", message="Password set; use it to login.")
+        self.see_other("home", message="Password set.")
 
 
 class Register(RequestHandler):

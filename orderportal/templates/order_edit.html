@@ -12,13 +12,12 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 
 {% block content %}
 <div class="row">
-  <div class="col-md-2 col-md-offset-10" style="margin-bottom: 0;">
+  <div class="col-md-2 col-md-offset-10">
     <form action="{{ reverse_url('order', order['_id']) }}"
           method="GET" role="form" class="allow_leaving_without_question">
-      <div class="form-group" style="margin-bottom: 0;">
+      <div class="form-group" style="margin-bottom: 4px;">
         <button type="submit" class="btn btn-default btn-block">
-          <span class="glyphicon glyphicon-remove"></span>
-          Cancel
+          <span class="glyphicon glyphicon-remove"></span> Cancel
         </button>
       </div>
     </form>
@@ -42,12 +41,14 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
                value="{{ order['title'] or '' }}">
       </div>
     </div>
-    <span class="help-block extra-indent">
-      Brief, descriptive title for the {{ terminology('order') }},
-      which will be displayed in your list of {{ terminology('orders') }}.
-      It is not required to be unique, but it is a good idea to make
-      it so anyway.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Brief, descriptive title for the {{ terminology('order') }},
+        which will be displayed in your list of {{ terminology('orders') }}.
+        It is not required to be unique, but it is a good idea to make
+        it so anyway.
+      </div>
+    </div>
   </div>
 
   {% if is_admin %}
@@ -76,18 +77,20 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
                   >{{ ', '.join(tags) }}</textarea>
       </div>
     </div>
-    <span class="help-block extra-indent">
-      Optional keywords (tags) characterizing the {{ terminology('order') }},
-      which are used in searches.
-      <br>
-      A keyword must look like an identifier: It begins with a letter and
-      continues with letters, digits and/or underscore '_'. Blank or comma
-      ',' separates keywords from one another.
-      {% if is_staff %}
-      <br>
-      Staff may use namespace prefixes, e.g. "project_id:P12345".
-      {% end %}
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Optional keywords (tags) characterizing the {{ terminology('order') }},
+        which are used in searches.
+        <br>
+        A keyword must look like an identifier: It begins with a letter and
+        continues with letters, digits and/or underscore '_'. Blank or comma
+        ',' separates keywords from one another.
+        {% if is_staff %}
+        <br>
+        Staff may use namespace prefixes, e.g. "project_id:P12345".
+        {% end %}
+      </div>
+    </div>
   </div>
   {% end %} {# if settings['ORDER_TAGS'] and ... #}
 
@@ -101,13 +104,15 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
                   >{{ '\n'.join(links) }}</textarea>
       </div>
     </div>
-    <span class="help-block extra-indent">
-      Optional links to external resources for the {{ terminology('order') }}.
-      <br>
-      One line per link, with the URL as the first item. The
-      URL is <b>not</b> checked for validity. Any words after the
-      URL are shown as the label for the link.
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Optional links to external resources for the {{ terminology('order') }}.
+        <br>
+        One line per link, with the URL as the first item. The
+        URL is <b>not</b> checked for validity. Any words after the
+        URL are shown as the label for the link.
+      </div>
+    </div>
   </div>
   {% end %} {#if settings.get('ORDER_LINKS') #}
 
@@ -127,19 +132,18 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   {% module Markdown(form.get('disclaimer')) %}
 </form>
 
-<div class="row">
-  <div class="col-md-2" style="margin-top: 20px;">
-    <form action="{{ reverse_url('order', order['_id']) }}"
-          method="GET" role="form" class="allow_leaving_without_question">
-      <div class="form-group">
+<form action="{{ reverse_url('order', order['_id']) }}"
+      method="GET" role="form" style="margin-top: 20px;"
+      class="allow_leaving_without_question">
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
         <button type="submit" class="btn btn-default btn-block">
-          <span class="glyphicon glyphicon-remove"></span>
-          Cancel
-        </button>
+          <span class="glyphicon glyphicon-remove"></span> Cancel</button>
       </div>
-    </form>
+    </div>
   </div>
-</div>
+</form>
 {% end %} {# block content #}
 
 {% block javascript_autofocus %}

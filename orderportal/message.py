@@ -16,7 +16,7 @@ class MessageSaver(saver.Saver):
     def initialize(self):
         super(MessageSaver, self).initialize()
         self["sender"] = settings["MESSAGE_SENDER_EMAIL"]
-        self["reply-to"] = settings["MESSAGE_REPLY_TO_EMAIL"] or settings["MESSAGE_SENDER_EMAIL"]
+        self["reply-to"] = settings["MESSAGE_REPLY_TO_EMAIL"]
         self["sent"] = None
 
     def create(self, template, **kwargs):
@@ -68,7 +68,8 @@ class MessageSaver(saver.Saver):
             message = email.message.EmailMessage()
             message["From"] = self["sender"]
             message["Subject"] = self["subject"]
-            message["Reply-To"] = self["reply-to"]
+            if self["reply-to"]:
+                message["Reply-To"] = self["reply-to"]
             message["To"] = ", ".join(set(self["recipients"]))
             message.set_content(self["text"])
             server.send_message(message)
