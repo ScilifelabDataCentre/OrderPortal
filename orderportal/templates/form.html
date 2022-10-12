@@ -194,7 +194,7 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     Fields
-    {% if are_fields_editable %}
+    {% if allow_edit_fields %}
     <form action="{{ reverse_url('field_create', form['_id']) }}"
           method="GET" role="form" class="pull-right">
       <button type="submit" class="btn btn-primary btn-xs">
@@ -269,7 +269,7 @@
         </td>
         <td>{% module Markdown(field.get('description')) %}</td>
         <td>
-          {% if are_fields_editable %}
+          {% if allow_edit_fields %}
           <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
                 method="GET" role="form">
             <button type="submit" class="btn btn-primary btn-xs">
@@ -284,7 +284,7 @@
             <span class="glyphicon glyphicon-edit"></span>
             Edit
           </button>
-        {% end %} {# if are_fields_editable #}
+        {% end %} {# if allow_edit_fields #}
         </td>
       </tr>
       {% end %}
@@ -294,7 +294,7 @@
 
   <div class="panel-footer">
     &nbsp;
-    {% if are_fields_editable %}
+    {% if allow_edit_fields %}
     <form action="{{ reverse_url('field_create', form['_id']) }}"
           method="GET" role="form" class="pull-right">
       <button type="submit" class="btn btn-primary btn-xs">
@@ -307,7 +307,7 @@
 </div>
 
 {# Allow edit of label, clone erase, description, even when form is enabled. #}
-{% if not are_fields_editable %}
+{% if not allow_edit_fields %}
 {% for field in fields %}
 <div id="{{ field['identifier'] }}" class="modal fade" role="dialog">
   <div class="modal-dialog modal-lg">
@@ -422,9 +422,7 @@
           <div class="form-group">
             <label class="control-label"></label>
             <button type="submit" class="btn btn-success">
-              <span class="glyphicon glyphicon-floppy-disk"></span>
-              Save
-            </button>
+              <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
           </div>
         </form>
       </div>
@@ -433,5 +431,5 @@
   </div>
 </div>
 {% end %}{# for field in fields #}
-{% end %}{# if not are_fields_editable #}
+{% end %}{# if not allow_edit_fields #}
 {% end %} {# block sub_main_content #}

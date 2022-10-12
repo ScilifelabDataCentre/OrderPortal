@@ -1,5 +1,14 @@
 /* field_visible_if.js
    Change visibility of fields according to value of another field.
+
+   NOTE: It is not clear whether other source fields than of type
+   'select' currently work. Therefore the web interface has now been
+   restricted to only allow 'select' field to be set as source for
+   visible-if.
+
+   The code below contains remnants from when other field types were
+   supposed to be used. These bits have not been removed since I
+   simply dare not touch this...
 */
 $(function() {
     var set_visible_if_initial = function() {

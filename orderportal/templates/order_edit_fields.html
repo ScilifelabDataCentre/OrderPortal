@@ -32,14 +32,12 @@
         {{ label }}
         {% if field['restrict_read'] %}
         &nbsp;
-        <span class="glyphicon glyphicon-eye-open"
-              title="Readable by staff only.">
+        <span class="glyphicon glyphicon-eye-open" title="Readable by staff only.">
         </span>
         {% end %}
         {% if field['restrict_write'] %}
         &nbsp;
-        <span class="glyphicon glyphicon-pencil"
-              title="Writeable by admin only.">
+        <span class="glyphicon glyphicon-pencil" title="Writeable by admin only.">
         </span>
         {% end %}
         <div class="pull-right">
@@ -50,9 +48,7 @@
           </span>
           {% else %}
           <span class="text-success">
-            <span class="glyphicon glyphicon-ok"></span>
-            OK
-          </span>
+            <span class="glyphicon glyphicon-ok"></span> OK</span>
           {% end %}
         </div>
       </h4>
@@ -77,36 +73,26 @@
       {{ label }}
       {% if field['restrict_read'] %}
       &nbsp;
-      <span class="glyphicon glyphicon-eye-open"
-            title="Readable by staff only.">
-      </span>
+      <span class="glyphicon glyphicon-eye-open" title="Readable by staff only."></span>
       {% end %}
       {% if field['restrict_write'] %}
       &nbsp;
-      <span class="glyphicon glyphicon-pencil"
-            title="Writeable by admin only.">
-      </span>
+      <span class="glyphicon glyphicon-pencil" title="Writeable by admin only."></span>
       {% end %}
-    <span style="margin-right: -3em;"
-          class="form-control-feedback nobr">
-      {% if field['identifier'] in order['invalid'] %}
-      <span class="text-danger">
-        <span class="glyphicon glyphicon-remove"></span>
-        {{ order['invalid'][field['identifier']] }}
+      <span style="margin-right: -3em;" class="form-control-feedback nobr">
+        {% if field['identifier'] in order['invalid'] %}
+        <span class="text-danger">
+          <span class="glyphicon glyphicon-remove"></span>
+          {{ order['invalid'][field['identifier']] }}
+        </span>
+        {% elif value in (None, '') %}
+        <span class="text-warning">
+          <span class="glyphicon glyphicon-question-sign"></span> No value is OK</span>
+        {% else %}
+        <span class="text-success">
+          <span class="glyphicon glyphicon-ok"></span> OK</span>
+        {% end %}
       </span>
-      {% elif value in (None, '') %}
-      <span class="text-warning">
-        <span class="glyphicon glyphicon-question-sign"></span>
-        No value is OK
-      </span>
-      {% else %}
-      <span class="text-success">
-        <span class="glyphicon glyphicon-ok"></span>
-        OK
-      </span>
-      {% end %}
-    </span>
-
     </label>
 
     {% if field['type'] == constants.BOOLEAN %}
@@ -225,11 +211,18 @@
 
     {% elif field['type'] == constants.DATE %}
     {# This requires jQuery datepicker! Loaded in calling HTML template. #}
-    <input type="text"
-           class="form-control datepicker visible-if-source"
-           name="{{ field['identifier'] }}"
-           id="{{ field['identifier'] }}"
-           value="{{ value or '' }}">
+    <div class="row">
+      <div class="col-md-3">
+        <input type="text"
+               class="form-control datepicker visible-if-source"
+               name="{{ field['identifier'] }}"
+               id="{{ field['identifier'] }}"
+               value="{{ value or '' }}">
+      </div>
+      <div class="col-md-4 help-block">
+        Date format: yyyy-mm-dd
+      </div>
+    </div>
 
     {% elif field['type'] == constants.TABLE %}
     {% set tableid = '_table_' + field['identifier'] %}
@@ -250,7 +243,7 @@
            name="_table_{{ field['identifier'] }}_count"
            id="_table_{{ field['identifier'] }}_count"
            value="{{ nrows }}">
-    <div class="form-group extra-indent">
+    <div class="form-group">
       <button type="button" id="_table_{{ field['identifier'] }}_add_button" 
               class="btn btn-info">
         Add row
@@ -275,18 +268,33 @@
     {% end %}
 
     {% elif field['type'] == constants.FLOAT %}
-    <input type="number" step="{{ constants.FLOAT_STEP }}"
-           class="form-control visible-if-source"
-           name="{{ field['identifier'] }}"
-           id="{{ field['identifier'] }}"
-           value="{{ '' if value is None else value  }}"> {# Must show 0.0 ! #}
+    <div class="row">
+      <div class="col-md-4">
+        <input type="number" step="{{ constants.FLOAT_STEP }}"
+               class="form-control visible-if-source"
+               name="{{ field['identifier'] }}"
+               id="{{ field['identifier'] }}"
+               value="{{ '' if value is None else value }}"> {# Value 0.0 must be shown! #}
+      </div>
+    </div>
 
-    {% else %} {# All other field types: STRING, EMAIL, INT, URL #}
+    {% elif field['type'] == constants.INT %}
+    <div class="row">
+      <div class="col-md-3">
+        <input type="{{ constants.TYPE_HTML.get(field['type'], 'text') }}"
+               class="form-control visible-if-source"
+               name="{{ field['identifier'] }}"
+               id="{{ field['identifier'] }}"
+               value="{{ '' if value is None else value }}"> {# Value 0 must be shown! #}
+      </div>
+    </div>
+
+    {% else %} {# All other field types: STRING, EMAIL, URL #}
     <input type="{{ constants.TYPE_HTML.get(field['type'], 'text') }}"
            class="form-control visible-if-source"
            name="{{ field['identifier'] }}"
            id="{{ field['identifier'] }}"
-           value="{{ '' if value is None else value  }}"> {# Must show 0 ! #}
+           value="{{ value or '' }}">
     {% end %} {# elif field['type'] == #}
     
     {% if field['required'] %}
@@ -303,21 +311,24 @@
     {% end %}
     {% end %} {# if field['required'] #}
 
-    <span class="help-block extra-indent extra-spacing">
-      {% module Markdown(field.get('description')) %}
-      {% if field['type'] == constants.TEXT %}
-      {% if field.get('maxlength') %}
-      Max {{ field['maxlength'] }} characters.
-      {% end %}
-      {% if settings['DISPLAY_TEXT_MARKDOWN_NOTATION_INFO'] %}
-      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
-      notation may optionally be used to format the text.
-      {% end %}
-      {% elif field['type'] == constants.TABLE %}
-      <strong>Note:</strong> Table rows with an empty (or "[no value]")
-      first field will be deleted.
-      {% end %}
-    </span>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        {% module Markdown(field.get('description')) %}
+        {% if field['type'] == constants.TEXT %}
+        {% if field.get('maxlength') %}
+        Max {{ field['maxlength'] }} characters.
+        {% end %}
+        {% if settings['DISPLAY_TEXT_MARKDOWN_NOTATION_INFO'] %}
+        <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+        notation may optionally be used to format the text.
+        {% end %}
+        {% elif field['type'] == constants.TABLE %}
+        <strong>Note:</strong> Table rows with an empty (or "[no value]")
+        first field will be deleted.
+        {% end %}
+      </div>
+    </div>
+
   </div>
 </div>
 
