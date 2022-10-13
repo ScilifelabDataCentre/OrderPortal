@@ -227,11 +227,10 @@ def get_dbserver():
 def get_db():
     "Return the handle for the CouchDB database."
     server = get_dbserver()
-    name = settings["DATABASE_NAME"]
     try:
-        return server[name]
+        return server[settings["DATABASE_NAME"]]
     except couchdb2.NotFoundError:
-        raise KeyError(f"CouchDB database '{name}' does not exist.")
+        raise KeyError(f"""CouchDB database '{settings["DATABASE_NAME"]}' does not exist.""")
 
 
 def get_count(db, designname, viewname, key=None):

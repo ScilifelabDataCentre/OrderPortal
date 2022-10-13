@@ -25,6 +25,28 @@ def cli(settings, log):
 
 
 @cli.command()
+def destroy_database():
+    "Hard delete of the entire database, including the instance within CouchDB."
+    server = utils.get_dbserver()
+    try:
+        db = server[settings["DATABASE_NAME"]]
+    except couchdb2.NotFoundError as error:
+        raise click.ClickException(str(error))
+    db.destroy()
+    click.echo(f"""Destroyed database '{settings["DATABASE_NAME"]}'.""")
+
+
+@cli.command()
+def create_database():
+    "Create the database within CouchDB. It is *not* initialized!"
+    server = utils.get_dbserver()
+    if settings["DATABASE_NAME"] in server:
+        raise click.ClickException(f"""Database '{settings["DATABASE_NAME"]}' already exists.""")
+    server.create(settings["DATABASE_NAME"])
+    click.echo(f"""Created database '{settings["DATABASE_NAME"]}'.""")
+
+
+@cli.command()
 @click.option(
     "--textfile",
     type=str,
@@ -112,8 +134,11 @@ def dump(dumpfile, dumpdir, progressbar):
     "--progressbar/--no-progressbar", default=True, help="Display a progressbar."
 )
 def undump(dumpfile, progressbar):
-    "Load a Orderportal database .tar.gz dump file. The database must be empty."
-    db = utils.get_db()
+    "Load a Orderportal database .tar.gz dump file. The database must exist and be empty."
+    try:
+        db = utils.get_db()
+    except KeyError as error:
+        raise click.ClickException(str(error))
     designs.load_design_documents(db)
     if (
         utils.get_count(db, "account", "all") != 0
