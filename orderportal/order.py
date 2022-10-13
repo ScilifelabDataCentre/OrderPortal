@@ -1164,7 +1164,7 @@ class Orders(RequestHandler):
     def set_filter(self):
         "Set the filter parameters dictionary."
         self.filter = dict()
-        for key in ["status", "form_id"] + [
+        for key in ["status", "form_id", "owner"] + [
             f["identifier"] for f in settings["ORDERS_LIST_FIELDS"]
         ]:
             try:
@@ -1180,6 +1180,7 @@ class Orders(RequestHandler):
         "Get all orders according to current filter."
         orders = self.filter_by_status(self.filter.get("status"))
         orders = self.filter_by_form(self.filter.get("form_id"), orders=orders)
+        orders = self.filter_by_owner(self.filter.get("owner"), orders=orders)
         for f in settings["ORDERS_LIST_FIELDS"]:
             orders = self.filter_by_field(
                 f["identifier"], self.filter.get(f["identifier"]), orders=orders
@@ -1188,7 +1189,7 @@ class Orders(RequestHandler):
         return orders
 
     def filter_by_status(self, status, orders=None):
-        "Return orders list if any status filter, or None if none."
+        "Return orders list if any status filter, or unchanged input if no such filter."
         if status:
             if orders is None:
                 view = self.db.view(
@@ -1205,7 +1206,9 @@ class Orders(RequestHandler):
         return orders
 
     def filter_by_form(self, form_id, orders=None):
-        "Return orders list after applying any form filter, or None if none."
+        """Return orders list after applying any form filter,
+        or unchanged input if no such filter.
+        """
         if form_id:
             if orders is None:
                 view = self.db.view(
@@ -1221,8 +1224,25 @@ class Orders(RequestHandler):
                 orders = [o for o in orders if o["form"] == form_id]
         return orders
 
+    def filter_by_owner(self, owner, orders=None):
+        "Return orders list if any owner filter, or unchanged input if no such filter."
+        if owner:
+            if orders is None:
+                view = self.db.view(
+                    "order",
+                    "owner",
+                    descending=True,
+                    startkey=[owner, constants.CEILING],
+                    endkey=[owner],
+                    include_docs=True,
+                )
+                orders = [r.doc for r in view]
+            else:
+                orders = [o for o in orders if o["owner"] == owner]
+        return orders
+
     def filter_by_field(self, identifier, value, orders=None):
-        "Return orders list if any field filter, or None if none."
+        "Return orders list if any field filter, or unchanged input if none."
         if value:
             if orders is None:
                 view = self.db.view(

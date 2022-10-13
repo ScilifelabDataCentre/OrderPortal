@@ -116,7 +116,7 @@ def counts():
     "--progressbar/--no-progressbar", default=True, help="Display a progressbar."
 )
 def dump(dumpfile, dumpdir, progressbar):
-    """Dump all data in the database to a .tar.gz dump file.
+    """Dump all data in the database to a '.tar.gz' dump file.
     NOTE: Environment variable BACKUP_DIR is no longer used.
     """
     db = utils.get_db()
@@ -134,7 +134,7 @@ def dump(dumpfile, dumpdir, progressbar):
     "--progressbar/--no-progressbar", default=True, help="Display a progressbar."
 )
 def undump(dumpfile, progressbar):
-    "Load a Orderportal database .tar.gz dump file. The database must exist and be empty."
+    "Load an Orderportal database '.tar.gz' dump file. The database must exist and be empty."
     try:
         db = utils.get_db()
     except KeyError as error:
