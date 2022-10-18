@@ -1,15 +1,39 @@
 # OrderPortal order status definitions.
-
+#
 # This file is read on server startup, so a restart is required 
 # whenever it has been modified.
-
-# Remove any unwanted statuses before deploying your site.
-
+#
+# 'identifier': The identifier of the status. This value is used in the database
+#               and for the icon name of the status.
+# 'description': One-line description of what the status means.
+# 'edit': Which account roles are allowed to edit the order when it is in this status?
+#         The possible account roles are user, staff, admin.
+# 'attach': Which account roles are allowed to attach a document to the order when
+#           it is in this status? Same roles as above.
+# 'action': The name of the action bringing an order into this status.
+#           Used only in the web interface.
+#
+# Remove or comment out any unwanted statuses before deploying your site.
+# It is possible to add statuses later without any resulting problems.
+#
+# Removing a status can be done *only if* no order is, or has been, in that status.
 # Removing statuses from a deployed site is a bad idea:
-# Orders and order histories in the database will become corrupt.
+# Orders and order histories in the database will become corrupt and may
+# cause crashes and/or unwanted behaviour.
+# Statuses are therefore in practice not possible to remove once the site has been
+# deployed.
+#
+# This list contains all statuses for which there are icon files in the 'static'
+# subdirectory. If you rename or add a status, ensure that the icon file is
+# renamed or added.
+#
+# It is possible to change the description and edit and attach privileges
+# for a site that has been deployed.
+#
+# The allowed transitions between statuses are defined in the file
+# 'order_transitions.yaml'.
 
-# Statuses may be added after a site has been deployed.
-
+# Status 'preparation' is required, and must not be removed or renamed!
 - identifier: preparation
   initial: true
   description: The order has been created and is being edited by the user.
@@ -17,8 +41,8 @@
   attach: [user, admin]
   action: Prepare
 
+# Status 'submitted' is required, and must not be removed or renamed!
 - identifier: submitted
-  label: Submit
   description: The order has been submitted by the user for consideration by the facility.
   attach: [user, admin]
   action: Submit
