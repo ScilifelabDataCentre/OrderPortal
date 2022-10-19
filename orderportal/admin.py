@@ -47,6 +47,22 @@ class Settings(RequestHandler):
         self.render("settings.html", settings=mod_settings)
 
 
+def load_texts(db):
+    pass
+### XXX Read the initial texts file.
+    # try:
+    #     with open(textfile) as infile:
+    #         texts = yaml.safe_load(infile)
+    # except IOError:
+    #     raise click.ClickException(f"Could not read '{textfile}'.")
+    # for name in constants.TEXTS:
+    #     if len(list(db.view("text", "name", key=name))) == 0:
+    #         with TextSaver(db=db) as saver:
+    #             saver["name"] = name
+    #             saver["text"] = texts.get(name, "")
+    # click.echo(f"Loaded texts from '{textfile}'.")
+
+
 class TextSaver(saver.Saver):
     doctype = constants.TEXT
 

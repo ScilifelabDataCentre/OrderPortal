@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "5.6.0"
+__version__ = "6.0.0"
 
 
 class Constants:
@@ -55,7 +55,7 @@ class Constants:
     # The endkey is inclusive, by default.
     CEILING = "ZZZZZZZZ"
 
-    # Entity documents
+    # Entity document types
     DOCTYPE = "orderportal_doctype"
     ACCOUNT = "account"
     GROUP = "group"
@@ -150,10 +150,6 @@ class Constants:
     ADMIN = "admin"
     ACCOUNT_ROLES = [USER, STAFF, ADMIN]
 
-    # Hard-wired order status
-    SUBMIT = "submit"
-    SUBMITTED = "submitted"
-
     # Form status; hard-wired!
     TESTING = "testing"
     FORM_STATUSES = [PENDING, TESTING, ENABLED, DISABLED]
@@ -239,8 +235,6 @@ settings = dict(
     DISPLAY_MENU_ITEM_URL=None,
     DISPLAY_MENU_ITEM_TEXT=None,
     ACCOUNT_MESSAGES_FILE="account_messages.yaml",
-    ORDER_STATUSES_FILE="order_statuses.yaml",
-    ORDER_TRANSITIONS_FILE="order_transitions.yaml",
     ORDER_MESSAGES_FILE="order_messages.yaml",
     UNIVERSITIES_FILE="swedish_universities.yaml",
     COUNTRY_CODES_FILE="country_codes.yaml",

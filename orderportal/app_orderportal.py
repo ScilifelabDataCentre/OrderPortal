@@ -10,6 +10,7 @@ import tornado.ioloop
 from orderportal import constants
 from orderportal import designs
 from orderportal import settings
+from orderportal import status
 from orderportal import utils
 from orderportal import uimodules
 from orderportal.requesthandler import RequestHandler
@@ -32,8 +33,10 @@ def main():
         filepath = sys.argv[1]
     else:
         filepath = None
-    utils.load_settings(filepath=filepath)
-    designs.load_design_documents(utils.get_db())
+    utils.get_settings(filepath=filepath)
+    db = utils.get_db()
+    designs.load_design_documents(db)
+    status.load_order_statuses(db)
 
     url = tornado.web.url
     handlers = [
@@ -206,10 +209,9 @@ def main():
         login_url=(settings["BASE_URL_PATH_PREFIX"] or "") + "/login",
     )
 
-    # Add href URLs for the status icons data in settings.
-    # This depends on order status setup.
+    # Add href URLs for the status icons in 'settings'.
     for key, value in settings["ORDER_STATUSES_LOOKUP"].items():
-        value["href"] = application.reverse_url("site", key + ".png")
+        value["href"] = application.static_url(key + ".png")
 
     application.listen(settings["PORT"], xheaders=True)
     url = settings["BASE_URL"]

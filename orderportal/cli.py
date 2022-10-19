@@ -6,14 +6,12 @@ import time
 
 import click
 import couchdb2
-import yaml
 
 from orderportal import constants
 from orderportal import designs
 from orderportal import settings
 from orderportal import utils
 from orderportal.account import AccountSaver
-from orderportal.admin import TextSaver
 import orderportal.app_orderportal
 
 
@@ -21,7 +19,7 @@ import orderportal.app_orderportal
 @click.option("-s", "--settings", help="Path of settings YAML file.")
 @click.option("--log", flag_value=True, default=False, help="Enable logging output.")
 def cli(settings, log):
-    utils.load_settings(settings, log=log)
+    utils.get_settings(settings, log=log)
 
 
 @cli.command()
@@ -47,17 +45,9 @@ def create_database():
 
 
 @cli.command()
-@click.option(
-    "--textfile",
-    type=str,
-    default="../site/init_texts.yaml",
-    help="The path of the initial texts YAML file.",
-)
-def initialize(textfile):
-    """Initialize the database, which must exist and be empty.
-
-    Load all design documents.
-    Load the initial texts from the given file, if any.
+def initialize():
+    """Initialize the database, which must have been newly created
+    (i.e. be completely empty). Load all design documents.
     """
     try:
         db = utils.get_db()
@@ -65,27 +55,11 @@ def initialize(textfile):
         raise click.ClickException(str(error))
     if len(db) != 0:
         raise click.ClickException(
-            f"The database '{settings['DATABASE_NAME']}' is not empty."
+            f"The database '{settings['DATABASE_NAME']}' is not completely empty."
         )
-    # Read the text file, if any. Check for errors before loading designs.
-    if textfile:
-        try:
-            with open(textfile) as infile:
-                texts = yaml.safe_load(infile)
-        except IOError:
-            raise click.ClickException(f"Could not read '{textfile}'.")
-    else:
-        texts = None
+    # Load the CouchDB design documents; indexes for entities.
     designs.load_design_documents(db)
-    click.echo("Loaded all design documents.")
-    # Actually load the texts.
-    if texts:
-        for name in constants.TEXTS:
-            if len(list(db.view("text", "name", key=name))) == 0:
-                with TextSaver(db=db) as saver:
-                    saver["name"] = name
-                    saver["text"] = texts.get(name, "")
-        click.echo(f"Loaded texts from '{textfile}'.")
+    click.echo("Loaded all CouchDB design documents.")
 
 
 @cli.command()
@@ -151,11 +125,13 @@ def undump(dumpfile, progressbar):
     ndocs, nfiles = db.undump(dumpfile, progressbar=progressbar)
     # Cleanup.
     # Remove old, obsolete meta documents.
-    for name in ["account_messages", "order_messages"]:
-        doc = db.get(name)
-        if doc:
+    for name in ["account_messages", "order_messages", "global_modes"]:
+        try:
+            doc = db[name]
             db.delete(doc)
-    # Text docs are doubled; youngest copy is from initialize.
+        except couchdb2.NotFoundError:
+            pass
+    # Text docs are doubled; youngest copy is from 'initialize'.
     # Keep only oldest version (from dump) of text docs.
     lookup = {}
     for row in db.view("text", "name", include_docs=True):

@@ -27,8 +27,8 @@ from orderportal import designs
 from orderportal import settings
 
 
-def load_settings(filepath=None, log=True):
-    """Load the settings. The file path first specified is used.
+def get_settings(filepath=None, log=True):
+    """Get the settings. The file path first specified is used.
     1) The argument to this procedure (possibly from a command line argument).
     2) The path environment variable ORDERPORTAL_SETTINGS.
     3) The file '../site/settings.yaml' relative to this directory.
@@ -124,30 +124,30 @@ def load_settings(filepath=None, log=True):
                 "ORDER_IDENTIFIER_FORMAT prefix must be all upper-case characters"
             )
 
-    # Read order statuses definitions YAML file.
-    filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_STATUSES_FILE"])
-    logging.info(f"order statuses: {filepath}")
-    with open(filepath) as infile:
-        settings["ORDER_STATUSES"] = yaml.safe_load(infile)
-    settings["ORDER_STATUSES_LOOKUP"] = lookup = dict()
-    initial = None
-    for status in settings["ORDER_STATUSES"]:
-        if status["identifier"] in lookup:
-            raise ValueError(
-                "Order status '%s' multiple definitions." % status["identifier"]
-            )
-        lookup[status["identifier"]] = status
-        if status.get("initial"):
-            initial = status
-    if not initial:
-        raise ValueError("No initial order status defined.")
-    settings["ORDER_STATUS_INITIAL"] = initial
+    # # Read order statuses definitions YAML file.
+    # filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_STATUSES_FILE"])
+    # logging.info(f"order statuses: {filepath}")
+    # with open(filepath) as infile:
+    #     settings["ORDER_STATUSES"] = yaml.safe_load(infile)
+    # settings["ORDER_STATUSES_LOOKUP"] = lookup = dict()
+    # initial = None
+    # for status in settings["ORDER_STATUSES"]:
+    #     if status["identifier"] in lookup:
+    #         raise ValueError(
+    #             "Order status '%s' multiple definitions." % status["identifier"]
+    #         )
+    #     lookup[status["identifier"]] = status
+    #     if status.get("initial"):
+    #         initial = status
+    # if not initial:
+    #     raise ValueError("No initial order status defined.")
+    # settings["ORDER_STATUS_INITIAL"] = initial
 
-    # Read order status transition definiton YAML file.
-    filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_TRANSITIONS_FILE"])
-    logging.info(f"order transitions: {filepath}")
-    with open(filepath) as infile:
-        settings["ORDER_TRANSITIONS"] = yaml.safe_load(infile)
+    # # Read order status transition definiton YAML file.
+    # filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_TRANSITIONS_FILE"])
+    # logging.info(f"order transitions: {filepath}")
+    # with open(filepath) as infile:
+    #     settings["ORDER_TRANSITIONS"] = yaml.safe_load(infile)
 
     # Read order messages YAML file.
     filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_MESSAGES_FILE"])

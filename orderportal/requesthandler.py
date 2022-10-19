@@ -21,7 +21,7 @@ class RequestHandler(tornado.web.RequestHandler):
     "Base request handler."
 
     def prepare(self):
-        "Get the database connection and global modes."
+        "Get the database connection."
         self.db = utils.get_db()
         try:                    # Remove obsolete doc from db.
             self.db.delete("global_modes")
