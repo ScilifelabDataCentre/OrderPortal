@@ -11,31 +11,15 @@
 <div class="well">
   <p>
     All {{ terminology('orders') }} have one and only one status at
-    all times.  The status value is one of those defined in the YAML
-    file
-    <code>{{ settings.get('ORDER_STATUSES_FILE') }}</code>
-    in <strong>SITE_DIR</strong> which is read on startup of the
-    OrderPortal server.
+    all times.
   </p>
+  {% if settings.get("ORDER_STATUSES_FILE") or settings.get("ORDER_TRANSITIONS_FILE") %}
   <p>
-    To change the set of allowed status values, the YAML file must be
-    edited and the OrderPortal server restarted. Only the sysadmin for
-    the server machine can do this. A status can be added, <b>but must
-    never be removed</b>, since orders with that deleted status would
-    become invalid.
+    <strong>NOTE!</strong> The site files named by settings ORDER_STATUSES_FILE and
+    ORDER_TRANSITIONS_FILE are no longer used. Remove these settings and files to
+    avoid confusion.
   </p>
-  <p>
-    The allowed transitions between statuses are defined in the YAML file 
-    <code>{{ settings.get('ORDER_TRANSITIONS_FILE') }}</code> 
-    in <strong>SITE_DIR</strong> which is read on startup of the
-    OrderPortal server.
-  </p>
-  <p>
-    To change the allowed transitions, the YAML file must be edited and
-    the OrderPortal server restarted. Only the sysadmin for the server
-    machine can do this. There are no hard restrictions on changing
-    transitions.
-  </p>
+  {% end %}
 </div>
 
 <table class="table table-condensed">
@@ -49,6 +33,7 @@
     <th># orders</th>
   </tr>
   {% for status in settings['ORDER_STATUSES'] %}
+  {% if status.get("enabled") %}
   <tr>
     <th>{% module Icon(status['identifier'], label=True) %}</th>
     <td>
@@ -106,6 +91,18 @@
       </a>
     </td>
   </tr>
-  {% end %}
+  {% end %} {# if status.get("enabled") #}
+  {% end %} {# for status in settings['ORDER_STATUSES'] #}
+
+  {% for status in settings['ORDER_STATUSES'] %}
+  {% if not status.get("enabled") %}
+  <tr>
+    <th>{% module Icon(status['identifier'], label=True) %}</th>
+    <td colspan="6">
+      <i>Not enabled</i>
+    </td>
+  </tr>
+  {% end %} {# if status.get("enabled") #}
+  {% end %} {# for status in settings['ORDER_STATUSES'] #}
 </table>
 {% end %} {# block main_content #}

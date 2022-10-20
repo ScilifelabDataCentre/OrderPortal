@@ -41,9 +41,9 @@ class Settings(RequestHandler):
         mod_settings["COUNTRIES_LOOKUP"] = f"<computed from file {mod_settings['COUNTRY_CODES_FILE']}>"
         mod_settings["ORDER_MESSAGES"] = f"<see file {mod_settings['ORDER_MESSAGES_FILE']}>"
         mod_settings["ORDER_MESSAGES"] = f"<see file {mod_settings['ORDER_MESSAGES_FILE']}>"
-        mod_settings["ORDER_STATUSES"] = f"<see file {mod_settings['ORDER_STATUSES_FILE']}>"
-        mod_settings["ORDER_STATUSES_LOOKUP"] = f"<computed from file {mod_settings['ORDER_STATUSES_FILE']}>"
-        mod_settings["ORDER_TRANSITIONS"] = f"<computed from file {mod_settings['ORDER_TRANSITIONS_FILE']}>"
+        mod_settings["ORDER_STATUSES"] = "<see page Admin -> Order statuses>"
+        mod_settings["ORDER_STATUSES_LOOKUP"] = "<computed from ORDER_STATUSES}>"
+        mod_settings["ORDER_TRANSITIONS"] = "<see page Admin -> Order statuses>"
         self.render("settings.html", settings=mod_settings)
 
 

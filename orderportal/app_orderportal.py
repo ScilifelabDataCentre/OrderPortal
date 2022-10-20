@@ -209,9 +209,9 @@ def main():
         login_url=(settings["BASE_URL_PATH_PREFIX"] or "") + "/login",
     )
 
-    # Add href URLs for the status icons in 'settings'.
+    # Add href URLs for the status icons.
     for key, value in settings["ORDER_STATUSES_LOOKUP"].items():
-        value["href"] = application.static_url(key + ".png")
+        value["href"] = f"/static/{key}.png"
 
     application.listen(settings["PORT"], xheaders=True)
     url = settings["BASE_URL"]

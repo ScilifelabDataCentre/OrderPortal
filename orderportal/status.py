@@ -2,10 +2,12 @@
 
 import copy
 import logging
+import os.path
 
 import couchdb2
 import yaml
 
+from orderportal import constants
 from orderportal import saver
 from orderportal import settings
 
@@ -16,15 +18,14 @@ class StatusSaver(saver.Saver):
 
 DEFAULT_ORDER_STATUSES = [
     dict(identifier="preparation",
-         enabled=True,          # This is hard-wired into the logic of the system!
-         initial=True,
+         enabled=True,          # Must be enabled! Hard-wired into the logic!
          description="The order has been created and is being edited by the user.",
          edit=["user", "staff", "admin"],
          attach=["user", "staff", "admin"],
          action="Prepare"
          ),
     dict(identifier="submitted",
-         enabled=True,          # This is hard-wired into the logic of the system!
+         enabled=True,          # Must be enabled! Hard-wired into the logic!
          description="The order has been submitted by the user for consideration.",
          edit=["staff", "admin"],
          attach=["staff", "admin"],
@@ -84,11 +85,23 @@ DEFAULT_ORDER_STATUSES = [
          attach=["admin"],
          action="On hold"
          ),
+    dict(identifier="halted",
+         description="The work on the order has been halted.",
+         edit=["admin"],
+         attach=["admin"],
+         action="Halt"
+         ),
     dict(identifier="aborted",
          description="The work on the order has been permanently stopped.",
          edit=["admin"],
          attach=["admin"],
          action="Abort"
+         ),
+    dict(identifier="terminated",
+         description="The order has been terminated.",
+         edit=["admin"],
+         attach=["admin"],
+         action="Terminate"
          ),
     dict(identifier="cancelled",
          description="The order has cancelled.",
@@ -101,6 +114,12 @@ DEFAULT_ORDER_STATUSES = [
          edit=["admin"],
          attach=["admin"],
          action="Finish"
+         ),
+    dict(identifier="completed",
+         description="The order has been completed.",
+         edit=["admin"],
+         attach=["admin"],
+         action="Complete"
          ),
     dict(identifier="closed",
          description="All work and other actions for the order have been performed.",
@@ -129,7 +148,7 @@ DEFAULT_ORDER_STATUSES = [
 ]
 
 
-# Bare bones, since only 'preparation' and 'submitted' are guaranteed to exist.
+# Minimal, since only 'preparation' and 'submitted' are guaranteed to be enabled.
 
 DEFAULT_ORDER_TRANSITIONS = [
     dict(source="preparation",
@@ -142,84 +161,100 @@ DEFAULT_ORDER_TRANSITIONS = [
 
 def load_order_statuses(db):
     """Load the order statuses and transitions from the database.
-    If not there, get from old site setup files.
+    If not there, get from legacy site YAML files.
     If none, then use default values.
     Save to database, if from default and/or old site setup files.
+    Once saved to the database, the legacy site YAML files will no longer
+    be used and can be deleted.
     """
-    legacy_statuses = []
-    legacy_transitions = []
     try:
+        # From version 6.0.0, the order statuses are in the database.
         doc = db["order_statuses"]
-        orig_doc = copy.deepcopy(doc)
         settings["ORDER_STATUSES"] = doc["statuses"]
         settings["ORDER_TRANSITIONS"] = doc["transitions"]
         logging.info("loaded order statuses from database")
-    except (couchdb2.NotFoundError, KeyError):
-        # Get legacy order statuses, or use the defaults.
+
+    except couchdb2.NotFoundError:
+        # Create the order statuses document in the database.
+
+        # Start with default order statuses setup.
         settings["ORDER_STATUSES"] = copy.deepcopy(DEFAULT_ORDER_STATUSES)
-        # Load the legacy 'site/order_statuses.yaml' file, if any.
+        lookup = dict([(s["identifier"], s) for s in settings["ORDER_STATUSES"]])
+
+        # Load the legacy site order_statuses.yaml file, if any.
         try:
             filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_STATUSES_FILE"])
             with open(filepath) as infile:
                 legacy_statuses = yaml.safe_load(infile)
-            logging.info(f"loaded legacy order statuses: {filepath}")
-        except FileNotFoundError as error:
+            logging.info(f"read legacy order statuses: {filepath}")
+        except (KeyError, FileNotFoundError) as error:
             logging.warning(f"defaults used for order statuses; {error}")
+        else:
+            # Transfer order status data from the legacy setup and flag as enabled.
+            lookup = dict([(s["identifier"], s) for s in settings["ORDER_STATUSES"]])
+            for status in legacy_statuses:
+                try:
+                    lookup[status["identifier"]].update(status)
+                    lookup[status["identifier"]]["enabled"] = True
+                except KeyError:
+                    logging.error(f"""unknown legacy order status: '{status["identifier"]}'; skipped""")
 
-        # Get legacy order transitions, or use defaults.
+        # Start with the default order transitions setup.
         settings["ORDER_TRANSITIONS"] = copy.deepcopy(DEFAULT_ORDER_TRANSITIONS)
-        # Load the legacy 'site/order_transitions.yaml' file, if any.
+
+        # Load the legacy site order_transitions.yaml file, if any.
         try:
             filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_TRANSITIONS_FILE"])
             with open(filepath) as infile:
                 legacy_transitions = yaml.safe_load(infile)
             logging.info(f"loaded legacy order transitions: {filepath}")
-        except FileNotFoundError as error:
+        except (KeyError, FileNotFoundError) as error:
             logging.warning(f"defaults used for order transitions; {error}")
-
-        orig_doc = {}           # Dummy, to trigger save into database.
-        doc = dict(statuses=settings["ORDER_STATUSES"],
-                   transitions=settings["ORDER_TRANSITIONS"])
-
-    # Order statuses lookup setup.
-    settings["ORDER_STATUSES_LOOKUP"] = dict([(s["identifier"], s)
-                                              for s in settings["ORDER_STATUSES"]])
-
-    # Handle legacy order statuses, if any.
-    for status in legacy_statuses:
-        if status["identifier"] in lookup:
-            status["enabled"] = True
         else:
-            logging.error(f"legacy status {status['identifier']} not in order statuses")
-    for status in settings["ORDER_STATUSES"]:
-        if status.get("initial"):
-            settings["ORDER_STATUS_INITIAL"] = status
-            break
-    else:
-        # Hard-setting initial status to 'preparation', if not set.
-        status = settings["ORDER_STATUSES_LOOKUP"]["preparation"]
-        status["initial"] = True
-        settings["ORDER_STATUS_INITIAL"] = status
+            # Transfer order transitions data from legacy setup.
+            for legacy_trans in legacy_transitions:
+                # Silently eliminate unknown target statues.
+                legacy_trans["targets"] = [t for t in legacy_trans["targets"]
+                                           if t in lookup]
+                for trans in settings["ORDER_TRANSITIONS"]:
+                    if legacy_trans["source"] == trans["source"]:
+                        trans.update(legacy_trans)
+                        break
+                else:
+                    settings["ORDER_TRANSITIONS"].append(legacy_trans)
 
-    # Handle legacy order transitions, if any.
-    try:
-        for transition in legacy_transitions:
-            if transition["source"] not in lookup:
-                raise KeyError(f"no such transition source {transition['source']}")
-            for target in transition["targets"]:
-                if target not in lookup:
-                    raise KeyError(f"no such transition target {target}")
-            for permission in transition["permission"]:
-                if permission not in constanct.ACCOUNT_ROLES:
-                    raise KeyError(f"no such transition permission role {permission}")
-            if transition.get("require") and transition["require"] != "valid":
-                raise KeyError(f"invalid 'require' value: {transition['require']}")
-    except KeyError as error:
-        logging.error(f"ignored legacy transitions: {error}")
-    else:
-        doc["transitions"] = legacy_transitions
-
-    if doc != orig_doc:
+        # Save current setup into database.
+        doc = {"_id": "order_statuses",
+               constants.DOCTYPE: constants.META,
+               "statuses": settings["ORDER_STATUSES"],
+               "transitions": settings["ORDER_TRANSITIONS"]}
         with StatusSaver(doc, db=db):
             pass
         logging.info("saved order statuses to database")
+
+    # Lookup for the enabled statuses.
+    settings["ORDER_STATUSES_LOOKUP"] = dict([(s["identifier"], s)
+                                              for s in settings["ORDER_STATUSES"]
+                                              if s.get("enabled")])
+
+    # Find the initial status: Ensure that there is one and only one.
+    initial = None
+    for status in settings["ORDER_STATUSES_LOOKUP"].values():
+        if status.get("initial"):
+            if initial:
+                status.pop("initial")
+            else:
+                initial = status
+
+    # No initial state defined; set 'preparation' to be it.
+    if initial is None:
+        initial = settings["ORDER_STATUSES_LOOKUP"]["preparation"]
+        initial["initial"] = True
+        # Save modified setup into database.
+        # The doc was either retrieved or already saved above.
+        with StatusSaver(doc, db=db):
+            pass
+        logging.info("saved order statuses to database after setting 'preparation' to initial")
+
+    settings["ORDER_STATUS_INITIAL"] = initial
+    
