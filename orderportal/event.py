@@ -14,6 +14,13 @@ class EventSaver(saver.Saver):
     doctype = constants.EVENT
 
 
+class Events(RequestHandler):
+    "List of all events."
+
+    def get(self):
+        self.render("events.html", events=self.get_events())
+
+
 class EventCreate(RequestHandler):
     "Create an event item."
 
@@ -28,7 +35,7 @@ class EventCreate(RequestHandler):
         self.see_other("home")
 
 
-class Event(RequestHandler):
+class EventEdit(RequestHandler):
     "Edit ot delete an event item."
 
     @tornado.web.authenticated
@@ -61,10 +68,3 @@ class Event(RequestHandler):
             return
         self.db.delete(event)
         self.see_other("home")
-
-
-class Events(RequestHandler):
-    "List of all events."
-
-    def get(self):
-        self.render("events.html", events=self.get_events())

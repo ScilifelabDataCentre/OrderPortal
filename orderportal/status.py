@@ -257,4 +257,3 @@ def load_order_statuses(db):
         logging.info("saved order statuses to database after setting 'preparation' to initial")
 
     settings["ORDER_STATUS_INITIAL"] = initial
-    

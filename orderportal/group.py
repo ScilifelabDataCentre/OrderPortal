@@ -16,19 +16,6 @@ class GroupSaver(saver.Saver):
     doctype = constants.GROUP
 
 
-class Groups(RequestHandler):
-    "Page for a list of all groups."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_staff()
-        view = self.db.view(
-            "group", "modified", descending=True, reduce=False, include_docs=True
-        )
-        groups = [r.doc for r in view]
-        self.render("groups.html", groups=groups)
-
-
 class GroupMixin(object):
 
     def check_readable(self, group):
@@ -215,3 +202,16 @@ class GroupDecline(RequestHandler):
                 members.discard(self.current_user["email"])
                 saver["members"] = sorted(members)
         self.see_other("account", self.current_user["email"])
+
+
+class Groups(RequestHandler):
+    "Page for a list of all groups."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_staff()
+        view = self.db.view(
+            "group", "modified", descending=True, reduce=False, include_docs=True
+        )
+        groups = [r.doc for r in view]
+        self.render("groups.html", groups=groups)

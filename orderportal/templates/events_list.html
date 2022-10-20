@@ -17,7 +17,7 @@
         Edit
       </button>
       <p></p>
-      <form action="{{ reverse_url('event', event['_id']) }}"
+      <form action="{{ reverse_url('event_edit', event['_id']) }}"
             role="form"
             method="POST">
         {% module xsrf_form_html() %}
@@ -52,7 +52,7 @@
         <h4 class="modal-title">Edit event item</h4>
       </div>
       <div class="modal-body">
-        <form action="{{ reverse_url('event', event['_id']) }}"
+        <form action="{{ reverse_url('event_edit', event['_id']) }}"
               role="form"
               method="POST">
           {% module xsrf_form_html() %}
