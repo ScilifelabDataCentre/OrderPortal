@@ -6,7 +6,7 @@
 
 {% block body_title %}{{ terminology('Order') }} statuses{% end %}
 
-{% block main_content %}
+{% block content %}
 
 <div class="well">
   <p>
@@ -105,4 +105,4 @@
   {% end %} {# if status.get("enabled") #}
   {% end %} {# for status in settings['ORDER_STATUSES'] #}
 </table>
-{% end %} {# block main_content #}
+{% end %} {# block content #}
