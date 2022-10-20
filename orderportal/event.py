@@ -26,7 +26,8 @@ class EventCreate(RequestHandler):
 
     @tornado.web.authenticated
     def post(self):
-        if self.readonly(): return
+        if self.readonly():
+            return
         self.check_admin()
         with EventSaver(rqh=self) as saver:
             saver["date"] = self.get_argument("date")
@@ -40,7 +41,8 @@ class EventEdit(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        if self.readonly(): return
+        if self.readonly():
+            return
         self.check_admin()
         if self.get_argument("_http_method", None) == "delete":
             self.delete(iuid)
@@ -58,7 +60,8 @@ class EventEdit(RequestHandler):
 
     @tornado.web.authenticated
     def delete(self, iuid):
-        if self.readonly(): return
+        if self.readonly():
+            return
         self.check_admin()
         event = self.get_entity(iuid, constants.EVENT)
         try:

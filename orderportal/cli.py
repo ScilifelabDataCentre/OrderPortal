@@ -39,7 +39,9 @@ def create_database():
     "Create the database within CouchDB. It is *not* initialized!"
     server = utils.get_dbserver()
     if settings["DATABASE_NAME"] in server:
-        raise click.ClickException(f"""Database '{settings["DATABASE_NAME"]}' already exists.""")
+        raise click.ClickException(
+            f"""Database '{settings["DATABASE_NAME"]}' already exists."""
+        )
     server.create(settings["DATABASE_NAME"])
     click.echo(f"""Created database '{settings["DATABASE_NAME"]}'.""")
 
@@ -78,21 +80,18 @@ def counts():
     "--dumpfile",
     type=str,
     help="The path of the Orderportal database dump file."
-    " NOTE: Environment variable BACKUP_DIR is no longer used.",
 )
 @click.option(
     "-D",
     "--dumpdir",
     type=str,
-    help="The directory to write the dump file in, using the standard name.",
+    help="The directory to write the dump file in, using the standard name."
 )
 @click.option(
     "--progressbar/--no-progressbar", default=True, help="Display a progressbar."
 )
 def dump(dumpfile, dumpdir, progressbar):
-    """Dump all data in the database to a '.tar.gz' dump file.
-    NOTE: Environment variable BACKUP_DIR is no longer used.
-    """
+    "Dump all data in the database to a '.tar.gz' dump file."
     db = utils.get_db()
     if not dumpfile:
         dumpfile = "dump_{0}.tar.gz".format(time.strftime("%Y-%m-%d"))
@@ -122,26 +121,30 @@ def undump(dumpfile, progressbar):
         raise click.ClickException(
             f"The database '{settings['DATABASE_NAME']}' contains data."
         )
+    # Remove meta and text docs which may be in the dump.
+    meta_docs = [row.doc for row in db.view("meta", "id", include_docs=True)]
+    for doc in meta_docs:
+        db.delete(doc)
+        doc.pop("_rev")
+    text_docs = [row.doc for row in db.view("text", "name", include_docs=True)]
+    for doc in text_docs:
+        db.delete(doc)
+        doc.pop("_rev")
     ndocs, nfiles = db.undump(dumpfile, progressbar=progressbar)
-    # Cleanup.
-    # Remove old, obsolete meta documents.
-    for name in ["account_messages", "order_messages", "global_modes"]:
+    # NOTE: Meta documents may not have these id's; these are forever banned.
+    for id in constants.BANNED_META_IDS:
         try:
-            doc = db[name]
+            doc = db[id]
             db.delete(doc)
         except couchdb2.NotFoundError:
             pass
-    # Text docs are doubled; youngest copy is from 'initialize'.
-    # Keep only oldest version (from dump) of text docs.
-    lookup = {}
-    for row in db.view("text", "name", include_docs=True):
-        if not row.doc["name"] in lookup:
-            lookup[row.doc["name"]] = row.doc
-        elif lookup[row.doc["name"]]["modified"] <= row.doc["modified"]:
-            db.delete(row.doc)
-        else:
-            db.delete(lookup.pop(row.doc["name"]))
-            lookup[row.doc["name"]] = row.doc
+    # If lacking any meta or text doc, then add the initial one.
+    for doc in meta_docs:
+        if doc["_id"] not in db:
+            db.put(doc)
+    for doc in text_docs:
+        if len(db.view("text", "name", key=doc["name"])) == 0:
+               db.put(doc)
     click.echo(f"Loaded {ndocs} documents and {nfiles} files.")
 
 

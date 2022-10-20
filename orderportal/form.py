@@ -206,13 +206,15 @@ class FormCreate(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
-        if self.readonly(): return
+        if self.readonly():
+            return
         self.check_admin()
         self.render("form_create.html")
 
     @tornado.web.authenticated
     def post(self):
-        if self.readonly(): return
+        if self.readonly():
+            return
         self.check_admin()
         with FormSaver(rqh=self) as saver:
             saver["title"] = self.get_argument("title") or "[no title]"

@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "6.0.2"
+__version__ = "6.0.3"
 
 
 class Constants:
@@ -115,6 +115,9 @@ class Constants:
     # Step for use with input type 'float'
     FLOAT_STEP = "0.0000001"
 
+    # Banned meta document id's; have changed format or been removed.
+    BANNED_META_IDS = frozenset(["account_messages", "order_messages", "global_modes"])
+
     # Texts for use in web site
     TEXTS = dict(
         header="Header on portal home page.",
@@ -153,6 +156,10 @@ class Constants:
     # Form status; hard-wired!
     TESTING = "testing"
     FORM_STATUSES = [PENDING, TESTING, ENABLED, DISABLED]
+
+    # Hard-wired order statuses
+    PREPARATION = "preparation"
+    SUBMITTED = "submitted"
 
     # Content types (MIME types)
     HTML_MIME = "text/html"
@@ -223,14 +230,16 @@ settings = dict(
     SITE_HOST_URL=None,
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
-    EMAIL=dict(HOST=None,  # Domain name. Must be defined for email to work,
-               PORT=0,     # which is required for proper execution.
-               SSL=False,
-               TLS=False,
-               USER=None,
-               PASSWORD=None),
+    EMAIL=dict(
+        HOST=None,  # Domain name. Must be defined for email to work,
+        PORT=0,  # which is required for proper execution.
+        SSL=False,
+        TLS=False,
+        USER=None,
+        PASSWORD=None,
+    ),
     MESSAGE_SENDER_EMAIL='"OrderPortal Support" <support@my-domain.com>',
-    MESSAGE_REPLY_TO_EMAIL=None, # Same format as above.
+    MESSAGE_REPLY_TO_EMAIL=None,  # Same format as above.
     DISPLAY_MENU_LIGHT=False,
     DISPLAY_MENU_ITEM_URL=None,
     DISPLAY_MENU_ITEM_TEXT=None,

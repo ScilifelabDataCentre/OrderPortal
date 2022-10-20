@@ -121,11 +121,9 @@ class Search(RequestHandler):
                 for i in list(orders.values())
                 if self.is_owner(i) or self.is_colleague(i["owner"])
             ]
-        # Go directly to order if exactly one found.
-        if len(orders) == 1:
-            self.see_other("entity", orders[0]["_id"])
-        else:
-            account_names = self.get_account_names()
-            self.render(
-                "search.html", term=orig, orders=orders, account_names=account_names
-            )
+        self.render(
+            "search.html",
+            term=orig,
+            orders=orders,
+            account_names=self.get_account_names(),
+        )

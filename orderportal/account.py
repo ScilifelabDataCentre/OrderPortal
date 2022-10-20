@@ -790,7 +790,8 @@ class Login(RequestHandler):
     "Login to a account account. Set a secure cookie."
 
     def get(self):
-        if self.readonly("Login disallowed."): return
+        if self.readonly("Login disallowed."):
+            return
         self.render("login.html")
 
     def post(self):
@@ -798,7 +799,8 @@ class Login(RequestHandler):
         Forward to account edit page if first login.
         Log failed login attempt. Disable account if too many recent.
         """
-        if self.readonly("Login disallowed."): return
+        if self.readonly("Login disallowed."):
+            return
         try:
             email = self.get_argument("email")
             password = self.get_argument("password")
@@ -882,11 +884,13 @@ class Reset(RequestHandler):
     "Reset the password of a account account."
 
     def get(self):
-        if self.readonly("Password reset not possible."): return
+        if self.readonly("Password reset not possible."):
+            return
         self.render("reset.html", email=self.get_argument("email", ""))
 
     def post(self):
-        if self.readonly("Password reset not possible."): return
+        if self.readonly("Password reset not possible."):
+            return
         URL = self.absolute_reverse_url
         try:
             account = self.get_account(self.get_argument("email"))
@@ -933,14 +937,18 @@ class Reset(RequestHandler):
                 except ValueError as error:
                     self.see_other("home", error=str(error))
                 else:
-                    self.see_other("home", message="An email has been sent containing a reset code. Use the link in the email.")
+                    self.see_other(
+                        "home",
+                        message="An email has been sent containing a reset code. Use the link in the email.",
+                    )
 
 
 class Password(RequestHandler):
     "Set the password of a account account; requires a code."
 
     def get(self):
-        if self.readonly("Password set not possible."): return
+        if self.readonly("Password set not possible."):
+            return
         self.render(
             "password.html",
             title="Set your password",
@@ -949,7 +957,8 @@ class Password(RequestHandler):
         )
 
     def post(self):
-        if self.readonly("Password set not possible."): return
+        if self.readonly("Password set not possible."):
+            return
         try:
             account = self.get_account(self.get_argument("email", ""))
         except ValueError as msg:
@@ -1007,7 +1016,8 @@ class Register(RequestHandler):
     ADDRESS_KEYS = ["address", "zip", "city", "country"]
 
     def get(self):
-        if self.readonly("Registration not possible."): return
+        if self.readonly("Registration not possible."):
+            return
         values = dict()
         for key in self.KEYS:
             values[key] = self.get_argument(key, None)
@@ -1018,7 +1028,8 @@ class Register(RequestHandler):
         self.render("register.html", values=values)
 
     def post(self):
-        if self.readonly("Registration not possible."): return
+        if self.readonly("Registration not possible."):
+            return
         try:
             with AccountSaver(rqh=self) as saver:
                 email = self.get_argument("email", None)
@@ -1086,8 +1097,10 @@ class Register(RequestHandler):
         else:
             account = saver.doc
             # Allow admin to register an account without sending an email to the person.
-            if not (self.is_admin() and
-                    not utils.to_bool(self.get_argument("send_email", False))):
+            if not (
+                self.is_admin()
+                and not utils.to_bool(self.get_argument("send_email", False))
+            ):
                 try:
                     with MessageSaver(rqh=self) as saver:
                         saver.create(
@@ -1117,7 +1130,8 @@ class AccountEnable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        if self.readonly(): return
+        if self.readonly():
+            return
         try:
             account = self.get_account(email)
         except ValueError as msg:
@@ -1152,7 +1166,8 @@ class AccountDisable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        if self.readonly(): return
+        if self.readonly():
+            return
         try:
             account = self.get_account(email)
         except ValueError as msg:
@@ -1170,7 +1185,8 @@ class AccountUpdateInfo(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        if self.readonly(): return
+        if self.readonly():
+            return
         try:
             account = self.get_account(email)
         except ValueError as msg:

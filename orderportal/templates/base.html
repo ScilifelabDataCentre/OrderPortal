@@ -226,7 +226,7 @@
 
       {% if alert %}
       <div class="row">
-        <div class="col-md-12 lead alert alert-danger">
+        <div class="col-md-12 lead alert alert-danger" style="margin-top: 4px;">
           {% if is_admin %}
           <a href="{{ reverse_url('text','alert',origin=reverse_url('home')) }}"
              class="btn btn-primary btn-xs pull-right" role="button">

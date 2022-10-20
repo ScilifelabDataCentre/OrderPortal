@@ -630,8 +630,13 @@ class OrderMixin(object):
         term = utils.terminology("Order")
         if settings.get("READONLY"):
             raise ValueError(f"{term} creation is currently disabled.")
-        if self.current_user["role"] == constants.USER and not settings["ORDER_CREATE_USER"]:
-            raise ValueError(f"{term} creation is not allowed for account with role 'user'.")
+        if (
+            self.current_user["role"] == constants.USER
+            and not settings["ORDER_CREATE_USER"]
+        ):
+            raise ValueError(
+                f"{term} creation is not allowed for account with role 'user'."
+            )
 
     def get_form(self, iuid, check=False):
         "Get the form given by its IUID. Optionally check that it is enabled."
@@ -1089,8 +1094,8 @@ class OrderCsv(OrderMixin, RequestHandler):
         n_column_headers = len(column_headers)
         writer.writerow(column_headers)
         for field in self.get_fields(order):
-            field.pop("description") # Must not be in the values list.
-            field_ref = field.pop("__field__") # Must not be in the values list.
+            field.pop("description")  # Must not be in the values list.
+            field_ref = field.pop("__field__")  # Must not be in the values list.
             values = list(field.values())
             # Special case for table field; spans more than one row
             if field["type"] == constants.TABLE:
@@ -1130,9 +1135,7 @@ class OrderCsv(OrderMixin, RequestHandler):
     def write_finish(self, order):
         self.set_header("Content-Type", constants.CSV_MIME)
         filename = order.get("identifier") or order["_id"]
-        self.set_header(
-            f"Content-Disposition", 'attachment; filename="{filename}.csv"'
-        )
+        self.set_header(f"Content-Disposition", 'attachment; filename="{filename}.csv"')
 
 
 class OrderXlsx(OrderCsv):
@@ -1177,9 +1180,7 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
         self.write(zip_io.getvalue())
         self.set_header("Content-Type", constants.ZIP_MIME)
         filename = order.get("identifier") or order["_id"]
-        self.set_header(
-            f"Content-Disposition", 'attachment; filename="{filename}.zip"'
-        )
+        self.set_header(f"Content-Disposition", 'attachment; filename="{filename}.zip"')
 
 
 class OrderLogs(OrderMixin, RequestHandler):
@@ -1244,28 +1245,20 @@ class OrderEdit(OrderMixin, RequestHandler):
                 column = utils.parse_field_table_column(coldef)
                 rowid = f"rowid_{i}"
                 if column["type"] == constants.SELECT:
-                    inp = [
-                        f"<select class='form-control' name='{rowid}' id='{rowid}'>"
-                    ]
+                    inp = [f"<select class='form-control' name='{rowid}' id='{rowid}'>"]
                     inp.extend(["<option>%s</option>" % o for o in column["options"]])
                     inp = "".join(inp)
                 elif column["type"] == constants.INT:
-                    inp = (
-                        f"<input type='number' step='1' class='form-control' name='{rowid}' id='{rowid}'>"
-                    )
+                    inp = f"<input type='number' step='1' class='form-control' name='{rowid}' id='{rowid}'>"
                 elif column["type"] == constants.FLOAT:
                     inp = (
                         f"<input type='number' step='{constants.FLOAT_STEP}'"
                         f" class='form-control' name='{rowid}' id='{rowid}'>"
                     )
                 elif column["type"] == constants.DATE:
-                    inp = (
-                        f"<input type='text' class='form-control datepicker' name='{rowid}' id='{rowid}'>"
-                    )
+                    inp = f"<input type='text' class='form-control datepicker' name='{rowid}' id='{rowid}'>"
                 else:  # Default type: 'string'
-                    inp = (
-                        f"<input type='text' class='form-control' name='{rowid}' id='{rowid}'>"
-                    )
+                    inp = f"<input type='text' class='form-control' name='{rowid}' id='{rowid}'>"
                 tableinput.append("<td>%s</td>" % inp)
             tableinput.append("</tr>")
             tableinputs[field["identifier"]] = "".join(tableinput)
@@ -1303,19 +1296,6 @@ class OrderEdit(OrderMixin, RequestHandler):
                 )
                 saver.set_external(self.get_argument("__links__", "").split("\n"))
                 saver.update_fields()
-                if flag == constants.SUBMIT:  # Hard-wired status
-                    if self.allow_submit(saver.doc):
-                        saver.set_status(constants.SUBMITTED)
-                        message = "{0} saved and submitted.".format(
-                            utils.terminology("Order")
-                        )
-                    else:
-                        error = (
-                            "{0} could not be submitted due to"
-                            " invalid or missing values.".format(
-                                utils.terminology("Order")
-                            )
-                        )
             self.set_error_flash(error)
             self.set_message_flash(message)
             if flag == "continue":
@@ -1554,8 +1534,9 @@ class OrderReport(OrderMixin, RequestHandler):
             self.set_header("Content-Type", content_type)
             name = order.get("identifier") or order["_id"]
             ext = utils.get_filename_extension(content_type)
-            self.set_header("Content-Disposition",
-                            f'attachment; filename="{name}_report{ext}"')
+            self.set_header(
+                "Content-Disposition", f'attachment; filename="{name}_report{ext}"'
+            )
 
 
 class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
@@ -1580,8 +1561,9 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         self.set_header("Content-Type", content_type)
         name = order.get("identifier") or order["_id"]
         ext = utils.get_filename_extension(content_type)
-        self.set_header("Content-Disposition", 
-                        f'attachment; filename="{name}_report{ext}"')
+        self.set_header(
+            "Content-Disposition", f'attachment; filename="{name}_report{ext}"'
+        )
 
     def put(self, iuid):
         try:
@@ -1653,7 +1635,7 @@ class Orders(RequestHandler):
             self.see_other("account_orders", self.current_user["email"])
             return
         # Count orders per year submitted.
-        view =self.db.view("order", "year_submitted", reduce=True, group_level=1)
+        view = self.db.view("order", "year_submitted", reduce=True, group_level=1)
         years = [(r.key, r.value) for r in view]
         years.reverse()
         # Count all orders.
@@ -1781,11 +1763,15 @@ class Orders(RequestHandler):
         if year == "recent":
             if orders is None:
                 view = self.db.view(
-                    "order", "modified", include_docs=True, descending=True, limit=settings["DISPLAY_ORDERS_MOST_RECENT"]
+                    "order",
+                    "modified",
+                    include_docs=True,
+                    descending=True,
+                    limit=settings["DISPLAY_ORDERS_MOST_RECENT"],
                 )
                 orders = [r.doc for r in view]
             else:
-                orders = orders[:settings["DISPLAY_ORDERS_MOST_RECENT"]]
+                orders = orders[: settings["DISPLAY_ORDERS_MOST_RECENT"]]
 
         elif year == "all":
             if orders is None:
@@ -1794,17 +1780,20 @@ class Orders(RequestHandler):
                 )
                 orders = [r.doc for r in view]
             else:
-                pass            # "all" means no filter by year.
+                pass  # "all" means no filter by year.
 
-        else:                   # Specific year
+        else:  # Specific year
             if orders is None:
                 view = self.db.view(
                     "order", "year_submitted", include_docs=True, key=year
                 )
                 orders = [r.doc for r in view]
             else:
-                orders = [o for o in orders
-                          if o["history"].get("submitted", "X").split("-")[0] == year]
+                orders = [
+                    o
+                    for o in orders
+                    if o["history"].get("submitted", "X").split("-")[0] == year
+                ]
         return orders
 
 

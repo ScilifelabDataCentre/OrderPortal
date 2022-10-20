@@ -41,11 +41,15 @@ class MessageSaver(saver.Saver):
         Raises ValueError if some other error.
         """
         try:
-            if not settings["EMAIL"]: raise KeyError
+            if not settings["EMAIL"]:
+                raise KeyError
             host = settings["EMAIL"]["HOST"]
-            if not host: raise KeyError
+            if not host:
+                raise KeyError
         except KeyError:
-            raise KeyError("Could not send email; no email server defined. Contact the admin.")
+            raise KeyError(
+                "Could not send email; no email server defined. Contact the admin."
+            )
         try:
             self["recipients"] = recipients
             port = settings["EMAIL"].get("PORT", 0)
@@ -58,9 +62,11 @@ class MessageSaver(saver.Saver):
             server.ehlo()
             try:
                 user = settings["EMAIL"]["USER"]
-                if not user: raise KeyError
+                if not user:
+                    raise KeyError
                 password = settings["EMAIL"]["PASSWORD"]
-                if not password: raise KeyError
+                if not password:
+                    raise KeyError
             except KeyError:
                 pass
             else:
@@ -75,9 +81,13 @@ class MessageSaver(saver.Saver):
             server.send_message(message)
             self["sent"] = utils.timestamp()
             # Additional logging info to help sorting out issue with email server.
-            logging.info(f"""Email "{self['subject']}" from {self['sender']} to {self['recipients']}""")
+            logging.info(
+                f"""Email "{self['subject']}" from {self['sender']} to {self['recipients']}"""
+            )
         except Exception as error:
-            logging.error(f"""Email "{self['subject']}" failed to {self['recipients']}: {error}""")
+            logging.error(
+                f"""Email "{self['subject']}" failed to {self['recipients']}: {error}"""
+            )
             raise ValueError(str(error))
 
     def post_process(self):

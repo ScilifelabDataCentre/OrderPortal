@@ -24,7 +24,7 @@ class Home(RequestHandler):
     "Home page; dashboard. Contents according to role of logged-in account."
 
     def get(self):
-        
+
         forms = [r.doc for r in self.db.view("form", "enabled", include_docs=True)]
         for f in forms:
             if f.get("ordinal") is None:
@@ -93,7 +93,7 @@ See your <a href="{0}">account</a>.""".format(
     def home_user(self, **kwargs):
         "Home page for a current user having role 'user'."
         if not settings["ORDER_CREATE_USER"]:
-            kwargs["forms"] = None # Indicates that users can't create orders.
+            kwargs["forms"] = None  # Indicates that users can't create orders.
         view = self.db.view(
             "order",
             "owner",
