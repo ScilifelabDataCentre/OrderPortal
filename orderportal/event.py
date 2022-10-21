@@ -14,12 +14,20 @@ class EventSaver(saver.Saver):
     doctype = constants.EVENT
 
 
+class Events(RequestHandler):
+    "List of all events."
+
+    def get(self):
+        self.render("events.html", events=self.get_events())
+
+
 class EventCreate(RequestHandler):
     "Create an event item."
 
     @tornado.web.authenticated
     def post(self):
-        if self.readonly(): return
+        if self.readonly():
+            return
         self.check_admin()
         with EventSaver(rqh=self) as saver:
             saver["date"] = self.get_argument("date")
@@ -28,12 +36,13 @@ class EventCreate(RequestHandler):
         self.see_other("home")
 
 
-class Event(RequestHandler):
+class EventEdit(RequestHandler):
     "Edit ot delete an event item."
 
     @tornado.web.authenticated
     def post(self, iuid):
-        if self.readonly(): return
+        if self.readonly():
+            return
         self.check_admin()
         if self.get_argument("_http_method", None) == "delete":
             self.delete(iuid)
@@ -51,7 +60,8 @@ class Event(RequestHandler):
 
     @tornado.web.authenticated
     def delete(self, iuid):
-        if self.readonly(): return
+        if self.readonly():
+            return
         self.check_admin()
         event = self.get_entity(iuid, constants.EVENT)
         try:
@@ -61,10 +71,3 @@ class Event(RequestHandler):
             return
         self.db.delete(event)
         self.see_other("home")
-
-
-class Events(RequestHandler):
-    "List of all events."
-
-    def get(self):
-        self.render("events.html", events=self.get_events())

@@ -57,8 +57,6 @@ ACCOUNT_DEFAULT_COUNTRY_CODES: 'SE'
 #   orders: applications
 
 # Order status, transition, messages definition files; in SITE_DIR.
-ORDER_STATUSES_FILE:    'order_statuses.yaml'
-ORDER_TRANSITIONS_FILE: 'order_transitions.yaml'
 ORDER_MESSAGES_FILE:    'order_messages.yaml'
 
 # Must be defined for sequentially numbered order identifiers.

@@ -21,9 +21,9 @@ class RequestHandler(tornado.web.RequestHandler):
     "Base request handler."
 
     def prepare(self):
-        "Get the database connection and global modes."
+        "Get the database connection."
         self.db = utils.get_db()
-        try:                    # Remove obsolete doc from db.
+        try:  # Remove obsolete doc from db.
             self.db.delete("global_modes")
         except couchdb2.NotFoundError:
             pass
@@ -266,11 +266,14 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_next_counter(self, doctype):
         "Get the next counter number for the doctype."
+        from orderportal.admin import MetaSaver # To avoid circular import.
         while True:
             try:
                 doc = self.db[doctype]  # Doc must be reloaded each iteration
             except couchdb2.NotFoundError:
-                doc = {"_id": doctype, constants.DOCTYPE: constants.META}
+                with MetaSaver(rqh=self) as saver:
+                    saver.set_id(doctype)
+                doc = saver.doc
             try:
                 number = doc["counter"] + 1
             except KeyError:

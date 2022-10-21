@@ -14,15 +14,11 @@ class Icon(tornado.web.UIModule):
 
     def render(self, name, title=None, label=False):
         if not name:
-            name = "unknown"
+            name = "undefined"
         elif not isinstance(name, str):
             name = name[constants.DOCTYPE]
-        # Order status icons are located in the site directory,
-        # since they depend on the setup.
-        if name in settings["ORDER_STATUSES_LOOKUP"]:
-            url = self.handler.reverse_url("site", name + ".png")
-        else:
-            url = self.handler.static_url(name + ".png")
+        # Order status icons have been moved to the generic 'static' directory.
+        url = self.handler.static_url(name + ".png")
         name = name.capitalize()
         title = utils.terminology(title or name)
         value = ICON_TEMPLATE.format(url=url, alt=name, title=title)

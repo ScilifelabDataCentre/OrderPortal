@@ -266,6 +266,15 @@
          href="{{ reverse_url('account_orders', account['email']) }}">
         {{ account['order_count'] }}
       </a>
+      <a href="{{ reverse_url('orders_api', owner=account['email'], year='all') }}" style="margin-left: 2em;">
+        {% module Icon('json') %} JSON
+      </a>
+      <a href="{{ reverse_url('orders_csv', owner=account['email'], year='all') }}" style="margin-left: 1em;">
+        {% module Icon('csv') %} CSV
+      </a>
+      <a href="{{ reverse_url('orders_xlsx', owner=account['email'], year='all') }}" style="margin-left: 1em;">
+        {% module Icon('excel') %} Excel
+      </a>
     </td>
   </tr>
   <tr>

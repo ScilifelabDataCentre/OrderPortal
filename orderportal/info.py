@@ -16,45 +16,6 @@ class InfoSaver(saver.Saver):
     doctype = constants.INFO
 
 
-class Info(RequestHandler):
-    "Information page."
-
-    def get(self, name):
-        info = self.get_entity_view("info", "name", name)
-        self.render("info.html", info=info)
-
-    @tornado.web.authenticated
-    def post(self, name):
-        self.check_admin()
-        if self.get_argument("_http_method", None) == "delete":
-            self.delete(name)
-            return
-        raise tornado.web.HTTPError(405, reason="POST only allowed for DELETE")
-
-    @tornado.web.authenticated
-    def delete(self, name):
-        self.check_admin()
-        info = self.get_entity_view("info", "name", name)
-        self.delete_logs(info["_id"])
-        self.db.delete(info)
-        self.see_other("infos")
-
-
-class InfoLogs(RequestHandler):
-    "Info log entries page."
-
-    @tornado.web.authenticated
-    def get(self, name):
-        self.check_admin()
-        info = self.get_entity_view("info", "name", name)
-        self.render(
-            "logs.html",
-            title="Logs for info '{0}'".format(name),
-            entity=info,
-            logs=self.get_logs(info["_id"]),
-        )
-
-
 class Infos(RequestHandler):
     "List of information pages."
 
@@ -101,6 +62,30 @@ class InfoCreate(RequestHandler):
         self.see_other("info", name)
 
 
+class Info(RequestHandler):
+    "Information page."
+
+    def get(self, name):
+        info = self.get_entity_view("info", "name", name)
+        self.render("info.html", info=info)
+
+    @tornado.web.authenticated
+    def post(self, name):
+        self.check_admin()
+        if self.get_argument("_http_method", None) == "delete":
+            self.delete(name)
+            return
+        raise tornado.web.HTTPError(405, reason="POST only allowed for DELETE")
+
+    @tornado.web.authenticated
+    def delete(self, name):
+        self.check_admin()
+        info = self.get_entity_view("info", "name", name)
+        self.delete_logs(info["_id"])
+        self.db.delete(info)
+        self.see_other("infos")
+
+
 class InfoEdit(RequestHandler):
     "Edit the information page."
 
@@ -122,3 +107,18 @@ class InfoEdit(RequestHandler):
                 saver["menu"] = None
             saver["text"] = self.get_argument("text", "")
         self.see_other("info", name)
+
+
+class InfoLogs(RequestHandler):
+    "Info log entries page."
+
+    @tornado.web.authenticated
+    def get(self, name):
+        self.check_admin()
+        info = self.get_entity_view("info", "name", name)
+        self.render(
+            "logs.html",
+            title="Logs for info '{0}'".format(name),
+            entity=info,
+            logs=self.get_logs(info["_id"]),
+        )

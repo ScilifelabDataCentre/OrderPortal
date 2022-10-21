@@ -10,46 +10,46 @@ from . import settings
 
 DESIGNS = dict(
     account=dict(
-        all=dict(               # account/all
+        all=dict(  # account/all
             reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.modified, null);
 }""",
         ),
-        api_key=dict(           # account/api_key
+        api_key=dict(  # account/api_key
             map="""function(doc) { 
     if (doc.orderportal_doctype !== 'account') return;
     if (!doc.api_key) return;
     emit(doc.api_key, doc.email);
 }"""
         ),
-        email=dict(             # account/email
+        email=dict(  # account/email
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.email, [doc.first_name, doc.last_name]);
 }"""
         ),
-        role=dict(              # account/role
+        role=dict(  # account/role
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.role, doc.email);
 }"""
         ),
-        status=dict(            # account/status
+        status=dict(  # account/status
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.status, doc.email);
 }"""
         ),
-        university=dict(        # account/university
+        university=dict(  # account/university
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.university, doc.email);
 }"""
         ),
     ),
-    event=dict(                 # event/date
+    event=dict(  # event/date
         date=dict(
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'event') return;
@@ -57,7 +57,7 @@ DESIGNS = dict(
 }"""
         )
     ),
-    file=dict(                  # file/name
+    file=dict(  # file/name
         name=dict(
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'file') return;
@@ -66,20 +66,20 @@ DESIGNS = dict(
         )
     ),
     form=dict(
-        all=dict(               # form/all
+        all=dict(  # form/all
             reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'form') return;
     emit(doc.modified, null);
 }""",
         ),
-        enabled=dict(           # form/enabled
+        enabled=dict(  # form/enabled
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'form') return;
     if (doc.status === 'enabled') emit(doc.modified, doc.title);
 }"""
         ),
-        modified=dict(          # form/modified
+        modified=dict(  # form/modified
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'form') return;
     emit(doc.modified, doc.title);
@@ -87,7 +87,7 @@ DESIGNS = dict(
         ),
     ),
     group=dict(
-        invited=dict(           # group/invited
+        invited=dict(  # group/invited
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'group') return;
     for (var i=0; i<doc.invited.length; i++) {
@@ -95,7 +95,7 @@ DESIGNS = dict(
     };
 }"""
         ),
-        member=dict(            # group/member
+        member=dict(  # group/member
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'group') return;
     for (var i=0; i<doc.members.length; i++) {
@@ -103,14 +103,14 @@ DESIGNS = dict(
     };
 }"""
         ),
-        modified=dict(          # group/modified
+        modified=dict(  # group/modified
             reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'group') return;
     emit(doc.modified, 1);
 }""",
         ),
-        owner=dict(             # group/owner
+        owner=dict(  # group/owner
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'group') return;
     emit(doc.owner, doc.name);
@@ -118,13 +118,13 @@ DESIGNS = dict(
         ),
     ),
     info=dict(
-        menu=dict(              # info/menu
+        menu=dict(  # info/menu
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'info') return;
     if (doc.menu) emit(doc.menu, [doc.name, doc.title]);
 }"""
         ),
-        name=dict(              # info/name
+        name=dict(  # info/name
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'info') return;
     emit(doc.name, null);
@@ -132,20 +132,20 @@ DESIGNS = dict(
         ),
     ),
     log=dict(
-        account=dict(           # log/account
+        account=dict(  # log/account
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'log') return;
     if (!doc.account) return;
     emit([doc.account, doc.modified], null);
 }"""
         ),
-        entity=dict(            # log/entity
+        entity=dict(  # log/entity
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'log') return;
     emit([doc.entity, doc.modified], null);
 }"""
         ),
-        login_failure=dict(     # log/login_failure
+        login_failure=dict(  # log/login_failure
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'log') return;
     if (!doc.changed.login_failure) return;
@@ -154,7 +154,7 @@ DESIGNS = dict(
         ),
     ),
     message=dict(
-        recipient=dict(         # message/recipient
+        recipient=dict(  # message/recipient
             reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'message') return;
@@ -172,7 +172,7 @@ DESIGNS = dict(
 }"""  # meta/id
         )
     ),
-    news=dict(                  # news/modified
+    news=dict(  # news/modified
         modified=dict(
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'news') return;
@@ -181,21 +181,21 @@ DESIGNS = dict(
         )
     ),
     order=dict(
-        form=dict(              # order/form
+        form=dict(  # order/form
             reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     emit([doc.form, doc.modified], 1);
 }""",
         ),
-        identifier=dict(        # order/identifier
+        identifier=dict(  # order/identifier
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     if (!doc.identifier) return;
     emit(doc.identifier, doc.title);
 }"""
         ),
-        keyword=dict(           # order/keyword; see 'fix_design_documents'!
+        keyword=dict(  # order/keyword; see 'fix_design_documents'!
             map="""function(doc) {{
     if (doc.orderportal_doctype !== 'order') return;
     var cleaned = doc.title.replace(/[{delims_lint}]/g, " ").toLowerCase();
@@ -207,27 +207,27 @@ DESIGNS = dict(
 var lint = {lint};
 """
         ),
-        modified=dict(          # order/modified
+        modified=dict(  # order/modified
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     emit(doc.modified, doc.title);
 }"""
         ),
-        owner=dict(             # order/owner
+        owner=dict(  # order/owner
             reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     emit([doc.owner, doc.modified], 1);
 }""",
         ),
-        status=dict(            # order/status
+        status=dict(  # order/status
             reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     emit([doc.status, doc.modified], 1);
 }""",
         ),
-        tag=dict(               # order/tag
+        tag=dict(  # order/tag
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     if (!doc.tags) return;
@@ -240,16 +240,16 @@ var lint = {lint};
     });
 }"""
         ),
-        year_submitted=dict(    # order/year_submitted
+        year_submitted=dict(  # order/year_submitted
             reduce="_count",
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     if (!doc.history.submitted) return;
     emit(doc.history.submitted.split('-')[0], 1);
-}"""
+}""",
         ),
     ),
-    text=dict(                  # text/map
+    text=dict(  # text/map
         name=dict(
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'text') return;

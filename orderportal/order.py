@@ -478,6 +478,28 @@ class OrderSaver(saver.Saver):
                     content_type=file["content_type"],
                 )
 
+    def get_order_url(self, order):
+        """Member rqh is not available when used from a stand-alone script,
+        so self.rqh.order_reverse_url cannot be used.
+        The URL has to be synthesized explicitly here."""
+        try:
+            identifier = order["identifier"]
+        except KeyError:
+            identifier = order["_id"]
+        path = "/order/{0}".format(identifier)
+        if settings["BASE_URL_PATH_PREFIX"]:
+            path = settings["BASE_URL_PATH_PREFIX"] + path
+        return settings["BASE_URL"].rstrip("/") + path
+
+    def get_account(self, email):
+        "Get the account document for the given email."
+        result = self.db.view("account", "email", key=email, include_docs=True)
+        rows = list(result)
+        if len(rows) == 1:
+            return rows[0].doc
+        else:
+            return None
+
     def send_message(self):
         "Send a message after status change."
         try:
@@ -509,7 +531,7 @@ class OrderSaver(saver.Saver):
                 if admin["status"] == constants.ENABLED:
                     recipients.add(admin["email"])
         try:
-            with MessageSaver(rqh=self) as saver:
+            with MessageSaver(rqh=self.rqh) as saver:
                 saver.create(
                     template,
                     owner=self.doc["owner"],
@@ -520,31 +542,9 @@ class OrderSaver(saver.Saver):
                 )
                 saver.send(list(recipients))
         except KeyError as error:
-            self.set_message_flash(str(error))
+            self.rqh.set_message_flash(str(error))
         except ValueError as error:
-            self.set_error_flash(str(error))
-
-    def get_order_url(self, order):
-        """Member rqh is not available when used from a stand-alone script,
-        so self.rqh.order_reverse_url cannot be used.
-        The URL has to be synthesized explicitly here."""
-        try:
-            identifier = order["identifier"]
-        except KeyError:
-            identifier = order["_id"]
-        path = "/order/{0}".format(identifier)
-        if settings["BASE_URL_PATH_PREFIX"]:
-            path = settings["BASE_URL_PATH_PREFIX"] + path
-        return settings["BASE_URL"].rstrip("/") + path
-
-    def get_account(self, email):
-        "Get the account document for the given email."
-        result = self.db.view("account", "email", key=email, include_docs=True)
-        rows = list(result)
-        if len(rows) == 1:
-            return rows[0].doc
-        else:
-            return None
+            self.rqh.set_error_flash(str(error))
 
 
 class OrderMixin(object):
@@ -630,8 +630,13 @@ class OrderMixin(object):
         term = utils.terminology("Order")
         if settings.get("READONLY"):
             raise ValueError(f"{term} creation is currently disabled.")
-        if self.current_user["role"] == constants.USER and not settings["ORDER_CREATE_USER"]:
-            raise ValueError(f"{term} creation is not allowed for account with role 'user'.")
+        if (
+            self.current_user["role"] == constants.USER
+            and not settings["ORDER_CREATE_USER"]
+        ):
+            raise ValueError(
+                f"{term} creation is not allowed for account with role 'user'."
+            )
 
     def get_form(self, iuid, check=False):
         "Get the form given by its IUID. Optionally check that it is enabled."
@@ -837,6 +842,67 @@ def convert_to_strings(doc):
             convert_to_strings(value)
 
 
+class OrderCreate(OrderMixin, RequestHandler):
+    "Create a new order."
+
+    # Do not use auth decorator: Instead show error message if not logged in.
+    def get(self):
+        try:
+            if not self.current_user:
+                raise ValueError(
+                    "You need to be logged in to create {0}."
+                    " Register to get an account if you don't have one.".format(
+                        utils.terminology("order")
+                    )
+                )
+            self.check_creation_enabled()
+            form = self.get_form(self.get_argument("form"), check=True)
+        except ValueError as msg:
+            self.see_other("home", error=str(msg))
+        else:
+            self.render("order_create.html", form=form)
+
+    @tornado.web.authenticated
+    def post(self):
+        try:
+            self.check_creation_enabled()
+            form = self.get_form(self.get_argument("form"), check=True)
+            with OrderSaver(rqh=self) as saver:
+                saver.create(form)
+                saver.autopopulate()
+                saver.check_fields_validity()
+        except ValueError as msg:
+            self.see_other("home", error=str(msg))
+        else:
+            self.see_other("order_edit", saver.doc["_id"])
+
+
+class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
+    "Create a new order by an API call."
+
+    def post(self):
+        "Form IUID and title in the JSON body of the request."
+        try:
+            self.check_login()
+        except ValueError as msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
+        try:
+            self.check_creation_enabled()
+            data = self.get_json_body()
+            iuid = data.get("form")
+            if not iuid:
+                raise ValueError("no form IUID given")
+            form = self.get_form(iuid, check=True)
+            with OrderSaver(rqh=self) as saver:
+                saver.create(form, title=data.get("title"))
+                saver.autopopulate()
+                saver.check_fields_validity()
+        except ValueError as msg:
+            raise tornado.web.HTTPError(400, reason=str(msg))
+        else:
+            self.write(self.get_order_json(saver.doc, full=True))
+
+
 class Order(OrderMixin, RequestHandler):
     "Order page."
 
@@ -1028,8 +1094,8 @@ class OrderCsv(OrderMixin, RequestHandler):
         n_column_headers = len(column_headers)
         writer.writerow(column_headers)
         for field in self.get_fields(order):
-            field.pop("description") # Must not be in the values list.
-            field_ref = field.pop("__field__") # Must not be in the values list.
+            field.pop("description")  # Must not be in the values list.
+            field_ref = field.pop("__field__")  # Must not be in the values list.
             values = list(field.values())
             # Special case for table field; spans more than one row
             if field["type"] == constants.TABLE:
@@ -1069,9 +1135,7 @@ class OrderCsv(OrderMixin, RequestHandler):
     def write_finish(self, order):
         self.set_header("Content-Type", constants.CSV_MIME)
         filename = order.get("identifier") or order["_id"]
-        self.set_header(
-            f"Content-Disposition", 'attachment; filename="{filename}.csv"'
-        )
+        self.set_header(f"Content-Disposition", 'attachment; filename="{filename}.csv"')
 
 
 class OrderXlsx(OrderCsv):
@@ -1116,260 +1180,7 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
         self.write(zip_io.getvalue())
         self.set_header("Content-Type", constants.ZIP_MIME)
         filename = order.get("identifier") or order["_id"]
-        self.set_header(
-            f"Content-Disposition", 'attachment; filename="{filename}.zip"'
-        )
-
-
-class Orders(RequestHandler):
-    "Orders list page."
-
-    @tornado.web.authenticated
-    def get(self):
-        # Ordinary users are not allowed to see the overall orders list.
-        if not self.is_staff():
-            self.see_other("account_orders", self.current_user["email"])
-            return
-        # Count orders per year submitted.
-        view =self.db.view("order", "year_submitted", reduce=True, group_level=1)
-        years = [(r.key, r.value) for r in view]
-        years.reverse()
-        # Count all orders.
-        view = self.db.view("order", "status", reduce=True)
-        try:
-            r = list(view)[0]
-        except IndexError:
-            all_count = 0
-        else:
-            all_count = r.value
-        # Initial ordering by the 'modified' column.
-        order_column = (
-            5
-            + int(settings["ORDERS_LIST_TAGS"])
-            + len(settings["ORDERS_LIST_FIELDS"])
-            + len(settings["ORDERS_LIST_STATUSES"])
-        )
-        self.set_filter()
-        self.render(
-            "orders.html",
-            forms_lookup=self.get_forms_lookup(),
-            years=years,
-            filter=self.filter,
-            orders=self.get_orders(),
-            order_column=order_column,
-            account_names=self.get_account_names(),
-            all_count=all_count,
-        )
-
-    def set_filter(self):
-        "Set the filter parameters dictionary."
-        self.filter = dict()
-        for key in ["status", "form_id"] + [
-            f["identifier"] for f in settings["ORDERS_LIST_FIELDS"]
-        ]:
-            try:
-                value = self.get_argument(key)
-                if not value:
-                    raise KeyError
-                self.filter[key] = value
-            except (tornado.web.MissingArgumentError, KeyError):
-                pass
-        self.filter["year"] = self.get_argument("year", None) or "recent"
-
-    def get_orders(self):
-        "Get all orders according to current filter."
-        orders = self.filter_by_status(self.filter.get("status"))
-        orders = self.filter_by_form(self.filter.get("form_id"), orders=orders)
-        for f in settings["ORDERS_LIST_FIELDS"]:
-            orders = self.filter_by_field(
-                f["identifier"], self.filter.get(f["identifier"]), orders=orders
-            )
-        orders = self.filter_by_year(self.filter["year"], orders=orders)
-        return orders
-
-    def filter_by_status(self, status, orders=None):
-        "Return orders list if any status filter, or None if none."
-        if status:
-            if orders is None:
-                view = self.db.view(
-                    "order",
-                    "status",
-                    descending=True,
-                    startkey=[status, constants.CEILING],
-                    endkey=[status],
-                    include_docs=True,
-                )
-                orders = [r.doc for r in view]
-            else:
-                orders = [o for o in orders if o["status"] == status]
-        return orders
-
-    def filter_by_form(self, form_id, orders=None):
-        "Return orders list after applying any form filter, or None if none."
-        if form_id:
-            if orders is None:
-                view = self.db.view(
-                    "order",
-                    "form",
-                    descending=True,
-                    startkey=[form_id, constants.CEILING],
-                    endkey=[form_id],
-                    include_docs=True,
-                )
-                orders = [r.doc for r in view]
-            else:
-                orders = [o for o in orders if o["form"] == form_id]
-        return orders
-
-    def filter_by_field(self, identifier, value, orders=None):
-        "Return orders list if any field filter, or None if none."
-        if value:
-            if orders is None:
-                view = self.db.view(
-                    "order", "modified", include_docs=True, descending=True
-                )
-                orders = [r.doc for r in view]
-            if value == "__none__":
-                value = None
-            orders = [o for o in orders if o["fields"].get(identifier) == value]
-        return orders
-
-    def filter_by_year(self, year, orders=None):
-        "Return orders list by year filter, most recent if none, or all if specified."
-        if year == "recent":
-            if orders is None:
-                view = self.db.view(
-                    "order", "modified", include_docs=True, descending=True, limit=settings["DISPLAY_ORDERS_MOST_RECENT"]
-                )
-                orders = [r.doc for r in view]
-            else:
-                orders = orders[:settings["DISPLAY_ORDERS_MOST_RECENT"]]
-
-        elif year == "all":
-            if orders is None:
-                view = self.db.view(
-                    "order", "modified", include_docs=True, descending=True
-                )
-                orders = [r.doc for r in view]
-            else:
-                pass            # "all" means no filter by year.
-
-        else:                   # Specific year
-            if orders is None:
-                view = self.db.view(
-                    "order", "year_submitted", include_docs=True, key=year
-                )
-                orders = [r.doc for r in view]
-            else:
-                orders = [o for o in orders
-                          if o["history"].get("submitted", "X").split("-")[0] == year]
-        return orders
-
-
-class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
-    "Orders API; JSON output."
-
-    def get(self):
-        "JSON output."
-        URL = self.absolute_reverse_url
-        self.check_staff()
-        self.set_filter()
-        result = utils.get_json(URL("orders_api", **self.filter), "orders")
-        result["filter"] = self.filter
-        result["links"] = dict(
-            api=dict(href=URL("orders_api")), display=dict(href=URL("orders"))
-        )
-        # Get account names and forms lookups once only.
-        account_names = self.get_account_names()
-        forms_lookup = self.get_forms_lookup()
-        result["items"] = []
-        keys = [f["identifier"] for f in settings["ORDERS_LIST_FIELDS"]]
-        for order in self.get_orders():
-            data = self.get_order_json(
-                order, account_names=account_names, forms_lookup=forms_lookup
-            )
-            data["fields"] = dict()
-            for key in keys:
-                data["fields"][key] = order["fields"].get(key)
-            result["items"].append(data)
-            result["invalid"] = order["invalid"]
-        self.write(result)
-
-
-class OrdersCsv(Orders):
-    "Orders list as CSV file."
-
-    @tornado.web.authenticated
-    def get(self):
-        # Ordinary users are not allowed to see the overall orders list.
-        if not self.is_staff():
-            self.see_other("account_orders", self.current_user["email"])
-            return
-        self.set_filter()
-        writer = self.get_writer()
-        writer.writerow((settings["SITE_NAME"], utils.today()))
-        row = [
-            "Identifier",
-            "Title",
-            "IUID",
-            "URL",
-            "Form",
-            "Form IUID",
-            "Form URL",
-            "Owner",
-            "Owner name",
-            "Owner URL",
-            "Tags",
-        ]
-        row.extend([f["identifier"] for f in settings["ORDERS_LIST_FIELDS"]])
-        row.append("Status")
-        row.extend([s.capitalize() for s in settings["ORDERS_LIST_STATUSES"]])
-        row.append("Modified")
-        writer.writerow(row)
-        account_names = self.get_account_names()
-        forms_lookup = self.get_forms_lookup()
-        for order in self.get_orders():
-            form = forms_lookup[order["form"]]
-            row = [
-                order.get("identifier") or "",
-                order["title"] or "[no title]",
-                order["_id"],
-                self.order_reverse_url(order),
-                f"{form['title']} ({form.get('version') or '-'})",
-                order["form"],
-                self.absolute_reverse_url("form", order["form"]),
-                order["owner"],
-                account_names[order["owner"]],
-                self.absolute_reverse_url("account", order["owner"]),
-                ", ".join(order.get("tags", [])),
-            ]
-            for f in settings["ORDERS_LIST_FIELDS"]:
-                row.append(order["fields"].get(f["identifier"]))
-            row.append(order["status"])
-            for s in settings["ORDERS_LIST_STATUSES"]:
-                row.append(order["history"].get(s))
-            row.append(order["modified"])
-            writer.writerow(row)
-        self.write(writer.getvalue())
-        self.write_finish()
-
-    def get_writer(self):
-        return utils.CsvWriter()
-
-    def write_finish(self):
-        self.set_header("Content-Type", constants.CSV_MIME)
-        self.set_header("Content-Disposition", 'attachment; filename="orders.csv"')
-
-
-class OrdersXlsx(OrdersCsv):
-    "Orders list as XLSX."
-
-    def get_writer(self):
-        return utils.XlsxWriter()
-
-    def write_finish(self):
-        self.set_header("Content-Type", constants.XLSX_MIME)
-        self.set_header("Content-Disposition", 'attachment; filename="orders.xlsx"')
+        self.set_header(f"Content-Disposition", 'attachment; filename="{filename}.zip"')
 
 
 class OrderLogs(OrderMixin, RequestHandler):
@@ -1393,67 +1204,6 @@ class OrderLogs(OrderMixin, RequestHandler):
         self.render(
             "logs.html", title=title, entity=order, logs=self.get_logs(order["_id"])
         )
-
-
-class OrderCreate(OrderMixin, RequestHandler):
-    "Create a new order."
-
-    # Do not use auth decorator: Instead show error message if not logged in.
-    def get(self):
-        try:
-            if not self.current_user:
-                raise ValueError(
-                    "You need to be logged in to create {0}."
-                    " Register to get an account if you don't have one.".format(
-                        utils.terminology("order")
-                    )
-                )
-            self.check_creation_enabled()
-            form = self.get_form(self.get_argument("form"), check=True)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
-        else:
-            self.render("order_create.html", form=form)
-
-    @tornado.web.authenticated
-    def post(self):
-        try:
-            self.check_creation_enabled()
-            form = self.get_form(self.get_argument("form"), check=True)
-            with OrderSaver(rqh=self) as saver:
-                saver.create(form)
-                saver.autopopulate()
-                saver.check_fields_validity()
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
-        else:
-            self.see_other("order_edit", saver.doc["_id"])
-
-
-class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
-    "Create a new order by an API call."
-
-    def post(self):
-        "Form IUID and title in the JSON body of the request."
-        try:
-            self.check_login()
-        except ValueError as msg:
-            raise tornado.web.HTTPError(403, reason=str(msg))
-        try:
-            self.check_creation_enabled()
-            data = self.get_json_body()
-            iuid = data.get("form")
-            if not iuid:
-                raise ValueError("no form IUID given")
-            form = self.get_form(iuid, check=True)
-            with OrderSaver(rqh=self) as saver:
-                saver.create(form, title=data.get("title"))
-                saver.autopopulate()
-                saver.check_fields_validity()
-        except ValueError as msg:
-            raise tornado.web.HTTPError(400, reason=str(msg))
-        else:
-            self.write(self.get_order_json(saver.doc, full=True))
 
 
 class OrderEdit(OrderMixin, RequestHandler):
@@ -1495,28 +1245,20 @@ class OrderEdit(OrderMixin, RequestHandler):
                 column = utils.parse_field_table_column(coldef)
                 rowid = f"rowid_{i}"
                 if column["type"] == constants.SELECT:
-                    inp = [
-                        f"<select class='form-control' name='{rowid}' id='{rowid}'>"
-                    ]
+                    inp = [f"<select class='form-control' name='{rowid}' id='{rowid}'>"]
                     inp.extend(["<option>%s</option>" % o for o in column["options"]])
                     inp = "".join(inp)
                 elif column["type"] == constants.INT:
-                    inp = (
-                        f"<input type='number' step='1' class='form-control' name='{rowid}' id='{rowid}'>"
-                    )
+                    inp = f"<input type='number' step='1' class='form-control' name='{rowid}' id='{rowid}'>"
                 elif column["type"] == constants.FLOAT:
                     inp = (
                         f"<input type='number' step='{constants.FLOAT_STEP}'"
                         f" class='form-control' name='{rowid}' id='{rowid}'>"
                     )
                 elif column["type"] == constants.DATE:
-                    inp = (
-                        f"<input type='text' class='form-control datepicker' name='{rowid}' id='{rowid}'>"
-                    )
+                    inp = f"<input type='text' class='form-control datepicker' name='{rowid}' id='{rowid}'>"
                 else:  # Default type: 'string'
-                    inp = (
-                        f"<input type='text' class='form-control' name='{rowid}' id='{rowid}'>"
-                    )
+                    inp = f"<input type='text' class='form-control' name='{rowid}' id='{rowid}'>"
                 tableinput.append("<td>%s</td>" % inp)
             tableinput.append("</tr>")
             tableinputs[field["identifier"]] = "".join(tableinput)
@@ -1554,19 +1296,6 @@ class OrderEdit(OrderMixin, RequestHandler):
                 )
                 saver.set_external(self.get_argument("__links__", "").split("\n"))
                 saver.update_fields()
-                if flag == constants.SUBMIT:  # Hard-wired status
-                    if self.allow_submit(saver.doc):
-                        saver.set_status(constants.SUBMITTED)
-                        message = "{0} saved and submitted.".format(
-                            utils.terminology("Order")
-                        )
-                    else:
-                        error = (
-                            "{0} could not be submitted due to"
-                            " invalid or missing values.".format(
-                                utils.terminology("Order")
-                            )
-                        )
             self.set_error_flash(error)
             self.set_message_flash(message)
             if flag == "continue":
@@ -1805,8 +1534,59 @@ class OrderReport(OrderMixin, RequestHandler):
             self.set_header("Content-Type", content_type)
             name = order.get("identifier") or order["_id"]
             ext = utils.get_filename_extension(content_type)
-            self.set_header("Content-Disposition",
-                            f'attachment; filename="{name}_report{ext}"')
+            self.set_header(
+                "Content-Disposition", f'attachment; filename="{name}_report{ext}"'
+            )
+
+
+class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
+    "Order report API: get or set."
+
+    def get(self, iuid):
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        try:
+            self.check_readable(order)
+        except ValueError as msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
+        try:
+            report = order["report"]
+            outfile = self.db.get_attachment(order, constants.SYSTEM_REPORT)
+            if outfile is None:
+                raise KeyError
+        except KeyError:
+            raise tornado.web.HTTPError(404)
+        self.write(outfile.read())
+        outfile.close()
+        content_type = order["_attachments"][constants.SYSTEM_REPORT]["content_type"]
+        self.set_header("Content-Type", content_type)
+        name = order.get("identifier") or order["_id"]
+        ext = utils.get_filename_extension(content_type)
+        self.set_header(
+            "Content-Disposition", f'attachment; filename="{name}_report{ext}"'
+        )
+
+    def put(self, iuid):
+        try:
+            self.check_admin()
+        except ValueError as msg:
+            raise tornado.web.HTTPError(403, reason=str(msg))
+        order = self.get_entity(iuid, doctype=constants.ORDER)
+        with OrderSaver(doc=order, rqh=self) as saver:
+            content_type = (
+                self.request.headers.get("content-type") or constants.BIN_MIME
+            )
+            saver["report"] = dict(
+                timestamp=utils.timestamp(),
+                inline=content_type in (constants.HTML_MIME, constants.TEXT_MIME),
+            )
+            saver.files.append(
+                dict(
+                    filename=constants.SYSTEM_REPORT,
+                    body=self.request.body,
+                    content_type=content_type,
+                )
+            )
+        self.write("")
 
 
 class OrderReportEdit(OrderMixin, RequestHandler):
@@ -1845,50 +1625,279 @@ class OrderReportEdit(OrderMixin, RequestHandler):
         self.redirect(self.order_reverse_url(order))
 
 
-class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
-    "Order report API: get or set."
+class Orders(RequestHandler):
+    "Orders list page."
 
-    def get(self, iuid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+    @tornado.web.authenticated
+    def get(self):
+        # Ordinary users are not allowed to see the overall orders list.
+        if not self.is_staff():
+            self.see_other("account_orders", self.current_user["email"])
+            return
+        # Count orders per year submitted.
+        view = self.db.view("order", "year_submitted", reduce=True, group_level=1)
+        years = [(r.key, r.value) for r in view]
+        years.reverse()
+        # Count all orders.
+        view = self.db.view("order", "status", reduce=True)
         try:
-            self.check_readable(order)
-        except ValueError as msg:
-            raise tornado.web.HTTPError(403, reason=str(msg))
-        try:
-            report = order["report"]
-            outfile = self.db.get_attachment(order, constants.SYSTEM_REPORT)
-            if outfile is None:
-                raise KeyError
-        except KeyError:
-            raise tornado.web.HTTPError(404)
-        self.write(outfile.read())
-        outfile.close()
-        content_type = order["_attachments"][constants.SYSTEM_REPORT]["content_type"]
-        self.set_header("Content-Type", content_type)
-        name = order.get("identifier") or order["_id"]
-        ext = utils.get_filename_extension(content_type)
-        self.set_header("Content-Disposition", 
-                        f'attachment; filename="{name}_report{ext}"')
+            r = list(view)[0]
+        except IndexError:
+            all_count = 0
+        else:
+            all_count = r.value
+        # Initial ordering by the 'modified' column.
+        order_column = (
+            5
+            + int(settings["ORDERS_LIST_TAGS"])
+            + len(settings["ORDERS_LIST_FIELDS"])
+            + len(settings["ORDERS_LIST_STATUSES"])
+        )
+        self.set_filter()
+        self.render(
+            "orders.html",
+            forms_lookup=self.get_forms_lookup(),
+            years=years,
+            filter=self.filter,
+            orders=self.get_orders(),
+            order_column=order_column,
+            account_names=self.get_account_names(),
+            all_count=all_count,
+        )
 
-    def put(self, iuid):
-        try:
-            self.check_admin()
-        except ValueError as msg:
-            raise tornado.web.HTTPError(403, reason=str(msg))
-        order = self.get_entity(iuid, doctype=constants.ORDER)
-        with OrderSaver(doc=order, rqh=self) as saver:
-            content_type = (
-                self.request.headers.get("content-type") or constants.BIN_MIME
+    def set_filter(self):
+        "Set the filter parameters dictionary."
+        self.filter = dict()
+        for key in ["status", "form_id", "owner"] + [
+            f["identifier"] for f in settings["ORDERS_LIST_FIELDS"]
+        ]:
+            try:
+                value = self.get_argument(key)
+                if not value:
+                    raise KeyError
+                self.filter[key] = value
+            except (tornado.web.MissingArgumentError, KeyError):
+                pass
+        self.filter["year"] = self.get_argument("year", None) or "recent"
+
+    def get_orders(self):
+        "Get all orders according to current filter."
+        orders = self.filter_by_status(self.filter.get("status"))
+        orders = self.filter_by_form(self.filter.get("form_id"), orders=orders)
+        orders = self.filter_by_owner(self.filter.get("owner"), orders=orders)
+        for f in settings["ORDERS_LIST_FIELDS"]:
+            orders = self.filter_by_field(
+                f["identifier"], self.filter.get(f["identifier"]), orders=orders
             )
-            saver["report"] = dict(
-                timestamp=utils.timestamp(),
-                inline=content_type in (constants.HTML_MIME, constants.TEXT_MIME),
-            )
-            saver.files.append(
-                dict(
-                    filename=constants.SYSTEM_REPORT,
-                    body=self.request.body,
-                    content_type=content_type,
+        orders = self.filter_by_year(self.filter["year"], orders=orders)
+        return orders
+
+    def filter_by_status(self, status, orders=None):
+        "Return orders list if any status filter, or unchanged input if no such filter."
+        if status:
+            if orders is None:
+                view = self.db.view(
+                    "order",
+                    "status",
+                    descending=True,
+                    startkey=[status, constants.CEILING],
+                    endkey=[status],
+                    include_docs=True,
                 )
+                orders = [r.doc for r in view]
+            else:
+                orders = [o for o in orders if o["status"] == status]
+        return orders
+
+    def filter_by_form(self, form_id, orders=None):
+        """Return orders list after applying any form filter,
+        or unchanged input if no such filter.
+        """
+        if form_id:
+            if orders is None:
+                view = self.db.view(
+                    "order",
+                    "form",
+                    descending=True,
+                    startkey=[form_id, constants.CEILING],
+                    endkey=[form_id],
+                    include_docs=True,
+                )
+                orders = [r.doc for r in view]
+            else:
+                orders = [o for o in orders if o["form"] == form_id]
+        return orders
+
+    def filter_by_owner(self, owner, orders=None):
+        "Return orders list if any owner filter, or unchanged input if no such filter."
+        if owner:
+            if orders is None:
+                view = self.db.view(
+                    "order",
+                    "owner",
+                    descending=True,
+                    startkey=[owner, constants.CEILING],
+                    endkey=[owner],
+                    include_docs=True,
+                )
+                orders = [r.doc for r in view]
+            else:
+                orders = [o for o in orders if o["owner"] == owner]
+        return orders
+
+    def filter_by_field(self, identifier, value, orders=None):
+        "Return orders list if any field filter, or unchanged input if none."
+        if value:
+            if orders is None:
+                view = self.db.view(
+                    "order", "modified", include_docs=True, descending=True
+                )
+                orders = [r.doc for r in view]
+            if value == "__none__":
+                value = None
+            orders = [o for o in orders if o["fields"].get(identifier) == value]
+        return orders
+
+    def filter_by_year(self, year, orders=None):
+        "Return orders list by year filter, most recent if none, or all if specified."
+        if year == "recent":
+            if orders is None:
+                view = self.db.view(
+                    "order",
+                    "modified",
+                    include_docs=True,
+                    descending=True,
+                    limit=settings["DISPLAY_ORDERS_MOST_RECENT"],
+                )
+                orders = [r.doc for r in view]
+            else:
+                orders = orders[: settings["DISPLAY_ORDERS_MOST_RECENT"]]
+
+        elif year == "all":
+            if orders is None:
+                view = self.db.view(
+                    "order", "modified", include_docs=True, descending=True
+                )
+                orders = [r.doc for r in view]
+            else:
+                pass  # "all" means no filter by year.
+
+        else:  # Specific year
+            if orders is None:
+                view = self.db.view(
+                    "order", "year_submitted", include_docs=True, key=year
+                )
+                orders = [r.doc for r in view]
+            else:
+                orders = [
+                    o
+                    for o in orders
+                    if o["history"].get("submitted", "X").split("-")[0] == year
+                ]
+        return orders
+
+
+class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
+    "Orders API; JSON output."
+
+    def get(self):
+        "JSON output."
+        URL = self.absolute_reverse_url
+        self.check_staff()
+        self.set_filter()
+        result = utils.get_json(URL("orders_api", **self.filter), "orders")
+        result["filter"] = self.filter
+        result["links"] = dict(
+            api=dict(href=URL("orders_api")), display=dict(href=URL("orders"))
+        )
+        # Get account names and forms lookups once only.
+        account_names = self.get_account_names()
+        forms_lookup = self.get_forms_lookup()
+        result["items"] = []
+        keys = [f["identifier"] for f in settings["ORDERS_LIST_FIELDS"]]
+        for order in self.get_orders():
+            data = self.get_order_json(
+                order, account_names=account_names, forms_lookup=forms_lookup
             )
-        self.write("")
+            data["fields"] = dict()
+            for key in keys:
+                data["fields"][key] = order["fields"].get(key)
+            result["items"].append(data)
+            result["invalid"] = order["invalid"]
+        self.write(result)
+
+
+class OrdersCsv(Orders):
+    "Orders list as CSV file."
+
+    @tornado.web.authenticated
+    def get(self):
+        # Ordinary users are not allowed to see the overall orders list.
+        if not self.is_staff():
+            self.see_other("account_orders", self.current_user["email"])
+            return
+        self.set_filter()
+        writer = self.get_writer()
+        writer.writerow((settings["SITE_NAME"], utils.today()))
+        row = [
+            "Identifier",
+            "Title",
+            "IUID",
+            "URL",
+            "Form",
+            "Form IUID",
+            "Form URL",
+            "Owner",
+            "Owner name",
+            "Owner URL",
+            "Tags",
+        ]
+        row.extend([f["identifier"] for f in settings["ORDERS_LIST_FIELDS"]])
+        row.append("Status")
+        row.extend([s.capitalize() for s in settings["ORDERS_LIST_STATUSES"]])
+        row.append("Modified")
+        writer.writerow(row)
+        account_names = self.get_account_names()
+        forms_lookup = self.get_forms_lookup()
+        for order in self.get_orders():
+            form = forms_lookup[order["form"]]
+            row = [
+                order.get("identifier") or "",
+                order["title"] or "[no title]",
+                order["_id"],
+                self.order_reverse_url(order),
+                f"{form['title']} ({form.get('version') or '-'})",
+                order["form"],
+                self.absolute_reverse_url("form", order["form"]),
+                order["owner"],
+                account_names[order["owner"]],
+                self.absolute_reverse_url("account", order["owner"]),
+                ", ".join(order.get("tags", [])),
+            ]
+            for f in settings["ORDERS_LIST_FIELDS"]:
+                row.append(order["fields"].get(f["identifier"]))
+            row.append(order["status"])
+            for s in settings["ORDERS_LIST_STATUSES"]:
+                row.append(order["history"].get(s))
+            row.append(order["modified"])
+            writer.writerow(row)
+        self.write(writer.getvalue())
+        self.write_finish()
+
+    def get_writer(self):
+        return utils.CsvWriter()
+
+    def write_finish(self):
+        self.set_header("Content-Type", constants.CSV_MIME)
+        self.set_header("Content-Disposition", 'attachment; filename="orders.csv"')
+
+
+class OrdersXlsx(OrdersCsv):
+    "Orders list as XLSX."
+
+    def get_writer(self):
+        return utils.XlsxWriter()
+
+    def write_finish(self):
+        self.set_header("Content-Type", constants.XLSX_MIME)
+        self.set_header("Content-Disposition", 'attachment; filename="orders.xlsx"')

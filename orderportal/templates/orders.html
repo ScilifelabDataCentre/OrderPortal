@@ -61,9 +61,11 @@
         <select name="status" class="form-control refresh">
           <option value="">[any status]</option>
           {% for s in settings['ORDER_STATUSES'] %}
+          {% if s.get("enabled") %}
           {% set sid = s['identifier'] %}
           {% set sel = sid == filter.get('status') and 'selected' or '' %}
           <option {{ sel }} value="{{ sid }}">{{ sid.capitalize() }}</option>
+          {% end %}
           {% end %}
         </select>
       </div>
