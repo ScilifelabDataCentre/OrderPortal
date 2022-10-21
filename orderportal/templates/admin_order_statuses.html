@@ -7,19 +7,13 @@
 {% block body_title %}{{ terminology('Order') }} statuses{% end %}
 
 {% block content %}
+{% if settings.get("ORDER_STATUSES_FILE") or settings.get("ORDER_TRANSITIONS_FILE") %}
 <div class="well">
-  <p>
-    All {{ terminology('orders') }} have one and only one status at
-    all times.
-  </p>
-  {% if settings.get("ORDER_STATUSES_FILE") or settings.get("ORDER_TRANSITIONS_FILE") %}
-  <p>
-    <strong>NOTE!</strong> The site files named by settings ORDER_STATUSES_FILE and
-    ORDER_TRANSITIONS_FILE are no longer used. Remove these settings and files to
-    avoid confusion.
-  </p>
-  {% end %}
+  <strong>NOTE!</strong> The site files named by settings ORDER_STATUSES_FILE and
+  ORDER_TRANSITIONS_FILE are no longer used. Remove these settings and files to
+  avoid confusion.
 </div>
+{% end %}
 
 <table class="table table-condensed">
   <tr>
@@ -37,11 +31,11 @@
     <th>{% module Icon(status['identifier'], label=True) %}</th>
     <td>
       {{ status['description'] }}
-      {% if status.get('initial') %}
-      <br><strong>Initial status.</strong>
-      {% end %}
     </td>
     <td>
+      {% if status.get('initial') %}
+      <i>[initial status]</i><br>
+      {% end %}
       {% set none = '[none]' %}
       {% set first = True %}
       {% for trans in settings['ORDER_TRANSITIONS'] %}

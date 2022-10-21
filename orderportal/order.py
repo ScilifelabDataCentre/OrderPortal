@@ -478,6 +478,28 @@ class OrderSaver(saver.Saver):
                     content_type=file["content_type"],
                 )
 
+    def get_order_url(self, order):
+        """Member rqh is not available when used from a stand-alone script,
+        so self.rqh.order_reverse_url cannot be used.
+        The URL has to be synthesized explicitly here."""
+        try:
+            identifier = order["identifier"]
+        except KeyError:
+            identifier = order["_id"]
+        path = "/order/{0}".format(identifier)
+        if settings["BASE_URL_PATH_PREFIX"]:
+            path = settings["BASE_URL_PATH_PREFIX"] + path
+        return settings["BASE_URL"].rstrip("/") + path
+
+    def get_account(self, email):
+        "Get the account document for the given email."
+        result = self.db.view("account", "email", key=email, include_docs=True)
+        rows = list(result)
+        if len(rows) == 1:
+            return rows[0].doc
+        else:
+            return None
+
     def send_message(self):
         "Send a message after status change."
         try:
@@ -509,7 +531,7 @@ class OrderSaver(saver.Saver):
                 if admin["status"] == constants.ENABLED:
                     recipients.add(admin["email"])
         try:
-            with MessageSaver(rqh=self) as saver:
+            with MessageSaver(rqh=self.rqh) as saver:
                 saver.create(
                     template,
                     owner=self.doc["owner"],
@@ -520,31 +542,9 @@ class OrderSaver(saver.Saver):
                 )
                 saver.send(list(recipients))
         except KeyError as error:
-            self.set_message_flash(str(error))
+            self.rqh.set_message_flash(str(error))
         except ValueError as error:
-            self.set_error_flash(str(error))
-
-    def get_order_url(self, order):
-        """Member rqh is not available when used from a stand-alone script,
-        so self.rqh.order_reverse_url cannot be used.
-        The URL has to be synthesized explicitly here."""
-        try:
-            identifier = order["identifier"]
-        except KeyError:
-            identifier = order["_id"]
-        path = "/order/{0}".format(identifier)
-        if settings["BASE_URL_PATH_PREFIX"]:
-            path = settings["BASE_URL_PATH_PREFIX"] + path
-        return settings["BASE_URL"].rstrip("/") + path
-
-    def get_account(self, email):
-        "Get the account document for the given email."
-        result = self.db.view("account", "email", key=email, include_docs=True)
-        rows = list(result)
-        if len(rows) == 1:
-            return rows[0].doc
-        else:
-            return None
+            self.rqh.set_error_flash(str(error))
 
 
 class OrderMixin(object):

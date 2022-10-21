@@ -47,24 +47,6 @@ def create_database():
 
 
 @cli.command()
-def initialize():
-    """Initialize the database, which must have been newly created
-    (i.e. be completely empty). Load all design documents.
-    """
-    try:
-        db = utils.get_db()
-    except KeyError as error:
-        raise click.ClickException(str(error))
-    if len(db) != 0:
-        raise click.ClickException(
-            f"The database '{settings['DATABASE_NAME']}' is not completely empty."
-        )
-    # Load the CouchDB design documents; indexes for entities.
-    designs.load_design_documents(db)
-    click.echo("Loaded all CouchDB design documents.")
-
-
-@cli.command()
 def counts():
     "Output counts of database entities."
     db = utils.get_db()
@@ -149,10 +131,13 @@ def undump(dumpfile, progressbar):
 
 
 @cli.command()
-@click.option("--email", prompt=True, help="Email address = account name")
+@click.argument("email")
 @click.option("--password")  # Get password after account existence check.
-def create_admin(email, password):
-    "Create a user account having the admin role."
+def admin(email, password):
+    """Create a user account having the admin role.
+    The email address is the account identifier.
+    No email is sent to the email address by this command.
+    """
     db = utils.get_db()
     try:
         with AccountSaver(db=db) as saver:

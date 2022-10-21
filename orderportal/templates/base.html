@@ -226,15 +226,16 @@
 
       {% if alert %}
       <div class="row">
-        <div class="col-md-12 lead alert alert-danger" style="margin-top: 4px;">
-          {% if is_admin %}
-          <a href="{{ reverse_url('text','alert',origin=reverse_url('home')) }}"
-             class="btn btn-primary btn-xs pull-right" role="button">
-            <span class="glyphicon glyphicon-edit"></span>
-            Edit
-          </a>
-          {% end %}
-          {% raw alert %}
+        <div class="col-md-12">
+          <div class="lead alert alert-danger" style="margin: 4px;" role="alert">
+            {% if is_admin %}
+            <a href="{{ reverse_url('text','alert',origin=reverse_url('home')) }}"
+               class="btn btn-primary btn-xs pull-right" role="button">
+              <span class="glyphicon glyphicon-edit"></span> Edit
+            </a>
+            {% end %}
+            {% raw alert %}
+          </div>
         </div>
       </div>
       {% end %} {# if alert #}

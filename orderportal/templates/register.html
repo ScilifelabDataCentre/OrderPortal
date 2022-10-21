@@ -407,19 +407,21 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-3">
-        <div class="form-group">
-          <label class="control-label"></label>
-          <button type="submit" class="btn btn-success btn-block">
-            <span class="glyphicon glyphicon-floppy-disk"></span> Register
-          </button>
-          <span class="help-block">
-            {% module Text('privacy_policy') %}
-          </span>
-        </div>
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-success btn-block">
+          <span class="glyphicon glyphicon-floppy-disk"></span> Register
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-10">
+        <span class="help-block">
+          {% module Text('privacy_policy') %}
+        </span>
       </div>
     </div>
   </div>
-  
+
 </form>
 
 <form action="{{ reverse_url('home') }}"

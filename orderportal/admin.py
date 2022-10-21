@@ -223,7 +223,7 @@ foregoing and consent to the uses of your information as set out
 above.
 """,
     registered="""An activation email will be sent to you from the administrator
-when your account has been enabled. This may take up to two working days.
+when your account has been enabled. This may take some time.
 """,
     reset="""Use this page to reset your password. 
 
@@ -297,7 +297,9 @@ def load_order_statuses(db):
             with open(filepath) as infile:
                 legacy_statuses = yaml.safe_load(infile)
             logging.info(f"read legacy order statuses: {filepath}")
-        except (KeyError, FileNotFoundError) as error:
+        except KeyError:
+            logging.warning(f"defaults used for order statuses")
+        except FileNotFoundError as error:
             logging.warning(f"defaults used for order statuses; {error}")
         else:
             # Transfer order status data from the legacy setup and flag as enabled.
@@ -322,7 +324,9 @@ def load_order_statuses(db):
             with open(filepath) as infile:
                 legacy_transitions = yaml.safe_load(infile)
             logging.info(f"loaded legacy order transitions: {filepath}")
-        except (KeyError, FileNotFoundError) as error:
+        except KeyError:
+            logging.warning(f"defaults used for order transitions")
+        except FileNotFoundError as error:
             logging.warning(f"defaults used for order transitions; {error}")
         else:
             # Transfer order transitions data from legacy setup.
@@ -343,6 +347,7 @@ def load_order_statuses(db):
             saver.set_id("order_statuses")
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
+        doc = saver.doc
         logging.info("saved order statuses to database")
 
     # Lookup for the enabled statuses.
@@ -365,7 +370,7 @@ def load_order_statuses(db):
         initial["initial"] = True
         # Save modified setup into database.
         # The doc was either retrieved or already saved above.
-        with StatusSaver(doc, db=db):
+        with MetaSaver(doc, db=db):
             pass
         logging.info(
             "saved order statuses to database after setting 'preparation' to initial"
