@@ -36,7 +36,6 @@
           <option value="">[any university]</option>
           {% set sel = filter.get('university') == '[other]' and 'selected' or '' %}
           <option value="[other]" {{ sel }}>[other]</option>
-          {# OrderedDict ! #}
           {% for abbrev, data in settings['UNIVERSITIES'].items() %}
           {% set sel = abbrev == filter.get('university') and 'selected' or '' %}
           <option {{ sel }} value="{{ abbrev }}">{{ abbrev }} ({{ data.get('name', abbrev) }})</option>

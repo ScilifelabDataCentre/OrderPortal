@@ -180,6 +180,13 @@ DEFAULT_ORDER_STATUSES = [
         attach=["admin"],
         action="Archive",
     ),
+    dict(
+        identifier="undefined",
+        description="The order has an undefined or unknown status.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Undefine",
+    ),
 ]
 
 

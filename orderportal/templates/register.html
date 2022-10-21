@@ -78,7 +78,6 @@
       {% if settings['UNIVERSITIES'] %}
       <div class="col-md-6">
         <select class="form-control" name="university" id="university">
-          {# OrderedDict ! #}
           {% set found = False %}
           <option value="">[select from the list below]</option>
           {% for abbrev, data in settings['UNIVERSITIES'].items() %}
@@ -363,7 +362,7 @@
             <label class="control-label" for="invoice_country">Country</label>
             <select class="form-control"
                     name="invoice_country" id="invoice_country">
-              {% set cocde = values.get('invoice_country') or settings['ACCOUNT_DEFAULT_COUNTRY_CODE'] %}
+              {% set code = values.get('invoice_country') or settings['ACCOUNT_DEFAULT_COUNTRY_CODE'] %}
               {% for c in settings['COUNTRIES'] %}
               <option value="{{ c['code'] }}" {{ c['code'] == code and 'selected' or '' }}>{{ c['name'] }}</option>
               {% end %}

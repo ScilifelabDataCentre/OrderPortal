@@ -82,7 +82,6 @@ administrator of the site can then change the ownership of your
       {% set other = True %}
       <div class="col-md-6">
         <select class="form-control" name="university" id="university">
-          {# OrderedDict ! #}
           {% for abbrev, data in settings['UNIVERSITIES'].items() %}
           {% if account.get('university') == abbrev %}
           {% set other = False %}
