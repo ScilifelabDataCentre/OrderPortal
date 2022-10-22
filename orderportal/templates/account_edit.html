@@ -199,13 +199,13 @@ administrator of the site can then change the ownership of your
       </div>
       {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') #}
 
-      {% if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['subjects'] %}
+      {% if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] %}
       <div class="form-group has-feedback">
         <div class="row">
           <div class="col-md-6">
             <label class="control-label" for="subject">Subject</label>
             <select class="form-control" name="subject" id="subject">
-              {% for subject in settings['subjects'] %}
+              {% for subject in settings['SUBJECT_TERMS'] %}
               <option value="{{ subject['code'] }}"
                       {{ subject['code'] == account.get('subject') and 'selected' or '' }}>
                 {{ '- ' * subject['level'] + subject['term'] }}
@@ -221,7 +221,7 @@ administrator of the site can then change the ownership of your
           Select the subject term that best characterizes your field.
         </span>
       </div>
-      {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['subjects'] #}
+      {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] #}
 
     </div>
   </div>

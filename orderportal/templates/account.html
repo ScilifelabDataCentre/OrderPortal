@@ -308,18 +308,18 @@
     </td>
   </tr>
   {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') #}
-  {% if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['subjects'] %}
+  {% if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] %}
   <tr>
     <th>Subject</th>
     <td>
       {% try %}
-      {{ settings['subjects_lookup'].get(account['subject']) or '-' }}
+      {{ settings['SUBJECT_TERMS_LOOKUP'].get(account['subject']) or '-' }}
       {% except KeyError %}
       <span class="text-warning glyphicon glyphicon-question-sign"></span>
       {% end %}
     </td>
   </tr>
-  {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['subjects'] #}
+  {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] #}
   {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO') #}
   <tr>
     <th>Postal address</th>
