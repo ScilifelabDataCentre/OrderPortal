@@ -188,14 +188,14 @@ def get_settings(filepath=None, log=True):
     # Read subject terms YAML file.
     filepath = settings.get("SUBJECT_TERMS_FILE")
     if not filepath:
-        settings["subjects"] = []
+        settings["SUBJECT_TERMS"] = []
     else:
         filepath = os.path.join(settings["SITE_DIR"], filepath)
         logging.info(f"subject terms: {filepath}")
         with open(filepath) as infile:
-            settings["subjects"] = yaml.safe_load(infile)
-    settings["subjects_lookup"] = dict(
-        [(s["code"], s["term"]) for s in settings["subjects"]]
+            settings["SUBJECT_TERMS"] = yaml.safe_load(infile)
+    settings["SUBJECT_TERMS_LOOKUP"] = dict(
+        [(s["code"], s["term"]) for s in settings["SUBJECT_TERMS"]]
     )
 
     # Settings computable from others.

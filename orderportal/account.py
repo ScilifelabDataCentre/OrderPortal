@@ -241,7 +241,7 @@ class AccountsCsv(Accounts):
             try:
                 subject = "{0}: {1}".format(
                     account.get("subject"),
-                    settings["subjects_lookup"][account.get("subject")],
+                    settings["SUBJECT_TERMS_LOOKUP"][account.get("subject")],
                 )
             except KeyError:
                 subject = ""
