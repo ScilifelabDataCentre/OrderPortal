@@ -43,6 +43,7 @@ def create_database():
             f"""Database '{settings["DATABASE_NAME"]}' already exists."""
         )
     server.create(settings["DATABASE_NAME"])
+    db = utils.get_db()
     designs.load_design_documents(db)
     click.echo(f"""Created database '{settings["DATABASE_NAME"]}'.""")
 

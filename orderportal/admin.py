@@ -303,7 +303,7 @@ def load_order_statuses(db):
             )
             with open(filepath) as infile:
                 legacy_statuses = yaml.safe_load(infile)
-            logging.info(f"read legacy order statuses: {filepath}")
+            logging.info(f"loaded legacy order statuses from file '{filepath}'")
         except KeyError:
             logging.warning(f"defaults used for order statuses")
         except FileNotFoundError as error:
@@ -330,7 +330,7 @@ def load_order_statuses(db):
             )
             with open(filepath) as infile:
                 legacy_transitions = yaml.safe_load(infile)
-            logging.info(f"loaded legacy order transitions: {filepath}")
+            logging.info(f"loaded legacy order transitions from file '{filepath}'")
         except KeyError:
             logging.warning(f"defaults used for order transitions")
         except FileNotFoundError as error:
