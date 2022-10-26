@@ -288,7 +288,7 @@ def load_design_documents(db):
     fixup_design_documents()
     for designname, views in DESIGNS.items():
         if db.put_design(designname, {"views": views}, rebuild=True):
-            logging.info("loaded design %s", designname)
+            logging.info(f"loaded design {designname}")
 
 
 def fixup_design_documents():
