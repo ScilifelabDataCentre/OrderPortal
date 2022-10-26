@@ -1792,7 +1792,7 @@ class Orders(RequestHandler):
                 orders = [
                     o
                     for o in orders
-                    if o["history"].get("submitted", "X").split("-")[0] == year
+                    if o["history"].get(constants.SUBMITTED, "X").split("-")[0] == year
                 ]
         return orders
 
