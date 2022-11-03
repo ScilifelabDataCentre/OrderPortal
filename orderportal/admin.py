@@ -207,10 +207,10 @@ INIT_TEXTS = dict(
 be logged in to create, edit, submit and view orders.
 """,
     register="""In order to place orders, you must have registered an account in this system.
-Register here. Your email address is the account name in this portal.
+Your email address is the account name in this portal.
 
-The administrator of the portal will review your account details.
-If everything seems fine the account will be enabled.
+The administrator of the portal will review your account details,
+and enable the account if everything seems fine.
 
 You will receive an email with a link to a page for setting the password
 when the account is enabled.

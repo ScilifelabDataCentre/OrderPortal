@@ -13,9 +13,18 @@ Document {% module Icon('file') %} {{ file.get('title') or file['name'] }}
 {% block action_content %}
 {% if is_admin %}
 <p>
+  <form action="{{ reverse_url('files') }}"
+        method="GET" role="form">
+    <button type="submit" class="btn btn-md btn-default btn-block">
+      <span class="glyphicon glyphicon-remove"></span>
+      Cancel
+    </button>
+  </form>
+</p>
+<p>
   <form action="{{ reverse_url('file_edit', file['name']) }}"
         method="GET" role="form">
-    <button type="submit" class="btn btn-md btn-primary">
+    <button type="submit" class="btn btn-md btn-primary btn-block">
       <span class="glyphicon glyphicon-edit"></span>
       Edit
     </button>
@@ -26,7 +35,7 @@ Document {% module Icon('file') %} {{ file.get('title') or file['name'] }}
         method="POST" role="form">
     {% module xsrf_form_html() %}
     <input type="hidden" name="_http_method" value="delete">
-    <button type="submit" class="btn btn-danger"
+    <button type="submit" class="btn btn-danger btn-block"
             onclick="return confirm('Cannot be undone! Really delete?');">
       <span class="glyphicon glyphicon-floppy-trash"></span>
       Delete

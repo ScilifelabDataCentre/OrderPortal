@@ -22,11 +22,15 @@
               aria-hidden="true"></span>
       </div>
     </div>
-    <span class="help-block">
-      Name of the file, which determines its URL. Must be
-      unique. Cannot be changed once set. If not provided, then the
-      filename of the uploaded file is used.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          Name of the file, which determines its URL. Must be
+          unique. Cannot be changed once set. If not provided, then the
+          filename of the uploaded file is used.
+        </span>
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
@@ -36,9 +40,13 @@
         <input type="text" class="form-control" id="title" name="title">
       </div>
     </div>
-    <span class="help-block">
-      Title to display for the file. The file name will be used if not defined.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          Title to display for the file. The file name will be used if not defined.
+        </span>
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
@@ -48,7 +56,7 @@
         <div class="checkbox">
           <label>
             <input type="checkbox" value="yes" id="hidden" name="hidden">
-            Do not show the file as a document in the list viewed by users.
+            Do not show the file as a document in the list for an ordinary user.
             The file is still accessible to all users using an explicit link,
             meaning that it can be referenced from other pages.
           </label>
@@ -76,17 +84,26 @@
     <label class="control-label" for="description">Description</label>
     <textarea class="form-control" rows="4" name="description" id="description">
     </textarea>
-    <span class="help-block">
-      (Optional: 
-      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
-      notation may be used to format the text.)
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          (Optional: 
+          <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+          notation may be used to format the text.)
+        </span>
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit" class="btn btn-success">
-      <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-success btn-block">
+          <span class="glyphicon glyphicon-floppy-disk"></span> Save
+        </button>
+      </div>
+    </div>
   </div>
 </form>
 
@@ -94,9 +111,14 @@
 <form action="{{ reverse_url('files') }}"
       method="GET" role="form">
   <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit" class="btn btn-default">
-      <span class="glyphicon glyphicon-remove"></span> Cancel</button>
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-default btn-block">
+          <span class="glyphicon glyphicon-remove"></span> Cancel
+        </button>
+      </div>
+    </div>
   </div>
 </form>
 

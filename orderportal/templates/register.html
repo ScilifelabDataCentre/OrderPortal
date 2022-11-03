@@ -7,17 +7,21 @@
 
 {% block main_content %}
 
-<div class="well">
-  {% module Text('register') %}
-  {% if is_admin %}
-  <form action="{{ reverse_url('text', 'register') }}"
-        method="GET" role="form" class="pull-right">
-    <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
-    <button type="submit" class="btn btn-primary btn-xs">
-      <span class="glyphicon glyphicon-edit"></span> Edit
-    </button>
-  </form>
-  {% end %}
+<div class="row">
+  <div class="col-md-10">
+    <div class="well">
+      {% module Text('register') %}
+      {% if is_admin %}
+      <form action="{{ reverse_url('text', 'register') }}"
+            method="GET" role="form">
+        <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
+        <button type="submit" class="btn btn-primary btn-xs">
+          <span class="glyphicon glyphicon-edit"></span> Edit
+        </button>
+      </form>
+      {% end %}
+    </div>
+  </div>
 </div>
 
 <form action="{{ reverse_url('register') }}"
@@ -36,12 +40,16 @@
               aria-hidden="true"></span>
       </div>
     </div>
-    <span class="help-block">
-      Your email address is your account name in this portal. It cannot
-      be changed once set.
-      <strong>Use your institutional email address</strong>,
-      rather than your personal Google, Yahoo or similar address.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          Your email address is your account name in this portal. It cannot
+          be changed once set.
+          <strong>Use your institutional email address</strong>,
+          rather than your personal Google, Yahoo or similar address.
+        </span>
+      </div>
+    </div>
   </div>
 
   <div class="form-group has-feedback">
@@ -121,10 +129,14 @@
       </div>
       {% end %}
     </div>
-    <span class="help-block">
-      Main affiliation: University, college, company, organization, or
-      similar.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          Main affiliation: University, college, company, organization, or
+          similar.
+        </span>
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
@@ -136,9 +148,13 @@
                value="{{ values.get('department') or '' }}">
       </div>
     </div>
-    <span class="help-block">
-      University department, company section, group, or similar.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          University department, company section, group, or similar.
+        </span>
+      </div>
+    </div>
   </div>
 
   {% if settings['ACCOUNT_PI_INFO'] %}
@@ -148,13 +164,33 @@
         <label class="control-label" for="pi">Principal Investigator</label>
         <div  class="form-control">
           <input type="checkbox" name="pi" id="pi" value="true"
-                 {{ values.get('pi') and 'checked' or '' }}
-                 > Yes
+                 {{ values.get('pi') and 'checked' or '' }}> Yes
         </div>
       </div>
     </div>
   </div>
   {% end %} {# if settings['ACCOUNT_PI_INFO'] #}
+
+  {% if settings['ACCOUNT_ORCID_INFO'] %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+        <label class="control-label" for="orcid">ORCID</label>
+        <input type="text" class="form-control"
+               name="orcid" id="orcid"
+               value="{{ values.get('orcid') or '' }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          Persistent digital identifier for researchers.
+          See the <a href="https://orcid.org/" target="_blank">ORCID website</a>.
+        </span>
+      </div>
+    </div>
+  </div>
+  {% end %} {# if settings['ACCOUNT_ORCID_INFO'] #}
 
   {% if settings['ACCOUNT_FUNDER_INFO'] %}
   <div class="panel panel-default">
@@ -172,9 +208,8 @@
               {% for gender in ['male', 'female', 'other'] %}
               <label class="radio-inline">
                 <input type="radio" name="gender"
-                       value="{{ gender }}"
-                       {{ gender == values.get('gender') and 'checked' or '' }}>
-                {{ gender.capitalize() }}
+                       {{ gender == values.get('gender') and 'checked' or '' }}
+                       value="{{ gender }}"> {{ gender.capitalize() }}
               </label>
               {% end %}
             </div>
@@ -199,9 +234,13 @@
                   aria-hidden="true"></span>
           </div>
         </div>
-        <span class="help-block">
-          Specify the approximate number of members in your group.
-        </span>
+        <div class="row">
+          <div class="col-md-12">
+            <span class="help-block">
+              Specify the approximate number of members in your group.
+            </span>
+          </div>
+        </div>
       </div>
       {% end %} {# if settings['ACCOUNT_FUNDER_INFO_GROUP_SIZE'] #}
 
@@ -223,9 +262,13 @@
                   aria-hidden="true"></span>
           </div>
         </div>
-        <span class="help-block">
-          Select the subject term that best characterizes your field.
-        </span>
+        <div class="row">
+          <div class="col-md-12">
+            <span class="help-block">
+              Select the subject term that best characterizes your field.
+            </span>
+          </div>
+        </div>
       </div>
       {% end %} {# if settings['ACCOUNT_FUNDER_INFO_SUBJECT'] and settings['SUBJECT_TERMS'] #}
 
@@ -248,10 +291,15 @@
                       >{{ values.get('address') or '' }}</textarea>
           </div>
         </div>
-        <span class="help-block">
-          Institution, building, street, number, post box, etc.
-        </span>
+        <div class="row">
+          <div class="col-md-12">
+            <span class="help-block">
+              Institution, building, street, number, post box, etc.
+            </span>
+          </div>
+        </div>
       </div>
+
       <div class="form-group">
         <div class="row">
           <div class="col-md-8">
@@ -261,10 +309,15 @@
                    value="{{ values.get('zip') or ''}}">
           </div>
         </div>
-        <span class="help-block">
-          Postal code.
-        </span>
+        <div class="row">
+          <div class="col-md-12">
+            <span class="help-block">
+              Postal code.
+            </span>
+          </div>
+        </div>
       </div>
+
       <div class="form-group">
         <div class="row">
           <div class="col-md-8">
@@ -275,6 +328,7 @@
           </div>
         </div>
       </div>
+
       <div class="form-group">
         <div class="row">
           <div class="col-md-8">
@@ -306,13 +360,17 @@
         {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
       </div>
     </div>
-    <span class="help-block">
-      {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
-      <strong>NOTE: Required!</strong>
-      {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
-      Invoice reference code required on your invoices for your accounting.
-      Some services may be free of charge.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
+          <strong>NOTE: Required!</strong>
+          {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
+          Invoice reference code required on your invoices for your accounting.
+          Some services may be free of charge.
+        </span>
+      </div>
+    </div>
   </div>
   
   <div class="panel panel-default">
@@ -329,10 +387,15 @@
                       >{{ values.get('invoice_address') or '' }}</textarea>
           </div>
         </div>
-        <span class="help-block">
-          Institution, building, street, number, post box, etc.
-        </span>
+        <div class="row">
+          <div class="col-md-12">
+            <span class="help-block">
+              Institution, building, street, number, post box, etc.
+            </span>
+          </div>
+        </div>
       </div>
+
       <div class="form-group">
         <div class="row">
           <div class="col-md-8">
@@ -342,10 +405,15 @@
                    value="{{ values.get('invoice_zip') or ''}}">
           </div>
         </div>
-        <span class="help-block">
-          Postal code.
-        </span>
+        <div class="row">
+          <div class="col-md-12">
+            <span class="help-block">
+              Postal code.
+            </span>
+          </div>
+        </div>
       </div>
+
       <div class="form-group">
         <div class="row">
           <div class="col-md-8">
@@ -356,6 +424,7 @@
           </div>
         </div>
       </div>
+
       <div class="form-group">
         <div class="row">
           <div class="col-md-8">
@@ -383,9 +452,13 @@
                   >{{ values.get('phone') or ''}}</textarea>
       </div>
     </div>
-    <span class="help-block">
-      One or more telephone numbers, one per line.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          One or more telephone numbers, one per line.
+        </span>
+      </div>
+    </div>
   </div>
   
   {% if is_admin %}
@@ -412,11 +485,21 @@
         </button>
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-10">
-        <span class="help-block">
-          {% module Text('privacy_policy') %}
-        </span>
+  </div>
+
+  <div class="row">
+    <div class="col-md-10">
+      <div class="well">
+        {% module Text('privacy_policy') %}
+        {% if is_admin %}
+        <form action="{{ reverse_url('text', 'privacy_policy') }}"
+              method="GET" role="form">
+          <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
+          <button type="submit" class="btn btn-primary btn-xs">
+            <span class="glyphicon glyphicon-edit"></span> Edit
+          </button>
+        </form>
+        {% end %}
       </div>
     </div>
   </div>

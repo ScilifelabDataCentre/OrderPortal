@@ -174,6 +174,7 @@ class AccountsApiV1(Accounts):
             item["first_name"] = first_name
             item["last_name"] = last_name
             item["pi"] = bool(account.get("pi"))
+            item["orcid"] = bool(account.get("orcid"))
             item["gender"] = account.get("gender")
             item["university"] = account.get("university")
             item["role"] = account["role"]
@@ -216,6 +217,7 @@ class AccountsCsv(Accounts):
                 "University",
                 "Department",
                 "PI",
+                "ORCID",
                 "Gender",
                 "Group size",
                 "Subject",
@@ -255,6 +257,7 @@ class AccountsCsv(Accounts):
                 account.get("university") or "",
                 account.get("department") or "",
                 account.get("pi") and "yes" or "no",
+                account.get("orcid") or "",
                 account.get("gender") or "",
                 account.get("group_size") or "",
                 subject,
@@ -469,6 +472,7 @@ class AccountApiV1(AccountMixin, RequestHandler):
         data["pi"] = bool(account.get("pi"))
         data["university"] = account["university"]
         data["role"] = account["role"]
+        data["orcid"] = account.get("orcid")
         data["gender"] = account.get("gender")
         data["group_size"] = account.get("group_size")
         data["status"] = account["status"]
@@ -749,6 +753,7 @@ class AccountEdit(AccountMixin, RequestHandler):
                 saver["university"] = university
                 saver["department"] = self.get_argument("department", None)
                 saver["pi"] = utils.to_bool(self.get_argument("pi", False))
+                saver["orcid"] = self.get_argument("orcid", None)
                 try:
                     saver["gender"] = self.get_argument("gender").lower()
                 except tornado.web.MissingArgumentError:
@@ -1007,6 +1012,7 @@ class Register(RequestHandler):
         "university",
         "department",
         "pi",
+        "orcid",
         "gender",
         "group_size",
         "subject",
@@ -1041,6 +1047,7 @@ class Register(RequestHandler):
                 saver["university"] = university
                 saver["department"] = self.get_argument("department", None)
                 saver["pi"] = utils.to_bool(self.get_argument("pi", False))
+                saver["orcid"] = self.get_argument("orcid", None)
                 gender = self.get_argument("gender", None)
                 if gender:
                     saver["gender"] = gender.lower()
