@@ -7,8 +7,16 @@
 
 {% block main_content %}
 
+{% if not is_admin and not settings['ACCOUNT_REGISTRATION_OPEN'] %}
+
+<div class="lead alert alert-warning">
+  User registration is currently not possible. Contact the admin of the site.
+</div>
+
+{% else %}
+
 <div class="row">
-  <div class="col-md-10">
+  <div class="col-md-11">
     <div class="well">
       {% module Text('register') %}
       {% if is_admin %}
@@ -488,7 +496,7 @@
   </div>
 
   <div class="row">
-    <div class="col-md-10">
+    <div class="col-md-11">
       <div class="well">
         {% module Text('privacy_policy') %}
         {% if is_admin %}
@@ -519,5 +527,7 @@
     </div>
   </div>
 </form>
+
+{% end %} {# if not is_admin and not settings['ACCOUNT_REGISTRATION_OPEN'] #}
 
 {% end %} {# block main_content #}
