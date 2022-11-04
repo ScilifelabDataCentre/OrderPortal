@@ -129,7 +129,7 @@ def get_settings(filepath=None, log=True):
             )
 
     # Read order messages YAML file.
-    filepath = settings["ORDER_MESSAGES_FILE"]
+    filepath = settings.get("ORDER_MESSAGES_FILE")
     if filepath:
         filepath = os.path.join(settings["SITE_DIR"], filepath)
         logging.info(f"order messages: {filepath}")
