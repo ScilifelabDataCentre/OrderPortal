@@ -128,42 +128,19 @@ def get_settings(filepath=None, log=True):
                 "ORDER_IDENTIFIER_FORMAT prefix must be all upper-case characters"
             )
 
-    # # Read order statuses definitions YAML file.
-    # filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_STATUSES_FILE"])
-    # logging.info(f"order statuses: {filepath}")
-    # with open(filepath) as infile:
-    #     settings["ORDER_STATUSES"] = yaml.safe_load(infile)
-    # settings["ORDER_STATUSES_LOOKUP"] = lookup = dict()
-    # initial = None
-    # for status in settings["ORDER_STATUSES"]:
-    #     if status["identifier"] in lookup:
-    #         raise ValueError(
-    #             "Order status '%s' multiple definitions." % status["identifier"]
-    #         )
-    #     lookup[status["identifier"]] = status
-    #     if status.get("initial"):
-    #         initial = status
-    # if not initial:
-    #     raise ValueError("No initial order status defined.")
-    # settings["ORDER_STATUS_INITIAL"] = initial
-
-    # # Read order status transition definiton YAML file.
-    # filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_TRANSITIONS_FILE"])
-    # logging.info(f"order transitions: {filepath}")
-    # with open(filepath) as infile:
-    #     settings["ORDER_TRANSITIONS"] = yaml.safe_load(infile)
-
     # Read order messages YAML file.
-    filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_MESSAGES_FILE"])
-    logging.info(f"order messages: {filepath}")
-    with open(filepath) as infile:
-        settings["ORDER_MESSAGES"] = yaml.safe_load(infile)
+    filepath = settings["ORDER_MESSAGES_FILE"]
+    if filepath:
+        filepath = os.path.join(settings["SITE_DIR"], filepath)
+        logging.info(f"order messages: {filepath}")
+        with open(filepath) as infile:
+            settings["ORDER_MESSAGES"] = yaml.safe_load(infile) or {}
+    else:
+        settings["ORDER_MESSAGES"] = {}
 
     # Read universities YAML file.
     filepath = settings.get("UNIVERSITIES_FILE")
-    if not filepath:
-        settings["UNIVERSITIES"] = dict()
-    else:
+    if filepath:
         filepath = os.path.join(settings["SITE_DIR"], filepath)
         logging.info(f"universities lookup: {filepath}")
         with open(filepath) as infile:
@@ -171,6 +148,8 @@ def get_settings(filepath=None, log=True):
         unis = list(unis.items())
         unis.sort(key=lambda i: (i[1].get("rank"), i[0]))
         settings["UNIVERSITIES"] = dict(unis)
+    else:
+        settings["UNIVERSITIES"] = {}
 
     # Read country codes YAML file
     filepath = settings.get("COUNTRY_CODES_FILE")
@@ -187,13 +166,13 @@ def get_settings(filepath=None, log=True):
 
     # Read subject terms YAML file.
     filepath = settings.get("SUBJECT_TERMS_FILE")
-    if not filepath:
-        settings["SUBJECT_TERMS"] = []
-    else:
+    if filepath:
         filepath = os.path.join(settings["SITE_DIR"], filepath)
         logging.info(f"subject terms: {filepath}")
         with open(filepath) as infile:
             settings["SUBJECT_TERMS"] = yaml.safe_load(infile)
+    else:
+        settings["SUBJECT_TERMS"] = []
     settings["SUBJECT_TERMS_LOOKUP"] = dict(
         [(s["code"], s["term"]) for s in settings["SUBJECT_TERMS"]]
     )
