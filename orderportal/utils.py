@@ -104,7 +104,7 @@ def get_settings(filepath=None, log=True):
     filepath = os.path.join(settings["SITE_DIR"], settings["ACCOUNT_MESSAGES_FILE"])
     logging.info(f"account messages: {filepath}")
     with open(filepath) as infile:
-        settings["ACCOUNT_MESSAGES"] = yaml.safe_load(infile)
+        settings["ACCOUNT_MESSAGES"] = yaml.safe_load(infile) or {}
     # Set recipients, which are hardwired into the source code.
     # Also checks for missing message for a status.
     try:
@@ -144,7 +144,7 @@ def get_settings(filepath=None, log=True):
         filepath = os.path.join(settings["SITE_DIR"], filepath)
         logging.info(f"universities lookup: {filepath}")
         with open(filepath) as infile:
-            unis = yaml.safe_load(infile)
+            unis = yaml.safe_load(infile) or {}
         unis = list(unis.items())
         unis.sort(key=lambda i: (i[1].get("rank"), i[0]))
         settings["UNIVERSITIES"] = dict(unis)
@@ -159,7 +159,7 @@ def get_settings(filepath=None, log=True):
         filepath = os.path.join(settings["SITE_DIR"], filepath)
         logging.info(f"country codes: {filepath}")
         with open(filepath) as infile:
-            settings["COUNTRIES"] = yaml.safe_load(infile)
+            settings["COUNTRIES"] = yaml.safe_load(infile) or []
         settings["COUNTRIES_LOOKUP"] = dict(
             [(c["code"], c["name"]) for c in settings["COUNTRIES"]]
         )
@@ -170,7 +170,7 @@ def get_settings(filepath=None, log=True):
         filepath = os.path.join(settings["SITE_DIR"], filepath)
         logging.info(f"subject terms: {filepath}")
         with open(filepath) as infile:
-            settings["SUBJECT_TERMS"] = yaml.safe_load(infile)
+            settings["SUBJECT_TERMS"] = yaml.safe_load(infile) or []
     else:
         settings["SUBJECT_TERMS"] = []
     settings["SUBJECT_TERMS_LOOKUP"] = dict(
