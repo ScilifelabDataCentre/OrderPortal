@@ -20,22 +20,27 @@
                value="{{ file.get('title') or '' }}">
       </div>
     </div>
-    <span class="help-block">
-      Title to display in the list of documents.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          Title to display in the list of documents.
+        </span>
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-        <label class="control-label" for="hidden">Unlisted</label>
+        <label class="control-label" for="hidden">Hidden</label>
         <div class="checkbox">
           {% set checked = file.get('hidden') and 'checked' or '' %}
           <label>
             <input type="checkbox" value="yes"
                    id="hidden" name="hidden" {{ checked }}>
-            Do not list the document in the user's view. 
-            However, it is still accessible to all users who have the link.
+            Do not show the document in the list for an ordinary user. 
+            The file is still accessible to all users using an explicit link,
+            meaning that it can be referenced from other pages.
           </label>
         </div>
       </div>
@@ -47,6 +52,10 @@
       <div class="col-md-8">
         <label for="text">File upload</label>
         <input type="file" name="file" class="form-control">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
         <span class="help-block">
           Provide a file to overwrite the current data. If none given,
           then no change.
@@ -56,21 +65,33 @@
   </div>
 
   <div class="form-group">
-    <label class="control-label" for="description">Description</label>
-    <textarea class="form-control" rows="4"
-              name="description" id="description"
-              >{{ file.get('description') or '' }}</textarea>
-    <span class="help-block">
-      (Optional: 
-      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
-      notation may be used to format the text.)
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <label class="control-label" for="description">Description</label>
+        <textarea class="form-control" rows="4"
+                  name="description" id="description"
+                  >{{ file.get('description') or '' }}</textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          (Optional: 
+          <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+          notation may be used to format the text.)
+        </span>
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit" class="btn btn-success">
-      <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-success btn-block">
+          <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+      </div>
+    </div>
   </div>
 </form>
 
@@ -78,9 +99,13 @@
 <form action="{{ reverse_url('files') }}"
       method="GET" role="form">
   <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit" class="btn btn-default">
-      <span class="glyphicon glyphicon-remove"></span> Cancel</button>
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-default btn-block">
+          <span class="glyphicon glyphicon-remove"></span> Cancel</button>
+      </div>
+    </div>
   </div>
 </form>
 

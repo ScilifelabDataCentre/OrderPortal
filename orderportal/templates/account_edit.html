@@ -122,10 +122,14 @@ administrator of the site can then change the ownership of your
       </div>
       {% end %}
     </div>
-    <span class="help-block">
-      Main affiliation: University, college, company, organization, or
-      similar.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          Main affiliation: University, college, company, organization, or
+          similar.
+        </span>
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
@@ -137,9 +141,13 @@ administrator of the site can then change the ownership of your
                value="{{ account.get('department') or '' }}">
       </div>
     </div>
-    <span class="help-block">
-      University department, company section, group, or similar.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          University department, company section, group, or similar.
+        </span>
+      </div>
+    </div>
   </div>
 
   {% if settings['ACCOUNT_PI_INFO'] %}
@@ -155,6 +163,27 @@ administrator of the site can then change the ownership of your
     </div>
   </div>
   {% end %} {# if settings['ACCOUNT_PI_INFO'] #}
+
+  {% if settings['ACCOUNT_ORCID_INFO'] %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+        <label class="control-label" for="orcid">ORCID</label>
+        <input type="text" class="form-control"
+               name="orcid" id="orcid"
+               value="{{ account.get('orcid') or '' }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          Persistent digital identifier for researchers.
+          See the <a href="https://orcid.org/" target="_blank">ORCID website</a>.
+        </span>
+      </div>
+    </div>
+  </div>
+  {% end %} {# if settings['ACCOUNT_ORCID_INFO'] #}
 
   {% if settings.get('ACCOUNT_FUNDER_INFO') %}
   <div class="panel panel-default">
@@ -192,10 +221,14 @@ administrator of the site can then change the ownership of your
                    value="{{ account.get('group_size') or '' }}">
           </div>
         </div>
-        <span class="help-block">
-          If you are a Principal Investigator (PI), specify the
-          approximate number of members in your group.
-        </span>
+        <div class="row">
+          <div class="col-md-12">
+            <span class="help-block">
+              If you are a Principal Investigator (PI), specify the
+              approximate number of members in your group.
+            </span>
+          </div>
+        </div>
       </div>
       {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') #}
 
@@ -217,9 +250,13 @@ administrator of the site can then change the ownership of your
                   aria-hidden="true"></span>
           </div>
         </div>
-        <span class="help-block">
-          Select the subject term that best characterizes your field.
-        </span>
+        <div class="row">
+          <div class="col-md-12">
+            <span class="help-block">
+              Select the subject term that best characterizes your field.
+            </span>
+          </div>
+        </div>
       </div>
       {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] #}
 
@@ -244,10 +281,15 @@ administrator of the site can then change the ownership of your
                       >{{ account['address'].get('address') or '' }}</textarea>
           </div>
         </div>
-        <span class="help-block">
-          Institution, building, street, number, post box, etc.
-        </span>
+        <div class="row">
+          <div class="col-md-12">
+            <span class="help-block">
+              Institution, building, street, number, post box, etc.
+            </span>
+          </div>
+        </div>
       </div>
+
       <div class="form-group">
         <div class="row">
           <div class="col-md-8">
@@ -256,10 +298,15 @@ administrator of the site can then change the ownership of your
                    value="{{ account['address'].get('zip') or '' }}">
           </div>
         </div>
-        <span class="help-block">
-          Postal code.
-        </span>
+        <div class="row">
+          <div class="col-md-12">
+            <span class="help-block">
+              Postal code.
+            </span>
+          </div>
+        </div>
       </div>
+
       <div class="form-group">
         <div class="row">
           <div class="col-md-8">
@@ -270,6 +317,7 @@ administrator of the site can then change the ownership of your
           </div>
         </div>
       </div>
+
       <div class="form-group">
         <div class="row">
           <div class="col-md-8">
@@ -304,13 +352,17 @@ administrator of the site can then change the ownership of your
         {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
       </div>
     </div>
-    <span class="help-block">
-      {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
-      <strong>NOTE: Required!</strong>
-      {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
-      Invoice reference code that may be required on your invoices for
-      your accounting.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
+          <strong>NOTE: Required!</strong>
+          {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
+          Invoice reference code that may be required on your invoices for
+          your accounting.
+        </span>
+      </div>
+    </div>
   </div>
 
   <div class="panel panel-default">
@@ -327,10 +379,15 @@ administrator of the site can then change the ownership of your
                       >{{ account['invoice_address'].get('address') or '' }}</textarea>
           </div>
         </div>
-        <span class="help-block">
-          Institution, building, street, number, post box, etc.
-        </span>
+        <div class="row">
+          <div class="col-md-12">
+            <span class="help-block">
+              Institution, building, street, number, post box, etc.
+            </span>
+          </div>
+        </div>
       </div>
+
       <div class="form-group">
         <div class="row">
           <div class="col-md-8">
@@ -340,10 +397,15 @@ administrator of the site can then change the ownership of your
                    value="{{ account['invoice_address'].get('zip') or '' }}">
           </div>
         </div>
-        <span class="help-block">
-          Postal code.
-        </span>
+        <div class="row">
+          <div class="col-md-12">
+            <span class="help-block">
+              Postal code.
+            </span>
+          </div>
+        </div>
       </div>
+
       <div class="form-group">
         <div class="row">
           <div class="col-md-8">
@@ -354,6 +416,7 @@ administrator of the site can then change the ownership of your
           </div>
         </div>
       </div>
+
       <div class="form-group">
         <div class="row">
           <div class="col-md-8">
@@ -382,9 +445,13 @@ administrator of the site can then change the ownership of your
                   >{{ account.get('phone') or '' }}</textarea>
       </div>
     </div>
-    <span class="help-block">
-      One or more telephone numbers, one per line.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          One or more telephone numbers, one per line.
+        </span>
+      </div>
+    </div>
   </div>
 
   <div class="form-group">
@@ -396,9 +463,13 @@ administrator of the site can then change the ownership of your
                   >{{ account.get('other_data') or '' }}</textarea>
       </div>
     </div>
-    <span class="help-block">
-      Miscellaneous user data from other sources.
-    </span>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          Miscellaneous user data from other sources.
+        </span>
+      </div>
+    </div>
   </div>
 
   {% if account['role'] in (constants.ADMIN, constants.STAFF) %}

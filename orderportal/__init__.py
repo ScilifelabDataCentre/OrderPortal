@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "6.0.4"
+__version__ = "6.1.0"
 
 
 class Constants:
@@ -277,7 +277,9 @@ settings = dict(
     ORDERS_SEARCH_DELIMS_LINT=[":", ",", ";", "'"],
     ORDERS_SEARCH_LINT=["an", "to", "in", "on", "of", "and", "the", "is", "was", "not"],
     ORDERS_SEARCH_FIELDS=[],
+    ACCOUNT_REGISTRATION_OPEN=True,
     ACCOUNT_PI_INFO=True,
+    ACCOUNT_ORCID_INFO=True,
     ACCOUNT_POSTAL_INFO=True,
     ACCOUNT_INVOICE_INFO=True,
     ACCOUNT_INVOICE_REF_REQUIRED=False,

@@ -277,18 +277,31 @@
       </a>
     </td>
   </tr>
+
   <tr>
     <th>University</th>
     <td>{{ account.get('university') or '-' }}</td>
   </tr>
+
   <tr>
     <th>Department</th>
     <td>{{ account.get('department') or '-' }}</td>
   </tr>
+
+  {% if settings['ACCOUNT_PI_INFO'] %}
   <tr>
     <th>Principal Investigator</th>
     <td>{{ account.get('pi') and 'Yes' or 'No' }}</td>
   </tr>
+  {% end %} {# if settings['ACCOUNT_PI_INFO'] #}
+
+  {% if settings['ACCOUNT_ORCID_INFO'] %}
+  <tr>
+    <th>ORCID</th>
+    <td>{{ account.get('orcid') or '-' }}</td>
+  </tr>
+  {% end %} {# if settings['ACCOUNT_ORCID_INFO'] #}
+
   {% if settings.get('ACCOUNT_FUNDER_INFO') %}
   {% if settings.get('ACCOUNT_FUNDER_INFO_GENDER') %}
   <tr>
@@ -296,6 +309,7 @@
     <td>{{ account.get('gender', '-').capitalize() }}</td>
   </tr>
   {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GENDER') #}
+
   {% if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') %}
   <tr>
     <th>Group size</th>
@@ -308,6 +322,7 @@
     </td>
   </tr>
   {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') #}
+
   {% if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] %}
   <tr>
     <th>Subject</th>
@@ -321,6 +336,7 @@
   </tr>
   {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] #}
   {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO') #}
+
   <tr>
     <th>Postal address</th>
     <td>
@@ -345,10 +361,12 @@
       </table>
     </td>
   </tr>
+
   <tr>
     <th>Invoice reference</th>
     <td>{{ account.get('invoice_ref') or '-'  }}</td>
   </tr>
+
   <tr>
     <th>Invoice address</th>
     <td>

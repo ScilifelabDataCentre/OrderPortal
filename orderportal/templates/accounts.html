@@ -71,6 +71,9 @@
         <tr>
           <th>Account</th>
           <th>Name</th>
+          {% if settings['ACCOUNT_ORCID_INFO'] %}
+          <th>ORCID</th>
+          {% end %} {# if settings['ACCOUNT_ORCID_INFO'] #}
           <th>{{ terminology('Orders') }}</th>
           <th width="10%">University</th>
           <th>Role</th>
@@ -84,6 +87,9 @@
         <tr>
           <td>{% module Entity(account, icon=False) %}</td>
           <td>{{ account['name'] }}</td>
+          {% if settings['ACCOUNT_ORCID_INFO'] %}
+          <td>{{ account.get('orcid') or '-' }}</td>
+          {% end %} {# if settings['ACCOUNT_ORCID_INFO'] #}
           <td>
             <a class="badge"
                href="{{ reverse_url('account_orders', account['email']) }}">
@@ -117,7 +123,7 @@ $(function() {
   $("#accounts").DataTable( {
     "pagingType": "full_numbers",
     "pageLength": 25,
-    "order": [[7, "desc"]],
+      "order": [[{% if settings['ACCOUNT_ORCID_INFO'] %}8{% else %}7{% end %}, "desc"]],
   });
 });
 </script>
