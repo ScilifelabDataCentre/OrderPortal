@@ -48,7 +48,7 @@
           <th width="5%">Keywords (tags)</th>
           {% end %}
           {% for f in settings['ORDERS_LIST_FIELDS'] %}
-          <th>{{ f['identifier'].capitalize().replace('_', ' ') }}</th>
+          <th>{{ f.get('label') or f['identifier'].replace('_', ' ').capitalize() }}</th>
           {% end %}
           <th>Status</th>
           {% for s in settings['ORDERS_LIST_STATUSES'] %}
