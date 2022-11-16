@@ -46,7 +46,7 @@
       {% if f.get('values') %}
       <div class="form-group">
         <select name="{{ f['identifier'] }}" class="form-control refresh">
-          <option value="">[any {{ f['identifier'].replace('_', ' ') }}]</option>
+          <option value="">[any {{ f.get('label') or f['identifier'].replace('_', ' ').capitalize() }}]</option>
           {% for v in f['values'] %}
           {% set sel = v == filter.get(f['identifier']) and 'selected' or '' %}
           <option {{ sel }} value="{{ v }}">{{ v }}</option>
@@ -96,7 +96,7 @@
           <th width="5%">Keywords (tags)</th>
           {% end %}
           {% for f in settings['ORDERS_LIST_FIELDS'] %}
-          <th>{{ f['identifier'].capitalize().replace('_', ' ') }}</th>
+          <th>{{ f.get('label') or f['identifier'].replace('_', ' ').capitalize() }}</th>
           {% end %}
           <th>Status</th>
           {% for s in settings['ORDERS_LIST_STATUSES'] %}

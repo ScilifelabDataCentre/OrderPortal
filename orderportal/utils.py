@@ -113,7 +113,7 @@ def get_settings(filepath=None, log=True):
         settings["ACCOUNT_MESSAGES"][constants.DISABLED]["recipients"] = ["account"]
         settings["ACCOUNT_MESSAGES"][constants.RESET]["recipients"] = ["account"]
     except KeyError:
-        raise ValueError("Account messages file: missing message for status")
+        raise ValueError("Account messages file: missing message for statuses")
 
     # Check valid order identifier format; prefix all upper case characters
     if not settings["ORDER_IDENTIFIER_FORMAT"]:
