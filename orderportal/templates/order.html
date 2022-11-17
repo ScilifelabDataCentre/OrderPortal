@@ -116,12 +116,10 @@
 <div class="panel panel-default">
   <div class="panel-body">
     <table class="table table-condensed table-fields table-noborder">
-      {% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
       <tr>
         <th>Identifier</th>
         <td colspan="2">{% module NoneStr(order.get('identifier'), '-') %}</td>
       </tr>
-      {% end %} {# if settings.get('ORDER_IDENTIFIER_FORMAT') #}
 
       {% if is_admin %}
       <tr>

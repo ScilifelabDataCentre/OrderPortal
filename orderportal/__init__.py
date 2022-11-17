@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "6.1.3"
+__version__ = "6.2.0"
 
 
 class Constants:
@@ -199,30 +199,33 @@ class Constants:
     DEFAULT_CONTENT_TYPE_ICON = "binary.png"
     VIEWABLE_CONTENT_TYPES = set([TEXT_MIME, JSON_MIME, CSV_MIME, PDF_MIME])
 
-
 constants = Constants()
 
 
 # Default settings, may be changed in a settings YAML file.
 settings = dict(
-    BASE_URL="http://localhost:8881/",
-    BASE_URL_PATH_PREFIX=None,
-    PORT=8881,  # The port used by tornado.
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
     LOGGING_FORMAT="%(levelname)s [%(asctime)s] %(message)s",
     LOGGING_FILEPATH=None,
     LOGGING_FILEMODE=None,
+    BASE_URL="http://localhost:8881/",
+    BASE_URL_PATH_PREFIX=None,
+    PORT=8881,  # The port used by tornado.
     PIDFILE=None,
     DATABASE_SERVER="http://localhost:5984/",
     DATABASE_NAME="orderportal",
-    PASSWORD_SALT="must-be-changed-to-be-unique-for-your-instance",
+    DATABASE_ACCOUNT="orderportal_account",
+    DATABASE_PASSWORD="CHANGE",
+    COOKIE_SECRET="CHANGE",
+    PASSWORD_SALT="CHANGE",
     MIN_PASSWORD_LENGTH=8,
     READONLY=False,
     MARKDOWN_URL="https://www.markdownguide.org/basic-syntax/",
     SITE_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site")),
     SITE_STATIC_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site/static")),
     SITE_NAME="OrderPortal",
+    SITE_SUPPORT_EMAIL=None,
     SITE_FAVICON="orderportal32.png",
     SITE_NAVBAR_ICON="orderportal32.png",
     SITE_HOME_ICON="orderportal144.png",
@@ -230,42 +233,19 @@ settings = dict(
     SITE_HOST_URL=None,
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
-    EMAIL=dict(
-        HOST=None,  # Domain name. Must be defined for email to work,
-        PORT=0,  # which is required for proper execution.
-        SSL=False,
-        TLS=False,
-        USER=None,
-        PASSWORD=None,
-    ),
-    MESSAGE_SENDER_EMAIL='"OrderPortal Support" <support@my-domain.com>',
-    MESSAGE_REPLY_TO_EMAIL=None,  # Same format as above.
     DISPLAY_MENU_LIGHT=False,
     DISPLAY_MENU_ITEM_URL=None,
     DISPLAY_MENU_ITEM_TEXT=None,
     ACCOUNT_MESSAGES_FILE="account_messages.yaml",
     ORDER_MESSAGES_FILE="order_messages.yaml",
-    UNIVERSITIES_FILE="swedish_universities.yaml",
     COUNTRY_CODES_FILE="country_codes.yaml",
+    UNIVERSITIES_FILE="swedish_universities.yaml",
     SUBJECT_TERMS_FILE="subject_terms.yaml",
-    TERMINOLOGY=dict(),  # Terms translation lookup.
-    LOGIN_MAX_AGE_DAYS=14,
-    LOGIN_MAX_FAILURES=6,
-    DISPLAY_DEFAULT_PAGE_SIZE=25,
-    DISPLAY_MAX_RECENT_ORDERS=10,
-    DISPLAY_ORDERS_MOST_RECENT=500,
-    DISPLAY_MAX_PENDING_ACCOUNTS=10,
-    DISPLAY_DEFAULT_MAX_LOG=20,
-    DISPLAY_NEWS=True,
-    DISPLAY_MAX_NEWS=4,
-    DISPLAY_EVENTS=True,
-    DISPLAY_MENU_INFORMATION=True,
-    DISPLAY_MENU_DOCUMENTS=True,
-    DISPLAY_MENU_CONTACT=True,
-    DISPLAY_MENU_ABOUT_US=True,
-    DISPLAY_TEXT_MARKDOWN_NOTATION_INFO=True,
+    TERMINOLOGY=dict(),         # Terms translation lookup.
+    LOGIN_MAX_AGE_DAYS=14,      # Max age of login session in a browser.
+    LOGIN_MAX_FAILURES=6,       # After this number of fails, the account is disabled.
     ORDER_CREATE_USER=True,
-    ORDER_IDENTIFIER_FORMAT="OD{0:=05d}",
+    ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",
     ORDER_IDENTIFIER_FIRST=1,
     ORDER_TAGS=True,
     ORDER_USER_TAGS=True,
@@ -288,4 +268,27 @@ settings = dict(
     ACCOUNT_FUNDER_INFO_GROUP_SIZE=True,
     ACCOUNT_FUNDER_INFO_SUBJECT=True,
     ACCOUNT_DEFAULT_COUNTRY_CODE="SE",
+    EMAIL=dict(
+        HOST=None,  # Domain name. Must be defined for email to work.
+        PORT=0,
+        SSL=False,
+        TLS=False,
+        USER=None,
+        PASSWORD=None,
+    ),
+    MESSAGE_SENDER_EMAIL='"OrderPortal Support" <support@my-domain.com>', # Required.
+    MESSAGE_REPLY_TO_EMAIL=None,  # Same format as above; optional.
+    DISPLAY_DEFAULT_PAGE_SIZE=25, # Number of paged items in a table.
+    DISPLAY_MAX_RECENT_ORDERS=10, # Max number in home page for admin and staff.
+    DISPLAY_MAX_PENDING_ACCOUNTS=10, # Max number in home page for admin and staff.
+    DISPLAY_ORDERS_MOST_RECENT=500, # Limit in all orders table; default.
+    DISPLAY_DEFAULT_MAX_LOG=20,     # Max number of log items displayed.
+    DISPLAY_NEWS=True,
+    DISPLAY_MAX_NEWS=4,
+    DISPLAY_EVENTS=True,
+    DISPLAY_MENU_INFORMATION=True,
+    DISPLAY_MENU_DOCUMENTS=True,
+    DISPLAY_MENU_CONTACT=True,
+    DISPLAY_MENU_ABOUT_US=True,
+    DISPLAY_TEXT_MARKDOWN_NOTATION_INFO=True,
 )

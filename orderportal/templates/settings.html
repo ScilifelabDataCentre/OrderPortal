@@ -31,7 +31,7 @@ Settings
   {% for key in sorted(settings) %}
   <tr>
     <th>{{ key }}</th>
-    <td>{{ settings.get(key) }}</td>
+    <td>{% raw settings.get(key) %}</td>
   </tr>
   {% end %}
 </table>

@@ -296,7 +296,7 @@ def load_order_statuses(db):
         settings["ORDER_STATUSES"] = copy.deepcopy(DEFAULT_ORDER_STATUSES)
         lookup = dict([(s["identifier"], s) for s in settings["ORDER_STATUSES"]])
 
-        # Load the legacy site order_statuses.yaml file, if any.
+        # Load the legacy site ORDER_STATUSES_FILE, if any defined.
         try:
             filepath = os.path.join(
                 settings["SITE_DIR"], settings["ORDER_STATUSES_FILE"]
@@ -323,7 +323,7 @@ def load_order_statuses(db):
         # Start with the default order transitions setup.
         settings["ORDER_TRANSITIONS"] = copy.deepcopy(DEFAULT_ORDER_TRANSITIONS)
 
-        # Load the legacy site order_transitions.yaml file, if any.
+        # Load the legacy site ORDER_TRANSITIONS_FILE, if any defined.
         try:
             filepath = os.path.join(
                 settings["SITE_DIR"], settings["ORDER_TRANSITIONS_FILE"]
@@ -410,16 +410,17 @@ class Settings(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
+        hidden = "&lt;hidden&gt;"
         mod_settings = settings.copy()
         # Add the root dir
         mod_settings["ROOT"] = constants.ROOT
         # Hide sensitive data.
         for key in settings:
             if "PASSWORD" in key or "SECRET" in key:
-                mod_settings[key] = "<hidden>"
+                mod_settings[key] = hidden
         # Do not show the email password.
         if mod_settings["EMAIL"].get("PASSWORD"):
-            mod_settings["EMAIL"]["PASSWORD"] = "<hidden>"
+            mod_settings["EMAIL"]["PASSWORD"] = hidden
         # Don't show the password in the CouchDB URL
         url = settings["DATABASE_SERVER"]
         match = re.search(r":([^/].+)@", url)
@@ -440,9 +441,16 @@ class Settings(RequestHandler):
         mod_settings[
             "ORDER_MESSAGES"
         ] = f"<see file {mod_settings['ORDER_MESSAGES_FILE']}>"
-        mod_settings["ORDER_STATUSES"] = "<see page Admin -> Order statuses>"
-        mod_settings["ORDER_STATUSES_LOOKUP"] = "<computed from ORDER_STATUSES}>"
-        mod_settings["ORDER_TRANSITIONS"] = "<see page Admin -> Order statuses>"
+        mod_settings["ORDER_STATUSES"] = f"""&lt;see page <a href="{self.reverse_url('order_statuses')}">Admin -> Order statuses</a>&gt;"""
+        mod_settings["ORDER_STATUSES_LOOKUP"] = "&lt;computed from ORDER_STATUSES&gt;"
+        mod_settings["ORDER_TRANSITIONS"] = mod_settings["ORDER_STATUSES"]
+        for obsolete in ["ORDER_STATUSES_FILE", 
+                         "ORDER_TRANSITIONS_FILE",
+                         "SITE_PERSONAL_DATA_POLICY"]:
+            try:
+                mod_settings[obsolete] += " &lt;<b>OBSOLETE; NO LONGER USED</b>&gt;"
+            except KeyError:
+                pass
         self.render("settings.html", settings=mod_settings)
 
 

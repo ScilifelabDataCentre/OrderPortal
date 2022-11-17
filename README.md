@@ -293,16 +293,17 @@ and cannot be edited by any user.
 Installation
 ============
 
-The current version requires Python 3.6 or higher.
+The current version has been developed using Python 3.10 or higher.
+It may work on Python 3.8 and 3.9, but this has not been tested.
 
 This instruction is based on the procedure used for the instances
 running on the SciLifeLab server. It will have to be adapted for your
 site.
 
-The Linux account `nginx` is used to host the instance files. Change
-according to the policy at your site.
+The Linux account `nginx` is used in the instructions below to host
+the instance files. Change according to the policy at your site.
 
-The name **xyz** is used below as a placeholder for the name of your instance.
+The name `xyz` is used below as a placeholder for the name of your instance.
 
 Instructions for upgrading the OrderPortal software is given below
 under [Updates](#updates).
@@ -310,97 +311,81 @@ under [Updates](#updates).
 Source code setup
 -----------------
 
-Clone the GitHub repo. The commands below use the base GitHub repo;
-substitute by whichever fork you are using.
+Download the `tar.gz` file for latest release from
+[the Github repo](https://github.com/pekrau/OrderPortal/releases)
+into the directory where the installation will be hosted. Substitute
+the directory `/var/www/apps` with the corresponding on your machine:
 
     $ cd /var/www/apps
-    $ sudo mkdir xyz
-    $ sudo chown nginx.nginx xyz
+    $ sudo -u nginx mkdir xyz
     $ cd xyz
-    $ sudo -u nginx git clone https://github.com/pekrau/OrderPortal.git
+    $ ### Download OrderPortal-version.tar.gz to here.
+    $ sudo -u nginx tar xvf OrderPortal-version.tar.gz
+    $ sudo -u nginx mv OrderPortal-version OrderPortal
 
-Create the `site` subdirectory for your instance using the `site_template`
-directory (since version 4.1):
+Create the `site` subdirectory for your instance by copying the
+`site_template` directory.
 
     $ cd OrderPortal
     $ sudo -u nginx cp -r site_template site
 
-Some files in your `site` directory most likely need to be modified.
-In particular, the YAML files may need to be modified.
+The OrderPortal server and the CLI must be executed in a Python
+environment where all the required dependencies have been installed,
+as specified by the file `requirements.txt`.  It is recommended that a
+virtual environment is created for this. Refer to the Python
+documentation.
 
 Download and install the required third-party Python modules using the
-`requirements.txt` file as approprate for your environment.
+`requirements.txt` file as approprate for your Python environment.
 
     $ sudo pip install -r requirements.txt
 
 Settings file
 -------------
 
-Edit the `site/settings.yaml` file according to your setup.
-Some of the settings depend on actions described below.
+Set the correction protection for the file `site/settings.yaml` and
+edit it according to your setup. Some of the settings depend on
+actions described below, so you may have to go back to edit it again.
 
     $ cd /var/www/apps/xyz/OrderPortal/site
-    $ sudo -u nginx chmod go-r settings.yaml
+    $ sudo -u nginx chmod go-rw settings.yaml
     $ sudo -u nginx emacs settings.yaml
 
-See the comments in the settings file.
+See the comments in the template `settings.yaml` file for editing the
+file for your site. In particular, the CouchDB variables must be set (see below).
 
 CouchDB setup
 -------------
 
-It is assumed that you already have a CouchDB instance running. Follow
-the standard CouchDB procedures.
+Install and set up a CouchDB instance, if you don't have one
+already. Follow the instructions for CouchDB, which are not included
+here.
 
-- Go to the CouchDB web interface.
-- Create the CouchDB user **orderportal_xyz**.
-- Log in as CouchDB admin. Set the password for the user **orderportal_xyz**:
-  - Go to the database **_users** and open the document for the user
-    **orderportal_xyz**.
-  - Create a new field with the key "password", and set its value to the
-    secret password. This password must also be edited into the settings file.
-  - When you save the document, CouchDB will hash the password and remove
-    the password field.
-- Create the database **orderportal_xyz** in CouchDB.
-- Click on "Security..." and ensure that only the proper user can access it:
-  - In the Names field of Admins, add the user name like so:
-    `["orderportal_xyz"]` (a string in a list).
-  - In the Names field of Members, add a dummy user name like so:
-    `["dummy"]` (a string in a list).
-  - The Roles fields should not be changed.
+- Go to the CouchDB web interface, usually http://localhost:5984/_utils/
+  if on the local machine and login.
+- It is a good idea to create a new CouchDB CouchDB user account
+  (e.g. `orderportal_xyz`) for your OrderPortal instance. It must have
+  privileges to create and delete databases in CouchDB.
+- However, it is possible to simply use the admin user account that you
+  created when setting up the CouchDB instance.
 
-Initialize the database in CouchDB using the CLI. This requires a
-valid **settings** file.
+Set the correct values for the CouchDB variables in the `site/settings.yaml` file
+(see above). Otherwise the following operations will fail.
+
+Create the database in CouchDB using the command-line interface utility (CLI).
 
     $ cd /var/www/apps/xyz/OrderPortal/orderportal
-    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py initialize
+    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py create-database
 
-Create the first admin account in the database using the CLI:
+Create the first OrderPortal admin account in the database using the CLI:
 
-    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py create-admin
-
-Logging
--------
-
-The settings file may define the file path of the log file (variable
-LOGGING_FILEPATH), if any. The log file must be located in a directory which
-the `tornado` server can write to. For example:
-
-    $ cd /var/log
-    $ sudo mkdir orderportal_xyz
-    $ sudo chown nginx.nginx orderportal_xyz
+    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py admin
 
 `Tornado` server
 --------------
 
-The `tornado` server should be executed as a system service. The
-mechanism for this depends on the operating system. For SELinux, a
-template systemd file is available at
-[orderportal/site/orderportal_xyz.service](orderportal/site/orderportal_xyz.service).
-Copy, rename and edit it.
-
-    $ cd /etc/systemd/system
-    $ sudo cp /var/www/apps/ddd/OrderPortal/orderportal/site/orderportal_xyz.service orderportal_ddd.service
-    $ sudo emacs orderportal_ddd.service
+The `tornado` server should be executed as a system service. This depends
+on your operating system; refer to its documentation.
 
 HTTP nginx configuration
 ------------------------

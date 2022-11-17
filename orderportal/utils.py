@@ -120,6 +120,10 @@ def get_settings(filepath=None, log=True):
         raise ValueError("Undefined ORDER_IDENTIFIER_FORMAT")
     if not isinstance(settings["ORDER_IDENTIFIER_FIRST"], int):
         raise ValueError("ORDER_IDENTIFIER_FIRST is not an integer")
+    if not settings["ORDER_IDENTIFIER_FORMAT"][0].isalpha():
+        raise ValueError(
+            "ORDER_IDENTIFIER_FORMAT prefix contain at least one alphabetical character"
+        )
     for c in settings["ORDER_IDENTIFIER_FORMAT"]:
         if not c.isalpha():
             break
