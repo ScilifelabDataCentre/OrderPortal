@@ -95,13 +95,13 @@ When the order form for a facility is changed, previously submitted
 orders are not affected. It is not possible to change the form for
 previously created orders.
 
-Simple info pages
------------------
+Basic info pages
+----------------
 
-There is a very simple information page subsystem. This is not by far
-a full-fledged wiki, so it can be used only for basic needs.  All
-administrators in the system can edit these pages via the web
-interface. This feature can be disabled by modifying the settings.
+There is a very basic information page subsystem. This is certainly
+not a full-fledged wiki.  All administrators in the system can edit
+these pages via the web interface. This feature can be disabled by
+modifying the settings.
 
 Facility
 --------
@@ -137,7 +137,7 @@ Users
 A user is an account in the system. Almost all operation require that
 the user is logged in. The email address is the user account identifier.
 
-There are three kinds of users:
+There are three kinds of users (roles):
 
 1. User: An external scientist, who uses the portal to place one or
    more orders, and to follow the progress of their own orders. The
@@ -226,7 +226,7 @@ in the table. Only the statuses PREPARATION and SUBMITTED are enabled by default
 | SUBMITTED   | The order has been submitted by the user for consideration.   |
 | REVIEW      | The order is under review.                                    |
 | QUEUED      | The order has been queued.                                    |
-¡ WAITING     | The order is waiting.                                         |
+| WAITING     | The order is waiting.                                         |
 | ACCEPTED    | The order has been checked and accepted.                      |
 | REJECTED    | The order has been rejected.                                  |
 | PROCESSING  | The order is being processed in the lab.                      |
@@ -293,6 +293,8 @@ The API allows other systems to interact with the order portal. It is
 based on RESTful principles using JSON and linked data to allow other
 systems to access and/or modify various data entities in the portal.
 
+The API is currently fairly limited.
+
 Attached files
 --------------
 
@@ -324,19 +326,19 @@ Docker containers
 
 Docker containers for the releases can be retrieved from [ghcr.io/pekrau](https://github.com/pekrau/OrderPortal/pkgs/container/orderportal).
 
-From source code setup
-----------------------
+From source code
+----------------
 
-This instruction is based on the procedure used for the instances
-running on the SciLifeLab server. It will have to be adapted for your
-site.
+This instruction is based on the old procedure used previously for the
+instances running on the SciLifeLab server. It will have to be adapted
+for your site.
 
 The Linux account `nginx` is used in the instructions below to host
 the instance files. Change according to the policy at your site.
 
 The name `xyz` is used below as a placeholder for the name of your instance.
 
-Instructions for upgrading the OrderPortal software is given below
+Instructions for updating the OrderPortal source code is given below
 under [Updates](#updates).
 
 ### Source code setup
@@ -431,11 +433,11 @@ See the `--help` option of the CLI.
 
 ### Updates
 
-To update the source code from the GitHub repo:
+To update the source code, simply download the latest release, unpack the `tar.gz`
+file, and move the `OrderPortal` directory tree to the correct location.
+Ensure that you keep your `site` directory, and that it is placed in the
+same location as before.
 
-    $ cd /var/www/apps/xyz/OrderPortal
-    $ sudo -u nginx git pull
-    $ sudo systemctl restart orderportal_xyz
-
-Since OrderPortal version 3.6.19, the design documents are
-automatically updated when the `tornado` server is restarted.
+Since OrderPortal version 3.6.19, the CouchDB design documents
+(indexes) are automatically updated when the `tornado` server is
+restarted.
