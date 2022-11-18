@@ -32,16 +32,16 @@ class MetaSaver(saver.Saver):
 
 DEFAULT_ORDER_STATUSES = [
     dict(
-        identifier=constants.PREPARATION, # Hard-wired! Must be present.
-        enabled=True,                     # Must be enabled!
+        identifier=constants.PREPARATION, # Hard-wired! Must be present and enabled.
+        enabled=True,
         description="The order has been created and is being edited by the user.",
         edit=["user", "staff", "admin"],
         attach=["user", "staff", "admin"],
         action="Prepare",
     ),
     dict(
-        identifier=constants.SUBMITTED, # Hard-wired! Must be present.
-        enabled=True,                   # Must be enabled!
+        identifier=constants.SUBMITTED, # Hard-wired! Must be present and enabled.
+        enabled=True,
         description="The order has been submitted by the user for consideration.",
         edit=["staff", "admin"],
         attach=["staff", "admin"],
@@ -133,7 +133,7 @@ DEFAULT_ORDER_STATUSES = [
     ),
     dict(
         identifier="cancelled",
-        description="The order has cancelled.",
+        description="The order has been cancelled.",
         edit=["admin"],
         attach=["admin"],
         action="Cancel",
@@ -202,7 +202,7 @@ DEFAULT_ORDER_TRANSITIONS = [
 ]
 
 
-INIT_TEXTS = dict(
+DEFAULT_TEXTS = dict(
     header="""This is a portal for placing orders. You need to have an account and
 be logged in to create, edit, submit and view orders.
 """,
@@ -376,7 +376,7 @@ def load_order_statuses(db):
         initial = settings["ORDER_STATUSES_LOOKUP"][constants.PREPARATION]
         initial["initial"] = True
         # Save modified setup into database.
-        # The doc was either retrieved or already saved above.
+        # The doc was either retrieved or created+saved above.
         with MetaSaver(doc, db=db):
             pass
         logging.info(
@@ -390,14 +390,14 @@ class TextSaver(saver.Saver):
     doctype = constants.TEXT
 
 
-def load_init_texts(db):
+def load_default_texts(db):
     "Load the default texts if not already in the database."
     loaded = False
     for name in constants.TEXTS:
         if len(list(db.view("text", "name", key=name))) == 0:
             with TextSaver(db=db) as saver:
                 saver["name"] = name
-                saver["text"] = INIT_TEXTS.get(name, "")
+                saver["text"] = DEFAULT_TEXTS.get(name, "")
             loaded = True
     if loaded:
         logging.info("loaded initial text(s)")
@@ -421,7 +421,7 @@ class Settings(RequestHandler):
         # Do not show the email password.
         if mod_settings["EMAIL"].get("PASSWORD"):
             mod_settings["EMAIL"]["PASSWORD"] = hidden
-        # Don't show the password in the CouchDB URL
+        # Don't show the password in the CouchDB URL; actually obsolete now...
         url = settings["DATABASE_SERVER"]
         match = re.search(r":([^/].+)@", url)
         if match:

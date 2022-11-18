@@ -157,7 +157,7 @@ class Constants:
     TESTING = "testing"
     FORM_STATUSES = [PENDING, TESTING, ENABLED, DISABLED]
 
-    # Hard-wired order statuses
+    # Hard-wired order statuses; must always be present.
     PREPARATION = "preparation"
     SUBMITTED = "submitted"
 

@@ -125,7 +125,7 @@
           <td>{% module Tags(order.get('tags', [])) %}</td>
           {% end %}
           {% for f in settings['ORDERS_LIST_FIELDS'] %}
-          <td>{% module NoneStr(order['fields'].get(f['identifier'])) %}</td>
+          <td>{% module NoneStr(order['fields'].get(f['identifier']), undef='-', list_delimiter=', ') %}</td>
           {% end %}
           <td>{% module Icon(order['status'], label=True) %}</td>
           {% for s in settings['ORDERS_LIST_STATUSES'] %}

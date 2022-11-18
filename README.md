@@ -10,10 +10,10 @@ some additional information.
 Background
 ----------
 
-The OrderPortal system allows basically any type of form-based
-submission of information. It was designed to work for any type of
-service facility that handles discrete orders or project proposals,
-reports, etc.
+The OrderPortal system allows nearly any type of form-based submission
+of information. It was designed to work for any type of service
+facility that handles discrete orders or project proposals, reports,
+etc.
 
 The OrderPortal system was originally created to satisfy the needs of the
 [National Genomics Infrastructure (NGI) Sweden](https://ngisweden.scilifelab.se/),
@@ -23,9 +23,12 @@ the samples according to the order from the researcher.
 
 The OrderPortal system is not hardcoded for any specific area such as
 DNA sequencing. On the contrary, considerable effort has gone into
-making sure the design is as general as possible. This means that
-installation of the system requires specific settings suite your
-particular needs.
+making sure the design is as general as possible within the scope of
+the problem it is intended to solve.
+
+Since the system is general in character, the installation of it
+requires specific configuration settings to suite your particular
+needs.
 
 Features
 --------
@@ -41,7 +44,7 @@ Features
 * Allow keeping track of Key Performance Indicators (KPIs), facilitating
   resource usage reports for the facility.
 
-Design outline
+Basic concepts
 --------------
 
 The system is a portal for **orders** (requests, project proposals,
@@ -52,7 +55,7 @@ Investigator (PI) for one or more projects.
 An order is created from a template which is called a **form** in this
 system. The facility administrators must set up and publish the order
 forms for a researcher to be able to create an order. Each form
-contains fields for data input by the researcher.
+defines the fields for data to be input by the researcher.
 
 The OrderPortal system is designed for only one facility, displaying
 up to about 8 different order forms. There is no hard limit to the
@@ -62,11 +65,6 @@ facilities requiring different sets of forms, then it is best to set
 up different instances of the OrderPortal system, with different
 back-end database instances.
 
-A user account is defined within each OrderPortal instance.
-We decided against a design based on a single central user account
-database for all facilities. The email address of the user is used as
-the user account identifier.
-
 The design of an order form is fairly general; there is nothing that
 is hardcoded for specific domains of science. The content of the order
 forms consists of a different fields for different types of input
@@ -74,9 +72,11 @@ data. The order forms are defined by the facility administrators. An
 order form can be used only when it has been enabled. An outdated
 order form can be disabled; its orders will still be accessible.
 
-The design of the system is kept as flexible and general as
-possible. Customisation of site logo and title is possible, and the
-information pages are under control of the facility administrators.
+A user account is defined within each OrderPortal instance.  The email
+address of the user is used as the user account identifier.
+
+Customisation of site logo and title is possible, and the information
+pages are under control of the facility administrators.
 
 The order form
 --------------
@@ -217,34 +217,57 @@ required value can be saved, but it cannot be submitted. This allows
 the user to create and fill in orders only partially, and to return to
 the order at a later date to complete it.
 
-An order can have one and only one status. The statuses available for
-an order is configurable. Here is a list of standard statuses:
+An order can have one and only one status. The available statuses are listed
+in the table. Only the statuses PREPARATION and SUBMITTED are enabled by default.
 
-| State       | Semantics                                            |
-|-------------|------------------------------------------------------|
-| PREPARATION | Created, and possibly edited.                        |
-| SUBMITTED   | Submitted by user.                                   |
-| REVIEW      | Under review by the facility.                        |
-| ACCEPTED    | Checked and accepted by the facility.                |
-| REJECTED    | Rejected by facility.                                |
-| PROCESSING  | The facility is working on the project.              |
-| ABORTED     | The project has been stopped.                        |
-| CLOSED      | All work and steps for the order have been done.     |
+| State       | Semantics                                                     |
+|-------------|---------------------------------------------------------------|
+| PREPARATION | The order has been created and is being edited by the user.   |
+| SUBMITTED   | The order has been submitted by the user for consideration.   |
+| REVIEW      | The order is under review.                                    |
+| QUEUED      | The order has been queued.                                    |
+¡ WAITING     | The order is waiting.                                         |
+| ACCEPTED    | The order has been checked and accepted.                      |
+| REJECTED    | The order has been rejected.                                  |
+| PROCESSING  | The order is being processed in the lab.                      |
+| ACTIVE      | The order is active.                                          |
+| ANALYSIS    | The order results are being analysed.                         |
+| ONHOLD      | The order is on hold.                                         |
+| HALTED      | The work on the order has been halted.                        |
+| ABORTED     | The work on the order has been permanently stopped.           |
+| TERMINATED  | The order has been terminated.                                |
+| CANCELLED   | The order has been cancelled.                                 |
+| FINISHED    | The work on the order has finished.                           |
+| COMPLETED   | The order has been completed.                                 |
+| CLOSED      | All work and other actions for the order have been performed. |
+| DELIVERED   | The order results have been delivered.                        |
+| INVOICED    | The order has been invoiced.                                  |
+| ARCHIVED    | The order has been archived.                                  |
+| UNDEFINED   | The order has an undefined or unknown status.                 |
 
-The statuses and the allowed transitions between them are defined in a
-YAML configuration file. This allows a facility to define other
-statuses and transitions than the standard ones. It also allows new
-statuses and transitions to be added to an existing setup. Removing
-existing statuses may break the system, and should not be attempted;
-instead, the transitions should be modified to avoid the redundant
+Statuses can be enabled by the admin. Once enabled, a status cannot be
+disabled. The description of the semantic of a status can be edited by the
+admin.
+
+Transitions between the statuses can be edited by the admin. The only
+transition enabled by default is the one from PREPARATION to SUBMITTED.
+
+Typically, enabling statuses and transitions should be done as part of
+the configuration and testing phase before the instance is launched
+into production. In general, it is a good idea to keep the number of
+enabled statuses at a minimum. Transitions should be set to those that
+are sensible given the typical workflow. Allowing too many transitions
+can lead to confusion.  Since transitions can be enabled and disabled
+at will by the admin, it is always in principle possible (if
+cumbersome) to 'rescue' and order which has been put in an incorrect
 status.
 
 Interface
 ---------
 
 There are two main interfaces to the system, the web and the API. The
-web interface behaves differently depending on the type of the user
-account logged in.
+web interface behaves slightly differently depending on the role of
+the user account logged in.
 
 ### User web interface
 
@@ -296,6 +319,14 @@ Installation
 The current version has been developed using Python 3.10 or higher.
 It may work on Python 3.8 and 3.9, but this has not been tested.
 
+Docker containers
+-----------------
+
+Docker containers for the releases can be retrieved from [ghcr.io/pekrau](https://github.com/pekrau/OrderPortal/pkgs/container/orderportal).
+
+From source code setup
+----------------------
+
 This instruction is based on the procedure used for the instances
 running on the SciLifeLab server. It will have to be adapted for your
 site.
@@ -308,8 +339,7 @@ The name `xyz` is used below as a placeholder for the name of your instance.
 Instructions for upgrading the OrderPortal software is given below
 under [Updates](#updates).
 
-Source code setup
------------------
+### Source code setup
 
 Download the `tar.gz` file for latest release from
 [the Github repo](https://github.com/pekrau/OrderPortal/releases)
@@ -340,8 +370,7 @@ Download and install the required third-party Python modules using the
 
     $ sudo pip install -r requirements.txt
 
-Settings file
--------------
+### Settings file
 
 Set the correction protection for the file `site/settings.yaml` and
 edit it according to your setup. Some of the settings depend on
@@ -354,8 +383,7 @@ actions described below, so you may have to go back to edit it again.
 See the comments in the template `settings.yaml` file for editing the
 file for your site. In particular, the CouchDB variables must be set (see below).
 
-CouchDB setup
--------------
+### CouchDB setup
 
 Install and set up a CouchDB instance, if you don't have one
 already. Follow the instructions for CouchDB, which are not included
@@ -381,50 +409,27 @@ Create the first OrderPortal admin account in the database using the CLI:
 
     $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py admin
 
-`Tornado` server
---------------
+### `Tornado` server
 
 The `tornado` server should be executed as a system service. This depends
 on your operating system; refer to its documentation.
 
-HTTP nginx configuration
-------------------------
+It is recommended that you use a reverse proxy for the `tornado`
+server, e.g. `nginx` or `apache`. See the documentation for those
+systems. A sample configuration file from an installation using `nginx` is
+provided at [orderportal/site_template/orderportal_xyz.conf](orderportal/site_template/orderportal_xyz.conf).
 
-In our case, the `tornado` server is accessed through a reverse-proxy
-via nginx. The template nginx file is available at
-[orderportal/site_template/orderportal_xyz.conf](orderportal/site_template/orderportal_xyz.conf).
-Copy, rename and edit it. In particular, ensure that the URL and port is
-specified correctly.
+### Backup
 
-    $ cd /etc/nginx/conf.d
-    $ sudo cp /var/www/apps/xyz/OrderPortal/orderportal/site_template/orderportal_xyz.conf orderportal_xyzconf
-    $ sudo emacs orderportal_xyz.conf
+Backups of the CouchDB database can easily be produced using the CLI:
 
-Backup
-------
+    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py dump
 
-Backup relies on running the CLI to dump all data in the CouchDB database
-to a tar file. Create a backup directory:
+This creates a `tar.gz` file with today's date in the file name. There are command
+options for setting the name of the file, or the directory in which it is written.
+See the `--help` option of the CLI.
 
-    $ sudo mkdir /home/backup/backup_files/orderportal_xyz
-
-Copy and rename the template bash backup script
-[orderportal/site_template/dump_orderportal_xyz.bash](orderportal/site_template/dump_orderportal_xyz.bash). It will also need editing, since it uses a SciLifeLab-specific tape-backup setup:
-
-    $ cd /etc/scripts
-    $ sudo cp /var/www/apps/xyz/OrderPortal/orderportal/site_template/dump_orderportal_xyz.bash dump_orderportal_xyz.bash
-
-Edit the crontab file:
-
-    $ export EDITOR=emacs
-    $ crontab -e
-
-The line in the crontab file should look something like this:
-
-    45 22 * * * /etc/scripts/dump_orderportal_xyz.bash
-
-Updates
--------
+### Updates
 
 To update the source code from the GitHub repo:
 
@@ -432,11 +437,5 @@ To update the source code from the GitHub repo:
     $ sudo -u nginx git pull
     $ sudo systemctl restart orderportal_xyz
 
-Since version 3.6.19, the design documents are automatically updated
-when the `tornado` server is restarted.
-
-Please note that if your installation uses a repo forked from the
-base, ensure that you have updated that repo first by making a pull
-request and executing it.
-
-Set up git commit signing.
+Since OrderPortal version 3.6.19, the design documents are
+automatically updated when the `tornado` server is restarted.

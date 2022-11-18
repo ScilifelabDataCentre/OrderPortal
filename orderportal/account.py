@@ -1122,7 +1122,10 @@ class Register(RequestHandler):
                     self.set_message_flash(str(error))
                 except ValueError as error:
                     self.set_error_flash(str(error))
-        self.see_other("registered")
+        if self.is_admin():
+            self.see_other("account", account["email"])
+        else:
+            self.see_other("registered")
 
 
 class Registered(RequestHandler):

@@ -118,11 +118,13 @@ class Tags(tornado.web.UIModule):
 class NoneStr(tornado.web.UIModule):
     "Output undef string if value is None, else str(value)."
 
-    def render(self, value, undef=""):
+    def render(self, value, undef="", list_delimiter=None):
         if value is None:
             return undef
-        else:
-            return str(value)
+        elif isinstance(value, list):
+            if list_delimiter:
+                return list_delimiter.join(value)
+        return str(value)
 
 
 class Version(tornado.web.UIModule):

@@ -35,7 +35,7 @@ def main():
     db = utils.get_db()
     orderportal.designs.load_design_documents(db)
     orderportal.admin.load_order_statuses(db)
-    orderportal.admin.load_init_texts(db)
+    orderportal.admin.load_default_texts(db)
 
     url = tornado.web.url
     handlers = [
