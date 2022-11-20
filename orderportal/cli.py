@@ -115,7 +115,8 @@ def undump(dumpfile, progressbar):
         raise click.ClickException(
             f"The database '{settings['DATABASE_NAME']}' contains data."
         )
-    # Remove meta and text docs which may be in the dump.
+    # Remove meta and text docs from the database since the dump may contain
+    # updated versions of them.
     meta_docs = [row.doc for row in db.view("meta", "id", include_docs=True)]
     for doc in meta_docs:
         db.delete(doc)
