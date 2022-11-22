@@ -116,12 +116,10 @@
 <div class="panel panel-default">
   <div class="panel-body">
     <table class="table table-condensed table-fields table-noborder">
-      {% if settings.get('ORDER_IDENTIFIER_FORMAT') %}
       <tr>
         <th>Identifier</th>
         <td colspan="2">{% module NoneStr(order.get('identifier'), '-') %}</td>
       </tr>
-      {% end %} {# if settings.get('ORDER_IDENTIFIER_FORMAT') #}
 
       {% if is_admin %}
       <tr>
@@ -198,7 +196,7 @@
         <th>History</th>
         <td>
           <table>
-            {% for s in reversed(settings['ORDER_STATUSES']) %}
+            {% for s in reversed(parameters['ORDER_STATUSES']) %}
             {% if order['history'].get(s['identifier']) %}
             <tr>
               <td>{% module Icon(s['identifier'], label=True) %}</td>

@@ -8,7 +8,7 @@ import tornado.web
 import tornado.ioloop
 
 from orderportal import constants
-from orderportal import settings
+from orderportal import settings, parameters
 from orderportal import utils
 
 import orderportal.account
@@ -34,8 +34,8 @@ def main():
     utils.get_settings(filepath=filepath)
     db = utils.get_db()
     orderportal.designs.load_design_documents(db)
+    orderportal.admin.load_default_texts(db)
     orderportal.admin.load_order_statuses(db)
-    orderportal.admin.load_init_texts(db)
 
     url = tornado.web.url
     handlers = [
@@ -290,22 +290,27 @@ def main():
             name="file_download",
         ),
         url(r"/file/([0-9a-f]{32})/logs", orderportal.file.FileLogs, name="file_logs"),
-        url(r"/admin/settings", orderportal.admin.Settings, name="settings"),
         url(r"/admin/text/([^/]+)", orderportal.admin.Text, name="text"),
         url(r"/admin/texts", orderportal.admin.Texts, name="texts"),
+        url(r"/admin/settings", orderportal.admin.Settings, name="settings"),
         url(
             r"/admin/order_statuses",
             orderportal.admin.OrderStatuses,
             name="order_statuses",
         ),
         url(
+            r"/admin/order_status/([^/]+)",
+            orderportal.admin.OrderStatusEnable,
+            name="order_status_enable",
+        ),
+        url(
             r"/admin/order_messages",
-            orderportal.admin.AdminOrderMessages,
+            orderportal.admin.OrderMessages,
             name="admin_order_messages",
         ),
         url(
             r"/admin/account_messages",
-            orderportal.admin.AdminAccountMessages,
+            orderportal.admin.AccountMessages,
             name="admin_account_messages",
         ),
         url(r"/search", orderportal.search.Search, name="search"),
@@ -331,7 +336,7 @@ def main():
     )
 
     # Add href URLs for the status icons.
-    for key, value in settings["ORDER_STATUSES_LOOKUP"].items():
+    for key, value in parameters["ORDER_STATUSES_LOOKUP"].items():
         value["href"] = f"/static/{key}.png"
 
     application.listen(settings["PORT"], xheaders=True)

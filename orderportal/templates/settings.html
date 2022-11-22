@@ -5,8 +5,7 @@
 {% block head_title %}Settings{% end %}
 
 {% block body_title %}
-Settings
-<small>Site-specific values for some configuration variables.</small>
+Settings <small>Site-specific values for some configuration variables.</small>
 {% end %}
 
 {% block content %}
@@ -31,7 +30,7 @@ Settings
   {% for key in sorted(settings) %}
   <tr>
     <th>{{ key }}</th>
-    <td>{{ settings.get(key) }}</td>
+    <td>{% raw settings.get(key) %}</td>
   </tr>
   {% end %}
 </table>

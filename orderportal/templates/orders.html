@@ -60,13 +60,12 @@
       <div class="form-group">
         <select name="status" class="form-control refresh">
           <option value="">[any status]</option>
-          {% for s in settings['ORDER_STATUSES'] %}
+          {% for s in parameters['ORDER_STATUSES'] %}
           {% if s.get("enabled") %}
-          {% set sid = s['identifier'] %}
-          {% set sel = sid == filter.get('status') and 'selected' or '' %}
-          <option {{ sel }} value="{{ sid }}">{{ sid.capitalize() }}</option>
-          {% end %}
-          {% end %}
+          {% set selected = s['identifier'] == filter.get('status') and 'selected' or '' %}
+          <option {{ selected }} value="{{ s['identifier'] }}">{{ s['identifier'].capitalize() }}</option>
+          {% end %} {# if s.get("enabled") #}
+          {% end %} {# for ... #}
         </select>
       </div>
       <div class="form-group">
@@ -125,7 +124,7 @@
           <td>{% module Tags(order.get('tags', [])) %}</td>
           {% end %}
           {% for f in settings['ORDERS_LIST_FIELDS'] %}
-          <td>{% module NoneStr(order['fields'].get(f['identifier'])) %}</td>
+          <td>{% module NoneStr(order['fields'].get(f['identifier']), undef='-', list_delimiter=', ') %}</td>
           {% end %}
           <td>{% module Icon(order['status'], label=True) %}</td>
           {% for s in settings['ORDERS_LIST_STATUSES'] %}

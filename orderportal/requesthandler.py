@@ -13,7 +13,7 @@ import couchdb2
 import tornado.web
 
 from orderportal import constants
-from orderportal import settings
+from orderportal import settings, parameters
 from orderportal import utils
 
 
@@ -33,6 +33,7 @@ class RequestHandler(tornado.web.RequestHandler):
         result = super(RequestHandler, self).get_template_namespace()
         result["constants"] = constants
         result["settings"] = settings
+        result["parameters"] = parameters
         result["terminology"] = utils.terminology
         result["get_account_name"] = utils.get_account_name
         result["absolute_reverse_url"] = self.absolute_reverse_url

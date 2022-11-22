@@ -15,6 +15,7 @@
 # {password_code_url} URL for password setting page, including code and email.
 # {code}    The password setting code itself.
 
+# This entry must exist, although its contents may be modified.
 pending:
   subject: "An account {account} in the {site} is pending approval."
   text: |
@@ -22,6 +23,7 @@ pending:
 
     Go to {url} to view and enable it.
 
+# This entry must exist, although its contents may be modified.
 enabled:
   subject: "Your account in the {site} has been enabled."
   text: |
@@ -39,6 +41,7 @@ enabled:
     Yours sincerely,
     The {site} administrators.
 
+# This entry must exist, although its contents may be modified.
 reset:
   subject: "The password has been reset for your account in the {site}."
   text: |
@@ -54,6 +57,7 @@ reset:
     Yours sincerely,
     The {site} administrators.
 
+# This entry must exist, although its contents may be modified.
 disabled:
   subject: "Your account in the {site} has been disabled."
   text: |
