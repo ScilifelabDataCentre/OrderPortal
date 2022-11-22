@@ -77,9 +77,8 @@
     <td>
       {{ ', '.join(sorted(set(['admin'] + status.get('attach', [])))) or '-' }}
     </td>
-    <td class="text-right">
-      <a href="{{ reverse_url('orders', status=status['identifier']) }}"
-         class="badge">
+    <td>
+      <a href="{{ reverse_url('orders', status=status['identifier']) }}" class="badge">
         {{ counts.get(status['identifier'], 0) }}
       </a>
     </td>

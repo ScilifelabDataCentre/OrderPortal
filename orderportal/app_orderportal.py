@@ -33,8 +33,9 @@ def main():
         filepath = None
     utils.get_settings(filepath=filepath)
     db = utils.get_db()
-    orderportal.designs.load_design_documents(db)
-    orderportal.admin.load_default_texts(db)
+    orderportal.designs.update_design_documents(db)
+    orderportal.admin.update_meta_documents(db)
+    orderportal.admin.load_texts(db)
     orderportal.admin.load_order_statuses(db)
 
     url = tornado.web.url

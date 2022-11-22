@@ -44,7 +44,7 @@ def create_database():
         )
     server.create(settings["DATABASE_NAME"])
     db = utils.get_db()
-    designs.load_design_documents(db)
+    designs.update_design_documents(db)
     click.echo(f"""Created database '{settings["DATABASE_NAME"]}'.""")
 
 
@@ -53,14 +53,14 @@ def initialize():
     """Initialize database; load design documents.
     No longer needed. Kept just for backwards compatibility.
     """
-    designs.load_design_documents(utils.get_db())
+    designs.update_design_documents(utils.get_db())
 
 
 @cli.command()
 def counts():
     "Output counts of database entities."
     db = utils.get_db()
-    designs.load_design_documents(db)
+    designs.update_design_documents(db)
     click.echo(f"{utils.get_count(db, 'order', 'owner'):>5} orders")
     click.echo(f"{utils.get_count(db, 'form', 'all'):>5} forms")
     click.echo(f"{utils.get_count(db, 'account', 'all'):>5} accounts")
@@ -106,7 +106,7 @@ def undump(dumpfile, progressbar):
         db = utils.get_db()
     except KeyError as error:
         raise click.ClickException(str(error))
-    designs.load_design_documents(db) # Just in case; not really needed.
+    designs.update_design_documents(db) # Just in case; probably not really needed.
     if (
         utils.get_count(db, "account", "all") != 0
         or utils.get_count(db, "form", "all") != 0

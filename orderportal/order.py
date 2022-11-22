@@ -12,9 +12,8 @@ import zipfile
 import couchdb2
 import tornado.web
 
-from orderportal import constants
+from orderportal import constants, settings, parameters
 from orderportal import saver
-from orderportal import settings, parameters
 from orderportal import utils
 from orderportal.fields import Fields
 from orderportal.message import MessageSaver
