@@ -12,22 +12,9 @@ import yaml
 import orderportal
 from orderportal import constants
 from orderportal import saver
-from orderportal import settings
+from orderportal import settings, parameters
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
-
-
-class MetaSaver(saver.Saver):
-    doctype = constants.META
-
-    def set_id(self, id):
-        if id in constants.BANNED_META_IDS:
-            raise ValueError(f"trying to use a banned meta document name '{id}'")
-        self.doc["_id"] = id
-
-    def log(self):
-        "Don't bother recording log for meta documents."
-        pass
 
 
 DEFAULT_ORDER_STATUSES = [
@@ -274,10 +261,87 @@ and orders contains the records of all changes to those items.
 )
 
 
+class TextSaver(saver.Saver):
+    doctype = constants.TEXT
+
+
+def load_default_texts(db):
+    """Load the default texts if not already in the database.
+    Remove old multiple texts; clean up previous mistake.
+    """
+    loaded = False
+    for name in constants.TEXTS:
+        docs = [row.doc for row in db.view("text", "name", key=name, include_docs=True)]
+        if len(docs) == 0:
+            with TextSaver(db=db) as saver:
+                saver["name"] = name
+                saver["text"] = DEFAULT_TEXTS.get(name, "")
+            loaded = True
+        elif len(docs) > 1:     # Deal with the consequence of a previous bug.
+            newest = docs[0]
+            for doc in docs[1:]:
+                if doc["modified"] > newest["modified"]:
+                    newest = doc
+            for doc in docs:
+                if doc != newest:
+                    db.delete(doc)
+    if loaded:
+        logging.info("loaded initial text(s)")
+
+
+
+class Text(RequestHandler):
+    "Edit page for information text."
+
+    @tornado.web.authenticated
+    def get(self, name):
+        self.check_admin()
+        try:
+            text = self.get_entity_view("text", "name", name)
+        except tornado.web.HTTPError:
+            text = dict(name=name)
+        origin = self.get_argument("origin", self.absolute_reverse_url("texts"))
+        self.render("admin_text_edit.html", text=text, origin=origin)
+
+    @tornado.web.authenticated
+    def post(self, name):
+        self.check_admin()
+        try:
+            text = self.get_entity_view("text", "name", name)
+        except tornado.web.HTTPError:
+            text = dict(name=name)
+        with TextSaver(doc=text, rqh=self) as saver:
+            saver["text"] = self.get_argument("text")
+        url = self.get_argument("origin", self.absolute_reverse_url("texts"))
+        self.redirect(url, status=303)
+
+
+class Texts(RequestHandler):
+    "Page listing texts used in the web site."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render("admin_texts.html", texts=sorted(constants.TEXTS.items()))
+
+
+class MetaSaver(saver.Saver):
+    doctype = constants.META
+
+    def set_id(self, id):
+        if id in constants.BANNED_META_IDS:
+            raise ValueError(f"trying to use a banned meta document name '{id}'")
+        self.doc["_id"] = id
+
+    def log(self):
+        "Don't bother recording log for meta documents."
+        pass
+
+
 def load_order_statuses(db):
-    """Load the order statuses and transitions from the database.
+    """Load the order statuses and transitions from the database into 'parameters'.
     If not there, get from legacy site YAML files.
-    If none, then use default values.
+    If not found there either, then use default values.
     Save to database, if from default and/or old site setup files.
     Once saved to the database, the legacy site YAML files will no longer
     be used and can be deleted.
@@ -285,16 +349,16 @@ def load_order_statuses(db):
     try:
         # From version 6.0.0, the order statuses are in the database.
         doc = db["order_statuses"]
-        settings["ORDER_STATUSES"] = doc["statuses"]
-        settings["ORDER_TRANSITIONS"] = doc["transitions"]
-        logging.info("loaded order statuses from database")
+        parameters["ORDER_STATUSES"] = doc["statuses"]
+        parameters["ORDER_TRANSITIONS"] = doc["transitions"]
+        logging.info("loaded order statuses from database into 'parameters'")
 
     except couchdb2.NotFoundError:
         # Create the order statuses document in the database.
 
-        # Start with default order statuses setup.
-        settings["ORDER_STATUSES"] = copy.deepcopy(DEFAULT_ORDER_STATUSES)
-        lookup = dict([(s["identifier"], s) for s in settings["ORDER_STATUSES"]])
+        # Initialize with default order statuses.
+        parameters["ORDER_STATUSES"] = copy.deepcopy(DEFAULT_ORDER_STATUSES)
+        lookup = dict([(p["identifier"], p) for p in parameters["ORDER_STATUSES"]])
 
         # Load the legacy site ORDER_STATUSES_FILE, if any defined.
         try:
@@ -310,7 +374,7 @@ def load_order_statuses(db):
             logging.warning(f"defaults used for order statuses; {error}")
         else:
             # Transfer order status data from the legacy setup and flag as enabled.
-            lookup = dict([(s["identifier"], s) for s in settings["ORDER_STATUSES"]])
+            lookup = dict([(p["identifier"], p) for p in parameters["ORDER_STATUSES"]])
             for status in legacy_statuses:
                 try:
                     lookup[status["identifier"]].update(status)
@@ -320,8 +384,8 @@ def load_order_statuses(db):
                         f"""unknown legacy order status: '{status["identifier"]}'; skipped"""
                     )
 
-        # Start with the default order transitions setup.
-        settings["ORDER_TRANSITIONS"] = copy.deepcopy(DEFAULT_ORDER_TRANSITIONS)
+        # Initialize with the default order transitions.
+        parameters["ORDER_TRANSITIONS"] = copy.deepcopy(DEFAULT_ORDER_TRANSITIONS)
 
         # Load the legacy site ORDER_TRANSITIONS_FILE, if any defined.
         try:
@@ -342,29 +406,29 @@ def load_order_statuses(db):
                 legacy_trans["targets"] = [
                     t for t in legacy_trans["targets"] if t in lookup
                 ]
-                for trans in settings["ORDER_TRANSITIONS"]:
+                for trans in parameters["ORDER_TRANSITIONS"]:
                     if legacy_trans["source"] == trans["source"]:
                         trans.update(legacy_trans)
                         break
                 else:
-                    settings["ORDER_TRANSITIONS"].append(legacy_trans)
+                    parameters["ORDER_TRANSITIONS"].append(legacy_trans)
 
         # Save current setup into database.
         with MetaSaver(db=db) as saver:
             saver.set_id("order_statuses")
-            saver["statuses"] = settings["ORDER_STATUSES"]
-            saver["transitions"] = settings["ORDER_TRANSITIONS"]
+            saver["statuses"] = parameters["ORDER_STATUSES"]
+            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
         doc = saver.doc
         logging.info("saved order statuses to database")
 
     # Lookup for the enabled statuses.
-    settings["ORDER_STATUSES_LOOKUP"] = dict(
-        [(s["identifier"], s) for s in settings["ORDER_STATUSES"] if s.get("enabled")]
+    parameters["ORDER_STATUSES_LOOKUP"] = dict(
+        [(s["identifier"], s) for s in parameters["ORDER_STATUSES"] if s.get("enabled")]
     )
 
     # Find the initial status: Ensure that there is one and only one.
     initial = None
-    for status in settings["ORDER_STATUSES_LOOKUP"].values():
+    for status in parameters["ORDER_STATUSES_LOOKUP"].values():
         if status.get("initial"):
             if initial:
                 status.pop("initial")
@@ -373,7 +437,7 @@ def load_order_statuses(db):
 
     # No initial state defined; set 'preparation' to be it.
     if initial is None:
-        initial = settings["ORDER_STATUSES_LOOKUP"][constants.PREPARATION]
+        initial = parameters["ORDER_STATUSES_LOOKUP"][constants.PREPARATION]
         initial["initial"] = True
         # Save modified setup into database.
         # The doc was either retrieved or created+saved above.
@@ -383,25 +447,7 @@ def load_order_statuses(db):
             "saved order statuses to database after setting 'preparation' to initial"
         )
 
-    settings["ORDER_STATUS_INITIAL"] = initial
-
-
-class TextSaver(saver.Saver):
-    doctype = constants.TEXT
-
-
-def load_default_texts(db):
-    "Load the default texts if not already in the database."
-    loaded = False
-    for name in constants.TEXTS:
-        if len(list(db.view("text", "name", key=name))) == 0:
-            with TextSaver(db=db) as saver:
-                saver["name"] = name
-                saver["text"] = DEFAULT_TEXTS.get(name, "")
-            loaded = True
-    if loaded:
-        logging.info("loaded initial text(s)")
-
+    parameters["ORDER_STATUS_INITIAL"] = initial
 
 
 class Settings(RequestHandler):
@@ -441,9 +487,6 @@ class Settings(RequestHandler):
         mod_settings[
             "ORDER_MESSAGES"
         ] = f"<see file {mod_settings['ORDER_MESSAGES_FILE']}>"
-        mod_settings["ORDER_STATUSES"] = f"""&lt;see page <a href="{self.reverse_url('order_statuses')}">Admin -> Order statuses</a>&gt;"""
-        mod_settings["ORDER_STATUSES_LOOKUP"] = "&lt;computed from ORDER_STATUSES&gt;"
-        mod_settings["ORDER_TRANSITIONS"] = mod_settings["ORDER_STATUSES"]
         for obsolete in ["ORDER_STATUSES_FILE", 
                          "ORDER_TRANSITIONS_FILE",
                          "SITE_PERSONAL_DATA_POLICY"]:
@@ -452,41 +495,6 @@ class Settings(RequestHandler):
             except KeyError:
                 pass
         self.render("settings.html", settings=mod_settings)
-
-
-class Text(RequestHandler):
-    "Edit page for information text."
-
-    @tornado.web.authenticated
-    def get(self, name):
-        self.check_admin()
-        try:
-            text = self.get_entity_view("text", "name", name)
-        except tornado.web.HTTPError:
-            text = dict(name=name)
-        origin = self.get_argument("origin", self.absolute_reverse_url("texts"))
-        self.render("text.html", text=text, origin=origin)
-
-    @tornado.web.authenticated
-    def post(self, name):
-        self.check_admin()
-        try:
-            text = self.get_entity_view("text", "name", name)
-        except tornado.web.HTTPError:
-            text = dict(name=name)
-        with TextSaver(doc=text, rqh=self) as saver:
-            saver["text"] = self.get_argument("text")
-        url = self.get_argument("origin", self.absolute_reverse_url("texts"))
-        self.redirect(url, status=303)
-
-
-class Texts(RequestHandler):
-    "Page listing texts used in the web site."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        self.render("texts.html", texts=sorted(constants.TEXTS.items()))
 
 
 class OrderStatuses(RequestHandler):
@@ -502,7 +510,30 @@ class OrderStatuses(RequestHandler):
         self.render("admin_order_statuses.html", counts=counts)
 
 
-class AdminOrderMessages(RequestHandler):
+class OrderStatusEnable(RequestHandler):
+    "Enable an order status."
+
+    @tornado.web.authenticated
+    def post(self, status_id):
+        self.check_admin()
+        for status in parameters["ORDER_STATUSES"]:
+            if status["identifier"] == status_id: break
+        else:
+            self.see_other("order_statuses", error="No such order status.")
+            return
+        status["enabled"] = True
+        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+            saver["statuses"] = parameters["ORDER_STATUSES"]
+            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
+        logging.info("saved modified order statuses to database")
+        # Update lookup for the enabled statuses.
+        parameters["ORDER_STATUSES_LOOKUP"] = dict(
+            [(s["identifier"], s) for s in parameters["ORDER_STATUSES"] if s.get("enabled")]
+        )
+        self.see_other("order_statuses")
+        
+
+class OrderMessages(RequestHandler):
     "Page for displaying order messages configuration."
 
     @tornado.web.authenticated
@@ -511,7 +542,7 @@ class AdminOrderMessages(RequestHandler):
         self.render("admin_order_messages.html")
 
 
-class AdminAccountMessages(RequestHandler):
+class AccountMessages(RequestHandler):
     "Page for displaying account messages configuration."
 
     @tornado.web.authenticated

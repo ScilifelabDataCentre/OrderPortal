@@ -115,8 +115,8 @@ def undump(dumpfile, progressbar):
         raise click.ClickException(
             f"The database '{settings['DATABASE_NAME']}' contains data."
         )
-    # Remove meta and text docs from the database since the dump may contain
-    # updated versions of them.
+    # Remove meta and text docs from the database since the dump
+    # may contain updated versions of them.
     meta_docs = [row.doc for row in db.view("meta", "id", include_docs=True)]
     for doc in meta_docs:
         db.delete(doc)
@@ -126,7 +126,7 @@ def undump(dumpfile, progressbar):
         db.delete(doc)
         doc.pop("_rev")
     ndocs, nfiles = db.undump(dumpfile, progressbar=progressbar)
-    # NOTE: Meta documents may not have these id's; these are forever banned.
+    # NOTE: Meta documents may not have these id's; these are henceforth banned.
     for id in constants.BANNED_META_IDS:
         try:
             doc = db[id]

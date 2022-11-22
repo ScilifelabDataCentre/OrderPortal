@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "6.2.0"
+__version__ = "7.0.0"
 
 
 class Constants:
@@ -116,9 +116,10 @@ class Constants:
     FLOAT_STEP = "0.0000001"
 
     # Banned meta document id's; have changed format or been removed.
+    # Re-using these id's would likely create backwards incompatibility issues.
     BANNED_META_IDS = frozenset(["account_messages", "order_messages", "global_modes"])
 
-    # Texts for use in web site
+    # Texts for use in various pages of the web site. Text content stored in database.
     TEXTS = dict(
         header="Header on portal home page.",
         register="Registration page.",
@@ -292,3 +293,7 @@ settings = dict(
     DISPLAY_MENU_ABOUT_US=True,
     DISPLAY_TEXT_MARKDOWN_NOTATION_INFO=True,
 )
+
+# In-memory copy of various configuration values such as order statuses and transitions.
+# Read from the database on server startup.
+parameters = {}

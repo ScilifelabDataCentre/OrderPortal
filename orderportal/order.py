@@ -12,13 +12,13 @@ import zipfile
 import couchdb2
 import tornado.web
 
-from . import constants
-from . import saver
-from . import settings
-from . import utils
-from .fields import Fields
-from .message import MessageSaver
-from .requesthandler import RequestHandler, ApiV1Mixin
+from orderportal import constants
+from orderportal import saver
+from orderportal import settings, parameters
+from orderportal import utils
+from orderportal.fields import Fields
+from orderportal.message import MessageSaver
+from orderportal.requesthandler import RequestHandler, ApiV1Mixin
 
 
 class OrderSaver(saver.Saver):
@@ -48,7 +48,7 @@ class OrderSaver(saver.Saver):
         self["form"] = form["_id"]
         self["title"] = title
         self["fields"] = dict([(f["identifier"], None) for f in self.fields])
-        self.set_status(settings["ORDER_STATUS_INITIAL"]["identifier"])
+        self.set_status(parameters["ORDER_STATUS_INITIAL"]["identifier"])
         # Set the order identifier if its format defined.
         # Allow also for disabled, since admin may clone such orders.
         if form["status"] in (constants.ENABLED, constants.DISABLED):
@@ -128,7 +128,7 @@ class OrderSaver(saver.Saver):
         "Set the new status of the order."
         if self.get("status") == new:
             return
-        if new not in settings["ORDER_STATUSES_LOOKUP"]:
+        if new not in parameters["ORDER_STATUSES_LOOKUP"]:
             raise ValueError(f"invalid status '{new}'")
         if "status" in self.doc:
             targets = self.rqh.get_targets(self.doc)
@@ -449,7 +449,7 @@ class OrderSaver(saver.Saver):
                 or (isinstance(date, str) and constants.DATE_RX.match(date))
             ):
                 raise ValueError("invalid date in history data")
-            if not status in settings["ORDER_STATUSES_LOOKUP"]:
+            if not status in parameters["ORDER_STATUSES_LOOKUP"]:
                 raise ValueError("invalid status in history data")
             self["history"][status] = date
 
@@ -683,11 +683,11 @@ class OrderMixin(object):
 
     def get_order_status(self, order):
         "Get the order status lookup item."
-        return settings["ORDER_STATUSES_LOOKUP"][order["status"]]
+        return parameters["ORDER_STATUSES_LOOKUP"][order["status"]]
 
     def get_targets(self, order):
         "Get the allowed status transition targets as status lookup items."
-        for transition in settings["ORDER_TRANSITIONS"]:
+        for transition in parameters["ORDER_TRANSITIONS"]:
             if (transition["source"] == order["status"]) and not (
                 transition.get("require") == "valid" and order["invalid"]
             ):
@@ -701,7 +701,7 @@ class OrderMixin(object):
                     break
         else:
             return []
-        result = [settings["ORDER_STATUSES_LOOKUP"][t] for t in targets]
+        result = [parameters["ORDER_STATUSES_LOOKUP"][t] for t in targets]
         if settings.get("READONLY"):
             result = [r for r in result if r["identifier"] != constants.SUBMITTED]
         return result
@@ -792,7 +792,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
             data["report"]["timestamp"] = order["report"]["timestamp"]
             data["report"]["link"] = dict(href=URL("order_report_api", order["_id"]))
         data["history"] = dict()
-        for s in settings["ORDER_STATUSES"]:
+        for s in parameters["ORDER_STATUSES"]:
             key = s["identifier"]
             data["history"][key] = order["history"].get(key)
         data["tags"] = order.get("tags", [])
@@ -1071,7 +1071,7 @@ class OrderCsv(OrderMixin, RequestHandler):
         ):
             writer.writerow(("", "Gender", account.get("gender", "-").capitalize()))
         writer.writerow(("Status", order["status"]))
-        for i, s in enumerate(settings["ORDER_STATUSES"]):
+        for i, s in enumerate(parameters["ORDER_STATUSES"]):
             key = s["identifier"]
             writer.writerow(
                 (i == 0 and "History" or "", key, order["history"].get(key, "-"))

@@ -3,7 +3,6 @@
 import tornado.web
 
 from orderportal import constants
-from orderportal import settings
 from orderportal import utils
 
 ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""

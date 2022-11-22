@@ -17,15 +17,16 @@ for form  {% module Entity(form, icon=False) %}
       method="POST" role="form" class="form-horizontal">
   {% module xsrf_form_html() %}
 
+  {% set enabled_statuses = [s for s in parameters['ORDER_STATUSES'] if s.get('enabled') ] %}
   <div class="form-group">
     <label class="control-label col-sm-2" for="status">
       {{ terminology('Order') }} status filter</label>
     <div class="col-sm-10">
-      <select multiple size="4" class="form-control" name="status" id="status">
+      <select multiple size="{{ len(enabled_statuses)+1 }}"
+              class="form-control" name="status" id="status">
         <option selected value="">[any]</option>
-        {% for s in settings['ORDER_STATUSES'] %}
-        <option value="{{ s['identifier'] }}">
-          {{ s['identifier'].capitalize() }}</option>
+        {% for s in enabled_statuses %}
+        <option value="{{ s['identifier'] }}">{{ s['identifier'].capitalize() }}</option>
         {% end %}
       </select>
       <span class="help-block">
@@ -58,10 +59,10 @@ for form  {% module Entity(form, icon=False) %}
     <label class="control-label col-sm-2" for="history">
       {{ terminology('Order') }} history</label>
     <div class="col-sm-10">
-      <select multiple size="{{ len(settings['ORDER_STATUSES']) }}"
+      <select multiple size="{{ len(enabled_statuses) }}"
               class="form-control" name="history" id="history">
-        {% for status in settings['ORDER_STATUSES'] %}
-        <option>{{ status['identifier'] }}</option>
+        {% for s in enabled_statuses %}
+        <option value="{{ s['identifier'] }}">{{ s['identifier'].capitalize() }}</option>
         {% end %}
       </select>
       <span class="help-block">

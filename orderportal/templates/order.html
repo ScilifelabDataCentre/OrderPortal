@@ -196,7 +196,7 @@
         <th>History</th>
         <td>
           <table>
-            {% for s in reversed(settings['ORDER_STATUSES']) %}
+            {% for s in reversed(parameters['ORDER_STATUSES']) %}
             {% if order['history'].get(s['identifier']) %}
             <tr>
               <td>{% module Icon(s['identifier'], label=True) %}</td>

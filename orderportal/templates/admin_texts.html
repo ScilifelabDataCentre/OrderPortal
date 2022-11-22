@@ -6,6 +6,13 @@
 {% block body_title %}Texts{% end %}
 
 {% block content %}
+<div class="well">
+  <p>
+    Short texts displayed in various pages of the system. Can be edited
+    here or from the page here they appear.
+  </p>
+</div>
+
 <table class="table">
   <thead>
     <tr>
@@ -21,7 +28,7 @@
       <td>{{ description }}</td>
       <td>
         <a href="{{ reverse_url('text', name) }}"
-           class="btn btn-success btn-sm" role="button">
+           class="btn btn-primary btn-sm" role="button">
           Edit
         </a>
       </td>
