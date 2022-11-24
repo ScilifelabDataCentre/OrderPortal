@@ -1,0 +1,134 @@
+{# Admin order status edit page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Edit {{ terminology('order') }} status '{{ status['identifier'] }}'{% end %}
+
+{% block body_title %}Edit {{ terminology('order') }} status '{{ status['identifier'] }}'{% end %}
+
+{% block main_content %}
+<form action="{{ reverse_url('admin_order_status_edit', status['identifier']) }}"
+      method="POST" role="form">
+  {% module xsrf_form_html() %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-12">
+        <label class="control-label" for="description">Description</label>
+        <input type="text" class="form-control"
+               id="description" name="description"
+               value="{{ status['description'] }}">
+      </div>
+    </div>
+    <span class="help-block">
+      One-line description of what the status means.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-12">
+        <label class="control-label" for="initial">
+          Initial
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="initial" id="initial"
+                   value="yes" {{ (status.get('initial') and 'checked') or '' }}>
+            When an order is created, it is assigned this status.
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-12">
+        <label class="control-label" for="edit_staff">
+          Staff may edit
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="edit_staff" id="edit_staff"
+                   value="yes" {{ 'staff' in status['edit'] and 'checked' or '' }}>
+            Any user with role 'staff' may edit an order in this status.
+            Users with role 'admin' may always edit an order.
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-12">
+        <label class="control-label" for="edit_user">
+          Owner may edit
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="edit_user" id="edit_user"
+                   value="yes" {{ 'user' in status['edit'] and 'checked' or '' }}>
+            The owner of the order may edit in this status.
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-12">
+        <label class="control-label" for="attach_staff">
+          Staff may attach
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="attach_staff" id="attach_staff"
+                   value="yes" {{ 'staff' in status['attach'] and 'checked' or '' }}>
+            Any user with role 'staff' may attach documents to an order in this status.
+            Users with role 'admin' may always attach documents to an order.
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-12">
+        <label class="control-label" for="attach_user">
+          Owner may attach
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="attach_user" id="attach_user"
+                   value="yes" {{ 'user' in status['attach'] and 'checked' or '' }}>
+            The owner of the order may attach documents to it in this status.
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-success btn-block">
+          <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+      </div>
+    </div>
+  </div>
+
+</form>
+{% end %} {# block main_content #}
+
+{% block action_content %}
+<form action="{{ reverse_url('admin_order_statuses') }}"
+      method="GET" role="form">
+    <button type="submit" class="btn btn-default btn-block">
+      <span class="glyphicon glyphicon-remove"></span> Cancel
+    </button>
+</form>
+{% end %} {# block action_content #}

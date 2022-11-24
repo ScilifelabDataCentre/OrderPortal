@@ -260,6 +260,23 @@ and orders contains the records of all changes to those items.
 )
 
 
+class MetaSaver(saver.Saver):
+    doctype = constants.META
+
+    def set_id(self, id):
+        if id in constants.BANNED_META_IDS:
+            raise ValueError(f"trying to use a banned meta document name '{id}'")
+        self.doc["_id"] = id
+
+    def log(self):
+        "Don't bother recording log for meta documents."
+        pass
+
+
+class TextSaver(saver.Saver):
+    doctype = constants.TEXT
+
+
 def update_meta_documents(db):
     "Update obsolete meta documents, or fix them."
     # Delete document 'global_modes' if present; obsolete.
@@ -343,10 +360,6 @@ def update_meta_documents(db):
         logging.info("saved order statuses to database")
 
 
-class TextSaver(saver.Saver):
-    doctype = constants.TEXT
-
-
 def load_texts(db):
     """Load the default texts if not already in the database.
     Remove old multiple texts; clean up previous mistake.
@@ -407,21 +420,10 @@ class Texts(RequestHandler):
         self.render("admin_texts.html", texts=sorted(constants.TEXTS.items()))
 
 
-class MetaSaver(saver.Saver):
-    doctype = constants.META
-
-    def set_id(self, id):
-        if id in constants.BANNED_META_IDS:
-            raise ValueError(f"trying to use a banned meta document name '{id}'")
-        self.doc["_id"] = id
-
-    def log(self):
-        "Don't bother recording log for meta documents."
-        pass
-
-
 def load_order_statuses(db):
-    "Load the order statuses and transitions from the database into 'parameters'."
+    """Load the order statuses and transitions from the database into 'parameters',
+    and setup derived variable values.
+    """
     doc = db["order_statuses"]
     parameters["ORDER_STATUSES"] = doc["statuses"]
     parameters["ORDER_TRANSITIONS"] = doc["transitions"]
@@ -508,19 +510,60 @@ class OrderStatusEnable(RequestHandler):
         for status in parameters["ORDER_STATUSES"]:
             if status["identifier"] == status_id: break
         else:
-            self.see_other("order_statuses", error="No such order status.")
+            self.see_other("admin_order_statuses", error="No such order status.")
             return
         status["enabled"] = True
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
             saver["statuses"] = parameters["ORDER_STATUSES"]
             saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        logging.info("saved modified order statuses to database")
-        # Update lookup for the enabled statuses.
-        parameters["ORDER_STATUSES_LOOKUP"] = dict(
-            [(s["identifier"], s) for s in parameters["ORDER_STATUSES"] if s.get("enabled")]
-        )
-        self.see_other("order_statuses")
+        load_order_statuses(self.db)
+        self.see_other("admin_order_statuses")
         
+
+class OrderStatusEdit(RequestHandler):
+    "Edit an order status."
+
+    @tornado.web.authenticated
+    def get(self, status_id):
+        self.check_admin()
+        try:
+            status = parameters["ORDER_STATUSES_LOOKUP"][status_id]
+        except KeyError:
+            self.see_other("admin_order_statuses", error="No such order status.")
+        else:
+            self.render("admin_order_status_edit.html", status=status)
+
+    @tornado.web.authenticated
+    def post(self, status_id):
+        self.check_admin()
+        try:
+            status = parameters["ORDER_STATUSES_LOOKUP"][status_id]
+        except KeyError:
+            self.see_other("admin_order_statuses", error="No such order status.")
+            return
+        status["description"] = self.get_argument("description", "").strip()
+        initial = utils.to_bool(self.get_argument("initial", False))
+        # Only one status may be initial; set all others to False.
+        if initial and not status.get("initial"):
+            for s in parameters["ORDER_STATUSES_LOOKUP"].values():
+                s["initial"] = False
+            status["initial"] = True
+        status["edit"] = ["admin"] # Is always allowed.
+        if utils.to_bool(self.get_argument("edit_staff", False)):
+            status["edit"].append("staff")
+        if utils.to_bool(self.get_argument("edit_user", False)):
+            status["edit"].append("user")
+        status["attach"] = ["admin"] # Is always allowed.
+        if utils.to_bool(self.get_argument("attach_staff", False)):
+            status["attach"].append("staff")
+        if utils.to_bool(self.get_argument("attach_user", False)):
+            status["attach"].append("user")
+        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+            saver["statuses"] = parameters["ORDER_STATUSES"]
+            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
+        load_order_statuses(self.db)
+        self.see_other("admin_order_statuses")
+
 
 class OrderMessages(RequestHandler):
     "Page for displaying order messages configuration."
