@@ -13,6 +13,7 @@ from orderportal import settings
 from orderportal import utils
 from orderportal.account import AccountSaver
 import orderportal.app_orderportal
+import orderportal.admin
 
 
 @click.group()
@@ -126,7 +127,7 @@ def undump(dumpfile, progressbar):
         db.delete(doc)
         doc.pop("_rev")
     ndocs, nfiles = db.undump(dumpfile, progressbar=progressbar)
-    # NOTE: Meta documents may not have these id's; these are henceforth banned.
+    # NOTE: Meta documents must not have these id's; these are henceforth banned.
     for id in constants.BANNED_META_IDS:
         try:
             doc = db[id]
@@ -140,6 +141,8 @@ def undump(dumpfile, progressbar):
     for doc in text_docs:
         if len(db.view("text", "name", key=doc["name"])) == 0:
                db.put(doc)
+    # And finally update the formats of some meta documents.
+    orderportal.admin.update_meta_documents(db)
     click.echo(f"Loaded {ndocs} documents and {nfiles} files.")
 
 

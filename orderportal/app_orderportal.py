@@ -305,9 +305,14 @@ def main():
             name="order_status_enable",
         ),
         url(
-            r"/admin/order_status/([^/]+)/edit",
+            r"/admin/order_status/([^/]+)",
             orderportal.admin.OrderStatusEdit,
             name="admin_order_status_edit",
+        ),
+        url(
+            r"/admin/order_transitions/([^/]+)",
+            orderportal.admin.OrderTransitionsEdit,
+            name="admin_order_transitions_edit",
         ),
         url(
             r"/admin/order_messages",

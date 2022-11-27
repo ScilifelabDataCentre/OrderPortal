@@ -15,7 +15,7 @@
 </div>
 {% end %}
 
-<table class="table table-condensed">
+<table class="table">
   <tr>
     <th>Status</th>
     <th>Description</th>
@@ -88,7 +88,7 @@
          class="btn btn-sm btn-primary btn-block" role="button">
         <span class="glyphicon glyphicon-edit"></span> Edit status
       </a>
-      <a href="{{ reverse_url('admin_order_status_edit', status['identifier']) }}",
+      <a href="{{ reverse_url('admin_order_transitions_edit', status['identifier']) }}",
          class="btn btn-sm btn-primary btn-block" role="button">
         <span class="glyphicon glyphicon-edit"></span> Edit transitions
       </a>
