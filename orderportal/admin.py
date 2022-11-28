@@ -10,9 +10,8 @@ import tornado.web
 import yaml
 
 import orderportal
-from orderportal import constants
+from orderportal import constants, settings, parameters
 from orderportal import saver
-from orderportal import settings, parameters
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 
@@ -178,15 +177,10 @@ DEFAULT_ORDER_STATUSES = [
 
 
 # Minimal, since only 'preparation' and 'submitted' are guaranteed to be enabled.
-
-DEFAULT_ORDER_TRANSITIONS = [
-    dict(
-        source=constants.PREPARATION,
-        targets=[constants.SUBMITTED],
-        permission=["user", "admin", "staff"],
-        require="valid",
-    ),
-]
+DEFAULT_ORDER_TRANSITIONS = dict([(s["identifier"], dict())
+                                  for s in DEFAULT_ORDER_STATUSES])
+DEFAULT_ORDER_TRANSITIONS[constants.PREPARATION][constants.SUBMITTED] = \
+    dict(permission=["admin", "staff", "user"], require_valid=True)
 
 
 DEFAULT_TEXTS = dict(
@@ -261,11 +255,138 @@ and orders contains the records of all changes to those items.
 )
 
 
+class MetaSaver(saver.Saver):
+    doctype = constants.META
+
+    def set_id(self, id):
+        if id in constants.BANNED_META_IDS:
+            raise ValueError(f"trying to use a banned meta document name '{id}'")
+        self.doc["_id"] = id
+
+    def log(self):
+        "Don't bother recording log for meta documents."
+        pass
+
+
 class TextSaver(saver.Saver):
     doctype = constants.TEXT
 
 
-def load_default_texts(db):
+def update_meta_documents(db):
+    "Update or delete meta documents for the current version."
+
+    # As of version 6.0 (I think), there are no longer any global modes.
+    # Delete document 'global_modes' if present.
+    try:
+        db.delete("global_modes")
+    except couchdb2.NotFoundError:
+        pass
+
+    if "order_statuses" not in db:
+        # As of version 6.0, the order statuses data is kept in a meta document
+        # in the database. It is no longer read from the file in
+        # the 'site' directory specified in 'settings.yaml'.
+
+        # If the 'order_statuses' document is not in the database, then create it.
+        # Start with the default setup.
+        # If the legacy site YAML files exist, use those to update.
+        # Finally save it to the database.
+
+        # Initialize with default order statuses.
+        parameters["ORDER_STATUSES"] = copy.deepcopy(DEFAULT_ORDER_STATUSES)
+        lookup = dict([(p["identifier"], p) for p in parameters["ORDER_STATUSES"]])
+
+        # Load the legacy site ORDER_STATUSES_FILE, if any defined.
+        try:
+            filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_STATUSES_FILE"])
+            with open(filepath) as infile:
+                legacy_statuses = yaml.safe_load(infile)
+            logging.info(f"loaded legacy order statuses from file '{filepath}'")
+        except KeyError:
+            logging.warning(f"defaults used for order statuses")
+        except FileNotFoundError as error:
+            logging.warning(f"defaults used for order statuses; {error}")
+        else:
+            # Transfer order status data from the legacy setup and flag as enabled.
+            lookup = dict([(p["identifier"], p) for p in parameters["ORDER_STATUSES"]])
+            for status in legacy_statuses:
+                try:
+                    lookup[status["identifier"]].update(status)
+                    lookup[status["identifier"]]["enabled"] = True
+                except KeyError:
+                    logging.error(
+                        f"""unknown legacy order status: '{status["identifier"]}'; skipped"""
+                    )
+
+        # Initialize with the default order transitions.
+        parameters["ORDER_TRANSITIONS"] = copy.deepcopy(DEFAULT_ORDER_TRANSITIONS)
+
+        # Load the legacy site ORDER_TRANSITIONS_FILE, if any defined.
+        try:
+            filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_TRANSITIONS_FILE"])
+            with open(filepath) as infile:
+                legacy_transitions = yaml.safe_load(infile)
+            logging.info(f"loaded legacy order transitions from file '{filepath}'")
+        except KeyError:
+            logging.warning(f"defaults used for order transitions")
+        except FileNotFoundError as error:
+            logging.warning(f"defaults used for order transitions; {error}")
+        else:
+            # Transfer order transitions data from legacy setup.
+            # NOTE: the legacy setup had a different layout.
+            for legacy_trans in legacy_transitions:
+                # Skip any unknown source statuses.
+                if legacy_trans["source"] not in lookup: continue
+                for target in legacy_trans["targets"]:
+                    # Skip any unknown target statuses.
+                    if target not in lookup: continue
+                    value = dict(permission=legacy_trans["permission"])
+                    if legacy_trans.get("require") == "valid":
+                        value["require_valid"] = True
+                    parameters["ORDER_TRANSITIONS"][legacy_trans["source"]][target] = value
+
+        initial = None
+        for status in parameters["ORDER_STATUSES"]:
+            if status.get("initial"):
+                if initial:         # There must one and only one initial status.
+                    status.pop("initial")
+                else:
+                    initial = status
+        if initial is None:   # Set the status PREPARATION to initial, if none defined.
+            lookup[constants.PREPARATION]["status"] = True
+
+        # Save current setup into database.
+        with MetaSaver(db=db) as saver:
+            saver.set_id("order_statuses")
+            saver["statuses"] = parameters["ORDER_STATUSES"]
+            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
+        logging.info("saved order statuses to database")
+
+    doc = db["order_statuses"]
+    parameters["ORDER_STATUSES"] = doc["statuses"]
+    parameters["ORDER_TRANSITIONS"] = doc["transitions"]
+    if isinstance(parameters["ORDER_TRANSITIONS"], list):
+        # As of version 7.0, the layout of the transitions data ha been changed
+        # to a dict having (key: source status, value: dict of target statues
+        # with valid flag (instead of "require" key) and permissions list.
+        new = dict([(s["identifier"], dict()) for s in parameters["ORDER_STATUSES"]])
+        for trans in parameters["ORDER_TRANSITIONS"]:
+            for target in trans["targets"]:
+                value = dict(permission=trans["permission"])
+                if trans.get("require") == "valid":
+                    value["require_valid"] = True
+                new[trans["source"]][target] = value
+        parameters["ORDER_TRANSITIONS"] = new
+
+        # Save current setup into database.
+        with MetaSaver(doc=doc, db=db) as saver:
+            saver.set_id("order_statuses")
+            saver["statuses"] = parameters["ORDER_STATUSES"]
+            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
+        logging.info("saved updated order transitions to database")
+
+
+def load_texts(db):
     """Load the default texts if not already in the database.
     Remove old multiple texts; clean up previous mistake.
     """
@@ -325,129 +446,25 @@ class Texts(RequestHandler):
         self.render("admin_texts.html", texts=sorted(constants.TEXTS.items()))
 
 
-class MetaSaver(saver.Saver):
-    doctype = constants.META
-
-    def set_id(self, id):
-        if id in constants.BANNED_META_IDS:
-            raise ValueError(f"trying to use a banned meta document name '{id}'")
-        self.doc["_id"] = id
-
-    def log(self):
-        "Don't bother recording log for meta documents."
-        pass
-
-
 def load_order_statuses(db):
-    """Load the order statuses and transitions from the database into 'parameters'.
-    If not there, get from legacy site YAML files.
-    If not found there either, then use default values.
-    Save to database, if from default and/or old site setup files.
-    Once saved to the database, the legacy site YAML files will no longer
-    be used and can be deleted.
+    """Load the order statuses and transitions from the database into 'parameters',
+    and setup derived variable values.
     """
-    try:
-        # From version 6.0.0, the order statuses are in the database.
-        doc = db["order_statuses"]
-        parameters["ORDER_STATUSES"] = doc["statuses"]
-        parameters["ORDER_TRANSITIONS"] = doc["transitions"]
-        logging.info("loaded order statuses from database into 'parameters'")
-
-    except couchdb2.NotFoundError:
-        # Create the order statuses document in the database.
-
-        # Initialize with default order statuses.
-        parameters["ORDER_STATUSES"] = copy.deepcopy(DEFAULT_ORDER_STATUSES)
-        lookup = dict([(p["identifier"], p) for p in parameters["ORDER_STATUSES"]])
-
-        # Load the legacy site ORDER_STATUSES_FILE, if any defined.
-        try:
-            filepath = os.path.join(
-                settings["SITE_DIR"], settings["ORDER_STATUSES_FILE"]
-            )
-            with open(filepath) as infile:
-                legacy_statuses = yaml.safe_load(infile)
-            logging.info(f"loaded legacy order statuses from file '{filepath}'")
-        except KeyError:
-            logging.warning(f"defaults used for order statuses")
-        except FileNotFoundError as error:
-            logging.warning(f"defaults used for order statuses; {error}")
-        else:
-            # Transfer order status data from the legacy setup and flag as enabled.
-            lookup = dict([(p["identifier"], p) for p in parameters["ORDER_STATUSES"]])
-            for status in legacy_statuses:
-                try:
-                    lookup[status["identifier"]].update(status)
-                    lookup[status["identifier"]]["enabled"] = True
-                except KeyError:
-                    logging.error(
-                        f"""unknown legacy order status: '{status["identifier"]}'; skipped"""
-                    )
-
-        # Initialize with the default order transitions.
-        parameters["ORDER_TRANSITIONS"] = copy.deepcopy(DEFAULT_ORDER_TRANSITIONS)
-
-        # Load the legacy site ORDER_TRANSITIONS_FILE, if any defined.
-        try:
-            filepath = os.path.join(
-                settings["SITE_DIR"], settings["ORDER_TRANSITIONS_FILE"]
-            )
-            with open(filepath) as infile:
-                legacy_transitions = yaml.safe_load(infile)
-            logging.info(f"loaded legacy order transitions from file '{filepath}'")
-        except KeyError:
-            logging.warning(f"defaults used for order transitions")
-        except FileNotFoundError as error:
-            logging.warning(f"defaults used for order transitions; {error}")
-        else:
-            # Transfer order transitions data from legacy setup.
-            for legacy_trans in legacy_transitions:
-                # Silently eliminate unknown target statues.
-                legacy_trans["targets"] = [
-                    t for t in legacy_trans["targets"] if t in lookup
-                ]
-                for trans in parameters["ORDER_TRANSITIONS"]:
-                    if legacy_trans["source"] == trans["source"]:
-                        trans.update(legacy_trans)
-                        break
-                else:
-                    parameters["ORDER_TRANSITIONS"].append(legacy_trans)
-
-        # Save current setup into database.
-        with MetaSaver(db=db) as saver:
-            saver.set_id("order_statuses")
-            saver["statuses"] = parameters["ORDER_STATUSES"]
-            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        doc = saver.doc
-        logging.info("saved order statuses to database")
+    doc = db["order_statuses"]
+    parameters["ORDER_STATUSES"] = doc["statuses"]
+    parameters["ORDER_TRANSITIONS"] = doc["transitions"]
+    logging.info("loaded order statuses from database into 'parameters'")
 
     # Lookup for the enabled statuses.
     parameters["ORDER_STATUSES_LOOKUP"] = dict(
-        [(s["identifier"], s) for s in parameters["ORDER_STATUSES"] if s.get("enabled")]
+        [(s["identifier"], s)
+         for s in parameters["ORDER_STATUSES"] if s.get("enabled")]
     )
 
-    # Find the initial status: Ensure that there is one and only one.
-    initial = None
-    for status in parameters["ORDER_STATUSES_LOOKUP"].values():
+    # Find the initial status.
+    for status in parameters["ORDER_STATUSES"]:
         if status.get("initial"):
-            if initial:
-                status.pop("initial")
-            else:
-                initial = status
-
-    # No initial state defined; set 'preparation' to be it.
-    if initial is None:
-        initial = parameters["ORDER_STATUSES_LOOKUP"][constants.PREPARATION]
-        initial["initial"] = True
-        # Save modified setup into database.
-        # The doc was either retrieved or created+saved above.
-        with MetaSaver(doc, db=db):
-            pass
-        logging.info(
-            "saved order statuses to database after setting 'preparation' to initial"
-        )
-
-    parameters["ORDER_STATUS_INITIAL"] = initial
+            parameters["ORDER_STATUS_INITIAL"] = status
 
 
 class Settings(RequestHandler):
@@ -503,11 +520,22 @@ class OrderStatuses(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
+        enabled = [s for s in parameters["ORDER_STATUSES"] if s.get("enabled")]
+        not_enabled = [s for s in parameters["ORDER_STATUSES"] if not s.get("enabled")]
+        targets = {}
+        for source, transitions in parameters["ORDER_TRANSITIONS"].items():
+            for target, transition in transitions.items():
+                targets.setdefault(target, {})[source] = transition
         view = self.db.view(
             "order", "status", group_level=1, startkey=[""], endkey=[constants.CEILING]
         )
         counts = dict([(r.key[0], r.value) for r in view])
-        self.render("admin_order_statuses.html", counts=counts)
+        self.render("admin_order_statuses.html",
+                    enabled=enabled,
+                    not_enabled=not_enabled,
+                    sources=parameters["ORDER_TRANSITIONS"],
+                    targets=targets,
+                    counts=counts)
 
 
 class OrderStatusEnable(RequestHandler):
@@ -519,19 +547,89 @@ class OrderStatusEnable(RequestHandler):
         for status in parameters["ORDER_STATUSES"]:
             if status["identifier"] == status_id: break
         else:
-            self.see_other("order_statuses", error="No such order status.")
+            self.see_other("admin_order_statuses", error="No such order status.")
             return
         status["enabled"] = True
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
             saver["statuses"] = parameters["ORDER_STATUSES"]
             saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        logging.info("saved modified order statuses to database")
-        # Update lookup for the enabled statuses.
-        parameters["ORDER_STATUSES_LOOKUP"] = dict(
-            [(s["identifier"], s) for s in parameters["ORDER_STATUSES"] if s.get("enabled")]
-        )
-        self.see_other("order_statuses")
+        load_order_statuses(self.db)
+        self.see_other("admin_order_statuses")
         
+
+class OrderStatusEdit(RequestHandler):
+    "Edit an order status."
+
+    @tornado.web.authenticated
+    def get(self, status_id):
+        self.check_admin()
+        try:
+            status = parameters["ORDER_STATUSES_LOOKUP"][status_id]
+        except KeyError:
+            self.see_other("admin_order_statuses", error="No such order status.")
+        else:
+            self.render("admin_order_status_edit.html", status=status)
+
+    @tornado.web.authenticated
+    def post(self, status_id):
+        self.check_admin()
+        try:
+            status = parameters["ORDER_STATUSES_LOOKUP"][status_id]
+        except KeyError:
+            self.see_other("admin_order_statuses", error="No such order status.")
+            return
+        status["description"] = self.get_argument("description", "").strip()
+        initial = utils.to_bool(self.get_argument("initial", False))
+        # Only one status may be initial; set all others to False.
+        if initial and not status.get("initial"):
+            for s in parameters["ORDER_STATUSES_LOOKUP"].values():
+                s["initial"] = False
+            status["initial"] = True
+        status["edit"] = ["admin"] # Is always allowed.
+        if utils.to_bool(self.get_argument("edit_staff", False)):
+            status["edit"].append("staff")
+        if utils.to_bool(self.get_argument("edit_user", False)):
+            status["edit"].append("user")
+        status["attach"] = ["admin"] # Is always allowed.
+        if utils.to_bool(self.get_argument("attach_staff", False)):
+            status["attach"].append("staff")
+        if utils.to_bool(self.get_argument("attach_user", False)):
+            status["attach"].append("user")
+        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+            saver["statuses"] = parameters["ORDER_STATUSES"]
+            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
+        load_order_statuses(self.db)
+        self.see_other("admin_order_statuses")
+
+
+class OrderTransitionsEdit(RequestHandler):
+    "Edit the allowed transitions of an order."
+
+    @tornado.web.authenticated
+    def get(self, status_id):
+        self.check_admin()
+        try:
+            status = parameters["ORDER_STATUSES_LOOKUP"][status_id]
+        except KeyError:
+            self.see_other("admin_order_statuses", error="No such order status.")
+        else:
+            # XXX
+            transitions = [t for t in parameters["ORDER_TRANSITIONS"] 
+                           if t["source"] == status_id]
+            self.render("admin_order_transitions_edit.html",
+                        status=status,
+                        transitions=transitions)
+
+    @tornado.web.authenticated
+    def post(self, status_id):
+        self.check_admin()
+        try:
+            status = parameters["ORDER_STATUSES_LOOKUP"][status_id]
+        except KeyError:
+            self.see_other("admin_order_statuses", error="No such order status.")
+            return
+        self.see_other("admin_order_transitions_edit", status_id)
+
 
 class OrderMessages(RequestHandler):
     "Page for displaying order messages configuration."

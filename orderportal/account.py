@@ -6,9 +6,8 @@ import logging
 import tornado.web
 
 import orderportal
-from orderportal import constants
+from orderportal import constants, settings, parameters
 from orderportal import saver
-from orderportal import settings
 from orderportal import utils
 from orderportal.order import OrderApiV1Mixin
 from orderportal.group import GroupSaver

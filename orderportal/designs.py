@@ -283,7 +283,7 @@ ORDERS_SEARCH_FIELDS_MAP = """function(doc) {{
 var lint = {lint};"""
 
 
-def load_design_documents(db):
+def update_design_documents(db):
     "Load the design documents (view index definitions)."
     fixup_design_documents()
     for designname, views in DESIGNS.items():
@@ -294,7 +294,7 @@ def load_design_documents(db):
 def fixup_design_documents():
     """Replace 'lint' and 'delims_lint' in design view function 'order/keyword'.
     Add the order search field design views.
-    Done on first call to load_design_documents.
+    Done on first call to update_design_documents.
     """
     if "fields" in DESIGNS:
         return

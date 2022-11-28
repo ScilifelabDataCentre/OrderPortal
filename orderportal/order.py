@@ -12,9 +12,8 @@ import zipfile
 import couchdb2
 import tornado.web
 
-from orderportal import constants
+from orderportal import constants, settings, parameters
 from orderportal import saver
-from orderportal import settings, parameters
 from orderportal import utils
 from orderportal.fields import Fields
 from orderportal.message import MessageSaver
@@ -584,7 +583,7 @@ class OrderMixin(object):
             return False
         if self.is_admin():
             return True
-        status = self.get_order_status(order)
+        status = parameters["ORDER_STATUSES_LOOKUP"][order["status"]]
         edit = status.get("edit", [])
         if self.is_staff() and constants.STAFF in edit:
             return True
@@ -606,7 +605,7 @@ class OrderMixin(object):
         "May the current user may attach a file to the order?"
         if self.is_admin():
             return True
-        status = self.get_order_status(order)
+        status = parameters["ORDER_STATUSES_LOOKUP"][order["status"]]
         attach = status.get("attach", [])
         if self.is_staff() and constants.STAFF in attach:
             return True
@@ -681,29 +680,23 @@ class OrderMixin(object):
                 result.extend(self.get_fields(order, depth + 1, field["fields"]))
         return result
 
-    def get_order_status(self, order):
-        "Get the order status lookup item."
-        return parameters["ORDER_STATUSES_LOOKUP"][order["status"]]
-
     def get_targets(self, order):
         "Get the allowed status transition targets as status lookup items."
-        for transition in parameters["ORDER_TRANSITIONS"]:
-            if (transition["source"] == order["status"]) and not (
-                transition.get("require") == "valid" and order["invalid"]
-            ):
-                permission = transition["permission"]
-                if (
-                    (self.is_admin() and constants.ADMIN in permission)
-                    or (self.is_staff() and constants.STAFF in permission)
-                    or (self.is_owner(order) and constants.USER in permission)
-                ):
-                    targets = transition["targets"]
-                    break
-        else:
-            return []
-        result = [parameters["ORDER_STATUSES_LOOKUP"][t] for t in targets]
         if settings.get("READONLY"):
-            result = [r for r in result if r["identifier"] != constants.SUBMITTED]
+            return []
+        targets = parameters["ORDER_TRANSITIONS"].get(order["status"], dict())
+        result = []
+        for key, transition in targets.items():
+            if transition.get("require_valid") and order["invalid"]: continue
+            permission = transition["permission"]
+            if ((self.is_admin() and constants.ADMIN in permission)
+                or (self.is_staff() and constants.STAFF in permission)
+                or (self.is_owner(order) and constants.USER in permission)
+            ):
+                try:            # Defensive: only allow enabled statuses as targets.
+                    result.append(parameters["ORDER_STATUSES_LOOKUP"][key])
+                except KeyError:
+                    pass
         return result
 
     def allow_submit(self, order, check_valid=True):
@@ -937,7 +930,7 @@ class Order(OrderMixin, RequestHandler):
             title="{0} '{1}'".format(utils.terminology("Order"), order["title"]),
             order=order,
             account_names=self.get_account_names([order["owner"]]),
-            status=self.get_order_status(order),
+            status=parameters["ORDER_STATUSES_LOOKUP"][order["status"]],
             form=form,
             fields=form["fields"],
             attached_files=files,
@@ -1147,9 +1140,7 @@ class OrderXlsx(OrderCsv):
     def write_finish(self, order):
         self.set_header("Content-Type", constants.XLSX_MIME)
         filename = order.get("identifier") or order["_id"]
-        self.set_header(
-            f"Content-Disposition", 'attachment; filename="{filename}.xlsx"'
-        )
+        self.set_header("Content-Disposition", f'attachment; filename="{filename}.xlsx"')
 
 
 class OrderZip(OrderApiV1Mixin, OrderCsv):
@@ -1180,7 +1171,7 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
         self.write(zip_io.getvalue())
         self.set_header("Content-Type", constants.ZIP_MIME)
         filename = order.get("identifier") or order["_id"]
-        self.set_header(f"Content-Disposition", 'attachment; filename="{filename}.zip"')
+        self.set_header("Content-Disposition", f'attachment; filename="{filename}.zip"')
 
 
 class OrderLogs(OrderMixin, RequestHandler):

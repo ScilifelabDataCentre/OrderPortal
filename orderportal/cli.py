@@ -13,6 +13,7 @@ from orderportal import settings
 from orderportal import utils
 from orderportal.account import AccountSaver
 import orderportal.app_orderportal
+import orderportal.admin
 
 
 @click.group()
@@ -44,7 +45,7 @@ def create_database():
         )
     server.create(settings["DATABASE_NAME"])
     db = utils.get_db()
-    designs.load_design_documents(db)
+    designs.update_design_documents(db)
     click.echo(f"""Created database '{settings["DATABASE_NAME"]}'.""")
 
 
@@ -53,14 +54,14 @@ def initialize():
     """Initialize database; load design documents.
     No longer needed. Kept just for backwards compatibility.
     """
-    designs.load_design_documents(utils.get_db())
+    designs.update_design_documents(utils.get_db())
 
 
 @cli.command()
 def counts():
     "Output counts of database entities."
     db = utils.get_db()
-    designs.load_design_documents(db)
+    designs.update_design_documents(db)
     click.echo(f"{utils.get_count(db, 'order', 'owner'):>5} orders")
     click.echo(f"{utils.get_count(db, 'form', 'all'):>5} forms")
     click.echo(f"{utils.get_count(db, 'account', 'all'):>5} accounts")
@@ -106,7 +107,7 @@ def undump(dumpfile, progressbar):
         db = utils.get_db()
     except KeyError as error:
         raise click.ClickException(str(error))
-    designs.load_design_documents(db) # Just in case; not really needed.
+    designs.update_design_documents(db) # Just in case; probably not really needed.
     if (
         utils.get_count(db, "account", "all") != 0
         or utils.get_count(db, "form", "all") != 0
@@ -126,7 +127,7 @@ def undump(dumpfile, progressbar):
         db.delete(doc)
         doc.pop("_rev")
     ndocs, nfiles = db.undump(dumpfile, progressbar=progressbar)
-    # NOTE: Meta documents may not have these id's; these are henceforth banned.
+    # NOTE: Meta documents must not have these id's; these are henceforth banned.
     for id in constants.BANNED_META_IDS:
         try:
             doc = db[id]
@@ -140,6 +141,8 @@ def undump(dumpfile, progressbar):
     for doc in text_docs:
         if len(db.view("text", "name", key=doc["name"])) == 0:
                db.put(doc)
+    # And finally update the formats of some meta documents.
+    orderportal.admin.update_meta_documents(db)
     click.echo(f"Loaded {ndocs} documents and {nfiles} files.")
 
 

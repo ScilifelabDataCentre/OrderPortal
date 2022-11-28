@@ -33,8 +33,9 @@ def main():
         filepath = None
     utils.get_settings(filepath=filepath)
     db = utils.get_db()
-    orderportal.designs.load_design_documents(db)
-    orderportal.admin.load_default_texts(db)
+    orderportal.designs.update_design_documents(db)
+    orderportal.admin.update_meta_documents(db)
+    orderportal.admin.load_texts(db)
     orderportal.admin.load_order_statuses(db)
 
     url = tornado.web.url
@@ -296,12 +297,22 @@ def main():
         url(
             r"/admin/order_statuses",
             orderportal.admin.OrderStatuses,
-            name="order_statuses",
+            name="admin_order_statuses",
+        ),
+        url(
+            r"/admin/order_status/([^/]+)/enable",
+            orderportal.admin.OrderStatusEnable,
+            name="order_status_enable",
         ),
         url(
             r"/admin/order_status/([^/]+)",
-            orderportal.admin.OrderStatusEnable,
-            name="order_status_enable",
+            orderportal.admin.OrderStatusEdit,
+            name="admin_order_status_edit",
+        ),
+        url(
+            r"/admin/order_transitions/([^/]+)",
+            orderportal.admin.OrderTransitionsEdit,
+            name="admin_order_transitions_edit",
         ),
         url(
             r"/admin/order_messages",
@@ -327,6 +338,7 @@ def main():
     application = tornado.web.Application(
         handlers=handlers,
         debug=settings.get("TORNADO_DEBUG", False),
+        autoreload=settings.get("TORNADO_DEBUG", False),
         cookie_secret=settings["COOKIE_SECRET"],
         xsrf_cookies=True,
         ui_modules=orderportal.uimodules,

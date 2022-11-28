@@ -1,4 +1,4 @@
-{# Order status admin page. #}
+{# Admin order statuses page. #}
 
 {% extends "base.html" %}
 
@@ -15,7 +15,7 @@
 </div>
 {% end %}
 
-<table class="table table-condensed">
+<table class="table">
   <tr>
     <th>Status</th>
     <th>Description</th>
@@ -24,74 +24,49 @@
     <th>May edit {{ terminology('order') }}</th>
     <th>May attach to {{ terminology('order') }}</th>
     <th># orders</th>
+    <th></th>
   </tr>
-  {% for status in parameters['ORDER_STATUSES'] %}
-  {% if status.get("enabled") %}
+  {% for status in enabled %}
   <tr>
     <th>{% module Icon(status['identifier'], label=True) %}</th>
-    <td>
-      {{ status['description'] }}
-    </td>
+    <td>{{ status['description'] }}</td>
     <td>
       {% if status.get('initial') %}
       <i>[initial status]</i><br>
       {% end %}
-      {% set none = '[none]' %}
-      {% set first = True %}
-      {% for trans in parameters['ORDER_TRANSITIONS'] %}
-      {% if status['identifier'] in trans['targets'] %}
-      {% if first %}
-      {% set first = False %}
-      {% else %}
-      <br>
+      {% for source, transition in targets.get(status["identifier"], {}).items() %}
+      <strong>{{ source }}</strong> ({{', '.join(transition['permission']) }})<br>
       {% end %}
-      {% set none = '' %}
-      <strong>{{ trans['source'] }}</strong>
-      ({{', '.join(trans['permission']) }})
-      {% end %}
-      {% end %}
-      {{ none }}
     </td>
     <td>
-      {% set none = '[none]' %}
-      {% set first = True %}
-      {% for trans in parameters['ORDER_TRANSITIONS'] %}
-      {% if status['identifier'] == trans['source'] %}
-      {% for target in trans['targets'] %}
-      {% if first %}
-      {% set first = False %}
-      {% else %}
-      <br>
+      {% for target, transition in sources.get(status["identifier"], {}).items() %}
+      <strong>{{ target }}</strong> ({{', '.join(transition['permission']) }})<br>
       {% end %}
-      {% set none = '' %}
-      <strong>{{ target }}</strong>
-      ({{', '.join(trans['permission']) }})
-      {% end %}
-      {% end %}
-      {% end %}
-      {{ none }}
     </td>
+    <td>{{ ', '.join(sorted(set(['admin'] + status.get('edit', [])))) or '-' }}</td>
+    <td>{{ ', '.join(sorted(set(['admin'] + status.get('attach', [])))) or '-' }}</td>
     <td>
-      {{ ', '.join(sorted(set(['admin'] + status.get('edit', [])))) or '-' }}
-    </td>
-    <td>
-      {{ ', '.join(sorted(set(['admin'] + status.get('attach', [])))) or '-' }}
-    </td>
-    <td class="text-right">
-      <a href="{{ reverse_url('orders', status=status['identifier']) }}"
-         class="badge">
+      <a href="{{ reverse_url('orders', status=status['identifier']) }}" class="badge">
         {{ counts.get(status['identifier'], 0) }}
       </a>
     </td>
+    <td>
+      <a href="{{ reverse_url('admin_order_status_edit', status['identifier']) }}",
+         class="btn btn-sm btn-primary btn-block" role="button">
+        <span class="glyphicon glyphicon-edit"></span> Edit status
+      </a>
+      <a href="{{ reverse_url('admin_order_transitions_edit', status['identifier']) }}",
+         class="btn btn-sm btn-primary btn-block" role="button">
+        <span class="glyphicon glyphicon-edit"></span> Edit transitions
+      </a>
+    </td>
   </tr>
-  {% end %} {# if status.get("enabled") #}
-  {% end %} {# for status in parameters['ORDER_STATUSES'] #}
+  {% end %} {# for status in enabled #}
 
-  {% for status in parameters['ORDER_STATUSES'] %}
-  {% if not status.get("enabled") %}
+  {% for status in not_enabled %}
   <tr>
     <th>{% module Icon(status['identifier'], label=True) %}</th>
-    <td colspan="5">
+    <td colspan="6">
       <i>Not enabled</i>
     </td>
     <td>
@@ -106,7 +81,6 @@
       </form>
     </td>
   </tr>
-  {% end %} {# if status.get("enabled") #}
-  {% end %} {# for status in parameters['ORDER_STATUSES'] #}
+  {% end %} {# for status in not_enabled #}
 </table>
 {% end %} {# block content #}

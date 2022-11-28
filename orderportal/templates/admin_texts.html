@@ -18,7 +18,7 @@
     <tr>
       <th>Text</th>
       <th>Description</th>
-      <th></th>
+      <th width="10%"></th>
     </tr>
   </thead>
   <tbody>
@@ -28,8 +28,8 @@
       <td>{{ description }}</td>
       <td>
         <a href="{{ reverse_url('text', name) }}"
-           class="btn btn-primary btn-sm" role="button">
-          Edit
+           class="btn btn-primary btn-sm btn-block" role="button">
+          <span class="glyphicon glyphicon-edit"></span> Edit
         </a>
       </td>
     </tr>

@@ -12,8 +12,7 @@ import urllib.parse
 import couchdb2
 import tornado.web
 
-from orderportal import constants
-from orderportal import settings, parameters
+from orderportal import constants, settings, parameters
 from orderportal import utils
 
 
@@ -23,10 +22,6 @@ class RequestHandler(tornado.web.RequestHandler):
     def prepare(self):
         "Get the database connection."
         self.db = utils.get_db()
-        try:  # Remove obsolete doc from db.
-            self.db.delete("global_modes")
-        except couchdb2.NotFoundError:
-            pass
 
     def get_template_namespace(self):
         "Set the items accessible within the template."
