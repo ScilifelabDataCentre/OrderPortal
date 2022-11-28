@@ -35,12 +35,18 @@
       <i>[initial status]</i><br>
       {% end %}
       {% for source, transition in targets.get(status["identifier"], {}).items() %}
-      <strong>{{ source }}</strong> ({{', '.join(transition['permission']) }})<br>
+      <strong>{{ source }}</strong>
+      {% if transition.get('require_valid') %}<i>require valid</i>{% end %}
+      ({{', '.join(transition['permission']) }})
+      <br>
       {% end %}
     </td>
     <td>
       {% for target, transition in sources.get(status["identifier"], {}).items() %}
-      <strong>{{ target }}</strong> ({{', '.join(transition['permission']) }})<br>
+      <strong>{{ target }}</strong>
+      {% if transition.get('require_valid') %}<i>require valid</i>{% end %}
+      ({{', '.join(transition['permission']) }})
+      <br>
       {% end %}
     </td>
     <td>{{ ', '.join(sorted(set(['admin'] + status.get('edit', [])))) or '-' }}</td>

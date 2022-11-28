@@ -613,12 +613,14 @@ class OrderTransitionsEdit(RequestHandler):
         except KeyError:
             self.see_other("admin_order_statuses", error="No such order status.")
         else:
-            # XXX
-            transitions = [t for t in parameters["ORDER_TRANSITIONS"] 
-                           if t["source"] == status_id]
+            targets = parameters["ORDER_TRANSITIONS"].get(status_id, dict())
+            # Defensive: only allow enabled statuses as targets.
+            for target in targets.keys():
+                if target not in parameters["ORDER_STATUSES_LOOKUP"]:
+                    targets.pop(target)
             self.render("admin_order_transitions_edit.html",
                         status=status,
-                        transitions=transitions)
+                        targets=targets)
 
     @tornado.web.authenticated
     def post(self, status_id):
