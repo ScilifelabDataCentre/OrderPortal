@@ -343,7 +343,7 @@ def update_meta_documents(db):
                     value = dict(permission=legacy_trans["permission"])
                     if legacy_trans.get("require") == "valid":
                         value["require_valid"] = True
-                    parameters["ORDER_TRANSITIONS"][legacy_trans["source"]][target] = vvalue
+                    parameters["ORDER_TRANSITIONS"][legacy_trans["source"]][target] = value
 
         initial = None
         for status in parameters["ORDER_STATUSES"]:
@@ -520,11 +520,22 @@ class OrderStatuses(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
+        enabled = [s for s in parameters["ORDER_STATUSES"] if s.get("enabled")]
+        not_enabled = [s for s in parameters["ORDER_STATUSES"] if not s.get("enabled")]
+        targets = {}
+        for source, transitions in parameters["ORDER_TRANSITIONS"].items():
+            for target, transition in transitions.items():
+                targets.setdefault(target, {})[source] = transition
         view = self.db.view(
             "order", "status", group_level=1, startkey=[""], endkey=[constants.CEILING]
         )
         counts = dict([(r.key[0], r.value) for r in view])
-        self.render("admin_order_statuses.html", counts=counts)
+        self.render("admin_order_statuses.html",
+                    enabled=enabled,
+                    not_enabled=not_enabled,
+                    sources=parameters["ORDER_TRANSITIONS"],
+                    targets=targets,
+                    counts=counts)
 
 
 class OrderStatusEnable(RequestHandler):
@@ -602,6 +613,7 @@ class OrderTransitionsEdit(RequestHandler):
         except KeyError:
             self.see_other("admin_order_statuses", error="No such order status.")
         else:
+            # XXX
             transitions = [t for t in parameters["ORDER_TRANSITIONS"] 
                            if t["source"] == status_id]
             self.render("admin_order_transitions_edit.html",
