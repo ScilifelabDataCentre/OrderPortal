@@ -28,9 +28,8 @@ Edit {{ terminology('order') }} transitions from '{{ status['identifier'] }}'
             method="POST" role="button">
         {% module xsrf_form_html() %}
         <input type="hidden" name="_http_method" value="delete">
-        <button type="submit" name="target"
-                class="btn btn-danger"
-                value="{{ target }}">
+        <input type="hidden" name="target" value="{{ target }}">
+        <button type="submit" class="btn btn-danger">
           <span class="glyphicon glyphicon-remove"></span> Delete
         </button>
       </form>
@@ -39,12 +38,68 @@ Edit {{ terminology('order') }} transitions from '{{ status['identifier'] }}'
   {% end %}
 </table>
 
+<hr>
+<h4>Add new transition</h4>
 <form action="{{ reverse_url('admin_order_transitions_edit', status['identifier']) }}"
       method="POST" role="form">
   {% module xsrf_form_html() %}
-  <button type="submit" class="btn btn-success">
-    <span class="glyphicon glyphicon-save"></span> Save
-  </button>
+  <div class="row">
+    <div class="col-md-3">
+      <div class="form-group">
+        <label for="target">To status</label>
+        {% for target in new_targets %}
+        <div class="radio">
+          <label>
+            <input type="radio" name="target" value="{{ target }}"> {{ target }}
+          </label>
+        </div>
+        {% end %}
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="form-group">
+        <label for="permission">Permission</label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" id="permission" name="permission"
+                   value="admin" checked> admin
+          </label>
+        </div>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="permission" value="staff"> staff
+          </label>
+        </div>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="permission" value="user"> user
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="form-group">
+        <label for="require_valid">Require valid</label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" id="require_valid" name="require_valid" value="yes">
+            Yes
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-save"></span> Save
+      </button>
+    </div>
+    <div class="col-md-10">
+      If the transition already exists, its data will be overwritten.
+    </div>
+  </div>
 </form>
 
 {% end %} {# block main_content #}

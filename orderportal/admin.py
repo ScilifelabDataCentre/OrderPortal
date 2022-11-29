@@ -618,19 +618,53 @@ class OrderTransitionsEdit(RequestHandler):
             for target in targets.keys():
                 if target not in parameters["ORDER_STATUSES_LOOKUP"]:
                     targets.pop(target)
+            new_targets = [t for t in parameters["ORDER_STATUSES_LOOKUP"].keys()
+                           if t != status_id]
             self.render("admin_order_transitions_edit.html",
                         status=status,
-                        targets=targets)
+                        targets=targets,
+                        new_targets=new_targets)
 
     @tornado.web.authenticated
     def post(self, status_id):
         self.check_admin()
-        try:
-            status = parameters["ORDER_STATUSES_LOOKUP"][status_id]
-        except KeyError:
-            self.see_other("admin_order_statuses", error="No such order status.")
+        if self.get_argument("_http_method", None) == "delete":
+            self.delete(status_id)
             return
-        self.see_other("admin_order_transitions_edit", status_id)
+        try:
+            source = parameters["ORDER_STATUSES_LOOKUP"][status_id]
+            target = parameters["ORDER_STATUSES_LOOKUP"][self.get_argument("target")]
+        except (tornado.web.MissingArgumentError, KeyError):
+            self.see_other("admin_order_statuses", error="Invalid or missing order status.")
+            return
+        permission = self.get_arguments("permission")
+        if not permission:
+            self.see_other("admin_order_statuses", error="No permissions specified.")
+            return
+        value = dict(permission=permission)
+        if utils.to_bool(self.get_argument("require_valid", False)):
+            value["require_valid"] = True
+        parameters["ORDER_TRANSITIONS"][source["identifier"]][target["identifier"]] = value
+        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+            saver["statuses"] = parameters["ORDER_STATUSES"]
+            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
+        load_order_statuses(self.db)
+        self.see_other("admin_order_statuses")
+
+    @tornado.web.authenticated
+    def delete(self, status_id):
+        try:
+            source = parameters["ORDER_STATUSES_LOOKUP"][status_id]
+            target = parameters["ORDER_STATUSES_LOOKUP"][self.get_argument("target")]
+            parameters["ORDER_TRANSITIONS"][source["identifier"]].pop(target["identifier"])
+        except (tornado.web.MissingArgumentError, KeyError):
+            self.see_other("admin_order_statuses", error="Invalid or missing order status.")
+            return
+        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+            saver["statuses"] = parameters["ORDER_STATUSES"]
+            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
+        load_order_statuses(self.db)
+        self.see_other("admin_order_statuses")
 
 
 class OrderMessages(RequestHandler):

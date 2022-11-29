@@ -123,10 +123,10 @@ class FileEdit(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, name):
-        self.check_admin()
         if self.get_argument("_http_method", None) == "delete":
             self.delete(name)
             return
+        self.check_admin()
         file = self.get_entity_view("file", "name", name)
         with FileSaver(doc=file, rqh=self) as saver:
             try:
