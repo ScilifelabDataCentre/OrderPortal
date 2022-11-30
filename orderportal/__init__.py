@@ -120,6 +120,7 @@ class Constants:
     BANNED_META_IDS = frozenset(["account_messages", "order_messages", "global_modes"])
 
     # Texts for use in various pages of the web site. Text content stored in database.
+    # (I regret this design decision, but there is no point in fixing it. It works.)
     TEXTS = dict(
         header="Header on portal home page.",
         register="Registration page.",
@@ -203,7 +204,7 @@ class Constants:
 constants = Constants()
 
 
-# Default settings, may be changed in a settings YAML file.
+# Default settings. May be changed in the settings YAML file.
 settings = dict(
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
@@ -252,9 +253,6 @@ settings = dict(
     ORDER_USER_TAGS=True,
     ORDER_LINKS=True,
     ORDER_REPORT=True,
-    ORDERS_LIST_TAGS=False,
-    ORDERS_LIST_FIELDS=[],
-    ORDERS_LIST_STATUSES=[],
     ORDERS_SEARCH_DELIMS_LINT=[":", ",", ";", "'"],
     ORDERS_SEARCH_LINT=["an", "to", "in", "on", "of", "and", "the", "is", "was", "not"],
     ORDERS_SEARCH_FIELDS=[],
@@ -282,7 +280,6 @@ settings = dict(
     DISPLAY_DEFAULT_PAGE_SIZE=25, # Number of paged items in a table.
     DISPLAY_MAX_RECENT_ORDERS=10, # Max number in home page for admin and staff.
     DISPLAY_MAX_PENDING_ACCOUNTS=10, # Max number in home page for admin and staff.
-    DISPLAY_ORDERS_MOST_RECENT=500, # Limit in all orders table; default.
     DISPLAY_DEFAULT_MAX_LOG=20,     # Max number of log items displayed.
     DISPLAY_NEWS=True,
     DISPLAY_MAX_NEWS=4,
@@ -295,5 +292,5 @@ settings = dict(
 )
 
 # In-memory copy of various configuration values such as order statuses and transitions.
-# Read from the database on server startup.
+# Read from the database on server startup. Modifiable via the web interface.
 parameters = {}

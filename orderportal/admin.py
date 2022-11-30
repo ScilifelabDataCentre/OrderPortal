@@ -183,6 +183,7 @@ DEFAULT_ORDER_TRANSITIONS[constants.PREPARATION][constants.SUBMITTED] = \
     dict(permission=["admin", "staff", "user"], require_valid=True)
 
 
+# (I regret this design decision, but there is no point in fixing it. It works.)
 DEFAULT_TEXTS = dict(
     header="""This is a portal for placing orders. You need to have an account and
 be logged in to create, edit, submit and view orders.
@@ -268,6 +269,7 @@ class MetaSaver(saver.Saver):
         pass
 
 
+# (I regret this design decision, but there is no point in fixing it. It works.)
 class TextSaver(saver.Saver):
     doctype = constants.TEXT
 
@@ -275,17 +277,17 @@ class TextSaver(saver.Saver):
 def update_meta_documents(db):
     "Update or delete meta documents for the current version."
 
-    # As of version 6.0 (I think), there are no longer any global modes.
-    # Delete document 'global_modes' if present.
+    ### As of version 6.0 (I think), there are no longer any global modes.
+    ### Delete document 'global_modes' if present.
     try:
         db.delete("global_modes")
     except couchdb2.NotFoundError:
         pass
 
+    ### As of version 6.0, the order statuses data is kept in a meta document
+    ### in the database. It is no longer read from the file in
+    ### the 'site' directory specified in 'settings.yaml'.
     if "order_statuses" not in db:
-        # As of version 6.0, the order statuses data is kept in a meta document
-        # in the database. It is no longer read from the file in
-        # the 'site' directory specified in 'settings.yaml'.
 
         # If the 'order_statuses' document is not in the database, then create it.
         # Start with the default setup.
@@ -362,13 +364,13 @@ def update_meta_documents(db):
             saver["transitions"] = parameters["ORDER_TRANSITIONS"]
         logging.info("saved order statuses to database")
 
+    ### As of version 7.0, the layout of the transitions data ha been changed
+    ### to a dict having (key: source status, value: dict of target statues
+    ### with valid flag (instead of "require" key) and permissions list.
     doc = db["order_statuses"]
     parameters["ORDER_STATUSES"] = doc["statuses"]
     parameters["ORDER_TRANSITIONS"] = doc["transitions"]
     if isinstance(parameters["ORDER_TRANSITIONS"], list):
-        # As of version 7.0, the layout of the transitions data ha been changed
-        # to a dict having (key: source status, value: dict of target statues
-        # with valid flag (instead of "require" key) and permissions list.
         new = dict([(s["identifier"], dict()) for s in parameters["ORDER_STATUSES"]])
         for trans in parameters["ORDER_TRANSITIONS"]:
             for target in trans["targets"]:
@@ -385,10 +387,24 @@ def update_meta_documents(db):
             saver["transitions"] = parameters["ORDER_TRANSITIONS"]
         logging.info("saved updated order transitions to database")
 
+    # As of version 7.0.3, the list of order statuses to show in
+    # the order list is stored in the database, not in the settings file.
+    if "orders_list" not in db:
+        with MetaSaver(db=db) as saver:
+            saver.set_id("orders_list")
+            saver["tags"] = settings.get("ORDERS_LIST_TAGS", False)
+            saver["statuses"] = settings.get("ORDERS_LIST_STATUSES", list())
+            saver["fields"] = settings.get("ORDERS_LIST_FIELDS", list())
+            saver["max_most_recent"] = settings.get("DISPLAY_ORDERS_MOST_RECENT", 500)
+            saver["default_order_column"] = "modified"
+            saver["default_order_sort"] = "desc"
+        logging.info("saved orders list parameters to database")
+            
 
 def load_texts(db):
     """Load the default texts if not already in the database.
     Remove old multiple texts; clean up previous mistake.
+    (I regret this design decision, but there is no point in fixing it. It works.)
     """
     loaded = False
     for name in constants.TEXTS:
@@ -398,8 +414,8 @@ def load_texts(db):
                 saver["name"] = name
                 saver["text"] = DEFAULT_TEXTS.get(name, "")
             loaded = True
-        elif len(docs) > 1:     # Deal with the consequence of a previous bug.
-            newest = docs[0]
+        elif len(docs) > 1:     # Deal with the consequence of a previous mistake.
+            newest = docs[0]    # When more than one copy, then remove the older ones.
             for doc in docs[1:]:
                 if doc["modified"] > newest["modified"]:
                     newest = doc
@@ -413,6 +429,7 @@ def load_texts(db):
 
 class Text(RequestHandler):
     "Edit page for information text."
+    # (I regret this design decision, but there is no point in fixing it. It works.)
 
     @tornado.web.authenticated
     def get(self, name):
@@ -439,6 +456,7 @@ class Text(RequestHandler):
 
 class Texts(RequestHandler):
     "Page listing texts used in the web site."
+    # (I regret this design decision, but there is no point in fixing it. It works.)
 
     @tornado.web.authenticated
     def get(self):
@@ -446,14 +464,25 @@ class Texts(RequestHandler):
         self.render("admin_texts.html", texts=sorted(constants.TEXTS.items()))
 
 
-def load_order_statuses(db):
-    """Load the order statuses and transitions from the database into 'parameters',
+def load_parameters(db):
+    """Load the parameters from the database:
+    - order statuses and transitions
+    - orders list parameters
     and setup derived variable values.
     """
     doc = db["order_statuses"]
     parameters["ORDER_STATUSES"] = doc["statuses"]
     parameters["ORDER_TRANSITIONS"] = doc["transitions"]
     logging.info("loaded order statuses from database into 'parameters'")
+
+    doc = db["orders_list"]
+    parameters["ORDERS_LIST_STATUSES"] = doc["statuses"]
+    parameters["ORDERS_LIST_TAGS"] = doc["tags"]
+    parameters["ORDERS_LIST_FIELDS"] = doc["fields"]
+    parameters["DISPLAY_ORDERS_MOST_RECENT"] = doc["max_most_recent"]
+    parameters["DEFAULT_ORDER_COLUMN"] = doc["default_order_column"]
+    parameters["DEFAULT_ORDER_SORT"] = doc["default_order_sort"]
+    logging.info("loaded orders list parameters from database into 'parameters'")
 
     # Lookup for the enabled statuses.
     parameters["ORDER_STATUSES_LOOKUP"] = dict(
@@ -506,6 +535,10 @@ class Settings(RequestHandler):
         ] = f"<see file {mod_settings['ORDER_MESSAGES_FILE']}>"
         for obsolete in ["ORDER_STATUSES_FILE", 
                          "ORDER_TRANSITIONS_FILE",
+                         "ORDERS_LIST_TAGS",
+                         "ORDERS_LIST_STATUSES",
+                         "ORDERS_LIST_FIELDS",
+                         "DISPLAY_ORDERS_MOST_RECENT",
                          "SITE_PERSONAL_DATA_POLICY"]:
             try:
                 mod_settings[obsolete] += " &lt;<b>OBSOLETE; NO LONGER USED</b>&gt;"
@@ -553,7 +586,7 @@ class OrderStatusEnable(RequestHandler):
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
             saver["statuses"] = parameters["ORDER_STATUSES"]
             saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        load_order_statuses(self.db)
+        load_parameters(self.db)
         self.see_other("admin_order_statuses")
         
 
@@ -598,7 +631,7 @@ class OrderStatusEdit(RequestHandler):
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
             saver["statuses"] = parameters["ORDER_STATUSES"]
             saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        load_order_statuses(self.db)
+        load_parameters(self.db)
         self.see_other("admin_order_statuses")
 
 
@@ -648,7 +681,7 @@ class OrderTransitionsEdit(RequestHandler):
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
             saver["statuses"] = parameters["ORDER_STATUSES"]
             saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        load_order_statuses(self.db)
+        load_parameters(self.db)
         self.see_other("admin_order_statuses")
 
     @tornado.web.authenticated
@@ -663,8 +696,17 @@ class OrderTransitionsEdit(RequestHandler):
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
             saver["statuses"] = parameters["ORDER_STATUSES"]
             saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        load_order_statuses(self.db)
+        load_parameters(self.db)
         self.see_other("admin_order_statuses")
+
+
+class OrdersList(RequestHandler):
+    "Orders list parameters handling."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render("admin_orders_list.html")
 
 
 class OrderMessages(RequestHandler):

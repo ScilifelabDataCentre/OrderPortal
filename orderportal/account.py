@@ -546,13 +546,18 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        if self.is_staff():
-            order_column = 4
+        # Default ordering by the 'modified' column.
+        if parameters["DEFAULT_ORDER_COLUMN"] == "modified":
+            order_column = (
+                int(parameters["ORDERS_LIST_TAGS"]) # boolean
+                + len(parameters["ORDERS_LIST_FIELDS"]) # list
+                + len(parameters["ORDERS_LIST_STATUSES"]) # list
+            )
+            if self.is_staff():
+                order_column += 1
+        # Otherwise default ordering by the identifier column.
         else:
-            order_column = 3
-        order_column += len(settings["ORDERS_LIST_STATUSES"]) + len(
-            settings["ORDERS_LIST_FIELDS"]
-        )
+            order_column = 0
         view = self.db.view(
             "order",
             "owner",
@@ -622,13 +627,18 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        if self.is_staff():
-            order_column = 5
+        # Default ordering by the 'modified' column.
+        if parameters["DEFAULT_ORDER_COLUMN"] == "modified":
+            order_column = (
+                int(parameters["ORDERS_LIST_TAGS"]) # boolean
+                + len(parameters["ORDERS_LIST_FIELDS"]) # list
+                + len(parameters["ORDERS_LIST_STATUSES"]) # list
+            )
+            if self.is_staff():
+                order_column += 1
+        # Otherwise default ordering by the identifier column.
         else:
-            order_column = 4
-        order_column += len(settings["ORDERS_LIST_STATUSES"]) + len(
-            settings["ORDERS_LIST_FIELDS"]
-        )
+            order_column = 0
         self.render(
             "account_groups_orders.html",
             account=account,

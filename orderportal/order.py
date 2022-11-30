@@ -1637,13 +1637,17 @@ class Orders(RequestHandler):
             all_count = 0
         else:
             all_count = r.value
-        # Initial ordering by the 'modified' column.
-        order_column = (
-            5
-            + int(settings["ORDERS_LIST_TAGS"])
-            + len(settings["ORDERS_LIST_FIELDS"])
-            + len(settings["ORDERS_LIST_STATUSES"])
-        )
+        # Default ordering by the 'modified' column.
+        if parameters["DEFAULT_ORDER_COLUMN"] == "modified":
+            order_column = (
+                5
+                + int(parameters["ORDERS_LIST_TAGS"]) # boolean
+                + len(parameters["ORDERS_LIST_FIELDS"]) # list
+                + len(parameters["ORDERS_LIST_STATUSES"]) # list
+            )
+        # Otherwise default ordering by the identifier column.
+        else:
+            order_column = 0
         self.set_filter()
         self.render(
             "orders.html",
@@ -1660,7 +1664,7 @@ class Orders(RequestHandler):
         "Set the filter parameters dictionary."
         self.filter = dict()
         for key in ["status", "form_id", "owner"] + [
-            f["identifier"] for f in settings["ORDERS_LIST_FIELDS"]
+            f["identifier"] for f in parameters["ORDERS_LIST_FIELDS"]
         ]:
             try:
                 value = self.get_argument(key)
@@ -1676,7 +1680,7 @@ class Orders(RequestHandler):
         orders = self.filter_by_status(self.filter.get("status"))
         orders = self.filter_by_form(self.filter.get("form_id"), orders=orders)
         orders = self.filter_by_owner(self.filter.get("owner"), orders=orders)
-        for f in settings["ORDERS_LIST_FIELDS"]:
+        for f in parameters["ORDERS_LIST_FIELDS"]:
             orders = self.filter_by_field(
                 f["identifier"], self.filter.get(f["identifier"]), orders=orders
             )
@@ -1758,11 +1762,11 @@ class Orders(RequestHandler):
                     "modified",
                     include_docs=True,
                     descending=True,
-                    limit=settings["DISPLAY_ORDERS_MOST_RECENT"],
+                    limit=parameters["DISPLAY_ORDERS_MOST_RECENT"],
                 )
                 orders = [r.doc for r in view]
             else:
-                orders = orders[: settings["DISPLAY_ORDERS_MOST_RECENT"]]
+                orders = orders[: parameters["DISPLAY_ORDERS_MOST_RECENT"]]
 
         elif year == "all":
             if orders is None:
@@ -1805,7 +1809,7 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
         account_names = self.get_account_names()
         forms_lookup = self.get_forms_lookup()
         result["items"] = []
-        keys = [f["identifier"] for f in settings["ORDERS_LIST_FIELDS"]]
+        keys = [f["identifier"] for f in parameters["ORDERS_LIST_FIELDS"]]
         for order in self.get_orders():
             data = self.get_order_json(
                 order, account_names=account_names, forms_lookup=forms_lookup
@@ -1843,9 +1847,9 @@ class OrdersCsv(Orders):
             "Owner URL",
             "Tags",
         ]
-        row.extend([f["identifier"] for f in settings["ORDERS_LIST_FIELDS"]])
+        row.extend([f["identifier"] for f in parameters["ORDERS_LIST_FIELDS"]])
         row.append("Status")
-        row.extend([s.capitalize() for s in settings["ORDERS_LIST_STATUSES"]])
+        row.extend([s.capitalize() for s in parameters["ORDERS_LIST_STATUSES"]])
         row.append("Modified")
         writer.writerow(row)
         account_names = self.get_account_names()
@@ -1865,10 +1869,10 @@ class OrdersCsv(Orders):
                 self.absolute_reverse_url("account", order["owner"]),
                 ", ".join(order.get("tags", [])),
             ]
-            for f in settings["ORDERS_LIST_FIELDS"]:
+            for f in parameters["ORDERS_LIST_FIELDS"]:
                 row.append(order["fields"].get(f["identifier"]))
             row.append(order["status"])
-            for s in settings["ORDERS_LIST_STATUSES"]:
+            for s in parameters["ORDERS_LIST_STATUSES"]:
                 row.append(order["history"].get(s))
             row.append(order["modified"])
             writer.writerow(row)

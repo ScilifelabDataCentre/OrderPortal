@@ -1,0 +1,19 @@
+{# Admin order statuses page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}{{ terminology('Order') }} list parameters{% end %}
+
+{% block body_title %}{{ terminology('Order') }} list parameters{% end %}
+
+{% block main_content %}
+{% if settings.get("ORDERS_LIST_TAGS") or settings.get("ORDERS_LIST_STATUSES") or settings.get("ORDERS_LIST_FIELDS") or settings.get("DISPLAY_ORDERS_MOST_RECENT") %}
+<div class="well">
+  <strong>NOTE!</strong> The settings ORDERS_LIST_TAGS,
+  ORDERS_LIST_STATUSES, ORDERS_LIST_FIELDS and
+  DISPLAY_ORDERS_MOST_RECENT are no longer used. Remove these from the 'settings.yaml'
+  file to avoid confusion.
+</div>
+{% end %}
+
+{% end %} {# block main_content #}

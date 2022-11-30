@@ -44,14 +44,14 @@
           {% if is_staff %}
           <th>{% module Icon('form', label=True) %}</th>
           {% end %} {# if is_staff #}
-          {% if settings['ORDER_TAGS'] and settings['ORDERS_LIST_TAGS'] %}
+          {% if parameters['ORDERS_LIST_TAGS'] %}
           <th width="5%">Keywords (tags)</th>
           {% end %}
-          {% for f in settings['ORDERS_LIST_FIELDS'] %}
+          {% for f in parameters['ORDERS_LIST_FIELDS'] %}
           <th>{{ f.get('label') or f['identifier'].replace('_', ' ').capitalize() }}</th>
           {% end %}
           <th>Status</th>
-          {% for s in settings['ORDERS_LIST_STATUSES'] %}
+          {% for s in parameters['ORDERS_LIST_STATUSES'] %}
           <th>{% module Icon(s, label=True) %}</th>
           {% end %}
           <th>Modified</th>
@@ -69,14 +69,14 @@
             </a>
           </td>
           {% end %} {# if is_staff #}
-          {% if settings['ORDER_TAGS'] and settings['ORDERS_LIST_TAGS'] %}
+          {% if parameters['ORDERS_LIST_TAGS'] %}
           <td>{% module Tags(order.get('tags', [])) %}</td>
           {% end %}
-          {% for f in settings['ORDERS_LIST_FIELDS'] %}
+          {% for f in parameters['ORDERS_LIST_FIELDS'] %}
           <td>{% module NoneStr(order['fields'].get(f['identifier'])) %}</td>
           {% end %}
           <td>{% module Icon(order['status'], label=True) %}</td>
-          {% for s in settings['ORDERS_LIST_STATUSES'] %}
+          {% for s in parameters['ORDERS_LIST_STATUSES'] %}
           <td>{% module NoneStr(order['history'].get(s)) %}</td>
           {% end %}
           <td class="localtime nobr">{{ order['modified'] }}</td>
@@ -94,7 +94,7 @@ $(function() {
   $("#orders").DataTable( {
     "pagingType": "full_numbers",
     "pageLength": 25,
-    "order": [[{{ order_column }}, "desc"]],
+    "order": [[{{ order_column }}, "{{ parameters['DEFAULT_ORDER_SORT'] }}"]],
   });
 });
 </script>

@@ -36,7 +36,7 @@ def main():
     orderportal.designs.update_design_documents(db)
     orderportal.admin.update_meta_documents(db)
     orderportal.admin.load_texts(db)
-    orderportal.admin.load_order_statuses(db)
+    orderportal.admin.load_parameters(db)
 
     url = tornado.web.url
     handlers = [
@@ -298,6 +298,11 @@ def main():
             r"/admin/order_statuses",
             orderportal.admin.OrderStatuses,
             name="admin_order_statuses",
+        ),
+        url(
+            r"/admin/orders_list",
+            orderportal.admin.OrdersList,
+            name="admin_orders_list",
         ),
         url(
             r"/admin/order_status/([^/]+)/enable",
