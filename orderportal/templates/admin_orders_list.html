@@ -16,4 +16,55 @@
 </div>
 {% end %}
 
+<table class="table">
+  <tr>
+    <th>Parameter</th>
+    <th>Description</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <th>Order tags</th>
+    <td>
+      Display the tags for an order in the orders list.
+    </td>
+    <td>{{ parameters['ORDERS_LIST_TAGS'] and 'Yes' or 'No' }}</td>
+  </tr>
+  <tr>
+    <th>Statuses</th>
+    <td>
+      Display a column for each given order status, showing the date
+      for the order having reached it.
+    </td>
+    <td>{{ ', '.join(parameters['ORDERS_LIST_STATUSES']) }}</td>
+  </tr>
+  <tr>
+    <th>Fields</th>
+    <td>
+      Display a column for each given order field. The field does not have
+      to exist in every order.
+    </td>
+    <td>{{ ', '.join(parameters['ORDERS_LIST_FIELDS']) }}</td>
+  </tr>
+  <tr>
+    <th>Max most recent</th>
+    <td>
+      The maximum number of orders fetched by default for the orders list.
+    </td>
+    <td>{{ parameters['DISPLAY_ORDERS_MOST_RECENT'] }}</td>
+  </tr>
+  <tr>
+    <th>Default order column</th>
+    <td>
+      The column used for the default ordering in the orders list.
+    </td>
+    <td>{{ parameters['DEFAULT_ORDER_COLUMN'] }}</td>
+  </tr>
+  <tr>
+    <th>Default order sort</th>
+    <td>
+      The default sort direction for the default ordering in the orders list.
+    </td>
+    <td>{{ parameters['DEFAULT_ORDER_SORT'] }}</td>
+  </tr>
+</table>
 {% end %} {# block main_content #}

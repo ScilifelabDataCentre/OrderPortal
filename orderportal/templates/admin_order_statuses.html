@@ -48,6 +48,10 @@
       ({{', '.join(transition['permission']) }})
       <br>
       {% end %}
+      <a href="{{ reverse_url('admin_order_transitions_edit', status['identifier']) }}",
+         class="btn btn-sm btn-primary btn-block" role="button">
+        <span class="glyphicon glyphicon-edit"></span> Edit transitions
+      </a>
     </td>
     <td>{{ ', '.join(sorted(set(['admin'] + status.get('edit', [])))) or '-' }}</td>
     <td>{{ ', '.join(sorted(set(['admin'] + status.get('attach', [])))) or '-' }}</td>
@@ -60,10 +64,6 @@
       <a href="{{ reverse_url('admin_order_status_edit', status['identifier']) }}",
          class="btn btn-sm btn-primary btn-block" role="button">
         <span class="glyphicon glyphicon-edit"></span> Edit status
-      </a>
-      <a href="{{ reverse_url('admin_order_transitions_edit', status['identifier']) }}",
-         class="btn btn-sm btn-primary btn-block" role="button">
-        <span class="glyphicon glyphicon-edit"></span> Edit transitions from
       </a>
     </td>
   </tr>

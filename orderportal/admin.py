@@ -476,8 +476,8 @@ def load_parameters(db):
     logging.info("loaded order statuses from database into 'parameters'")
 
     doc = db["orders_list"]
-    parameters["ORDERS_LIST_STATUSES"] = doc["statuses"]
     parameters["ORDERS_LIST_TAGS"] = doc["tags"]
+    parameters["ORDERS_LIST_STATUSES"] = doc["statuses"]
     parameters["ORDERS_LIST_FIELDS"] = doc["fields"]
     parameters["DISPLAY_ORDERS_MOST_RECENT"] = doc["max_most_recent"]
     parameters["DEFAULT_ORDER_COLUMN"] = doc["default_order_column"]
@@ -701,12 +701,27 @@ class OrderTransitionsEdit(RequestHandler):
 
 
 class OrdersList(RequestHandler):
-    "Orders list parameters handling."
+    "Display orders list parameters."
 
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
         self.render("admin_orders_list.html")
+
+
+class OrdersListEdit(RequestHandler):
+    "Edit orders list parameters."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render("admin_orders_list_edit.html")
+
+    @tornado.web.authenticated
+    def post(self):
+        self.check_admin()
+        # XXX
+        self.see_other("admin_orders_list")
 
 
 class OrderMessages(RequestHandler):
