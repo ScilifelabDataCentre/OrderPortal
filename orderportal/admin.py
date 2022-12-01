@@ -720,6 +720,12 @@ class OrdersListEdit(RequestHandler):
     @tornado.web.authenticated
     def post(self):
         self.check_admin()
+        logging.info(self.get_argument("orders_list_tags", False))
+        logging.info(self.get_arguments("orders_list_statuses"))
+        logging.info(self.get_argument("orders_list_fields", "-"))
+        logging.info(self.get_argument("orders_most_recent", "-"))
+        logging.info(self.get_argument("default_order_column", "-"))
+        logging.info(self.get_argument("default_order_sort", "-"))
         # XXX
         self.see_other("admin_orders_list")
 

@@ -1,10 +1,22 @@
-{# Admin order statuses page. #}
+{# Admin orders list parameters page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}{{ terminology('Order') }} list parameters{% end %}
+{% block head_title %}{{ terminology('Orders') }} list parameters{% end %}
 
-{% block body_title %}{{ terminology('Order') }} list parameters{% end %}
+{% block body_title %}{{ terminology('Orders') }} list parameters{% end %}
+
+{% block action_content %}
+<p>
+  <form action="{{ reverse_url('admin_orders_list_edit') }}"
+        method="GET" role="form">
+    <button type="submit" class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-edit"></span> Edit
+    </button>
+  </form>
+</p>
+{% end %} {# block action_content #}
+
 
 {% block main_content %}
 {% if settings.get("ORDERS_LIST_TAGS") or settings.get("ORDERS_LIST_STATUSES") or settings.get("ORDERS_LIST_FIELDS") or settings.get("DISPLAY_ORDERS_MOST_RECENT") %}
@@ -33,22 +45,22 @@
     <th>Statuses</th>
     <td>
       Display a column for each given order status, showing the date
-      for the order having reached it.
+      for when the order reached it.
     </td>
     <td>{{ ', '.join(parameters['ORDERS_LIST_STATUSES']) }}</td>
   </tr>
   <tr>
     <th>Fields</th>
     <td>
-      Display a column for each given order field. The field does not have
-      to exist in every order.
+      Display a column for each order field given by its identifier.
+      The field does not have to exist in every order.
     </td>
     <td>{{ ', '.join(parameters['ORDERS_LIST_FIELDS']) }}</td>
   </tr>
   <tr>
     <th>Max most recent</th>
     <td>
-      The maximum number of orders fetched by default for the orders list.
+      The maximum number of most recent orders fetched by default for the orders list.
     </td>
     <td>{{ parameters['DISPLAY_ORDERS_MOST_RECENT'] }}</td>
   </tr>
