@@ -522,17 +522,17 @@ class Settings(RequestHandler):
             mod_settings["DATABASE_SERVER"] = "".join(url)
         mod_settings[
             "ACCOUNT_MESSAGES"
-        ] = f"<see file {mod_settings['ACCOUNT_MESSAGES_FILE']}>"
-        mod_settings["COUNTRIES"] = f"<see file {mod_settings['COUNTRY_CODES_FILE']}>"
+        ] = f"&lt;see file {mod_settings['ACCOUNT_MESSAGES_FILE']}&gt;"
+        mod_settings["COUNTRIES"] = f"&lt;see file {mod_settings['COUNTRY_CODES_FILE']}&gt;"
         mod_settings[
             "COUNTRIES_LOOKUP"
-        ] = f"<computed from file {mod_settings['COUNTRY_CODES_FILE']}>"
+        ] = f"&lt;computed from file {mod_settings['COUNTRY_CODES_FILE']}&gt;"
         mod_settings[
             "ORDER_MESSAGES"
-        ] = f"<see file {mod_settings['ORDER_MESSAGES_FILE']}>"
+        ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}%gt;"
         mod_settings[
             "ORDER_MESSAGES"
-        ] = f"<see file {mod_settings['ORDER_MESSAGES_FILE']}>"
+        ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}&gt;"
         for obsolete in ["ORDER_STATUSES_FILE", 
                          "ORDER_TRANSITIONS_FILE",
                          "ORDERS_LIST_TAGS",
@@ -540,10 +540,8 @@ class Settings(RequestHandler):
                          "ORDERS_LIST_FIELDS",
                          "DISPLAY_ORDERS_MOST_RECENT",
                          "SITE_PERSONAL_DATA_POLICY"]:
-            try:
-                mod_settings[obsolete] += " &lt;<b>OBSOLETE; NO LONGER USED</b>&gt;"
-            except KeyError:
-                pass
+            if obsolete in mod_settings:
+                mod_settings[obsolete] = " &lt;<b>OBSOLETE; NO LONGER USED</b>&gt;"
         self.render("settings.html", settings=mod_settings)
 
 

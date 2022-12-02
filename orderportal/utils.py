@@ -157,9 +157,10 @@ def get_settings(filepath=None, log=True):
         logging.info(f"country codes: {filepath}")
         with open(filepath) as infile:
             settings["COUNTRIES"] = yaml.safe_load(infile) or []
-        settings["COUNTRIES_LOOKUP"] = dict(
-            [(c["code"], c["name"]) for c in settings["COUNTRIES"]]
-        )
+    settings["COUNTRIES_LOOKUP"] = dict(
+        [(c["code"], c["name"]) for c in settings["COUNTRIES"]]
+    )
+    logging.info(f"COUNTRIES {settings['COUNTRIES']}")
 
     # Read subject terms YAML file.
     filepath = settings.get("SUBJECT_TERMS_FILE")
