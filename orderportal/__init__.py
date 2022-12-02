@@ -177,7 +177,10 @@ class Constants:
     XLSM_MIME = "application/vnd.ms-excel.sheet.macroEnabled.12"
 
     # Hard-wired mapping content type -> extension (overriding mimetypes module)
-    MIME_EXTENSIONS = {TEXT_MIME: ".txt", JPEG_MIME: ".jpg", XLSM_MIME: ".xlsm", XLSX_MIME: ".xlsx"}
+    MIME_EXTENSIONS = {TEXT_MIME: ".txt",
+                       JPEG_MIME: ".jpg",
+                       XLSM_MIME: ".xlsm",
+                       XLSX_MIME: ".xlsx"}
 
     # Content-type to icon mapping
     CONTENT_TYPE_ICONS = {
