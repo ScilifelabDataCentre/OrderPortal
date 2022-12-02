@@ -724,7 +724,7 @@ class OrdersListEdit(RequestHandler):
             saver["tags"] = utils.to_bool(self.get_argument("orders_list_tags", False))
             saver["statuses"] = [s for s in self.get_arguments("orders_list_statuses")
                                  if s in parameters["ORDER_STATUSES_LOOKUP"]]
-            saver["fields"] = self.get_argument("orders_list_fields", "").split()
+            saver["fields"] = self.get_argument("orders_list_fields", "").strip().split()
             try:
                 value = int(self.get_argument("orders_most_recent"))
                 if value < 10:
