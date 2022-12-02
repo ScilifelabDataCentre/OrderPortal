@@ -4,14 +4,17 @@
 
 {% block head_title %}{{ terminology('Order') }} statuses{% end %}
 
-{% block body_title %}{{ terminology('Order') }} statuses{% end %}
+{% block body_title %}
+{{ terminology('Order') }} statuses
+<small>Setup of statuses and transitions.</small>
+{% end %}
 
 {% block content %}
 {% if settings.get("ORDER_STATUSES_FILE") or settings.get("ORDER_TRANSITIONS_FILE") %}
 <div class="well">
   <strong>NOTE!</strong> The site files named by settings ORDER_STATUSES_FILE and
-  ORDER_TRANSITIONS_FILE are no longer used. Remove these settings and files to
-  avoid confusion.
+  ORDER_TRANSITIONS_FILE are no longer used. Remove these from the 'settings.yaml'
+  file and also the files themselves to avoid confusion.
 </div>
 {% end %}
 
@@ -35,13 +38,23 @@
       <i>[initial status]</i><br>
       {% end %}
       {% for source, transition in targets.get(status["identifier"], {}).items() %}
-      <strong>{{ source }}</strong> ({{', '.join(transition['permission']) }})<br>
+      <strong>{{ source }}</strong>
+      {% if transition.get('require_valid') %}<i>require valid</i>{% end %}
+      ({{', '.join(transition['permission']) }})
+      <br>
       {% end %}
     </td>
     <td>
       {% for target, transition in sources.get(status["identifier"], {}).items() %}
-      <strong>{{ target }}</strong> ({{', '.join(transition['permission']) }})<br>
+      <strong>{{ target }}</strong>
+      {% if transition.get('require_valid') %}<i>require valid</i>{% end %}
+      ({{', '.join(transition['permission']) }})
+      <br>
       {% end %}
+      <a href="{{ reverse_url('admin_order_transitions_edit', status['identifier']) }}",
+         class="btn btn-sm btn-primary btn-block" role="button">
+        <span class="glyphicon glyphicon-edit"></span> Edit transitions
+      </a>
     </td>
     <td>{{ ', '.join(sorted(set(['admin'] + status.get('edit', [])))) or '-' }}</td>
     <td>{{ ', '.join(sorted(set(['admin'] + status.get('attach', [])))) or '-' }}</td>
@@ -54,10 +67,6 @@
       <a href="{{ reverse_url('admin_order_status_edit', status['identifier']) }}",
          class="btn btn-sm btn-primary btn-block" role="button">
         <span class="glyphicon glyphicon-edit"></span> Edit status
-      </a>
-      <a href="{{ reverse_url('admin_order_transitions_edit', status['identifier']) }}",
-         class="btn btn-sm btn-primary btn-block" role="button">
-        <span class="glyphicon glyphicon-edit"></span> Edit transitions
       </a>
     </td>
   </tr>

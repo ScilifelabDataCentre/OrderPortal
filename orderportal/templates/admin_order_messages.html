@@ -81,7 +81,7 @@
     <th>Subject</th>
     <th>Text</th>
   </tr>
-  {% for status in parameters['ORDER_STATUSES'] %}
+  {% for status in parameters['ORDER_STATUSES_LOOKUP'].values() %}
   {% set msg = settings['ORDER_MESSAGES'].get(status['identifier'], dict()) %}
   <tr>
     <td>

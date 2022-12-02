@@ -1,0 +1,84 @@
+{# Admin orders list parameters page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}{{ terminology('Orders') }} list{% end %}
+
+{% block body_title %}{{ terminology('Orders') }} list
+<small>Parameters controlling {{ terminology('orders') }} list content and display.</small>
+{% end %}
+
+{% block action_content %}
+<p>
+  <form action="{{ reverse_url('admin_orders_list_edit') }}"
+        method="GET" role="form">
+    <button type="submit" class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-edit"></span> Edit
+    </button>
+  </form>
+</p>
+{% end %} {# block action_content #}
+
+
+{% block main_content %}
+{% if settings.get("ORDERS_LIST_TAGS") or settings.get("ORDERS_LIST_STATUSES") or settings.get("ORDERS_LIST_FIELDS") or settings.get("DISPLAY_ORDERS_MOST_RECENT") %}
+<div class="well">
+  <strong>NOTE!</strong> The settings ORDERS_LIST_TAGS,
+  ORDERS_LIST_STATUSES, ORDERS_LIST_FIELDS and
+  DISPLAY_ORDERS_MOST_RECENT are no longer used. Remove these from the 'settings.yaml'
+  file to avoid confusion.
+</div>
+{% end %}
+
+<table class="table">
+  <tr>
+    <th>Parameter</th>
+    <th>Description</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <th>Order tags</th>
+    <td>
+      Display the tags for an order in the orders list.
+    </td>
+    <td>{{ parameters['ORDERS_LIST_TAGS'] and 'Yes' or 'No' }}</td>
+  </tr>
+  <tr>
+    <th>Statuses</th>
+    <td>
+      Display a column for each given order status, showing the date
+      for when the order reached it.
+    </td>
+    <td>{{ ', '.join(parameters['ORDERS_LIST_STATUSES']) }}</td>
+  </tr>
+  <tr>
+    <th>Fields</th>
+    <td>
+      Display a column for each order field given by its identifier.
+      The field does not have to exist in every order.
+    </td>
+    <td>{{ ', '.join(parameters['ORDERS_LIST_FIELDS']) }}</td>
+  </tr>
+  <tr>
+    <th>Max most recent</th>
+    <td>
+      The maximum number of most recent orders fetched by default for the orders list.
+    </td>
+    <td>{{ parameters['DISPLAY_ORDERS_MOST_RECENT'] }}</td>
+  </tr>
+  <tr>
+    <th>Default order column</th>
+    <td>
+      The column used for the default ordering in the orders list.
+    </td>
+    <td>{{ parameters['DEFAULT_ORDER_COLUMN'] }}</td>
+  </tr>
+  <tr>
+    <th>Default order sort</th>
+    <td>
+      The default sort direction for the default ordering in the orders list.
+    </td>
+    <td>{{ parameters['DEFAULT_ORDER_SORT'] }}</td>
+  </tr>
+</table>
+{% end %} {# block main_content #}

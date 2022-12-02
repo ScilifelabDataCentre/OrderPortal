@@ -1,0 +1,114 @@
+{# Admin order transitions edit page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}
+Edit {{ terminology('order') }} transitions from '{{ status['identifier'] }}'
+{% end %}
+
+{% block body_title %}
+Edit {{ terminology('order') }} transitions from '{{ status['identifier'] }}'
+{% end %}
+
+{% block main_content %}
+<table class="table">
+  <tr>
+    <th>To status</th>
+    <th>Permission</th>
+    <th>Require valid</th>
+    <th></th>
+  </tr>
+  {% for target, value in targets.items() %}
+  <tr>
+    <th>{{ target }}</th>
+    <td>{{ ', '.join(value['permission']) }}</td>
+    <td>{{ value.get('require_valid') and 'yes' or 'no' }}</td>
+    <td>
+      <form action="{{ reverse_url('admin_order_transitions_edit', status['identifier']) }}"
+            method="POST" role="button">
+        {% module xsrf_form_html() %}
+        <input type="hidden" name="_http_method" value="delete">
+        <input type="hidden" name="target" value="{{ target }}">
+        <button type="submit" class="btn btn-danger">
+          <span class="glyphicon glyphicon-remove"></span> Delete
+        </button>
+      </form>
+    </td>
+  </tr>
+  {% end %}
+</table>
+
+<hr>
+<h3>Add new transition from '{{ status['identifier'] }}'</h3>
+<form action="{{ reverse_url('admin_order_transitions_edit', status['identifier']) }}"
+      method="POST" role="form">
+  {% module xsrf_form_html() %}
+  <div class="row">
+    <div class="col-md-3">
+      <div class="form-group">
+        <label for="target">To status</label>
+        {% for target in new_targets %}
+        <div class="radio">
+          <label>
+            <input type="radio" name="target" value="{{ target }}"> {{ target }}
+          </label>
+        </div>
+        {% end %}
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="form-group">
+        <label for="permission">Permission</label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" id="permission" name="permission"
+                   value="admin" checked> admin
+          </label>
+        </div>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="permission" value="staff"> staff
+          </label>
+        </div>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="permission" value="user"> user
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="form-group">
+        <label for="require_valid">Require valid</label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" id="require_valid" name="require_valid" value="yes">
+            Yes
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-save"></span> Save
+      </button>
+    </div>
+    <div class="col-md-10">
+      If the transition already exists, its current data will be overwritten.
+    </div>
+  </div>
+</form>
+
+{% end %} {# block main_content #}
+
+{% block action_content %}
+<form action="{{ reverse_url('admin_order_statuses') }}"
+      method="GET" role="form">
+    <button type="submit" class="btn btn-default btn-block">
+      <span class="glyphicon glyphicon-remove"></span> Cancel
+    </button>
+</form>
+{% end %} {# block action_content #}

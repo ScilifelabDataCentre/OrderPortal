@@ -93,13 +93,6 @@ def get_settings(filepath=None, log=True):
             raise ValueError(f"settings['{key}'] has invalid value.")
     if len(settings.get("COOKIE_SECRET", "")) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short.")
-    if (
-        not isinstance(settings["DISPLAY_ORDERS_MOST_RECENT"], int)
-        or settings["DISPLAY_ORDERS_MOST_RECENT"] <= 0
-    ):
-        raise ValueError(
-            "settings['DISPLAY_ORDERS_MOST_RECENT'] must be a positive integer."
-        )
     # Read account messages YAML file.
     filepath = os.path.join(settings["SITE_DIR"], settings["ACCOUNT_MESSAGES_FILE"])
     logging.info(f"account messages: {filepath}")

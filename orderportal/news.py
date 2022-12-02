@@ -41,12 +41,12 @@ class NewsEdit(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        if self.readonly():
-            return
-        self.check_admin()
         if self.get_argument("_http_method", None) == "delete":
             self.delete(iuid)
             return
+        if self.readonly():
+            return
+        self.check_admin()
         news = self.get_entity(iuid, constants.NEWS)
         if news is None:
             self.see_other("home", error="No such news item.")

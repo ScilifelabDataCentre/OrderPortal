@@ -10,6 +10,15 @@ Edit {{ terminology('order') }} status '{{ status['identifier'] }}'
 Edit {{ terminology('order') }} status '{{ status['identifier'] }}'
 {% end %}
 
+{% block action_content %}
+<form action="{{ reverse_url('admin_order_statuses') }}"
+      method="GET" role="form">
+    <button type="submit" class="btn btn-default btn-block">
+      <span class="glyphicon glyphicon-remove"></span> Cancel
+    </button>
+</form>
+{% end %} {# block action_content #}
+
 {% block main_content %}
 <form action="{{ reverse_url('admin_order_status_edit', status['identifier']) }}"
       method="POST" role="form">
@@ -127,12 +136,3 @@ Edit {{ terminology('order') }} status '{{ status['identifier'] }}'
 
 </form>
 {% end %} {# block main_content #}
-
-{% block action_content %}
-<form action="{{ reverse_url('admin_order_statuses') }}"
-      method="GET" role="form">
-    <button type="submit" class="btn btn-default btn-block">
-      <span class="glyphicon glyphicon-remove"></span> Cancel
-    </button>
-</form>
-{% end %} {# block action_content #}

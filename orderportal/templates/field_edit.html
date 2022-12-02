@@ -163,27 +163,21 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
         <label class="control-label" for="display">Display</label>
         <div class="radio">
           <label>
-            <input type="radio"
-                   name="display"
-                   value="menu"
+            <input type="radio" name="display" value="menu"
                    {{ field.get('display', 'menu') == 'menu' and 'checked' }}>
             Menu
           </label>
         </div>
         <div class="radio">
           <label>
-            <input type="radio"
-                   name="display"
-                   value="radio"
+            <input type="radio" name="display" value="radio"
                    {{ field.get('display') == 'radio' and 'checked' }}>
             Radio buttons, on the same line
           </label>
         </div>
         <div class="radio">
           <label>
-            <input type="radio"
-                   name="display"
-                   value="radio-newline"
+            <input type="radio" name="display" value="radio-newline"
                    {{ field.get('display') == 'radio-newline' and 'checked' }}>
             Radio buttons, one per line
           </label>
@@ -222,10 +216,7 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
         <label class="control-label" for="checkbox">Checkbox</label>
         <div class="checkbox">
           <label>
-            <input type="checkbox"
-                   id="checkbox"
-                   name="checkbox"
-                   value="yes"
+            <input type="checkbox" id="checkbox" name="checkbox" value="yes"
                    {{ field.get('checkbox') and 'checked' or '' }}>
             Display the field as a checkbox: Otherwise as a selection.
           </label>
@@ -279,9 +270,9 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-        <label for="mexlength">Maxlength</label>
-        <input type="int" class="form-control"
-               id="maxlength" name="maxlength"
+        <label for="maxlength">Maxlength</label>
+        <input type="number" id="maxlength" name="maxlength"
+               class="form-control"
                value="{{ field.get('maxlength') or ''}}">
       </div>
     </div>

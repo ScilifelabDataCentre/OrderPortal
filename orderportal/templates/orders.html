@@ -42,21 +42,10 @@
           {% end %}
         </select>
       </div>
-      {% for f in settings['ORDERS_LIST_FIELDS'] %}
-      {% if f.get('values') %}
-      <div class="form-group">
-        <select name="{{ f['identifier'] }}" class="form-control refresh">
-          <option value="">[any {{ f.get('label') or f['identifier'].replace('_', ' ').capitalize() }}]</option>
-          {% for v in f['values'] %}
-          {% set sel = v == filter.get(f['identifier']) and 'selected' or '' %}
-          <option {{ sel }} value="{{ v }}">{{ v }}</option>
-          {% end %}
-          {% set sel = '__none__' == filter.get(f['identifier']) and 'selected' or '' %}
-          <option {{ sel }} value="__none__">[none]</option>
-        </select>
-      </div>
-      {% end %} {# if f.get('values') #}
-      {% end %} {# for f in settings['ORDERS_LIST_FIELDS'] #}
+      {#
+      Previously, it was possible to filter by ORDERS_LIST_FIELDS that had select
+      values. But with the web interface for setting this (v7.0.3) this was skipped.
+      #}
       <div class="form-group">
         <select name="status" class="form-control refresh">
           <option value="">[any status]</option>
@@ -70,7 +59,7 @@
       </div>
       <div class="form-group">
         <select name="year" class="form-control refresh">
-          <option value="" {{ not filter.get('year') and 'selected' or '' }}>{{ settings['DISPLAY_ORDERS_MOST_RECENT'] }} most recent
+          <option value="" {{ not filter.get('year') and 'selected' or '' }}>{{ parameters['DISPLAY_ORDERS_MOST_RECENT'] }} most recent
           </option>
           {% for year, count in years %}
           <option value="{{ year }}"{{ filter.get('year') == year and 'selected' or '' }}>{{ year }} ({{ count }})</option>
@@ -91,14 +80,14 @@
           <th width="30%">Title</th>
           <th>Form</th>
           <th>Owner</th>
-          {% if settings['ORDER_TAGS'] and settings['ORDERS_LIST_TAGS'] %}
+          {% if parameters['ORDERS_LIST_TAGS'] %}
           <th width="5%">Keywords (tags)</th>
           {% end %}
-          {% for f in settings['ORDERS_LIST_FIELDS'] %}
-          <th>{{ f.get('label') or f['identifier'].replace('_', ' ').capitalize() }}</th>
+          {% for f in parameters['ORDERS_LIST_FIELDS'] %}
+          <th>{{ f.replace('_', ' ').capitalize() }}</th>
           {% end %}
           <th>Status</th>
-          {% for s in settings['ORDERS_LIST_STATUSES'] %}
+          {% for s in parameters['ORDERS_LIST_STATUSES'] %}
           <th>{{ s.capitalize() }}</th>
           {% end %}
           <th>Modified</th>
@@ -120,14 +109,16 @@
               {{ account_names[order['owner']] }}
             </a>
           </td>
-          {% if settings['ORDER_TAGS'] and settings['ORDERS_LIST_TAGS'] %}
+          {% if parameters['ORDERS_LIST_TAGS'] %}
           <td>{% module Tags(order.get('tags', [])) %}</td>
           {% end %}
-          {% for f in settings['ORDERS_LIST_FIELDS'] %}
-          <td>{% module NoneStr(order['fields'].get(f['identifier']), undef='-', list_delimiter=', ') %}</td>
+          {% for f in parameters['ORDERS_LIST_FIELDS'] %}
+          <td>
+            {% module NoneStr(order['fields'].get(f), undef='-', list_delimiter=', ') %}
+          </td>
           {% end %}
           <td>{% module Icon(order['status'], label=True) %}</td>
-          {% for s in settings['ORDERS_LIST_STATUSES'] %}
+          {% for s in parameters['ORDERS_LIST_STATUSES'] %}
           <td class="nobr">{% module NoneStr(order['history'].get(s)) %}</td>
           {% end %}
           <td class="localtime nobr">{{ order['modified'] }}</td>
@@ -153,7 +144,7 @@ $(function() {
   $("#orders").DataTable( {
     "pagingType": "full_numbers",
     "pageLength": 25,
-    "order": [[{{ order_column }}, "desc"]],
+    "order": [[{{ order_column }}, "{{ parameters['DEFAULT_ORDER_SORT'] }}"]],
   });
 });
 </script>

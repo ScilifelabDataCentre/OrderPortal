@@ -123,10 +123,10 @@ class FileEdit(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, name):
-        self.check_admin()
         if self.get_argument("_http_method", None) == "delete":
             self.delete(name)
             return
+        self.check_admin()
         file = self.get_entity_view("file", "name", name)
         with FileSaver(doc=file, rqh=self) as saver:
             try:
@@ -166,9 +166,9 @@ class FileDownload(File):
         ext = utils.get_filename_extension(self.doc["content_type"])
         if ext:
             name += ext
-        self.set_header(
-            "Content-Disposition", 'attachment; filename="{0}"'.format(name)
-        )
+        if self.doc["content_type"]:
+            self.set_header("Content-Type", self.doc["content_type"])
+        self.set_header("Content-Disposition", f'attachment; filename="{name}"')
 
 
 class FileLogs(RequestHandler):

@@ -88,31 +88,7 @@ class Search(RequestHandler):
             id_set = reduce(lambda i, j: i.intersection(j), id_sets)
             for id in reduce(lambda i, j: i.intersection(j), id_sets):
                 orders[id] = self.get_entity(id, doctype=constants.ORDER)
-        # Search settings-defined indexes for order fields.
-        parts.append(orig)  # Entire original term.
-        try:
-            fields = list(self.db["_design/fields"]["views"].keys())
-        except (couchdb2.NotFoundError, KeyError):
-            fields = []
-        for field in fields:
-            id_sets = []
-            id_sets.append(
-                set(
-                    [
-                        r.id
-                        for r in self.db.view(
-                            "fields",
-                            field,
-                            startkey=orig,
-                            endkey=orig + constants.CEILING,
-                        )
-                    ]
-                )
-            )
-            if id_sets:
-                for id in reduce(lambda i, j: i.union(j), id_sets):
-                    orders[id] = self.get_entity(id, doctype=constants.ORDER)
-        # Convert to list; keep orders readable by the user.
+        # Convert to list; keep the orders that are readable by the user.
         if self.is_admin():
             orders = list(orders.values())
         else:
