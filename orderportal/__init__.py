@@ -11,7 +11,7 @@ __version__ = "7.0.3"
 
 class Constants:
     def __setattr__(self, key, value):
-        raise ValueError("cannot set constant")
+        raise ValueError("setting constant is not allowed")
 
     VERSION = __version__
     SOURCE_URL = "https://github.com/pekrau/OrderPortal"
@@ -177,7 +177,7 @@ class Constants:
     XLSM_MIME = "application/vnd.ms-excel.sheet.macroEnabled.12"
 
     # Hard-wired mapping content type -> extension (overriding mimetypes module)
-    MIME_EXTENSIONS = {TEXT_MIME: ".txt", JPEG_MIME: ".jpg", XLSM_MIME: ".xlsm"}
+    MIME_EXTENSIONS = {TEXT_MIME: ".txt", JPEG_MIME: ".jpg", XLSM_MIME: ".xlsm", XLSX_MIME: ".xlsx"}
 
     # Content-type to icon mapping
     CONTENT_TYPE_ICONS = {
@@ -204,7 +204,7 @@ class Constants:
 constants = Constants()
 
 
-# Default settings. May be changed in the settings YAML file.
+# Default settings. Some of these need to be set in the 'site/settings.yaml' file.
 settings = dict(
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
@@ -218,9 +218,9 @@ settings = dict(
     DATABASE_SERVER="http://localhost:5984/",
     DATABASE_NAME="orderportal",
     DATABASE_ACCOUNT="orderportal_account",
-    DATABASE_PASSWORD="CHANGE",
-    COOKIE_SECRET="CHANGE",
-    PASSWORD_SALT="CHANGE",
+    DATABASE_PASSWORD="CHANGE THIS!",
+    COOKIE_SECRET="CHANGE THIS!",
+    PASSWORD_SALT="CHANGE THIS!",
     MIN_PASSWORD_LENGTH=8,
     READONLY=False,
     MARKDOWN_URL="https://www.markdownguide.org/basic-syntax/",
@@ -255,7 +255,6 @@ settings = dict(
     ORDER_REPORT=True,
     ORDERS_SEARCH_DELIMS_LINT=[":", ",", ";", "'"],
     ORDERS_SEARCH_LINT=["an", "to", "in", "on", "of", "and", "the", "is", "was", "not"],
-    ORDERS_SEARCH_FIELDS=[],
     ACCOUNT_REGISTRATION_OPEN=True,
     ACCOUNT_PI_INFO=True,
     ACCOUNT_ORCID_INFO=True,

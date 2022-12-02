@@ -4,7 +4,10 @@
 
 {% block head_title %}{{ terminology('Order') }} statuses{% end %}
 
-{% block body_title %}{{ terminology('Order') }} statuses{% end %}
+{% block body_title %}
+{{ terminology('Order') }} statuses
+<small>Setup of statuses and transitions.</small>
+{% end %}
 
 {% block content %}
 {% if settings.get("ORDER_STATUSES_FILE") or settings.get("ORDER_TRANSITIONS_FILE") %}

@@ -42,21 +42,10 @@
           {% end %}
         </select>
       </div>
-      {% for f in parameters['ORDERS_LIST_FIELDS'] %}
-      {% if f.get('values') %}
-      <div class="form-group">
-        <select name="{{ f['identifier'] }}" class="form-control refresh">
-          <option value="">[any {{ f.get('label') or f['identifier'].replace('_', ' ').capitalize() }}]</option>
-          {% for v in f['values'] %}
-          {% set sel = v == filter.get(f['identifier']) and 'selected' or '' %}
-          <option {{ sel }} value="{{ v }}">{{ v }}</option>
-          {% end %}
-          {% set sel = '__none__' == filter.get(f['identifier']) and 'selected' or '' %}
-          <option {{ sel }} value="__none__">[none]</option>
-        </select>
-      </div>
-      {% end %} {# if f.get('values') #}
-      {% end %} {# for f in parameters['ORDERS_LIST_FIELDS'] #}
+      {#
+      Previously, it was possible to filter by ORDERS_LIST_FIELDS that had select
+      values. But with the web interface for setting this (v7.0.3) this was skipped.
+      #}
       <div class="form-group">
         <select name="status" class="form-control refresh">
           <option value="">[any status]</option>
@@ -95,7 +84,7 @@
           <th width="5%">Keywords (tags)</th>
           {% end %}
           {% for f in parameters['ORDERS_LIST_FIELDS'] %}
-          <th>{{ f.get('label') or f['identifier'].replace('_', ' ').capitalize() }}</th>
+          <th>{{ f.replace('_', ' ').capitalize() }}</th>
           {% end %}
           <th>Status</th>
           {% for s in parameters['ORDERS_LIST_STATUSES'] %}
@@ -124,7 +113,9 @@
           <td>{% module Tags(order.get('tags', [])) %}</td>
           {% end %}
           {% for f in parameters['ORDERS_LIST_FIELDS'] %}
-          <td>{% module NoneStr(order['fields'].get(f['identifier']), undef='-', list_delimiter=', ') %}</td>
+          <td>
+            {% module NoneStr(order['fields'].get(f), undef='-', list_delimiter=', ') %}
+          </td>
           {% end %}
           <td>{% module Icon(order['status'], label=True) %}</td>
           {% for s in parameters['ORDERS_LIST_STATUSES'] %}

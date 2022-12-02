@@ -260,55 +260,14 @@ var lint = {lint};
 )
 
 
-# This will be added to DESIGNS as 'order/fields'. See 'fix_design_documents'.
-# Double {{ and }} are converted to single such by '.format'.
-ORDERS_SEARCH_FIELDS_MAP = """function(doc) {{
-  if (doc.orderportal_doctype !== 'order') return;
-  var value = doc.fields.{fieldid};
-  if (!value) return;
-  var type = typeof(value);
-  if (type === 'string') {{
-    var words = value.replace(/[{delims_lint}]/g, " ").toLowerCase().split(/\s+/);
-  }} else if (type === 'number') {{
-    var words = [value.toString()];
-  }} else {{
-    var words = value;
-  }};
-  if (words.length) {{
-    words.forEach(function(word) {{
-      if (word.length > 2 && !lint[word]) emit(word, null);
-    }});
-  }};
-}};
-var lint = {lint};"""
-
-
 def update_design_documents(db):
-    "Load the design documents (view index definitions)."
-    fixup_design_documents()
-    for designname, views in DESIGNS.items():
-        if db.put_design(designname, {"views": views}, rebuild=True):
-            logging.info(f"loaded design {designname}")
-
-
-def fixup_design_documents():
-    """Replace 'lint' and 'delims_lint' in design view function 'order/keyword'.
-    Add the order search field design views.
-    Done on first call to update_design_documents.
+    """Load the design documents (view index definitions).
+    Replace 'lint' and 'delims_lint' in design view function 'order/keyword'.
     """
-    if "fields" in DESIGNS:
-        return
     delims_lint = "".join(settings["ORDERS_SEARCH_DELIMS_LINT"])
     lint = "{%s}" % ", ".join(["'%s': 1" % w for w in settings["ORDERS_SEARCH_LINT"]])
     func = DESIGNS["order"]["keyword"]["map"]
     DESIGNS["order"]["keyword"]["map"] = func.format(delims_lint=delims_lint, lint=lint)
-    fields = dict()
-    for field in settings["ORDERS_SEARCH_FIELDS"]:
-        if not constants.ID_RX.match(field):
-            raise ValueError(f"Invalid identifier in search field '{field}'.")
-        fields[field] = dict(
-            map=ORDERS_SEARCH_FIELDS_MAP.format(
-                fieldid=field, delims_lint=delims_lint, lint=lint
-            )
-        )
-    DESIGNS["fields"] = fields
+    for designname, views in DESIGNS.items():
+        if db.put_design(designname, {"views": views}, rebuild=True):
+            logging.info(f"loaded design {designname}")

@@ -1663,9 +1663,7 @@ class Orders(RequestHandler):
     def set_filter(self):
         "Set the filter parameters dictionary."
         self.filter = dict()
-        for key in ["status", "form_id", "owner"] + [
-            f["identifier"] for f in parameters["ORDERS_LIST_FIELDS"]
-        ]:
+        for key in ["status", "form_id", "owner"] + parameters["ORDERS_LIST_FIELDS"]:
             try:
                 value = self.get_argument(key)
                 if not value:
@@ -1680,10 +1678,6 @@ class Orders(RequestHandler):
         orders = self.filter_by_status(self.filter.get("status"))
         orders = self.filter_by_form(self.filter.get("form_id"), orders=orders)
         orders = self.filter_by_owner(self.filter.get("owner"), orders=orders)
-        for f in parameters["ORDERS_LIST_FIELDS"]:
-            orders = self.filter_by_field(
-                f["identifier"], self.filter.get(f["identifier"]), orders=orders
-            )
         orders = self.filter_by_year(self.filter["year"], orders=orders)
         return orders
 
@@ -1809,13 +1803,12 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
         account_names = self.get_account_names()
         forms_lookup = self.get_forms_lookup()
         result["items"] = []
-        keys = [f["identifier"] for f in parameters["ORDERS_LIST_FIELDS"]]
         for order in self.get_orders():
             data = self.get_order_json(
                 order, account_names=account_names, forms_lookup=forms_lookup
             )
             data["fields"] = dict()
-            for key in keys:
+            for key in parameters["ORDERS_LIST_FIELDS"]:
                 data["fields"][key] = order["fields"].get(key)
             result["items"].append(data)
             result["invalid"] = order["invalid"]
@@ -1847,7 +1840,7 @@ class OrdersCsv(Orders):
             "Owner URL",
             "Tags",
         ]
-        row.extend([f["identifier"] for f in parameters["ORDERS_LIST_FIELDS"]])
+        row.extend(parameters["ORDERS_LIST_FIELDS"])
         row.append("Status")
         row.extend([s.capitalize() for s in parameters["ORDERS_LIST_STATUSES"]])
         row.append("Modified")
@@ -1870,7 +1863,7 @@ class OrdersCsv(Orders):
                 ", ".join(order.get("tags", [])),
             ]
             for f in parameters["ORDERS_LIST_FIELDS"]:
-                row.append(order["fields"].get(f["identifier"]))
+                row.append(order["fields"].get(f))
             row.append(order["status"])
             for s in parameters["ORDERS_LIST_STATUSES"]:
                 row.append(order["history"].get(s))

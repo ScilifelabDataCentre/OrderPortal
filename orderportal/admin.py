@@ -720,13 +720,29 @@ class OrdersListEdit(RequestHandler):
     @tornado.web.authenticated
     def post(self):
         self.check_admin()
-        logging.info(self.get_argument("orders_list_tags", False))
-        logging.info(self.get_arguments("orders_list_statuses"))
-        logging.info(self.get_argument("orders_list_fields", "-"))
-        logging.info(self.get_argument("orders_most_recent", "-"))
-        logging.info(self.get_argument("default_order_column", "-"))
-        logging.info(self.get_argument("default_order_sort", "-"))
-        # XXX
+        with MetaSaver(doc=self.db["orders_list"], rqh=self) as saver:
+            saver["tags"] = utils.to_bool(self.get_argument("orders_list_tags", False))
+            saver["statuses"] = [s for s in self.get_arguments("orders_list_statuses")
+                                 if s in parameters["ORDER_STATUSES_LOOKUP"]]
+            saver["fields"] = self.get_argument("orders_list_fields", "").split()
+            try:
+                value = int(self.get_argument("orders_most_recent"))
+                if value < 10:
+                    raise ValueError
+                saver["max_most_recent"] = value
+            except (tornado.web.MissingArgumentError, ValueError, TypeError):
+                pass
+            value = self.get_argument("default_order_column", "-").lower()
+            if value == "identifier":
+                saver["default_order_column"] = "identifier"
+            else:
+                saver["default_order_column"] = "modified"
+            value = self.get_argument("default_order_sort", "-").lower()
+            if value == "asc":
+                saver["default_order_sort"] = "asc"
+            else:
+                saver["default_order_sort"] = "desc"
+        load_parameters(self.db)
         self.see_other("admin_orders_list")
 
 

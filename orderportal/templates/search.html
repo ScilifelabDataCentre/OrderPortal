@@ -28,7 +28,13 @@
             </button>
           </div>
         </div>
-        <p class="help-block">Searches title, identifier, tags and any indexed fields.</p>
+        <p class="help-block">
+          {% if settings.get('ORDER_TAGS') %}
+          Searches {{ terminology('order') }} title, identifier and tags.
+          {% else %}
+          Searches {{ terminology('order') }} title and identifier.
+          {% end %}
+        </p>
       </div>
     </div>
   </div>

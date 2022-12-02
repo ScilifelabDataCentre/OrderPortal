@@ -51,7 +51,7 @@
           <th width="5%">Keywords (tags)</th>
           {% end %}
           {% for f in parameters['ORDERS_LIST_FIELDS'] %}
-          <th>{{ f.get('label') or f['identifier'].replace('_', ' ').capitalize() }}</th>
+          <th>{{ f.replace('_', ' ').capitalize() }}</th>
           {% end %}
           <th>Status</th>
           {% for s in parameters['ORDERS_LIST_STATUSES'] %}
@@ -76,7 +76,9 @@
           <td>{% module Tags(order.get('tags', [])) %}</td>
           {% end %}
           {% for f in parameters['ORDERS_LIST_FIELDS'] %}
-          <td>{% module NoneStr(order['fields'].get(f['identifier'])) %}</td>
+          <td>
+            {% module NoneStr(order['fields'].get(f), undef='-', list_delimiter=', ') %}
+          </td>
           {% end %}
           <td>{% module Icon(order['status'], label=True) %}</td>
           {% for s in parameters['ORDERS_LIST_STATUSES'] %}

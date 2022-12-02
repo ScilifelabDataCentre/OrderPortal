@@ -2,9 +2,11 @@
 
 {% extends "base.html" %}
 
-{% block head_title %}{{ terminology('Orders') }} list parameters{% end %}
+{% block head_title %}{{ terminology('Orders') }} list{% end %}
 
-{% block body_title %}{{ terminology('Orders') }} list parameters{% end %}
+{% block body_title %}{{ terminology('Orders') }} list
+<small>Parameters controlling {{ terminology('orders') }} list content and display.</small>
+{% end %}
 
 {% block action_content %}
 <p>

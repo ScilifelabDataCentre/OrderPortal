@@ -166,9 +166,9 @@ class FileDownload(File):
         ext = utils.get_filename_extension(self.doc["content_type"])
         if ext:
             name += ext
-        self.set_header(
-            "Content-Disposition", 'attachment; filename="{0}"'.format(name)
-        )
+        if self.doc["content_type"]:
+            self.set_header("Content-Type", self.doc["content_type"])
+        self.set_header("Content-Disposition", f'attachment; filename="{name}"')
 
 
 class FileLogs(RequestHandler):
