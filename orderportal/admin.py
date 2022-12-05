@@ -419,7 +419,7 @@ def update_meta_documents(db):
             saver["tags"] = settings.get("ORDERS_LIST_TAGS", False)
             saver["statuses"] = settings.get("ORDERS_LIST_STATUSES", list())
             # This was screwed up before: dict instead of list.
-            saver["fields"] = list(settings.get("ORDERS_LIST_FIELDS", dict()))
+            saver["fields"] = list(settings.get("ORDERS_LIST_FIELDS", dict()).keys())
             saver["max_most_recent"] = settings.get("DISPLAY_ORDERS_MOST_RECENT", 500)
             saver["default_order_column"] = "modified"
             saver["default_order_sort"] = "desc"
@@ -428,13 +428,8 @@ def update_meta_documents(db):
 
     # Fix mistake dict when there should be list.
     doc = db["orders_list"]
-    value = doc["fields"]
-    if isinstance(value, dict):
-        with MetaSaver(doc, db=db) as saver:
-            saver["fields"] = list(value)
-    elif not isinstance(value, list):
-        with MetaSaver(doc, db=db) as saver:
-            saver["fields"] = []
+    with MetaSaver(doc, db=db) as saver:
+        saver["fields"] = []
     try:
         logging.info(f"orders_list fields {db['orders_list']['fields']}")
     except KeyError:
