@@ -431,7 +431,14 @@ def update_meta_documents(db):
     value = doc["fields"]
     if isinstance(value, dict):
         with MetaSaver(doc, db=db) as saver:
-            saver["fields"] = value.keys()
+            saver["fields"] = list(value)
+    elif not isinstance(value, list):
+        with MetaSaver(doc, db=db) as saver:
+            saver["fields"] = []
+    try:
+        logging.info(f"orders_list fields {db['orders_list']['fields']}")
+    except KeyError:
+        logging.info("orders_list fields BAD")
 
 
 class TextSaver(saver.Saver):
