@@ -17,17 +17,19 @@
   <thead>
     <tr>
       <th>Text</th>
+      <th>Type</th>
       <th>Description</th>
       <th width="10%"></th>
     </tr>
   </thead>
   <tbody>
-    {% for name, description in texts %}
+    {% for text in texts %}
     <tr>
-      <td>{{ name }}</td>
-      <td>{{ description }}</td>
+      <td>{{ text['name'] }}</td>
+      <td>{{ text['type'] }}</td>
+      <td>{{ text['description'] }}</td>
       <td>
-        <a href="{{ reverse_url('text', name) }}"
+        <a href="{{ reverse_url('text', text['name']) }}"
            class="btn btn-primary btn-sm btn-block" role="button">
           <span class="glyphicon glyphicon-edit"></span> Edit
         </a>

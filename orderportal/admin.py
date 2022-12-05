@@ -183,7 +183,7 @@ DEFAULT_ORDER_TRANSITIONS[constants.PREPARATION][constants.SUBMITTED] = \
     dict(permission=["admin", "staff", "user"], require_valid=True)
 
 
-DEFAULT_DISPLAY_TEXTS = [
+DEFAULT_TEXTS_DISPLAY = [
     dict(name="header",
          description="Header on portal home page.",
          text="""This is a portal for placing orders. You need to have an account and
@@ -250,7 +250,7 @@ Go to [the reset page](/reset) to obtain a new code.
         text="[Add information on how to contact the facility.]"),
     dict(
         name="about",
-        description="About page.",
+        description="About us page.",
         text="[Add information about this site.]"),
     dict(
         name="alert",
@@ -443,11 +443,12 @@ def update_text_documents(db):
     the database may have been loaded with data from an old dump.
     """
     loaded = False
-    for text in DEFAULT_DISPLAY_TEXTS:
+    for text in DEFAULT_TEXTS_DISPLAY:
         docs = [row.doc for row in
                 db.view("text", "name", key=text["name"], include_docs=True)]
-        if len(docs) == 0:      # No document in db; add it from defaults.
+        if len(docs) == 0:       # No document in db; add it from defaults.
             with TextSaver(db=db) as saver:
+                saver["type"] = constants.DISPLAY
                 saver["name"] = text["name"]
                 saver["description"] = text["description"]
                 saver["text"] = text["text"]
@@ -464,59 +465,62 @@ def update_text_documents(db):
         logging.info("loaded default display text(s)")
 
     ### As of version 7.0.4, the one-line description of a text is in the document.
-    for text in DEFAULT_DISPLAY_TEXTS:
+    ### Defensive; This may have been done above, but not for certain.
+    for text in DEFAULT_TEXTS_DISPLAY:
         docs = [row.doc for row in
                 db.view("text", "name", key=text["name"], include_docs=True)]
         doc = docs[0]
         if "description" not in doc: # Update to version 7.0.4
             with TextSaver(doc, db=db) as saver:
-                saver["description"] = text["description"]
                 saver["type"] = constants.DISPLAY
+                saver["description"] = text["description"]
 
 
 def load_texts(db):
     "Load the texts into parameters."
-    parameters["display"] = dict()
-    parameters["account"] = dict()
-    parameters["order"] = dict()
-    for row in db.view("text", "name", include_docs=True):
-        pass
+    for type in [constants.DISPLAY, constants.ACCOUNT, constants.ORDER]:
+        parameters[type] = dict()
+        for row in db.view("text", "type", key=type, include_docs=True):
+            parameters[type][row.doc["name"]] = row.doc
 
 
 class Text(RequestHandler):
-    "Edit page for information text."
+    "Edit page for text."
 
     @tornado.web.authenticated
     def get(self, name):
         self.check_admin()
         try:
-            text = self.get_entity_view("text", "name", name)
-        except tornado.web.HTTPError:
+            text = parameters[constants.DISPLAY][name]["text"]
+        except KeyError:
             text = dict(name=name)
+        # Go back to display page showing the text, if given.
         origin = self.get_argument("origin", self.absolute_reverse_url("texts"))
         self.render("admin_text_edit.html", text=text, origin=origin)
 
     @tornado.web.authenticated
     def post(self, name):
+        "Save the modified text to the database, and update parameters."
         self.check_admin()
-        try:
-            text = self.get_entity_view("text", "name", name)
-        except tornado.web.HTTPError:
-            text = dict(name=name)
-        with TextSaver(doc=text, rqh=self) as saver:
-            saver["text"] = self.get_argument("text")
+        doc = self.get_entity_view("text", "name", name)
+        text = self.get_argument("text", "")
+        with TextSaver(doc=doc, rqh=self) as saver:
+            saver["text"] = text
+        parameters[doc["type"]][doc["name"]]["text"] = text
         url = self.get_argument("origin", self.absolute_reverse_url("texts"))
         self.redirect(url, status=303)
 
 
 class Texts(RequestHandler):
     "Page listing texts used in the web site."
-    # (I regret this design decision, but there is no point in fixing it. It works.)
 
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin_texts.html", texts=sorted(constants.TEXTS.items()))
+        texts = []
+        for type in [constants.DISPLAY, constants.ACCOUNT, constants.ORDER]:
+            texts.extend(sorted(parameters[type].values(), key=lambda d: d["name"]))
+        self.render("admin_texts.html", texts=texts)
 
 
 def load_parameters(db):

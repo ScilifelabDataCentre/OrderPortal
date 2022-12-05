@@ -249,13 +249,19 @@ var lint = {lint};
 }""",
         ),
     ),
-    text=dict(  # text/map
-        name=dict(
+    text=dict(
+        name=dict(              # text/name
             map="""function(doc) {
     if (doc.orderportal_doctype !== 'text') return;
     emit(doc.name, doc.modified);
 }"""
-        )
+        ),
+        type=dict(              # text/type
+            map="""function(doc) {
+    if (doc.orderportal_doctype !== 'text') return;
+    emit(doc.type, doc.modified);
+}"""
+        ),
     ),
 )
 

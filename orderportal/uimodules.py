@@ -2,7 +2,7 @@
 
 import tornado.web
 
-from orderportal import constants
+from orderportal import constants, parameters
 from orderportal import utils
 
 ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""
@@ -90,16 +90,16 @@ class Markdown(tornado.web.UIModule):
 
 
 class Text(tornado.web.UIModule):
-    "Fetch text object from the database, process it, and output."
+    "Process the display Markdown text message fetched from the parameters and output."
 
-    def render(self, name, default=""):
+    def render(self, name):
         try:
-            doc = self.handler.get_entity_view("text", "name", name)
-            text = doc["text"]
-        except (tornado.web.HTTPError, KeyError):
-            text = default
-        if not text and self.handler.is_admin():
-            text = "*No text defined.*"
+            text = parameters[constants.DISPLAY][name]["text"]
+        except KeyError:
+            if self.handler.is_admin():
+                text = "*No text defined.*"
+            else:
+                return ""
         return utils.markdown2html(text, safe=True)
 
 

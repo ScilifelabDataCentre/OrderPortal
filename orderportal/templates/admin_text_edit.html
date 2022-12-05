@@ -10,9 +10,9 @@
       method="POST" role="form">
   {% module xsrf_form_html() %}
 
-  <p>
-    {{ text['description'] }}
-  </p>
+  <h4>
+    {{ text.get('description') or '-' }}
+  </h4>
 
   <div class="form-group">
     <div class="row">
