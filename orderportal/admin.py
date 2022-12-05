@@ -418,22 +418,13 @@ def update_meta_documents(db):
             saver.set_id("orders_list")
             saver["tags"] = settings.get("ORDERS_LIST_TAGS", False)
             saver["statuses"] = settings.get("ORDERS_LIST_STATUSES", list())
-            # This was screwed up before: dict instead of list.
-            saver["fields"] = list(settings.get("ORDERS_LIST_FIELDS", dict()).keys())
+            # This was screwed up before version 7.0.8
+            saver["fields"] = [d["identifier"] for d in settings.get("ORDERS_LIST_FIELDS", list())]
             saver["max_most_recent"] = settings.get("DISPLAY_ORDERS_MOST_RECENT", 500)
             saver["default_order_column"] = "modified"
             saver["default_order_sort"] = "desc"
         doc = saver.doc
         logging.info("saved orders list parameters to database")
-
-    # Fix mistake dict when there should be list.
-    doc = db["orders_list"]
-    with MetaSaver(doc, db=db) as saver:
-        saver["fields"] = []
-    try:
-        logging.info(f"orders_list fields {db['orders_list']['fields']}")
-    except KeyError:
-        logging.info("orders_list fields BAD")
 
 
 class TextSaver(saver.Saver):
