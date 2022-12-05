@@ -10,12 +10,11 @@
 <div class="well">
   {% module Text('reset') %}
   {% if is_admin %}
-  <form action="{{ reverse_url('text', 'reset') }}"
+  <form action="{{ reverse_url('text_edit', 'reset') }}"
         method="GET" role="form">
     <input type="hidden" name="origin" value="{{ reverse_url('reset') }}">
     <button type="submit" class="btn btn-primary btn-xs">
-      <span class="glyphicon glyphicon-edit"></span>
-      Edit
+      <span class="glyphicon glyphicon-edit"></span> Edit
     </button>
   </form>
   {% end %}

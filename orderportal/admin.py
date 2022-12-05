@@ -484,14 +484,26 @@ def load_texts(db):
             parameters[type][row.doc["name"]] = row.doc
 
 
-class Text(RequestHandler):
+class Texts(RequestHandler):
+    "Page listing texts used in the web site."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        texts = []
+        for type in [constants.DISPLAY, constants.ACCOUNT, constants.ORDER]:
+            texts.extend(sorted(parameters[type].values(), key=lambda d: d["name"]))
+        self.render("admin_texts.html", texts=texts)
+
+
+class TextEdit(RequestHandler):
     "Edit page for text."
 
     @tornado.web.authenticated
     def get(self, name):
         self.check_admin()
         try:
-            text = parameters[constants.DISPLAY][name]["text"]
+            text = parameters[constants.DISPLAY][name]
         except KeyError:
             text = dict(name=name)
         # Go back to display page showing the text, if given.
@@ -509,18 +521,6 @@ class Text(RequestHandler):
         parameters[doc["type"]][doc["name"]]["text"] = text
         url = self.get_argument("origin", self.absolute_reverse_url("texts"))
         self.redirect(url, status=303)
-
-
-class Texts(RequestHandler):
-    "Page listing texts used in the web site."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        texts = []
-        for type in [constants.DISPLAY, constants.ACCOUNT, constants.ORDER]:
-            texts.extend(sorted(parameters[type].values(), key=lambda d: d["name"]))
-        self.render("admin_texts.html", texts=texts)
 
 
 def load_parameters(db):

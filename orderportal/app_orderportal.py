@@ -292,8 +292,8 @@ def main():
             name="file_download",
         ),
         url(r"/file/([0-9a-f]{32})/logs", orderportal.file.FileLogs, name="file_logs"),
-        url(r"/admin/text/([^/]+)", orderportal.admin.Text, name="text"),
         url(r"/admin/texts", orderportal.admin.Texts, name="texts"),
+        url(r"/admin/text/([^/]+)", orderportal.admin.TextEdit, name="text_edit"),
         url(
             r"/admin/order_statuses",
             orderportal.admin.OrderStatuses,

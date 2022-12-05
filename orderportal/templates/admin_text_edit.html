@@ -6,7 +6,7 @@
 {% block body_title %}Edit text '{{ text['name'] }}'{% end %}
 
 {% block main_content %}
-<form action="{{ reverse_url('text', text['name']) }}"
+<form action="{{ reverse_url('text_edit', text['name']) }}"
       method="POST" role="form">
   {% module xsrf_form_html() %}
 
@@ -17,8 +17,7 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-        <textarea rows="16" class="form-control"
-                  id="text" name="text"
+        <textarea id="text" name="text" rows="16" class="form-control"
                   >{{ text.get('text') or '' }}</textarea>
       </div>
     </div>

@@ -18,10 +18,9 @@
     {% end %}
     <h2>{{ settings['SITE_NAME'] }}</h2>
     {% if is_admin %}
-    <a href="{{ reverse_url('text', 'header', origin=reverse_url('home')) }}"
+    <a href="{{ reverse_url('text_edit', 'header', origin=reverse_url('home')) }}"
        class="btn btn-primary btn-xs pull-right" role="button">
-      <span class="glyphicon glyphicon-edit"></span>
-      Edit
+      <span class="glyphicon glyphicon-edit"></span> Edit
     </a>
     {% end %}
     {% module Text('header') %}
@@ -38,8 +37,7 @@
     {% block content_left %}
     <div class="panel panel-default">
       <div class="panel-heading">
-        <span class="glyphicon glyphicon-user"></span>
-        Login
+        <span class="glyphicon glyphicon-user"></span> Login
       </div>
       <div class="panel-body">
         <form action="{{ reverse_url('login') }}"
@@ -59,8 +57,7 @@
           <div class="form-group"> 
             <button type="submit"
                     class="btn btn-info btn-block">
-              <span class="glyphicon glyphicon-log-in"></span>
-              Login
+              <span class="glyphicon glyphicon-log-in"></span> Login
             </button>
           </div>
         </form>
@@ -71,24 +68,21 @@
         <div>
           <a href="{{ reverse_url('register') }}" role="button"
              class="btn btn-success btn-block">
-            <span class="glyphicon glyphicon-user"></span>
-            Register account
+            <span class="glyphicon glyphicon-user"></span> Register account
           </a>
         </div>
         <br>
         <div>
           <a href="{{ reverse_url('reset') }}" role="button"
              class="btn btn-warning btn-block">
-            <span class="glyphicon glyphicon-step-backward"></span>
-            Reset password
+            <span class="glyphicon glyphicon-step-backward"></span> Reset password
           </a>
         </div>
         <br>
         <div>
           <a href="{{ reverse_url('password') }}" role="button"
              class="btn btn-danger btn-block">
-            <span class="glyphicon glyphicon-lock"></span>
-            Set password
+            <span class="glyphicon glyphicon-lock"></span> Set password
           </a>
         </div>
       </div>
@@ -147,14 +141,12 @@
   <div class="{{ settings['DISPLAY_EVENTS'] and 'col-md-6' or 'col-md-12' }}">
     <div class="panel panel-info">
       <div class="panel-heading">
-        <span class="glyphicon glyphicon-info-sign"></span>
-        Recent news
+        <span class="glyphicon glyphicon-info-sign"></span> Recent news
         {% if is_admin %}
         &nbsp;
         <button type="button" class="btn btn-info btn-xs"
                 data-toggle="modal" data-target="#news_create">
-          <span class="glyphicon glyphicon-plus"></span>
-          Create entry
+          <span class="glyphicon glyphicon-plus"></span> Create entry
         </button>
         {% end %} {# if is_admin #}
         <a class="btn btn-info btn-xs pull-right" role="button"
@@ -171,15 +163,13 @@
   <div class="{{ settings['DISPLAY_NEWS'] and 'col-md-6' or 'col-md-12' }}">
     <div class="panel panel-success">
       <div class="panel-heading">
-        <span class="glyphicon glyphicon-calendar"></span>
-        Upcoming events
+        <span class="glyphicon glyphicon-calendar"></span> Upcoming events
         {% if is_admin %}
         &nbsp;
         <button type="button"
                 class="btn btn-success btn-xs"
                 data-toggle="modal" data-target="#event_create">
-          <span class="glyphicon glyphicon-plus"></span>
-          Create entry
+          <span class="glyphicon glyphicon-plus"></span> Create entry
         </button>
         {% end %}{# if is_admin #}
         <a class="btn btn-success btn-xs pull-right" role="button"
@@ -198,10 +188,9 @@
   <div class="col-md-12">
     <div class="panel-body">
       {% if is_admin %}
-      <a href="{{ reverse_url('text','general', origin=reverse_url('home')) }}"
+      <a href="{{ reverse_url('text_edit','general', origin=reverse_url('home')) }}"
          class="btn btn-primary btn-xs pull-right" role="button">
-        <span class="glyphicon glyphicon-edit"></span>
-        Edit
+        <span class="glyphicon glyphicon-edit"></span> Edit
       </a>
       {% end %}
       {% module Text('general') %}
