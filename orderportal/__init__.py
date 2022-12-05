@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "7.0.3"
+__version__ = "7.0.4"
 
 
 class Constants:
@@ -84,12 +84,11 @@ class Constants:
     URL = "url"
     SELECT = "select"
     MULTISELECT = "multiselect"
-    TEXT = "text"
+    ### TEXT = "text" Already defined above.
     DATE = "date"
     TABLE = "table"
-    ### This constant already defined above.
     ### GROUP   = 'group'
-    ### FILE    = 'file'
+    ### FILE    = 'file' Already defined above.
     TYPES = [
         STRING,
         EMAIL,
@@ -119,20 +118,10 @@ class Constants:
     # Re-using these id's would likely create backwards incompatibility issues.
     BANNED_META_IDS = frozenset(["account_messages", "order_messages", "global_modes"])
 
-    # Texts for use in various pages of the web site. Text content stored in database.
-    # (I regret this design decision, but there is no point in fixing it. It works.)
-    TEXTS = dict(
-        header="Header on portal home page.",
-        register="Registration page.",
-        registered="Page after registration.",
-        reset="Password reset page.",
-        password="Password setting page.",
-        general="General information on portal home page.",
-        contact="Contact page.",
-        about="About page.",
-        alert="Alert text at the top of every page.",
-        privacy_policy="Privacy policy statement; GDPR, etc.",
-    )
+    # Text types
+    DISPLAY = "display"
+    ### ACCOUNT = "account" Already defined above.
+    ### ORDER = "order" Already defined above.
 
     # Boolean string values
     TRUE = frozenset(["true", "yes", "t", "y", "1"])

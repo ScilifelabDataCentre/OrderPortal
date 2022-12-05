@@ -35,6 +35,7 @@ def main():
     db = utils.get_db()
     orderportal.designs.update_design_documents(db)
     orderportal.admin.update_meta_documents(db)
+    orderportal.admin.update_text_documents(db)
     orderportal.admin.load_texts(db)
     orderportal.admin.load_parameters(db)
 
@@ -293,7 +294,6 @@ def main():
         url(r"/file/([0-9a-f]{32})/logs", orderportal.file.FileLogs, name="file_logs"),
         url(r"/admin/text/([^/]+)", orderportal.admin.Text, name="text"),
         url(r"/admin/texts", orderportal.admin.Texts, name="texts"),
-        url(r"/admin/settings", orderportal.admin.Settings, name="settings"),
         url(
             r"/admin/order_statuses",
             orderportal.admin.OrderStatuses,
@@ -334,6 +334,7 @@ def main():
             orderportal.admin.AccountMessages,
             name="admin_account_messages",
         ),
+        url(r"/admin/settings", orderportal.admin.Settings, name="settings"),
         url(r"/search", orderportal.search.Search, name="search"),
         url(
             r"/site/([^/]+)",

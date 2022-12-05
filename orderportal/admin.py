@@ -183,12 +183,14 @@ DEFAULT_ORDER_TRANSITIONS[constants.PREPARATION][constants.SUBMITTED] = \
     dict(permission=["admin", "staff", "user"], require_valid=True)
 
 
-# (I regret this design decision, but there is no point in fixing it. It works.)
-DEFAULT_TEXTS = dict(
-    header="""This is a portal for placing orders. You need to have an account and
-be logged in to create, edit, submit and view orders.
-""",
-    register="""In order to place orders, you must have registered an account in this system.
+DEFAULT_DISPLAY_TEXTS = [
+    dict(name="header",
+         description="Header on portal home page.",
+         text="""This is a portal for placing orders. You need to have an account and
+be logged in to create, edit, submit and view orders."""),
+    dict(name="register",
+         description="Registration page.",
+         text="""In order to place orders, you must have registered an account in this system.
 Your email address is the account name in this portal.
 
 The administrator of the portal will review your account details,
@@ -210,30 +212,54 @@ individuals with regard to the processing of personal data.
 By submitting you acknowledge that you have read and understood the
 foregoing and consent to the uses of your information as set out
 above.
-""",
-    registered="""An activation email will be sent to you from the administrator
+"""),
+    dict(
+        name="registered",
+        description="Page after registration.",
+        text="""An activation email will be sent to you from the administrator
 when your account has been enabled. This may take some time.
-""",
-    reset="""Use this page to reset your password. 
+"""),
+    dict(
+        name="reset",
+        description="Password reset page.",
+        text="""Use this page to reset your password. 
 
 An email with a link to a page for setting a new password will be sent
 to you. **This may take a couple of minutes! Check your spam filter.**
 
 The email contains a one-time code for setting a new password, and a link
 to the relevant page. If you loose this code, simply do reset again.
-""",
-    password="""Set the password for your account. You need the one-time code which
+"""),
+    dict(
+        name="password",
+        description="Password setting page.",
+        text="""Set the password for your account. You need the one-time code which
 was contained in the URL sent to you by email. **Note that it takes a couple
 of minutes for the email to reach you.**
 
 If the code does not work, it may have been overwritten or already been used.
 Go to [the reset page](/reset) to obtain a new code.
-""",
-    general="""[Add general information about the facility.]""",
-    contact="""[Add information on how to contact the facility.]""",
-    about="""[Add information about this site.]""",
-    alert="""**NOTE**: This site has not yet been configured.""",
-    privacy_policy="""### Privacy policy (GDPR)
+"""),
+    dict(
+        name="general",
+        description="General information on portal home page.",
+        text="[Add general information about the facility.]"),
+    dict(
+        name="contact",
+        description="Contact page.",
+        text="[Add information on how to contact the facility.]"),
+    dict(
+        name="about",
+        description="About page.",
+        text="[Add information about this site.]"),
+    dict(
+        name="alert",
+        description="Alert text at the top of every page.",
+        text="**NOTE**: This site has not yet been configured."),
+    dict(
+        name="privacy_policy",
+        description="Privacy policy statement; GDPR, etc.",
+        text="""### Privacy policy (GDPR)
 
 The personal data you provide in this registration form is to enable
 SciLifeLab to: register and contact you about submitted information;
@@ -252,8 +278,8 @@ information as set out above.
 All your personal data is reachable via links from this page and the
 pages for all your orders (link below). The logs for your account
 and orders contains the records of all changes to those items.
-""",
-)
+"""),
+]
 
 
 class MetaSaver(saver.Saver):
@@ -269,15 +295,13 @@ class MetaSaver(saver.Saver):
         pass
 
 
-# (I regret this design decision, but there is no point in fixing it. It works.)
-class TextSaver(saver.Saver):
-    doctype = constants.TEXT
-
-
 def update_meta_documents(db):
-    "Update or delete meta documents for the current version."
+    """Update or delete meta documents for the current version.
+    This has to be checked each time the server starts because
+    the database may have been loaded with data from an old dump.
+    """
 
-    ### As of version 6.0 (I think), there are no longer any global modes.
+    ### As of version 6.0 (or thereabouts), there are no longer any global modes.
     ### Delete document 'global_modes' if present.
     try:
         db.delete("global_modes")
@@ -394,42 +418,80 @@ def update_meta_documents(db):
             saver.set_id("orders_list")
             saver["tags"] = settings.get("ORDERS_LIST_TAGS", False)
             saver["statuses"] = settings.get("ORDERS_LIST_STATUSES", list())
-            saver["fields"] = settings.get("ORDERS_LIST_FIELDS", list())
+            # This was screwed up before: dict instead of list.
+            saver["fields"] = list(settings.get("ORDERS_LIST_FIELDS", dict()))
             saver["max_most_recent"] = settings.get("DISPLAY_ORDERS_MOST_RECENT", 500)
             saver["default_order_column"] = "modified"
             saver["default_order_sort"] = "desc"
+        doc = saver.doc
         logging.info("saved orders list parameters to database")
-            
 
-def load_texts(db):
-    """Load the default texts if not already in the database.
-    Remove old multiple texts; clean up previous mistake.
-    (I regret this design decision, but there is no point in fixing it. It works.)
+    # Fix mistake dict when there should be list.
+    doc = db["orders_list"]
+    value = doc["fields"]
+    if isinstance(value, dict):
+        with MetaSaver(doc, db=db) as saver:
+            saver["fields"] = value.keys()
+
+
+class TextSaver(saver.Saver):
+    doctype = constants.TEXT
+
+    def log(self):
+        "Don't bother recording log for text documents."
+        pass
+
+
+def update_text_documents(db):
+    """Update text documents for the current version of the system.
+    Remove old multiple texts; clean up after previous bug.
+    Load the default texts if not already in the database.
+    This has to be checked each time the server starts because
+    the database may have been loaded with data from an old dump.
     """
     loaded = False
-    for name in constants.TEXTS:
-        docs = [row.doc for row in db.view("text", "name", key=name, include_docs=True)]
-        if len(docs) == 0:
+    for text in DEFAULT_DISPLAY_TEXTS:
+        docs = [row.doc for row in
+                db.view("text", "name", key=text["name"], include_docs=True)]
+        if len(docs) == 0:      # No document in db; add it from defaults.
             with TextSaver(db=db) as saver:
-                saver["name"] = name
-                saver["text"] = DEFAULT_TEXTS.get(name, "")
+                saver["name"] = text["name"]
+                saver["description"] = text["description"]
+                saver["text"] = text["text"]
             loaded = True
-        elif len(docs) > 1:     # Deal with the consequence of a previous mistake.
-            newest = docs[0]    # When more than one copy, then remove the older ones.
-            for doc in docs[1:]:
+        elif len(docs) > 1:
+            newest = docs[0]     # Deal with the consequence of a previous mistake.
+            for doc in docs[1:]: # When more than one copy, then remove the older ones.
                 if doc["modified"] > newest["modified"]:
                     newest = doc
             for doc in docs:
                 if doc != newest:
                     db.delete(doc)
     if loaded:
-        logging.info("loaded initial text(s)")
+        logging.info("loaded default display text(s)")
 
+    ### As of version 7.0.4, the one-line description of a text is in the document.
+    for text in DEFAULT_DISPLAY_TEXTS:
+        docs = [row.doc for row in
+                db.view("text", "name", key=text["name"], include_docs=True)]
+        doc = docs[0]
+        if "description" not in doc: # Update to version 7.0.4
+            with TextSaver(doc, db=db) as saver:
+                saver["description"] = text["description"]
+                saver["type"] = constants.DISPLAY
+
+
+def load_texts(db):
+    "Load the texts into parameters."
+    parameters["display"] = dict()
+    parameters["account"] = dict()
+    parameters["order"] = dict()
+    for row in db.view("text", "name", include_docs=True):
+        pass
 
 
 class Text(RequestHandler):
     "Edit page for information text."
-    # (I regret this design decision, but there is no point in fixing it. It works.)
 
     @tornado.web.authenticated
     def get(self, name):
