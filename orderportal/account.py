@@ -1106,12 +1106,19 @@ class Register(RequestHandler):
                 )
             self.see_other("register", error=str(msg), **kwargs)
             return
+        account = saver.doc
         try:
-            template = settings["ACCOUNT_MESSAGES"][constants.PENDING]
+            if account["status"] == constants.PENDING:
+                template = settings["ACCOUNT_MESSAGES"][constants.PENDING]
+                # Admins get the email about the pending account.
+                recipients = [a["email"] for a in self.get_admins()]
+            else:
+                template = settings["ACCOUNT_MESSAGES"][constants.ENABLED]
+                # The user gets the email about the enabled account.
+                recipients = [account["email"]]
         except KeyError:
             pass
         else:
-            account = saver.doc
             # Allow admin to register an account without sending an email to the person.
             if not (
                 self.is_admin()
@@ -1124,8 +1131,6 @@ class Register(RequestHandler):
                             account=account["email"],
                             url=self.absolute_reverse_url("account", account["email"]),
                         )
-                        # Recipients are hardwired to be admins.
-                        recipients = [a["email"] for a in self.get_admins()]
                         saver.send(recipients)
                 except KeyError as error:
                     self.set_message_flash(str(error))

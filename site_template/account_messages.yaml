@@ -36,7 +36,7 @@ enabled:
     In case that link does not work, go to {password_url} and
     fill in your email address and the one-time code {code}.
 
-    If you have any questions, use {support}
+    If you have any questions, contact {support}
 
     Yours sincerely,
     The {site} administrators.
@@ -52,7 +52,7 @@ reset:
     In case that link does not work, go to {password_url} and
     fill in your email address and the one-time code {code}.
 
-    If you have any questions, use {support}
+    If you have any questions, contact {support}
 
     Yours sincerely,
     The {site} administrators.
@@ -64,7 +64,7 @@ disabled:
     Your account has been disabled by the administrator.
     This may be due to too many recent failed login attempts.
 
-    To resolve this, please use {support}
+    To resolve this, please contact {support}
 
     Yours sincerely,
     The {site} administrators.
