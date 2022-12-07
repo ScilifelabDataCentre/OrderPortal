@@ -15,6 +15,44 @@ from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler
 
 
+DESIGN_DOC = {
+    "views": {
+        "all": {
+            "reduce": "_count",
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    emit(doc.modified, null);
+}"""},
+        "api_key": {
+            "map": """function(doc) { 
+    if (doc.orderportal_doctype !== 'account') return;
+    if (!doc.api_key) return;
+    emit(doc.api_key, doc.email);
+}"""},
+        "email": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    emit(doc.email, [doc.first_name, doc.last_name]);
+}"""},
+        "role": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    emit(doc.role, doc.email);
+}"""},
+        "status": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    emit(doc.status, doc.email);
+}"""},
+        "university": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    emit(doc.university, doc.email);
+}"""}
+    }
+}
+
+
 class AccountSaver(saver.Saver):
     doctype = constants.ACCOUNT
 

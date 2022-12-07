@@ -23,8 +23,40 @@ import xlsxwriter
 import yaml
 
 from orderportal import constants
-from orderportal import designs
 from orderportal import settings
+
+
+LOG_DESIGN_DOC = {
+    "views": {
+        "account": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'log') return;
+    if (!doc.account) return;
+    emit([doc.account, doc.modified], null);
+}"""},
+        "entity": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'log') return;
+    emit([doc.entity, doc.modified], null);
+}"""},
+        "login_failure": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'log') return;
+    if (!doc.changed.login_failure) return;
+    emit([doc.entity, doc.modified], doc.changed.login_failure);
+}"""}
+    }
+}
+
+META_DESIGN_DOC = {
+    "views": {
+        "id": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'meta') return;
+    emit(doc._id, null);
+}"""}
+    }
+}
 
 
 def get_settings(filepath=None, log=True):
@@ -215,6 +247,51 @@ def get_db():
         )
 
 
+def load_design_documents(db):
+    "Load the design documents for the entities."
+    import orderportal.account
+    import orderportal.event
+    import orderportal.file
+    import orderportal.form
+    import orderportal.group
+    import orderportal.info
+    import orderportal.message
+    import orderportal.news
+    import orderportal.order
+    import orderportal.admin    # Yes, admin
+
+    if db.put_design("account", orderportal.account.DESIGN_DOC):
+        logging.info("Updated 'account' design document.")
+    if db.put_design("event", orderportal.event.DESIGN_DOC):
+        logging.info("Updated 'event' design document.")
+    if db.put_design("file", orderportal.file.DESIGN_DOC):
+        logging.info("Updated 'file' design document.")
+    if db.put_design("form", orderportal.form.DESIGN_DOC):
+        logging.info("Updated 'form' design document.")
+    if db.put_design("group", orderportal.group.DESIGN_DOC):
+        logging.info("Updated 'group' design document.")
+    if db.put_design("info", orderportal.info.DESIGN_DOC):
+        logging.info("Updated 'info' design document.")
+    if db.put_design("log", LOG_DESIGN_DOC):
+        logging.info("Updated 'log' design document.")
+    if db.put_design("message", orderportal.message.DESIGN_DOC):
+        logging.info("Updated 'message' design document.")
+    if db.put_design("meta", META_DESIGN_DOC):
+        logging.info("Updated 'meta' design document.")
+    if db.put_design("news", orderportal.news.DESIGN_DOC):
+        logging.info("Updated 'news' design document.")
+    # Replace variables in the function body according to 'settings'.
+    func = orderportal.order.DESIGN_DOC["views"]["keyword"]["map"]
+    delims_lint = "".join(settings["ORDERS_SEARCH_DELIMS_LINT"])
+    lint = "{%s}" % ", ".join(["'%s': 1" % w for w in settings["ORDERS_SEARCH_LINT"]])
+    func = func.format(delims_lint=delims_lint, lint=lint)
+    orderportal.order.DESIGN_DOC["views"]["keyword"]["map"] = func
+    if db.put_design("order", orderportal.order.DESIGN_DOC):
+        logging.info("Updated 'order' design document.")
+    if db.put_design("text", orderportal.admin.DESIGN_DOC): # Yes, admin
+        logging.info("Updated 'text' design document.")
+
+
 def get_count(db, designname, viewname, key=None):
     "Get the reduce value for the name view and the given key."
     if key is None:
@@ -241,23 +318,32 @@ def get_iuid():
 
 
 def get_document(db, identifier):
-    """Get the database document by identifier, else None:
-    1) document id
-    2) order identifier
-    3) account email
+    """Get the database document by identifier, else None.
+    The identifier may be an account email, account API key, file name, info name,
+    order identifier, or '_id' of the CouchDB document.
     """
-    identifier = identifier.strip()
-    if not identifier:
+    if not identifier:          # If empty string, database info is returned.
         return None
-    try:
-        return db[identifier]
-    except couchdb2.NotFoundError:
-        for designname, viewname in [("order", "identifier"), ("account", "email")]:
-            view = db.view(designname, viewname, key=identifier, reduce=False, include_docs=True)
+    for designname, viewname in [
+        ("account", "email"),
+        ("account", "api_key"),
+        ("file", "name"),
+        ("info", "name"),
+        ("order", "identifier"),
+    ]:
+        try:
+            view = db.view(
+                designname, viewname, key=identifier, reduce=False, include_docs=True
+            )
             result = list(view)
             if len(result) == 1:
                 return result[0].doc
-    return None
+        except KeyError:
+            pass
+    try:
+        return db[identifier]
+    except couchdb2.NotFoundError:
+        return None
 
 
 def timestamp(days=None):

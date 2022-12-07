@@ -12,6 +12,28 @@ from .fields import Fields
 from .requesthandler import RequestHandler, ApiV1Mixin
 
 
+DESIGN_DOC = {
+    "views": {
+        "all": {
+            "reduce": "_count",
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'form') return;
+    emit(doc.modified, null);
+}"""},
+        "enabled": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'form') return;
+    if (doc.status === 'enabled') emit(doc.modified, doc.title);
+}"""},
+        "modified": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'form') return;
+    emit(doc.modified, doc.title);
+}"""}
+    }
+}
+
+
 class FormSaver(saver.Saver):
     doctype = constants.FORM
 

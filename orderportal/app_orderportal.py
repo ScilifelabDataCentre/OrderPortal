@@ -13,7 +13,6 @@ from orderportal import utils
 
 import orderportal.account
 import orderportal.admin
-import orderportal.designs
 import orderportal.event
 import orderportal.file
 import orderportal.form
@@ -33,7 +32,7 @@ def main():
         filepath = None
     utils.get_settings(filepath=filepath)
     db = utils.get_db()
-    orderportal.designs.update_design_documents(db)
+    utils.load_design_documents(db)
     orderportal.admin.update_meta_documents(db)
     orderportal.admin.update_text_documents(db)
     orderportal.admin.load_texts(db)

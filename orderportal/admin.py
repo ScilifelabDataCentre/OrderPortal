@@ -17,6 +17,21 @@ from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 
 
+DESIGN_DOC = {
+    "views": {
+        "name": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'text') return;
+    emit(doc.name, doc.modified);
+}"""},
+        "type": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'text') return;
+    emit(doc.type, doc.modified);
+}"""}
+    }
+}
+
 DEFAULT_ORDER_STATUSES = [
     dict(
         identifier=constants.PREPARATION, # Hard-wired! Must be present and enabled.
@@ -780,14 +795,17 @@ class Database(RequestHandler):
     def get(self):
         self.check_admin()
         server = utils.get_dbserver()
+        identifier = self.get_argument("identifier", "")
         self.render("admin_database.html",
-                    doc=utils.get_document(self.db, self.get_argument("identifier", "")),
+                    identifier=identifier,
+                    doc=utils.get_document(self.db, identifier),
                     counts=utils.get_counts(self.db),
                     db_info=self.db.get_info(),
                     server_data=server(),
                     databases=list(server),
                     system_stats=server.get_node_system(),
                     node_stats=server.get_node_stats())
+
 
 class Document(RequestHandler):
     "Download a document from the CouchDB database."
@@ -801,7 +819,7 @@ class Document(RequestHandler):
             return self.see_other("admin_database")
         self.set_header("Content-Type", constants.JSON_MIME)
         self.set_header("Content-Disposition", f'attachment; filename="{id}.json"')
-        self.write(json.dumps(doc, indent=2))
+        self.write(json.dumps(doc, ensure_ascii=False, indent=2))
 
 
 class Settings(RequestHandler):

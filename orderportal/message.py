@@ -10,6 +10,20 @@ from orderportal import settings
 from orderportal import utils
 
 
+DESIGN_DOC = {
+    "views": {
+        "recipient": {
+            "reduce": "_count",
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'message') return;
+    for (var i=0; i<doc.recipients.length; i++) {
+	emit([doc.recipients[i], doc.modified], 1);
+    };
+}"""}
+    }
+}
+
+
 class MessageSaver(saver.Saver):
     doctype = constants.MESSAGE
 

@@ -20,6 +20,72 @@ from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler, ApiV1Mixin
 
 
+DESIGN_DOC = {
+    "views": {
+        "form": {
+            "reduce": "_count",
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'order') return;
+    emit([doc.form, doc.modified], 1);
+}"""},
+        "identifier": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'order') return;
+    if (!doc.identifier) return;
+    emit(doc.identifier, doc.title);
+}"""},
+        "keyword": {      # order/keyword
+            # NOTE: The 'map' function body is modified in utils.load_design_documents.
+            "map": """function(doc) {{
+    if (doc.orderportal_doctype !== 'order') return;
+    var cleaned = doc.title.replace(/[{delims_lint}]/g, " ").toLowerCase();
+    var words = cleaned.split(/\s+/);
+    words.forEach(function(word) {{
+        if (word.length >= 2 && !lint[word]) emit(word, doc.title);
+    }});
+}};
+var lint = {lint};
+"""},
+        "modified": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'order') return;
+    emit(doc.modified, doc.title);
+}"""},
+        "owner": {
+            "reduce": "_count",
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'order') return;
+    emit([doc.owner, doc.modified], 1);
+}"""},
+        "status": {
+            "reduce": "_count",
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'order') return;
+    emit([doc.status, doc.modified], 1);
+}"""},
+        "tag": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'order') return;
+    if (!doc.tags) return;
+    doc.tags.forEach(function(tag) {
+	emit(tag.toLowerCase(), doc.title);
+	var parts = tag.split(':');
+	if (parts.length === 2) {
+	    emit(parts[1].toLowerCase(), doc.title);
+	};
+    });
+}"""},
+        "year_submitted": {
+            "reduce": "_count",
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'order') return;
+    if (!doc.history.submitted) return;
+    emit(doc.history.submitted.split('-')[0], 1);
+}"""}
+    }
+}
+
+
 class OrderSaver(saver.Saver):
     doctype = constants.ORDER
 
