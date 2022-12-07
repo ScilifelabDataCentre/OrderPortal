@@ -11,12 +11,11 @@
 
 {% block action_content %}
 {% if is_admin %}
-<form action="{{ reverse_url('text', 'about') }}"
+<form action="{{ reverse_url('text_edit', 'about') }}"
       method="GET" role="form">
   <input type="hidden" name="origin" value="{{ reverse_url('about') }}">
   <button type="submit" class="btn btn-primary">
-    <span class="glyphicon glyphicon-edit"></span>
-    Edit
+    <span class="glyphicon glyphicon-edit"></span> Edit
   </button>
 </form>
 {% end %}

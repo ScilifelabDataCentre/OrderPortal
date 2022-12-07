@@ -319,8 +319,6 @@ class AccountMixin(object):
 
     def allow_edit(self, account):
         "Is the account editable by the current user?"
-        if settings.get("READONLY"):
-            return False
         if self.is_owner(account):
             return True
         if self.is_staff():
@@ -428,8 +426,6 @@ class Account(AccountMixin, RequestHandler):
 
     def allow_delete(self, account):
         "Can the account be deleted? Pending, or disabled and no orders."
-        if settings.get("READONLY"):
-            return False
         if account["status"] == constants.PENDING:
             return True
         if account["status"] == constants.ENABLED:
@@ -804,8 +800,6 @@ class Login(RequestHandler):
     "Login to a account account. Set a secure cookie."
 
     def get(self):
-        if self.readonly("Login disallowed."):
-            return
         self.render("login.html")
 
     def post(self):
@@ -813,8 +807,6 @@ class Login(RequestHandler):
         Forward to account edit page if first login.
         Log failed login attempt. Disable account if too many recent.
         """
-        if self.readonly("Login disallowed."):
-            return
         try:
             email = self.get_argument("email")
             password = self.get_argument("password")
@@ -898,13 +890,9 @@ class Reset(RequestHandler):
     "Reset the password of a account account."
 
     def get(self):
-        if self.readonly("Password reset not possible."):
-            return
         self.render("reset.html", email=self.get_argument("email", ""))
 
     def post(self):
-        if self.readonly("Password reset not possible."):
-            return
         URL = self.absolute_reverse_url
         try:
             account = self.get_account(self.get_argument("email"))
@@ -961,8 +949,6 @@ class Password(RequestHandler):
     "Set the password of a account account; requires a code."
 
     def get(self):
-        if self.readonly("Password set not possible."):
-            return
         self.render(
             "password.html",
             title="Set your password",
@@ -971,8 +957,6 @@ class Password(RequestHandler):
         )
 
     def post(self):
-        if self.readonly("Password set not possible."):
-            return
         try:
             account = self.get_account(self.get_argument("email", ""))
         except ValueError as msg:
@@ -1031,8 +1015,6 @@ class Register(RequestHandler):
     ADDRESS_KEYS = ["address", "zip", "city", "country"]
 
     def get(self):
-        if self.readonly("Registration not possible."):
-            return
         values = dict()
         for key in self.KEYS:
             values[key] = self.get_argument(key, None)
@@ -1043,8 +1025,6 @@ class Register(RequestHandler):
         self.render("register.html", values=values)
 
     def post(self):
-        if self.readonly("Registration not possible."):
-            return
         try:
             with AccountSaver(rqh=self) as saver:
                 email = self.get_argument("email", None)
@@ -1106,12 +1086,19 @@ class Register(RequestHandler):
                 )
             self.see_other("register", error=str(msg), **kwargs)
             return
+        account = saver.doc
         try:
-            template = settings["ACCOUNT_MESSAGES"][constants.PENDING]
+            if account["status"] == constants.PENDING:
+                template = settings["ACCOUNT_MESSAGES"][constants.PENDING]
+                # Admins get the email about the pending account.
+                recipients = [a["email"] for a in self.get_admins()]
+            else:
+                template = settings["ACCOUNT_MESSAGES"][constants.ENABLED]
+                # The user gets the email about the enabled account.
+                recipients = [account["email"]]
         except KeyError:
             pass
         else:
-            account = saver.doc
             # Allow admin to register an account without sending an email to the person.
             if not (
                 self.is_admin()
@@ -1124,8 +1111,6 @@ class Register(RequestHandler):
                             account=account["email"],
                             url=self.absolute_reverse_url("account", account["email"]),
                         )
-                        # Recipients are hardwired to be admins.
-                        recipients = [a["email"] for a in self.get_admins()]
                         saver.send(recipients)
                 except KeyError as error:
                     self.set_message_flash(str(error))
@@ -1149,8 +1134,6 @@ class AccountEnable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        if self.readonly():
-            return
         try:
             account = self.get_account(email)
         except ValueError as msg:
@@ -1185,8 +1168,6 @@ class AccountDisable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        if self.readonly():
-            return
         try:
             account = self.get_account(email)
         except ValueError as msg:
@@ -1204,8 +1185,6 @@ class AccountUpdateInfo(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
-        if self.readonly():
-            return
         try:
             account = self.get_account(email)
         except ValueError as msg:

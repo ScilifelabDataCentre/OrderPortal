@@ -579,8 +579,6 @@ class OrderMixin(object):
 
     def allow_edit(self, order):
         "Is the order editable by the current user?"
-        if settings.get("READONLY"):
-            return False
         if self.is_admin():
             return True
         status = parameters["ORDER_STATUSES_LOOKUP"][order["status"]]
@@ -595,11 +593,7 @@ class OrderMixin(object):
         "Check if current user may edit the order."
         if self.allow_edit(order):
             return
-        if settings.get("READONLY"):
-            msg = "{0} editing is currently disabled."
-        else:
-            msg = "You may not edit the {0}."
-        raise ValueError(msg.format(utils.terminology("order")))
+        raise ValueError("You may not edit the " + utils.terminology("order"))
 
     def allow_attach(self, order):
         "May the current user may attach a file to the order?"
@@ -627,8 +621,6 @@ class OrderMixin(object):
     def check_creation_enabled(self):
         "If order creation is disabled, raise ValueError."
         term = utils.terminology("Order")
-        if settings.get("READONLY"):
-            raise ValueError(f"{term} creation is currently disabled.")
         if (
             self.current_user["role"] == constants.USER
             and not settings["ORDER_CREATE_USER"]
@@ -682,8 +674,6 @@ class OrderMixin(object):
 
     def get_targets(self, order):
         "Get the allowed status transition targets as status lookup items."
-        if settings.get("READONLY"):
-            return []
         targets = parameters["ORDER_TRANSITIONS"].get(order["status"], dict())
         result = []
         for key, transition in targets.items():
@@ -708,8 +698,6 @@ class OrderMixin(object):
         """Can the given order be cloned? Its form must be enabled.
         Special case: Admin can clone an order even if its form is disabled.
         """
-        if settings.get("READONLY"):
-            return False
         form = self.get_form(order["form"])
         if self.is_admin():
             return form["status"] in (

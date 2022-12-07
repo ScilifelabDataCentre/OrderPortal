@@ -157,7 +157,10 @@
                   <a href="{{ reverse_url('admin_account_messages') }}">Account messages</a>
                 </li>
                 <li>
-                  <a href="{{ reverse_url('settings') }}">Settings</a>
+                  <a href="{{ reverse_url('admin_database') }}">Database</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('admin_settings') }}">Settings</a>
                 </li>
                 <li>
                   <a href="{{ reverse_url('software') }}">Software</a>
@@ -233,7 +236,7 @@
         <div class="col-md-12">
           <div class="lead alert alert-danger" style="margin: 4px;" role="alert">
             {% if is_admin %}
-            <a href="{{ reverse_url('text','alert',origin=reverse_url('home')) }}"
+            <a href="{{ reverse_url('text_edit', 'alert', origin=reverse_url('home')) }}"
                class="btn btn-primary btn-xs pull-right" role="button">
               <span class="glyphicon glyphicon-edit"></span> Edit
             </a>
@@ -247,12 +250,6 @@
       {% block body_header %}
       <div class="row">
         <div class="col-md-10">
-          {% if current_user and settings['READONLY'] %}
-          <div class="alert alert-danger" role="alert">
-            <strong>This service is currently read-only:</strong>
-            {{ settings['READONLY'] }}
-          </div>
-          {% end %}
           <h1>{% block body_title %}OrderPortal{% end %}</h1>
         </div>
         <div class="col-md-2 hidden-print" style="margin-top: 20px">

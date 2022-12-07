@@ -38,7 +38,7 @@ class Search(RequestHandler):
         for iuid in parts:
             try:
                 order = self.get_entity(iuid, doctype=constants.ORDER)
-            except tornado.web.HTTPError as err:
+            except tornado.web.HTTPError:
                 pass
             else:
                 orders[order.get("identifier") or iuid] = order

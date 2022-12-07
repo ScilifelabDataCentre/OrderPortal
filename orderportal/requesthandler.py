@@ -231,13 +231,6 @@ class RequestHandler(tornado.web.RequestHandler):
         if not self.current_user:
             raise tornado.web.HTTPError(403, reason="Must be logged in.")
 
-    def readonly(self, msg=""):
-        "If site is readonly, redirect to home page with a message and return True."
-        if settings.get("READONLY"):
-            self.see_other("home", error=f"Site is currently read-only. {msg}")
-            return True
-        return False
-
     def get_admins(self):
         "Get the list of enabled admin accounts."
         view = self.db.view("account", "role", key=constants.ADMIN, include_docs=True)

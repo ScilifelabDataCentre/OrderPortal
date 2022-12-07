@@ -6,12 +6,7 @@
 {% block body_title %}Texts{% end %}
 
 {% block content %}
-<div class="well">
-  <p>
-    Short texts displayed in various pages of the system. Can be edited
-    here or from the page here they appear.
-  </p>
-</div>
+<h4>Short texts displayed in various pages.</h4>
 
 <table class="table">
   <thead>
@@ -29,7 +24,7 @@
       <td>{{ text['type'] }}</td>
       <td>{{ text['description'] }}</td>
       <td>
-        <a href="{{ reverse_url('text', text['name']) }}"
+        <a href="{{ reverse_url('text_edit', text['name']) }}"
            class="btn btn-primary btn-sm btn-block" role="button">
           <span class="glyphicon glyphicon-edit"></span> Edit
         </a>

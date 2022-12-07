@@ -29,8 +29,6 @@ class GroupMixin(object):
 
     def allow_edit(self, group):
         "Is the group editable by the current user?"
-        if settings.get("READONLY"):
-            return False
         if self.is_admin():
             return True
         if self.is_owner(group):
@@ -79,14 +77,10 @@ class GroupCreate(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
-        if self.readonly():
-            return
         self.render("group_create.html")
 
     @tornado.web.authenticated
     def post(self):
-        if self.readonly():
-            return
         with GroupSaver(rqh=self) as saver:
             saver["name"] = self.get_argument("name", "") or "[no name]"
             saver["owner"] = self.current_user["email"]
@@ -170,8 +164,6 @@ class GroupAccept(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        if self.readonly():
-            return
         group = self.get_entity(iuid, doctype=constants.GROUP)
         with GroupSaver(doc=group, rqh=self) as saver:
             invited = set(group["invited"])
@@ -193,8 +185,6 @@ class GroupDecline(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        if self.readonly():
-            return
         group = self.get_entity(iuid, doctype=constants.GROUP)
         with GroupSaver(doc=group, rqh=self) as saver:
             invited = set(group["invited"])

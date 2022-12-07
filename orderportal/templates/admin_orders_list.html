@@ -3,10 +3,7 @@
 {% extends "base.html" %}
 
 {% block head_title %}{{ terminology('Orders') }} list{% end %}
-
-{% block body_title %}{{ terminology('Orders') }} list
-<small>Parameters for {{ terminology('orders') }} list content and display.</small>
-{% end %}
+{% block body_title %}{{ terminology('Orders') }} list{% end %}
 
 {% block action_content %}
 <p>
@@ -21,6 +18,8 @@
 
 
 {% block main_content %}
+<h4>Setup of {{ terminology('orders') }} list content and display.</h4>
+
 {% if settings.get("ORDERS_LIST_TAGS") or settings.get("ORDERS_LIST_STATUSES") or settings.get("ORDERS_LIST_FIELDS") or settings.get("DISPLAY_ORDERS_MOST_RECENT") %}
 <div class="well">
   <strong>NOTE!</strong> The settings ORDERS_LIST_TAGS,

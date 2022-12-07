@@ -69,7 +69,8 @@ class File(RequestHandler):
         else:
             self.write(outfile.read())
             outfile.close()
-        self.set_header("Content-Type", self.doc["content_type"])
+        if self.doc["content_type"]:
+            self.set_header("Content-Type", self.doc["content_type"])
 
 
 class FileMeta(RequestHandler):
@@ -166,8 +167,6 @@ class FileDownload(File):
         ext = utils.get_filename_extension(self.doc["content_type"])
         if ext:
             name += ext
-        if self.doc["content_type"]:
-            self.set_header("Content-Type", self.doc["content_type"])
         self.set_header("Content-Disposition", f'attachment; filename="{name}"')
 
 
