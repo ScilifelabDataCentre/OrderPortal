@@ -214,7 +214,6 @@ settings = dict(
     COOKIE_SECRET="CHANGE THIS!",
     PASSWORD_SALT="CHANGE THIS!",
     MIN_PASSWORD_LENGTH=8,
-    READONLY=False,
     MARKDOWN_URL="https://www.markdownguide.org/basic-syntax/",
     SITE_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site")),
     SITE_STATIC_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site/static")),

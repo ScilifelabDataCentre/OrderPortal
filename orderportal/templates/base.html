@@ -250,12 +250,6 @@
       {% block body_header %}
       <div class="row">
         <div class="col-md-10">
-          {% if current_user and settings['READONLY'] %}
-          <div class="alert alert-danger" role="alert">
-            <strong>This service is currently read-only:</strong>
-            {{ settings['READONLY'] }}
-          </div>
-          {% end %}
           <h1>{% block body_title %}OrderPortal{% end %}</h1>
         </div>
         <div class="col-md-2 hidden-print" style="margin-top: 20px">

@@ -10,12 +10,6 @@
          src="{{ reverse_url('site', settings['SITE_HOME_ICON']) }}">
   </div>
   <div class="col-md-8">
-    {% if current_user and settings['READONLY'] %}
-    <div class="alert alert-danger" role="alert">
-      <strong>This service is currently read-only:</strong>
-      {{ settings['READONLY'] }}
-    </div>
-    {% end %}
     <h2>{{ settings['SITE_NAME'] }}</h2>
     {% if is_admin %}
     <a href="{{ reverse_url('text_edit', 'header', origin=reverse_url('home')) }}"
@@ -94,7 +88,6 @@
     {% block content_right %}
 
     <div class="panel-group">
-      {% if not settings['READONLY'] %}
       {% if forms %}
       {% for form in forms %}
       <div class="panel panel-primary">
@@ -127,7 +120,6 @@
       {% else %}
       <i>No {{ terminology('order') }} forms have been enabled.</i>
       {% end %} {# if forms #}
-      {% end %} {# if not settings['READONLY'] #}
     </div>
 
     {% end %} {# block content_right #}
