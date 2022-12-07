@@ -334,7 +334,13 @@ def main():
             orderportal.admin.AccountMessages,
             name="admin_account_messages",
         ),
-        url(r"/admin/settings", orderportal.admin.Settings, name="settings"),
+        url(r"/admin/database", orderportal.admin.Database, name="admin_database"),
+        url(
+            r"/admin/document/(.+)",
+            orderportal.admin.Document,
+            name="admin_document"
+        ),
+        url(r"/admin/settings", orderportal.admin.Settings, name="admin_settings"),
         url(r"/search", orderportal.search.Search, name="search"),
         url(
             r"/site/([^/]+)",

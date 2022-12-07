@@ -1,0 +1,53 @@
+{# Database display page. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Database{% end %}
+{% block body_title %}Database{% end %}
+
+{% block content %}
+<h4>CouchDB database information.</h4>
+
+<h3>Search CouchDB database</h3>
+<div class="row">
+  <div class="col-md-5">
+    <form action="{{ reverse_url('admin_database') }}"
+          method="GET" role="form">
+      <div class="form-group has-feedback">
+        <input type="search" id="identifier" name="identifier"
+               class="form-control"
+               placeholder="Search by document id, order identifier or account email">
+        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+      </div>
+    </form>
+  </div>
+  {% if doc %}
+  <div class="col-md-5 col-md-offset-1">
+    Found <code>{{ doc['_id'] }}</code>
+    <a href="{{ reverse_url('admin_document', doc['_id']) }}"
+       class="btn btn-primary">
+      <span class="glyphicon glyphicon-download"></span> Download
+    </a>
+  </div>
+  {% end %}
+</div>
+
+<h3>Document counts in the OrderPortal database</h3>
+{% module Json(counts) %}
+
+<h3>OrderPortal database info</h3>
+{% module Json(db_info) %}
+
+<h3>CouchDB server</h3>
+{% module Json(server_data) %}
+
+<h3>All databases in CouchDB server</h3>
+{{ ", ".join([str(d) for d in databases]) }}
+
+<h3>CouchDB system stats</h3>
+{% module Json(system_stats) %}
+
+<h3>CouchDB node stats</h3>
+{% module Json(node_stats) %}
+
+{% end %} {# block content #}

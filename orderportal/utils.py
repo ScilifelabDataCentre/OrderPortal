@@ -227,9 +227,37 @@ def get_count(db, designname, viewname, key=None):
         return 0
 
 
+def get_counts(db):
+    "Get the counts for the most important types of entities in the database."
+    return dict(n_orders=get_count(db, "order", "status"),
+                n_forms=get_count(db, "form", "all"),
+                n_accounts=get_count(db, "account", "all"),
+                n_documents=len(db))
+
+
 def get_iuid():
     "Return a unique instance identifier."
     return uuid.uuid4().hex
+
+
+def get_document(db, identifier):
+    """Get the database document by identifier, else None:
+    1) document id
+    2) order identifier
+    3) account email
+    """
+    identifier = identifier.strip()
+    if not identifier:
+        return None
+    try:
+        return db[identifier]
+    except couchdb2.NotFoundError:
+        for designname, viewname in [("order", "identifier"), ("account", "email")]:
+            view = db.view(designname, viewname, key=identifier, reduce=False, include_docs=True)
+            result = list(view)
+            if len(result) == 1:
+                return result[0].doc
+    return None
 
 
 def timestamp(days=None):

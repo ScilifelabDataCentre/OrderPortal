@@ -1,6 +1,7 @@
 "Admin pages."
 
 import copy
+import json
 import logging
 import os.path
 import re
@@ -555,55 +556,6 @@ def load_parameters(db):
             parameters["ORDER_STATUS_INITIAL"] = status
 
 
-class Settings(RequestHandler):
-    "Page displaying settings info."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        hidden = "&lt;hidden&gt;"
-        mod_settings = settings.copy()
-        # Add the root dir
-        mod_settings["ROOT"] = constants.ROOT
-        # Hide sensitive data.
-        for key in settings:
-            if "PASSWORD" in key or "SECRET" in key:
-                mod_settings[key] = hidden
-        # Do not show the email password.
-        if mod_settings["EMAIL"].get("PASSWORD"):
-            mod_settings["EMAIL"]["PASSWORD"] = hidden
-        # Don't show the password in the CouchDB URL; actually obsolete now...
-        url = settings["DATABASE_SERVER"]
-        match = re.search(r":([^/].+)@", url)
-        if match:
-            url = list(url)
-            url[match.start(1) : match.end(1)] = "password"
-            mod_settings["DATABASE_SERVER"] = "".join(url)
-        mod_settings[
-            "ACCOUNT_MESSAGES"
-        ] = f"&lt;see file {mod_settings['ACCOUNT_MESSAGES_FILE']}&gt;"
-        mod_settings["COUNTRIES"] = f"&lt;see file {mod_settings['COUNTRY_CODES_FILE']}&gt;"
-        mod_settings[
-            "COUNTRIES_LOOKUP"
-        ] = f"&lt;computed from file {mod_settings['COUNTRY_CODES_FILE']}&gt;"
-        mod_settings[
-            "ORDER_MESSAGES"
-        ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}%gt;"
-        mod_settings[
-            "ORDER_MESSAGES"
-        ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}&gt;"
-        for obsolete in ["ORDER_STATUSES_FILE", 
-                         "ORDER_TRANSITIONS_FILE",
-                         "ORDERS_LIST_TAGS",
-                         "ORDERS_LIST_STATUSES",
-                         "ORDERS_LIST_FIELDS",
-                         "DISPLAY_ORDERS_MOST_RECENT",
-                         "SITE_PERSONAL_DATA_POLICY"]:
-            if obsolete in mod_settings:
-                mod_settings[obsolete] = " &lt;<b>OBSOLETE; NO LONGER USED</b>&gt;"
-        self.render("settings.html", settings=mod_settings)
-
-
 class OrderStatuses(RequestHandler):
     "Page displaying currently defined order statuses and transitions."
 
@@ -819,3 +771,83 @@ class AccountMessages(RequestHandler):
     def get(self):
         self.check_admin()
         self.render("admin_account_messages.html")
+
+
+class Database(RequestHandler):
+    "Page displaying info about the database."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        server = utils.get_dbserver()
+        self.render("admin_database.html",
+                    doc=utils.get_document(self.db, self.get_argument("identifier", "")),
+                    counts=utils.get_counts(self.db),
+                    db_info=self.db.get_info(),
+                    server_data=server(),
+                    databases=list(server),
+                    system_stats=server.get_node_system(),
+                    node_stats=server.get_node_stats())
+
+class Document(RequestHandler):
+    "Download a document from the CouchDB database."
+
+    @tornado.web.authenticated
+    def get(self, id):
+        self.check_admin()
+        try:
+            doc = self.db[id]
+        except couchdb2.NotFoundError:
+            return self.see_other("admin_database")
+        self.set_header("Content-Type", constants.JSON_MIME)
+        self.set_header("Content-Disposition", f'attachment; filename="{id}.json"')
+        self.write(json.dumps(doc, indent=2))
+
+
+class Settings(RequestHandler):
+    "Page displaying settings info."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        hidden = "&lt;hidden&gt;"
+        mod_settings = settings.copy()
+        # Add the root dir
+        mod_settings["ROOT"] = constants.ROOT
+        # Hide sensitive data.
+        for key in settings:
+            if "PASSWORD" in key or "SECRET" in key:
+                mod_settings[key] = hidden
+        # Do not show the email password.
+        if mod_settings["EMAIL"].get("PASSWORD"):
+            mod_settings["EMAIL"]["PASSWORD"] = hidden
+        # Don't show the password in the CouchDB URL; actually obsolete now...
+        url = settings["DATABASE_SERVER"]
+        match = re.search(r":([^/].+)@", url)
+        if match:
+            url = list(url)
+            url[match.start(1) : match.end(1)] = "password"
+            mod_settings["DATABASE_SERVER"] = "".join(url)
+        mod_settings[
+            "ACCOUNT_MESSAGES"
+        ] = f"&lt;see file {mod_settings['ACCOUNT_MESSAGES_FILE']}&gt;"
+        mod_settings["COUNTRIES"] = f"&lt;see file {mod_settings['COUNTRY_CODES_FILE']}&gt;"
+        mod_settings[
+            "COUNTRIES_LOOKUP"
+        ] = f"&lt;computed from file {mod_settings['COUNTRY_CODES_FILE']}&gt;"
+        mod_settings[
+            "ORDER_MESSAGES"
+        ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}%gt;"
+        mod_settings[
+            "ORDER_MESSAGES"
+        ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}&gt;"
+        for obsolete in ["ORDER_STATUSES_FILE", 
+                         "ORDER_TRANSITIONS_FILE",
+                         "ORDERS_LIST_TAGS",
+                         "ORDERS_LIST_STATUSES",
+                         "ORDERS_LIST_FIELDS",
+                         "DISPLAY_ORDERS_MOST_RECENT",
+                         "SITE_PERSONAL_DATA_POLICY"]:
+            if obsolete in mod_settings:
+                mod_settings[obsolete] = " &lt;<b>OBSOLETE; NO LONGER USED</b>&gt;"
+        self.render("admin_settings.html", settings=mod_settings)

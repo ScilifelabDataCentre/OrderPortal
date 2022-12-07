@@ -1,5 +1,7 @@
 "UI modules for tornado."
 
+import json
+
 import tornado.web
 
 from orderportal import constants, parameters
@@ -101,6 +103,13 @@ class Text(tornado.web.UIModule):
             else:
                 return ""
         return utils.markdown2html(text, safe=True)
+
+
+class Json(tornado.web.UIModule):
+    "Display JSON with indent."
+
+    def render(self, data):
+        return "<pre>" + json.dumps(data, indent=2) + "</pre>"
 
 
 class Tags(tornado.web.UIModule):
