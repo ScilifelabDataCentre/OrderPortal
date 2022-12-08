@@ -11,7 +11,7 @@
 
 {% block action_content %}
 {% if is_admin %}
-<form action="{{ reverse_url('text_edit', 'contact') }}"
+<form action="{{ reverse_url('text_edit', constants.DISPLAY, 'contact') }}"
       method="GET" role="form">
   <input type="hidden" name="origin" value="{{ reverse_url('contact') }}">
   <button type="submit" class="btn btn-primary">

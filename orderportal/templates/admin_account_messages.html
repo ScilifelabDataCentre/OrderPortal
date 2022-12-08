@@ -8,53 +8,7 @@
 {% block content %}
 <h4>Templates for email messages about account status changes.</h4>
 
-<div class="well">
-  <p>
-    The account messages are defined in the YAML file
-    <code>{{ settings.get('ACCOUNT_MESSAGES_FILE') }}</code>
-    in <strong>SITE_DIR</strong> which is read on startup of the
-    OrderPortal server.
-  </p>
-  <p>
-    To change the messages, the YAML file must be edited and the
-    OrderPortal server restarted. Only the sysadmin for the server
-    machine can do this.
-  </p>
-  <table class="table">
-    <tr>
-      <th>Variable</th>
-      <th>Value</th>
-    </tr>
-    <tr>
-      <td><code>{site}</code></td>
-      <td>The name of the OrderPortal site.</td>
-    </tr>
-    <tr>
-      <td><code>{support}</code></td>
-      <td>The contact email for the OrderPortal site.</td>
-    </tr>
-    <tr>
-      <td><code>{account}</code></td>
-      <td>The email of the account.</td>
-    </tr>
-    <tr>
-      <td><code>{url}</code></td>
-      <td>The URL of the account.</td>
-    </tr>
-    <tr>
-      <td><code>{password_url}</code></td>
-      <td>The URL for the password setting page.</td>
-    </tr>
-    <tr>
-      <td><code>{password_code_url}</code></td>
-      <td>The URL for the password setting page, including code and account email..</td>
-    </tr>
-    <tr>
-      <td><code>{code}</code></td>
-      <td>The password setting code.</td>
-    </tr>
-  </table>
-</div>
+{% include 'admin_account_messages_variables.html' %}
 
 <table class="table">
   <tr>
@@ -62,15 +16,20 @@
     <th>Recipients</th>
     <th>Subject</th>
     <th>Text</th>
+    <th></th>
   </tr>
-  {% set statuses = constants.ACCOUNT_STATUSES + [constants.RESET] %}
-  {% for status in  statuses %}
-  {% set msg = settings['ACCOUNT_MESSAGES'].get(status, dict()) %}
+  {% for text in  texts %}
   <tr>
-    <td>{% module Icon(status, label=True) %}</td>
-    <td>{{ ', '.join(msg.get('recipients', [])) or '-' }}</td>
-    <td>{{ msg.get('subject') or '-' }}</td>
-    <td class="pre">{{ msg.get('text') or '-' }}</td>
+    <td>{% module Icon(text['status'], label=True) %}</td>
+    <td>{{ ', '.join(text['recipients']) or '-' }}</td>
+    <td>{{ text['subject'] }}</td>
+    <td class="pre">{{ text['text'] }}</td>
+    <td>
+      <a href="{{ reverse_url('text_edit', constants.ACCOUNT, text['status']) }}",
+         class="btn btn-sm btn-primary btn-block" role="button">
+        <span class="glyphicon glyphicon-edit"></span> Edit
+      </a>
+    </td>
   </tr>
   {% end %}
 </table>

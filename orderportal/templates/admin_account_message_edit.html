@@ -1,18 +1,17 @@
-{# Text edit page. #}
+{# Account message edit page. #}
 
 {% extends "base.html" %}
 
-{% block head_title %}Edit text '{{ text['name'] }}'{% end %}
-{% block body_title %}Edit text '{{ text['name'] }}'{% end %}
+{% block head_title %}Edit account message '{{ text['name'] }}'{% end %}
+{% block body_title %}Edit account message '{{ text['name'] }}'{% end %}
 
 {% block main_content %}
-<form action="{{ reverse_url('text_edit', text['type'], text['name']) }}"
+<form action="{{ reverse_url('admin_account_message_edit', text['name']) }}"
       method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <h4>{{ text.get('description') or '-' }}</h4>
 
-  {% if text["type"] == constants.ACCOUNT %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
@@ -22,7 +21,6 @@
       </div>
     </div>
   </div>
-  {% end %}
 
   <div class="form-group">
     <div class="row">
@@ -32,15 +30,7 @@
                   >{{ text.get('text') or '' }}</textarea>
       </div>
     </div>
-    {% if text["type"] == constants.DISPLAY %}
-    <span class="help-block">
-      This text will be formatted using
-      <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>.
-    </span>
-    {% end %}
   </div>
-
-  <input type="hidden" name="origin" value="{{ origin }}">
 
   <div class="form-group">
     <div class="row">
@@ -53,14 +43,17 @@
 
 </form>
 
-{% if text["type"] == constants.ACCOUNT %}
 {% include 'admin_account_messages_variables.html' %}
-{% end %}
 
 {% end %} {# block main_content #}
 
 {% block action_content %}
-<form action="{{ origin }}"
+<a href="{{ reverse_url('admin_account_messages') }}"
+   role="button" class="btn btn-default btn-block">
+  <span class="glyphicon glyphicon-remove"></span> Cancel
+</a>
+  
+<form action="{{ reverse_url('admin_account_messages') }}"
       method="GET" role="form">
   <div class="form-group">
     <label class="control-label"></label>

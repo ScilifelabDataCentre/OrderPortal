@@ -131,7 +131,7 @@ def get_settings(filepath=None, log=True):
     with open(filepath) as infile:
         settings["ACCOUNT_MESSAGES"] = yaml.safe_load(infile) or {}
     # Set recipients, which are hardwired into the source code.
-    # Also checks for missing message for a status.
+    # # Also checks for missing message for a status.
     try:
         settings["ACCOUNT_MESSAGES"][constants.PENDING]["recipients"] = ["admin"]
         settings["ACCOUNT_MESSAGES"][constants.ENABLED]["recipients"] = ["account"]

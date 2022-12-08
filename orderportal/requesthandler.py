@@ -237,6 +237,25 @@ class RequestHandler(tornado.web.RequestHandler):
         admins = [r.doc for r in view]
         return [a for a in admins if a["status"] == constants.ENABLED]
 
+    def get_staff(self):
+        "Get the list of enabled staff accounts."
+        view = self.db.view("account", "role", key=constants.STAFF, include_docs=True)
+        staff = [r.doc for r in view]
+        return [a for a in staff if a["status"] == constants.ENABLED]
+
+    def get_recipients(self, text, account):
+        """Return the list of emails for the recipients according to
+        the specification in the text, given the user account.
+        May include admin and staff.
+        """
+        result = []
+        if constants.USER in text["recipients"]:
+            result.append(account["email"])
+        if constants.ADMIN in text["recipients"]:
+            result.extend([a["email"] for a in self.get_admins()])
+        if constants.STAFF in text["recipients"]:
+            result.extend([a["email"] for a in self.get_staff()])
+
     def get_colleagues(self, email):
         "Get list of accounts in same groups as the account given by email."
         colleagues = dict()
@@ -300,6 +319,22 @@ class RequestHandler(tornado.web.RequestHandler):
             return result[0].doc
         else:
             raise tornado.web.HTTPError(404, reason=reason)
+
+    def get_texts(self, type):
+        "Return all texts of the given type."
+        return [row.doc for row in self.db.view("text", "type", key=type,
+                                                reduce=False, include_docs=True)]
+
+    def get_text(self, type, name):
+        """Get the requested text by type and name.
+        Raise KeyError if not found.
+        """
+        docs = [row.doc for row in self.db.view("text", "type", key=type,
+                                                 reduce=False, include_docs=True)]
+        for doc in docs:
+            if doc["name"] == name:
+                return doc
+        raise KeyError
 
     def get_news(self, limit=None):
         "Get all news items in descending 'modified' order."

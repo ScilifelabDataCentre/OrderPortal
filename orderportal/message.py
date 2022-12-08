@@ -24,6 +24,11 @@ DESIGN_DOC = {
 }
 
 
+class SafeDict(dict):
+    def __missing__(self, key):
+        return f"[unknown variable {key}]"
+
+
 class MessageSaver(saver.Saver):
     doctype = constants.MESSAGE
 
@@ -33,21 +38,21 @@ class MessageSaver(saver.Saver):
         self["reply-to"] = settings["MESSAGE_REPLY_TO_EMAIL"]
         self["sent"] = None
 
-    def create(self, template, **kwargs):
-        "Create the message from the template and parameters for it."
+    def create(self, text, **kwargs):
+        "Create the message from the text template and parameters for it."
         site_url = settings["BASE_URL"]
         if settings["BASE_URL_PATH_PREFIX"]:
             site_url = settings["BASE_URL_PATH_PREFIX"] + site_url
-        params = dict(
+        params = SafeDict(
             site=settings["SITE_NAME"],
             site_url=site_url,
-            support=settings.get("SITE_SUPPORT_EMAIL") or "[?]",
-            host=settings.get("SITE_HOST_TITLE") or "[?]",
-            host_url=settings.get("SITE_HOST_URL") or "[?]",
+            support=settings.get("SITE_SUPPORT_EMAIL") or "[not defined]",
+            host=settings.get("SITE_HOST_TITLE") or "[not defined]",
+            host_url=settings.get("SITE_HOST_URL") or "[not defined]",
         )
         params.update(kwargs)
-        self["subject"] = str(template["subject"]).format(**params)
-        self["text"] = str(template["text"]).format(**params)
+        self["subject"] = str(text["subject"]).format_map(params)
+        self["text"] = str(text["text"]).format_map(params)
 
     def send(self, recipients):
         """Send the message to the given recipient email addresses.
@@ -64,6 +69,8 @@ class MessageSaver(saver.Saver):
             raise KeyError(
                 "Could not send email; no email server defined. Contact the admin."
             )
+        if not recipients:
+            raise ValueError("No recipients specified.")
         try:
             self["recipients"] = recipients
             port = settings["EMAIL"].get("PORT", 0)

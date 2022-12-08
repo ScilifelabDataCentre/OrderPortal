@@ -199,13 +199,14 @@ DEFAULT_ORDER_TRANSITIONS[constants.PREPARATION][constants.SUBMITTED] = \
     dict(permission=["admin", "staff", "user"], require_valid=True)
 
 
+# Texts shown in some web pages.
 DEFAULT_TEXTS_DISPLAY = [
     dict(name="header",
          description="Header on portal home page.",
          text="""This is a portal for placing orders. You need to have an account and
 be logged in to create, edit, submit and view orders."""),
     dict(name="register",
-         description="Registration page.",
+         description="Registration page text.",
          text="""In order to place orders, you must have registered an account in this system.
 Your email address is the account name in this portal.
 
@@ -227,17 +228,15 @@ individuals with regard to the processing of personal data.
 
 By submitting you acknowledge that you have read and understood the
 foregoing and consent to the uses of your information as set out
-above.
-"""),
+above."""),
     dict(
         name="registered",
-        description="Page after registration.",
+        description="Text on page after registration.",
         text="""An activation email will be sent to you from the administrator
-when your account has been enabled. This may take some time.
-"""),
+when your account has been enabled. This may take some time."""),
     dict(
         name="reset",
-        description="Password reset page.",
+        description="Password reset page text.",
         text="""Use this page to reset your password. 
 
 An email with a link to a page for setting a new password will be sent
@@ -248,25 +247,24 @@ to the relevant page. If you loose this code, simply do reset again.
 """),
     dict(
         name="password",
-        description="Password setting page.",
+        description="Password setting page text.",
         text="""Set the password for your account. You need the one-time code which
 was contained in the URL sent to you by email. **Note that it takes a couple
 of minutes for the email to reach you.**
 
 If the code does not work, it may have been overwritten or already been used.
-Go to [the reset page](/reset) to obtain a new code.
-"""),
+Go to [the reset page](/reset) to obtain a new code."""),
     dict(
         name="general",
         description="General information on portal home page.",
         text="[Add general information about the facility.]"),
     dict(
         name="contact",
-        description="Contact page.",
+        description="Contact page text.",
         text="[Add information on how to contact the facility.]"),
     dict(
         name="about",
-        description="About us page.",
+        description="Text on the about us page.",
         text="[Add information about this site.]"),
     dict(
         name="alert",
@@ -293,8 +291,67 @@ information as set out above.
 
 All your personal data is reachable via links from this page and the
 pages for all your orders (link below). The logs for your account
-and orders contains the records of all changes to those items.
+and orders contains the records of all changes to those items."""),
+]
+
+
+# Message templates for account status changes.
+DEFAULT_TEXTS_ACCOUNT = [
+    dict(status=constants.PENDING,
+         description="Message to admin about a pending account.",
+         recipients=[constants.ADMIN],
+         subject="An account {account} in the {site} is pending approval.",
+         text="""An account {account} in the {site} is pending approval.
+
+Go to {url} to view and enable it.
 """),
+    dict(status=constants.ENABLED,
+         description="Message to user about enabled account.",
+         recipients=[constants.USER],
+         subject="Your account in the {site} has been enabled.",
+         text="""Your account {account} in the {site} has been enabled.
+
+However, you will first have to set your password for the account.
+
+Go to {password_code_url} to set the password.
+
+In case that link does not work, go to {password_url} and
+fill in your email address and the one-time code {code}.
+
+If you have any questions, contact {support}
+
+Yours sincerely,
+The {site} administrators.
+"""),
+
+    dict(status=constants.RESET,
+         description="Message to user about password reset.",
+         recipients=[constants.USER],
+         subject="The password has been reset for your account in the {site}.",
+         text="""The password has been reset for your account {account} in the {site}.
+
+Go to {password_code_url} to set a new password.
+
+In case that link does not work, go to {password_url} and
+fill in your email address and the one-time code {code}.
+
+If you have any questions, contact {support}
+
+Yours sincerely,
+The {site} administrators.
+"""),
+    dict(status=constants.DISABLED,
+         description="Message to user about disabled account.",
+         recipients=[constants.USER],
+         subject="Your account in the {site} has been disabled.",
+         text="""Your account has been disabled by the administrator.
+This may be due to too many recent failed login attempts.
+
+To resolve this, please contact {support}
+
+Yours sincerely,
+The {site} administrators.
+""")
 ]
 
 
@@ -460,8 +517,9 @@ def update_text_documents(db):
     """
     loaded = False
     for text in DEFAULT_TEXTS_DISPLAY:
-        docs = [row.doc for row in
-                db.view("text", "name", key=text["name"], include_docs=True)]
+        # Due to the problem lower down, have to use a bespoke docs fetch here.
+        docs = [row.doc for row in db.view("text", "name", key=text["name"],
+                                           reduce=False, include_docs=True)]
         if len(docs) == 0:       # No document in db; add it from defaults.
             with TextSaver(db=db) as saver:
                 saver["type"] = constants.DISPLAY
@@ -482,22 +540,48 @@ def update_text_documents(db):
 
     ### As of version 7.0.4, the one-line description of a text is in the document.
     ### Defensive; This may have been done above, but not for certain.
+    docs = [row.doc for row in db.view("text", "type", constants.DISPLAY,
+                                       include_docs=True)]
+    lookup = dict([(d["name"], d) for d in docs])
     for text in DEFAULT_TEXTS_DISPLAY:
-        docs = [row.doc for row in
-                db.view("text", "name", key=text["name"], include_docs=True)]
-        doc = docs[0]
-        if "description" not in doc: # Update to version 7.0.4
-            with TextSaver(doc, db=db) as saver:
-                saver["type"] = constants.DISPLAY
+        try:
+            doc = lookup[text["name"]]
+        except KeyError:
+            pass
+        else:
+            if "description" not in doc: # Update to version 7.0.4
+                with TextSaver(doc, db=db) as saver:
+                    saver["type"] = constants.DISPLAY
+                    saver["description"] = text["description"]
+
+    ### As of version 7.0.11, the message templates for emails about account
+    ### status changes are stored in the database as texts.
+    ### NOTE: The account messages YAML file is ignored! It is unlikely
+    ### to have been customized by anyone. The default is used.
+    docs = [row.doc for row in db.view("text", "type", constants.ACCOUNT,
+                                       include_docs=True)]
+    lookup = dict([(d["status"], d) for d in docs])
+    loaded = False
+    for text in DEFAULT_TEXTS_ACCOUNT:
+        if text["status"] not in lookup:
+            with TextSaver(db=db) as saver:
+                saver["type"] = constants.ACCOUNT
+                saver["name"] = text["status"] # Yes, the status only.
+                saver["status"] = text["status"]
                 saver["description"] = text["description"]
+                saver["recipients"] = text["recipients"]
+                saver["subject"] = text["subject"]
+                saver["text"] = text["text"]
+            loaded = True
 
 
 def load_texts(db):
     "Load the texts into parameters."
     for type in [constants.DISPLAY, constants.ACCOUNT, constants.ORDER]:
+        docs = [row.doc for row in db.view("text", "type", type, include_docs=True)]
         parameters[type] = dict()
-        for row in db.view("text", "type", key=type, include_docs=True):
-            parameters[type][row.doc["name"]] = row.doc
+        for doc in docs:
+            parameters[type][doc["name"]] = doc
 
 
 class Texts(RequestHandler):
@@ -506,14 +590,11 @@ class Texts(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        texts = []
-        for type in [constants.DISPLAY, constants.ACCOUNT, constants.ORDER]:
-            texts.extend(sorted(parameters[type].values(), key=lambda d: d["name"]))
-        self.render("admin_texts.html", texts=texts)
+        self.render("admin_texts.html", texts=self.get_texts(constants.DISPLAY))
 
 
 class TextEdit(RequestHandler):
-    "Edit page for text."
+    "Edit page for display text."
 
     @tornado.web.authenticated
     def get(self, name):
@@ -527,10 +608,13 @@ class TextEdit(RequestHandler):
         self.render("admin_text_edit.html", text=text, origin=origin)
 
     @tornado.web.authenticated
-    def post(self, name):
+    def post(self, type, name):
         "Save the modified text to the database, and update parameters."
         self.check_admin()
-        doc = self.get_entity_view("text", "name", name)
+        try:
+            doc = self.get_text(type, name)
+        except KeyError:
+            raise tornado.web.HTTPError(404, reason="No such text.")
         text = self.get_argument("text", "")
         with TextSaver(doc=doc, rqh=self) as saver:
             saver["text"] = text
@@ -635,7 +719,11 @@ class OrderStatusEdit(RequestHandler):
         except KeyError:
             self.see_other("admin_order_statuses", error="No such order status.")
             return
-        status["description"] = self.get_argument("description", "").strip()
+        value = self.get_argument("description", "").strip()
+        if value:
+            status["description"] = value
+        else:
+            self.set_error_flash("There must be a description; not changed.")
         initial = utils.to_bool(self.get_argument("initial", False))
         # Only one status may be initial; set all others to False.
         if initial and not status.get("initial"):
@@ -755,7 +843,7 @@ class OrdersListEdit(RequestHandler):
                     raise ValueError
                 saver["max_most_recent"] = value
             except (tornado.web.MissingArgumentError, ValueError, TypeError):
-                pass
+                self.set_error_flash("Invalid value for 'Max most recent'; ignored.")
             value = self.get_argument("default_order_column", "-").lower()
             if value == "identifier":
                 saver["default_order_column"] = "identifier"
@@ -785,7 +873,22 @@ class AccountMessages(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin_account_messages.html")
+        docs = [row.doc for row in self.db.view("text", "type", key=constants.ACCOUNT,
+                                                 reduce=False, include_docs=True)]
+        docs.sort(key=lambda t: t["status"])
+        self.render("admin_account_messages.html", texts=docs)
+
+
+class AccountMessageEdit(RequestHandler):
+    "Page for editing an account message."
+
+    @tornado.web.authenticated
+    def get(self, name):
+        self.check_admin()
+        texts = [row.doc for row in self.db.view("text", "type", key=constants.ACCOUNT,
+                                                 reduce=False, include_docs=True)]
+        texts.sort(key=lambda t: t["status"])
+        self.render("admin_account_messages.html", texts=texts)
 
 
 class Database(RequestHandler):

@@ -12,7 +12,7 @@
   <div class="col-md-8">
     <h2>{{ settings['SITE_NAME'] }}</h2>
     {% if is_admin %}
-    <a href="{{ reverse_url('text_edit', 'header', origin=reverse_url('home')) }}"
+    <a href="{{ reverse_url('text_edit', constants.DISPLAY, 'header', origin=reverse_url('home')) }}"
        class="btn btn-primary btn-xs pull-right" role="button">
       <span class="glyphicon glyphicon-edit"></span> Edit
     </a>
@@ -180,7 +180,7 @@
   <div class="col-md-12">
     <div class="panel-body">
       {% if is_admin %}
-      <a href="{{ reverse_url('text_edit','general', origin=reverse_url('home')) }}"
+      <a href="{{ reverse_url('text_edit', constants.DISPLAY, 'general', origin=reverse_url('home')) }}"
          class="btn btn-primary btn-xs pull-right" role="button">
         <span class="glyphicon glyphicon-edit"></span> Edit
       </a>

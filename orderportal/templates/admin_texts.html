@@ -6,13 +6,12 @@
 {% block body_title %}Texts{% end %}
 
 {% block content %}
-<h4>Short texts displayed in various pages.</h4>
+<h4>Texts displayed in various pages.</h4>
 
 <table class="table">
   <thead>
     <tr>
       <th>Text</th>
-      <th>Type</th>
       <th>Description</th>
       <th width="10%"></th>
     </tr>
@@ -21,7 +20,6 @@
     {% for text in texts %}
     <tr>
       <td>{{ text['name'] }}</td>
-      <td>{{ text['type'] }}</td>
       <td>{{ text['description'] }}</td>
       <td>
         <a href="{{ reverse_url('text_edit', text['name']) }}"
