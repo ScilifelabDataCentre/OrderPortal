@@ -79,9 +79,9 @@ class MessageSaver(saver.Saver):
             else:
                 server = smtplib.SMTP(host, port=port)
                 if settings["EMAIL"].get("TLS"):
+                    # XXX Is this the cause of the Google SMTP problem?
+                    # server.ehlo()
                     server.starttls()
-            # XXX Is this the problem?
-            # server.ehlo()
             try:
                 user = settings["EMAIL"]["USER"]
                 if not user:

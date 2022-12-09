@@ -1,0 +1,140 @@
+{# Admin debug email to figure out Google SMTP issue. #}
+
+{% extends "base.html" %}
+
+{% block head_title %}Debug email{% end %}
+{% block body_title %}Debug email{% end %}
+
+{% block main_content %}
+<form action="{{ reverse_url('admin_debug_email') }}"
+      method="POST" role="form">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-4">
+        <label for="host">SMTP host</label>
+        <input type="text" id="host" name="host"
+               class="form-control" value="{{ EMAIL.get('HOST') or '' }}">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+        <div class="radio">
+          <label>
+            <input type="radio" name="protocol" value="TLS" 
+                   {{ EMAIL.get('TLS') and 'checked' or '' }}> TLS
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="protocol" value="SSL" 
+                   {{ EMAIL.get('SSL') and 'checked' or '' }}> SSL
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="protocol" value="neither"
+                   {{ not (EMAIL.get('TLS') or EMAIL.get('SSL')) and 'checked' or '' }}> neither
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+        <div class="radio">
+          <label>
+            <input type="radio" name="ehlo" value="before" checked> EHLO before
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="ehlo" value="after"> EHLO after
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="ehlo" value="neither"> neither
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-2">
+        <label for="port">Port</label>
+        <input type="number" class="form-control" id="port" name="port"
+               value="{{ EMAIL.get('PORT') or 587 }}">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-4">
+        <label for="host">User</label>
+        <input type="text" id="user" name="user"
+               class="form-control" value="{{ EMAIL.get('USER') or '' }}">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-4">
+        <label for="host">Password</label>
+        <input type="text" id="password" name="password"
+               class="form-control" value="{{ EMAIL.get('PASSWORD') or '' }}">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-4">
+        <label for="host">Recipient</label>
+        <input type="text" id="recipient" name="recipient"
+               class="form-control" value="per.kraulis@gmail.com">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-4">
+        <label for="host">Subject</label>
+        <input type="text" id="subject" name="subject"
+               class="form-control" value="Email test">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+        <label for="host">Content</label>
+        <input type="text" id="content" name="content"
+               class="form-control" value="Testing Google SMTP.">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-success btn-block">
+          Send
+      </div>
+    </div>
+  </div>
+</form>
+{% end %} {# block main_content #}

@@ -342,6 +342,7 @@ def main():
             name="admin_account_message_edit",
         ),
         url(r"/admin/database", orderportal.admin.Database, name="admin_database"),
+        url(r"/admin/debug_email", orderportal.admin.DebugEmail, name="admin_debug_email"),
         url(
             r"/admin/document/(.+)",
             orderportal.admin.Document,

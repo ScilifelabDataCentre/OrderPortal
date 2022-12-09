@@ -1,10 +1,12 @@
 "Admin pages."
 
 import copy
+import email.message
 import json
 import logging
 import os.path
 import re
+import smtplib
 
 import couchdb2
 import tornado.web
@@ -985,3 +987,69 @@ class Settings(RequestHandler):
             if obsolete in mod_settings:
                 mod_settings[obsolete] = " &lt;<b>OBSOLETE; NO LONGER USED</b>&gt;"
         self.render("admin_settings.html", settings=mod_settings)
+
+
+class DebugEmail(RequestHandler):
+    "Debug for sending email."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render("admin_debug_email.html", EMAIL=settings.get("EMAIL") or {})
+
+    @tornado.web.authenticated
+    def post(self):
+        self.check_admin()
+        EMAIL=settings.get("EMAIL") or {}
+        try:
+            host = self.get_argument("host") or EMAIL["HOST"]
+            if not host: raise ValueError("no host given")
+            port = int(self.get_argument("port")) or EMAIL["PORT"]
+            protocol = self.get_argument("protocol")
+            if protocol == "TLS":
+                server = smtplib.SMTP(host, port=port)
+                ehlo = self.get_argument("ehlo")
+                if ehlo == "before":
+                    server.ehlo()
+                server.starttls()
+                if ehlo == "after":
+                    server.ehlo()
+            elif protocol == "SSL":
+                server = smtplib.SMTP_SSL(host, port=port)
+            else:
+                server = smtplib.SMTP(host, port=port)
+            user = self.get_argument("user") or EMAIL.get("USER")
+            if not user: raise ValueError("no user given")
+            password = self.get_argument("password") or EMAIL.get("PASSWORD")
+            if not password: raise ValueError("no password given")
+            server.login(user, password)
+            recipient = self.get_argument("recipient") or "per.kraulis@gmail.com"
+            subject = self.get_argument("subject") or "no subject"
+            content = self.get_argument("content") or "no extra content"
+            content = f"""{host=}
+{protocol=}
+{port=}
+{ehlo=}
+{user=}
+{password=}
+{recipient=}
+{subject=}
+{content=}
+"""
+            logging.info(content)
+            message = email.message.EmailMessage()
+            message["From"] = user
+            message["Subject"] = subject
+            message["Reply-To"] = user
+            message["To"] = recipient
+            message.set_content(content)
+            server.send_message(message)
+        except Exception as error:
+            self.set_error_flash(str(error))
+        else:
+            self.set_message_flash("Success!")
+        try:
+            server.quit()
+        except NameError:
+            pass
+        self.see_other("admin_debug_email")
