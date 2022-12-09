@@ -12,6 +12,37 @@ from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 
 
+DESIGN_DOC = {
+    "views": {
+        "invited": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'group') return;
+    for (var i=0; i<doc.invited.length; i++) {
+	emit(doc.invited[i], doc.name);
+    };
+}"""},
+        "member": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'group') return;
+    for (var i=0; i<doc.members.length; i++) {
+	emit(doc.members[i], doc.name);
+    };
+}"""},
+        "modified": {
+            "reduce": "_count",
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'group') return;
+    emit(doc.modified, 1);
+}"""},
+        "owner": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'group') return;
+    emit(doc.owner, doc.name);
+}"""}
+    }
+}
+
+
 class GroupSaver(saver.Saver):
     doctype = constants.GROUP
 

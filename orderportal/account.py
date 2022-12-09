@@ -15,6 +15,44 @@ from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler
 
 
+DESIGN_DOC = {
+    "views": {
+        "all": {
+            "reduce": "_count",
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    emit(doc.modified, null);
+}"""},
+        "api_key": {
+            "map": """function(doc) { 
+    if (doc.orderportal_doctype !== 'account') return;
+    if (!doc.api_key) return;
+    emit(doc.api_key, doc.email);
+}"""},
+        "email": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    emit(doc.email, [doc.first_name, doc.last_name]);
+}"""},
+        "role": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    emit(doc.role, doc.email);
+}"""},
+        "status": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    emit(doc.status, doc.email);
+}"""},
+        "university": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    emit(doc.university, doc.email);
+}"""}
+    }
+}
+
+
 class AccountSaver(saver.Saver):
     doctype = constants.ACCOUNT
 
@@ -838,16 +876,12 @@ class Login(RequestHandler):
                     saver["status"] = constants.DISABLED
                     saver.erase_password()
                 msg = "Too many failed login attempts: Your account has been disabled. Contact the admin"
-                # Prepare email message
-                try:
-                    template = settings["ACCOUNT_MESSAGES"][constants.DISABLED]
-                except KeyError:
-                    pass
-                else:
-                    with MessageSaver(rqh=self) as saver:
-                        saver.create(template)
-                        # Recipient is hardwired here.
-                        saver.send([account["email"]])
+                # Prepare email message about being disabled.
+                # text = settings["ACCOUNT_MESSAGES"][constants.DISABLED]
+                text = parameters[constants.ACCOUNT][constants.DISABLED]
+                with MessageSaver(rqh=self) as saver:
+                    saver.create(text)
+                    saver.send(self.get_recipients(text, account))
             self.see_other("home", error=msg)
             return
         try:
@@ -912,37 +946,33 @@ class Reset(RequestHandler):
                 return
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver.reset_password()
+            # text = settings["ACCOUNT_MESSAGES"][constants.RESET]
+            text = parameters[constants.ACCOUNT][constants.RESET]
             try:
-                template = settings["ACCOUNT_MESSAGES"][constants.RESET]
-            except KeyError:
-                pass
-            else:
-                try:
-                    with MessageSaver(rqh=self) as saver:
-                        saver.create(
-                            template,
-                            account=account["email"],
-                            url=URL("password"),
-                            password_url=URL("password"),
-                            password_code_url=URL(
-                                "password", email=account["email"], code=account["code"]
-                            ),
-                            code=account["code"],
-                        )
-                        # Recipient is hardwired here.
-                        saver.send([account["email"]])
-                        if self.current_user and not self.is_admin():
-                            # Log out the user
-                            self.set_secure_cookie(constants.USER_COOKIE, "")
-                except KeyError as error:
-                    self.see_other("home", message=str(error))
-                except ValueError as error:
-                    self.see_other("home", error=str(error))
-                else:
-                    self.see_other(
-                        "home",
-                        message="An email has been sent containing a reset code. Use the link in the email.",
+                with MessageSaver(rqh=self) as saver:
+                    saver.create(
+                        text,
+                        account=account["email"],
+                        url=URL("password"),
+                        password_url=URL("password"),
+                        password_code_url=URL(
+                            "password", email=account["email"], code=account["code"]
+                        ),
+                        code=account["code"],
                     )
+                    saver.send(self.get_recipients(text, account))
+                    # Log out the user if not admin.
+                    if self.current_user and not self.is_admin():
+                        self.set_secure_cookie(constants.USER_COOKIE, "")
+            except KeyError as error:
+                self.see_other("home", message=str(error))
+            except ValueError as error:
+                self.see_other("home", error=str(error))
+            else:
+                self.see_other(
+                    "home",
+                    message="An email has been sent containing a reset code. Use the link in the email.",
+                )
 
 
 class Password(RequestHandler):
@@ -1087,35 +1117,25 @@ class Register(RequestHandler):
             self.see_other("register", error=str(msg), **kwargs)
             return
         account = saver.doc
-        try:
-            if account["status"] == constants.PENDING:
-                template = settings["ACCOUNT_MESSAGES"][constants.PENDING]
-                # Admins get the email about the pending account.
-                recipients = [a["email"] for a in self.get_admins()]
-            else:
-                template = settings["ACCOUNT_MESSAGES"][constants.ENABLED]
-                # The user gets the email about the enabled account.
-                recipients = [account["email"]]
-        except KeyError:
-            pass
-        else:
-            # Allow admin to register an account without sending an email to the person.
-            if not (
-                self.is_admin()
-                and not utils.to_bool(self.get_argument("send_email", False))
-            ):
-                try:
-                    with MessageSaver(rqh=self) as saver:
-                        saver.create(
-                            template,
-                            account=account["email"],
-                            url=self.absolute_reverse_url("account", account["email"]),
-                        )
-                        saver.send(recipients)
-                except KeyError as error:
-                    self.set_message_flash(str(error))
-                except ValueError as error:
-                    self.set_error_flash(str(error))
+        # text = settings["ACCOUNT_MESSAGES"][account["status"]]
+        text = parameters[constants.ACCOUNT][account["status"]]
+        # Allow admin to avoid sending email to the person when register an account.
+        if not (
+            self.is_admin()
+            and not utils.to_bool(self.get_argument("send_email", False))
+        ):
+            try:
+                with MessageSaver(rqh=self) as saver:
+                    saver.create(
+                        text,
+                        account=account["email"],
+                        url=self.absolute_reverse_url("account", account["email"]),
+                    )
+                    saver.send(self.get_recipients(text, account))
+            except KeyError as error:
+                self.set_message_flash(str(error))
+            except ValueError as error:
+                self.set_error_flash(str(error))
         if self.is_admin():
             self.see_other("account", account["email"])
         else:
@@ -1143,23 +1163,19 @@ class AccountEnable(RequestHandler):
         with AccountSaver(account, rqh=self) as saver:
             saver["status"] = constants.ENABLED
             saver.reset_password()
-        try:
-            template = settings["ACCOUNT_MESSAGES"][constants.ENABLED]
-        except KeyError:
-            pass
-        else:
-            with MessageSaver(rqh=self) as saver:
-                saver.create(
-                    template,
-                    account=account["email"],
-                    password_url=self.absolute_reverse_url("password"),
-                    password_code_url=self.absolute_reverse_url(
-                        "password", email=account["email"], code=account["code"]
-                    ),
-                    code=account["code"],
-                )
-                # Recipient is hardwired here.
-                saver.send([account["email"]])
+        # text = settings["ACCOUNT_MESSAGES"][constants.ENABLED]
+        text = parameters[constants.ACCOUNT][constants.ENABLED]
+        with MessageSaver(rqh=self) as saver:
+            saver.create(
+                text,
+                account=account["email"],
+                password_url=self.absolute_reverse_url("password"),
+                password_code_url=self.absolute_reverse_url(
+                    "password", email=account["email"], code=account["code"]
+                ),
+                code=account["code"],
+            )
+            saver.send(self.get_recipients(text, account))
         self.see_other("account", account["email"])
 
 
@@ -1177,6 +1193,7 @@ class AccountDisable(RequestHandler):
         with AccountSaver(account, rqh=self) as saver:
             saver["status"] = constants.DISABLED
             saver.erase_password()
+        # No message sent here.Only done when user has too many login failures; above.
         self.see_other("account", account["email"])
 
 

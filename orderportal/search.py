@@ -20,12 +20,8 @@ class Search(RequestHandler):
     """Search orders:
     - identifier (exact)
     - tags (exact)
-    - title (words),
-    - fields defined in settings
+    - title (words)
     """
-
-    # Keep this in sync with JS script 'designs/order/views/keyword.js'
-    LINT = set(["an", "to", "in", "on", "of", "and", "the", "was", "not"])
 
     @tornado.web.authenticated
     def get(self):
@@ -60,12 +56,12 @@ class Search(RequestHandler):
         if id_sets:
             for id in reduce(lambda i, j: i.union(j), id_sets):
                 orders[id] = self.get_entity(id, doctype=constants.ORDER)
-        # Keep this in sync with JS script 'designs/order/views/keyword.js'
-        term = "".join([c in ":,;'" and " " or c for c in orig]).strip().lower()
+        term = "".join([c in settings["ORDERS_SEARCH_DELIMS_LINT"] and " " or c
+                        for c in orig]).strip().lower()
         parts = [
             part
             for part in term.split()
-            if part and len(part) >= 2 and part not in self.LINT
+            if part and len(part) >= 2 and part not in settings["ORDERS_SEARCH_LINT"]
         ]
         # Search order titles for the parts extracted from search term.
         id_sets = []

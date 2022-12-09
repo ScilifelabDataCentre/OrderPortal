@@ -6,20 +6,31 @@
 {% block body_title %}Database{% end %}
 
 {% block content %}
-<h4>CouchDB database information.</h4>
+<h4>CouchDB database information and access.</h4>
 
 <h3>Search CouchDB database</h3>
 <div class="row">
-  <div class="col-md-5">
-    <form action="{{ reverse_url('admin_database') }}"
-          method="GET" role="form">
-      <div class="form-group has-feedback">
-        <input type="search" id="identifier" name="identifier"
-               class="form-control"
-               placeholder="Search by document id, order identifier or account email">
-        <span class="glyphicon glyphicon-search form-control-feedback"></span>
+  <div class="col-md-6">
+<form action="{{ reverse_url('admin_database') }}"
+      method="GET" role="form" class="form-inline">
+  <div class="form-group">
+    <div class="input-group">
+      <div class="input-group-addon">Find document</div>
+      <input type="text" name="identifier" id="identifier"
+             class="form-control" size="40" placeholder="Identifier"
+             value="{{ identifier }}">
+      <div class="input-group-btn">
+        <button class="btn btn-default" type="submit">
+          <span class="glyphicon glyphicon-search"></span>
+        </button>
       </div>
-    </form>
+    </div>
+    <p class="help-block">
+      Look up document for account email, API key, file name, info name,
+      order identifier or document id.
+    </p>
+  </div>
+</form>
   </div>
   {% if doc %}
   <div class="col-md-5 col-md-offset-1">

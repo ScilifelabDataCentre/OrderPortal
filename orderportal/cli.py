@@ -8,7 +8,6 @@ import click
 import couchdb2
 
 from orderportal import constants
-from orderportal import designs
 from orderportal import settings
 from orderportal import utils
 from orderportal.account import AccountSaver
@@ -44,8 +43,7 @@ def create_database():
             f"""Database '{settings["DATABASE_NAME"]}' already exists."""
         )
     server.create(settings["DATABASE_NAME"])
-    db = utils.get_db()
-    designs.update_design_documents(db)
+    utils.load_design_documents(utils.get_db())
     click.echo(f"""Created database '{settings["DATABASE_NAME"]}'.""")
 
 
@@ -54,14 +52,14 @@ def initialize():
     """Initialize database; load design documents.
     No longer needed. Kept just for backwards compatibility.
     """
-    designs.update_design_documents(utils.get_db())
+    utils.load_design_documents(utils.get_db())
 
 
 @cli.command()
 def counts():
     "Output counts of database entities."
     db = utils.get_db()
-    designs.update_design_documents(db)
+    utils.load_design_documents(db)
     click.echo(f"{utils.get_count(db, 'order', 'owner'):>5} orders")
     click.echo(f"{utils.get_count(db, 'form', 'all'):>5} forms")
     click.echo(f"{utils.get_count(db, 'account', 'all'):>5} accounts")
@@ -107,7 +105,7 @@ def undump(dumpfile, progressbar):
         db = utils.get_db()
     except KeyError as error:
         raise click.ClickException(str(error))
-    designs.update_design_documents(db) # Just in case; probably not really needed.
+    utils.load_design_documents(db) # Just in case; probably not really needed.
     if (
         utils.get_count(db, "account", "all") != 0
         or utils.get_count(db, "form", "all") != 0
@@ -239,33 +237,13 @@ def role(email, role):
 @cli.command()
 @click.argument("identifier")
 def show(identifier):
-    """Display the JSON for the single item in the database.
-    The identifier may be an email, API key, file name, info name,
-    order identifier, or IUID of the document.
+    """Display the JSON for the single document in the database.
+    The identifier may be an account email, account API key, file name, info name,
+    order identifier, or '_id' of the CouchDB document.
     """
-    db = utils.get_db()
-    for designname, viewname in [
-        ("account", "email"),
-        ("account", "api_key"),
-        ("file", "name"),
-        ("info", "name"),
-        ("order", "identifier"),
-    ]:
-        try:
-            view = db.view(
-                designname, viewname, key=identifier, reduce=False, include_docs=True
-            )
-            result = list(view)
-            if len(result) == 1:
-                doc = result[0].doc
-                break
-        except KeyError:
-            pass
-    else:
-        try:
-            doc = db[identifier]
-        except couchdb2.NotFoundError:
-            raise click.ClickException("No such item in the database.")
+    doc = utils.get_document(utils.get_db(), identifier)
+    if doc is None:
+        raise click.ClickException("No such item in the database.")
     click.echo(json.dumps(doc, ensure_ascii=False, indent=2))
 
 

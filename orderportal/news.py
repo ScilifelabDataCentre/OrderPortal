@@ -10,6 +10,17 @@ from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 
 
+DESIGN_DOC = {
+    "views": {
+        "modified": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'news') return;
+    emit(doc.modified, null);
+}"""}
+    }
+}
+
+
 class NewsSaver(saver.Saver):
     doctype = constants.NEWS
 

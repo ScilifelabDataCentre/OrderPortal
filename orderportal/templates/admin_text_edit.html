@@ -10,21 +10,34 @@
       method="POST" role="form">
   {% module xsrf_form_html() %}
 
-  <h4>
-    {{ text.get('description') or '-' }}
-  </h4>
+  <h4>{{ text.get('description') or '-' }}</h4>
+
+  {% if text["type"] == constants.ACCOUNT %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+        <label for="subject">Subject line</label>
+        <input type="text" id="subject" name="subject"
+               class="form-control" value="{{ text.get('subject') or '' }}">
+      </div>
+    </div>
+  </div>
+  {% end %}
 
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
+        <label for="text">Text content</label>
         <textarea id="text" name="text" rows="16" class="form-control"
                   >{{ text.get('text') or '' }}</textarea>
       </div>
     </div>
+    {% if text["type"] == constants.DISPLAY %}
     <span class="help-block">
       This text will be formatted using
       <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>.
     </span>
+    {% end %}
   </div>
 
   <input type="hidden" name="origin" value="{{ origin }}">
@@ -32,7 +45,6 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-3">
-        <label class="control-label"></label>
         <button type="submit" class="btn btn-success btn-block">
           <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
       </div>
@@ -40,6 +52,11 @@
   </div>
 
 </form>
+
+{% if text["type"] == constants.ACCOUNT %}
+{% include 'admin_account_messages_variables.html' %}
+{% end %}
+
 {% end %} {# block main_content #}
 
 {% block action_content %}
