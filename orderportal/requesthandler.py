@@ -249,12 +249,14 @@ class RequestHandler(tornado.web.RequestHandler):
         May include admin and staff.
         """
         result = []
+        print(text)
         if constants.USER in text["recipients"]:
             result.append(account["email"])
         if constants.ADMIN in text["recipients"]:
             result.extend([a["email"] for a in self.get_admins()])
         if constants.STAFF in text["recipients"]:
             result.extend([a["email"] for a in self.get_staff()])
+        return result
 
     def get_colleagues(self, email):
         "Get list of accounts in same groups as the account given by email."

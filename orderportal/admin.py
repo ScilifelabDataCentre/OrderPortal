@@ -344,7 +344,7 @@ The {site} administrators.
          description="Message to user about disabled account.",
          recipients=[constants.USER],
          subject="Your account in the {site} has been disabled.",
-         text="""Your account has been disabled by the administrator.
+         text="""Your account has been disabled.
 This may be due to too many recent failed login attempts.
 
 To resolve this, please contact {support}
@@ -608,11 +608,11 @@ class TextEdit(RequestHandler):
         self.render("admin_text_edit.html", text=text, origin=origin)
 
     @tornado.web.authenticated
-    def post(self, type, name):
+    def post(self, name):
         "Save the modified text to the database, and update parameters."
         self.check_admin()
         try:
-            doc = self.get_text(type, name)
+            doc = self.get_text(constants.DISPLAY, name)
         except KeyError:
             raise tornado.web.HTTPError(404, reason="No such text.")
         text = self.get_argument("text", "")
@@ -885,10 +885,18 @@ class AccountMessageEdit(RequestHandler):
     @tornado.web.authenticated
     def get(self, name):
         self.check_admin()
-        texts = [row.doc for row in self.db.view("text", "type", key=constants.ACCOUNT,
-                                                 reduce=False, include_docs=True)]
-        texts.sort(key=lambda t: t["status"])
-        self.render("admin_account_messages.html", texts=texts)
+        self.render("admin_account_message_edit.html",
+                    text=self.get_text(constants.ACCOUNT, name))
+
+    @tornado.web.authenticated
+    def post(self, name):
+        self.check_admin()
+        doc = self.get_text(constants.ACCOUNT, name)
+        with TextSaver(doc, rqh=self) as saver:
+            saver["subject"] = self.get_argument("subject", None) or "[no subject]"
+            saver["recipients"] = self.get_arguments("recipients")
+            saver["text"] = self.get_argument("text", None) or "[no text]"
+        self.see_other("admin_account_messages")
 
 
 class Database(RequestHandler):
@@ -932,7 +940,7 @@ class Settings(RequestHandler):
     def get(self):
         self.check_admin()
         hidden = "&lt;hidden&gt;"
-        mod_settings = settings.copy()
+        mod_settings = copy.deepcopy(settings)
         # Add the root dir
         mod_settings["ROOT"] = constants.ROOT
         # Hide sensitive data.
@@ -942,6 +950,11 @@ class Settings(RequestHandler):
         # Do not show the email password.
         if mod_settings["EMAIL"].get("PASSWORD"):
             mod_settings["EMAIL"]["PASSWORD"] = hidden
+        # Escape any '<' and '>' in email addresses
+        for key in ["SITE_SUPPORT_EMAIL", "MESSAGE_SENDER_EMAIL", "MESSAGE_REPLY_TO_EMAIL"]:
+            value = mod_settings[key]
+            if value:
+                mod_settings[key] = value.replace("<", "&lt;").replace(">", "&gt;")
         # Don't show the password in the CouchDB URL; actually obsolete now...
         url = settings["DATABASE_SERVER"]
         match = re.search(r":([^/].+)@", url)

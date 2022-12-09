@@ -293,7 +293,7 @@ def main():
         url(r"/file/([0-9a-f]{32})/logs", orderportal.file.FileLogs, name="file_logs"),
         url(r"/admin/texts", orderportal.admin.Texts, name="texts"),
         url(
-            r"/admin/text/([^/]+)/([^/]+)",
+            r"/admin/text/([^/]+)",
             orderportal.admin.TextEdit,
             name="text_edit"),
         url(
@@ -335,6 +335,11 @@ def main():
             r"/admin/account_messages",
             orderportal.admin.AccountMessages,
             name="admin_account_messages",
+        ),
+        url(
+            r"/admin/account_message/([^/]+)",
+            orderportal.admin.AccountMessageEdit,
+            name="admin_account_message_edit",
         ),
         url(r"/admin/database", orderportal.admin.Database, name="admin_database"),
         url(

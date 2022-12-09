@@ -20,7 +20,7 @@
     <div class="well">
       {% module Text('register') %}
       {% if is_admin %}
-      <form action="{{ reverse_url('text_edit', constants.DISPLAY, 'register') }}"
+      <form action="{{ reverse_url('text_edit', 'register') }}"
             method="GET" role="form">
         <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
         <button type="submit" class="btn btn-primary btn-xs">
@@ -500,7 +500,7 @@
       <div class="well">
         {% module Text('privacy_policy') %}
         {% if is_admin %}
-        <form action="{{ reverse_url('text_edit', constants.DISPLAY, 'privacy_policy') }}"
+        <form action="{{ reverse_url('text_edit', 'privacy_policy') }}"
               method="GET" role="form">
           <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
           <button type="submit" class="btn btn-primary btn-xs">

@@ -13,19 +13,19 @@
 <table class="table">
   <tr>
     <th>Status</th>
-    <th>Recipients</th>
     <th>Subject</th>
+    <th>Recipients</th>
     <th>Text</th>
     <th></th>
   </tr>
   {% for text in  texts %}
   <tr>
     <td>{% module Icon(text['status'], label=True) %}</td>
-    <td>{{ ', '.join(text['recipients']) or '-' }}</td>
     <td>{{ text['subject'] }}</td>
+    <td>{{ ', '.join(text['recipients']) or '-' }}</td>
     <td class="pre">{{ text['text'] }}</td>
     <td>
-      <a href="{{ reverse_url('text_edit', constants.ACCOUNT, text['status']) }}",
+      <a href="{{ reverse_url('admin_account_message_edit', text['status']) }}",
          class="btn btn-sm btn-primary btn-block" role="button">
         <span class="glyphicon glyphicon-edit"></span> Edit
       </a>

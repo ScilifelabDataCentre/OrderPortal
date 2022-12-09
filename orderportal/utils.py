@@ -134,9 +134,9 @@ def get_settings(filepath=None, log=True):
     # # Also checks for missing message for a status.
     try:
         settings["ACCOUNT_MESSAGES"][constants.PENDING]["recipients"] = ["admin"]
-        settings["ACCOUNT_MESSAGES"][constants.ENABLED]["recipients"] = ["account"]
-        settings["ACCOUNT_MESSAGES"][constants.DISABLED]["recipients"] = ["account"]
-        settings["ACCOUNT_MESSAGES"][constants.RESET]["recipients"] = ["account"]
+        settings["ACCOUNT_MESSAGES"][constants.ENABLED]["recipients"] = ["user"]
+        settings["ACCOUNT_MESSAGES"][constants.DISABLED]["recipients"] = ["user"]
+        settings["ACCOUNT_MESSAGES"][constants.RESET]["recipients"] = ["user"]
     except KeyError:
         raise ValueError("Account messages file: missing message for statuses")
 

@@ -877,7 +877,8 @@ class Login(RequestHandler):
                     saver.erase_password()
                 msg = "Too many failed login attempts: Your account has been disabled. Contact the admin"
                 # Prepare email message about being disabled.
-                text = settings["ACCOUNT_MESSAGES"][constants.DISABLED]
+                # text = settings["ACCOUNT_MESSAGES"][constants.DISABLED]
+                text = parameters[constants.ACCOUNT][constants.DISABLED]
                 with MessageSaver(rqh=self) as saver:
                     saver.create(text)
                     saver.send(self.get_recipients(text, account))
@@ -945,7 +946,8 @@ class Reset(RequestHandler):
                 return
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver.reset_password()
-            text = settings["ACCOUNT_MESSAGES"][constants.RESET]
+            # text = settings["ACCOUNT_MESSAGES"][constants.RESET]
+            text = parameters[constants.ACCOUNT][constants.RESET]
             try:
                 with MessageSaver(rqh=self) as saver:
                     saver.create(
@@ -1115,7 +1117,8 @@ class Register(RequestHandler):
             self.see_other("register", error=str(msg), **kwargs)
             return
         account = saver.doc
-        text = settings["ACCOUNT_MESSAGES"][account["status"]]
+        # text = settings["ACCOUNT_MESSAGES"][account["status"]]
+        text = parameters[constants.ACCOUNT][account["status"]]
         # Allow admin to avoid sending email to the person when register an account.
         if not (
             self.is_admin()
@@ -1160,7 +1163,8 @@ class AccountEnable(RequestHandler):
         with AccountSaver(account, rqh=self) as saver:
             saver["status"] = constants.ENABLED
             saver.reset_password()
-        text = settings["ACCOUNT_MESSAGES"][constants.ENABLED]
+        # text = settings["ACCOUNT_MESSAGES"][constants.ENABLED]
+        text = parameters[constants.ACCOUNT][constants.ENABLED]
         with MessageSaver(rqh=self) as saver:
             saver.create(
                 text,
@@ -1189,7 +1193,7 @@ class AccountDisable(RequestHandler):
         with AccountSaver(account, rqh=self) as saver:
             saver["status"] = constants.DISABLED
             saver.erase_password()
-        ### XXX Send message!
+        # No message sent here.Only done when user has too many login failures; above.
         self.see_other("account", account["email"])
 
 

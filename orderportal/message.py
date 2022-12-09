@@ -80,7 +80,8 @@ class MessageSaver(saver.Saver):
                 server = smtplib.SMTP(host, port=port)
                 if settings["EMAIL"].get("TLS"):
                     server.starttls()
-            server.ehlo()
+            # XXX Is this the problem?
+            # server.ehlo()
             try:
                 user = settings["EMAIL"]["USER"]
                 if not user:
@@ -109,7 +110,14 @@ class MessageSaver(saver.Saver):
             logging.error(
                 f"""Email "{self['subject']}" failed to {self['recipients']}: {error}"""
             )
-            raise ValueError(str(error))
+            try:
+                if self.rqh.is_admin():
+                    msg = str(error)
+                else:
+                    msg = "Contact the admin."
+            except AttributeError: # If rqh is None.
+                msg = ""
+            raise ValueError(f"The operation succeeded, but no email could be sent; problem connecting to the email server. {msg}")
 
     def post_process(self):
         try:

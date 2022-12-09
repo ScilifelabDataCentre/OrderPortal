@@ -6,7 +6,7 @@
 {% block body_title %}Edit text '{{ text['name'] }}'{% end %}
 
 {% block main_content %}
-<form action="{{ reverse_url('text_edit', text['type'], text['name']) }}"
+<form action="{{ reverse_url('text_edit', text['name']) }}"
       method="POST" role="form">
   {% module xsrf_form_html() %}
 
