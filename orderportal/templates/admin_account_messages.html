@@ -6,6 +6,14 @@
 {% block body_title %}Account messages{% end %}
 
 {% block content %}
+{% if settings.get("ACCOUNT_MESSAGES_FILE") %}
+<div class="well">
+  <strong>NOTE!</strong> The site file named by settings ACCOUNT_MESSAGES_FILE
+  is no longer used. Remove it from the 'settings.yaml' file and also
+  the file itself to avoid confusion.
+</div>
+{% end %}
+
 <h4>Templates for email messages about account status changes.</h4>
 
 {% include 'admin_account_messages_variables.html' %}
