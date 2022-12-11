@@ -964,9 +964,6 @@ class Settings(RequestHandler):
             url = list(url)
             url[match.start(1) : match.end(1)] = "password"
             mod_settings["DATABASE_SERVER"] = "".join(url)
-        mod_settings[
-            "ACCOUNT_MESSAGES"
-        ] = f"&lt;see file {mod_settings['ACCOUNT_MESSAGES_FILE']}&gt;"
         mod_settings["COUNTRIES"] = f"&lt;see file {mod_settings['COUNTRY_CODES_FILE']}&gt;"
         mod_settings[
             "COUNTRIES_LOOKUP"
@@ -974,10 +971,8 @@ class Settings(RequestHandler):
         mod_settings[
             "ORDER_MESSAGES"
         ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}%gt;"
-        mod_settings[
-            "ORDER_MESSAGES"
-        ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}&gt;"
-        for obsolete in ["ORDER_STATUSES_FILE", 
+        for obsolete in ["ACCOUNTS_MESSAGES_FILE",
+                         "ORDER_STATUSES_FILE", 
                          "ORDER_TRANSITIONS_FILE",
                          "ORDERS_LIST_TAGS",
                          "ORDERS_LIST_STATUSES",
