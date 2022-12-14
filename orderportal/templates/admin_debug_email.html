@@ -13,9 +13,9 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-4">
-        <label for="host">SMTP host</label>
-        <input type="text" id="host" name="host"
-               class="form-control" value="{{ EMAIL.get('HOST') or '' }}">
+        <label for="server">SMTP server</label>
+        <input type="text" id="server" name="server"
+               class="form-control" value="{{ settings['MAIL_SERVER'] or '' }}">
       </div>
     </div>
   </div>
@@ -26,19 +26,19 @@
         <div class="radio">
           <label>
             <input type="radio" name="protocol" value="TLS" 
-                   {{ EMAIL.get('TLS') and 'checked' or '' }}> TLS
+                   {{ settings['MAIL_USE_TLS'] and 'checked' or '' }}> TLS
           </label>
         </div>
         <div class="radio">
           <label>
             <input type="radio" name="protocol" value="SSL" 
-                   {{ EMAIL.get('SSL') and 'checked' or '' }}> SSL
+                   {{ settings['MAIL_USE_SSL'] and 'checked' or '' }}> SSL
           </label>
         </div>
         <div class="radio">
           <label>
             <input type="radio" name="protocol" value="neither"
-                   {{ not (EMAIL.get('TLS') or EMAIL.get('SSL')) and 'checked' or '' }}> neither
+                   {{ not (settings['MAIL_USE_TLS'] or settings['MAIL_USE_SSL']) and 'checked' or '' }}> neither
           </label>
         </div>
       </div>
@@ -47,22 +47,11 @@
 
   <div class="form-group">
     <div class="row">
-      <div class="col-md-10">
-        <div class="radio">
-          <label>
-            <input type="radio" name="ehlo" value="before" checked> EHLO before
-          </label>
-        </div>
-        <div class="radio">
-          <label>
-            <input type="radio" name="ehlo" value="after"> EHLO after
-          </label>
-        </div>
-        <div class="radio">
-          <label>
-            <input type="radio" name="ehlo" value="neither"> neither
-          </label>
-        </div>
+      <div class="col-md-4">
+        <label for="ehlo">EHLO</label>
+        <input type="text" id="ehlo" name="ehlo"
+               class="form-control" placeholder="[No EHLO]"
+               value="{{ settings['MAIL_EHLO'] or '' }}">
       </div>
     </div>
   </div>
@@ -72,7 +61,7 @@
       <div class="col-md-2">
         <label for="port">Port</label>
         <input type="number" class="form-control" id="port" name="port"
-               value="{{ EMAIL.get('PORT') or 587 }}">
+               value="{{ settings['MAIL_PORT'] or 587 }}">
       </div>
     </div>
   </div>
@@ -80,9 +69,9 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-4">
-        <label for="host">User</label>
-        <input type="text" id="user" name="user"
-               class="form-control" value="{{ EMAIL.get('USER') or '' }}">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username"
+               class="form-control" value="{{ settings['MAIL_USERNAME'] or '' }}">
       </div>
     </div>
   </div>
@@ -90,9 +79,9 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-4">
-        <label for="host">Password</label>
+        <label for="password">Password</label>
         <input type="text" id="password" name="password"
-               class="form-control" value="{{ EMAIL.get('PASSWORD') or '' }}">
+               class="form-control" value="{{ settings['MAIL_PASSWORD'] or '' }}">
       </div>
     </div>
   </div>
@@ -100,7 +89,7 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-4">
-        <label for="host">Recipient</label>
+        <label for="recipient">Recipient</label>
         <input type="text" id="recipient" name="recipient"
                class="form-control" value="per.kraulis@gmail.com">
       </div>
@@ -110,7 +99,7 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-4">
-        <label for="host">Subject</label>
+        <label for="subject">Subject</label>
         <input type="text" id="subject" name="subject"
                class="form-control" value="Email test">
       </div>
@@ -120,7 +109,7 @@
   <div class="form-group">
     <div class="row">
       <div class="col-md-10">
-        <label for="host">Content</label>
+        <label for="content">Content</label>
         <input type="text" id="content" name="content"
                class="form-control" value="Testing Google SMTP.">
       </div>

@@ -949,11 +949,8 @@ class Settings(RequestHandler):
         for key in settings:
             if "PASSWORD" in key or "SECRET" in key:
                 mod_settings[key] = hidden
-        # Do not show the email password.
-        if mod_settings["EMAIL"].get("PASSWORD"):
-            mod_settings["EMAIL"]["PASSWORD"] = hidden
         # Escape any '<' and '>' in email addresses
-        for key in ["SITE_SUPPORT_EMAIL", "MESSAGE_SENDER_EMAIL", "MESSAGE_REPLY_TO_EMAIL"]:
+        for key in ["MAIL_DEFAULT_SENDER", "MAIL_REPLY_TO"]:
             value = mod_settings[key]
             if value:
                 mod_settings[key] = value.replace("<", "&lt;").replace(">", "&gt;")
@@ -990,42 +987,40 @@ class DebugEmail(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin_debug_email.html", EMAIL=settings.get("EMAIL") or {})
+        self.render("admin_debug_email.html")
 
     @tornado.web.authenticated
     def post(self):
         self.check_admin()
-        EMAIL=settings.get("EMAIL") or {}
         try:
-            host = self.get_argument("host") or EMAIL["HOST"]
-            if not host: raise ValueError("no host given")
-            port = int(self.get_argument("port")) or EMAIL["PORT"]
+            server = self.get_argument("server")
+            if not server: raise ValueError("no server given")
+            port = int(self.get_argument("port"))
             protocol = self.get_argument("protocol")
+            ehlo = self.get_argument("ehlo")
             if protocol == "TLS":
-                server = smtplib.SMTP(host, port=port)
-                ehlo = self.get_argument("ehlo")
-                if ehlo == "before":
-                    server.ehlo()
-                server.starttls()
-                if ehlo == "after":
-                    server.ehlo()
+                smtp_server = smtplib.SMTP(server, port=port)
+                if ehlo:
+                    smtp_server.ehlo(ehlo)
+                smtp_server.starttls()
+                if ehlo:
+                    smtp_server.ehlo(ehlo)
             elif protocol == "SSL":
-                server = smtplib.SMTP_SSL(host, port=port)
+                smtp_server = smtplib.SMTP_SSL(server, port=port)
             else:
-                server = smtplib.SMTP(host, port=port)
-            user = self.get_argument("user") or EMAIL.get("USER")
-            if not user: raise ValueError("no user given")
-            password = self.get_argument("password") or EMAIL.get("PASSWORD")
-            if not password: raise ValueError("no password given")
-            server.login(user, password)
+                smtp_server = smtplib.SMTP(server, port=port)
+            username = self.get_argument("username")
+            password = self.get_argument("password")
+            if username and password:
+                smtp_server.login(username, password)
             recipient = self.get_argument("recipient") or "per.kraulis@gmail.com"
             subject = self.get_argument("subject") or "no subject"
             content = self.get_argument("content") or "no extra content"
-            content = f"""{host=}
+            content = f"""{server=}
 {protocol=}
 {port=}
 {ehlo=}
-{user=}
+{username=}
 {password=}
 {recipient=}
 {subject=}
@@ -1033,18 +1028,18 @@ class DebugEmail(RequestHandler):
 """
             logging.info(content)
             message = email.message.EmailMessage()
-            message["From"] = user
+            message["From"] = username
             message["Subject"] = subject
-            message["Reply-To"] = user
+            message["Reply-To"] = username
             message["To"] = recipient
             message.set_content(content)
-            server.send_message(message)
+            smtp_server.send_message(message)
         except Exception as error:
             self.set_error_flash(str(error))
         else:
             self.set_message_flash("Success!")
         try:
-            server.quit()
+            smtp_server.quit()
         except NameError:
             pass
         self.see_other("admin_debug_email")
