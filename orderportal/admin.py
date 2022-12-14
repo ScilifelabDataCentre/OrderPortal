@@ -529,6 +529,10 @@ def update_text_documents(db):
                 saver["description"] = text["description"]
                 saver["text"] = text["text"]
             loaded = True
+        elif len(docs) == 1:
+            if not docs[0].get("type"): # Fix previous mistake.
+                with TextSaver(doc=docs[0], db=db) as saver:
+                    saver["type"] = constants.DISPLAY
         elif len(docs) > 1:
             newest = docs[0]     # Deal with the consequence of a previous mistake.
             for doc in docs[1:]: # When more than one copy, then remove the older ones.
@@ -537,6 +541,9 @@ def update_text_documents(db):
             for doc in docs:
                 if doc != newest:
                     db.delete(doc)
+            if not newest.get("type"):
+                with TextSaver(doc=newest, db=db) as saver:
+                    saver["type"] = constants.DISPLAY
     if loaded:
         logging.info("loaded default display text(s)")
 
