@@ -975,7 +975,7 @@ class Settings(RequestHandler):
         mod_settings[
             "ORDER_MESSAGES"
         ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}%gt;"
-        for obsolete in ["ACCOUNTS_MESSAGES_FILE",
+        for obsolete in ["ACCOUNT_MESSAGES_FILE",
                          "ORDER_STATUSES_FILE", 
                          "ORDER_TRANSITIONS_FILE",
                          "ORDERS_LIST_TAGS",
