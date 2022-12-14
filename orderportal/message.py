@@ -33,10 +33,46 @@ class MessageSaver(saver.Saver):
     doctype = constants.MESSAGE
 
     def initialize(self):
-        super(MessageSaver, self).initialize()
-        self["sender"] = settings["MESSAGE_SENDER_EMAIL"]
-        self["reply-to"] = settings["MESSAGE_REPLY_TO_EMAIL"]
-        self["sent"] = None
+        """Connect to the email server.
+        Raises KeyError if email server is badly configured.
+        """
+        super().initialize()
+        try:
+            server = settings["MAIL_SERVER"]
+            if not server:
+                raise KeyError("Email server not configured.")
+            sender = settings["MAIL_DEFAULT_SENDER"] or settings["MAIL_USERNAME"]
+            if not sender:
+                raise KeyError("Email server badly configured.")
+            port = int(settings["MAIL_PORT"])
+            use_ssl = utils.to_bool(settings["MAIL_USE_SSL"])
+            use_tls = utils.to_bool(settings["MAIL_USE_TLS"])
+            if use_tls:
+                self.server = smtplib.SMTP(server, port=port)
+                if settings.get("MAIL_EHLO"):
+                    self.server.ehlo(settings["MAIL_EHLO"])
+                self.server.starttls()
+                if settings.get("MAIL_EHLO"):
+                    self.server.ehlo(settings["MAIL_EHLO"])
+            elif use_ssl:
+                self.server = smtplib.SMTP_SSL(server, port=port)
+            else:
+                self.server = smtplib.SMTP(server, port=port)
+            try:
+                username = settings["MAIL_USERNAME"]
+                if not username:
+                    raise KeyError
+                password = settings["MAIL_PASSWORD"]
+                if not password:
+                    raise KeyError
+            except KeyError:
+                pass
+            else:
+                self.server.login(username, password)
+            self["sender"] = sender
+            self["reply-to"] = settings["MAIL_REPLY_TO"]
+        except (ValueError, TypeError, KeyError, smtplib.SMTPException) as error:
+            self.handle_error(error)
 
     def create(self, text, **kwargs):
         "Create the message from the text template and parameters for it."
@@ -46,7 +82,7 @@ class MessageSaver(saver.Saver):
         params = SafeDict(
             site=settings["SITE_NAME"],
             site_url=site_url,
-            support=settings.get("SITE_SUPPORT_EMAIL") or "[not defined]",
+            support=settings.get("MAIL_DEFAULT_SENDER") or "[not defined]",
             host=settings.get("SITE_HOST_TITLE") or "[not defined]",
             host_url=settings.get("SITE_HOST_URL") or "[not defined]",
         )
@@ -56,43 +92,12 @@ class MessageSaver(saver.Saver):
 
     def send(self, recipients):
         """Send the message to the given recipient email addresses.
-        Raises KeyError if no email server defined.
         Raises ValueError if some other error.
         """
-        try:
-            if not settings["EMAIL"]:
-                raise KeyError
-            host = settings["EMAIL"]["HOST"]
-            if not host:
-                raise KeyError
-        except KeyError:
-            raise KeyError(
-                "Could not send email; no email server defined. Contact the admin."
-            )
         if not recipients:
             raise ValueError("No recipients specified.")
         try:
             self["recipients"] = recipients
-            port = settings["EMAIL"].get("PORT", 0)
-            if settings["EMAIL"].get("SSL"):
-                server = smtplib.SMTP_SSL(host, port=port)
-            else:
-                server = smtplib.SMTP(host, port=port)
-                if settings["EMAIL"].get("TLS"):
-                    # XXX Is this the cause of the Google SMTP problem?
-                    # server.ehlo()
-                    server.starttls()
-            try:
-                user = settings["EMAIL"]["USER"]
-                if not user:
-                    raise KeyError
-                password = settings["EMAIL"]["PASSWORD"]
-                if not password:
-                    raise KeyError
-            except KeyError:
-                pass
-            else:
-                server.login(user, password)
             message = email.message.EmailMessage()
             message["From"] = self["sender"]
             message["Subject"] = self["subject"]
@@ -100,29 +105,27 @@ class MessageSaver(saver.Saver):
                 message["Reply-To"] = self["reply-to"]
             message["To"] = ", ".join(set(self["recipients"]))
             message.set_content(self["text"])
-            server.send_message(message)
+            self.server.send_message(message)
             self["sent"] = utils.timestamp()
-            # Additional logging info to help sorting out issue with email server.
-            logging.info(
-                f"""Email "{self['subject']}" from {self['sender']} to {self['recipients']}"""
-            )
-        except Exception as error:
-            logging.error(
-                f"""Email "{self['subject']}" failed to {self['recipients']}: {error}"""
-            )
-            try:
-                if self.rqh.is_admin():
-                    msg = str(error)
-                else:
-                    msg = "Contact the admin."
-            except AttributeError: # If rqh is None.
-                msg = ""
-            raise ValueError(f"The operation succeeded, but no email could be sent; problem connecting to the email server. {msg}")
+        except smtplib.SMTPException as error:
+            self.handle_error(error)
+
+    def handle_error(self, error):
+        "Convert into a better error message to display."
+        try:
+            if self.rqh.is_admin():
+                msg = str(error)
+            else:
+                logging.error(f"Email failure: {error}")
+                msg = "Contact the admin."
+        except AttributeError: # If rqh is None.
+            msg = str(error)
+        raise ValueError(f"The operation succeeded, but no email could be sent; problem with the email server. {msg}")
 
     def post_process(self):
         try:
             self.server.quit()
-        except AttributeError:
+        except (smtplib.SMTPException, AttributeError):
             pass
 
     def log(self):

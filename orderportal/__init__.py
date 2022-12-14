@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "7.0.12"
+__version__ = "7.1.0"
 
 
 class Constants:
@@ -218,7 +218,7 @@ settings = dict(
     SITE_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site")),
     SITE_STATIC_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site/static")),
     SITE_NAME="OrderPortal",
-    SITE_SUPPORT_EMAIL=None,
+    # SITE_SUPPORT_EMAIL=None,
     SITE_FAVICON="orderportal32.png",
     SITE_NAVBAR_ICON="orderportal32.png",
     SITE_HOME_ICON="orderportal144.png",
@@ -257,16 +257,25 @@ settings = dict(
     ACCOUNT_FUNDER_INFO_GROUP_SIZE=True,
     ACCOUNT_FUNDER_INFO_SUBJECT=True,
     ACCOUNT_DEFAULT_COUNTRY_CODE="SE",
-    EMAIL=dict(
-        HOST=None,  # Domain name. Must be defined for email to work.
-        PORT=0,
-        SSL=False,
-        TLS=False,
-        USER=None,
-        PASSWORD=None,
-    ),
-    MESSAGE_SENDER_EMAIL='"OrderPortal Support" <support@my-domain.com>', # Required.
-    MESSAGE_REPLY_TO_EMAIL=None,  # Same format as above; optional.
+    MAIL_SERVER=None,           # If not set, then no emails can be sent.
+    MAIL_DEFAULT_SENDER=None,   # If not set, MAIL_USERNAME will be used.
+    MAIL_PORT=25,
+    MAIL_USE_SSL=False,
+    MAIL_USE_TLS=False,
+    MAIL_EHLO=None,
+    MAIL_USERNAME=None,
+    MAIL_PASSWORD=None,
+    MAIL_REPLY_TO=None,
+    # EMAIL=dict(
+    #     HOST=None,  # Domain name. Must be defined for email to work.
+    #     PORT=0,
+    #     SSL=False,
+    #     TLS=False,
+    #     USER=None,
+    #     PASSWORD=None,
+    # ),
+    # MESSAGE_SENDER_EMAIL='"OrderPortal Support" <support@my-domain.com>', # Required.
+    # MESSAGE_REPLY_TO_EMAIL=None,  # Same format as above; optional.
     DISPLAY_DEFAULT_PAGE_SIZE=25, # Number of paged items in a table.
     DISPLAY_MAX_RECENT_ORDERS=10, # Max number in home page for admin and staff.
     DISPLAY_MAX_PENDING_ACCOUNTS=10, # Max number in home page for admin and staff.
