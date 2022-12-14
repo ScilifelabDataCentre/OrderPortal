@@ -1130,6 +1130,11 @@ class Register(RequestHandler):
                         text,
                         account=account["email"],
                         url=self.absolute_reverse_url("account", account["email"]),
+                        password_url=self.absolute_reverse_url("password"),
+                        password_code_url=self.absolute_reverse_url(
+                            "password", email=account["email"], code=account["code"]
+                        ),
+                        code=account["code"],
                     )
                     saver.send(self.get_recipients(text, account))
             except KeyError as error:
