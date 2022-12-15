@@ -1804,7 +1804,17 @@ class Orders(RequestHandler):
                 orders = [r.doc for r in view]
             if value == "__none__":
                 value = None
-            orders = [o for o in orders if o["fields"].get(identifier) == value]
+            result = []
+            for order in orders:
+                field_value = o["fields"].get(identifier)
+                if isinstance(field_value, list):
+                    if value in field_value:
+                        result.append(order)
+                else:
+                    if value == field_value:
+                        result.append(order)
+            orders = result
+            # orders = [o for o in orders if o["fields"].get(identifier) == value]
         return orders
 
     def filter_by_year(self, year, orders=None):
