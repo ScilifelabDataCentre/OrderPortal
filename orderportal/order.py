@@ -1717,7 +1717,9 @@ class Orders(RequestHandler):
     def set_filter(self):
         "Set the filter parameters dictionary."
         self.filter = dict()
-        for key in ["status", "form_id", "owner"] + parameters["ORDERS_LIST_FIELDS"]:
+        for key in ["status", "form_id", "owner"] + [
+                f["identifier"] for f in parameters["ORDERS_FILTER_FIELDS"]
+        ]:
             try:
                 value = self.get_argument(key)
                 if not value:
@@ -1732,6 +1734,10 @@ class Orders(RequestHandler):
         orders = self.filter_by_status(self.filter.get("status"))
         orders = self.filter_by_form(self.filter.get("form_id"), orders=orders)
         orders = self.filter_by_owner(self.filter.get("owner"), orders=orders)
+        for f in parameters["ORDERS_FILTER_FIELDS"]:
+            orders = self.filter_by_field(
+                f["identifier"], self.filter.get(f["identifier"]), orders=orders
+            )
         orders = self.filter_by_year(self.filter["year"], orders=orders)
         return orders
 

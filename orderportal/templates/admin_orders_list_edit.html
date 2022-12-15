@@ -75,6 +75,50 @@
 
   <div class="form-group">
     <div class="row">
+      <div class="col-md-12">
+        <label class="control-label" for="orders_filter_field_delete">
+          Delete {{ terminology('orders') }} filter field(s)</label>
+        {% for f in parameters['ORDERS_FILTER_FIELDS'] %}
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" id="orders_filter_field_delete"
+                   name="orders_filter_field_delete" value="{{ f['identifier'] }}">
+            {{ f.get('label') or f['identifier'] }}
+          </label>
+        </div>
+        {% end %}
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+        <label class="control-label" for="orders_filter_field">
+          Add {{ terminology('orders') }} filter field</label>
+        <textarea id="orders_filter_field" name="orders_filter_field"
+                  class="form-control" rows="6"></textarea>
+        <span class="help-block">
+          Specification for an order field to use as filter in the orders
+          list. YAML format must be used to specify a dictionary,
+          where <i>identifier</i> (a string) and <i>values</i> (a list of
+          strings" are required. <i>label</i> is optional. An example:
+          <pre>
+identifier: assigned_node
+label: Assigned node
+values:
+  - Stockholm
+  - "Uppsala SNP&SEQ"
+  - Uppsala UGC
+  - Not assigned
+</pre>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
       <div class="col-md-4">
         <label for="orders_most_recent">Max most recent</label>
         <input type="number" id="orders_most_recent" name="orders_most_recent"

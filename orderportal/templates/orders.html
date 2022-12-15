@@ -42,10 +42,19 @@
           {% end %}
         </select>
       </div>
-      {#
-      Previously, it was possible to filter by ORDERS_LIST_FIELDS that had select
-      values. But with the web interface for setting this (v7.0.3) this was skipped.
-      #}
+      {% for f in parameters['ORDERS_FILTER_FIELDS'] %}
+      <div class="form-group">
+        <select name="{{ f['identifier'] }}" class="form-control refresh">
+          <option value="">[any {{ f.get('label') or f['identifier'].replace('_', ' ').capitalize() }}]</option>
+          {% for v in f['values'] %}
+          {% set sel = v == filter.get(f['identifier']) and 'selected' or '' %}
+          <option {{ sel }} value="{{ v }}">{{ v }}</option>
+          {% end %}
+          {% set sel = '__none__' == filter.get(f['identifier']) and 'selected' or '' %}
+          <option {{ sel }} value="__none__">[none]</option>
+        </select>
+      </div>
+      {% end %} {# for f in parameters['ORDERS_FILTER_FIELDS'] #}
       <div class="form-group">
         <select name="status" class="form-control refresh">
           <option value="">[any status]</option>
