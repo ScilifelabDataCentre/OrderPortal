@@ -498,8 +498,13 @@ def update_meta_documents(db):
             saver["max_most_recent"] = settings.get("DISPLAY_ORDERS_MOST_RECENT", 500)
             saver["default_order_column"] = "modified"
             saver["default_order_sort"] = "desc"
-        doc = saver.doc
         logging.info("saved orders list parameters to database")
+
+    # Re-introduce order list filters, this time separately from orders list fields.
+    doc = db["orders_list"]
+    if "filters" not in doc:
+        with MetaSaver(doc=doc, db=db) as saver:
+            saver["filters"] = []
 
 
 class TextSaver(saver.Saver):
@@ -647,6 +652,7 @@ def load_parameters(db):
     parameters["ORDERS_LIST_TAGS"] = doc["tags"]
     parameters["ORDERS_LIST_STATUSES"] = doc["statuses"]
     parameters["ORDERS_LIST_FIELDS"] = doc["fields"]
+    parameters["ORDERS_FILTER_FIELDS"] = doc["filters"]
     parameters["DISPLAY_ORDERS_MOST_RECENT"] = doc["max_most_recent"]
     parameters["DEFAULT_ORDER_COLUMN"] = doc["default_order_column"]
     parameters["DEFAULT_ORDER_SORT"] = doc["default_order_sort"]
@@ -841,11 +847,41 @@ class OrdersListEdit(RequestHandler):
     @tornado.web.authenticated
     def post(self):
         self.check_admin()
-        with MetaSaver(doc=self.db["orders_list"], rqh=self) as saver:
+        doc = self.db["orders_list"]
+        with MetaSaver(doc=doc, rqh=self) as saver:
             saver["tags"] = utils.to_bool(self.get_argument("orders_list_tags", False))
             saver["statuses"] = [s for s in self.get_arguments("orders_list_statuses")
                                  if s in parameters["ORDER_STATUSES_LOOKUP"]]
             saver["fields"] = self.get_argument("orders_list_fields", "").strip().split()
+            # Lookup of filters with identifier as key.
+            filters = dict([(f["identifier"], f) for f in doc["filters"]])
+            # Delete specified fields.
+            for value in self.get_arguments("orders_filter_field_delete"):
+                filters.pop(value, None)
+            # Add a specified field.
+            try:
+                value = self.get_argument("orders_filter_field")
+                if value:
+                    value = yaml.safe_load(value)
+                    if not isinstance(value, dict):
+                        raise ValueError
+                    filter = dict(identifier=value["identifier"],
+                                  values=value["values"])
+                    if not isinstance(filter["identifier"], str):
+                        raise ValueError
+                    if not isinstance(filter["values"], list):
+                        raise ValueError
+                    if len(filter["values"]) == 0:
+                        raise ValueError
+                    try:
+                        filter["label"] = value["label"]
+                    except KeyError:
+                        pass
+                    # Overwrite if identifier is already in the list.
+                    filters[filter["identifier"]] = filter
+            except (KeyError, ValueError):
+                self.set_error_flash("Invalid YAML for 'Orders filter field'; ignored.")
+            saver["filters"] =  list(filters.values())
             try:
                 value = int(self.get_argument("orders_most_recent"))
                 if value < 10:
@@ -975,7 +1011,7 @@ class Settings(RequestHandler):
         mod_settings[
             "ORDER_MESSAGES"
         ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}%gt;"
-        for obsolete in ["ACCOUNTS_MESSAGES_FILE",
+        for obsolete in ["ACCOUNT_MESSAGES_FILE",
                          "ORDER_STATUSES_FILE", 
                          "ORDER_TRANSITIONS_FILE",
                          "ORDERS_LIST_TAGS",

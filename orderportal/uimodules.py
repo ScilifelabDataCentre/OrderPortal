@@ -97,6 +97,8 @@ class Text(tornado.web.UIModule):
     def render(self, name):
         try:
             text = parameters[constants.DISPLAY][name]["text"]
+            if not text:
+                raise KeyError
         except KeyError:
             if self.handler.is_admin():
                 text = "*No text defined.*"

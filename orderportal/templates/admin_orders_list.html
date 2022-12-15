@@ -79,5 +79,22 @@
     </td>
     <td>{{ parameters['DEFAULT_ORDER_SORT'] }}</td>
   </tr>
+  <tr>
+    <th>Field filters</th>
+    <td>
+      Filters based on field values in orders.
+    </td>
+    <td>
+      {% for f in parameters['ORDERS_FILTER_FIELDS'] %}
+      <p>
+        <b>{{ f['identifier'] }}</b>
+        <br>
+        label: {{ f.get('label') or '-' }}
+        <br>
+        values: {{ ", ".join(f['values']) }}
+      </p>
+      {% end %}
+    </td>
+  </tr>
 </table>
 {% end %} {# block main_content #}

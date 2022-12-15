@@ -476,6 +476,7 @@ class Account(AccountMixin, RequestHandler):
 class AccountApiV1(AccountMixin, RequestHandler):
     "Account API; JSON output."
 
+    @tornado.web.authenticated
     def get(self, email):
         URL = self.absolute_reverse_url
         try:
@@ -615,6 +616,7 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
 class AccountOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandler):
     "Account orders API; JSON output."
 
+    @tornado.web.authenticated
     def get(self, email):
         "JSON output."
         URL = self.absolute_reverse_url
@@ -685,6 +687,7 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
 class AccountGroupsOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandler):
     "Account group orders API; JSON output."
 
+    @tornado.web.authenticated
     def get(self, email):
         "JSON output."
         URL = self.absolute_reverse_url
