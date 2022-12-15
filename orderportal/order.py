@@ -1806,7 +1806,7 @@ class Orders(RequestHandler):
                 value = None
             result = []
             for order in orders:
-                field_value = o["fields"].get(identifier)
+                field_value = order["fields"].get(identifier)
                 if isinstance(field_value, list):
                     if value in field_value:
                         result.append(order)
