@@ -407,6 +407,8 @@ def update_meta_documents(db):
             logging.warning(f"defaults used for order statuses")
         except FileNotFoundError as error:
             logging.warning(f"defaults used for order statuses; {error}")
+        except yaml.YAMLError as error:
+            logging.warning(f"Error trying to read ORDER_STATUSES_FILE: {error}")
         else:
             # Transfer order status data from the legacy setup and flag as enabled.
             lookup = dict([(p["identifier"], p) for p in parameters["ORDER_STATUSES"]])
@@ -432,6 +434,8 @@ def update_meta_documents(db):
             logging.warning(f"defaults used for order transitions")
         except FileNotFoundError as error:
             logging.warning(f"defaults used for order transitions; {error}")
+        except yaml.YAMLError as error:
+            logging.warning(f"Error trying to read ORDER_TRANSITIONS_FILE: {error}")
         else:
             # Transfer order transitions data from legacy setup.
             # NOTE: the legacy setup had a different layout.
@@ -879,7 +883,7 @@ class OrdersListEdit(RequestHandler):
                         pass
                     # Overwrite if identifier is already in the list.
                     filters[filter["identifier"]] = filter
-            except (KeyError, ValueError):
+            except (KeyError, ValueError, yaml.YAMLError):
                 self.set_error_flash("Invalid YAML for 'Orders filter field'; ignored.")
             saver["filters"] =  list(filters.values())
             try:
