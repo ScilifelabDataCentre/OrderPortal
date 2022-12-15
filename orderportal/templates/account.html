@@ -395,12 +395,10 @@
     <th>Phone</th>
     <td>{{ account.get('phone') or '-' }}</td>
   </tr>
-  {% if account['role'] in (constants.ADMIN, constants.STAFF) %}
   <tr>
     <th>API key</th>
     <td>{{ account.get('api_key') or '-' }}</td>
   </tr>
-  {% end %}
   <tr>
     <th>Other data</th>
     <td class="pre">{{ account.get('other_data') or '-' }}</td>
