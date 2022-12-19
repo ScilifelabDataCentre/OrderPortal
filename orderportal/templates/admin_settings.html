@@ -14,6 +14,11 @@
     <strong>SETTINGS_FILE</strong> (see below), which is read on
     startup of the OrderPortal server.
   </p>
+  {% if obsolete %}
+  <p class="text-danger">
+    Some obsolete settings variables are set; see below. Remove them to avoid confusion.
+  </p>
+  {% end %}
   <p>
     To change the settings, the YAML file must be edited and the
     OrderPortal server restarted. Only the sysadmin for the server

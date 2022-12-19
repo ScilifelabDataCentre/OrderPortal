@@ -990,8 +990,6 @@ class Settings(RequestHandler):
         self.check_admin()
         hidden = "&lt;hidden&gt;"
         mod_settings = copy.deepcopy(settings)
-        # Add the root dir
-        mod_settings["ROOT"] = constants.ROOT
         # Hide sensitive data.
         for key in settings:
             if "PASSWORD" in key or "SECRET" in key:
@@ -1008,24 +1006,15 @@ class Settings(RequestHandler):
             url = list(url)
             url[match.start(1) : match.end(1)] = "password"
             mod_settings["DATABASE_SERVER"] = "".join(url)
-        mod_settings["COUNTRIES"] = f"&lt;see file {mod_settings['COUNTRY_CODES_FILE']}&gt;"
-        mod_settings[
-            "COUNTRIES_LOOKUP"
-        ] = f"&lt;computed from file {mod_settings['COUNTRY_CODES_FILE']}&gt;"
         mod_settings[
             "ORDER_MESSAGES"
         ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}%gt;"
-        for obsolete in ["ACCOUNT_MESSAGES_FILE",
-                         "ORDER_STATUSES_FILE", 
-                         "ORDER_TRANSITIONS_FILE",
-                         "ORDERS_LIST_TAGS",
-                         "ORDERS_LIST_STATUSES",
-                         "ORDERS_LIST_FIELDS",
-                         "DISPLAY_ORDERS_MOST_RECENT",
-                         "SITE_PERSONAL_DATA_POLICY"]:
-            if obsolete in mod_settings:
-                mod_settings[obsolete] = " &lt;<b>OBSOLETE; NO LONGER USED</b>&gt;"
-        self.render("admin_settings.html", settings=mod_settings)
+        obsolete = False
+        for key in mod_settings:
+            if key not in parameters["SETTINGS_KEYS"]:
+                mod_settings[key] = " &lt;<b>OBSOLETE; NO LONGER USED</b>&gt;"
+                obsolete = True
+        self.render("admin_settings.html", settings=mod_settings, obsolete=obsolete)
 
 
 class DebugEmail(RequestHandler):

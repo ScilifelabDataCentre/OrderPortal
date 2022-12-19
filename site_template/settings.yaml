@@ -40,9 +40,8 @@ DATABASE_PASSWORD: 'Change this to CouchDB account password'
 COOKIE_SECRET: 'Change this to a long string of random characters.'
 PASSWORD_SALT: 'Change this to another long string of random characters.'
 
-# The name of your instance, and the support email address.
+# The name of your instance.
 SITE_NAME:          'My Order Portal'
-SITE_SUPPORT_EMAIL: 'my.email@my-domain.com'
 
 # These files must be in the SITE_STATIC_DIR (see above).
 # An absolute file path is *not* allowed.
@@ -50,9 +49,6 @@ SITE_FAVICON:     'orderportal32.png'
 SITE_NAVBAR_ICON: 'orderportal32.png'  # Or set to 'null' for none.
 SITE_HOME_ICON:   'orderportal144.png'
 SITE_CSS_FILE:    null
-
-# Account setup email message templates file; in SITE_DIR (see above).
-ACCOUNT_MESSAGES_FILE: 'account_messages.yaml'
 
 # Flags indicating which user account registration input fields to ask for.
 ACCOUNT_PI_INFO: true
@@ -62,15 +58,6 @@ ACCOUNT_FUNDER_INFO: true
 
 # Default country for registering account. Should be present in the COUNTRY_CODES_FILE.
 ACCOUNT_DEFAULT_COUNTRY_CODES: 'SE'
-
-# File containing country names and codes.
-# Optional, may be set to null; in SITE_DIR (see above).
-COUNTRY_CODES_FILE: 'country_codes.yaml'
-
-# Terminology: change key to value in various display labels and texts.
-# TERMINOLOGY:
-#   order: application
-#   orders: applications
 
 # File containing the messages sent out at order status changes; in SITE_DIR (see above).
 ORDER_MESSAGES_FILE: 'order_messages.yaml'
@@ -88,28 +75,6 @@ ORDER_TAGS: true
 # Allow users to set tags on orders.
 ORDER_USER_TAGS: true
 
-# The statuses to show in the orders list.
-ORDERS_LIST_STATUSES:
-  - submitted
-  - accepted
-  - processing
-  - closed
-
-# The order fields (identifiers) to show in the orders list.
-# Given by list of dicts, where each dict has a required item 'identifier'
-# specifying the field identifier, and an optional item 'values'
-# specifying a list of values to allow filtering by.
-# Orders (forms) lacking the field will just show an empty slot.
-# The value is an example only; edit or comment out.
-ORDERS_LIST_FIELDS:
-  -
-    identifier: project_pi
-    label: 'Project PI'
-
-# Fields of orders to use when doing search; only scalar fields are allowed!
-ORDER_SEARCH_FIELDS:
-  - project_pi
-
 # File containing university symbols (abbreviations), names and rank in a dictionary.
 # Optional, may be set to 'null'; in SITE_DIR.
 UNIVERSITIES_FILE: 'swedish_universities.yaml'
@@ -117,24 +82,6 @@ UNIVERSITIES_FILE: 'swedish_universities.yaml'
 # File containing subject codes file, terms in a hierarchy.
 # Optional, may be set to 'null'; in SITE_DIR.
 SUBJECT_TERMS_FILE: 'subject_terms.yaml'
-
-# Sending email. No longer strictly required, but account registration and
-# password setting functionality will be severely limited.
-# Email server settings when available on the local machine.
-EMAIL:
-  HOST: 'localhost'
-# Email server settings when using the Google Mail server.
-# EMAIL:
-#   HOST: 'smtp.gmail.com'
-#   PORT: 465
-#   SSL: true
-#   USER: 'your.account@your.domain'
-#   PASSWORD: 'your app password'
-
-# Email address to display when for sending emails. Required.
-MESSAGE_SENDER_EMAIL: '"OrderPortal Support" <support@your.domain>'
-# Email address for replies if different from the sender. Optional.
-MESSAGE_REPLY_TO_EMAIL: null
 
 # Display news items in the home page.
 DISPLAY_NEWS: true
@@ -149,3 +96,19 @@ DISPLAY_MENU_DOCUMENTS: true
 DISPLAY_MENU_CONTACT: true
 # Display the 'About us' item in the top menu.
 DISPLAY_MENU_ABOUT_US: true
+
+# Email setup. Not strictly required, but emails for account registration,
+# password setting and order status updates will not be sent.
+# This would complicate life for the administrators.
+
+# Email settings using Google server and the webservice account; not relay!.
+MAIL_SERVER: 'smtp.gmail.com'
+MAIL_DEFAULT_SENDER: '"OrderPortal webservice" <webservice@whatever.com>'
+MAIL_PORT: 587
+MAIL_USE_TLS: true
+MAIL_USERNAME: 'webservice@whatever.com'
+# App-specific password for best behaviour.
+MAIL_PASSWORD: '16-char code'
+
+# Email server settings when available on the local machine.
+# MAIL_SERVER: localhost

@@ -5,11 +5,11 @@ import logging
 
 import tornado.web
 
-from . import constants, settings, parameters
-from . import saver
-from . import utils
-from .fields import Fields
-from .requesthandler import RequestHandler, ApiV1Mixin
+from orderportal import constants, settings, parameters
+from orderportal import saver
+from orderportal import utils
+from orderportal.fields import Fields
+from orderportal.requesthandler import RequestHandler, ApiV1Mixin
 
 
 DESIGN_DOC = {

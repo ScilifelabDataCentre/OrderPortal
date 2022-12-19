@@ -325,9 +325,8 @@ administrator of the site can then change the ownership of your
             <select class="form-control" name="country" id="country">
               <option value="">[none]</option>
               {% set country = account['address'].get('country') %}
-              {% for c in settings['COUNTRIES'] %}
-              {% set sel = country == c['code'] and 'selected' or '' %}
-              <option {{ sel }} value="{{ c['code'] }}">{{ c['name'] }}</option>
+              {% for code, name in constants.COUNTRIES.items() %}
+              <option value="{{ code }}" {{ country == code and 'selected' or '' }}>{{ name }}</option>
               {% end %}
             </select>
           </div>
@@ -424,9 +423,9 @@ administrator of the site can then change the ownership of your
             <select class="form-control"
                     name="invoice_country" id="invoice_country">
               <option value="">[none]</option>
-              {% for c in settings['COUNTRIES'] %}
-              {% set sel = account['invoice_address'].get('country') == c['code'] and 'selected' or '' %}
-              <option {{ sel }} value="{{ c['code'] }}">{{ c['name'] }}</option>
+              {% set country = account['invoice_address'].get('country') %}
+              {% for code, name in constants.COUNTRIES.items() %}
+              <option value="{{ code }}"  {{ country == code and 'selected' or '' }}>{{ name }}</option>
               {% end %}
             </select>
           </div>

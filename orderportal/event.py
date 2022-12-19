@@ -3,9 +3,8 @@
 import logging
 import tornado.web
 
-from orderportal import constants
+from orderportal import constants, settings
 from orderportal import saver
-from orderportal import settings
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 

@@ -7,8 +7,7 @@ import time
 import click
 import couchdb2
 
-from orderportal import constants
-from orderportal import settings
+from orderportal import constants, settings
 from orderportal import utils
 from orderportal.account import AccountSaver
 import orderportal.app_orderportal
@@ -18,8 +17,8 @@ import orderportal.admin
 @click.group()
 @click.option("-s", "--settings", help="Path of settings YAML file.")
 @click.option("--log", flag_value=True, default=False, help="Enable logging output.")
-def cli(settings, log):
-    utils.get_settings(settings, log=log)
+def cli(settings, log):         # This is the settings file, not the settings dict.
+    utils.load_settings(settings, log=log)
 
 
 @cli.command()

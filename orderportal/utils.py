@@ -22,8 +22,7 @@ import tornado.escape
 import xlsxwriter
 import yaml
 
-from orderportal import constants
-from orderportal import settings
+from orderportal import constants, settings, parameters
 
 
 LOG_DESIGN_DOC = {
@@ -59,8 +58,8 @@ META_DESIGN_DOC = {
 }
 
 
-def get_settings(filepath=None, log=True):
-    """Get the settings. The file path first specified is used.
+def load_settings(filepath=None, log=True):
+    """Load the settings. The file path first specified is used.
     1) The argument to this procedure (possibly from a command line argument).
     2) The path environment variable ORDERPORTAL_SETTINGS.
     3) The file '../site/settings.yaml' relative to this directory.
@@ -69,6 +68,7 @@ def get_settings(filepath=None, log=True):
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
     """
+    parameters["SETTINGS_KEYS"] = set(settings.keys())
     site_dir = settings["SITE_DIR"]
     if not os.path.exists(site_dir):
         raise IOError(f"The required site directory '{site_dir}' does not exist.")
@@ -83,6 +83,7 @@ def get_settings(filepath=None, log=True):
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
     settings["SETTINGS_FILE"] = filepath
+    parameters["SETTINGS_KEYS"].add("SETTINGS_FILE")
 
     # Set logging state
     if settings.get("LOGGING_DEBUG"):
@@ -180,18 +181,18 @@ def get_settings(filepath=None, log=True):
     else:
         settings["UNIVERSITIES"] = {}
 
-    # Read country codes YAML file
-    filepath = settings.get("COUNTRY_CODES_FILE")
-    if not filepath:
-        settings["COUNTRIES"] = []
-    else:
-        filepath = os.path.join(settings["SITE_DIR"], filepath)
-        logging.info(f"country codes file: {filepath}")
-        with open(filepath) as infile:
-            settings["COUNTRIES"] = yaml.safe_load(infile) or []
-    settings["COUNTRIES_LOOKUP"] = dict(
-        [(c["code"], c["name"]) for c in settings["COUNTRIES"]]
-    )
+    # # Read country codes YAML file
+    # filepath = settings.get("COUNTRY_CODES_FILE")
+    # if not filepath:
+    #     settings["COUNTRIES"] = []
+    # else:
+    #     filepath = os.path.join(settings["SITE_DIR"], filepath)
+    #     logging.info(f"country codes file: {filepath}")
+    #     with open(filepath) as infile:
+    #         settings["COUNTRIES"] = yaml.safe_load(infile) or []
+    # settings["COUNTRIES_LOOKUP"] = dict(
+    #     [(c["code"], c["name"]) for c in settings["COUNTRIES"]]
+    # )
 
     # Read subject terms YAML file.
     filepath = settings.get("SUBJECT_TERMS_FILE")
