@@ -40,8 +40,7 @@
     <div class="row">
       <div class="col-md-6">
         <label class="control-label" for="email">Email</label>
-        <input type="email" class="form-control"
-               name="email" id="email"
+        <input type="email" name="email" id="email" class="form-control"
                value="{{ values.get('email') or '' }}">
         <span style="color:red; margin-right: 1em;"
               class="glyphicon glyphicon-star form-control-feedback"
@@ -64,8 +63,7 @@
     <div class="row">
       <div class="col-md-6">
         <label class="control-label" for="first_name">First name</label>
-        <input type="text" class="form-control"
-               name="first_name" id="first_name"
+        <input type="text" name="first_name" id="first_name" class="form-control"
                value="{{ values.get('first_name') or '' }}">
         <span style="color:red; margin-right: 1em;"
               class="glyphicon glyphicon-star form-control-feedback"
@@ -78,8 +76,7 @@
     <div class="row">
       <div class="col-md-6">
         <label class="control-label" for="last_name">Last name</label>
-        <input type="text" class="form-control"
-               name="last_name" id="last_name"
+        <input type="text" name="last_name" id="last_name" class="form-control"
                value="{{ values.get('last_name') or '' }}">
         <span style="color:red; margin-right: 1em;"
               class="glyphicon glyphicon-star form-control-feedback"
@@ -116,20 +113,19 @@
       </div>
       <div class="col-md-6">
         {% if found %}
-        <input type="text" class="form-control"
-               name="university_other" id="university_other"
+        <input type="text" name="university_other" id="university_other"
+               class="form-control"
                placeholder="Provide full name of organization if not in list.">
         {% else %}
-        <input type="text" class="form-control"
-               name="university_other" id="university_other"
+        <input type="text" name="university_other" id="university_other"
+               class="form-control"
                value="{{ values.get('university') or ''}}"
                placeholder="Provide full name of organization if not in list.">
         {% end %}
       </div>
       {% else %}
       <div class="col-md-6">
-        <input type="text" class="form-control"
-               name="university" id="university"
+        <input type="text" name="university" id="university" class="form-control"
                value="{{ values.get('university') or ''}}">
         <span style="color:red; margin-right: 1em;"
               class="glyphicon glyphicon-star form-control-feedback"
@@ -151,8 +147,7 @@
     <div class="row">
       <div class="col-md-6">
         <label class="control-label" for="department">Department</label>
-        <input type="text" class="form-control"
-               name="department" id="department"
+        <input type="text" name="department" id="department" class="form-control"
                value="{{ values.get('department') or '' }}">
       </div>
     </div>
@@ -184,8 +179,7 @@
     <div class="row">
       <div class="col-md-6">
         <label class="control-label" for="orcid">ORCID</label>
-        <input type="text" class="form-control"
-               name="orcid" id="orcid"
+        <input type="text" name="orcid" id="orcid" class="form-control"
                value="{{ values.get('orcid') or '' }}">
       </div>
     </div>
@@ -234,8 +228,7 @@
         <div class="row">
           <div class="col-md-3">
             <label class="control-label" for="gender">Group size</label>
-            <input type="number" class="form-control"
-                   name="group_size", id="group_size"
+            <input type="number" name="group_size", id="group_size" class="form-control"
                    value="{{ values.get('group_size') or '0' }}">
             <span style="color:red; margin-right: 1em;"
                   class="glyphicon glyphicon-star form-control-feedback"
@@ -294,8 +287,7 @@
         <div class="row">
           <div class="col-md-8">
             <label class="control-label" for="street">Address</label>
-            <textarea class="form-control" rows="2"
-                      id="address" name="address"
+            <textarea id="address" name="address" class="form-control" rows="2"
                       >{{ values.get('address') or '' }}</textarea>
           </div>
         </div>
@@ -312,8 +304,7 @@
         <div class="row">
           <div class="col-md-8">
             <label class="control-label" for="zip">Zip code</label>
-            <input type="text" class="form-control"
-                   id="zip" name="zip"
+            <input type="text" id="zip" name="zip" class="form-control"
                    value="{{ values.get('zip') or ''}}">
           </div>
         </div>
@@ -330,8 +321,7 @@
         <div class="row">
           <div class="col-md-8">
             <label class="control-label" for="city">City</label>
-            <input type="text" class="form-control"
-                   id="city" name="city"
+            <input type="text" id="city" name="city" class="form-control"
                    value="{{ values.get('city') or '' }}">
           </div>
         </div>
@@ -342,9 +332,9 @@
           <div class="col-md-8">
             <label class="control-label" for="country">Country</label>
             <select class="form-control" name="country" id="country">
-              {% set code = values.get('country') or settings['ACCOUNT_DEFAULT_COUNTRY_CODE'] %}
-              {% for c in settings['COUNTRIES'] %}
-              <option value="{{ c['code'] }}" {{ c['code'] == code and 'selected' or '' }}>{{ c['name'] }}</option>
+              {% set country = values.get('country') or settings['ACCOUNT_DEFAULT_COUNTRY_CODE'] %}
+              {% for code, name in constants.COUNTRIES.items() %}
+              <option value="{{ code }}" {{ country == code and 'selected' or '' }}>{{ name }}</option>
               {% end %}
             </select>
           </div>
@@ -359,8 +349,7 @@
     <div class="row">
       <div class="col-md-6">
         <label class="control-label" for="invoice_ref">Invoice reference</label>
-        <input type="text" class="form-control"
-               name="invoice_ref" id="invoice_ref">
+        <input name="invoice_ref" id="invoice_ref" type="text" class="form-control">
         {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
         <span style="color:red; margin-right: 1em;"
               class="glyphicon glyphicon-star form-control-feedback"
@@ -390,8 +379,8 @@
         <div class="row">
           <div class="col-md-8">
             <label class="control-label" for="invoice_address">Address</label>
-            <textarea class="form-control" rows="2"
-                      id="invoice_address" name="invoice_address"
+            <textarea id="invoice_address" name="invoice_address"
+                      class="form-control" rows="2"
                       >{{ values.get('invoice_address') or '' }}</textarea>
           </div>
         </div>
@@ -408,8 +397,8 @@
         <div class="row">
           <div class="col-md-8">
             <label class="control-label" for="invoice_zip">Zip code</label>
-            <input type="text" class="form-control"
-                   id="invoice_zip" name="invoice_zip"
+            <input type="text" id="invoice_zip" name="invoice_zip"
+                   class="form-control"
                    value="{{ values.get('invoice_zip') or ''}}">
           </div>
         </div>
@@ -426,8 +415,8 @@
         <div class="row">
           <div class="col-md-8">
             <label class="control-label" for="invoice_city">City</label>
-            <input type="text" class="form-control"
-                   id="invoice_city" name="invoice_city"
+            <input type="text" id="invoice_city" name="invoice_city"
+                   class="form-control"
                    value="{{ values.get('invoice_city') or '' }}">
           </div>
         </div>
@@ -437,11 +426,10 @@
         <div class="row">
           <div class="col-md-8">
             <label class="control-label" for="invoice_country">Country</label>
-            <select class="form-control"
-                    name="invoice_country" id="invoice_country">
-              {% set code = values.get('invoice_country') or settings['ACCOUNT_DEFAULT_COUNTRY_CODE'] %}
-              {% for c in settings['COUNTRIES'] %}
-              <option value="{{ c['code'] }}" {{ c['code'] == code and 'selected' or '' }}>{{ c['name'] }}</option>
+            <select name="invoice_country" id="invoice_country" class="form-control">
+              {% set country = values.get('invoice_country') or settings['ACCOUNT_DEFAULT_COUNTRY_CODE'] %}
+              {% for code, name in constants.COUNTRIES.items() %}
+              <option value="{{ code }}" {{ country == code and 'selected' or '' }}>{{ name }}</option>
               {% end %}
             </select>
           </div>
@@ -455,8 +443,7 @@
     <div class="row">
       <div class="col-md-6">
         <label class="control-label" for="phone">Phone</label>
-        <textarea rows="3" class="form-control"
-                  name="phone" id="phone"
+        <textarea name="phone" id="phone" rows="3" class="form-control"
                   >{{ values.get('phone') or ''}}</textarea>
       </div>
     </div>

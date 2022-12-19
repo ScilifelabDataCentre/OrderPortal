@@ -4,9 +4,8 @@ import logging
 
 import tornado.web
 
-from . import constants
-from . import settings
-from . import utils
+from orderportal import constants, settings
+from orderportal import utils
 
 
 class Fields(object):

@@ -7,12 +7,11 @@ import urllib.parse
 import couchdb2
 import tornado.web
 
-from . import constants
-from . import saver
-from . import settings
-from . import utils
-from .fields import Fields
-from .requesthandler import RequestHandler
+from orderportal import constants, settings
+from orderportal import saver
+from orderportal import utils
+from orderportal.fields import Fields
+from orderportal.requesthandler import RequestHandler
 from functools import reduce
 
 

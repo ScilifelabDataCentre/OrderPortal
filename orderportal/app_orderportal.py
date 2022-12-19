@@ -7,8 +7,7 @@ import sys
 import tornado.web
 import tornado.ioloop
 
-from orderportal import constants
-from orderportal import settings, parameters
+from orderportal import constants, settings, parameters
 from orderportal import utils
 
 import orderportal.account
@@ -30,7 +29,7 @@ def main():
         filepath = sys.argv[1]
     else:
         filepath = None
-    utils.get_settings(filepath=filepath)
+    utils.load_settings(filepath=filepath)
     db = utils.get_db()
     utils.load_design_documents(db)
     orderportal.admin.update_meta_documents(db)
