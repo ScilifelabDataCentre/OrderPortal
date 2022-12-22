@@ -341,13 +341,14 @@ def main():
             name="admin_account_message_edit",
         ),
         url(r"/admin/database", orderportal.admin.Database, name="admin_database"),
-        url(r"/admin/debug_email", orderportal.admin.DebugEmail, name="admin_debug_email"),
         url(
             r"/admin/document/(.+)",
             orderportal.admin.Document,
             name="admin_document"
         ),
         url(r"/admin/settings", orderportal.admin.Settings, name="admin_settings"),
+        url(r"/admin/debug_email", orderportal.admin.DebugEmail, name="admin_debug_email"),
+        url(r"/admin/debug_timezone", orderportal.admin.DebugTimezone, name="admin_debug_timezone"),
         url(r"/search", orderportal.search.Search, name="search"),
         url(
             r"/site/([^/]+)",
