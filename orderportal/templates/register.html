@@ -7,7 +7,7 @@
 
 {% block main_content %}
 
-{% if not is_admin and not settings['ACCOUNT_REGISTRATION_OPEN'] %}
+{% if not is_staff and not settings['ACCOUNT_REGISTRATION_OPEN'] %}
 
 <div class="lead alert alert-warning">
   User registration has been switched off. Contact the admin of the site.
@@ -456,20 +456,19 @@
     </div>
   </div>
   
-  {% if is_admin %}
+  {% if is_staff %}
   <div class="form-group">
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-8">
         <label class="control-label" for="send_email">Send email</label>
         <div  class="form-control">
-          <input type="checkbox" name="send_email" id="send_email"
-                 checked value="true">
+          <input type="checkbox" name="send_email" id="send_email" value="true">
           Send email to the user informing about this registration.
         </div>
       </div>
     </div>
   </div>
-  {% end %} {# if is_admin #}
+  {% end %} {# if is_staff #}
   
   <div class="form-group">
     <div class="row">
@@ -482,24 +481,24 @@
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-md-11">
-      <div class="well">
-        {% module Text('privacy_policy') %}
-        {% if is_admin %}
-        <form action="{{ reverse_url('text_edit', 'privacy_policy') }}"
-              method="GET" role="form">
-          <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
-          <button type="submit" class="btn btn-primary btn-xs">
-            <span class="glyphicon glyphicon-edit"></span> Edit
-          </button>
-        </form>
-        {% end %}
-      </div>
+</form>
+
+<div class="row">
+  <div class="col-md-11">
+    <div class="well">
+      {% module Text('privacy_policy') %}
+      {% if is_admin %}
+      <form action="{{ reverse_url('text_edit', 'privacy_policy') }}"
+            method="GET" role="form">
+        <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
+        <button type="submit" class="btn btn-primary btn-xs">
+          <span class="glyphicon glyphicon-edit"></span> Edit
+        </button>
+      </form>
+      {% end %}
     </div>
   </div>
-
-</form>
+</div>
 
 <form action="{{ reverse_url('home') }}"
       method="GET" role="form">
@@ -515,6 +514,6 @@
   </div>
 </form>
 
-{% end %} {# if not is_admin and not settings['ACCOUNT_REGISTRATION_OPEN'] #}
+{% end %} {# if not is_staff and not settings['ACCOUNT_REGISTRATION_OPEN'] #}
 
 {% end %} {# block main_content #}

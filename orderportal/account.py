@@ -423,7 +423,7 @@ class Account(AccountMixin, RequestHandler):
     def delete(self, email):
         "Delete a account that is pending; to get rid of spam application."
         account = self.get_account(email)
-        self.check_admin()
+        self.check_staff()
         if not self.allow_delete(account):
             self.see_other(
                 "account", account["email"], error="Account cannot be deleted."
@@ -785,7 +785,7 @@ class AccountEdit(AccountMixin, RequestHandler):
             return
         try:
             with AccountSaver(doc=account, rqh=self) as saver:
-                # Only admin may change role of an account.
+                # Only admin (not staff!) may change role of an account.
                 if self.is_admin():
                     role = self.get_argument("role")
                     if role not in constants.ACCOUNT_ROLES:
@@ -924,7 +924,7 @@ class Logout(RequestHandler):
 
 
 class Reset(RequestHandler):
-    "Reset the password of a account account."
+    "Reset the password of an account."
 
     def get(self):
         self.render("reset.html", email=self.get_argument("email", ""))
@@ -949,7 +949,6 @@ class Reset(RequestHandler):
                 return
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver.reset_password()
-            # text = settings["ACCOUNT_MESSAGES"][constants.RESET]
             text = parameters[constants.ACCOUNT][constants.RESET]
             try:
                 with MessageSaver(rqh=self) as saver:
@@ -964,8 +963,8 @@ class Reset(RequestHandler):
                         code=account["code"],
                     )
                     saver.send(self.get_recipients(text, account))
-                    # Log out the user if not admin.
-                    if self.current_user and not self.is_admin():
+                    # Log out the user if not staff.
+                    if self.current_user and not self.is_staff():
                         self.set_secure_cookie(constants.USER_COOKIE, "")
             except KeyError as error:
                 self.see_other("home", message=str(error))
@@ -995,7 +994,7 @@ class Password(RequestHandler):
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        if not self.is_admin() and (account.get("code") != self.get_argument("code")):
+        if not self.is_staff() and (account.get("code") != self.get_argument("code")):
             self.see_other(
                 "home",
                 error="Either the email address or the code"
@@ -1101,7 +1100,7 @@ class Register(RequestHandler):
                 saver["owner"] = saver["email"]
                 saver["role"] = constants.USER
                 saver["api_key"] = utils.get_iuid()
-                if self.is_admin():
+                if self.is_staff():
                     saver["status"] = constants.ENABLED
                     saver.reset_password()
                 else:
@@ -1120,11 +1119,10 @@ class Register(RequestHandler):
             self.see_other("register", error=str(msg), **kwargs)
             return
         account = saver.doc
-        # text = settings["ACCOUNT_MESSAGES"][account["status"]]
         text = parameters[constants.ACCOUNT][account["status"]]
-        # Allow admin to avoid sending email to the person when register an account.
+        # Allow staff to avoid sending email to the person when registering an account.
         if not (
-            self.is_admin()
+            self.is_staff()
             and not utils.to_bool(self.get_argument("send_email", False))
         ):
             try:
@@ -1144,7 +1142,7 @@ class Register(RequestHandler):
                 self.set_message_flash(str(error))
             except ValueError as error:
                 self.set_error_flash(str(error))
-        if self.is_admin():
+        if self.is_staff():
             self.see_other("account", account["email"])
         else:
             self.see_other("registered")
@@ -1162,12 +1160,12 @@ class AccountEnable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
+        self.check_staff()
         try:
             account = self.get_account(email)
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        self.check_admin()
         with AccountSaver(account, rqh=self) as saver:
             saver["status"] = constants.ENABLED
             saver.reset_password()
@@ -1192,12 +1190,12 @@ class AccountDisable(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
+        self.check_staff()
         try:
             account = self.get_account(email)
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        self.check_admin()
         with AccountSaver(account, rqh=self) as saver:
             saver["status"] = constants.DISABLED
             saver.erase_password()
@@ -1210,12 +1208,12 @@ class AccountUpdateInfo(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, email):
+        self.check_staff()
         try:
             account = self.get_account(email)
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        self.check_admin()
         if not account.get("update_info"):
             with AccountSaver(account, rqh=self) as saver:
                 saver["update_info"] = True

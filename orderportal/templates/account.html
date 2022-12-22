@@ -29,7 +29,7 @@
 </p>
 {% end %} {# if current_user['email'] == account['email'] #}
 
-{% if is_admin or current_user['email'] == account['email'] %}
+{% if is_staff or current_user['email'] == account['email'] %}
 <p>
   <div>
     <a href="{{ reverse_url('account_edit', account['email']) }}"
@@ -53,9 +53,9 @@
     </a>
   </div>
 </p>
-{% end %} {# if current_user['email'] == account['email'] #}
+{% end %} {# is_staff or if current_user['email'] == account['email'] #}
 
-{% if is_admin or current_user['email'] == account['email'] %}
+{% if is_staff or current_user['email'] == account['email'] %}
 <p>
   <div>
     <a href="{{ reverse_url('reset', email=account['email']) }}"
@@ -66,9 +66,9 @@
     </a>
   </div>
 </p>
-{% end %} {# if is_admin or current_user['email'] == account['email'] #}
+{% end %} {# if is_staff or current_user['email'] == account['email'] #}
 
-{% if is_admin %}
+{% if is_staff %}
 <p>
   <div>
     <a href="{{ reverse_url('password', email=account['email']) }}"
@@ -79,9 +79,9 @@
     </a>
   </div>
 </p>
-{% end %} {# if is_admin #}
+{% end %} {# if is_staff #}
 
-{% if is_admin and current_user['email'] != account['email'] %}
+{% if is_staff and current_user['email'] != account['email'] %}
 
 <p>
   <form action="{{ reverse_url('account_update_info', account['email']) }}"
@@ -127,7 +127,7 @@
     </div>
   </form>
 </p>
-{% end %} {# if  account['status'] != constants.DISABLED #}
+{% end %} {# if account['status'] != constants.DISABLED #}
 
 {% if allow_delete %}
 <p>
@@ -146,7 +146,7 @@
 </p>
 {% end %} {# if allow_delete #}
 
-{% end %} {# if is_admin and current_user['email'] != account['email'] #}
+{% end %} {# if is_staff and current_user['email'] != account['email'] #}
 {% end %} {# block action_content #}
 
 {% block main_content %}
