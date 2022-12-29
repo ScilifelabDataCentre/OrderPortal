@@ -660,10 +660,10 @@ class FormOrdersAggregate(RequestHandler):
         if table_field:
             filename += "_" + table_field["identifier"]
         if file_format == "xlsx":
-            self.set_header("Content-Type", constants.XLSX_MIME)
+            self.set_header("Content-Type", constants.XLSX_MIMETYPE)
             filename = filename + ".xlsx"
         elif file_format == "csv":
-            self.set_header("Content-Type", constants.CSV_MIME)
+            self.set_header("Content-Type", constants.CSV_MIMETYPE)
             filename = filename + ".csv"
         self.set_header(
             "Content-Disposition", 'attachment; filename="orders_%s"' % filename

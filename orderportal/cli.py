@@ -146,7 +146,7 @@ def undump(dumpfile, progressbar):
 @cli.command()
 @click.argument("email")
 @click.option("--password")  # Get password after account existence check.
-def admin(email, password):
+def create_admin(email, password):
     """Create a user account having the admin role.
     The email address is the account identifier.
     No email is sent to the email address by this command.
@@ -235,8 +235,8 @@ def role(email, role):
 
 @cli.command()
 @click.argument("identifier")
-def show(identifier):
-    """Display the JSON for the single document in the database.
+def output(identifier):
+    """Output the JSON for the single document in the database.
     The identifier may be an account email, account API key, file name, info name,
     order identifier, or '_id' of the CouchDB document.
     """

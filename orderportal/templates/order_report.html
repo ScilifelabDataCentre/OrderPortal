@@ -13,7 +13,7 @@ Report for {{ terminology('order') }} '{{ order['title'] }}'
 {% block main_content %}
 <h2>{{ terminology('Order') }} identifier: {% module Entity(order, icon=False) %}</h2>
 
-{% if content_type == constants.TEXT_MIME %}
+{% if content_type == constants.TEXT_MIMETYPE %}
 <pre>{{ content }}</pre>
 {% else %}
   {% raw content %}

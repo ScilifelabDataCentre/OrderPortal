@@ -504,7 +504,7 @@ def log(db, rqh, entity, changed=dict()):
 def get_filename_extension(content_type):
     "Return filename extension, correcting for silliness in 'mimetypes'."
     try:
-        return constants.MIME_EXTENSIONS[content_type]
+        return constants.MIMETYPE_EXTENSIONS[content_type]
     except KeyError:
         return mimetypes.guess_extension(content_type)
 

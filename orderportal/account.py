@@ -321,7 +321,7 @@ class AccountsCsv(Accounts):
         return utils.CsvWriter()
 
     def write_finish(self):
-        self.set_header("Content-Type", constants.CSV_MIME)
+        self.set_header("Content-Type", constants.CSV_MIMETYPE)
         self.set_header("Content-Disposition", 'attachment; filename="accounts.csv"')
 
 
@@ -332,7 +332,7 @@ class AccountsXlsx(AccountsCsv):
         return utils.XlsxWriter()
 
     def write_finish(self):
-        self.set_header("Content-Type", constants.XLSX_MIME)
+        self.set_header("Content-Type", constants.XLSX_MIMETYPE)
         self.set_header("Content-Disposition", 'attachment; filename="accounts.xlsx"')
 
 

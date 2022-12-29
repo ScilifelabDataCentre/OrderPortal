@@ -18,24 +18,23 @@
                  class="form-control" size="40" placeholder="Identifier"
                  value="{{ identifier }}">
           <div class="input-group-btn">
-            <button class="btn btn-default" type="submit">
-              <span class="glyphicon glyphicon-search"></span>
-            </button>
+            <button class="btn btn-primary" type="submit">Lookup</button>
           </div>
         </div>
-        <p class="help-block">
-          Look up document for account email, API key, file name, info name,
-          order identifier or document id.
-        </p>
+        <div class="help-block">
+          Lookup a CouchDB document given an identifier. The
+          identifier may be an account email or API key, or a file
+          name, info name, order identifier, or '_id' of the CouchDB
+          document.
+        </div>
       </div>
     </form>
   </div>
   {% if doc %}
   <div class="col-md col-md-offset-1">
-    Found <code>{{ doc['_id'] }}</code>
     <a href="{{ reverse_url('admin_document', doc['_id']) }}"
        class="btn btn-primary">
-      <span class="glyphicon glyphicon-download"></span> Download
+      Download {{ doc['_id'] }}
     </a>
   </div>
   {% end %}

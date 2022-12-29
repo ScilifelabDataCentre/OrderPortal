@@ -1180,7 +1180,7 @@ class OrderCsv(OrderMixin, RequestHandler):
         return utils.CsvWriter("Order")
 
     def write_finish(self, order):
-        self.set_header("Content-Type", constants.CSV_MIME)
+        self.set_header("Content-Type", constants.CSV_MIMETYPE)
         filename = order.get("identifier") or order["_id"]
         self.set_header(f"Content-Disposition", 'attachment; filename="{filename}.csv"')
 
@@ -1192,7 +1192,7 @@ class OrderXlsx(OrderCsv):
         return utils.XlsxWriter("Order")
 
     def write_finish(self, order):
-        self.set_header("Content-Type", constants.XLSX_MIME)
+        self.set_header("Content-Type", constants.XLSX_MIMETYPE)
         filename = order.get("identifier") or order["_id"]
         self.set_header("Content-Disposition", f'attachment; filename="{filename}.xlsx"')
 
@@ -1223,7 +1223,7 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
                 outfile = self.db.get_attachment(order, filename)
                 writer.writestr(filename, outfile.read())
         self.write(zip_io.getvalue())
-        self.set_header("Content-Type", constants.ZIP_MIME)
+        self.set_header("Content-Type", constants.ZIP_MIMETYPE)
         filename = order.get("identifier") or order["_id"]
         self.set_header("Content-Disposition", f'attachment; filename="{filename}.zip"')
 
@@ -1618,11 +1618,11 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         order = self.get_entity(iuid, doctype=constants.ORDER)
         with OrderSaver(doc=order, rqh=self) as saver:
             content_type = (
-                self.request.headers.get("content-type") or constants.BIN_MIME
+                self.request.headers.get("content-type") or constants.BIN_MIMETYPE
             )
             saver["report"] = dict(
                 timestamp=utils.timestamp(),
-                inline=content_type in (constants.HTML_MIME, constants.TEXT_MIME),
+                inline=content_type in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE),
             )
             saver.files.append(
                 dict(
@@ -1658,7 +1658,7 @@ class OrderReportEdit(OrderMixin, RequestHandler):
                 saver["report"] = dict(
                     timestamp=utils.timestamp(),
                     inline=infile.content_type
-                    in (constants.HTML_MIME, constants.TEXT_MIME),
+                    in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE),
                 )
                 saver.files.append(
                     dict(
@@ -1946,7 +1946,7 @@ class OrdersCsv(Orders):
         return utils.CsvWriter()
 
     def write_finish(self):
-        self.set_header("Content-Type", constants.CSV_MIME)
+        self.set_header("Content-Type", constants.CSV_MIMETYPE)
         self.set_header("Content-Disposition", 'attachment; filename="orders.csv"')
 
 
@@ -1957,5 +1957,5 @@ class OrdersXlsx(OrdersCsv):
         return utils.XlsxWriter()
 
     def write_finish(self):
-        self.set_header("Content-Type", constants.XLSX_MIME)
+        self.set_header("Content-Type", constants.XLSX_MIMETYPE)
         self.set_header("Content-Disposition", 'attachment; filename="orders.xlsx"')

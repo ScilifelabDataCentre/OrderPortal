@@ -495,7 +495,7 @@ class ApiV1Mixin(object):
     def get_json_body(self):
         "Return the body of the request interpreted as JSON."
         content_type = self.request.headers.get("Content-Type", "")
-        if content_type.startswith(constants.JSON_MIME):
+        if content_type.startswith(constants.JSON_MIMETYPE):
             return json.loads(self.request.body)
         else:
             return {}
