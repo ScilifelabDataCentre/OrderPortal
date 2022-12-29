@@ -108,7 +108,6 @@ def load_settings(filepath=None, log=True):
         kwargs["filemode"] = filemode
     except KeyError:
         pass
-    settings["LOG"] = log
     if log:
         logging.basicConfig(**kwargs)
         logging.info(f"OrderPortal version {constants.VERSION}")
@@ -356,14 +355,6 @@ def timestamp(days=None):
         instant += datetime.timedelta(days=days)
     instant = instant.isoformat()
     return instant[:17] + "%06.3f" % float(instant[17:]) + "Z"
-
-
-def epoch_to_iso(epoch):
-    """Convert the given number of seconds since the epoch
-    to date and time in ISO format.
-    """
-    dt = datetime.datetime.fromtimestamp(float(epoch))
-    return dt.isoformat() + "Z"
 
 
 def today(days=None):

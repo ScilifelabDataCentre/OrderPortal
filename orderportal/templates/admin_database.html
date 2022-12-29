@@ -6,34 +6,32 @@
 {% block body_title %}Database{% end %}
 
 {% block content %}
-<h4>CouchDB database information and access.</h4>
-
-<h3>Search CouchDB database</h3>
+<h3>Search OrderPortal CouchDB database</h3>
 <div class="row">
-  <div class="col-md-6">
-<form action="{{ reverse_url('admin_database') }}"
-      method="GET" role="form" class="form-inline">
-  <div class="form-group">
-    <div class="input-group">
-      <div class="input-group-addon">Find document</div>
-      <input type="text" name="identifier" id="identifier"
-             class="form-control" size="40" placeholder="Identifier"
-             value="{{ identifier }}">
-      <div class="input-group-btn">
-        <button class="btn btn-default" type="submit">
-          <span class="glyphicon glyphicon-search"></span>
-        </button>
+  <div class="col-md-8">
+    <form action="{{ reverse_url('admin_database') }}"
+          method="GET" role="form" class="form-inline">
+      <div class="form-group">
+        <div class="input-group">
+          <div class="input-group-addon">Find document</div>
+          <input type="text" name="identifier" id="identifier"
+                 class="form-control" size="40" placeholder="Identifier"
+                 value="{{ identifier }}">
+          <div class="input-group-btn">
+            <button class="btn btn-default" type="submit">
+              <span class="glyphicon glyphicon-search"></span>
+            </button>
+          </div>
+        </div>
+        <p class="help-block">
+          Look up document for account email, API key, file name, info name,
+          order identifier or document id.
+        </p>
       </div>
-    </div>
-    <p class="help-block">
-      Look up document for account email, API key, file name, info name,
-      order identifier or document id.
-    </p>
-  </div>
-</form>
+    </form>
   </div>
   {% if doc %}
-  <div class="col-md-5 col-md-offset-1">
+  <div class="col-md col-md-offset-1">
     Found <code>{{ doc['_id'] }}</code>
     <a href="{{ reverse_url('admin_document', doc['_id']) }}"
        class="btn btn-primary">
@@ -43,10 +41,10 @@
   {% end %}
 </div>
 
-<h3>Document counts in the OrderPortal database</h3>
+<h3>Document counts in the OrderPortal CouchDBdatabase</h3>
 {% module Json(counts) %}
 
-<h3>OrderPortal database info</h3>
+<h3>OrderPortal CouchDB database info</h3>
 {% module Json(db_info) %}
 
 <h3>CouchDB server</h3>
