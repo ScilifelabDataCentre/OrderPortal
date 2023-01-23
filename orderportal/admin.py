@@ -20,7 +20,7 @@ from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 
 
-DESIGN_DOC = {
+DESIGN_DOC = {                  # Doctype is 'text', for historical reasons.
     "views": {
         "name": {
             "map": """function(doc) {
@@ -978,7 +978,7 @@ class Document(RequestHandler):
             doc = self.db[id]
         except couchdb2.NotFoundError:
             return self.see_other("admin_database")
-        self.set_header("Content-Type", constants.JSON_MIME)
+        self.set_header("Content-Type", constants.JSON_MIMETYPE)
         self.set_header("Content-Disposition", f'attachment; filename="{id}.json"')
         self.write(json.dumps(doc, ensure_ascii=False, indent=2))
 
@@ -1080,29 +1080,3 @@ class DebugEmail(RequestHandler):
         except NameError:
             pass
         self.see_other("admin_debug_email")
-
-
-class DebugTimezone(RequestHandler):
-    "Debug of timezone handling."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        data = dict(
-            TZ = os.environ.get("TZ"),
-            local_timezone_name = self.get_eval("str(datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo)"),
-            cet_tz = self.get_eval('pytz.timezone("CET")'),
-            dec = self.get_eval('pytz.timezone("CET").localize(datetime.datetime.fromisoformat("2022-12-22 17:00"))'),
-            dec_utc = self.get_eval('pytz.timezone("CET").localize(datetime.datetime.fromisoformat("2022-12-22 17:00")).astimezone(pytz.utc)'),
-            june = self.get_eval('pytz.timezone("CET").localize(datetime.datetime.fromisoformat("2022-06-22 17:00"))'),
-            june_utc = self.get_eval('pytz.timezone("CET").localize(datetime.datetime.fromisoformat("2022-06-22 17:00")).astimezone(pytz.utc)'),
-        )
-        self.render("admin_debug_timezone.html", data=data)
-
-    def get_eval(self, s):
-        try:
-            import datetime
-            import pytz
-            return eval(s)
-        except Exception as error:
-            return str(error)

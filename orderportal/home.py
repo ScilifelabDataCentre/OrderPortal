@@ -166,7 +166,7 @@ class Log(RequestHandler):
         log.pop("_rev")
         log.pop("orderportal_doctype")
         self.write(log)
-        self.set_header("Content-Type", constants.JSON_MIME)
+        self.set_header("Content-Type", constants.JSON_MIMETYPE)
 
 
 class Entity(RequestHandler):

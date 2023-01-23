@@ -29,7 +29,7 @@ class Icon(tornado.web.UIModule):
 
 
 class ContentType(tornado.web.UIModule):
-    "HTML for a content (MIME) type icon."
+    "HTML for a content MIME type icon."
 
     def render(self, content_type):
         url = self.handler.static_url(

@@ -2,11 +2,12 @@
 An order can be a project application, a request, a report, etc.
 """
 
+import datetime
 import os.path
 import re
 import sys
 
-__version__ = "7.2.5"
+__version__ = "7.2.6"
 
 
 class Constants:
@@ -153,45 +154,45 @@ class Constants:
     SUBMITTED = "submitted"
 
     # Content types (MIME types)
-    HTML_MIME = "text/html"
-    JSON_MIME = "application/json"
-    CSV_MIME = "text/csv"
-    ZIP_MIME = "application/zip"
-    TEXT_MIME = "text/plain"
-    BIN_MIME = "application/octet-stream"
-    PDF_MIME = "application/pdf"
-    JPEG_MIME = "image/jpeg"
-    PNG_MIME = "image/png"
-    XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    XLSM_MIME = "application/vnd.ms-excel.sheet.macroEnabled.12"
+    HTML_MIMETYPE = "text/html"
+    JSON_MIMETYPE = "application/json"
+    CSV_MIMETYPE = "text/csv"
+    ZIP_MIMETYPE = "application/zip"
+    TEXT_MIMETYPE = "text/plain"
+    BIN_MIMETYPE = "application/octet-stream"
+    PDF_MIMETYPE = "application/pdf"
+    JPEG_MIMETYPE = "image/jpeg"
+    PNG_MIMETYPE = "image/png"
+    XLSX_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    XLSM_MIMETYPE = "application/vnd.ms-excel.sheet.macroEnabled.12"
 
     # Hard-wired mapping content type -> extension (overriding mimetypes module)
-    MIME_EXTENSIONS = {TEXT_MIME: ".txt",
-                       JPEG_MIME: ".jpg",
-                       XLSM_MIME: ".xlsm",
-                       XLSX_MIME: ".xlsx"}
+    MIMETYPE_EXTENSIONS = {TEXT_MIMETYPE: ".txt",
+                           JPEG_MIMETYPE: ".jpg",
+                           XLSM_MIMETYPE: ".xlsm",
+                           XLSX_MIMETYPE: ".xlsx"}
 
     # Content-type to icon mapping
     CONTENT_TYPE_ICONS = {
-        JSON_MIME: "json.png",
-        CSV_MIME: "csv.png",
-        TEXT_MIME: "text.png",
-        HTML_MIME: "html.png",
-        PDF_MIME: "pdf.png",
-        PNG_MIME: "image.png",
-        JPEG_MIME: "image.png",
+        JSON_MIMETYPE: "json.png",
+        CSV_MIMETYPE: "csv.png",
+        TEXT_MIMETYPE: "text.png",
+        HTML_MIMETYPE: "html.png",
+        PDF_MIMETYPE: "pdf.png",
+        PNG_MIMETYPE: "image.png",
+        JPEG_MIMETYPE: "image.png",
         "application/vnd.ms-excel": "excel.png",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "excel.png",
         "application/vnd.ms-excel": "excel.png",
-        XLSX_MIME: "excel.png",
-        XLSM_MIME: "excel.png",
+        XLSX_MIMETYPE: "excel.png",
+        XLSM_MIMETYPE: "excel.png",
         "application/msword": "word.png",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "word.png",
         "application/vnd.ms-powerpoint": "ppt.png",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation": "ppt.png",
     }
     DEFAULT_CONTENT_TYPE_ICON = "binary.png"
-    VIEWABLE_CONTENT_TYPES = set([TEXT_MIME, JSON_MIME, CSV_MIME, PDF_MIME])
+    VIEWABLE_CONTENT_TYPES = set([TEXT_MIMETYPE, JSON_MIMETYPE, CSV_MIMETYPE, PDF_MIMETYPE])
 
     COUNTRIES = dict([
         ("AF", "Afghanistan"),
@@ -424,6 +425,8 @@ settings = dict(
     SITE_HOST_URL=None,
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
+    # Default timezone to that of the host machine.
+    TIMEZONE=str(datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo),
     DISPLAY_MENU_LIGHT=False,
     DISPLAY_MENU_ITEM_URL=None,
     DISPLAY_MENU_ITEM_TEXT=None,
