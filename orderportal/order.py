@@ -1358,6 +1358,7 @@ class OrderOwner(OrderMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         order = self.get_entity(iuid, doctype=constants.ORDER)
+        colleagues = sorted(self.get_account_colleagues(self.current_user["email"]))
         try:
             self.check_editable(order)
         except ValueError as msg:
@@ -1369,6 +1370,7 @@ class OrderOwner(OrderMixin, RequestHandler):
                 utils.terminology("order"), order["title"] or "[no title]"
             ),
             order=order,
+            colleagues=colleagues
         )
 
     @tornado.web.authenticated
@@ -1388,7 +1390,7 @@ class OrderOwner(OrderMixin, RequestHandler):
                 saver["owner"] = account["email"]
         except tornado.web.MissingArgumentError:
             pass
-        except ValueError as msg:
+        except ValueError as msg: # No such account.
             self.set_error_flash(str(msg))
         self.set_message_flash(
             "Changed owner of {0}.".format(utils.terminology("Order"))
