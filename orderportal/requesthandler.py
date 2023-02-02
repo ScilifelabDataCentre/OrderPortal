@@ -324,8 +324,10 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_texts(self, type):
         "Return all texts of the given type."
-        return [row.doc for row in self.db.view("text", "type", key=type,
-                                                reduce=False, include_docs=True)]
+        result = [row.doc for row in self.db.view("text", "type", key=type,
+                                                  reduce=False, include_docs=True)]
+        result.sort(key=lambda d: d["name"])
+        return result
 
     def get_text(self, type, name):
         """Get the requested text by type and name.
