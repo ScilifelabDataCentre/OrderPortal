@@ -125,20 +125,6 @@ def load_settings(filepath=None, log=True):
             raise ValueError(f"settings['{key}'] has invalid value.")
     if len(settings.get("COOKIE_SECRET", "")) < 10:
         raise ValueError("settings['COOKIE_SECRET'] not set, or too short.")
-    # # Read account messages YAML file.
-    # filepath = os.path.join(settings["SITE_DIR"], settings["ACCOUNT_MESSAGES_FILE"])
-    # logging.info(f"account messages file: {filepath}")
-    # with open(filepath) as infile:
-    #     settings["ACCOUNT_MESSAGES"] = yaml.safe_load(infile) or {}
-    # Set recipients, which are hardwired into the source code.
-    # # Also checks for missing message for a status.
-    # try:
-    #     settings["ACCOUNT_MESSAGES"][constants.PENDING]["recipients"] = ["admin"]
-    #     settings["ACCOUNT_MESSAGES"][constants.ENABLED]["recipients"] = ["user"]
-    #     settings["ACCOUNT_MESSAGES"][constants.DISABLED]["recipients"] = ["user"]
-    #     settings["ACCOUNT_MESSAGES"][constants.RESET]["recipients"] = ["user"]
-    # except KeyError:
-    #     raise ValueError("Account messages file: missing message for statuses")
 
     # Check valid order identifier format; prefix all upper case characters
     if not settings["ORDER_IDENTIFIER_FORMAT"]:
@@ -179,19 +165,6 @@ def load_settings(filepath=None, log=True):
         settings["UNIVERSITIES"] = dict(unis)
     else:
         settings["UNIVERSITIES"] = {}
-
-    # # Read country codes YAML file
-    # filepath = settings.get("COUNTRY_CODES_FILE")
-    # if not filepath:
-    #     settings["COUNTRIES"] = []
-    # else:
-    #     filepath = os.path.join(settings["SITE_DIR"], filepath)
-    #     logging.info(f"country codes file: {filepath}")
-    #     with open(filepath) as infile:
-    #         settings["COUNTRIES"] = yaml.safe_load(infile) or []
-    # settings["COUNTRIES_LOOKUP"] = dict(
-    #     [(c["code"], c["name"]) for c in settings["COUNTRIES"]]
-    # )
 
     # Read subject terms YAML file.
     filepath = settings.get("SUBJECT_TERMS_FILE")

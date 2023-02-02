@@ -1009,7 +1009,7 @@ class Settings(RequestHandler):
             mod_settings["DATABASE_SERVER"] = "".join(url)
         mod_settings[
             "ORDER_MESSAGES"
-        ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}%gt;"
+        ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}&gt;"
         obsolete = False
         for key in mod_settings:
             if key not in parameters["SETTINGS_KEYS"]:
