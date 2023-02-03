@@ -837,7 +837,22 @@ class AccountEdit(AccountMixin, RequestHandler):
             self.see_other("account", account["email"])
 
 
-class Login(RequestHandler):
+class LoginMixin:
+
+    def do_login(self, user):
+        self.set_secure_cookie(
+            constants.USER_COOKIE,
+            account["email"],
+            expires_days=settings["LOGIN_MAX_AGE_DAYS"],
+        )
+        with AccountSaver(doc=account, rqh=self) as saver:
+            saver["login"] = utils.timestamp()  # Set login timestamp.
+
+    def do_logout(self):
+        self.set_secure_cookie(constants.USER_COOKIE, "")
+
+
+class Login(LoginMixin, RequestHandler):
     "Login to a account account. Set a secure cookie."
 
     def get(self):
@@ -894,14 +909,8 @@ class Login(RequestHandler):
             msg = "Account is disabled. Contact the admin."
             self.see_other("home", error=msg)
             return
-        self.set_secure_cookie(
-            constants.USER_COOKIE,
-            account["email"],
-            expires_days=settings["LOGIN_MAX_AGE_DAYS"],
-        )
         logging.info(f"Basic auth login: account {account['email']}")
-        with AccountSaver(doc=account, rqh=self) as saver:
-            saver["login"] = utils.timestamp()  # Set login timestamp.
+        self.do_login(account)
         if account.get("update_info"):
             self.see_other(
                 "account_edit",
@@ -913,17 +922,16 @@ class Login(RequestHandler):
         # But seems to work anyway.
         self.see_other("home")
 
-
-class Logout(RequestHandler):
+class Logout(LoginMixin, RequestHandler):
     "Logout; unset the secure cookie, and invalidate login session."
 
     @tornado.web.authenticated
     def post(self):
-        self.set_secure_cookie(constants.USER_COOKIE, "")
+        self.do_logout()
         self.see_other("home")
 
 
-class Reset(RequestHandler):
+class Reset(LoginMixin, RequestHandler):
     "Reset the password of an account."
 
     def get(self):
@@ -963,9 +971,9 @@ class Reset(RequestHandler):
                         code=account["code"],
                     )
                     saver.send(self.get_recipients(text, account))
-                    # Log out the user if not staff.
-                    if self.current_user and not self.is_staff():
-                        self.set_secure_cookie(constants.USER_COOKIE, "")
+                    # Log out the user if same as the account that was reset.
+                    if self.current_user == account:
+                        self.do_logout()
             except KeyError as error:
                 self.see_other("home", message=str(error))
             except ValueError as error:
@@ -977,7 +985,7 @@ class Reset(RequestHandler):
                 )
 
 
-class Password(RequestHandler):
+class Password(LoginMixin, RequestHandler):
     "Set the password of a account account; requires a code."
 
     def get(self):
@@ -997,10 +1005,8 @@ class Password(RequestHandler):
         if not self.is_staff() and (account.get("code") != self.get_argument("code")):
             self.see_other(
                 "home",
-                error="Either the email address or the code"
-                + " for setting password was wrong."
-                + " Try to request a new code using the"
-                + " 'Reset password' button.",
+                error="Either the email address or the code for setting password was"
+                " wrong.Try to request a new code using the 'Reset password' button."
             )
             return
         password = self.get_argument("password", "")
@@ -1021,9 +1027,11 @@ class Password(RequestHandler):
                 code=self.get_argument("code") or "",
                 error="Password confirmation failed. Not the same!",
             )
-            return
+
         with AccountSaver(doc=account, rqh=self) as saver:
             saver.set_password(password)
+        if not self.current_user:
+            self.do_login(account)
         self.see_other("home", message="Password set.")
 
 
