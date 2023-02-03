@@ -1935,11 +1935,15 @@ class OrdersCsv(Orders):
                 ", ".join(order.get("tags", [])),
             ]
             for f in parameters["ORDERS_LIST_FIELDS"]:
-                row.append(order["fields"].get(f))
+                value = order["fields"].get(f)
+                if isinstance(value, list):
+                    value = ", ".join([str(i) for i in value])
+                row.append(value)
             row.append(order["status"])
             for s in parameters["ORDERS_LIST_STATUSES"]:
                 row.append(order["history"].get(s))
             row.append(order["modified"])
+            print(row)
             writer.writerow(row)
         self.write(writer.getvalue())
         self.write_finish()
