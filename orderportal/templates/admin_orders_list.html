@@ -30,71 +30,96 @@
 {% end %}
 
 <table class="table">
-  <tr>
-    <th>Parameter</th>
-    <th>Description</th>
-    <th>Value</th>
-  </tr>
-  <tr>
-    <th>Order tags</th>
-    <td>
-      Display the tags for an order in the orders list.
-    </td>
-    <td>{{ parameters['ORDERS_LIST_TAGS'] and 'Yes' or 'No' }}</td>
-  </tr>
-  <tr>
-    <th>Statuses</th>
-    <td>
-      Display a column for each given order status, showing the date
-      for when the order reached it.
-    </td>
-    <td>{{ ', '.join(parameters['ORDERS_LIST_STATUSES']) }}</td>
-  </tr>
-  <tr>
-    <th>Fields</th>
-    <td>
-      Display a column for each order field given by its identifier.
-      The field does not have to exist in every order.
-    </td>
-    <td>{{ ', '.join(parameters['ORDERS_LIST_FIELDS']) }}</td>
-  </tr>
-  <tr>
-    <th>Max most recent</th>
-    <td>
-      The maximum number of most recent orders fetched by default for the orders list.
-    </td>
-    <td>{{ parameters['DISPLAY_ORDERS_MOST_RECENT'] }}</td>
-  </tr>
-  <tr>
-    <th>Default order column</th>
-    <td>
-      The column used for the default ordering in the orders list.
-    </td>
-    <td>{{ parameters['DEFAULT_ORDER_COLUMN'] }}</td>
-  </tr>
-  <tr>
-    <th>Default order sort</th>
-    <td>
-      The default sort direction for the default ordering in the orders list.
-    </td>
-    <td>{{ parameters['DEFAULT_ORDER_SORT'] }}</td>
-  </tr>
-  <tr>
-    <th>Field filters</th>
-    <td>
-      Filters based on field values in orders.
-    </td>
-    <td>
-      {% for f in parameters['ORDERS_FILTER_FIELDS'] %}
-      <p>
-        <b>{{ f['identifier'] }}</b>
-        <br>
-        label: {{ f.get('label') or '-' }}
-        <br>
-        values: {{ ", ".join(f['values']) }}
-      </p>
-      {% end %}
-    </td>
-  </tr>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Description</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Order owner university</th>
+      <td>
+        Display the university of the owner.
+      </td>
+      <td>{{ parameters['ORDERS_LIST_OWNER_UNIVERSITY'] and 'Yes' or 'No' }}</td>
+    </tr>
+    <tr>
+      <th>Order owner department</th>
+      <td>
+        Display the department of the owner.
+      </td>
+      <td>{{ parameters['ORDERS_LIST_OWNER_DEPARTMENT'] and 'Yes' or 'No' }}</td>
+    </tr>
+    <tr>
+      <th>Order owner gender</th>
+      <td>
+        Display the gender of the owner.
+      </td>
+      <td>{{ parameters['ORDERS_LIST_OWNER_GENDER'] and 'Yes' or 'No' }}</td>
+    </tr>
+    <tr>
+      <th>Order tags</th>
+      <td>
+        Display the tags for an order in the orders list.
+      </td>
+      <td>{{ parameters['ORDERS_LIST_TAGS'] and 'Yes' or 'No' }}</td>
+    </tr>
+    <tr>
+      <th>Statuses</th>
+      <td>
+        Display a column for each given order status, showing the date
+        for when the order reached it.
+      </td>
+      <td>{{ ', '.join(parameters['ORDERS_LIST_STATUSES']) }}</td>
+    </tr>
+    <tr>
+      <th>Fields</th>
+      <td>
+        Display a column for each order field given by its identifier.
+        The field does not have to exist in every order.
+      </td>
+      <td>{{ ', '.join(parameters['ORDERS_LIST_FIELDS']) }}</td>
+    </tr>
+    <tr>
+      <th>Max most recent</th>
+      <td>
+        The maximum number of most recent orders fetched by default for the orders list.
+      </td>
+      <td>{{ parameters['DISPLAY_ORDERS_MOST_RECENT'] }}</td>
+    </tr>
+    <tr>
+      <th>Default order column</th>
+      <td>
+        The column used for the default ordering in the orders list.
+      </td>
+      <td>{{ parameters['DEFAULT_ORDER_COLUMN'] }}</td>
+    </tr>
+    <tr>
+      <th>Default order sort</th>
+      <td>
+        The default sort direction for the default ordering in the orders list.
+      </td>
+      <td>{{ parameters['DEFAULT_ORDER_SORT'] }}</td>
+    </tr>
+    <tr>
+      <th>Field filters</th>
+      <td>
+        Filters based on field values in orders.
+      </td>
+      <td>
+        {% for f in parameters['ORDERS_FILTER_FIELDS'] %}
+        <p>
+          <b>{{ f['identifier'] }}</b>
+          <br>
+          label: {{ f.get('label') or '-' }}
+          <br>
+          values: {{ ", ".join(f['values']) }}
+        </p>
+        {% end %}
+      </td>
+    </tr>
+  </tbody>
 </table>
 {% end %} {# block main_content #}

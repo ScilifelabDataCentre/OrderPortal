@@ -491,8 +491,8 @@ def update_meta_documents(db):
             saver["transitions"] = parameters["ORDER_TRANSITIONS"]
         logging.info("saved updated order transitions to database")
 
-    # As of version 7.0.3, the list of order statuses to show in
-    # the order list is stored in the database, not in the settings file.
+    # As of version 7.0.3, items to show in the order list is stored
+    # in the database, not in the settings file.
     if "orders_list" not in db:
         with MetaSaver(db=db) as saver:
             saver.set_id("orders_list")
@@ -654,6 +654,9 @@ def load_parameters(db):
     logging.info("loaded order statuses from database into 'parameters'")
 
     doc = db["orders_list"]
+    parameters["ORDERS_LIST_OWNER_UNIVERSITY"] = doc.get("owner_university", False)
+    parameters["ORDERS_LIST_OWNER_DEPARTMENT"] = doc.get("owner_department", False)
+    parameters["ORDERS_LIST_OWNER_GENDER"] = doc.get("owner_gender", False)
     parameters["ORDERS_LIST_TAGS"] = doc["tags"]
     parameters["ORDERS_LIST_STATUSES"] = doc["statuses"]
     parameters["ORDERS_LIST_FIELDS"] = doc["fields"]
@@ -854,10 +857,15 @@ class OrdersListEdit(RequestHandler):
         self.check_admin()
         doc = self.db["orders_list"]
         with MetaSaver(doc=doc, rqh=self) as saver:
-            saver["tags"] = utils.to_bool(self.get_argument("orders_list_tags", False))
-            saver["statuses"] = [s for s in self.get_arguments("orders_list_statuses")
+            saver["owner_university"] = utils.to_bool(self.get_argument("owner_university", False))
+            saver["owner_department"] = utils.to_bool(self.get_argument("owner_department", False))
+            if parameters.get("ACCOUNT_FUNDER_INFO"):
+                if parameters.get("ACCOUNT_FUNDER_INFO_GENDER"):
+                    saver["owner_gender"] = utils.to_bool(self.get_argument("owner_gender", False))
+            saver["tags"] = utils.to_bool(self.get_argument("tags", False))
+            saver["statuses"] = [s for s in self.get_arguments("statuses")
                                  if s in parameters["ORDER_STATUSES_LOOKUP"]]
-            saver["fields"] = self.get_argument("orders_list_fields", "").strip().split()
+            saver["fields"] = self.get_argument("fields", "").strip().split()
             # Lookup of filters with identifier as key.
             filters = dict([(f["identifier"], f) for f in doc["filters"]])
             # Delete specified fields.

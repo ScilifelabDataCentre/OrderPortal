@@ -875,8 +875,8 @@ class OrderApiV1Mixin(ApiV1Mixin):
                         "order_file", order["_id"], filename
                     ),
                 )
-        # XXX Terrible kludge! Converts binary keys and values to string.
-        # XXX A Python3 issue, possible due to bad old CouchDB interface.
+        # Terrible kludge! Converts binary keys and values to string.
+        # A Python3 issue, possible due to bad old CouchDB interface.
         return json.loads(json.dumps(data))
 
 
@@ -1113,7 +1113,7 @@ class OrderCsv(OrderMixin, RequestHandler):
         writer.writerow(("", "University", account.get("university") or "-"))
         writer.writerow(("", "Department", account.get("department") or "-"))
         writer.writerow(("", "PI", account.get("pi") and "Yes" or "No"))
-        if settings.get("ACCOUNT_FUNDER_INFO") and settings.get(
+        if parameters.get("ACCOUNT_FUNDER_INFO") and parameters.get(
             "ACCOUNT_FUNDER_INFO_GENDER"
         ):
             writer.writerow(("", "Gender", account.get("gender", "-").capitalize()))
@@ -1910,8 +1910,10 @@ class OrdersCsv(Orders):
             "Owner",
             "Owner name",
             "Owner URL",
-            "Tags",
         ]
+# XXX
+#        if parameters
+        row.append("Tags")
         row.extend(parameters["ORDERS_LIST_FIELDS"])
         row.append("Status")
         row.extend([s.capitalize() for s in parameters["ORDERS_LIST_STATUSES"]])
@@ -1943,7 +1945,6 @@ class OrdersCsv(Orders):
             for s in parameters["ORDERS_LIST_STATUSES"]:
                 row.append(order["history"].get(s))
             row.append(order["modified"])
-            print(row)
             writer.writerow(row)
         self.write(writer.getvalue())
         self.write_finish()
