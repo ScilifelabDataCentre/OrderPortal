@@ -302,7 +302,6 @@
   </tr>
   {% end %} {# if settings['ACCOUNT_ORCID_INFO'] #}
 
-  {% if settings.get('ACCOUNT_FUNDER_INFO') %}
   {% if settings.get('ACCOUNT_FUNDER_INFO_GENDER') %}
   <tr>
     <th>Gender</th>
@@ -335,7 +334,6 @@
     </td>
   </tr>
   {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] #}
-  {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO') #}
 
   <tr>
     <th>Postal address</th>

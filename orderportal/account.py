@@ -895,7 +895,6 @@ class Login(LoginMixin, RequestHandler):
                     saver.erase_password()
                 msg = "Too many failed login attempts: Your account has been disabled. Contact the admin"
                 # Prepare email message about being disabled.
-                # text = settings["ACCOUNT_MESSAGES"][constants.DISABLED]
                 text = parameters[constants.ACCOUNT][constants.DISABLED]
                 with MessageSaver(rqh=self) as saver:
                     saver.create(text)
@@ -1177,7 +1176,6 @@ class AccountEnable(RequestHandler):
         with AccountSaver(account, rqh=self) as saver:
             saver["status"] = constants.ENABLED
             saver.reset_password()
-        # text = settings["ACCOUNT_MESSAGES"][constants.ENABLED]
         text = parameters[constants.ACCOUNT][constants.ENABLED]
         with MessageSaver(rqh=self) as saver:
             saver.create(

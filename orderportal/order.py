@@ -1113,9 +1113,7 @@ class OrderCsv(OrderMixin, RequestHandler):
         writer.writerow(("", "University", account.get("university") or "-"))
         writer.writerow(("", "Department", account.get("department") or "-"))
         writer.writerow(("", "PI", account.get("pi") and "Yes" or "No"))
-        if parameters.get("ACCOUNT_FUNDER_INFO") and parameters.get(
-            "ACCOUNT_FUNDER_INFO_GENDER"
-        ):
+        if parameters.get("ACCOUNT_FUNDER_INFO_GENDER"):
             writer.writerow(("", "Gender", account.get("gender", "-").capitalize()))
         writer.writerow(("Status", order["status"]))
         for i, s in enumerate(parameters["ORDER_STATUSES"]):
@@ -1677,7 +1675,7 @@ class Orders(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
-        # Ordinary users are not allowed to see the overall orders list.
+        # Ordinary users are not allowed to see the complete orders list.
         if not self.is_staff():
             self.see_other("account_orders", self.current_user["email"])
             return
@@ -1693,6 +1691,19 @@ class Orders(RequestHandler):
             all_count = 0
         else:
             all_count = r.value
+        # Account info lookups; dummies if not used.
+        if parameters["ORDERS_LIST_OWNER_UNIVERSITY"]:
+            accounts_university = self.get_accounts_university()
+        else:
+            accounts_university = None
+        if parameters["ORDERS_LIST_OWNER_DEPARTMENT"]:
+            accounts_department = self.get_accounts_department()
+        else:
+            accounts_department = None
+        if parameters["ORDERS_LIST_OWNER_GENDER"]:
+            accounts_gender = self.get_accounts_gender()
+        else:
+            accounts_gender = None
         # Default ordering by the 'modified' column.
         if parameters["DEFAULT_ORDER_COLUMN"] == "modified":
             order_column = (
@@ -1701,6 +1712,12 @@ class Orders(RequestHandler):
                 + len(parameters["ORDERS_LIST_FIELDS"]) # list
                 + len(parameters["ORDERS_LIST_STATUSES"]) # list
             )
+            if parameters["ORDERS_LIST_OWNER_UNIVERSITY"]:
+                order_column += 1
+            if parameters["ORDERS_LIST_OWNER_DEPARTMENT"]:
+                order_column += 1
+            if parameters["ORDERS_LIST_OWNER_GENDER"]:
+                order_column += 1
         # Otherwise default ordering by the identifier column.
         else:
             order_column = 0
@@ -1713,8 +1730,26 @@ class Orders(RequestHandler):
             orders=self.get_orders(),
             order_column=order_column,
             account_names=self.get_account_names(),
+            accounts_university=accounts_university,
+            accounts_department=accounts_department,
+            accounts_gender=accounts_gender,
             all_count=all_count,
         )
+
+    def get_accounts_university(self):
+        "Get dictionary with email as key and university as value."
+        return dict([(email, account.get("university"))
+                     for email, account in self.get_all_accounts().items()])
+
+    def get_accounts_department(self):
+        "Get dictionary with email as key and department as value."
+        return dict([(email, account.get("department"))
+                     for email, account in self.get_all_accounts().items()])
+
+    def get_accounts_gender(self):
+        "Get dictionary with email as key and gender as value."
+        return dict([(email, account.get("gender"))
+                     for email, account in self.get_all_accounts().items()])
 
     def set_filter(self):
         "Set the filter parameters dictionary."
@@ -1911,8 +1946,16 @@ class OrdersCsv(Orders):
             "Owner name",
             "Owner URL",
         ]
-# XXX
-#        if parameters
+        # Account info lookups for optional columns.
+        if parameters["ORDERS_LIST_OWNER_UNIVERSITY"]:
+            row.append("Owner university")
+            accounts_university = self.get_accounts_university()
+        if parameters["ORDERS_LIST_OWNER_DEPARTMENT"]:
+            row.append("Owner department")
+            accounts_department = self.get_accounts_department()
+        if parameters["ORDERS_LIST_OWNER_GENDER"]:
+            row.append("Owner gender")
+            accounts_gender = self.get_accounts_gender()
         row.append("Tags")
         row.extend(parameters["ORDERS_LIST_FIELDS"])
         row.append("Status")
@@ -1934,8 +1977,14 @@ class OrdersCsv(Orders):
                 order["owner"],
                 account_names[order["owner"]],
                 self.absolute_reverse_url("account", order["owner"]),
-                ", ".join(order.get("tags", [])),
             ]
+            if parameters["ORDERS_LIST_OWNER_UNIVERSITY"]:
+                row.append(accounts_university[order["owner"]])
+            if parameters["ORDERS_LIST_OWNER_DEPARTMENT"]:
+                row.append(accounts_department[order["owner"]])
+            if parameters["ORDERS_LIST_OWNER_GENDER"]:
+                row.append(accounts_gender[order["owner"]])
+            row.append(", ".join(order.get("tags", [])))
             for f in parameters["ORDERS_LIST_FIELDS"]:
                 value = order["fields"].get(f)
                 if isinstance(value, list):

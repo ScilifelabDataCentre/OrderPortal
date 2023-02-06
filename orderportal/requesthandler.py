@@ -429,7 +429,7 @@ class RequestHandler(tornado.web.RequestHandler):
         return self.current_user["email"] in self.get_account_colleagues(email)
 
     def get_account_names(self, emails=[]):
-        """Get dictionary with emails as key and names (last, first) as value.
+        """Get dictionary with email as key and name (last, first) as value.
         If emails is None, then for all accounts."""
         result = {}
         if emails:
@@ -447,6 +447,17 @@ class RequestHandler(tornado.web.RequestHandler):
             for row in self.db.view("account", "email"):
                 result[row.key] = utils.get_account_name(value=row.value)
         return result
+
+    def get_all_accounts(self):
+        "Get all accounts docs, from cache if it exists, otherwise create it."
+        try:
+            return self.cache_all_accounts
+        except AttributeError:
+            logging.info("Getting all accounts into request cache.")
+            self.cache_all_accounts = {}
+            for row in self.db.view("account", "email", include_docs=True):
+                self.cache_all_accounts[row.key] = row.doc
+            return self.cache_all_accounts
 
     def get_forms_lookup(self):
         "Get all forms as a lookup with form iuid as key, form doc as value."

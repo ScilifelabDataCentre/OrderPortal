@@ -306,11 +306,6 @@ def main():
             name="admin_orders_list",
         ),
         url(
-            r"/admin/orders_list/edit",
-            orderportal.admin.OrdersListEdit,
-            name="admin_orders_list_edit",
-        ),
-        url(
             r"/admin/order_status/([^/]+)/enable",
             orderportal.admin.OrderStatusEnable,
             name="order_status_enable",

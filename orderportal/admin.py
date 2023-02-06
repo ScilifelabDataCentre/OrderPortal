@@ -836,21 +836,12 @@ class OrderTransitionsEdit(RequestHandler):
 
 
 class OrdersList(RequestHandler):
-    "Display orders list parameters."
+    "Orders list configuration."
 
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
         self.render("admin_orders_list.html")
-
-
-class OrdersListEdit(RequestHandler):
-    "Edit orders list parameters."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        self.render("admin_orders_list_edit.html")
 
     @tornado.web.authenticated
     def post(self):
@@ -859,9 +850,8 @@ class OrdersListEdit(RequestHandler):
         with MetaSaver(doc=doc, rqh=self) as saver:
             saver["owner_university"] = utils.to_bool(self.get_argument("owner_university", False))
             saver["owner_department"] = utils.to_bool(self.get_argument("owner_department", False))
-            if parameters.get("ACCOUNT_FUNDER_INFO"):
-                if parameters.get("ACCOUNT_FUNDER_INFO_GENDER"):
-                    saver["owner_gender"] = utils.to_bool(self.get_argument("owner_gender", False))
+            if settings.get("ACCOUNT_FUNDER_INFO_GENDER"):
+                saver["owner_gender"] = utils.to_bool(self.get_argument("owner_gender", False))
             saver["tags"] = utils.to_bool(self.get_argument("tags", False))
             saver["statuses"] = [s for s in self.get_arguments("statuses")
                                  if s in parameters["ORDER_STATUSES_LOOKUP"]]
@@ -913,6 +903,7 @@ class OrdersListEdit(RequestHandler):
             else:
                 saver["default_order_sort"] = "desc"
         load_parameters(self.db)
+        self.set_message_flash("Saved configuration.")
         self.see_other("admin_orders_list")
 
 

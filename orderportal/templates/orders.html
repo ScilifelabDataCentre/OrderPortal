@@ -92,6 +92,15 @@
           {% if parameters['ORDERS_LIST_TAGS'] %}
           <th width="5%">Keywords (tags)</th>
           {% end %}
+          {% if parameters['ORDERS_LIST_OWNER_UNIVERSITY'] %}
+          <th>Owner university</th>
+          {% end %}
+          {% if parameters['ORDERS_LIST_OWNER_DEPARTMENT'] %}
+          <th>Owner department</th>
+          {% end %}
+          {% if parameters['ORDERS_LIST_OWNER_GENDER'] %}
+          <th>Owner gender</th>
+          {% end %}
           {% for f in parameters['ORDERS_LIST_FIELDS'] %}
           <th>{{ f.replace('_', ' ').capitalize() }}</th>
           {% end %}
@@ -118,6 +127,15 @@
               {{ account_names[order['owner']] }}
             </a>
           </td>
+          {% if parameters['ORDERS_LIST_OWNER_UNIVERSITY'] %}
+          <td>{% module NoneStr(accounts_university[order['owner']], undef='-') %}</td>
+          {% end %}
+          {% if parameters['ORDERS_LIST_OWNER_DEPARTMENT'] %}
+          <td>{% module NoneStr(accounts_department[order['owner']], undef='-') %}</td>
+          {% end %}
+          {% if parameters['ORDERS_LIST_OWNER_GENDER'] %}
+          <td>{% module NoneStr(accounts_gender[order['owner']], undef='-') %}</td>
+          {% end %}
           {% if parameters['ORDERS_LIST_TAGS'] %}
           <td>{% module Tags(order.get('tags', [])) %}</td>
           {% end %}
