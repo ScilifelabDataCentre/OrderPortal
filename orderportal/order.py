@@ -821,7 +821,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
                 ]
             )
         if account_names is None:
-            account_names = self.get_account_names([order["owner"]])
+            account_names = self.get_accounts_name([order["owner"]])
         data["owner"] = dict(
             email=order["owner"],
             name=account_names.get(order["owner"]),
@@ -983,7 +983,7 @@ class Order(OrderMixin, RequestHandler):
             "order.html",
             title="{0} '{1}'".format(utils.terminology("Order"), order["title"]),
             order=order,
-            account_names=self.get_account_names([order["owner"]]),
+            account_names=self.get_accounts_name([order["owner"]]),
             status=parameters["ORDER_STATUSES_LOOKUP"][order["status"]],
             form=form,
             fields=form["fields"],
@@ -1107,7 +1107,10 @@ class OrderCsv(OrderMixin, RequestHandler):
         writer.writerow(("", "Version", form.get("version") or "-"))
         writer.writerow(("", "IUID", form["_id"]))
         account = self.get_account(order["owner"])
-        writer.writerow(("Owner", "Name", utils.get_account_name(account)))
+        name = ", ".join([n for n in [account.get("last_name"),
+                                      account.get("first_name")]
+                          if n])
+        writer.writerow(("Owner", "Name", name))
         writer.writerow(("", "URL", URL("account", account["email"])))
         writer.writerow(("", "Email", order["owner"]))
         writer.writerow(("", "University", account.get("university") or "-"))
@@ -1180,7 +1183,7 @@ class OrderCsv(OrderMixin, RequestHandler):
     def write_finish(self, order):
         self.set_header("Content-Type", constants.CSV_MIMETYPE)
         filename = order.get("identifier") or order["_id"]
-        self.set_header(f"Content-Disposition", 'attachment; filename="{filename}.csv"')
+        self.set_header("Content-Disposition", f'attachment; filename="{filename}.csv"')
 
 
 class OrderXlsx(OrderCsv):
@@ -1729,7 +1732,7 @@ class Orders(RequestHandler):
             filter=self.filter,
             orders=self.get_orders(),
             order_column=order_column,
-            account_names=self.get_account_names(),
+            account_names=self.get_accounts_name(),
             accounts_university=accounts_university,
             accounts_department=accounts_department,
             accounts_gender=accounts_gender,
@@ -1907,7 +1910,7 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
             api=dict(href=URL("orders_api")), display=dict(href=URL("orders"))
         )
         # Get account names and forms lookups once only.
-        account_names = self.get_account_names()
+        account_names = self.get_accounts_name()
         forms_lookup = self.get_forms_lookup()
         result["items"] = []
         for order in self.get_orders():
@@ -1962,7 +1965,7 @@ class OrdersCsv(Orders):
         row.extend([s.capitalize() for s in parameters["ORDERS_LIST_STATUSES"]])
         row.append("Modified")
         writer.writerow(row)
-        account_names = self.get_account_names()
+        account_names = self.get_accounts_name()
         forms_lookup = self.get_forms_lookup()
         for order in self.get_orders():
             form = forms_lookup[order["form"]]

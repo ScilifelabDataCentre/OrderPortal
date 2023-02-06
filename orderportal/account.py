@@ -135,7 +135,9 @@ class Accounts(RequestHandler):
         counts = dict([(r.key[0], r.value) for r in view])
         for account in accounts:
             account["order_count"] = counts.get(account["email"], 0)
-            account["name"] = utils.get_account_name(account=account)
+            account["name"] = ", ".join([n for n in [account.get("last_name"),
+                                                     account.get("first_name")]
+                                         if n])
         return accounts
 
     def filter_by_university(self, university, accounts=None):
@@ -608,7 +610,7 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
             orders=orders,
             account=account,
             order_column=order_column,
-            account_names=self.get_account_names(),
+            account_names=self.get_accounts_name(),
             any_groups=bool(self.get_account_groups(account["email"])),
         )
 
@@ -628,7 +630,7 @@ class AccountOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandler):
             self.check_readable(account)
         except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        account_names = self.get_account_names()
+        account_names = self.get_accounts_name()
         forms_lookup = self.get_forms_lookup()
         data = utils.get_json(URL("account_orders", account["email"]), "account orders")
         data["links"] = dict(
@@ -699,7 +701,7 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandl
             self.check_readable(account)
         except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        account_names = self.get_account_names()
+        account_names = self.get_accounts_name()
         forms_lookup = self.get_forms_lookup()
         data = utils.get_json(
             URL("account_groups_orders_api", account["email"]), "account groups orders"
@@ -908,7 +910,7 @@ class Login(LoginMixin, RequestHandler):
             msg = "Account is disabled. Contact the admin."
             self.see_other("home", error=msg)
             return
-        logging.info(f"Basic auth login: account {account['email']}")
+        logging.debug(f"Basic auth login: account {account['email']}")
         self.do_login(account)
         if account.get("update_info"):
             self.see_other(

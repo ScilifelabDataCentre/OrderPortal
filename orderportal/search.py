@@ -96,5 +96,5 @@ class Search(RequestHandler):
             "search.html",
             term=orig,
             orders=orders,
-            account_names=self.get_account_names(),
+            account_names=self.get_accounts_name(),
         )

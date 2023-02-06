@@ -30,7 +30,6 @@ class RequestHandler(tornado.web.RequestHandler):
         result["settings"] = settings
         result["parameters"] = parameters
         result["terminology"] = utils.terminology
-        result["get_account_name"] = utils.get_account_name
         result["absolute_reverse_url"] = self.absolute_reverse_url
         result["order_reverse_url"] = self.order_reverse_url
         result["is_staff"] = self.is_staff()
@@ -171,7 +170,7 @@ class RequestHandler(tornado.web.RequestHandler):
         # Check if login session is invalidated.
         if account.get("login") is None:
             raise ValueError
-        logging.info("Session authentication: %s", account["email"])
+        logging.debug("Session authentication: %s", account["email"])
         return account
 
     def get_current_user_basic(self):
@@ -194,7 +193,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 raise ValueError
         except (IndexError, ValueError, TypeError):
             raise ValueError
-        logging.info("Basic auth login: account %s", account["email"])
+        logging.debug("Basic auth login: account %s", account["email"])
         return account
 
     def is_owner(self, entity):
@@ -428,7 +427,7 @@ class RequestHandler(tornado.web.RequestHandler):
             return False
         return self.current_user["email"] in self.get_account_colleagues(email)
 
-    def get_account_names(self, emails=[]):
+    def get_accounts_name(self, emails=[]):
         """Get dictionary with email as key and name (last, first) as value.
         If emails is None, then for all accounts."""
         result = {}
@@ -441,11 +440,11 @@ class RequestHandler(tornado.web.RequestHandler):
                 except IndexError:
                     name = "[unknown]"
                 else:
-                    name = utils.get_account_name(value=value)
+                    name = ", ".join(reversed(value))
                 result[email] = name
         else:
             for row in self.db.view("account", "email"):
-                result[row.key] = utils.get_account_name(value=row.value)
+                result[row.key] = ", ".join(reversed(row.value))
         return result
 
     def get_all_accounts(self):
@@ -453,7 +452,7 @@ class RequestHandler(tornado.web.RequestHandler):
         try:
             return self.cache_all_accounts
         except AttributeError:
-            logging.info("Getting all accounts into request cache.")
+            logging.debug("Getting all accounts into request cache.")
             self.cache_all_accounts = {}
             for row in self.db.view("account", "email", include_docs=True):
                 self.cache_all_accounts[row.key] = row.doc
