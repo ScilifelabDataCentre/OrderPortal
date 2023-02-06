@@ -2,12 +2,11 @@
 An order can be a project application, a request, a report, etc.
 """
 
-import datetime
 import os.path
 import re
 import sys
 
-__version__ = "7.2.9"
+__version__ = "7.2.10"
 
 
 class Constants:
@@ -425,8 +424,6 @@ settings = dict(
     SITE_HOST_URL=None,
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
-    # Default timezone to that of the host machine.
-    TIMEZONE=str(datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo),
     DISPLAY_MENU_LIGHT=False,
     DISPLAY_MENU_ITEM_URL=None,
     DISPLAY_MENU_ITEM_TEXT=None,
@@ -455,7 +452,6 @@ settings = dict(
     ACCOUNT_POSTAL_INFO=True,
     ACCOUNT_INVOICE_INFO=True,
     ACCOUNT_INVOICE_REF_REQUIRED=False,
-    ACCOUNT_FUNDER_INFO=True,
     ACCOUNT_FUNDER_INFO_GENDER=True,
     ACCOUNT_FUNDER_INFO_GROUP_SIZE=True,
     ACCOUNT_FUNDER_INFO_SUBJECT=True,
