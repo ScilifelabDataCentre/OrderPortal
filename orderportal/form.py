@@ -108,13 +108,13 @@ class Forms(FormMixin, RequestHandler):
         view = self.db.view("form", "modified", descending=True, include_docs=True)
         title = "Recent forms"
         forms = [r.doc for r in view]
-        names = self.get_account_names()
+        account_names = self.get_accounts_name()
         counts = dict([(f["_id"], self.get_order_count(f)) for f in forms])
         self.render(
             "forms.html",
             title=title,
             forms=forms,
-            account_names=names,
+            account_names=account_names,
             order_counts=counts,
         )
 
@@ -547,7 +547,7 @@ class FormOrders(RequestHandler):
             endkey=[iuid],
         )
         orders = [r.doc for r in view]
-        account_names = self.get_account_names()
+        account_names = self.get_accounts_name()
         self.render(
             "form_orders.html", form=form, orders=orders, account_names=account_names
         )

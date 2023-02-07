@@ -58,12 +58,11 @@ META_DESIGN_DOC = {
 }
 
 
-def load_settings(filepath=None, log=True):
+def load_settings(filepath=None):
     """Load the settings. The file path first specified is used.
     1) The argument to this procedure (possibly from a command line argument).
     2) The path environment variable ORDERPORTAL_SETTINGS.
     3) The file '../site/settings.yaml' relative to this directory.
-    If 'log' is True, activate logging according to DEBUG settings.
     Raise IOError if settings file could not be read.
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
@@ -87,35 +86,15 @@ def load_settings(filepath=None, log=True):
 
     # Set logging state
     if settings.get("LOGGING_DEBUG"):
-        kwargs = dict(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG, format=constants.LOGGING_FORMAT)
     else:
-        kwargs = dict(level=logging.INFO)
-    try:
-        kwargs["format"] = settings["LOGGING_FORMAT"]
-    except KeyError:
-        pass
-    try:
-        filepath = settings["LOGGING_FILEPATH"]
-        if not filepath:
-            raise KeyError
-        kwargs["filename"] = filepath
-    except KeyError:
-        pass
-    try:
-        filemode = settings["LOGGING_FILEMODE"]
-        if not filemode:
-            raise KeyError
-        kwargs["filemode"] = filemode
-    except KeyError:
-        pass
-    if log:
-        logging.basicConfig(**kwargs)
-        logging.info(f"OrderPortal version {constants.VERSION}")
-        logging.info(f"ROOT: {constants.ROOT}")
-        logging.info(f"SITE_DIR: {settings['SITE_DIR']}")
-        logging.info(f"settings: {settings['SETTINGS_FILE']}")
-        logging.info(f"logging debug: {settings['LOGGING_DEBUG']}")
-        logging.info(f"tornado debug: {settings['TORNADO_DEBUG']}")
+        logging.basicConfig(level=logging.INFO, format=constants.LOGGING_FORMAT)
+    logging.info(f"OrderPortal version {constants.VERSION}")
+    logging.info(f"ROOT: {constants.ROOT}")
+    logging.info(f"SITE_DIR: {settings['SITE_DIR']}")
+    logging.info(f"settings: {settings['SETTINGS_FILE']}")
+    logging.info(f"logging debug: {settings['LOGGING_DEBUG']}")
+    logging.info(f"tornado debug: {settings['TORNADO_DEBUG']}")
 
     # Check some settings.
     for key in ["BASE_URL", "DATABASE_SERVER", "DATABASE_NAME", "COOKIE_SECRET"]:
@@ -408,26 +387,6 @@ def get_json(id, type):
     result["site"] = settings["SITE_NAME"]
     result["timestamp"] = timestamp()
     return result
-
-
-def get_account_name(account=None, value=None):
-    """Return person name of account as 'lastname, firstname'.
-    'account' is an account document.
-    'value' is a row value from a view.
-    """
-    if account is not None:
-        last_name = account.get("last_name")
-        first_name = account.get("first_name")
-    elif value is not None:
-        first_name, last_name = value
-    if last_name:
-        if first_name:
-            name = "{0}, {1}".format(last_name, first_name)
-        else:
-            name = last_name
-    else:
-        name = first_name
-    return name
 
 
 def check_password(password):

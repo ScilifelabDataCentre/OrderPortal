@@ -16,9 +16,8 @@ import orderportal.admin
 
 @click.group()
 @click.option("-s", "--settings", help="Path of settings YAML file.")
-@click.option("--log", flag_value=True, default=False, help="Enable logging output.")
-def cli(settings, log):         # This is the settings file, not the settings dict.
-    utils.load_settings(settings, log=log)
+def cli(settings):         # This is the settings file, not the settings dict.
+    utils.load_settings(settings)
 
 
 @cli.command()

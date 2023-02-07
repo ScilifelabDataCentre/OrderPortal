@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "7.2.10"
+__version__ = "7.2.12"
 
 
 class Constants:
@@ -41,6 +41,8 @@ class Constants:
 
     DATATABLES_VERSION = "1.10.11"
     DATATABLES_URL = "https://datatables.net/"
+
+    LOGGING_FORMAT="[%(asctime)s] %(levelname)s %(message)s"
 
     # Patterns
     ID_RX = re.compile(r"^[a-z][_a-z0-9]*$", re.IGNORECASE)
@@ -398,9 +400,6 @@ constants = Constants()
 settings = dict(
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
-    LOGGING_FORMAT="%(levelname)s [%(asctime)s] %(message)s",
-    LOGGING_FILEPATH=None,
-    LOGGING_FILEMODE=None,
     BASE_URL="http://localhost:8881/",
     BASE_URL_PATH_PREFIX=None,
     PORT=8881,  # The port used by tornado.
