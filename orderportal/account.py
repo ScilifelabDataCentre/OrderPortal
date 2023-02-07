@@ -841,7 +841,7 @@ class AccountEdit(AccountMixin, RequestHandler):
 
 class LoginMixin:
 
-    def do_login(self, user):
+    def do_login(self, account):
         self.set_secure_cookie(
             constants.USER_COOKIE,
             account["email"],
