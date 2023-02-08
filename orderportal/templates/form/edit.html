@@ -1,0 +1,147 @@
+{# Form edit page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Edit form '{{ form['title'] }}'{% end %}
+{% block body_title %}Edit form {{ form['title'] }}{% end %}
+
+{% block main_content %}
+<form action="{{ reverse_url('form_edit', form['_id']) }}" method="POST" role="form">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+        <label for="title">Title</label>
+        <input type="text" class="form-control"
+               id="title" name="title"
+               value="{{ form.get('title') or ''}}">
+      </div>
+    </div>
+    <span class="help-block">
+      Brief, descriptive title for the form. It is not required to
+      be unique, but it is a good idea to make it so anyway.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-4">
+        <label for="version">Version</label>
+        <input type="text" class="form-control" name="version" id="version"
+               value="{{ form.get('version') or '' }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          The version denotes a minor update of a form. It is optional.
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-12">
+        <label for="description">Description</label>
+        <textarea rows="6" class="form-control"
+                  id="description" name="description"
+                  >{{ form.get('description') or '' }}</textarea>
+        <span class="help-block">
+          The description is displayed in the order creation panel on the
+          home page.
+          <br>
+          (Optional: 
+          <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+          notation may be used to format the text.)
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-12">
+        <label for="instruction">Instruction</label>
+        <textarea rows="6" class="form-control"
+                  id="instruction" name="instruction"
+                  >{{ form.get('instruction') or '' }}</textarea>
+        <span class="help-block">
+          The instruction is displayed at the top of the order edit page.
+          <br>
+          (Optional: 
+          <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+          notation may be used to format the text.)
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-12">
+        <label for="disclaimer">Disclaimer</label>
+        <textarea rows="6" class="form-control"
+                  id="disclaimer" name="disclaimer"
+                  >{{ form.get('disclaimer') or '' }}</textarea>
+        <span class="help-block">
+          The disclaimer is displayed at the bottom of the order edit page,
+          and in the header part of the order view page.
+          <br>
+          (Optional: 
+          <a href="{{ settings['MARKDOWN_URL'] }}" target="_blank">Markdown</a>
+          notation may be used to format the text.)
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-2">
+        <label for="ordinal">Ordinal</label>
+        <input type="text" class="form-control" name="ordinal" id="ordinal"
+               value="{{ form.get('ordinal') or 0 }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <span class="help-block">
+          Integer value determining order of forms in display for users.
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-success btn-block">
+          <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+      </div>
+    </div>
+  </div>
+
+</form>
+
+<form action="{{ reverse_url('form', form['_id']) }}"
+      method="GET" role="form" style="margin-top: 20px;">
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-default btn-block">
+          <span class="glyphicon glyphicon-remove"></span> Cancel</button>
+      </div>
+    </div>
+  </div>
+</form>
+{% end %} {# block main_content #}
+
+{% block javascript_autofocus %}
+<script>
+  $(function(){ $("#title").focus(); });
+</script>
+{% end %}

@@ -28,7 +28,7 @@ class News(RequestHandler):
     "List all news items."
 
     def get(self):
-        self.render("news.html", news_items=self.get_news())
+        self.render("news/all.html", news_items=self.get_news())
 
 
 class NewsCreate(RequestHandler):

@@ -1,0 +1,178 @@
+{# List of all orders; for admin and staff. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}{{ terminology('Orders') }}{% end %}
+{% block body_title %}{{ terminology('Orders') }}{% end %}
+
+{% block body_header_alt_format %}
+<a href="{{ reverse_url('orders_api', **filter) }}">
+  {% module Icon('json') %} JSON
+</a>
+<br>
+<a href="{{ reverse_url('orders_csv', **filter) }}">
+  {% module Icon('csv') %} CSV
+</a>
+<br>
+<a href="{{ reverse_url('orders_xlsx', **filter) }}">
+  {% module Icon('excel') %} Excel
+</a>
+{% end %}
+
+{% block container %}
+<div class="container-fluid">
+{% end %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-7 col-md-offset-3">
+    <form action="{{ reverse_url('orders', **filter) }}"
+          id="refresh" class="form-inline"
+          method="GET" role="form">
+      <span class="glyphicon glyphicon-filter"></span>
+      <div class="form-group">
+        <label for="form_id">Filter by</label>
+        <select name="form_id" id="form_id" class="form-control refresh">
+          <option value="">[any form]</option>
+          {% for form_id, form in forms_lookup.items() %}
+          {% set sel = form_id == filter.get('form_id') and 'selected' or '' %}
+          <option {{ sel }} value="{{ form_id }}">
+            {{ form['title'] }} {% module Version(form) %}
+          </option>
+          {% end %}
+        </select>
+      </div>
+      {% for f in parameters['ORDERS_FILTER_FIELDS'] %}
+      <div class="form-group">
+        <select name="{{ f['identifier'] }}" class="form-control refresh">
+          <option value="">[any {{ f.get('label') or f['identifier'].replace('_', ' ').capitalize() }}]</option>
+          {% for v in f['values'] %}
+          {% set sel = v == filter.get(f['identifier']) and 'selected' or '' %}
+          <option {{ sel }} value="{{ v }}">{{ v }}</option>
+          {% end %}
+          {% set sel = '__none__' == filter.get(f['identifier']) and 'selected' or '' %}
+          <option {{ sel }} value="__none__">[none]</option>
+        </select>
+      </div>
+      {% end %} {# for f in parameters['ORDERS_FILTER_FIELDS'] #}
+      <div class="form-group">
+        <select name="status" class="form-control refresh">
+          <option value="">[any status]</option>
+          {% for s in parameters['ORDER_STATUSES'] %}
+          {% if s.get("enabled") %}
+          {% set selected = s['identifier'] == filter.get('status') and 'selected' or '' %}
+          <option {{ selected }} value="{{ s['identifier'] }}">{{ s['identifier'].capitalize() }}</option>
+          {% end %} {# if s.get("enabled") #}
+          {% end %} {# for ... #}
+        </select>
+      </div>
+      <div class="form-group">
+        <select name="year" class="form-control refresh">
+          <option value="" {{ not filter.get('year') and 'selected' or '' }}>{{ parameters['DISPLAY_ORDERS_MOST_RECENT'] }} most recent
+          </option>
+          {% for year, count in years %}
+          <option value="{{ year }}"{{ filter.get('year') == year and 'selected' or '' }}>{{ year }} ({{ count }})</option>
+          {% end %}
+          <option value="all" {{ filter.get('year') == 'all' and 'selected' or '' }}>All ({{ all_count }})</option>
+        </select>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <table id="orders" class="table table-striped table-condensed">
+      <thead>
+        <tr>
+          <th>{{ terminology('Order') }}</th>
+          <th width="30%">Title</th>
+          <th>Form</th>
+          <th>Owner</th>
+          {% if parameters['ORDERS_LIST_TAGS'] %}
+          <th width="5%">Keywords (tags)</th>
+          {% end %}
+          {% if parameters['ORDERS_LIST_OWNER_UNIVERSITY'] %}
+          <th>Owner university</th>
+          {% end %}
+          {% if parameters['ORDERS_LIST_OWNER_DEPARTMENT'] %}
+          <th>Owner department</th>
+          {% end %}
+          {% if parameters['ORDERS_LIST_OWNER_GENDER'] %}
+          <th>Owner gender</th>
+          {% end %}
+          {% for f in parameters['ORDERS_LIST_FIELDS'] %}
+          <th>{{ f.replace('_', ' ').capitalize() }}</th>
+          {% end %}
+          <th>Status</th>
+          {% for s in parameters['ORDERS_LIST_STATUSES'] %}
+          <th>{{ s.capitalize() }}</th>
+          {% end %}
+          <th>Modified</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
+          <td>{% module Entity(order, icon=False) %}</td>
+          <td>{{ order.get('title') or '[no title]' }}</td>
+          <td>
+            {% set form = forms_lookup[order['form']] %}
+            <a href="{{ reverse_url('form', order['form']) }}">
+              {{ form['title'] }} {% module Version(form) %}
+            </a>
+          </td>
+          <td>
+            <a href="{{ reverse_url('account', order['owner']) }}">
+              {{ account_names[order['owner']] }}
+            </a>
+          </td>
+          {% if parameters['ORDERS_LIST_OWNER_UNIVERSITY'] %}
+          <td>{% module NoneStr(accounts_university[order['owner']], undef='-') %}</td>
+          {% end %}
+          {% if parameters['ORDERS_LIST_OWNER_DEPARTMENT'] %}
+          <td>{% module NoneStr(accounts_department[order['owner']], undef='-') %}</td>
+          {% end %}
+          {% if parameters['ORDERS_LIST_OWNER_GENDER'] %}
+          <td>{% module NoneStr(accounts_gender[order['owner']], undef='-') %}</td>
+          {% end %}
+          {% if parameters['ORDERS_LIST_TAGS'] %}
+          <td>{% module Tags(order.get('tags', [])) %}</td>
+          {% end %}
+          {% for f in parameters['ORDERS_LIST_FIELDS'] %}
+          <td>
+            {% module NoneStr(order['fields'].get(f), undef='-', list_delimiter=', ') %}
+          </td>
+          {% end %}
+          <td>{% module Icon(order['status'], label=True) %}</td>
+          {% for s in parameters['ORDERS_LIST_STATUSES'] %}
+          <td class="nobr">{% module NoneStr(order['history'].get(s)) %}</td>
+          {% end %}
+          <td class="localtime nobr">{{ order['modified'] }}</td>
+        </tr>
+        {% end %} {# for order in orders #}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% end %} {# block content #}
+
+{% block javascript_code %}
+<script>
+$(function() {
+  $(".refresh").change(function () {
+    $("#refresh").submit();
+  });
+});
+</script>
+
+<script>
+$(function() {
+  $("#orders").DataTable( {
+    "pagingType": "full_numbers",
+    "pageLength": 25,
+    "order": [[{{ order_column }}, "{{ parameters['DEFAULT_ORDER_SORT'] }}"]],
+  });
+});
+</script>
+{% end %} {# block javascript_code #}

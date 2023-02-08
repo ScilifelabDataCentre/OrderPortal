@@ -892,23 +892,6 @@ def convert_to_strings(doc):
 class OrderCreate(OrderMixin, RequestHandler):
     "Create a new order."
 
-    # Do not use auth decorator: Instead show error message if not logged in.
-    def get(self):
-        try:
-            if not self.current_user:
-                raise ValueError(
-                    "You need to be logged in to create {0}."
-                    " Register to get an account if you don't have one.".format(
-                        utils.terminology("order")
-                    )
-                )
-            self.check_creation_enabled()
-            form = self.get_form(self.get_argument("form"), check=True)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
-        else:
-            self.render("order_create.html", form=form)
-
     @tornado.web.authenticated
     def post(self):
         try:
@@ -980,7 +963,7 @@ class Order(OrderMixin, RequestHandler):
             )
             files.sort(key=lambda i: i["filename"].lower())
         self.render(
-            "order.html",
+            "order/display.html",
             title="{0} '{1}'".format(utils.terminology("Order"), order["title"]),
             order=order,
             account_names=self.get_accounts_name([order["owner"]]),
@@ -1309,7 +1292,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             tableinput.append("</tr>")
             tableinputs[field["identifier"]] = "".join(tableinput)
         self.render(
-            "order_edit.html",
+            "order/edit.html",
             title="Edit {0} '{1}'".format(
                 utils.terminology("order"), order["title"] or "[no title]"
             ),
@@ -1366,7 +1349,7 @@ class OrderOwner(OrderMixin, RequestHandler):
             self.see_other("home", error=str(msg))
             return
         self.render(
-            "order_owner.html",
+            "order/owner.html",
             title="Change owner of {0} '{1}'".format(
                 utils.terminology("order"), order["title"] or "[no title]"
             ),
@@ -1571,7 +1554,7 @@ class OrderReport(OrderMixin, RequestHandler):
         content_type = order["_attachments"][constants.SYSTEM_REPORT]["content_type"]
         if report.get("inline"):
             self.render(
-                "order_report.html",
+                "order/report.html",
                 order=order,
                 content=outfile.read(),
                 content_type=content_type,
@@ -1644,7 +1627,7 @@ class OrderReportEdit(OrderMixin, RequestHandler):
     def get(self, iuid):
         self.check_admin()
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.render("order_report_edit.html", order=order)
+        self.render("order/report_edit.html", order=order)
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -1726,7 +1709,7 @@ class Orders(RequestHandler):
             order_column = 0
         self.set_filter()
         self.render(
-            "orders.html",
+            "order/list.html",
             forms_lookup=self.get_forms_lookup(),
             years=years,
             filter=self.filter,

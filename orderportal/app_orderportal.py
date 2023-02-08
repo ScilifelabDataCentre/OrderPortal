@@ -260,8 +260,8 @@ def main():
         ),
         url(
             r"/form/([0-9a-f]{32})/aggregate",
-            orderportal.form.FormOrdersAggregate,
-            name="form_orders_aggregate",
+            orderportal.form.FormAggregate,
+            name="form_aggregate",
         ),
         url(r"/news", orderportal.news.News, name="news"),
         url(r"/new", orderportal.news.NewsCreate, name="news_create"),
@@ -342,7 +342,6 @@ def main():
             name="admin_document"
         ),
         url(r"/admin/settings", orderportal.admin.Settings, name="admin_settings"),
-        url(r"/admin/debug_email", orderportal.admin.DebugEmail, name="admin_debug_email"),
         url(r"/search", orderportal.search.Search, name="search"),
         url(
             r"/site/([^/]+)",

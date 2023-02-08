@@ -82,7 +82,7 @@ class Group(GroupMixin, RequestHandler):
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        self.render("group.html", group=group, allow_edit=self.allow_edit(group))
+        self.render("group/display.html", group=group, allow_edit=self.allow_edit(group))
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -107,7 +107,7 @@ class GroupCreate(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
-        self.render("group_create.html")
+        self.render("group/create.html")
 
     @tornado.web.authenticated
     def post(self):
@@ -135,7 +135,7 @@ class GroupEdit(GroupMixin, RequestHandler):
     def get(self, iuid):
         group = self.get_entity(iuid, doctype=constants.GROUP)
         self.check_editable(group)
-        self.render("group_edit.html", group=group)
+        self.render("group/edit.html", group=group)
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -237,4 +237,4 @@ class Groups(RequestHandler):
             "group", "modified", descending=True, reduce=False, include_docs=True
         )
         groups = [r.doc for r in view]
-        self.render("groups.html", groups=groups)
+        self.render("group/list.html", groups=groups)

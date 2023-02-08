@@ -1,0 +1,211 @@
+{# Order edit page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}
+Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
+{% end %}
+
+{% block body_title %}
+Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
+{% end %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-2 col-md-offset-10">
+    <form action="{{ reverse_url('order', order['_id']) }}"
+          method="GET" role="form" class="allow_leaving_without_question">
+      <div class="form-group" style="margin-bottom: 4px;">
+        <button type="submit" class="btn btn-default btn-block">
+          <span class="glyphicon glyphicon-remove"></span> Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<form action="{{ reverse_url('order_edit', order['_id']) }}"
+      id="__order_edit__" class="allow_leaving_without_question"
+      method="POST" role="form" enctype="multipart/form-data">
+  {% module xsrf_form_html() %}
+
+  {% module Markdown(form.get('instruction')) %}
+
+  <div class="row">
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-lg btn-success btn-block"
+              name="__save__" value="continue">
+        <span class="glyphicon glyphicon-floppy-disk"></span>
+        Save and continue edit
+      </button>
+    </div>
+    <div class="col-md-3">
+      <button type="submit" class="btn btn-lg btn-success btn-block">
+        <span class="glyphicon glyphicon-floppy-save"></span>
+        Save and view
+      </button>
+    </div>
+    <div class="col-md-6">
+      You may save an incomplete {{ terminology('order') }} and resume
+      work on it later.
+      <br>
+      Validity messages (OK, missing value, etc) are updated only when
+      saving the {{ terminology('order') }}.
+    </div>
+  </div>
+
+  <div class="form-group" style="padding-top: 2em;">
+    <div class="row">
+      <div class="col-md-9">
+        <label class="control-label" for="__title__">Title</label>
+        <input type="text" class="form-control"
+               name="__title__" id="__title__"
+               value="{{ order['title'] or '' }}">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Brief, descriptive title for the {{ terminology('order') }},
+        which will be displayed in your list of {{ terminology('orders') }}.
+        It is not required to be unique, but it is a good idea to make
+        it so anyway.
+      </div>
+    </div>
+  </div>
+
+  {% if is_admin %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-9">
+        <label class="control-label" for="__form__">
+          {{ terminology('Order') }} form
+        </label>
+        <p id="__form__" class="form-control-static">
+          {{ form['title'] }} {% module Version(form) %}
+        </p>
+      </div>
+    </div>
+  </div>
+  {% end %}
+
+  {% if settings['ORDER_TAGS'] and (is_staff or settings['ORDER_USER_TAGS']) %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-9">
+        <label class="control-label" for="__tags__">Keywords (tags)</label>
+        {# Terminology in display: keyword; in code: tag #}
+        <textarea class="form-control"
+                  name="__tags__" id="__tags__" rows="2"
+                  >{{ ', '.join(tags) }}</textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Optional keywords (tags) characterizing the {{ terminology('order') }},
+        which are used in searches.
+        <br>
+        A keyword must look like an identifier: It begins with a letter and
+        continues with letters, digits and/or underscore '_'. Blank or comma
+        ',' separates keywords from one another.
+        {% if is_staff %}
+        <br>
+        Staff may use namespace prefixes, e.g. "project_id:P12345".
+        {% end %}
+      </div>
+    </div>
+  </div>
+  {% end %} {# if settings['ORDER_TAGS'] and ... #}
+
+  {% if settings.get('ORDER_LINKS') %}
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-9">
+        <label class="control-label" for="__links__">Links</label>
+        <textarea class="form-control"
+                  name="__links__" id="__links__" rows="2"
+                  >{{ '\n'.join(links) }}</textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Optional links to external resources for the {{ terminology('order') }}.
+        <br>
+        One line per link, with the URL as the first item. The
+        URL is <b>not</b> checked for validity. Any words after the
+        URL are shown as the label for the link.
+      </div>
+    </div>
+  </div>
+  {% end %} {#if settings.get('ORDER_LINKS') #}
+
+  {# Recursion: 'include' cannot be used! #}
+  {% module Template('order/fields_edit.html', fields=fields, order=order, is_staff=is_staff, hidden_fields=hidden_fields, tableinputs=tableinputs) %}
+
+  <div>
+    {# Fields must be allowed to influence others, even when hidden. #}
+    {% for f in hidden_fields %}
+    <input type="hidden" class="visible-if-source"
+           name="{{ f }}" id="{{ f }}" 
+           value="{% module NoneStr(order['fields'].get(f)) %}">
+    {% end %}
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
+      <button type="submit" class="btn btn-lg btn-success btn-block"
+              name="__save__" value="continue">
+        <span class="glyphicon glyphicon-floppy-disk"></span>
+        Save and continue edit
+      </button>
+    </div>
+    <div class="col-md-3">
+      <button type="submit" class="btn btn-lg btn-success btn-block">
+        <span class="glyphicon glyphicon-floppy-save"></span>
+        Save and view
+      </button>
+    </div>
+    <div class="col-md-6">
+      You may save an incomplete {{ terminology('order') }} and resume
+      work on it later.
+      <br>
+      Validity messages (OK, missing value, etc) are updated only when
+      saving the {{ terminology('order') }}.
+    </div>
+  </div>
+
+  {% module Markdown(form.get('disclaimer')) %}
+</form>
+
+<form action="{{ reverse_url('order', order['_id']) }}"
+      method="GET" role="form" style="margin-top: 20px;"
+      class="allow_leaving_without_question">
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-default btn-block">
+          <span class="glyphicon glyphicon-remove"></span> Cancel</button>
+      </div>
+    </div>
+  </div>
+</form>
+{% end %} {# block content #}
+
+{% block javascript_autofocus %}
+<script>
+  $(function(){ $("#__title__").focus(); });
+</script>
+{% end %}
+
+{% block javascript_code %}
+<script src="{{ static_url('field_visible_if.js') }}"></script>
+<script src="{{ static_url('quit_through_submit.js') }}"></script>
+<script src="{{ static_url('table_edit.js') }}"></script>
+<script>
+  $("#__order_edit__").find("a").attr("target", "_blank");
+</script>
+{% for tableid in tableinputs %}
+<script>
+  $("#_table_{{ tableid }}_add_button").click({tableid: "{{ tableid }}", tableinput: "{% raw tableinputs[tableid] %}"}, table_add_row);
+</script>
+{% end %}
+{% end %}

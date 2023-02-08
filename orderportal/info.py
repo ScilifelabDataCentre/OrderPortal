@@ -41,7 +41,7 @@ class Infos(RequestHandler):
         menu_infos = [r.doc for r in view]
         view = self.db.view("info", "name", include_docs=True)
         rest_infos = [r.doc for r in view if r.doc.get("menu") is None]
-        self.render("infos.html", all_infos=menu_infos + rest_infos)
+        self.render("info/list.html", all_infos=menu_infos + rest_infos)
 
 
 class InfoCreate(RequestHandler):
@@ -50,7 +50,7 @@ class InfoCreate(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("info_create.html")
+        self.render("info/create.html")
 
     @tornado.web.authenticated
     def post(self):
@@ -82,7 +82,7 @@ class Info(RequestHandler):
 
     def get(self, name):
         info = self.get_entity_view("info", "name", name)
-        self.render("info.html", info=info)
+        self.render("info/display.html", info=info)
 
     @tornado.web.authenticated
     def post(self, name):
@@ -108,7 +108,7 @@ class InfoEdit(RequestHandler):
     def get(self, name):
         self.check_admin()
         info = self.get_entity_view("info", "name", name)
-        self.render("info_edit.html", info=info)
+        self.render("info/edit.html", info=info)
 
     @tornado.web.authenticated
     def post(self, name):

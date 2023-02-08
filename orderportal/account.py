@@ -104,7 +104,7 @@ class Accounts(RequestHandler):
     def get(self):
         self.check_staff()
         self.set_filter()
-        self.render("accounts.html", accounts=self.get_accounts(), filter=self.filter)
+        self.render("account/list.html", accounts=self.get_accounts(), filter=self.filter)
 
     def set_filter(self):
         "Set the filter parameters dictionary."
@@ -404,7 +404,7 @@ class Account(AccountMixin, RequestHandler):
         else:
             invitations = []
         self.render(
-            "account.html",
+            "account/display.html",
             account=account,
             groups=self.get_account_groups(account["email"]),
             latest_activity=latest_activity,
@@ -605,7 +605,7 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
         )
         orders = [r.doc for r in view]
         self.render(
-            "account_orders.html",
+            "account/orders.html",
             forms_lookup=self.get_forms_lookup(),
             orders=orders,
             account=account,
@@ -678,7 +678,7 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
         else:
             order_column = 0
         self.render(
-            "account_groups_orders.html",
+            "account/groups_orders.html",
             account=account,
             forms_lookup=self.get_forms_lookup(),
             orders=self.get_group_orders(account),
@@ -761,7 +761,7 @@ class AccountMessages(AccountMixin, RequestHandler):
             include_docs=True,
         )
         messages = [r.doc for r in view]
-        self.render("account_messages.html", account=account, messages=messages)
+        self.render("account/messages.html", account=account, messages=messages)
 
 
 class AccountEdit(AccountMixin, RequestHandler):
@@ -775,7 +775,7 @@ class AccountEdit(AccountMixin, RequestHandler):
         except ValueError as msg:
             self.see_other("account", account["email"], error=str(msg))
             return
-        self.render("account_edit.html", account=account)
+        self.render("account/edit.html", account=account)
 
     @tornado.web.authenticated
     def post(self, email):
@@ -858,7 +858,7 @@ class Login(LoginMixin, RequestHandler):
     "Login to a account account. Set a secure cookie."
 
     def get(self):
-        self.render("login.html")
+        self.render("account/login.html")
 
     def post(self):
         """Login to a account account. Set a secure cookie.
@@ -936,7 +936,7 @@ class Reset(LoginMixin, RequestHandler):
     "Reset the password of an account."
 
     def get(self):
-        self.render("reset.html", email=self.get_argument("email", ""))
+        self.render("account/reset.html", email=self.get_argument("email", ""))
 
     def post(self):
         URL = self.absolute_reverse_url
@@ -991,7 +991,7 @@ class Password(LoginMixin, RequestHandler):
 
     def get(self):
         self.render(
-            "password.html",
+            "account/password.html",
             title="Set your password",
             email=self.get_argument("email", default=""),
             code=self.get_argument("code", default=""),
@@ -1063,7 +1063,7 @@ class Register(RequestHandler):
             values[key] = self.get_argument(key, None)
         for key in self.ADDRESS_KEYS:
             values["invoice_" + key] = self.get_argument("invoice_" + key, None)
-        self.render("register.html", values=values)
+        self.render("account/register.html", values=values)
 
     def post(self):
         try:
@@ -1161,7 +1161,7 @@ class Registered(RequestHandler):
     "Successful registration. Display message."
 
     def get(self):
-        self.render("registered.html")
+        self.render("account/registered.html")
 
 
 class AccountEnable(RequestHandler):

@@ -43,7 +43,7 @@ See your <a href="{0}">account</a>.""".format(
                 url
             )
         if not self.current_user:
-            self.render("home.html", **kwargs)
+            self.render("anonymous.html", **kwargs)
         elif self.current_user["role"] == constants.ADMIN:
             self.home_admin(**kwargs)
         elif self.current_user["role"] == constants.STAFF:
@@ -71,7 +71,7 @@ See your <a href="{0}">account</a>.""".format(
             include_docs=True,
         )
         orders = [r.doc for r in view]
-        self.render("home_admin.html", pending=pending, orders=orders, **kwargs)
+        self.render("home/admin.html", pending=pending, orders=orders, **kwargs)
 
     def home_staff(self, **kwargs):
         "Home page for a current user having role 'staff'."
@@ -87,7 +87,7 @@ See your <a href="{0}">account</a>.""".format(
             include_docs=True,
         )
         orders = [r.doc for r in view]
-        self.render("home_staff.html", orders=orders, **kwargs)
+        self.render("home/staff.html", orders=orders, **kwargs)
 
     def home_user(self, **kwargs):
         "Home page for a current user having role 'user'."
@@ -104,7 +104,7 @@ See your <a href="{0}">account</a>.""".format(
             limit=settings["DISPLAY_MAX_RECENT_ORDERS"],
         )
         orders = [r.doc for r in view]
-        self.render("home_user.html", orders=orders, **kwargs)
+        self.render("home/user.html", orders=orders, **kwargs)
 
 
 class Status(RequestHandler):
@@ -120,14 +120,14 @@ class Contact(RequestHandler):
     "Display contact information."
 
     def get(self):
-        self.render("contact.html")
+        self.render("home/contact.html")
 
 
 class About(RequestHandler):
     "Display 'About us' information."
 
     def get(self):
-        self.render("about.html")
+        self.render("home/about.html")
 
 
 class Software(RequestHandler):
@@ -154,7 +154,7 @@ class Software(RequestHandler):
             ),
             ("DataTables", constants.DATATABLES_VERSION, constants.DATATABLES_URL),
         ]
-        self.render("software.html", software=software)
+        self.render("home/software.html", software=software)
 
 
 class Log(RequestHandler):

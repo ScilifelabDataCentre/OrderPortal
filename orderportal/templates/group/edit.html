@@ -1,0 +1,104 @@
+{# Group edit page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Edit group {{ group['name'] }}{% end %}
+
+{% block body_title %}
+Edit {% module Icon('group') %} {{ group['name'] }}
+{% end %}
+
+{% block main_content %}
+<div class="well">
+  A member of a group may read <strong>any</strong> {{ terminology('order') }}
+  of another member of that group. This feature is therefore suitable
+  for true working groups, but <strong>not</strong> for the occasional
+  collaboration.
+</div>
+
+<form action="{{ reverse_url('group_edit', group['_id']) }}"
+      method="POST" role="form">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+        <label class="control-label" for="owner">Owner</label>
+        <select name="owner" id="owner" class="form-control">
+          {% for member in group['members'] %}
+          <option {{ member == group['owner'] and 'selected' or ''}}>
+            {{ member }}
+          </option>
+          {% end %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-md-8">
+        <label class="control-label" for="name">Name</label>
+        <input type="text" class="form-control"
+               name="name" id="name" value="{{ group['name'] }}">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true">
+        </span>
+      </div>
+    </div>
+    <span class="help-block">
+      Name of group. It is not required to be unique, but it is a good
+      idea to make it so anyway.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+        <label class="control-label" for="members">Members</label>
+        <textarea class="form-control" name="members" id="members"
+                  >{{ '\n'.join(group['members'] + group['invited']) }}</textarea>
+      </div>
+    </div>
+    <span class="help-block">
+      Email addresses of members, which must have accounts in the
+      system. One per line. Any new email will be invited, if it
+      corresponds to an account in the system. Simply remove the
+      emails for those account you wish to exclude or disinvite.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-success btn-block">
+          <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+      </div>
+    </div>
+  </div>
+
+</form>
+
+<br>
+<form action="{{ reverse_url('group', group['_id']) }}"
+      method="GET" role="form">
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-default btn-block">
+          <span class="glyphicon glyphicon-remove"></span> Cancel</button>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% end %} {# block main_content #}
+
+{% block javascript_autofocus %}
+<script>
+  $(function(){ $("#owner").focus(); });
+</script>
+{% end %}

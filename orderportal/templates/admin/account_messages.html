@@ -1,0 +1,44 @@
+{# Account messages admin page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Account messages{% end %}
+{% block body_title %}Account messages{% end %}
+
+{% block content %}
+{% if settings.get("ACCOUNT_MESSAGES_FILE") %}
+<div class="well">
+  <strong>NOTE!</strong> The site file named by settings ACCOUNT_MESSAGES_FILE
+  is no longer used. Remove it from the 'settings.yaml' file and also
+  the file itself to avoid confusion.
+</div>
+{% end %}
+
+<h4>Templates for email messages about account status changes.</h4>
+
+{% include 'admin_account_messages_variables.html' %}
+
+<table class="table">
+  <tr>
+    <th>Status</th>
+    <th>Subject</th>
+    <th>Recipients</th>
+    <th>Text</th>
+    <th></th>
+  </tr>
+  {% for text in  texts %}
+  <tr>
+    <td>{% module Icon(text['status'], label=True) %}</td>
+    <td>{{ text['subject'] }}</td>
+    <td>{{ ', '.join(text['recipients']) or '-' }}</td>
+    <td class="pre">{{ text['text'] }}</td>
+    <td>
+      <a href="{{ reverse_url('admin_account_message_edit', text['status']) }}",
+         class="btn btn-sm btn-primary btn-block" role="button">
+        <span class="glyphicon glyphicon-edit"></span> Edit
+      </a>
+    </td>
+  </tr>
+  {% end %}
+</table>
+{% end %} {# block content #}

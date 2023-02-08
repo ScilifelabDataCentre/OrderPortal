@@ -1,0 +1,9 @@
+{# Home page for anonymous used. #}
+
+{% extends "home/base.html" %}
+
+{% block javascript_autofocus %}
+<script>
+  $(function(){ $("#email").focus(); });
+</script>
+{% end %}

@@ -6,7 +6,7 @@ import os.path
 import re
 import sys
 
-__version__ = "7.2.12"
+__version__ = "8.0.0"
 
 
 class Constants:
@@ -436,6 +436,7 @@ settings = dict(
     TERMINOLOGY=dict(),         # Terms translation lookup.
     LOGIN_MAX_AGE_DAYS=14,      # Max age of login session in a browser.
     LOGIN_MAX_FAILURES=6,       # After this number of fails, the account is disabled.
+    ORDER_AUTOPOPULATE=None,    # Dictionary key=order field, value=account field.
     ORDER_CREATE_USER=True,
     ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",
     ORDER_IDENTIFIER_FIRST=1,

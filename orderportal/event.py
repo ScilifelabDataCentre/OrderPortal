@@ -28,7 +28,7 @@ class Events(RequestHandler):
     "List of all events."
 
     def get(self):
-        self.render("events.html", events=self.get_events())
+        self.render("event/all.html", events=self.get_events())
 
 
 class EventCreate(RequestHandler):

@@ -51,8 +51,7 @@
             {% if is_staff %}
             <li>
               <a href="{{ reverse_url('orders') }}">
-                {{ terminology('Orders') }}
-              </a>
+                {{ terminology('Orders') }}</a>
             </li>
             {% else %}
             <li>
@@ -70,15 +69,18 @@
             {% if is_staff %}
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                Accounts
-                <span class="caret"></span>
-              </a>
+                Accounts <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li>
                   <a href="{{ reverse_url('accounts') }}">All accounts</a>
                 </li>
                 <li>
-                  <a href="{{ reverse_url('accounts', role='admin') }}">All admin accounts</a>
+                  <a href="{{ reverse_url('accounts', status='pending') }}">
+                    Pending accounts</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('accounts', role='admin') }}">
+                    Admin accounts</a>
                 </li>
                 <li>
                   <a href="{{ reverse_url('groups') }}">All groups</a>
@@ -86,8 +88,7 @@
                 {% if is_staff %}
                 <li>
                   <a href="{{ reverse_url('register') }}">
-                    Register new account
-                  </a>
+                    Register new account</a>
                 </li>
                 <li>
                   <a href="{{ reverse_url('reset') }}">Reset password</a>
@@ -103,9 +104,7 @@
             {% if settings['DISPLAY_MENU_INFORMATION'] %}
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                Information
-                <span class="caret"></span>
-              </a>
+                Information <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 {% if is_admin %}
                 <li>
@@ -115,8 +114,7 @@
                 {% for n, t in infos %}
                 <li>
                   <a href="{{ reverse_url('info', n) }}">
-                    {{ t or n }}
-                  </a>
+                    {{ t or n }}</a>
                 </li>
                 {% end %}
               </ul>
@@ -131,9 +129,8 @@
 
             {% if is_admin %}
             <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#">Admin
-                <span class="caret"></span>
-              </a>
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                Admin <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li>
                   <a href="{{ reverse_url('files') }}">Documents</a>

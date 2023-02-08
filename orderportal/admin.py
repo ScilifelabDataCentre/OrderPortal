@@ -486,7 +486,6 @@ def update_meta_documents(db):
 
         # Save current setup into database.
         with MetaSaver(doc=doc, db=db) as saver:
-            saver.set_id("order_statuses")
             saver["statuses"] = parameters["ORDER_STATUSES"]
             saver["transitions"] = parameters["ORDER_TRANSITIONS"]
         logging.info("saved updated order transitions to database")
@@ -609,7 +608,7 @@ class Texts(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin_texts.html", texts=self.get_texts(constants.DISPLAY))
+        self.render("admin/texts.html", texts=self.get_texts(constants.DISPLAY))
 
 
 class TextEdit(RequestHandler):
@@ -624,7 +623,7 @@ class TextEdit(RequestHandler):
             text = dict(name=name)
         # Go back to display page showing the text, if given.
         origin = self.get_argument("origin", self.absolute_reverse_url("texts"))
-        self.render("admin_text_edit.html", text=text, origin=origin)
+        self.render("admin/text_edit.html", text=text, origin=origin)
 
     @tornado.web.authenticated
     def post(self, name):
@@ -694,7 +693,7 @@ class OrderStatuses(RequestHandler):
             "order", "status", group_level=1, startkey=[""], endkey=[constants.CEILING]
         )
         counts = dict([(r.key[0], r.value) for r in view])
-        self.render("admin_order_statuses.html",
+        self.render("admin/order_statuses.html",
                     enabled=enabled,
                     not_enabled=not_enabled,
                     sources=parameters["ORDER_TRANSITIONS"],
@@ -732,7 +731,7 @@ class OrderStatusEdit(RequestHandler):
         except KeyError:
             self.see_other("admin_order_statuses", error="No such order status.")
         else:
-            self.render("admin_order_status_edit.html", status=status)
+            self.render("admin/order_status_edit.html", status=status)
 
     @tornado.web.authenticated
     def post(self, status_id):
@@ -788,7 +787,7 @@ class OrderTransitionsEdit(RequestHandler):
                     targets.pop(target)
             new_targets = [t for t in parameters["ORDER_STATUSES_LOOKUP"].keys()
                            if t != status_id]
-            self.render("admin_order_transitions_edit.html",
+            self.render("admin/order_transitions_edit.html",
                         status=status,
                         targets=targets,
                         new_targets=new_targets)
@@ -841,7 +840,7 @@ class OrdersList(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin_orders_list.html")
+        self.render("admin/orders_list.html")
 
     @tornado.web.authenticated
     def post(self):
@@ -913,7 +912,7 @@ class OrderMessages(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin_order_messages.html")
+        self.render("admin/order_messages.html")
 
 
 class AccountMessages(RequestHandler):
@@ -925,7 +924,7 @@ class AccountMessages(RequestHandler):
         docs = [row.doc for row in self.db.view("text", "type", key=constants.ACCOUNT,
                                                  reduce=False, include_docs=True)]
         docs.sort(key=lambda t: t["status"])
-        self.render("admin_account_messages.html", texts=docs)
+        self.render("admin/account_messages.html", texts=docs)
 
 
 class AccountMessageEdit(RequestHandler):
@@ -934,7 +933,7 @@ class AccountMessageEdit(RequestHandler):
     @tornado.web.authenticated
     def get(self, name):
         self.check_admin()
-        self.render("admin_account_message_edit.html",
+        self.render("admin/account_message_edit.html",
                     text=self.get_text(constants.ACCOUNT, name))
 
     @tornado.web.authenticated
@@ -956,7 +955,7 @@ class Database(RequestHandler):
         self.check_admin()
         server = utils.get_dbserver()
         identifier = self.get_argument("identifier", "")
-        self.render("admin_database.html",
+        self.render("admin/database.html",
                     identifier=identifier,
                     doc=utils.get_document(self.db, identifier),
                     counts=utils.get_counts(self.db),
@@ -1014,68 +1013,4 @@ class Settings(RequestHandler):
             if key not in parameters["SETTINGS_KEYS"]:
                 mod_settings[key] = " &lt;<b>OBSOLETE; NO LONGER USED</b>&gt;"
                 obsolete = True
-        self.render("admin_settings.html", settings=mod_settings, obsolete=obsolete)
-
-
-class DebugEmail(RequestHandler):
-    "Debug of email sending."
-
-    @tornado.web.authenticated
-    def get(self):
-        self.check_admin()
-        self.render("admin_debug_email.html")
-
-    @tornado.web.authenticated
-    def post(self):
-        self.check_admin()
-        try:
-            server = self.get_argument("server")
-            if not server: raise ValueError("no server given")
-            port = int(self.get_argument("port"))
-            protocol = self.get_argument("protocol")
-            ehlo = self.get_argument("ehlo")
-            if protocol == "TLS":
-                smtp_server = smtplib.SMTP(server, port=port)
-                if ehlo:
-                    smtp_server.ehlo(ehlo)
-                smtp_server.starttls()
-                if ehlo:
-                    smtp_server.ehlo(ehlo)
-            elif protocol == "SSL":
-                smtp_server = smtplib.SMTP_SSL(server, port=port)
-            else:
-                smtp_server = smtplib.SMTP(server, port=port)
-            username = self.get_argument("username")
-            password = self.get_argument("password")
-            if username and password:
-                smtp_server.login(username, password)
-            recipient = self.get_argument("recipient") or "per.kraulis@gmail.com"
-            subject = self.get_argument("subject") or "no subject"
-            content = self.get_argument("content") or "no extra content"
-            content = f"""{server=}
-{protocol=}
-{port=}
-{ehlo=}
-{username=}
-{password=}
-{recipient=}
-{subject=}
-{content=}
-"""
-            logging.info(content)
-            message = email.message.EmailMessage()
-            message["From"] = username
-            message["Subject"] = subject
-            message["Reply-To"] = username
-            message["To"] = recipient
-            message.set_content(content)
-            smtp_server.send_message(message)
-        except Exception as error:
-            self.set_error_flash(str(error))
-        else:
-            self.set_message_flash("Success!")
-        try:
-            smtp_server.quit()
-        except NameError:
-            pass
-        self.see_other("admin_debug_email")
+        self.render("admin/settings.html", settings=mod_settings, obsolete=obsolete)

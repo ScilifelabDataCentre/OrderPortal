@@ -1,0 +1,67 @@
+{# Home page for a logged in user having role 'admin'. #}
+
+{% extends "home/base.html" %}
+
+{% block content_left %}
+<div class="panel panel-warning">
+  <div class="panel-heading">
+    <span class="glyphicon glyphicon-user"></span>
+    Pending accounts
+    <a href="{{ reverse_url('accounts', status='pending') }}"
+       class="btn btn-warning btn-xs pull-right" role="button">
+      <span class="glyphicon glyphicon-user"></span>
+      All pending
+    </a>
+  </div>
+  <div class="panel-body">
+    {% if pending %}
+    <table class="table table-condensed table-noborder">
+      {% for account in pending %}
+      <tr>
+        <td>
+          <a href="{{ reverse_url('account', account['email']) }}">
+            {{ account['email'] }}
+          </a>
+        </td>
+        <td class="localtime nobr">{{ account['created'] }}</td>
+      </tr>
+      {% end %}
+    </table>
+    {% else %}
+    <i>Currently none.</i>
+    {% end %}
+  </div>
+</div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <span class="glyphicon glyphicon-list-alt"></span>
+    Recently submitted {{ terminology('orders') }}
+    <a href="{{ reverse_url('orders', status='submitted') }}"
+       class="btn btn-default btn-xs pull-right" role="button">
+      <span class="glyphicon glyphicon-list-alt"></span>
+      All submitted
+    </a>
+  </div>
+  <div class="panel-body">
+    <table class="table table-condensed table-noborder">
+      {% for order in orders %}
+      <tr>
+        <th>
+          {% if order.get('identifier') %}
+          <a href="{{ reverse_url('order', order['identifier']) }}">
+            {{ order['title'] }}
+          </a>
+          {% else %}
+          <a href="{{ reverse_url('order', order['_id']) }}">
+            {{ order['title'] }}
+          </a>
+          {% end %}
+        </th>
+        <td>{% module Icon(order['status'], label=True) %}</td>
+        <td class="localtime nobr">{{ order['modified'] }}</td>
+      </tr>
+      {% end %}
+    </table>
+  </div>
+</div>
+{% end %} {# block content_left #}
