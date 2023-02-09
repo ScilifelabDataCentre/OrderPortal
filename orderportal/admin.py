@@ -990,15 +990,18 @@ class Settings(RequestHandler):
         self.check_admin()
         hidden = "&lt;hidden&gt;"
         safe_settings = dict([(key, settings[key]) for key in constants.SETTINGS_KEYS])
+
         # Hide sensitive data.
         for key in safe_settings:
             if "PASSWORD" in key or "SECRET" in key:
                 safe_settings[key] = hidden
+
         # Escape any '<' and '>' in email addresses
         for key in ["MAIL_DEFAULT_SENDER", "MAIL_REPLY_TO"]:
             value = safe_settings[key]
             if value:
                 safe_settings[key] = value.replace("<", "&lt;").replace(">", "&gt;")
+
         # Don't show the password in the CouchDB URL; actually obsolete now...
         url = safe_settings["DATABASE_SERVER"]
         match = re.search(r":([^/].+)@", url)

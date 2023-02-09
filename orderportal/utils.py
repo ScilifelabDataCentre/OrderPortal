@@ -71,13 +71,15 @@ def load_settings():
         raise OSError(f"The required site directory '{site_dir}' does not exist.")
     if not os.path.isdir(site_dir):
         raise OSError(f"The site directory path '{site_dir}' is not a directory.")
+
     # Find and read the settings file, updating the defaults.
     try:
         filepath = os.environ["ORDERPORTAL_SETTINGS"]
     except KeyError:
         filepath = os.path.join(site_dir, "settings.yaml")
     with open(filepath) as infile:
-        settings.update(yaml.safe_load(infile))
+        from_settings_file = yaml.safe_load(infile)
+    settings.update(from_settings_file)
     settings["SETTINGS_FILE"] = filepath
 
     # Setup logging.
@@ -95,7 +97,8 @@ def load_settings():
     logger.info(f"tornado debug: {settings['TORNADO_DEBUG']}")
 
     # Check some settings.
-    for key in ["BASE_URL", "DATABASE_SERVER", "DATABASE_NAME", "COOKIE_SECRET"]:
+    for key in ["BASE_URL", "DATABASE_SERVER", "DATABASE_NAME", "DATABASE_ACCOUNT",
+                "COOKIE_SECRET", "PASSWORD_SALT"]:
         if key not in settings:
             raise KeyError(f"No settings['{key}'] item.")
         if not settings[key]:
@@ -119,6 +122,11 @@ def load_settings():
             raise ValueError(
                 "ORDER_IDENTIFIER_FORMAT prefix must be all upper-case characters"
             )
+
+    # Check for obsolete settings.
+    for key in sorted(from_settings_file):
+        if key not in constants.SETTINGS_KEYS:
+            logger.warning(f"Obsolete entry '{key}' in settings file.")
 
     # Read order messages YAML file.
     filepath = settings.get("ORDER_MESSAGES_FILE")
