@@ -58,43 +58,41 @@ META_DESIGN_DOC = {
 }
 
 
-def load_settings(filepath=None):
+def load_settings():
     """Load the settings. The file path first specified is used.
-    1) The argument to this procedure (possibly from a command line argument).
-    2) The path environment variable ORDERPORTAL_SETTINGS.
-    3) The file '../site/settings.yaml' relative to this directory.
-    Raise IOError if settings file could not be read.
+    1) The path environment variable ORDERPORTAL_SETTINGS.
+    2) The file '../site/settings.yaml' relative to this directory.
+    Raise OSError if settings file could not be read.
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
     """
-    parameters["SETTINGS_KEYS"] = set(settings.keys())
     site_dir = settings["SITE_DIR"]
     if not os.path.exists(site_dir):
-        raise IOError(f"The required site directory '{site_dir}' does not exist.")
+        raise OSError(f"The required site directory '{site_dir}' does not exist.")
     if not os.path.isdir(site_dir):
-        raise IOError(f"The site directory path '{site_dir}' is not a directory.")
+        raise OSError(f"The site directory path '{site_dir}' is not a directory.")
     # Find and read the settings file, updating the defaults.
-    if not filepath:
-        try:
-            filepath = os.environ["ORDERPORTAL_SETTINGS"]
-        except KeyError:
-            filepath = os.path.join(site_dir, "settings.yaml")
+    try:
+        filepath = os.environ["ORDERPORTAL_SETTINGS"]
+    except KeyError:
+        filepath = os.path.join(site_dir, "settings.yaml")
     with open(filepath) as infile:
         settings.update(yaml.safe_load(infile))
     settings["SETTINGS_FILE"] = filepath
-    parameters["SETTINGS_KEYS"].add("SETTINGS_FILE")
 
-    # Set logging state
+    # Setup logging.
+    logging.basicConfig(format=constants.LOGGING_FORMAT)
+    logger = logging.getLogger("orderportal")
     if settings.get("LOGGING_DEBUG"):
-        logging.basicConfig(level=logging.DEBUG, format=constants.LOGGING_FORMAT)
+        logger.setLevel(logging.DEBUG)
     else:
-        logging.basicConfig(level=logging.INFO, format=constants.LOGGING_FORMAT)
-    logging.info(f"OrderPortal version {constants.VERSION}")
-    logging.info(f"ROOT: {constants.ROOT}")
-    logging.info(f"SITE_DIR: {settings['SITE_DIR']}")
-    logging.info(f"settings: {settings['SETTINGS_FILE']}")
-    logging.info(f"logging debug: {settings['LOGGING_DEBUG']}")
-    logging.info(f"tornado debug: {settings['TORNADO_DEBUG']}")
+        logger.setLevel(logging.INFO)
+    logger.info(f"OrderPortal version {constants.VERSION}")
+    logger.info(f"ROOT: {constants.ROOT}")
+    logger.info(f"SITE_DIR: {settings['SITE_DIR']}")
+    logger.info(f"settings: {settings['SETTINGS_FILE']}")
+    logger.info(f"logger debug: {settings['LOGGING_DEBUG']}")
+    logger.info(f"tornado debug: {settings['TORNADO_DEBUG']}")
 
     # Check some settings.
     for key in ["BASE_URL", "DATABASE_SERVER", "DATABASE_NAME", "COOKIE_SECRET"]:
@@ -126,7 +124,7 @@ def load_settings(filepath=None):
     filepath = settings.get("ORDER_MESSAGES_FILE")
     if filepath:
         filepath = os.path.join(settings["SITE_DIR"], filepath)
-        logging.info(f"order messages file: {filepath}")
+        logger.info(f"order messages file: {filepath}")
         with open(filepath) as infile:
             settings["ORDER_MESSAGES"] = yaml.safe_load(infile) or {}
     else:
@@ -136,7 +134,7 @@ def load_settings(filepath=None):
     filepath = settings.get("UNIVERSITIES_FILE")
     if filepath:
         filepath = os.path.join(settings["SITE_DIR"], filepath)
-        logging.info(f"universities lookup file: {filepath}")
+        logger.info(f"universities lookup file: {filepath}")
         with open(filepath) as infile:
             unis = yaml.safe_load(infile) or {}
         unis = list(unis.items())
@@ -149,7 +147,7 @@ def load_settings(filepath=None):
     filepath = settings.get("SUBJECT_TERMS_FILE")
     if filepath:
         filepath = os.path.join(settings["SITE_DIR"], filepath)
-        logging.info(f"subject terms file: {filepath}")
+        logger.info(f"subject terms file: {filepath}")
         with open(filepath) as infile:
             settings["SUBJECT_TERMS"] = yaml.safe_load(infile) or []
     else:
@@ -212,26 +210,27 @@ def load_design_documents(db):
     import orderportal.order
     import orderportal.admin    # Yes, admin
 
+    logger = logging.getLogger("orderportal")
     if db.put_design("account", orderportal.account.DESIGN_DOC):
-        logging.info("Updated 'account' design document.")
+        logger.info("Updated 'account' design document.")
     if db.put_design("event", orderportal.event.DESIGN_DOC):
-        logging.info("Updated 'event' design document.")
+        logger.info("Updated 'event' design document.")
     if db.put_design("file", orderportal.file.DESIGN_DOC):
-        logging.info("Updated 'file' design document.")
+        logger.info("Updated 'file' design document.")
     if db.put_design("form", orderportal.form.DESIGN_DOC):
-        logging.info("Updated 'form' design document.")
+        logger.info("Updated 'form' design document.")
     if db.put_design("group", orderportal.group.DESIGN_DOC):
-        logging.info("Updated 'group' design document.")
+        logger.info("Updated 'group' design document.")
     if db.put_design("info", orderportal.info.DESIGN_DOC):
-        logging.info("Updated 'info' design document.")
+        logger.info("Updated 'info' design document.")
     if db.put_design("log", LOG_DESIGN_DOC):
-        logging.info("Updated 'log' design document.")
+        logger.info("Updated 'log' design document.")
     if db.put_design("message", orderportal.message.DESIGN_DOC):
-        logging.info("Updated 'message' design document.")
+        logger.info("Updated 'message' design document.")
     if db.put_design("meta", META_DESIGN_DOC):
-        logging.info("Updated 'meta' design document.")
+        logger.info("Updated 'meta' design document.")
     if db.put_design("news", orderportal.news.DESIGN_DOC):
-        logging.info("Updated 'news' design document.")
+        logger.info("Updated 'news' design document.")
     # Replace variables in the function body according to 'settings'.
     func = orderportal.order.DESIGN_DOC["views"]["keyword"]["map"]
     delims_lint = "".join(settings["ORDERS_SEARCH_DELIMS_LINT"])
@@ -239,9 +238,9 @@ def load_design_documents(db):
     func = func.format(delims_lint=delims_lint, lint=lint)
     orderportal.order.DESIGN_DOC["views"]["keyword"]["map"] = func
     if db.put_design("order", orderportal.order.DESIGN_DOC):
-        logging.info("Updated 'order' design document.")
+        logger.info("Updated 'order' design document.")
     if db.put_design("text", orderportal.admin.DESIGN_DOC): # Yes, admin
-        logging.info("Updated 'text' design document.")
+        logger.info("Updated 'text' design document.")
 
 
 def get_count(db, designname, viewname, key=None):

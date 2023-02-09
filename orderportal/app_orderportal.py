@@ -1,8 +1,7 @@
 "OrderPortal web application server."
 
 import logging
-import os
-import sys
+import os.path
 
 import tornado.web
 import tornado.ioloop
@@ -25,11 +24,7 @@ import orderportal.uimodules
 
 
 def main():
-    if len(sys.argv) == 2:
-        filepath = sys.argv[1]
-    else:
-        filepath = None
-    utils.load_settings(filepath=filepath)
+    utils.load_settings()
     db = utils.get_db()
     utils.load_design_documents(db)
     orderportal.admin.update_meta_documents(db)
@@ -373,11 +368,7 @@ def main():
     url = settings["BASE_URL"]
     if settings["BASE_URL_PATH_PREFIX"]:
         url += settings["BASE_URL_PATH_PREFIX"]
-    pid = os.getpid()
-    if settings["PIDFILE"]:
-        with open(settings["PIDFILE"], "w") as pf:
-            pf.write(str(pid))
-    logging.info(f"web server PID {pid} at {url}")
+    logging.getLogger("orderportal").info(f"web server at {url}")
 
     tornado.ioloop.IOLoop.instance().start()
 

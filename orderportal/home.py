@@ -1,6 +1,5 @@
 "Home page variants, and a few general resources."
 
-import logging
 import os.path
 import sys
 
@@ -189,7 +188,7 @@ class NoSuchEntity(RequestHandler):
     "Error message on home page."
 
     def get(self, path=None):
-        logging.debug("No such entity: %s", path)
+        self.logger.debug("No such entity: %s", path)
         self.see_other("home", error="Sorry, no such entity found.")
 
 
@@ -197,15 +196,15 @@ class NoSuchEntityApiV1(RequestHandler):
     "Return Not Found status code."
 
     def get(self, path=None):
-        logging.debug("No such entity: %s", path)
+        self.logger.debug("No such entity: %s", path)
         raise tornado.web.HTTPError(404)
 
     def post(self, path=None):
-        logging.debug("No such entity: %s", path)
+        self.logger.debug("No such entity: %s", path)
         raise tornado.web.HTTPError(404)
 
     def put(self, path=None):
-        logging.debug("No such entity: %s", path)
+        self.logger.debug("No such entity: %s", path)
         raise tornado.web.HTTPError(404)
 
     def check_xsrf_cookie(self):

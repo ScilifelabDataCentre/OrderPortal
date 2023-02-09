@@ -1,7 +1,6 @@
 "Message to account email address; store and send."
 
 import email.message
-import logging
 import smtplib
 
 from orderportal import constants, settings
@@ -110,12 +109,12 @@ class MessageSaver(saver.Saver):
             self.handle_error(error)
 
     def handle_error(self, error):
-        "Convert into a better error message to display."
+        "Convert into a nicer error message to display."
         try:
             if self.rqh.is_admin():
                 msg = str(error)
             else:
-                logging.error(f"Email failure: {error}")
+                self.rqh.logger.error(f"Email failure: {error}")
                 msg = "Contact the admin."
         except AttributeError: # If rqh is None.
             msg = str(error)

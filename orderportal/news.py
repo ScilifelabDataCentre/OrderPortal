@@ -1,6 +1,5 @@
 "News item handling; news announcements for home page."
 
-import logging
 import tornado.web
 
 from orderportal import constants, settings

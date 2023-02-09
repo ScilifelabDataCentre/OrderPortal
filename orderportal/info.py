@@ -1,7 +1,5 @@
 "Information pages; simplest possible CMS using Markdown."
 
-import logging
-
 import tornado.web
 
 import orderportal

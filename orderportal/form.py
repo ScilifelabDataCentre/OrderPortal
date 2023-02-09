@@ -1,7 +1,6 @@
 "Forms are templates for orders."
 
 import json
-import logging
 
 import tornado.web
 

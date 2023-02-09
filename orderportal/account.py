@@ -1,7 +1,6 @@
 "Account and login pages."
 
 import csv
-import logging
 
 import tornado.web
 
@@ -75,7 +74,7 @@ class AccountSaver(saver.Saver):
     def set_password(self, new):
         utils.check_password(new)
         self["code"] = None
-        # Bypass ordinary 'set'; avoid logging password, even if hashed.
+        # Bypass ordinary 'set'; avoid saving password, even if hashed.
         self.doc["password"] = utils.hashed_password(new)
         self.changed["password"] = "******"
 
@@ -889,7 +888,7 @@ class Login(LoginMixin, RequestHandler):
             )
             # Disable account if too many recent login failures.
             if len(list(view)) > settings["LOGIN_MAX_FAILURES"]:
-                logging.warning(
+                self.logger.warning(
                     f"account {account['email']} has been disabled due to too many login failures"
                 )
                 with AccountSaver(doc=account, rqh=self) as saver:
@@ -910,7 +909,7 @@ class Login(LoginMixin, RequestHandler):
             msg = "Account is disabled. Contact the admin."
             self.see_other("home", error=msg)
             return
-        logging.debug(f"Basic auth login: account {account['email']}")
+        self.logger.debug(f"Basic auth login: account {account['email']}")
         self.do_login(account)
         if account.get("update_info"):
             self.see_other(

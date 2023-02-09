@@ -20,8 +20,9 @@ class RequestHandler(tornado.web.RequestHandler):
     "Base request handler."
 
     def prepare(self):
-        "Get the database connection."
+        "Get the database connection and logger."
         self.db = utils.get_db()
+        self.logger = logging.getLogger("orderportal")
 
     def get_template_namespace(self):
         "Set the items accessible within the template."
@@ -136,7 +137,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 except ValueError:
                     return None
         if account.get("status") == constants.DISABLED:
-            logging.info("Account %s DISABLED", account["email"])
+            self.logger.info("Account %s DISABLED", account["email"])
             return None
         return account
 
@@ -153,7 +154,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 account = self.get_entity_view("account", "api_key", api_key)
             except tornado.web.HTTPError:
                 raise ValueError
-            logging.info("API key login: account %s", account["email"])
+            self.logger.info("API key login: account %s", account["email"])
             return account
 
     def get_current_user_session(self):
@@ -170,7 +171,7 @@ class RequestHandler(tornado.web.RequestHandler):
         # Check if login session is invalidated.
         if account.get("login") is None:
             raise ValueError
-        logging.debug("Session authentication: %s", account["email"])
+        self.logger.debug("Session authentication: %s", account["email"])
         return account
 
     def get_current_user_basic(self):
@@ -193,7 +194,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 raise ValueError
         except (IndexError, ValueError, TypeError):
             raise ValueError
-        logging.debug("Basic auth login: account %s", account["email"])
+        self.logger.debug("Basic auth login: account %s", account["email"])
         return account
 
     def is_owner(self, entity):
@@ -452,7 +453,7 @@ class RequestHandler(tornado.web.RequestHandler):
         try:
             return self.cache_all_accounts
         except AttributeError:
-            logging.debug("Getting all accounts into request cache.")
+            self.logger.debug("Getting all accounts into request cache.")
             self.cache_all_accounts = {}
             for row in self.db.view("account", "email", include_docs=True):
                 self.cache_all_accounts[row.key] = row.doc

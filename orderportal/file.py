@@ -1,6 +1,5 @@
 "File (a.k.a document) pages; uploaded files."
 
-import logging
 import os.path
 
 import tornado.web

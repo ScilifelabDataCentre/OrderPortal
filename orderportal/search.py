@@ -1,6 +1,5 @@
 "Search orders page."
 
-import logging
 import pprint
 import urllib.parse
 

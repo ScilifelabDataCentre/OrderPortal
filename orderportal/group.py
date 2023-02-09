@@ -1,7 +1,5 @@
 "Group pages; accounts which are able to see all orders of each other."
 
-import logging
-
 import tornado.web
 
 import orderportal

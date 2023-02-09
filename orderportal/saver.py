@@ -1,7 +1,5 @@
 "Context handler for saving an entity as a CouchDB document. "
 
-import logging
-
 import couchdb2
 import tornado.web
 

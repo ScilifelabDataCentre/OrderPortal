@@ -1,7 +1,5 @@
 "Order form fields utility class."
 
-import logging
-
 import tornado.web
 
 from orderportal import constants, settings

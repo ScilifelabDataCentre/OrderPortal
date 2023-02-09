@@ -376,7 +376,7 @@ def update_meta_documents(db):
     This has to be checked each time the server starts because
     the database may have been loaded with data from an old dump.
     """
-
+    logger = logging.getLogger("orderportal")
     ### As of version 6.0 (or thereabouts), there are no longer any global modes.
     ### Delete document 'global_modes' if present.
     try:
@@ -403,13 +403,13 @@ def update_meta_documents(db):
             filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_STATUSES_FILE"])
             with open(filepath) as infile:
                 legacy_statuses = yaml.safe_load(infile)
-            logging.info(f"loaded legacy order statuses from file '{filepath}'")
+            logger.info(f"loaded legacy order statuses from file '{filepath}'")
         except KeyError:
-            logging.warning(f"defaults used for order statuses")
+            logger.warning(f"defaults used for order statuses")
         except FileNotFoundError as error:
-            logging.warning(f"defaults used for order statuses; {error}")
+            logger.warning(f"defaults used for order statuses; {error}")
         except yaml.YAMLError as error:
-            logging.warning(f"Error trying to read ORDER_STATUSES_FILE: {error}")
+            logger.warning(f"Error trying to read ORDER_STATUSES_FILE: {error}")
         else:
             # Transfer order status data from the legacy setup and flag as enabled.
             lookup = dict([(p["identifier"], p) for p in parameters["ORDER_STATUSES"]])
@@ -418,7 +418,7 @@ def update_meta_documents(db):
                     lookup[status["identifier"]].update(status)
                     lookup[status["identifier"]]["enabled"] = True
                 except KeyError:
-                    logging.error(
+                    logger.error(
                         f"""unknown legacy order status: '{status["identifier"]}'; skipped"""
                     )
 
@@ -430,13 +430,13 @@ def update_meta_documents(db):
             filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_TRANSITIONS_FILE"])
             with open(filepath) as infile:
                 legacy_transitions = yaml.safe_load(infile)
-            logging.info(f"loaded legacy order transitions from file '{filepath}'")
+            logger.info(f"loaded legacy order transitions from file '{filepath}'")
         except KeyError:
-            logging.warning(f"defaults used for order transitions")
+            logger.warning(f"defaults used for order transitions")
         except FileNotFoundError as error:
-            logging.warning(f"defaults used for order transitions; {error}")
+            logger.warning(f"defaults used for order transitions; {error}")
         except yaml.YAMLError as error:
-            logging.warning(f"Error trying to read ORDER_TRANSITIONS_FILE: {error}")
+            logger.warning(f"Error trying to read ORDER_TRANSITIONS_FILE: {error}")
         else:
             # Transfer order transitions data from legacy setup.
             # NOTE: the legacy setup had a different layout.
@@ -466,7 +466,7 @@ def update_meta_documents(db):
             saver.set_id("order_statuses")
             saver["statuses"] = parameters["ORDER_STATUSES"]
             saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        logging.info("saved order statuses to database")
+        logger.info("saved order statuses to database")
 
     ### As of version 7.0, the layout of the transitions data ha been changed
     ### to a dict having (key: source status, value: dict of target statues
@@ -488,7 +488,7 @@ def update_meta_documents(db):
         with MetaSaver(doc=doc, db=db) as saver:
             saver["statuses"] = parameters["ORDER_STATUSES"]
             saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        logging.info("saved updated order transitions to database")
+        logger.info("saved updated order transitions to database")
 
     # As of version 7.0.3, items to show in the order list is stored
     # in the database, not in the settings file.
@@ -502,7 +502,7 @@ def update_meta_documents(db):
             saver["max_most_recent"] = settings.get("DISPLAY_ORDERS_MOST_RECENT", 500)
             saver["default_order_column"] = "modified"
             saver["default_order_sort"] = "desc"
-        logging.info("saved orders list parameters to database")
+        logger.info("saved orders list parameters to database")
 
     # Re-introduce order list filters, this time separately from orders list fields.
     doc = db["orders_list"]
@@ -554,7 +554,7 @@ def update_text_documents(db):
                 with TextSaver(doc=newest, db=db) as saver:
                     saver["type"] = constants.DISPLAY
     if loaded:
-        logging.info("loaded default display text(s)")
+        logging.getLogger("orderportal").info("loaded default display text(s)")
 
     ### As of version 7.0.4, the one-line description of a text is in the document.
     ### Defensive; This may have been done above, but not for certain.
@@ -647,10 +647,11 @@ def load_parameters(db):
     - orders list parameters
     and setup derived variable values.
     """
+    logger = logging.getLogger("orderportal")
     doc = db["order_statuses"]
     parameters["ORDER_STATUSES"] = doc["statuses"]
     parameters["ORDER_TRANSITIONS"] = doc["transitions"]
-    logging.info("loaded order statuses from database into 'parameters'")
+    logger.info("loaded order statuses from database into 'parameters'")
 
     doc = db["orders_list"]
     parameters["ORDERS_LIST_OWNER_UNIVERSITY"] = doc.get("owner_university", False)
@@ -663,7 +664,7 @@ def load_parameters(db):
     parameters["DISPLAY_ORDERS_MOST_RECENT"] = doc["max_most_recent"]
     parameters["DEFAULT_ORDER_COLUMN"] = doc["default_order_column"]
     parameters["DEFAULT_ORDER_SORT"] = doc["default_order_sort"]
-    logging.info("loaded orders list parameters from database into 'parameters'")
+    logger.info("loaded orders list parameters from database into 'parameters'")
 
     # Lookup for the enabled statuses.
     parameters["ORDER_STATUSES_LOOKUP"] = dict(
@@ -988,29 +989,24 @@ class Settings(RequestHandler):
     def get(self):
         self.check_admin()
         hidden = "&lt;hidden&gt;"
-        mod_settings = copy.deepcopy(settings)
+        safe_settings = dict([(key, settings[key]) for key in constants.SETTINGS_KEYS])
         # Hide sensitive data.
-        for key in settings:
+        for key in safe_settings:
             if "PASSWORD" in key or "SECRET" in key:
-                mod_settings[key] = hidden
+                safe_settings[key] = hidden
         # Escape any '<' and '>' in email addresses
         for key in ["MAIL_DEFAULT_SENDER", "MAIL_REPLY_TO"]:
-            value = mod_settings[key]
+            value = safe_settings[key]
             if value:
-                mod_settings[key] = value.replace("<", "&lt;").replace(">", "&gt;")
+                safe_settings[key] = value.replace("<", "&lt;").replace(">", "&gt;")
         # Don't show the password in the CouchDB URL; actually obsolete now...
-        url = settings["DATABASE_SERVER"]
+        url = safe_settings["DATABASE_SERVER"]
         match = re.search(r":([^/].+)@", url)
         if match:
             url = list(url)
             url[match.start(1) : match.end(1)] = "password"
-            mod_settings["DATABASE_SERVER"] = "".join(url)
-        mod_settings[
+            safe_settings["DATABASE_SERVER"] = "".join(url)
+        safe_settings[
             "ORDER_MESSAGES"
-        ] = f"&lt;see file {mod_settings['ORDER_MESSAGES_FILE']}&gt;"
-        obsolete = False
-        for key in mod_settings:
-            if key not in parameters["SETTINGS_KEYS"]:
-                mod_settings[key] = " &lt;<b>OBSOLETE; NO LONGER USED</b>&gt;"
-                obsolete = True
-        self.render("admin/settings.html", settings=mod_settings, obsolete=obsolete)
+        ] = f"&lt;see file {safe_settings['ORDER_MESSAGES_FILE']}&gt;"
+        self.render("admin/settings.html", settings=safe_settings)
