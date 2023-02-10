@@ -42,7 +42,7 @@ See your <a href="{0}">account</a>.""".format(
                 url
             )
         if not self.current_user:
-            self.render("anonymous.html", **kwargs)
+            self.render("home/anonymous.html", **kwargs)
         elif self.current_user["role"] == constants.ADMIN:
             self.home_admin(**kwargs)
         elif self.current_user["role"] == constants.STAFF:

@@ -9,21 +9,22 @@ import couchdb2
 
 from orderportal import constants, settings
 from orderportal import utils
-from orderportal.account import AccountSaver
-import orderportal.app_orderportal
+import orderportal.account
 import orderportal.admin
+import orderportal.config
+import orderportal.database
 
 
 @click.group()
-@click.option("-s", "--settings", help="Path of settings YAML file.")
-def cli(settings):         # This is the settings file, not the settings dict.
-    utils.load_settings(settings)
+def cli():
+    "Command line interface for operations on the OrderPortal database."
+    orderportal.config.load_settings_from_file()
 
 
 @cli.command()
 def destroy_database():
     "Hard delete of the entire database, including the instance within CouchDB."
-    server = utils.get_dbserver()
+    server = orderportal.database.get_server()
     try:
         db = server[settings["DATABASE_NAME"]]
     except couchdb2.NotFoundError as error:
@@ -35,13 +36,13 @@ def destroy_database():
 @cli.command()
 def create_database():
     "Create the database instance within CouchDB. Load the design document."
-    server = utils.get_dbserver()
+    server = orderportal.database.get_server()
     if settings["DATABASE_NAME"] in server:
         raise click.ClickException(
             f"""Database '{settings["DATABASE_NAME"]}' already exists."""
         )
     server.create(settings["DATABASE_NAME"])
-    utils.load_design_documents(utils.get_db())
+    orderportal.database.update_design_documents(orderportal.database.get_db())
     click.echo(f"""Created database '{settings["DATABASE_NAME"]}'.""")
 
 
@@ -50,14 +51,14 @@ def initialize():
     """Initialize database; load design documents.
     No longer needed. Kept just for backwards compatibility.
     """
-    utils.load_design_documents(utils.get_db())
+    orderportal.database.update_design_documents(orderportal.database.get_db())
 
 
 @cli.command()
 def counts():
     "Output counts of database entities."
-    db = utils.get_db()
-    utils.load_design_documents(db)
+    db = orderportal.database.get_db()
+    orderportal.database.update_design_documents(db)
     click.echo(f"{utils.get_count(db, 'order', 'owner'):>5} orders")
     click.echo(f"{utils.get_count(db, 'form', 'all'):>5} forms")
     click.echo(f"{utils.get_count(db, 'account', 'all'):>5} accounts")
@@ -81,7 +82,7 @@ def counts():
 )
 def dump(dumpfile, dumpdir, progressbar):
     "Dump all data in the database to a '.tar.gz' dump file."
-    db = utils.get_db()
+    db = orderportal.database.get_db()
     if not dumpfile:
         dumpfile = "dump_{0}.tar.gz".format(time.strftime("%Y-%m-%d"))
         if dumpdir:
@@ -100,7 +101,7 @@ def undump(dumpfile, progressbar):
     The database must exist and be empty.
     """
     try:
-        db = utils.get_db()
+        db = orderportal.database.get_db()
     except KeyError as error:
         raise click.ClickException(str(error))
     utils.load_design_documents(db) # Just in case; probably not really needed.
@@ -150,9 +151,9 @@ def create_admin(email, password):
     The email address is the account identifier.
     No email is sent to the email address by this command.
     """
-    db = utils.get_db()
+    db = orderportal.database.get_db()
     try:
-        with AccountSaver(db=db) as saver:
+        with orderportal.account.AccountSaver(db=db) as saver:
             saver.set_email(email)
             if not password:
                 password = click.prompt(
@@ -180,13 +181,13 @@ def create_admin(email, password):
 @click.option("--password")  # Get password after account existence check.
 def password(email, password):
     "Set the password for the given account."
-    db = utils.get_db()
+    db = orderportal.database.get_db()
     try:
         account = _get_account(db, email)
     except KeyError as error:
         raise click.ClickException(str(error))
     try:
-        with AccountSaver(doc=account, db=db) as saver:
+        with orderportal.account.AccountSaver(doc=account, db=db) as saver:
             if not password:
                 password = click.prompt(
                     "Password", hide_input=True, confirmation_prompt=True
@@ -219,13 +220,13 @@ def _get_account(db, email):
 )
 def role(email, role):
     "Set the role for the given account."
-    db = utils.get_db()
+    db = orderportal.database.get_db()
     try:
         account = _get_account(db, email)
     except KeyError as error:
         raise click.ClickException(str(error))
     try:
-        with AccountSaver(doc=account, db=db) as saver:
+        with orderportal.account.AccountSaver(doc=account, db=db) as saver:
             saver["role"] = role
     except ValueError as error:
         raise click.ClickException(str(error))
@@ -239,7 +240,7 @@ def output(identifier):
     The identifier may be an account email, account API key, file name, info name,
     order identifier, or '_id' of the CouchDB document.
     """
-    doc = utils.get_document(utils.get_db(), identifier)
+    doc = utils.get_document(orderportal.database.get_db(), identifier)
     if doc is None:
         raise click.ClickException("No such item in the database.")
     click.echo(json.dumps(doc, ensure_ascii=False, indent=2))

@@ -11,17 +11,6 @@ from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 
 
-DESIGN_DOC = {
-    "views": {
-        "name": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'file') return;
-    emit(doc.name, null);
-}"""}
-    }
-}
-
-
 class FileSaver(saver.Saver):
     doctype = constants.FILE
 

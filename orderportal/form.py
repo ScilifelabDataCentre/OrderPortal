@@ -4,33 +4,11 @@ import json
 
 import tornado.web
 
-from orderportal import constants, settings, parameters
+from orderportal import constants, settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.fields import Fields
 from orderportal.requesthandler import RequestHandler, ApiV1Mixin
-
-
-DESIGN_DOC = {
-    "views": {
-        "all": {
-            "reduce": "_count",
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'form') return;
-    emit(doc.modified, null);
-}"""},
-        "enabled": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'form') return;
-    if (doc.status === 'enabled') emit(doc.modified, doc.title);
-}"""},
-        "modified": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'form') return;
-    emit(doc.modified, doc.title);
-}"""}
-    }
-}
 
 
 class FormSaver(saver.Saver):

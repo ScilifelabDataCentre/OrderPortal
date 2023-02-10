@@ -42,7 +42,7 @@
           {% end %}
         </select>
       </div>
-      {% for f in parameters['ORDERS_FILTER_FIELDS'] %}
+      {% for f in settings['ORDERS_FILTER_FIELDS'] %}
       <div class="form-group">
         <select name="{{ f['identifier'] }}" class="form-control refresh">
           <option value="">[any {{ f.get('label') or f['identifier'].replace('_', ' ').capitalize() }}]</option>
@@ -54,11 +54,11 @@
           <option {{ sel }} value="__none__">[none]</option>
         </select>
       </div>
-      {% end %} {# for f in parameters['ORDERS_FILTER_FIELDS'] #}
+      {% end %} {# for f in settings['ORDERS_FILTER_FIELDS'] #}
       <div class="form-group">
         <select name="status" class="form-control refresh">
           <option value="">[any status]</option>
-          {% for s in parameters['ORDER_STATUSES'] %}
+          {% for s in settings['ORDER_STATUSES'] %}
           {% if s.get("enabled") %}
           {% set selected = s['identifier'] == filter.get('status') and 'selected' or '' %}
           <option {{ selected }} value="{{ s['identifier'] }}">{{ s['identifier'].capitalize() }}</option>
@@ -68,7 +68,7 @@
       </div>
       <div class="form-group">
         <select name="year" class="form-control refresh">
-          <option value="" {{ not filter.get('year') and 'selected' or '' }}>{{ parameters['DISPLAY_ORDERS_MOST_RECENT'] }} most recent
+          <option value="" {{ not filter.get('year') and 'selected' or '' }}>{{ settings['DISPLAY_ORDERS_MOST_RECENT'] }} most recent
           </option>
           {% for year, count in years %}
           <option value="{{ year }}"{{ filter.get('year') == year and 'selected' or '' }}>{{ year }} ({{ count }})</option>
@@ -89,23 +89,23 @@
           <th width="30%">Title</th>
           <th>Form</th>
           <th>Owner</th>
-          {% if parameters['ORDERS_LIST_TAGS'] %}
+          {% if settings['ORDERS_LIST_TAGS'] %}
           <th width="5%">Keywords (tags)</th>
           {% end %}
-          {% if parameters['ORDERS_LIST_OWNER_UNIVERSITY'] %}
+          {% if settings['ORDERS_LIST_OWNER_UNIVERSITY'] %}
           <th>Owner university</th>
           {% end %}
-          {% if parameters['ORDERS_LIST_OWNER_DEPARTMENT'] %}
+          {% if settings['ORDERS_LIST_OWNER_DEPARTMENT'] %}
           <th>Owner department</th>
           {% end %}
-          {% if parameters['ORDERS_LIST_OWNER_GENDER'] %}
+          {% if settings['ORDERS_LIST_OWNER_GENDER'] %}
           <th>Owner gender</th>
           {% end %}
-          {% for f in parameters['ORDERS_LIST_FIELDS'] %}
+          {% for f in settings['ORDERS_LIST_FIELDS'] %}
           <th>{{ f.replace('_', ' ').capitalize() }}</th>
           {% end %}
           <th>Status</th>
-          {% for s in parameters['ORDERS_LIST_STATUSES'] %}
+          {% for s in settings['ORDERS_LIST_STATUSES'] %}
           <th>{{ s.capitalize() }}</th>
           {% end %}
           <th>Modified</th>
@@ -127,25 +127,25 @@
               {{ account_names[order['owner']] }}
             </a>
           </td>
-          {% if parameters['ORDERS_LIST_OWNER_UNIVERSITY'] %}
+          {% if settings['ORDERS_LIST_OWNER_UNIVERSITY'] %}
           <td>{% module NoneStr(accounts_university[order['owner']], undef='-') %}</td>
           {% end %}
-          {% if parameters['ORDERS_LIST_OWNER_DEPARTMENT'] %}
+          {% if settings['ORDERS_LIST_OWNER_DEPARTMENT'] %}
           <td>{% module NoneStr(accounts_department[order['owner']], undef='-') %}</td>
           {% end %}
-          {% if parameters['ORDERS_LIST_OWNER_GENDER'] %}
+          {% if settings['ORDERS_LIST_OWNER_GENDER'] %}
           <td>{% module NoneStr(accounts_gender[order['owner']], undef='-') %}</td>
           {% end %}
-          {% if parameters['ORDERS_LIST_TAGS'] %}
+          {% if settings['ORDERS_LIST_TAGS'] %}
           <td>{% module Tags(order.get('tags', [])) %}</td>
           {% end %}
-          {% for f in parameters['ORDERS_LIST_FIELDS'] %}
+          {% for f in settings['ORDERS_LIST_FIELDS'] %}
           <td>
             {% module NoneStr(order['fields'].get(f), undef='-', list_delimiter=', ') %}
           </td>
           {% end %}
           <td>{% module Icon(order['status'], label=True) %}</td>
-          {% for s in parameters['ORDERS_LIST_STATUSES'] %}
+          {% for s in settings['ORDERS_LIST_STATUSES'] %}
           <td class="nobr">{% module NoneStr(order['history'].get(s)) %}</td>
           {% end %}
           <td class="localtime nobr">{{ order['modified'] }}</td>
@@ -171,7 +171,7 @@ $(function() {
   $("#orders").DataTable( {
     "pagingType": "full_numbers",
     "pageLength": 25,
-    "order": [[{{ order_column }}, "{{ parameters['DEFAULT_ORDER_SORT'] }}"]],
+    "order": [[{{ order_column }}, "{{ settings['DEFAULT_ORDER_SORT'] }}"]],
   });
 });
 </script>

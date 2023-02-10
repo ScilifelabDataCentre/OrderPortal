@@ -8,17 +8,6 @@ from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 
 
-DESIGN_DOC = {
-    "views": {
-        "date": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'event') return;
-    emit(doc.date, doc.title);
-}"""}
-    }
-}
-
-
 class EventSaver(saver.Saver):
     doctype = constants.EVENT
 

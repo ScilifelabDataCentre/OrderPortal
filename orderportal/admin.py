@@ -14,26 +14,12 @@ import tornado.web
 import yaml
 
 import orderportal
-from orderportal import constants, settings, parameters
+from orderportal import constants, DEFAULT_SETTINGS, settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
+import orderportal.database
 
-
-DESIGN_DOC = {                  # Doctype is 'text', for historical reasons.
-    "views": {
-        "name": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'text') return;
-    emit(doc.name, doc.modified);
-}"""},
-        "type": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'text') return;
-    emit(doc.type, doc.modified);
-}"""}
-    }
-}
 
 DEFAULT_ORDER_STATUSES = [
     dict(
@@ -395,8 +381,8 @@ def update_meta_documents(db):
         # Finally save it to the database.
 
         # Initialize with default order statuses.
-        parameters["ORDER_STATUSES"] = copy.deepcopy(DEFAULT_ORDER_STATUSES)
-        lookup = dict([(p["identifier"], p) for p in parameters["ORDER_STATUSES"]])
+        settings["ORDER_STATUSES"] = copy.deepcopy(DEFAULT_ORDER_STATUSES)
+        lookup = dict([(p["identifier"], p) for p in settings["ORDER_STATUSES"]])
 
         # Load the legacy site ORDER_STATUSES_FILE, if any defined.
         try:
@@ -412,7 +398,7 @@ def update_meta_documents(db):
             logger.warning(f"Error trying to read ORDER_STATUSES_FILE: {error}")
         else:
             # Transfer order status data from the legacy setup and flag as enabled.
-            lookup = dict([(p["identifier"], p) for p in parameters["ORDER_STATUSES"]])
+            lookup = dict([(p["identifier"], p) for p in settings["ORDER_STATUSES"]])
             for status in legacy_statuses:
                 try:
                     lookup[status["identifier"]].update(status)
@@ -423,7 +409,7 @@ def update_meta_documents(db):
                     )
 
         # Initialize with the default order transitions.
-        parameters["ORDER_TRANSITIONS"] = copy.deepcopy(DEFAULT_ORDER_TRANSITIONS)
+        settings["ORDER_TRANSITIONS"] = copy.deepcopy(DEFAULT_ORDER_TRANSITIONS)
 
         # Load the legacy site ORDER_TRANSITIONS_FILE, if any defined.
         try:
@@ -449,10 +435,10 @@ def update_meta_documents(db):
                     value = dict(permission=legacy_trans["permission"])
                     if legacy_trans.get("require") == "valid":
                         value["require_valid"] = True
-                    parameters["ORDER_TRANSITIONS"][legacy_trans["source"]][target] = value
+                    settings["ORDER_TRANSITIONS"][legacy_trans["source"]][target] = value
 
         initial = None
-        for status in parameters["ORDER_STATUSES"]:
+        for status in settings["ORDER_STATUSES"]:
             if status.get("initial"):
                 if initial:         # There must one and only one initial status.
                     status.pop("initial")
@@ -464,30 +450,30 @@ def update_meta_documents(db):
         # Save current setup into database.
         with MetaSaver(db=db) as saver:
             saver.set_id("order_statuses")
-            saver["statuses"] = parameters["ORDER_STATUSES"]
-            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
+            saver["statuses"] = settings["ORDER_STATUSES"]
+            saver["transitions"] = settings["ORDER_TRANSITIONS"]
         logger.info("saved order statuses to database")
 
     ### As of version 7.0, the layout of the transitions data ha been changed
     ### to a dict having (key: source status, value: dict of target statues
     ### with valid flag (instead of "require" key) and permissions list.
     doc = db["order_statuses"]
-    parameters["ORDER_STATUSES"] = doc["statuses"]
-    parameters["ORDER_TRANSITIONS"] = doc["transitions"]
-    if isinstance(parameters["ORDER_TRANSITIONS"], list):
-        new = dict([(s["identifier"], dict()) for s in parameters["ORDER_STATUSES"]])
-        for trans in parameters["ORDER_TRANSITIONS"]:
+    settings["ORDER_STATUSES"] = doc["statuses"]
+    settings["ORDER_TRANSITIONS"] = doc["transitions"]
+    if isinstance(settings["ORDER_TRANSITIONS"], list):
+        new = dict([(s["identifier"], dict()) for s in settings["ORDER_STATUSES"]])
+        for trans in settings["ORDER_TRANSITIONS"]:
             for target in trans["targets"]:
                 value = dict(permission=trans["permission"])
                 if trans.get("require") == "valid":
                     value["require_valid"] = True
                 new[trans["source"]][target] = value
-        parameters["ORDER_TRANSITIONS"] = new
+        settings["ORDER_TRANSITIONS"] = new
 
         # Save current setup into database.
         with MetaSaver(doc=doc, db=db) as saver:
-            saver["statuses"] = parameters["ORDER_STATUSES"]
-            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
+            saver["statuses"] = settings["ORDER_STATUSES"]
+            saver["transitions"] = settings["ORDER_TRANSITIONS"]
         logger.info("saved updated order transitions to database")
 
     # As of version 7.0.3, items to show in the order list is stored
@@ -502,7 +488,7 @@ def update_meta_documents(db):
             saver["max_most_recent"] = settings.get("DISPLAY_ORDERS_MOST_RECENT", 500)
             saver["default_order_column"] = "modified"
             saver["default_order_sort"] = "desc"
-        logger.info("saved orders list parameters to database")
+        logger.info("saved orders list settings to database")
 
     # Re-introduce order list filters, this time separately from orders list fields.
     doc = db["orders_list"]
@@ -594,12 +580,12 @@ def update_text_documents(db):
 
 
 def load_texts(db):
-    "Load the texts into parameters."
+    "Load the texts into settings."
     for type in [constants.DISPLAY, constants.ACCOUNT, constants.ORDER]:
         docs = [row.doc for row in db.view("text", "type", type, include_docs=True)]
-        parameters[type] = dict()
+        settings[type] = dict()
         for doc in docs:
-            parameters[type][doc["name"]] = doc
+            settings[type][doc["name"]] = doc
 
 
 class Texts(RequestHandler):
@@ -618,7 +604,7 @@ class TextEdit(RequestHandler):
     def get(self, name):
         self.check_admin()
         try:
-            text = parameters[constants.DISPLAY][name]
+            text = settings[constants.DISPLAY][name]
         except KeyError:
             text = dict(name=name)
         # Go back to display page showing the text, if given.
@@ -627,7 +613,7 @@ class TextEdit(RequestHandler):
 
     @tornado.web.authenticated
     def post(self, name):
-        "Save the modified text to the database, and update parameters."
+        "Save the modified text to the database, and update settings."
         self.check_admin()
         try:
             doc = self.get_text(constants.DISPLAY, name)
@@ -636,46 +622,9 @@ class TextEdit(RequestHandler):
         text = self.get_argument("text", "")
         with TextSaver(doc=doc, rqh=self) as saver:
             saver["text"] = text
-        parameters[doc["type"]][doc["name"]]["text"] = text
+        settings[doc["type"]][doc["name"]]["text"] = text
         url = self.get_argument("origin", self.absolute_reverse_url("texts"))
         self.redirect(url, status=303)
-
-
-def load_parameters(db):
-    """Load the parameters from the database:
-    - order statuses and transitions
-    - orders list parameters
-    and setup derived variable values.
-    """
-    logger = logging.getLogger("orderportal")
-    doc = db["order_statuses"]
-    parameters["ORDER_STATUSES"] = doc["statuses"]
-    parameters["ORDER_TRANSITIONS"] = doc["transitions"]
-    logger.info("loaded order statuses from database into 'parameters'")
-
-    doc = db["orders_list"]
-    parameters["ORDERS_LIST_OWNER_UNIVERSITY"] = doc.get("owner_university", False)
-    parameters["ORDERS_LIST_OWNER_DEPARTMENT"] = doc.get("owner_department", False)
-    parameters["ORDERS_LIST_OWNER_GENDER"] = doc.get("owner_gender", False)
-    parameters["ORDERS_LIST_TAGS"] = doc["tags"]
-    parameters["ORDERS_LIST_STATUSES"] = doc["statuses"]
-    parameters["ORDERS_LIST_FIELDS"] = doc["fields"]
-    parameters["ORDERS_FILTER_FIELDS"] = doc["filters"]
-    parameters["DISPLAY_ORDERS_MOST_RECENT"] = doc["max_most_recent"]
-    parameters["DEFAULT_ORDER_COLUMN"] = doc["default_order_column"]
-    parameters["DEFAULT_ORDER_SORT"] = doc["default_order_sort"]
-    logger.info("loaded orders list parameters from database into 'parameters'")
-
-    # Lookup for the enabled statuses.
-    parameters["ORDER_STATUSES_LOOKUP"] = dict(
-        [(s["identifier"], s)
-         for s in parameters["ORDER_STATUSES"] if s.get("enabled")]
-    )
-
-    # Find the initial status.
-    for status in parameters["ORDER_STATUSES"]:
-        if status.get("initial"):
-            parameters["ORDER_STATUS_INITIAL"] = status
 
 
 class OrderStatuses(RequestHandler):
@@ -684,10 +633,10 @@ class OrderStatuses(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        enabled = [s for s in parameters["ORDER_STATUSES"] if s.get("enabled")]
-        not_enabled = [s for s in parameters["ORDER_STATUSES"] if not s.get("enabled")]
+        enabled = [s for s in settings["ORDER_STATUSES"] if s.get("enabled")]
+        not_enabled = [s for s in settings["ORDER_STATUSES"] if not s.get("enabled")]
         targets = {}
-        for source, transitions in parameters["ORDER_TRANSITIONS"].items():
+        for source, transitions in settings["ORDER_TRANSITIONS"].items():
             for target, transition in transitions.items():
                 targets.setdefault(target, {})[source] = transition
         view = self.db.view(
@@ -697,7 +646,7 @@ class OrderStatuses(RequestHandler):
         self.render("admin/order_statuses.html",
                     enabled=enabled,
                     not_enabled=not_enabled,
-                    sources=parameters["ORDER_TRANSITIONS"],
+                    sources=settings["ORDER_TRANSITIONS"],
                     targets=targets,
                     counts=counts)
 
@@ -708,16 +657,16 @@ class OrderStatusEnable(RequestHandler):
     @tornado.web.authenticated
     def post(self, status_id):
         self.check_admin()
-        for status in parameters["ORDER_STATUSES"]:
+        for status in settings["ORDER_STATUSES"]:
             if status["identifier"] == status_id: break
         else:
             self.see_other("admin_order_statuses", error="No such order status.")
             return
         status["enabled"] = True
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
-            saver["statuses"] = parameters["ORDER_STATUSES"]
-            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        load_parameters(self.db)
+            saver["statuses"] = settings["ORDER_STATUSES"]
+            saver["transitions"] = settings["ORDER_TRANSITIONS"]
+        load_settings_from_db(self.db)
         self.see_other("admin_order_statuses")
         
 
@@ -728,7 +677,7 @@ class OrderStatusEdit(RequestHandler):
     def get(self, status_id):
         self.check_admin()
         try:
-            status = parameters["ORDER_STATUSES_LOOKUP"][status_id]
+            status = settings["ORDER_STATUSES_LOOKUP"][status_id]
         except KeyError:
             self.see_other("admin_order_statuses", error="No such order status.")
         else:
@@ -738,7 +687,7 @@ class OrderStatusEdit(RequestHandler):
     def post(self, status_id):
         self.check_admin()
         try:
-            status = parameters["ORDER_STATUSES_LOOKUP"][status_id]
+            status = settings["ORDER_STATUSES_LOOKUP"][status_id]
         except KeyError:
             self.see_other("admin_order_statuses", error="No such order status.")
             return
@@ -750,7 +699,7 @@ class OrderStatusEdit(RequestHandler):
         initial = utils.to_bool(self.get_argument("initial", False))
         # Only one status may be initial; set all others to False.
         if initial and not status.get("initial"):
-            for s in parameters["ORDER_STATUSES_LOOKUP"].values():
+            for s in settings["ORDER_STATUSES_LOOKUP"].values():
                 s["initial"] = False
             status["initial"] = True
         status["edit"] = ["admin"] # Is always allowed.
@@ -764,9 +713,9 @@ class OrderStatusEdit(RequestHandler):
         if utils.to_bool(self.get_argument("attach_user", False)):
             status["attach"].append("user")
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
-            saver["statuses"] = parameters["ORDER_STATUSES"]
-            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        load_parameters(self.db)
+            saver["statuses"] = settings["ORDER_STATUSES"]
+            saver["transitions"] = settings["ORDER_TRANSITIONS"]
+        load_settings_from_db(self.db)
         self.see_other("admin_order_statuses")
 
 
@@ -777,16 +726,16 @@ class OrderTransitionsEdit(RequestHandler):
     def get(self, status_id):
         self.check_admin()
         try:
-            status = parameters["ORDER_STATUSES_LOOKUP"][status_id]
+            status = settings["ORDER_STATUSES_LOOKUP"][status_id]
         except KeyError:
             self.see_other("admin_order_statuses", error="No such order status.")
         else:
-            targets = parameters["ORDER_TRANSITIONS"].get(status_id, dict())
+            targets = settings["ORDER_TRANSITIONS"].get(status_id, dict())
             # Defensive: only allow enabled statuses as targets.
             for target in targets.keys():
-                if target not in parameters["ORDER_STATUSES_LOOKUP"]:
+                if target not in settings["ORDER_STATUSES_LOOKUP"]:
                     targets.pop(target)
-            new_targets = [t for t in parameters["ORDER_STATUSES_LOOKUP"].keys()
+            new_targets = [t for t in settings["ORDER_STATUSES_LOOKUP"].keys()
                            if t != status_id]
             self.render("admin/order_transitions_edit.html",
                         status=status,
@@ -800,8 +749,8 @@ class OrderTransitionsEdit(RequestHandler):
             self.delete(status_id)
             return
         try:
-            source = parameters["ORDER_STATUSES_LOOKUP"][status_id]
-            target = parameters["ORDER_STATUSES_LOOKUP"][self.get_argument("target")]
+            source = settings["ORDER_STATUSES_LOOKUP"][status_id]
+            target = settings["ORDER_STATUSES_LOOKUP"][self.get_argument("target")]
         except (tornado.web.MissingArgumentError, KeyError):
             self.see_other("admin_order_statuses", error="Invalid or missing order status.")
             return
@@ -812,26 +761,26 @@ class OrderTransitionsEdit(RequestHandler):
         value = dict(permission=permission)
         if utils.to_bool(self.get_argument("require_valid", False)):
             value["require_valid"] = True
-        parameters["ORDER_TRANSITIONS"][source["identifier"]][target["identifier"]] = value
+        settings["ORDER_TRANSITIONS"][source["identifier"]][target["identifier"]] = value
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
-            saver["statuses"] = parameters["ORDER_STATUSES"]
-            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        load_parameters(self.db)
+            saver["statuses"] = settings["ORDER_STATUSES"]
+            saver["transitions"] = settings["ORDER_TRANSITIONS"]
+        load_settings_from_db(self.db)
         self.see_other("admin_order_statuses")
 
     @tornado.web.authenticated
     def delete(self, status_id):
         try:
-            source = parameters["ORDER_STATUSES_LOOKUP"][status_id]
-            target = parameters["ORDER_STATUSES_LOOKUP"][self.get_argument("target")]
-            parameters["ORDER_TRANSITIONS"][source["identifier"]].pop(target["identifier"])
+            source = settings["ORDER_STATUSES_LOOKUP"][status_id]
+            target = settings["ORDER_STATUSES_LOOKUP"][self.get_argument("target")]
+            settings["ORDER_TRANSITIONS"][source["identifier"]].pop(target["identifier"])
         except (tornado.web.MissingArgumentError, KeyError):
             self.see_other("admin_order_statuses", error="Invalid or missing order status.")
             return
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
-            saver["statuses"] = parameters["ORDER_STATUSES"]
-            saver["transitions"] = parameters["ORDER_TRANSITIONS"]
-        load_parameters(self.db)
+            saver["statuses"] = settings["ORDER_STATUSES"]
+            saver["transitions"] = settings["ORDER_TRANSITIONS"]
+        load_settings_from_db(self.db)
         self.see_other("admin_order_statuses")
 
 
@@ -854,7 +803,7 @@ class OrdersList(RequestHandler):
                 saver["owner_gender"] = utils.to_bool(self.get_argument("owner_gender", False))
             saver["tags"] = utils.to_bool(self.get_argument("tags", False))
             saver["statuses"] = [s for s in self.get_arguments("statuses")
-                                 if s in parameters["ORDER_STATUSES_LOOKUP"]]
+                                 if s in settings["ORDER_STATUSES_LOOKUP"]]
             saver["fields"] = self.get_argument("fields", "").strip().split()
             # Lookup of filters with identifier as key.
             filters = dict([(f["identifier"], f) for f in doc["filters"]])
@@ -902,7 +851,7 @@ class OrdersList(RequestHandler):
                 saver["default_order_sort"] = "asc"
             else:
                 saver["default_order_sort"] = "desc"
-        load_parameters(self.db)
+        load_settings_from_db(self.db)
         self.set_message_flash("Saved configuration.")
         self.see_other("admin_orders_list")
 
@@ -954,7 +903,7 @@ class Database(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        server = utils.get_dbserver()
+        server = orderportal.database.get_server()
         identifier = self.get_argument("identifier", "")
         self.render("admin/database.html",
                     identifier=identifier,
@@ -989,7 +938,7 @@ class Settings(RequestHandler):
     def get(self):
         self.check_admin()
         hidden = "&lt;hidden&gt;"
-        safe_settings = dict([(key, settings[key]) for key in constants.SETTINGS_KEYS])
+        safe_settings = dict([(key, settings[key]) for key in DEFAULT_SETTINGS])
 
         # Hide sensitive data.
         for key in safe_settings:

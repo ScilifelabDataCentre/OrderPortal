@@ -9,22 +9,6 @@ from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 
 
-DESIGN_DOC = {
-    "views": {
-        "menu": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'info') return;
-    if (doc.menu) emit(doc.menu, [doc.name, doc.title]);
-}"""},
-        "name": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'info') return;
-    emit(doc.name, null);
-}"""}
-    }
-}
-
-
 class InfoSaver(saver.Saver):
     doctype = constants.INFO
 

@@ -12,8 +12,9 @@ import urllib.parse
 import couchdb2
 import tornado.web
 
-from orderportal import constants, settings, parameters
+from orderportal import constants, settings
 from orderportal import utils
+import orderportal.database
 
 
 class RequestHandler(tornado.web.RequestHandler):
@@ -21,7 +22,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def prepare(self):
         "Get the database connection and logger."
-        self.db = utils.get_db()
+        self.db = orderportal.database.get_db()
         self.logger = logging.getLogger("orderportal")
 
     def get_template_namespace(self):
@@ -29,7 +30,6 @@ class RequestHandler(tornado.web.RequestHandler):
         result = super(RequestHandler, self).get_template_namespace()
         result["constants"] = constants
         result["settings"] = settings
-        result["parameters"] = parameters
         result["terminology"] = utils.terminology
         result["absolute_reverse_url"] = self.absolute_reverse_url
         result["order_reverse_url"] = self.order_reverse_url

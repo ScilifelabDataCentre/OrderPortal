@@ -5,51 +5,13 @@ import csv
 import tornado.web
 
 import orderportal
-from orderportal import constants, settings, parameters
+from orderportal import constants, settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.order import OrderApiV1Mixin
 from orderportal.group import GroupSaver
 from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler
-
-
-DESIGN_DOC = {
-    "views": {
-        "all": {
-            "reduce": "_count",
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'account') return;
-    emit(doc.modified, null);
-}"""},
-        "api_key": {
-            "map": """function(doc) { 
-    if (doc.orderportal_doctype !== 'account') return;
-    if (!doc.api_key) return;
-    emit(doc.api_key, doc.email);
-}"""},
-        "email": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'account') return;
-    emit(doc.email, [doc.first_name, doc.last_name]);
-}"""},
-        "role": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'account') return;
-    emit(doc.role, doc.email);
-}"""},
-        "status": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'account') return;
-    emit(doc.status, doc.email);
-}"""},
-        "university": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'account') return;
-    emit(doc.university, doc.email);
-}"""}
-    }
-}
 
 
 class AccountSaver(saver.Saver):
@@ -583,11 +545,11 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
             self.see_other("home", error=str(msg))
             return
         # Default ordering by the 'modified' column.
-        if parameters["DEFAULT_ORDER_COLUMN"] == "modified":
+        if settings["DEFAULT_ORDER_COLUMN"] == "modified":
             order_column = (
-                int(parameters["ORDERS_LIST_TAGS"]) # boolean
-                + len(parameters["ORDERS_LIST_FIELDS"]) # list
-                + len(parameters["ORDERS_LIST_STATUSES"]) # list
+                int(settings["ORDERS_LIST_TAGS"]) # boolean
+                + len(settings["ORDERS_LIST_FIELDS"]) # list
+                + len(settings["ORDERS_LIST_STATUSES"]) # list
             )
             if self.is_staff():
                 order_column += 1
@@ -665,11 +627,11 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
             self.see_other("home", error=str(msg))
             return
         # Default ordering by the 'modified' column.
-        if parameters["DEFAULT_ORDER_COLUMN"] == "modified":
+        if settings["DEFAULT_ORDER_COLUMN"] == "modified":
             order_column = (
-                int(parameters["ORDERS_LIST_TAGS"]) # boolean
-                + len(parameters["ORDERS_LIST_FIELDS"]) # list
-                + len(parameters["ORDERS_LIST_STATUSES"]) # list
+                int(settings["ORDERS_LIST_TAGS"]) # boolean
+                + len(settings["ORDERS_LIST_FIELDS"]) # list
+                + len(settings["ORDERS_LIST_STATUSES"]) # list
             )
             if self.is_staff():
                 order_column += 1
@@ -896,7 +858,7 @@ class Login(LoginMixin, RequestHandler):
                     saver.erase_password()
                 msg = "Too many failed login attempts: Your account has been disabled. Contact the admin"
                 # Prepare email message about being disabled.
-                text = parameters[constants.ACCOUNT][constants.DISABLED]
+                text = settings[constants.ACCOUNT][constants.DISABLED]
                 with MessageSaver(rqh=self) as saver:
                     saver.create(text)
                     saver.send(self.get_recipients(text, account))
@@ -957,7 +919,7 @@ class Reset(LoginMixin, RequestHandler):
                 return
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver.reset_password()
-            text = parameters[constants.ACCOUNT][constants.RESET]
+            text = settings[constants.ACCOUNT][constants.RESET]
             try:
                 with MessageSaver(rqh=self) as saver:
                     saver.create(
@@ -1127,7 +1089,7 @@ class Register(RequestHandler):
             self.see_other("register", error=str(msg), **kwargs)
             return
         account = saver.doc
-        text = parameters[constants.ACCOUNT][account["status"]]
+        text = settings[constants.ACCOUNT][account["status"]]
         # Allow staff to avoid sending email to the person when registering an account.
         if not (
             self.is_staff()
@@ -1177,7 +1139,7 @@ class AccountEnable(RequestHandler):
         with AccountSaver(account, rqh=self) as saver:
             saver["status"] = constants.ENABLED
             saver.reset_password()
-        text = parameters[constants.ACCOUNT][constants.ENABLED]
+        text = settings[constants.ACCOUNT][constants.ENABLED]
         with MessageSaver(rqh=self) as saver:
             saver.create(
                 text,

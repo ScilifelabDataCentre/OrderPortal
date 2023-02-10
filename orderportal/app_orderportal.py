@@ -6,11 +6,13 @@ import os.path
 import tornado.web
 import tornado.ioloop
 
-from orderportal import constants, settings, parameters
+from orderportal import constants, settings
 from orderportal import utils
 
 import orderportal.account
 import orderportal.admin
+import orderportal.config
+import orderportal.database
 import orderportal.event
 import orderportal.file
 import orderportal.form
@@ -24,13 +26,13 @@ import orderportal.uimodules
 
 
 def main():
-    utils.load_settings()
-    db = utils.get_db()
-    utils.load_design_documents(db)
+    orderportal.config.load_settings_from_file()
+    db = orderportal.database.get_db()
+    orderportal.database.update_design_documents(db)
     orderportal.admin.update_meta_documents(db)
     orderportal.admin.update_text_documents(db)
     orderportal.admin.load_texts(db)
-    orderportal.admin.load_parameters(db)
+    orderportal.config.load_settings_from_db(db)
 
     url = tornado.web.url
     handlers = [
@@ -361,7 +363,7 @@ def main():
     )
 
     # Add href URLs for the status icons.
-    for key, value in parameters["ORDER_STATUSES_LOOKUP"].items():
+    for key, value in settings["ORDER_STATUSES_LOOKUP"].items():
         value["href"] = f"/static/{key}.png"
 
     application.listen(settings["PORT"], xheaders=True)

@@ -4,7 +4,7 @@ import json
 
 import tornado.web
 
-from orderportal import constants, parameters
+from orderportal import constants, settings
 from orderportal import utils
 
 ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""
@@ -92,11 +92,11 @@ class Markdown(tornado.web.UIModule):
 
 
 class Text(tornado.web.UIModule):
-    "Process the display Markdown text message fetched from the parameters and output."
+    "Process the display Markdown text message fetched from the settings and output."
 
     def render(self, name):
         try:
-            text = parameters[constants.DISPLAY][name]["text"]
+            text = settings[constants.DISPLAY][name]["text"]
             if not text:
                 raise KeyError
         except KeyError:

@@ -21,10 +21,10 @@ for form  {% module Entity(form, icon=False) %}
     <label class="control-label col-sm-2" for="status">
       {{ terminology('Order') }} status filter</label>
     <div class="col-sm-10">
-      <select multiple size="{{ len(parameters['ORDER_STATUSES_LOOKUP'])+1 }}"
+      <select multiple size="{{ len(settings['ORDER_STATUSES_LOOKUP'])+1 }}"
               class="form-control" name="status" id="status">
         <option selected value="">[any]</option>
-        {% for s in parameters['ORDER_STATUSES_LOOKUP'] %}
+        {% for s in settings['ORDER_STATUSES_LOOKUP'] %}
         <option value="{{ s }}">{{ s.capitalize() }}</option>
         {% end %}
       </select>
@@ -58,9 +58,9 @@ for form  {% module Entity(form, icon=False) %}
     <label class="control-label col-sm-2" for="history">
       {{ terminology('Order') }} history</label>
     <div class="col-sm-10">
-      <select multiple size="{{ len(parameters['ORDER_STATUSES_LOOKUP']) }}"
+      <select multiple size="{{ len(settings['ORDER_STATUSES_LOOKUP']) }}"
               class="form-control" name="history" id="history">
-        {% for s in parameters['ORDER_STATUSES_LOOKUP'] %}
+        {% for s in settings['ORDER_STATUSES_LOOKUP'] %}
         <option value="{{ s }}">{{ s.capitalize() }}</option>
         {% end %}
       </select>

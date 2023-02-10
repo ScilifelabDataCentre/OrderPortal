@@ -2,6 +2,7 @@
 An order can be a project application, a request, a report, etc.
 """
 
+import copy
 import os.path
 import re
 import sys
@@ -49,9 +50,6 @@ class Constants:
     IUID_RX = re.compile(r"^[0-9a-f]{32}$")
     DATE_RX = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")  # Works until 9999 CE...
     EMAIL_RX = re.compile(r"^[^@]+@[^@]+\.[^@]+$")
-
-    # The original set of settings keys, populated at the end if this module.
-    SETTINGS_KEYS = set()
 
     # For CouchDB view ranges: CouchDB uses the Unicode Collation Algorithm,
     # which is not the same as the ASCII collation sequence.
@@ -397,8 +395,8 @@ class Constants:
 constants = Constants()
 
 
-# Default settings. Some of these need to be set in the 'site/settings.yaml' file.
-settings = dict(
+# Default settings.
+DEFAULT_SETTINGS = dict(
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
     BASE_URL="http://localhost:8881/",
@@ -474,8 +472,5 @@ settings = dict(
     DISPLAY_TEXT_MARKDOWN_NOTATION_INFO=True,
 )
 
-constants.SETTINGS_KEYS.update(settings.keys())
-
-# In-memory copy of various configuration values such as order statuses and transitions.
-# Read from the database on server startup. Modifiable via the web interface.
-parameters = {}
+# Settings to be modified by 'settings.yaml' file, by computed values, or from database.
+settings = copy.deepcopy(DEFAULT_SETTINGS)
