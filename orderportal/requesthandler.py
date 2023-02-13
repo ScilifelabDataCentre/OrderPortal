@@ -381,14 +381,18 @@ class RequestHandler(tornado.web.RequestHandler):
             infile.close()
         return data
 
-    def get_account(self, email):
+    def get_account(self, email, password=None):
         """Get the account identified by the email address.
-        Raise ValueError if no such account.
+        Check the password, if given. XXX not implemented.
+        Raise ValueError if no such account or wrong password.
         """
         try:
-            return self.get_entity_view("account", "email", email.strip().lower())
+            account = self.get_entity_view("account", "email", email.strip().lower())
         except tornado.web.HTTPError:
             raise ValueError(f"Sorry, no such account: '{email}'")
+        if password:
+            pass
+        return account
 
     def get_account_order_count(self, email):
         "Get the number of orders for the account."

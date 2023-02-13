@@ -12,17 +12,6 @@ from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler
 
 
-def check_password(password):
-    """Check that the password is long and complex enough.
-    Raise ValueError otherwise."""
-    if len(password) < settings["MIN_PASSWORD_LENGTH"]:
-        raise ValueError(
-            "Password must be at least {0} characters long.".format(
-                settings["MIN_PASSWORD_LENGTH"]
-            )
-        )
-
-
 class AccountSaver(saver.Saver):
     doctype = constants.ACCOUNT
 
@@ -43,7 +32,8 @@ class AccountSaver(saver.Saver):
         self["password"] = None
 
     def set_password(self, new):
-        check_password(new)
+        if len(password) < settings["MIN_PASSWORD_LENGTH"]:
+            raise ValueError(f"Password must be at least {settings['MIN_PASSWORD_LENGTH']} characters long.")
         self["code"] = None
         # Bypass ordinary 'set'; avoid saving password, even if hashed.
         self.doc["password"] = utils.hashed_password(new)
@@ -980,17 +970,8 @@ class Password(LoginMixin, RequestHandler):
                 " wrong.Try to request a new code using the 'Reset password' button."
             )
             return
+
         password = self.get_argument("password", "")
-        try:
-            check_password(password)
-        except ValueError as msg:
-            self.see_other(
-                "password",
-                email=self.get_argument("email") or "",
-                code=self.get_argument("code") or "",
-                error=str(msg),
-            )
-            return
         if password != self.get_argument("confirm_password"):
             self.see_other(
                 "password",
@@ -998,9 +979,20 @@ class Password(LoginMixin, RequestHandler):
                 code=self.get_argument("code") or "",
                 error="Password confirmation failed. Not the same!",
             )
+            return
 
-        with AccountSaver(doc=account, rqh=self) as saver:
-            saver.set_password(password)
+        try:
+            with AccountSaver(doc=account, rqh=self) as saver:
+                saver.set_password(password)
+        except ValueError as error:
+            self.see_other(
+                "password",
+                email=self.get_argument("email") or "",
+                code=self.get_argument("code") or "",
+                error=str(error)
+            )
+            return
+
         if not self.current_user:
             self.do_login(account)
         self.see_other("home", message="Password set.")

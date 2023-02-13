@@ -61,7 +61,7 @@ Edit {% module Icon('group') %} {{ group['name'] }}
     <div class="row">
       <div class="col-md-8">
         <label class="control-label" for="members">Members</label>
-        <textarea class="form-control" name="members" id="members"
+        <textarea class="form-control" name="members" id="members" rows="6"
                   >{{ '\n'.join(group['members'] + group['invited']) }}</textarea>
       </div>
     </div>
