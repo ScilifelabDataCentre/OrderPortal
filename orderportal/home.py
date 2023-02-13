@@ -12,6 +12,7 @@ import xlsxwriter
 import yaml
 
 import orderportal
+import orderportal.database
 from orderportal import constants, settings
 from orderportal import saver
 from orderportal import utils
@@ -111,7 +112,7 @@ class Status(RequestHandler):
 
     def get(self):
         result = dict(status="OK")
-        result.update(utils.get_counts(self.db))
+        result.update(orderportal.database.get_counts(self.db))
         self.write(result)
 
 

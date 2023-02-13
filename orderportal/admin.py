@@ -18,330 +18,8 @@ from orderportal import constants, DEFAULT_SETTINGS, settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
+import orderportal.config
 import orderportal.database
-
-
-DEFAULT_ORDER_STATUSES = [
-    dict(
-        identifier=constants.PREPARATION, # Hard-wired! Must be present and enabled.
-        enabled=True,
-        description="The order has been created and is being edited by the user.",
-        edit=["user", "staff", "admin"],
-        attach=["user", "staff", "admin"],
-        action="Prepare",
-    ),
-    dict(
-        identifier=constants.SUBMITTED, # Hard-wired! Must be present and enabled.
-        enabled=True,
-        description="The order has been submitted by the user for consideration.",
-        edit=["staff", "admin"],
-        attach=["staff", "admin"],
-        action="Submit",
-    ),
-    dict(
-        identifier="review",
-        description="The order is under review.",
-        edit=["staff", "admin"],
-        attach=["staff", "admin"],
-        action="Review",
-    ),
-    dict(
-        identifier="queued",
-        description="The order has been queued.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Queue",
-    ),
-    dict(
-        identifier="waiting",
-        description="The order is waiting.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Wait",
-    ),
-    dict(
-        identifier="accepted",
-        description="The order has been checked and accepted.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Accept",
-    ),
-    dict(
-        identifier="rejected",
-        description="The order has been rejected.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Reject",
-    ),
-    dict(
-        identifier="processing",
-        description="The order is being processed in the lab.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Process",
-    ),
-    dict(
-        identifier="active",
-        description="The order is active.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Active",
-    ),
-    dict(
-        identifier="analysis",
-        description="The order results are being analysed.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Analyse",
-    ),
-    dict(
-        identifier="onhold",
-        description="The order is on hold.",
-        edit=["admin"],
-        attach=["admin"],
-        action="On hold",
-    ),
-    dict(
-        identifier="halted",
-        description="The work on the order has been halted.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Halt",
-    ),
-    dict(
-        identifier="aborted",
-        description="The work on the order has been permanently stopped.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Abort",
-    ),
-    dict(
-        identifier="terminated",
-        description="The order has been terminated.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Terminate",
-    ),
-    dict(
-        identifier="cancelled",
-        description="The order has been cancelled.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Cancel",
-    ),
-    dict(
-        identifier="finished",
-        description="The work on the order has finished.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Finish",
-    ),
-    dict(
-        identifier="completed",
-        description="The order has been completed.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Complete",
-    ),
-    dict(
-        identifier="closed",
-        description="All work and other actions for the order have been performed.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Closed",
-    ),
-    dict(
-        identifier="delivered",
-        description="The order results have been delivered.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Deliver",
-    ),
-    dict(
-        identifier="invoiced",
-        description="The order has been invoiced.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Invoice",
-    ),
-    dict(
-        identifier="archived",
-        description="The order has been archived.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Archive",
-    ),
-    dict(
-        identifier="undefined",
-        description="The order has an undefined or unknown status.",
-        edit=["admin"],
-        attach=["admin"],
-        action="Undefine",
-    ),
-]
-
-
-# Minimal, since only 'preparation' and 'submitted' are guaranteed to be enabled.
-DEFAULT_ORDER_TRANSITIONS = dict([(s["identifier"], dict())
-                                  for s in DEFAULT_ORDER_STATUSES])
-DEFAULT_ORDER_TRANSITIONS[constants.PREPARATION][constants.SUBMITTED] = \
-    dict(permission=["admin", "staff", "user"], require_valid=True)
-
-
-# Texts shown in some web pages.
-DEFAULT_TEXTS_DISPLAY = [
-    dict(name="header",
-         description="Header on portal home page.",
-         text="""This is a portal for placing orders. You need to have an account and
-be logged in to create, edit, submit and view orders."""),
-    dict(name="register",
-         description="Registration page text.",
-         text="""In order to place orders, you must have registered an account in this system.
-Your email address is the account name in this portal.
-
-The administrator of the portal will review your account details,
-and enable the account if everything seems fine.
-
-You will receive an email with a link to a page for setting the password
-when the account is enabled.
-
-The personal data you provide in this registration form is to enable
-SciLifeLab to: register and contact you about submitted information;
-carry out administrative tasks and evaluate your submitted
-information; and allow the compilation and analysis of submitted
-information for internal purposes.
-
-The information you provide will be processed in accordance with the
-Swedish law implementing the EU GDPR directive for the protection of
-individuals with regard to the processing of personal data.
-
-By submitting you acknowledge that you have read and understood the
-foregoing and consent to the uses of your information as set out
-above."""),
-    dict(
-        name="registered",
-        description="Text on page after registration.",
-        text="""An activation email will be sent to you from the administrator
-when your account has been enabled. This may take some time."""),
-    dict(
-        name="reset",
-        description="Password reset page text.",
-        text="""Use this page to reset your password. 
-
-An email with a link to a page for setting a new password will be sent
-to you. **This may take a couple of minutes! Check your spam filter.**
-
-The email contains a one-time code for setting a new password, and a link
-to the relevant page. If you loose this code, simply do reset again.
-"""),
-    dict(
-        name="password",
-        description="Password setting page text.",
-        text="""Set the password for your account. You need the one-time code which
-was contained in the URL sent to you by email. **Note that it takes a couple
-of minutes for the email to reach you.**
-
-If the code does not work, it may have been overwritten or already been used.
-Go to [the reset page](/reset) to obtain a new code."""),
-    dict(
-        name="general",
-        description="General information on portal home page.",
-        text="[Add general information about the facility.]"),
-    dict(
-        name="contact",
-        description="Contact page text.",
-        text="[Add information on how to contact the facility.]"),
-    dict(
-        name="about",
-        description="Text on the about us page.",
-        text="[Add information about this site.]"),
-    dict(
-        name="alert",
-        description="Alert text at the top of every page.",
-        text="**NOTE**: This site has not yet been configured."),
-    dict(
-        name="privacy_policy",
-        description="Privacy policy statement; GDPR, etc.",
-        text="""### Privacy policy (GDPR)
-
-The personal data you provide in this registration form is to enable
-SciLifeLab to: register and contact you about submitted information;
-carry out administrative tasks and evaluate your submitted
-information; and allow the compilation and analysis of submitted
-information for internal purposes.
-
-The information you provide will be processed in accordance with the
-Swedish law implementing the EU GDPR directive for the protection of
-individuals with regard to the processing of personal data.
-
-By registering your account, you have acknowledged that you have
-read and understood the foregoing and consent to the uses of your
-information as set out above.
-
-All your personal data is reachable via links from this page and the
-pages for all your orders (link below). The logs for your account
-and orders contains the records of all changes to those items."""),
-]
-
-
-# Message templates for account status changes.
-DEFAULT_TEXTS_ACCOUNT = [
-    dict(status=constants.PENDING,
-         description="Message to admin about a pending account.",
-         recipients=[constants.ADMIN],
-         subject="An account {account} in the {site} is pending approval.",
-         text="""An account {account} in the {site} is pending approval.
-
-Go to {url} to view and enable it.
-"""),
-    dict(status=constants.ENABLED,
-         description="Message to user about enabled account.",
-         recipients=[constants.USER],
-         subject="Your account in the {site} has been enabled.",
-         text="""Your account {account} in the {site} has been enabled.
-
-However, you will first have to set your password for the account.
-
-Go to {password_code_url} to set the password.
-
-In case that link does not work, go to {password_url} and
-fill in your email address and the one-time code {code}.
-
-If you have any questions, contact {support}
-
-Yours sincerely,
-The {site} administrators.
-"""),
-
-    dict(status=constants.RESET,
-         description="Message to user about password reset.",
-         recipients=[constants.USER],
-         subject="The password has been reset for your account in the {site}.",
-         text="""The password has been reset for your account {account} in the {site}.
-
-Go to {password_code_url} to set a new password.
-
-In case that link does not work, go to {password_url} and
-fill in your email address and the one-time code {code}.
-
-If you have any questions, contact {support}
-
-Yours sincerely,
-The {site} administrators.
-"""),
-    dict(status=constants.DISABLED,
-         description="Message to user about disabled account.",
-         recipients=[constants.USER],
-         subject="Your account in the {site} has been disabled.",
-         text="""Your account has been disabled.
-This may be due to too many recent failed login attempts.
-
-To resolve this, please contact {support}
-
-Yours sincerely,
-The {site} administrators.
-""")
-]
 
 
 class MetaSaver(saver.Saver):
@@ -666,7 +344,7 @@ class OrderStatusEnable(RequestHandler):
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
-        load_settings_from_db(self.db)
+        orderportal.config.load_settings_from_db(self.db)
         self.see_other("admin_order_statuses")
         
 
@@ -715,7 +393,7 @@ class OrderStatusEdit(RequestHandler):
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
-        load_settings_from_db(self.db)
+        orderportal.config.load_settings_from_db(self.db)
         self.see_other("admin_order_statuses")
 
 
@@ -765,7 +443,7 @@ class OrderTransitionsEdit(RequestHandler):
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
-        load_settings_from_db(self.db)
+        orderportal.config.load_settings_from_db(self.db)
         self.see_other("admin_order_statuses")
 
     @tornado.web.authenticated
@@ -780,7 +458,7 @@ class OrderTransitionsEdit(RequestHandler):
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
-        load_settings_from_db(self.db)
+        orderportal.config.load_settings_from_db(self.db)
         self.see_other("admin_order_statuses")
 
 
@@ -851,7 +529,7 @@ class OrdersList(RequestHandler):
                 saver["default_order_sort"] = "asc"
             else:
                 saver["default_order_sort"] = "desc"
-        load_settings_from_db(self.db)
+        orderportal.config.load_settings_from_db(self.db)
         self.set_message_flash("Saved configuration.")
         self.see_other("admin_orders_list")
 
@@ -864,6 +542,21 @@ class OrderMessages(RequestHandler):
         self.check_admin()
         self.render("admin/order_messages.html")
 
+
+class Account(RequestHandler):
+    "Page for display and edit of account configuration."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render("admin/account_config.html")
+    
+    @tornado.web.authenticated
+    def post(self):
+        self.check_admin()
+        self.set_message_flash("Saved configuration.")
+        self.see_other("admin_orders_list")
+    
 
 class AccountMessages(RequestHandler):
     "Page for displaying account messages configuration."
@@ -907,8 +600,8 @@ class Database(RequestHandler):
         identifier = self.get_argument("identifier", "")
         self.render("admin/database.html",
                     identifier=identifier,
-                    doc=utils.get_document(self.db, identifier),
-                    counts=utils.get_counts(self.db),
+                    doc=orderportal.database.lookup_document(self.db, identifier),
+                    counts=orderportal.database.get_counts(self.db),
                     db_info=self.db.get_info(),
                     server_data=server(),
                     databases=list(server),
@@ -962,3 +655,326 @@ class Settings(RequestHandler):
             "ORDER_MESSAGES"
         ] = f"&lt;see file {safe_settings['ORDER_MESSAGES_FILE']}&gt;"
         self.render("admin/settings.html", settings=safe_settings)
+
+
+DEFAULT_ORDER_STATUSES = [
+    dict(
+        identifier=constants.PREPARATION, # Hard-wired! Must be present and enabled.
+        enabled=True,
+        description="The order has been created and is being edited by the user.",
+        edit=["user", "staff", "admin"],
+        attach=["user", "staff", "admin"],
+        action="Prepare",
+    ),
+    dict(
+        identifier=constants.SUBMITTED, # Hard-wired! Must be present and enabled.
+        enabled=True,
+        description="The order has been submitted by the user for consideration.",
+        edit=["staff", "admin"],
+        attach=["staff", "admin"],
+        action="Submit",
+    ),
+    dict(
+        identifier="review",
+        description="The order is under review.",
+        edit=["staff", "admin"],
+        attach=["staff", "admin"],
+        action="Review",
+    ),
+    dict(
+        identifier="queued",
+        description="The order has been queued.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Queue",
+    ),
+    dict(
+        identifier="waiting",
+        description="The order is waiting.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Wait",
+    ),
+    dict(
+        identifier="accepted",
+        description="The order has been checked and accepted.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Accept",
+    ),
+    dict(
+        identifier="rejected",
+        description="The order has been rejected.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Reject",
+    ),
+    dict(
+        identifier="processing",
+        description="The order is being processed in the lab.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Process",
+    ),
+    dict(
+        identifier="active",
+        description="The order is active.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Active",
+    ),
+    dict(
+        identifier="analysis",
+        description="The order results are being analysed.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Analyse",
+    ),
+    dict(
+        identifier="onhold",
+        description="The order is on hold.",
+        edit=["admin"],
+        attach=["admin"],
+        action="On hold",
+    ),
+    dict(
+        identifier="halted",
+        description="The work on the order has been halted.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Halt",
+    ),
+    dict(
+        identifier="aborted",
+        description="The work on the order has been permanently stopped.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Abort",
+    ),
+    dict(
+        identifier="terminated",
+        description="The order has been terminated.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Terminate",
+    ),
+    dict(
+        identifier="cancelled",
+        description="The order has been cancelled.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Cancel",
+    ),
+    dict(
+        identifier="finished",
+        description="The work on the order has finished.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Finish",
+    ),
+    dict(
+        identifier="completed",
+        description="The order has been completed.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Complete",
+    ),
+    dict(
+        identifier="closed",
+        description="All work and other actions for the order have been performed.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Closed",
+    ),
+    dict(
+        identifier="delivered",
+        description="The order results have been delivered.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Deliver",
+    ),
+    dict(
+        identifier="invoiced",
+        description="The order has been invoiced.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Invoice",
+    ),
+    dict(
+        identifier="archived",
+        description="The order has been archived.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Archive",
+    ),
+    dict(
+        identifier="undefined",
+        description="The order has an undefined or unknown status.",
+        edit=["admin"],
+        attach=["admin"],
+        action="Undefine",
+    ),
+]
+
+
+# Minimal, since only 'preparation' and 'submitted' are guaranteed to be enabled.
+DEFAULT_ORDER_TRANSITIONS = dict([(s["identifier"], dict())
+                                  for s in DEFAULT_ORDER_STATUSES])
+DEFAULT_ORDER_TRANSITIONS[constants.PREPARATION][constants.SUBMITTED] = \
+    dict(permission=["admin", "staff", "user"], require_valid=True)
+
+
+# Texts shown in some web pages.
+DEFAULT_TEXTS_DISPLAY = [
+    dict(name="header",
+         description="Header on portal home page.",
+         text="""This is a portal for placing orders. You need to have an account and
+be logged in to create, edit, submit and view orders."""),
+    dict(name="register",
+         description="Registration page text.",
+         text="""In order to place orders, you must have registered an account in this system.
+Your email address is the account name in this portal.
+
+The administrator of the portal will review your account details,
+and enable the account if everything seems fine.
+
+You will receive an email with a link to a page for setting the password
+when the account is enabled.
+
+The personal data you provide in this registration form is to enable
+SciLifeLab to: register and contact you about submitted information;
+carry out administrative tasks and evaluate your submitted
+information; and allow the compilation and analysis of submitted
+information for internal purposes.
+
+The information you provide will be processed in accordance with the
+Swedish law implementing the EU GDPR directive for the protection of
+individuals with regard to the processing of personal data.
+
+By submitting you acknowledge that you have read and understood the
+foregoing and consent to the uses of your information as set out
+above."""),
+    dict(
+        name="registered",
+        description="Text on page after registration.",
+        text="""An activation email will be sent to you from the administrator
+when your account has been enabled. This may take some time."""),
+    dict(
+        name="reset",
+        description="Password reset page text.",
+        text="""Use this page to reset your password. 
+
+An email with a link to a page for setting a new password will be sent
+to you. **This may take a couple of minutes! Check your spam filter.**
+
+The email contains a one-time code for setting a new password, and a link
+to the relevant page. If you loose this code, simply do reset again.
+"""),
+    dict(
+        name="password",
+        description="Password setting page text.",
+        text="""Set the password for your account. You need the one-time code which
+was contained in the URL sent to you by email. **Note that it takes a couple
+of minutes for the email to reach you.**
+
+If the code does not work, it may have been overwritten or already been used.
+Go to [the reset page](/reset) to obtain a new code."""),
+    dict(
+        name="general",
+        description="General information on portal home page.",
+        text="[Add general information about the facility.]"),
+    dict(
+        name="contact",
+        description="Contact page text.",
+        text="[Add information on how to contact the facility.]"),
+    dict(
+        name="about",
+        description="Text on the about us page.",
+        text="[Add information about this site.]"),
+    dict(
+        name="alert",
+        description="Alert text at the top of every page.",
+        text="**NOTE**: This site has not yet been configured."),
+    dict(
+        name="privacy_policy",
+        description="Privacy policy statement; GDPR, etc.",
+        text="""### Privacy policy (GDPR)
+
+The personal data you provide in this registration form is to enable
+SciLifeLab to: register and contact you about submitted information;
+carry out administrative tasks and evaluate your submitted
+information; and allow the compilation and analysis of submitted
+information for internal purposes.
+
+The information you provide will be processed in accordance with the
+Swedish law implementing the EU GDPR directive for the protection of
+individuals with regard to the processing of personal data.
+
+By registering your account, you have acknowledged that you have
+read and understood the foregoing and consent to the uses of your
+information as set out above.
+
+All your personal data is reachable via links from this page and the
+pages for all your orders (link below). The logs for your account
+and orders contains the records of all changes to those items."""),
+]
+
+
+# Message templates for account status changes.
+DEFAULT_TEXTS_ACCOUNT = [
+    dict(status=constants.PENDING,
+         description="Message to admin about a pending account.",
+         recipients=[constants.ADMIN],
+         subject="An account {account} in the {site} is pending approval.",
+         text="""An account {account} in the {site} is pending approval.
+
+Go to {url} to view and enable it.
+"""),
+    dict(status=constants.ENABLED,
+         description="Message to user about enabled account.",
+         recipients=[constants.USER],
+         subject="Your account in the {site} has been enabled.",
+         text="""Your account {account} in the {site} has been enabled.
+
+However, you will first have to set your password for the account.
+
+Go to {password_code_url} to set the password.
+
+In case that link does not work, go to {password_url} and
+fill in your email address and the one-time code {code}.
+
+If you have any questions, contact {support}
+
+Yours sincerely,
+The {site} administrators.
+"""),
+
+    dict(status=constants.RESET,
+         description="Message to user about password reset.",
+         recipients=[constants.USER],
+         subject="The password has been reset for your account in the {site}.",
+         text="""The password has been reset for your account {account} in the {site}.
+
+Go to {password_code_url} to set a new password.
+
+In case that link does not work, go to {password_url} and
+fill in your email address and the one-time code {code}.
+
+If you have any questions, contact {support}
+
+Yours sincerely,
+The {site} administrators.
+"""),
+    dict(status=constants.DISABLED,
+         description="Message to user about disabled account.",
+         recipients=[constants.USER],
+         subject="Your account in the {site} has been disabled.",
+         text="""Your account has been disabled.
+This may be due to too many recent failed login attempts.
+
+To resolve this, please contact {support}
+
+Yours sincerely,
+The {site} administrators.
+""")
+]

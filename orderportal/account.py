@@ -14,6 +14,17 @@ from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler
 
 
+def check_password(password):
+    """Check that the password is long and complex enough.
+    Raise ValueError otherwise."""
+    if len(password) < settings["MIN_PASSWORD_LENGTH"]:
+        raise ValueError(
+            "Password must be at least {0} characters long.".format(
+                settings["MIN_PASSWORD_LENGTH"]
+            )
+        )
+
+
 class AccountSaver(saver.Saver):
     doctype = constants.ACCOUNT
 
@@ -34,7 +45,7 @@ class AccountSaver(saver.Saver):
         self["password"] = None
 
     def set_password(self, new):
-        utils.check_password(new)
+        check_password(new)
         self["code"] = None
         # Bypass ordinary 'set'; avoid saving password, even if hashed.
         self.doc["password"] = utils.hashed_password(new)
@@ -973,7 +984,7 @@ class Password(LoginMixin, RequestHandler):
             return
         password = self.get_argument("password", "")
         try:
-            utils.check_password(password)
+            check_password(password)
         except ValueError as msg:
             self.see_other(
                 "password",

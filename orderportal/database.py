@@ -28,7 +28,7 @@ def update_design_documents(db):
         logger.info("Updated 'account' design document.")
     if db.put_design("event", EVENT_DESIGN_DOC):
         logger.info("Updated 'event' design document.")
-    if db.put_design("file", EVENT_DESIGN_DOC):
+    if db.put_design("file", FILE_DESIGN_DOC):
         logger.info("Updated 'file' design document.")
     if db.put_design("form", FORM_DESIGN_DOC):
         logger.info("Updated 'form' design document.")
@@ -53,6 +53,56 @@ def update_design_documents(db):
         logger.info("Updated 'order' design document.")
     if db.put_design("text", TEXT_DESIGN_DOC):
         logger.info("Updated 'text' design document.")
+
+
+def get_count(db, designname, viewname, key=None):
+    "Get the reduce value for the name view and the given key."
+    if key is None:
+        view = db.view(designname, viewname, reduce=True)
+    else:
+        view = db.view(designname, viewname, key=key, reduce=True)
+    try:
+        return list(view)[0].value
+    except IndexError:
+        return 0
+
+
+def get_counts(db):
+    "Get the counts for the most important types of entities in the database."
+    return dict(n_orders=get_count(db, "order", "status"),
+                n_forms=get_count(db, "form", "all"),
+                n_accounts=get_count(db, "account", "all"),
+                n_documents=len(db))
+
+
+def lookup_document(db, identifier):
+    """Lookup the database document by identifier, else None.
+    The identifier may be an account email, account API key, file name, info name,
+    order identifier, or '_id' of the CouchDB document.
+    """
+    if not identifier:          # If empty string, database info is returned.
+        return None
+    for designname, viewname in [
+        ("account", "email"),
+        ("account", "api_key"),
+        ("file", "name"),
+        ("info", "name"),
+        ("order", "identifier"),
+    ]:
+        try:
+            view = db.view(
+                designname, viewname, key=identifier, reduce=False, include_docs=True
+            )
+            result = list(view)
+            if len(result) == 1:
+                return result[0].doc
+        except KeyError:
+            pass
+    try:
+        return db[identifier]
+    except couchdb2.NotFoundError:
+        return None
+
 
 
 ACCOUNT_DESIGN_DOC = {

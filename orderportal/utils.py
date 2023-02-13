@@ -8,6 +8,7 @@ import mimetypes
 import uuid
 
 import couchdb2
+import htmlgenerator as hg
 import markdown
 import tornado.web
 import tornado.escape
@@ -30,58 +31,9 @@ def terminology(word):
     return word
 
 
-def get_count(db, designname, viewname, key=None):
-    "Get the reduce value for the name view and the given key."
-    if key is None:
-        view = db.view(designname, viewname, reduce=True)
-    else:
-        view = db.view(designname, viewname, key=key, reduce=True)
-    try:
-        return list(view)[0].value
-    except IndexError:
-        return 0
-
-
-def get_counts(db):
-    "Get the counts for the most important types of entities in the database."
-    return dict(n_orders=get_count(db, "order", "status"),
-                n_forms=get_count(db, "form", "all"),
-                n_accounts=get_count(db, "account", "all"),
-                n_documents=len(db))
-
-
 def get_iuid():
     "Return a unique instance identifier."
     return uuid.uuid4().hex
-
-
-def get_document(db, identifier):
-    """Get the database document by identifier, else None.
-    The identifier may be an account email, account API key, file name, info name,
-    order identifier, or '_id' of the CouchDB document.
-    """
-    if not identifier:          # If empty string, database info is returned.
-        return None
-    for designname, viewname in [
-        ("account", "email"),
-        ("account", "api_key"),
-        ("file", "name"),
-        ("info", "name"),
-        ("order", "identifier"),
-    ]:
-        try:
-            view = db.view(
-                designname, viewname, key=identifier, reduce=False, include_docs=True
-            )
-            result = list(view)
-            if len(result) == 1:
-                return result[0].doc
-        except KeyError:
-            pass
-    try:
-        return db[identifier]
-    except couchdb2.NotFoundError:
-        return None
 
 
 def timestamp(days=None):
@@ -173,17 +125,6 @@ def get_json(id, type):
     result["site"] = settings["SITE_NAME"]
     result["timestamp"] = timestamp()
     return result
-
-
-def check_password(password):
-    """Check that the password is long and complex enough.
-    Raise ValueError otherwise."""
-    if len(password) < settings["MIN_PASSWORD_LENGTH"]:
-        raise ValueError(
-            "Password must be at least {0} characters long.".format(
-                settings["MIN_PASSWORD_LENGTH"]
-            )
-        )
 
 
 def hashed_password(password):

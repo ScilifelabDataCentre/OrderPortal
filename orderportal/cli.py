@@ -59,9 +59,9 @@ def counts():
     "Output counts of database entities."
     db = orderportal.database.get_db()
     orderportal.database.update_design_documents(db)
-    click.echo(f"{utils.get_count(db, 'order', 'owner'):>5} orders")
-    click.echo(f"{utils.get_count(db, 'form', 'all'):>5} forms")
-    click.echo(f"{utils.get_count(db, 'account', 'all'):>5} accounts")
+    click.echo(f"{orderportal.database.get_count(db, 'order', 'owner'):>5} orders")
+    click.echo(f"{orderportal.database.get_count(db, 'form', 'all'):>5} forms")
+    click.echo(f"{orderportal.database.get_count(db, 'account', 'all'):>5} accounts")
 
 
 @cli.command()
@@ -106,9 +106,9 @@ def undump(dumpfile, progressbar):
         raise click.ClickException(str(error))
     utils.load_design_documents(db) # Just in case; probably not really needed.
     if (
-        utils.get_count(db, "account", "all") != 0
-        or utils.get_count(db, "form", "all") != 0
-        or utils.get_count(db, "order", "form") != 0
+        orderportal.database.get_count(db, "account", "all") != 0
+        or orderportal.database.get_count(db, "form", "all") != 0
+        or orderportal.database.get_count(db, "order", "form") != 0
     ):
         raise click.ClickException(
             f"The database '{settings['DATABASE_NAME']}' contains data."
@@ -240,7 +240,7 @@ def output(identifier):
     The identifier may be an account email, account API key, file name, info name,
     order identifier, or '_id' of the CouchDB document.
     """
-    doc = utils.get_document(orderportal.database.get_db(), identifier)
+    doc = orderportal.database.lookup_document(orderportal.database.get_db(), identifier)
     if doc is None:
         raise click.ClickException("No such item in the database.")
     click.echo(json.dumps(doc, ensure_ascii=False, indent=2))
