@@ -1,23 +1,11 @@
 "News item handling; news announcements for home page."
 
-import logging
 import tornado.web
 
 from orderportal import constants, settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
-
-
-DESIGN_DOC = {
-    "views": {
-        "modified": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'news') return;
-    emit(doc.modified, null);
-}"""}
-    }
-}
 
 
 class NewsSaver(saver.Saver):
@@ -28,7 +16,7 @@ class News(RequestHandler):
     "List all news items."
 
     def get(self):
-        self.render("news.html", news_items=self.get_news())
+        self.render("news/all.html", news_items=self.get_news())
 
 
 class NewsCreate(RequestHandler):

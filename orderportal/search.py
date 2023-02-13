@@ -1,6 +1,5 @@
 "Search orders page."
 
-import logging
 import pprint
 import urllib.parse
 
@@ -84,7 +83,7 @@ class Search(RequestHandler):
             for id in reduce(lambda i, j: i.intersection(j), id_sets):
                 orders[id] = self.get_entity(id, doctype=constants.ORDER)
         # Convert to list; keep the orders that are readable by the user.
-        if self.is_staff():
+        if self.am_staff():
             orders = list(orders.values())
         else:
             orders = [

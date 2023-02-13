@@ -1,0 +1,228 @@
+{# Admin orders list edit page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}{{ terminology('Orders') }} list configuration{% end %}
+{% block body_title %}{{ terminology('Orders') }} list configuration{% end %}
+
+{% block action_content %}
+{% module CancelButton(reverse_url('home')) %}
+{% end %} {# block action_content #}
+
+{% block main_content %}
+{% module Form(reverse_url('admin_orders_list'), fields) %}
+
+<form action="{{ reverse_url('admin_orders_list') }}" method="POST" role="form">
+  {% module xsrf_form_html() %}
+
+  <div class="row form-group">
+    <div class="col-md-12">
+      <label class="control-label" for="owner_university">
+        {{ terminology('Order') }} owner university</label>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="owner_university" name="owner_university"
+                 value="yes"
+                 {{ settings['ORDERS_LIST_OWNER_UNIVERSITY'] and 'checked' or '' }}>
+          Yes, display the university of the {{ terminology('order') }} owner
+          in the {{ terminology('orders') }} list.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-12">
+      <label class="control-label" for="owner_department">
+        {{ terminology('Order') }} owner department</label>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="owner_department" name="owner_department"
+                 value="yes"
+                 {{ settings['ORDERS_LIST_OWNER_DEPARTMENT'] and 'checked' or '' }}>
+          Yes, display the department of the {{ terminology('order') }} owner
+          in the {{ terminology('orders') }} list.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-12">
+      <label class="control-label" for="owner_gender">
+        {{ terminology('Order') }} owner gender</label>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="owner_gender" name="owner_gender" value="yes"
+                 {{ settings['ORDERS_LIST_OWNER_GENDER'] and 'checked' or '' }}>
+          Yes, display the gender of the {{ terminology('order') }} owner
+          in the {{ terminology('orders') }} list.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-12">
+      <label class="control-label" for="tags">
+        {{ terminology('Orders') }} list tags</label>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="tags" name="tags" value="yes"
+                 {{ settings['ORDERS_LIST_TAGS'] and 'checked' or '' }}>
+          Yes, display the tags for an {{ terminology('order') }} in the
+          {{ terminology('orders') }} list.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-12">
+      <label class="control-label" for="statuses">
+        {{ terminology('Orders') }} list statuses</label>
+      {% for target in settings['ORDER_STATUSES_LOOKUP'] %}
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" name="statuses" value="{{ target }}"
+                 {{ target in settings['ORDERS_LIST_STATUSES'] and 'checked' or '' }}>
+          {{ target }}
+        </label>
+      </div>
+      {% end %}
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-12">
+      <div class="row">
+        <div class="col-md-4">
+          <label class="control-label" for="fields">
+            {{ terminology('Orders') }} list fields</label>
+          <textarea id="fields" name="fields" class="form-control" rows="4"
+                    >{{ '\n'.join(settings['ORDERS_LIST_FIELDS']) }}</textarea>
+        </div>
+      </div>
+      <span class="help-block">
+        Display a column for each {{ terminology('order') }} field given by
+        its identifier.
+        One field identifier per line.
+        The field does not have to exist in every {{ terminology('order') }}.
+      </span>
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-12">
+      <label class="control-label" for="orders_filter_field_delete">
+        Delete {{ terminology('orders') }} filter field(s)</label>
+      {% for f in settings['ORDERS_FILTER_FIELDS'] %}
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="orders_filter_field_delete"
+                 name="orders_filter_field_delete" value="{{ f['identifier'] }}">
+          {{ f.get('label') or f['identifier'] }}
+        </label>
+      </div>
+      {% end %}
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-12">
+      <div class="row">
+        <div class="col-md-8">
+          <label class="control-label" for="orders_filter_field">
+            Add {{ terminology('orders') }} filter field</label>
+          <textarea id="orders_filter_field" name="orders_filter_field"
+                    class="form-control" rows="6"></textarea>
+        </div>
+      </div>
+      <span class="help-block">
+        Specification for an order field to use as filter in the orders
+        list. YAML format must be used to specify a dictionary,
+        where <i>identifier</i> (a string) and <i>values</i> (a list of
+        strings" are required. <i>label</i> is optional. An example:
+        <pre>
+identifier: assigned_node
+label: Assigned node
+values:
+  - Stockholm
+  - "Uppsala SNP&SEQ"
+  - Uppsala UGC
+  - Not assigned
+</pre>
+      </span>
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-12">
+      <div class="row">
+        <div class="col-md-4">
+          <label for="orders_most_recent">Max most recent</label>
+          <input type="number" id="orders_most_recent" name="orders_most_recent"
+                 class="form-control" min="10"
+                 value="{{ settings['DISPLAY_ORDERS_MOST_RECENT'] }}">
+        </div>
+      </div>
+    </div>
+    <span class="help-block">
+      The maximum number of most recent {{ terminology('orders') }} fetched by
+      default for the {{ terminology('orders') }} list.
+    </span>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-12">
+      <label class="control-label" for="display">
+        Default column to sort {{ terminology('orders') }} list by
+      </label>
+      <div class="radio">
+        <label>
+          <input type="radio" name="default_order_column" value="identifier"
+                 {{ settings['DEFAULT_ORDER_COLUMN'] == 'identifier' and 'checked' }}>
+          Identifier
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" name="default_order_column" value="modified"
+                 {{ settings['DEFAULT_ORDER_COLUMN'] == 'modified' and 'checked' }}>
+          Modified
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-12">
+      <label class="control-label" for="display">
+        Default {{ terminology('orders') }} list sort direction</label>
+      <div class="radio">
+        <label>
+          <input type="radio" name="default_order_sort" value="desc"
+                 {{ settings['DEFAULT_ORDER_SORT'] == 'desc' and 'checked' }}>
+          Descending
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" name="default_order_sort" value="asc"
+                 {{ settings['DEFAULT_ORDER_SORT'] == 'asc' and 'checked' }}>
+          Ascending
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-3">
+      <label class="control-label"></label>
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+    </div>
+  </div>
+
+</form>
+{% end %} {# block main_content #}

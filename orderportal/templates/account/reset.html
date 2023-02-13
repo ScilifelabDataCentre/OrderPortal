@@ -1,0 +1,49 @@
+{# Reset password page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Reset password{% end %}
+{% block body_title %}Reset password{% end %}
+
+{% block action_content %}
+{% module CancelButton(reverse_url('home')) %}
+{% end %} {# block action_content #}
+
+{% block main_content %}
+
+<div class="well">
+  {% module Text('reset', origin=reverse_url('reset')) %}
+</div>
+
+<form action="{{ reverse_url('reset') }}"
+      method="POST" role="form">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-md-6">
+        <label class="control-label" for="email">Email</label>
+        <input type="email" class="form-control"
+               name="email" id="email"
+               value="{{ email or ''}}">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
+      </div>
+    </div>
+    <span class="help-block">
+      Your email address is name of your account in this portal.
+    </span>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-warning btn-block">
+          <span class="glyphicon glyphicon-step-backward"></span> Reset</button>
+      </div>
+    </div>
+  </div>
+
+</form>
+{% end %} {# block main_content #}

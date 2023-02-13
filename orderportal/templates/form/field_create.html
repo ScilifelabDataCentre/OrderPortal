@@ -1,0 +1,372 @@
+{# Form field create page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Create field in form '{{ form['title'] }}'{% end %}
+{% block body_title %}Create field in form '{{ form['title'] }}'{% end %}
+
+{% block action_content %}
+{% module CancelButton(reverse_url('form', form['_id'])) %}
+{% end %} {# block action_content #}
+
+{% block main_content %}
+<form action="{{ reverse_url('field_create', form['_id']) }}"
+      method="POST" role="form">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-md-4">
+        <label class="control-label" for="group">Group</label>
+        <select class="form-control" name="group" id="group">
+          <option value="">[top level]</option>
+          {% for field in fields %}
+            {% if field['type'] == constants.GROUP %}
+              <option>{{ field['identifier'] }}</option>
+            {% end %}
+          {% end %}
+        </select>
+        <span style="color:red; margin-right: 2em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Parent group for the field. May be edited later.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group has-feedback">
+    <label class="control-label" for="identifier">Identifier</label>
+    <div class="row">
+      <div class="col-md-4">
+        <input type="text" class="form-control"
+               name="identifier" id="identifier">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
+      </div>
+      <div class="col-md-4">
+        <select class="form-control" id="_identifier">
+          <option value="" disabled selected>[identifiers in other forms]</option>
+          {% for identifier in identifiers %}
+          <option>{{ identifier }}</option>
+          {% end %}
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Identifier for the field, which must be unique within this
+        form. It must contain only alphanumerical characters and
+        underscore; no blanks! It is case sensitive.
+        <strong>NOTE:</strong> Cannot be changed once field has been created.
+        <br>
+        The pull-down menu contains all identifiers in other enabled
+        forms, to assist in making forms more coherent.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+        <label class="control-label" for="label">Label</label>
+        <input type="text" class="form-control" name="label" id="label">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Label to display for the field in the {{ terminology('order') }} form.
+        The identifier will be used if this is not provided.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label" for="type">Type</label>
+        <select class="form-control visible-if-source"
+                name="type" id="type">
+          {% for type in constants.TYPES %}
+          <option value="{{ type }}">{{ type }}</option>
+          {% end %}
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Data type for the field.
+        <strong>NOTE:</strong> Cannot be changed once field has been created.
+        <button type="button" class="btn btn-default btn-sm"
+                data-toggle="collapse" data-target="#_details_datatypes">
+          <span class="glyphicon glyphicon-triangle-bottom"></span>
+          Details
+        </button>
+        <div id="_details_datatypes" class="collapse">
+          {% include 'details_datatypes.html' %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group visible-if"
+       data-if-id="type"
+       data-if-val="group">
+    <div class="row">
+      <div class="col-md-6">
+        <label class="control-label" for="initial_display">
+          Initial display
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="initial_display" id="initial_display"
+                   value="yes"> Yes
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        The fields of the group are shown already when the page is
+        opened. This works only for groups at the top level.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group visible-if"
+       data-if-id="type"
+       data-if-val="select">
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label" for="select">Select values</label>
+        <textarea class="form-control" name="select" rows="4"></textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        One value per line. A label for a group of options is denoted
+        by a leading dash '-'; this is just a group label, and not an
+        option in itself. May be edited later.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group visible-if"
+       data-if-id="type"
+       data-if-val="select">
+    <div class="row">
+      <div class="col-md-4">
+        <label class="control-label" for="display">Display</label>
+        <div class="radio">
+          <label>
+            <input type="radio" name="display" value="menu" checked>Menu
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="display" value="radio">
+            Radio buttons, on the same line
+          </label>
+        </div>
+        <div class="radio">
+          <label>
+            <input type="radio" name="display" value="radio-newline">
+            Radio buttons, one per line
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Type of display to use for the select field.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group visible-if"
+       data-if-id="type"
+       data-if-val="multiselect">
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label" for="multiselect">Multiselect values</label>
+        <textarea class="form-control" name="multiselect" rows="4"></textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        One value per line. A label for a group of options is denoted
+        by a leading dash '-'; this is just a group label, and not an
+        option in itself. May be edited later.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group visible-if"
+       data-if-id="type"
+       data-if-val="table">
+    <div class="row">
+      <div class="col-md-8">
+        <label class="control-label" for="table">Table columns</label>
+        <textarea class="form-control" name="table" rows="4"></textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        One line defines one column in the table. May be edited later.
+        <button type="button" class="btn btn-default btn-sm"
+                data-toggle="collapse" data-target="#_details_table">
+          <span class="glyphicon glyphicon-triangle-bottom"></span>
+          Details
+        </button>
+        <div id="_details_table" class="collapse">
+          {% include 'details_table.html' %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+        <label class="control-label" for="required">Required</label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="required" id="required" value="yes">Yes
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Require that the field must have a value specified in the
+        {{ terminology('order') }}. If no value, then the
+        {{ terminology('order') }} is incomplete, which means it cannot 
+        be submitted.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+        <label class="control-label" for="restrict_read">
+          Restricted read
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="restrict_read"
+                   id="restrict_read"
+                   value="yes">
+            Yes
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        The field is not visible to the user, only to admin and staff.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-6">
+        <label class="control-label" for="restrict_write">
+          Restricted write
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="restrict_write"
+                   id="restrict_write"
+                   value="yes">
+            Yes
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        The field visible to the users, but can be edited only by admin and staff.
+      </div>
+    </div>
+  </div>
+ 
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-8">
+        <label class="control-label" for="erase_on_clone">
+          Erase on clone
+        </label>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"
+                   name="erase_on_clone"
+                   id="erase_on_clone"
+                   value="true">
+            Yes
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Erase the value of the field in a new {{ terminology('order') }}
+        when cloning. This has no effect on fields of
+        type <b>group</b>.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+        <label class="control-label" for="description">Description</label>
+        <textarea class="form-control" name="description" id="description"></textarea>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        Description to display in the {{ terminology('order') }} to help
+        the user fill in the field correctly, using
+        <a href="{{ constants.MARKDOWN_URL }}" target="_blank">Markdown</a>
+        notation for formatting.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-success btn-block">
+          <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+      </div>
+    </div>
+  </div>
+
+</form>
+{% end %} {# block main_content #}
+
+{% block javascript_code %}
+<script>
+$(function() {
+  $("#_identifier").change(function(event) {
+    $("#identifier").val(event.target.value);
+  });
+});
+</script>
+<script src="{{ static_url('field_visible_if.js') }}"></script>
+{% end %}
+
+{% block javascript_autofocus %}
+<script>
+  $(function(){ $("#group").focus(); });
+</script>
+{% end %}

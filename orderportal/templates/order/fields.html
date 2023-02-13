@@ -1,0 +1,181 @@
+{# Order fields recursive display. #}
+
+{% for field in fields %}
+
+{# Check if field may not be viewed by the current user. #}
+{% if field['restrict_read'] and not am_staff %}
+{% continue %}
+{% end %}
+
+{# Is there a visibility condition? If so, check it. #}
+{% set fid = field.get('visible_if_field') %}
+{% if fid and str(order['fields'].get(fid)).lower() not in str(field.get('visible_if_value')).lower().split('|') %}
+{% continue %}
+{% end %}
+
+{% set label = field.get('label') or field['identifier'].capitalize().replace('_', ' ') %}
+
+{% if field['type'] == constants.GROUP %}
+<tr>
+  <th>
+    <div style="padding-left:{{ 1.5*field['depth'] }}em;">
+      {% if field['depth'] == 0 %}
+      <button type="button" class="btn btn-default btn-lg"
+              data-toggle="collapse" data-target="#{{ field['identifier'] }}">
+        <span class="glyphicon glyphicon-triangle-bottom"></span>
+        {{ label }}
+      </button>
+      {% else %}
+      {{ label }}
+      {% end %}
+      {% if field.get('description') %}
+      <href data-toggle="collapse"
+            data-target="#_collapsible_{{ field['identifier'] }}"
+            style="padding-left:1em;">
+        <span class="glyphicon glyphicon-info-sign"></span>
+      </href>
+      {% end %}
+    </div>
+  </th>
+  <td>
+    {% if field.get('description') %}
+    <div id="_collapsible_{{ field['identifier'] }}" class="collapse small">
+      {% module Markdown(field.get('description')) %}
+    </div>
+    {% end %}
+  </td>
+
+  <td>
+    {% if field['restrict_read'] %}
+    <span class="glyphicon glyphicon-eye-open"
+          title="Readable by admin and staff only.">
+    </span>
+    {% end %}
+    {% if field['restrict_write'] %}
+    <span class="glyphicon glyphicon-pencil"
+          title="Writeable by admin only.">
+    </span>
+    {% end %}
+    {% if field['identifier'] in order['invalid'] %}
+    <span class="text-danger">
+      <span class="glyphicon glyphicon-remove"></span>
+      {{ order['invalid'][field['identifier']] }}
+    </span>
+    {% else %}
+    <span class="text-success">
+      <span class="glyphicon glyphicon-ok"></span>
+      OK
+    </span>
+    {% end %}
+  </td>
+</tr>
+
+{# Recursion into fields of this group: 'include' cannot be used! #}
+{% if field['fields'] %}
+{% set default_show = field.get('default_show') %}
+
+{% if field['depth'] == 0 %}
+<tbody id="{{ field['identifier'] }}"
+       class="collapse {{ field.get('initial_display') and 'in' or '' }}">
+{% end %}
+
+  {# Recursion: 'include' cannot be used! #}
+  {% module Template('order/fields.html', order=order, fields=field['fields'], am_staff=am_staff) %}
+
+{% if field['depth'] == 0 %}
+</tbody>
+{% end %}
+
+{% end %} {# if field['fields'] #}
+
+{% else %} {# if field['type'] == constants.GROUP #}
+<tr>
+  <th>
+    <div style="padding-left:{{ 1.5*field['depth'] }}em;">
+      {{ label }}
+      {% if field.get('description') %}
+      <href data-toggle="collapse"
+            data-target="#_collapsible_{{ field['identifier'] }}"
+            style="padding-left:1em;">
+        <span class="glyphicon glyphicon-info-sign"></span>
+      </href>
+      {% end %}
+    </div>
+  </th>
+  <td>
+    {% set value = order['fields'].get(field['identifier']) %}
+    {% if field['type'] == constants.TEXT %}
+      {% module Markdown(value or '-') %}
+    {% elif field['type'] == constants.BOOLEAN %}
+      {% if value == True %}
+        {{ field.get('selection') == 'yes_no' and 'Yes' or 'True' }}
+      {% elif value == False %}
+        {{ field.get('selection') == 'yes_no' and 'No' or 'False' }}
+      {% else %}
+        -
+      {% end %}
+    {% elif field['type'] == constants.MULTISELECT %}
+      {% if value %}
+      <p class="pre">{{ '\n'.join(value) }}</p>
+      {% else %}
+      -
+      {% end %}
+    {% elif field['type'] == constants.TABLE %}
+      <table class="table table-bordered table-condensed">
+        {% module TableRows(field, value) %}
+      </table>
+    {% elif field['type'] == constants.FILE %}
+      {% if value is None %}
+      -
+      {% else %}
+      file <a href="{{ reverse_url('order_file', order['_id'], value) }}">{{ value }}</a>
+      {% end %}
+
+    {% else %} {# All other field types. #}
+      {% if value is None %}
+      -
+      {% else %}
+      {{ value }}
+      {% end %}
+    {% end %}
+  </td>
+  <td>
+    {% if field['restrict_read'] %}
+    <span class="glyphicon glyphicon-eye-open"
+          title="Readable by admin and staff only.">
+    </span>
+    {% end %}
+    {% if field['restrict_write'] %}
+    <span class="glyphicon glyphicon-pencil"
+          title="Writeable by admin only.">
+    </span>
+    {% end %}
+    {% if field['identifier'] in order['invalid'] %}
+    <span class="text-danger">
+      <span class="glyphicon glyphicon-remove"></span>
+      {{ order['invalid'][field['identifier']] }}
+    </span>
+    {% elif value in (None, '') %}
+    <span class="text-warning">
+      <span class="glyphicon glyphicon-question-sign"></span>
+      no value OK
+    </span>
+    {% else %}
+    <span class="text-success">
+      <span class="glyphicon glyphicon-ok"></span>
+      OK
+    </span>
+    {% end %}
+  </td>
+</tr>
+
+{% if field.get('description') %}
+<tr id="_collapsible_{{ field['identifier'] }}" class="collapse">
+  <td></td>
+  <td class="left small">{% module Markdown(field.get('description')) %}</td>
+</tr>
+{% end %}
+
+{% end %} {# if field['type'] == constants.GROUP #}
+
+{% end %} {# for field in fields #}

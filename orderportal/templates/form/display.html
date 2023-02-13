@@ -1,0 +1,423 @@
+{# Form page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Form: {{ form['title'] }}{% end %}
+
+{% block container %}
+<div class="container-fluid">
+{% end %}
+
+{% block body_title %}Form: {{ form['title'] }}{% end %}
+
+{% block body_header_alt_format %}
+<a href="{{ reverse_url('form_api', form['_id']) }}">
+  {% module Icon('json') %} JSON
+</a>
+{% end %}
+
+{% block action_content %}
+{% if form['status'] == constants.PENDING %}
+<p>
+  <form action="{{ reverse_url('form_testing', form['_id']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <button type="submit" class="btn btn-default btn-lg btn-block">
+      Set to {% module Icon('testing', label=True) %}
+    </button>
+  </form>
+</p>
+<p>
+  <form action="{{ reverse_url('form_enable', form['_id']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <button type="submit" class="btn btn-default btn-lg btn-block"
+            onclick="return confirm('Cannot be undone! Really enable?');">
+      Set to {% module Icon('enabled', label=True) %}
+    </button>
+  </form>
+</p>
+
+{% elif form['status'] == constants.TESTING %}
+<p>
+  <form action="{{ reverse_url('order_create') }}" method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <input type="hidden" name="form" value="{{ form['_id'] }}">
+    <button type="submit" class="btn btn-success btn-block">
+      <span class="glyphicon glyphicon-plus"></span> Create {{ terminology('order') }}
+    </button>
+  </form>
+</p>
+<p>
+  <form action="{{ reverse_url('form_pending', form['_id']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <button type="submit" class="btn btn-default btn-block">
+      Set to {% module Icon('pending', label=True) %}
+    </button>
+  </form>
+</p>
+
+{% elif form['status'] == constants.ENABLED %}
+<p>
+  <form action="{{ reverse_url('order_create') }}" method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <input type="hidden" name="form" value="{{ form['_id'] }}">
+    <button type="submit" class="btn btn-success btn-block">
+      <span class="glyphicon glyphicon-plus"></span> Create {{ terminology('order') }}
+    </button>
+  </form>
+</p>
+<p>
+  <form action="{{ reverse_url('form_disable', form['_id']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <button type="submit" class="btn btn-default btn-block"
+            onclick="return confirm('Cannot be undone! Really disable?');">
+      {% module Icon('disabled') %} Disable
+    </button>
+  </form>
+</p>
+{% end %} {# if form['status'] == ... #}
+
+{% if allow_delete %}
+<p>
+  <form action="{{ reverse_url('form', form['_id']) }}" method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <input type="hidden" name="_http_method" value="delete">
+    <button type="submit" class="btn btn-danger btn-block"
+            onclick="return confirm('Cannot be undone! Really delete?');">
+      <span class="glyphicon glyphicon-trash"></span> Delete
+    </button>
+  </form>
+</p>
+{% end %} {# if allow_delete #}
+
+<p>
+  <form action="{{ reverse_url('form_clone', form['_id']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <button type="submit" class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-plus-sign"></span> Clone
+    </button>
+  </form>
+</p>
+<p>
+  <form action="{{ reverse_url('form_aggregate', form['_id']) }}"
+        method="GET" role="form">
+    <button type="submit" class="btn btn-info btn-block">
+      <span class="glyphicon glyphicon-th"></span> Aggregate
+    </button>
+  </form>
+</p>
+{% end %} {# block action_content #}
+
+{% block main_content %}
+<div class="panel panel-default">
+  <div class="panel-body">
+    <form action="{{ reverse_url('form_edit', form['_id']) }}"
+          method="GET" role="form" class="panel-form pull-right">
+      <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-edit"></span>
+        Edit
+      </button>
+    </form>
+    <table class="table-condensed table-fields">
+      <tr>
+        <th>Version</th>
+        <td>{{ form.get('version') or '-' }}</td>
+      </tr>
+      <tr>
+        <th>Description</th>
+        <td>{% module Markdown(form.get('description')) %}</td>
+      </tr>
+      <tr>
+        <th>Instruction</th>
+        <td>{% module Markdown(form.get('instruction')) %}</td>
+      </tr>
+      <tr>
+        <th>Disclaimer</th>
+        <td>{% module Markdown(form.get('disclaimer')) %}</td>
+      </tr>
+      <tr>
+        <th>{{ terminology('Orders') }}</th>
+        <td>
+          <a class="badge"
+             href="{{ reverse_url('form_orders', form['_id']) }}">
+            {{ order_count }}
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <th>Status</th>
+        <td>{% module Icon(form['status'], label=True) %}</td>
+      </tr>
+      <tr>
+        <th>Ordinal</th>
+        <td>{{ form.get('ordinal') or 0 }}</td>
+      </tr>
+      <tr>
+        <th>Modified</th>
+        <td>
+          <span class="localtime">{{ form['modified'] }}</span>
+          <a href="{{ reverse_url('form_logs', form['_id']) }}">
+            {% module Icon('logs', label=True) %}
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <th>Created</th>
+        <td class="localtime">{{ form['created'] }}</td>
+      </tr>
+      <tr>
+        <th>IUID</th>
+        <td>{{ form['_id'] }}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+{% end %} {# block main_content #}
+
+{% block sub_main_content %}
+<div class="panel panel-default">
+  <div class="panel-heading">
+    Fields
+    {% if allow_edit_fields %}
+    <form action="{{ reverse_url('field_create', form['_id']) }}"
+          method="GET" role="form" class="pull-right">
+      <button type="submit" class="btn btn-primary btn-xs">
+        <span class="glyphicon glyphicon-plus"></span>
+        Create field
+      </button>
+    </form>
+    {% end %}
+  </div>
+
+  <div class="panel-body">
+
+    <table class="table">
+      <tr>
+        <th width="15%">Identifier</th>
+        <th width="15%">Label</th>
+        <th width="15%">Type</th>
+        <th width="5%">Visible</th>
+        <th width="5%">Restrictions</th>
+        <th width="45%">Description</th>
+      </tr>
+      {% for field in fields %}
+      <tr>
+        <td width="20%" class="text-nowrap">
+          <span style="padding-left:{{ 1.5*field['depth'] }}em; display:block;">
+            {{ field['identifier'] }}
+          </span>
+        </td>
+        <td>{{ field.get('label') or '-' }}</td>
+        <td>
+          {{ field['type'] }}
+          {% if field['type'] == constants.SELECT %}
+          ({{ field.get('display') or 'menu' }})
+          {% module ShortenedPre(field.get('select')) %}
+          {% elif field['type'] == constants.BOOLEAN %}
+          ({{ field.get('checkbox') and 'checkbox' or 'selection' }};
+          {{ field.get('selection') == 'yes_no' and 'Yes/No' or 'True/False' }})
+          {% elif field['type'] == constants.MULTISELECT %}
+          {% module ShortenedPre(field.get('multiselect')) %}
+          {% elif field['type'] == constants.TABLE %}
+          {% module ShortenedPre(field.get('table')) %}
+          {% elif field['type'] == constants.TEXT %}
+          (maxlength {{ field.get('maxlength') or '-' }})
+          {% end %}
+        </td>
+        <td>
+          {% if field.get('initial_display') %}
+          <em>initial</em><br>
+          {% end %}
+          {% set identifier = field.get('visible_if_field') %}
+          {% if identifier %}
+          if {{ identifier }} == '{{ field.get("visible_if_value") }}'
+          {% end %}
+        </td>
+        <td>
+          {% if field['required'] %}
+          <span class="glyphicon glyphicon-star"
+                title="A value is required." style="color: red;"></span>
+          {% end %}
+          {% if field['restrict_read'] %}
+          <span class="glyphicon glyphicon-eye-open"
+                title="Readable by staff only."></span>
+          {% end %}
+          {% if field['restrict_write'] %}
+          <span class="glyphicon glyphicon-pencil"
+                title="Writeable by admin only."></span>
+          {% end %}
+          {% if field.get('erase_on_clone') %}
+          <span class="glyphicon glyphicon-ban-circle"
+                title="Value erased on clone."></span>
+          {% end %}
+        </td>
+        <td>{% module Markdown(field.get('description')) %}</td>
+        <td>
+          {% if allow_edit_fields %}
+          <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
+                method="GET" role="form">
+            <button type="submit" class="btn btn-primary btn-xs">
+              <span class="glyphicon glyphicon-edit"></span>
+              Edit
+            </button>
+          </form>
+        {% else %}
+        {# Allow edit of non-data properties when not editable. #}
+          <button type="button" class="btn btn-primary btn-xs"
+                  data-toggle="modal" data-target="#{{ field['identifier'] }}">
+            <span class="glyphicon glyphicon-edit"></span>
+            Edit
+          </button>
+        {% end %} {# if allow_edit_fields #}
+        </td>
+      </tr>
+      {% end %}
+    </table>
+
+  </div> <!-- panel-body -->
+
+  <div class="panel-footer">
+    &nbsp;
+    {% if allow_edit_fields %}
+    <form action="{{ reverse_url('field_create', form['_id']) }}"
+          method="GET" role="form" class="pull-right">
+      <button type="submit" class="btn btn-primary btn-xs">
+        <span class="glyphicon glyphicon-plus"></span>
+        Create field
+      </button>
+    </form>
+    {% end %}
+  </div>
+</div>
+
+{# Allow edit of label, clone erase, description, even when form is enabled. #}
+{% if not allow_edit_fields %}
+{% for field in fields %}
+<div id="{{ field['identifier'] }}" class="modal fade" role="dialog">
+  <div class="modal-dialog modal-lg">
+
+    {# Modal content #}
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close"
+                data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">Edit field</h4>
+      </div>
+      <div class="modal-body">
+        <form action="{{ reverse_url('field_edit_descr', form['_id'], field['identifier']) }}"
+              method="POST" role="form">
+          {% module xsrf_form_html() %}
+
+          <div class="form-group">
+            <label class="control-label"
+                   for="{{ field['identifier'] }}/label">
+              Label
+            </label>
+            <input class="form-control"
+                   name="{{ field['identifier'] }}/label"
+                   id="{{ field['identifier'] }}/label"
+                   value="{{ field.get('label') or '' }}">
+            <span class="help-block">
+              Label to display for the field in the {{ terminology('order') }}
+              form. The identifier will be used if this is not provided.
+            </span>
+          </div>
+
+          {% if field['type'] != constants.GROUP %}
+          <div class="form-group">
+            <label class="control-label"
+                   for="{{ field['identifier'] }}/erase_on_clone">
+              Erase on clone
+            </label>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox"
+                       name="{{ field['identifier'] }}/erase_on_clone"
+                       id="{{ field['identifier'] }}/erase_on_clone"
+                       value="true"
+                       {{ field.get('erase_on_clone') and 'checked' or ''}}>
+                Erase the value of the field in a new {{ terminology('order') }}
+                when cloning.
+              </label>
+            </div>
+          </div>
+          {% end %} {# if field['type'] != constants.GROUP #}
+
+          {% if settings['ORDER_TAGS'] and field['type'] in [constants.STRING, constants.SELECT] %}
+          <div class="form-group">
+            <label class="control-label"
+                   for="{{ field['identifier'] }}/auto_tag">
+              Erase on clone
+            </label>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox"
+                       name="{{ field['identifier'] }}/auto_tag"
+                       id="{{ field['identifier'] }}/auto_tag"
+                       value="true"
+                       {{ field.get('auto_tag') and 'checked' or ''}}>
+                Automatically include the value of the field in the
+                tags of the {{ terminology('order') }}.
+              </label>
+            </div>
+          </div>
+          {% end %} {# if settings['ORDER_TAGS'] and field['type'] in [constants.STRING, constants.SELECT] #}
+
+          {% if field['type'] == constants.GROUP %}
+          <div class="form-group">
+            <label class="control-label"
+                   for="{{ field['identifier'] }}/initial_display">
+              Initial display
+            </label>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox"
+                       name="{{ field['identifier'] }}/initial_display"
+                       id="{{ field['identifier'] }}/initial_display"
+                       value="yes"
+                       {{ field.get('initial_display') and 'checked' or '' }}>
+                Yes
+              </label>
+              <span class="help-block">
+                The group's fields are shown already when the page is
+                opened. This is used only for groups at the top level.
+              </span>
+            </div>
+          </div>
+          {% end %}
+
+          <div class="form-group">
+            <label class="control-label" for="{{ field['identifier'] }}/descr">
+              Description
+            </label>
+            <textarea class="form-control"
+                      name="{{ field['identifier'] }}/descr"
+                      id="{{ field['identifier'] }}/descr"
+                      >{{ field.get('description') or '' }}</textarea>
+            <span class="help-block">
+              Description to display in the {{ terminology('order') }}
+              to help the user fill in the field correctly, using
+              <a href="{{ constants.MARKDOWN_URL }}">Markdown</a>
+              format.
+            </span>
+          </div>
+          <div class="form-group">
+            <label class="control-label"></label>
+            <button type="submit" class="btn btn-success">
+              <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% end %}{# for field in fields #}
+{% end %}{# if not allow_edit_fields #}
+{% end %} {# block sub_main_content #}

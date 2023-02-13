@@ -1,0 +1,449 @@
+{# Account display page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Account {{ account['email'] }}{% end %}
+{% block body_title %}Account {{ account['email'] }}{% end %}
+
+{% block body_header_alt_format %}
+<a href="{{ reverse_url('account_api', account['email']) }}">
+  {% module Icon('json') %} JSON
+</a>
+{% end %}
+
+{% block main_content %}
+{% module Text('privacy_policy', origin=reverse_url('account', account['email'])) %}
+
+<table class="table-condensed table-fields">
+  <tr>
+    <th>First name</th>
+    <td>{{ account['first_name'] or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Last name</th>
+    <td>{{ account['last_name'] or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Role</th>
+    <td>{{ account['role'] }}</td>
+  </tr>
+  <tr>
+    <th>Status</th>
+    <td>{% module Icon(account['status'], label=True) %}</td>
+  </tr>
+  {% if am_admin %}
+  <tr>
+    <th>Code for setting password</th>
+    <td>
+      {% if account.get('code') %}
+      {{ account['code'] }}
+      <br>
+      URL: {{ absolute_reverse_url('password', email=account['email'], code=account['code']) }}
+      {% else %}
+      -
+      {% end %}
+    </td>
+  </tr>
+  {% end %} {# if am_admin #}
+  <tr>
+    <th>Groups</th>
+    <td>
+      <table>
+        {% for group in groups %}
+        <tr>
+          <td>
+            {% module Entity(group) %}
+            {% if group['owner'] == account['email'] %}
+            (owner)
+            {% end %}
+          </td>
+          {% if current_user['email'] == account['email'] and account['email'] != group['owner'] %}
+          <td>
+            <form action="{{ reverse_url('group_decline', group['_id']) }}"
+                  method="POST" role="form" class="form-inline">
+              {% module xsrf_form_html() %}
+              <div class="form-group">
+                &nbsp;
+                <button type="submit" class="btn btn-danger btn-xs"
+                        onclick="return confirm('Cannot be undone! Really decline?');">
+                  <span class="glyphicon glyphicon-remove"></span>
+                  Decline
+                </button>
+              </div>
+            </form>
+          </td>
+          {% end %}
+        </tr>
+        {% end %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <th>Group invitations</th>
+    <td>
+      <table>
+      {% for group in invitations %}
+        <tr>
+          <td>
+            {{ group['name'] }}
+            (owner {% module Icon('account') %} {{ group['owner'] }})
+          </td>
+          {% if current_user['email'] == account['email'] %}
+          <td>
+            <form action="{{ reverse_url('group_accept', group['_id']) }}"
+                  method="POST" role="form" class="form-inline">
+              {% module xsrf_form_html() %}
+              <div class="form-group">
+                &nbsp;
+                <button type="submit" class="btn btn-success btn-xs"
+                        onclick="return confirm('All members of this group will be able to see all your data. Really accept?');">
+                  <span class="glyphicon glyphicon-ok"></span>
+                  Accept
+                </button>
+              </div>
+            </form>
+          </td>
+          <td>
+            <form action="{{ reverse_url('group_decline', group['_id']) }}"
+                  method="POST" role="form" class="form-inline">
+              {% module xsrf_form_html() %}
+              <div class="form-group">
+                &nbsp;
+                <button type="submit" class="btn btn-danger btn-xs">
+                  <span class="glyphicon glyphicon-remove"></span>
+                  Decline
+                </button>
+              </div>
+            </form>
+          </td>
+          {% end %}
+        </tr>
+      {% end %}
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <th>{{ terminology('Orders') }}</th>
+    <td>
+      <a class="badge"
+         href="{{ reverse_url('account_orders', account['email']) }}">
+        {{ account['order_count'] }}
+      </a>
+      <a href="{{ reverse_url('orders_api', owner=account['email'], year='all') }}" style="margin-left: 2em;">
+        {% module Icon('json') %} JSON
+      </a>
+      <a href="{{ reverse_url('orders_csv', owner=account['email'], year='all') }}" style="margin-left: 1em;">
+        {% module Icon('csv') %} CSV
+      </a>
+      <a href="{{ reverse_url('orders_xlsx', owner=account['email'], year='all') }}" style="margin-left: 1em;">
+        {% module Icon('excel') %} Excel
+      </a>
+    </td>
+  </tr>
+
+  <tr>
+    <th>University</th>
+    <td>{{ account.get('university') or '-' }}</td>
+  </tr>
+
+  <tr>
+    <th>Department</th>
+    <td>{{ account.get('department') or '-' }}</td>
+  </tr>
+
+  {% if settings['ACCOUNT_PI_INFO'] %}
+  <tr>
+    <th>Principal Investigator</th>
+    <td>{{ account.get('pi') and 'Yes' or 'No' }}</td>
+  </tr>
+  {% end %} {# if settings['ACCOUNT_PI_INFO'] #}
+
+  {% if settings['ACCOUNT_ORCID_INFO'] %}
+  <tr>
+    <th>ORCID</th>
+    <td>{{ account.get('orcid') or '-' }}</td>
+  </tr>
+  {% end %} {# if settings['ACCOUNT_ORCID_INFO'] #}
+
+  {% if settings.get('ACCOUNT_FUNDER_INFO_GENDER') %}
+  <tr>
+    <th>Gender</th>
+    <td>{{ account.get('gender', '-').capitalize() }}</td>
+  </tr>
+  {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GENDER') #}
+
+  {% if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') %}
+  <tr>
+    <th>Group size</th>
+    <td>
+      {% try %}
+      {{ account['group_size'] }}
+      {% except KeyError %}
+      <span class="text-warning glyphicon glyphicon-question-sign"></span>
+      {% end %}
+    </td>
+  </tr>
+  {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') #}
+
+  {% if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] %}
+  <tr>
+    <th>Subject</th>
+    <td>
+      {% try %}
+      {{ settings['SUBJECT_TERMS_LOOKUP'].get(account['subject']) or '-' }}
+      {% except KeyError %}
+      <span class="text-warning glyphicon glyphicon-question-sign"></span>
+      {% end %}
+    </td>
+  </tr>
+  {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] #}
+
+  <tr>
+    <th>Postal address</th>
+    <td>
+      {% set address = account.get('address') or dict() %}
+      <table class="table table-condensed table-noborder">
+        <tr>
+          <th>Address</th>
+          <td class="pre">{{ address.get('address') or '-' }}</td>
+        </tr>
+        <tr>
+          <th>Zip code</th>
+          <td>{{ address.get('zip') or '-' }}</td>
+        </tr>
+        <tr>
+          <th>City</th>
+          <td>{{ address.get('city') or '-' }}</td>
+        </tr>
+        <tr>
+          <th>Country</th>
+          <td>{{ constants.COUNTRIES.get(address.get('country')) or '-' }}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr>
+    <th>Invoice reference</th>
+    <td>{{ account.get('invoice_ref') or '-'  }}</td>
+  </tr>
+
+  <tr>
+    <th>Invoice address</th>
+    <td>
+      {% set address = account.get('invoice_address') or dict() %}
+      <table class="table table-condensed table-noborder">
+        <tr>
+          <th>Address</th>
+          <td class="pre">{{ address.get('address') or '-' }}</td>
+        </tr>
+        <tr>
+          <th>Zip code</th>
+          <td>{{ address.get('zip') or '-' }}</td>
+        </tr>
+        <tr>
+          <th>City</th>
+          <td>{{ address.get('city') or '-' }}</td>
+        </tr>
+        <tr>
+          <th>Country</th>
+          <td>{{ constants.COUNTRIES.get(address.get('country')) or '-' }}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <th>Phone</th>
+    <td>{{ account.get('phone') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>API key</th>
+    <td>{{ account.get('api_key') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Other data</th>
+    <td class="pre">{{ account.get('other_data') or '-' }}</td>
+  </tr>
+  <tr>
+    <th>Latest activity</th>
+    <td>
+      {% if latest_activity %}
+      <span class="localtime">{{ latest_activity }}</span>
+      {% else %}
+      -
+      {% end %}
+    </td>
+  </tr>
+  <tr>
+    <th>Latest login</th>
+    <td>
+      {% if account.get('login') %}
+      <span class="localtime">{{ account['login'] }}</span>
+      {% else %}
+      -
+      {% end %}
+    </td>
+  </tr>
+  <tr>
+    <th>Messages</th>
+    <td>
+      <a href="{{ reverse_url('account_messages', account['email']) }}">
+        {% module Icon('message', label=True, title='Messages') %}
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <th>Modified</th>
+    <td>
+      <span class="localtime">{{ account['modified'] }}</span>
+      <a href="{{ reverse_url('account_logs', account['email']) }}">
+        {% module Icon('logs', label=True) %}
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <th>Created</th>
+    <td class="localtime">{{ account['created'] }}</td>
+  </tr>
+  <tr>
+    <th>IUID</th>
+    <td>{{ account['_id'] }}</td>
+  </tr>
+</table>
+{% end %} {# block main_content #}
+
+{% block action_content %}
+{% if current_user['email'] == account['email'] %}
+<p>
+  <form action="{{ reverse_url('logout') }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <button type="submit"
+            title="Logout"
+            class="btn btn-default btn-block">
+      <span class="glyphicon glyphicon-log-out"></span>
+      Logout
+    </button>
+  </form>
+</p>
+{% end %} {# if current_user['email'] == account['email'] #}
+
+{% if am_staff or current_user['email'] == account['email'] %}
+<p>
+  <div>
+    <a href="{{ reverse_url('account_edit', account['email']) }}"
+       role="button"
+       class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-edit"></span>
+      Edit
+    </a>
+  </div>
+</p>
+{% end %}
+
+{% if current_user['email'] == account['email'] %}
+<p>
+  <div>
+    <a href="{{ reverse_url('group_create') }}"
+       role="button"
+       class="btn btn-success btn-block">
+      <span class="glyphicon glyphicon-plus"></span>
+      Create group
+    </a>
+  </div>
+</p>
+{% end %} {# am_staff or if current_user['email'] == account['email'] #}
+
+{% if am_staff or current_user['email'] == account['email'] %}
+<p>
+  <div>
+    <a href="{{ reverse_url('reset', email=account['email']) }}"
+       role="button"
+       class="btn btn-warning btn-block">
+      <span class="glyphicon glyphicon-step-backward"></span>
+      Reset password
+    </a>
+  </div>
+</p>
+{% end %} {# if am_staff or current_user['email'] == account['email'] #}
+
+{% if am_staff %}
+<p>
+  <div>
+    <a href="{{ reverse_url('password', email=account['email']) }}"
+       role="button"
+       class="btn btn-warning btn-block">
+      <span class="glyphicon glyphicon-eye-open"></span>
+      Set password
+    </a>
+  </div>
+</p>
+{% end %} {# if am_staff #}
+
+{% if am_staff and current_user['email'] != account['email'] %}
+
+<p>
+  <form action="{{ reverse_url('account_update_info', account['email']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <button type="submit"
+              class="btn btn-warning btn-block"
+              {{ account.get('update_info') and 'disabled' or ''}}>
+        <span class="glyphicon glyphicon-exclamation-sign"></span>
+        Request update
+      </button>
+    </div>
+  </form>
+</p>
+
+{% if account['status'] != constants.ENABLED %}
+<p>
+  <form action="{{ reverse_url('account_enable', account['email']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-ok"></span>
+        Enable
+      </button>
+    </div>
+  </form>
+</p>
+{% end %} {# if account['status'] != constants.ENABLED #}
+
+{% if account['status'] != constants.DISABLED %}
+<p>
+  <form action="{{ reverse_url('account_disable', account['email']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <button type="submit" class="btn btn-danger btn-block"
+              onclick="return confirm('Really disable?');">
+        <span class="glyphicon glyphicon-ban-circle"></span>
+        Disable
+      </button>
+    </div>
+  </form>
+</p>
+{% end %} {# if account['status'] != constants.DISABLED #}
+
+{% if allow_delete %}
+<p>
+  <form action="{{ reverse_url('account', account['email']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <input type="hidden" name="_http_method" value="delete">
+      <button type="submit" class="btn btn-danger btn-block"
+              onclick="return confirm('Cannot be undone! Really delete?');">
+        <span class="glyphicon glyphicon-trash"></span>
+        Delete
+      </button>
+    </div>
+  </form>
+</p>
+{% end %} {# if allow_delete #}
+
+{% end %} {# if am_staff and current_user['email'] != account['email'] #}
+{% end %} {# block action_content #}

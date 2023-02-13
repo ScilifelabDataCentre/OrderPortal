@@ -2,11 +2,12 @@
 An order can be a project application, a request, a report, etc.
 """
 
+import copy
 import os.path
 import re
 import sys
 
-__version__ = "7.2.12"
+__version__ = "8.0.0"
 
 
 class Constants:
@@ -42,22 +43,20 @@ class Constants:
     DATATABLES_VERSION = "1.10.11"
     DATATABLES_URL = "https://datatables.net/"
 
-    LOGGING_FORMAT="[%(asctime)s] %(levelname)s %(message)s"
+    LOGGING_FORMAT="%(asctime)s %(name)s %(levelname)s %(message)s"
 
-    # Patterns
     ID_RX = re.compile(r"^[a-z][_a-z0-9]*$", re.IGNORECASE)
     NAME_RX = re.compile(r"^[^/]+$")
     IUID_RX = re.compile(r"^[0-9a-f]{32}$")
     DATE_RX = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}$")  # Works until 9999 CE...
     EMAIL_RX = re.compile(r"^[^@]+@[^@]+\.[^@]+$")
 
-    # CouchDB
-    # For view ranges: CouchDB uses the Unicode Collation Algorithm,
+    # For CouchDB view ranges: CouchDB uses the Unicode Collation Algorithm,
     # which is not the same as the ASCII collation sequence.
     # The endkey is inclusive, by default.
     CEILING = "ZZZZZZZZ"
 
-    # Entity document types
+    # Entity document types.
     DOCTYPE = "orderportal_doctype"
     ACCOUNT = "account"
     GROUP = "group"
@@ -73,11 +72,11 @@ class Constants:
     META = "meta"
     ENTITIES = frozenset([ACCOUNT, GROUP, FORM, ORDER, INFO, FILE, MESSAGE])
 
-    # System attachments to order
+    # System attachments to order.
     SYSTEM = "system"
     SYSTEM_REPORT = "system_report"
 
-    # Field types
+    # Field types.
     STRING = "string"
     EMAIL = "email"
     INT = "int"
@@ -113,23 +112,23 @@ class Constants:
         EMAIL: "email",
         URL: "url",
     }
-    # Step for use with input type 'float'
+    # Step for use with input type 'float'.
     FLOAT_STEP = "0.0000001"
 
     # Banned meta document id's; have changed format or been removed.
     # Re-using these id's would likely create backwards incompatibility issues.
     BANNED_META_IDS = frozenset(["account_messages", "order_messages", "global_modes"])
 
-    # Text types
+    # Text types.
     DISPLAY = "display"
     ### ACCOUNT = "account" Already defined above.
     ### ORDER = "order" Already defined above.
 
-    # Boolean string values
+    # Boolean string values.
     TRUE = frozenset(["true", "yes", "t", "y", "1"])
     FALSE = frozenset(["false", "no", "f", "n", "0"])
 
-    # User login account
+    # User login account.
     USER_COOKIE = "orderportal_user"
     API_KEY_HEADER = "X-OrderPortal-API-key"
 
@@ -140,7 +139,7 @@ class Constants:
     ACCOUNT_STATUSES = [PENDING, ENABLED, DISABLED]
     RESET = "reset"
 
-    # Account role
+    # Account roles.
     USER = "user"
     STAFF = "staff"
     ADMIN = "admin"
@@ -154,7 +153,7 @@ class Constants:
     PREPARATION = "preparation"
     SUBMITTED = "submitted"
 
-    # Content types (MIME types)
+    # Content types (MIME types).
     HTML_MIMETYPE = "text/html"
     JSON_MIMETYPE = "application/json"
     CSV_MIMETYPE = "text/csv"
@@ -167,13 +166,13 @@ class Constants:
     XLSX_MIMETYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     XLSM_MIMETYPE = "application/vnd.ms-excel.sheet.macroEnabled.12"
 
-    # Hard-wired mapping content type -> extension (overriding mimetypes module)
+    # Hard-wired mapping content type -> extension (overriding mimetypes module).
     MIMETYPE_EXTENSIONS = {TEXT_MIMETYPE: ".txt",
                            JPEG_MIMETYPE: ".jpg",
                            XLSM_MIMETYPE: ".xlsm",
                            XLSX_MIMETYPE: ".xlsx"}
 
-    # Content-type to icon mapping
+    # Content-type to icon mapping.
     CONTENT_TYPE_ICONS = {
         JSON_MIMETYPE: "json.png",
         CSV_MIMETYPE: "csv.png",
@@ -396,26 +395,24 @@ class Constants:
 constants = Constants()
 
 
-# Default settings. Some of these need to be set in the 'site/settings.yaml' file.
-settings = dict(
+# Default settings.
+DEFAULT_SETTINGS = dict(
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
     BASE_URL="http://localhost:8881/",
     BASE_URL_PATH_PREFIX=None,
     PORT=8881,  # The port used by tornado.
-    PIDFILE=None,
     DATABASE_SERVER="http://localhost:5984/",
     DATABASE_NAME="orderportal",
     DATABASE_ACCOUNT="orderportal_account",
-    DATABASE_PASSWORD="CHANGE THIS!",
-    COOKIE_SECRET="CHANGE THIS!",
-    PASSWORD_SALT="CHANGE THIS!",
+    DATABASE_PASSWORD=None,
+    COOKIE_SECRET=None,
+    PASSWORD_SALT=None,
     MIN_PASSWORD_LENGTH=8,
-    MARKDOWN_URL="https://www.markdownguide.org/basic-syntax/",
+    SETTINGS_FILE=None,
     SITE_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site")),
     SITE_STATIC_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site/static")),
     SITE_NAME="OrderPortal",
-    # SITE_SUPPORT_EMAIL=None,
     SITE_FAVICON="orderportal32.png",
     SITE_NAVBAR_ICON="orderportal32.png",
     SITE_HOME_ICON="orderportal144.png",
@@ -427,15 +424,12 @@ settings = dict(
     DISPLAY_MENU_ITEM_URL=None,
     DISPLAY_MENU_ITEM_TEXT=None,
     ORDER_MESSAGES_FILE="order_messages.yaml",
-    ORDER_MESSAGES={},          # Set automatically.
     UNIVERSITIES_FILE="swedish_universities.yaml",
-    UNIVERSITIES={},            # Set automatically.
     SUBJECT_TERMS_FILE="subject_terms.yaml",
-    SUBJECT_TERMS=[],
-    SUBJECT_TERMS_LOOKUP={},    # Set automatically.
     TERMINOLOGY=dict(),         # Terms translation lookup.
     LOGIN_MAX_AGE_DAYS=14,      # Max age of login session in a browser.
     LOGIN_MAX_FAILURES=6,       # After this number of fails, the account is disabled.
+    ORDER_AUTOPOPULATE=None,    # Dictionary key=order field, value=account field.
     ORDER_CREATE_USER=True,
     ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",
     ORDER_IDENTIFIER_FIRST=1,
@@ -478,6 +472,5 @@ settings = dict(
     DISPLAY_TEXT_MARKDOWN_NOTATION_INFO=True,
 )
 
-# In-memory copy of various configuration values such as order statuses and transitions.
-# Read from the database on server startup. Modifiable via the web interface.
-parameters = {}
+# Settings to be modified by 'settings.yaml' file, by computed values, or from database.
+settings = copy.deepcopy(DEFAULT_SETTINGS)

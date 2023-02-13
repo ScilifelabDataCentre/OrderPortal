@@ -1,0 +1,87 @@
+{# Files list page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Documents{% end %}
+{% block body_title %}{% module Icon('file') %} Documents{% end %}
+
+{% block main_content %}
+<table id="files" class="table table-striped">
+  <thead>
+    <tr>
+      <th width="80%">Document</th>
+      <th></th>
+      <th>Modified</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for file in files %}
+    {% if am_admin or not file.get('hidden') %}
+    <tr>
+      <td>
+        <h4>
+          <a href="{{ reverse_url('file_meta', file['name']) }}">
+            {% module ContentType(file['content_type']) %}
+            {{ file.get('title') or file['name'] }}
+          </a>
+          {% if file.get('hidden') %}
+          <span class="glyphicon glyphicon-eye-close"></span>
+          Hidden
+          {% end %}
+        </h4>
+        {% module Markdown(file.get('description')) %}
+      </td>
+      <td>
+        {% if file['content_type'] in constants.VIEWABLE_CONTENT_TYPES %}
+        <p>
+          <a class="btn btn-xs btn-primary"
+             href="{{ reverse_url('file', file['name']) }}">
+            <span class="glyphicon glyphicon-eye-open"></span>
+            View
+          </a>
+        </p>
+        {% end %}
+        <p>
+          <a class="btn btn-xs btn-primary"
+             href="{{ reverse_url('file_download', file['name']) }}">
+            <span class="glyphicon glyphicon-download"></span>
+            Download
+          </a>
+        </p>
+      </td>
+      <td class="localtime nobr">{{ file['modified'] }}</td>
+    </tr>
+    {% end %} {# if #}
+    {% end %} {# for #}
+  </tbody>
+</table>    
+
+{% end %} {# block main_content #}
+
+{% block action_content %}
+{% if am_admin %}
+<form action="{{ reverse_url('file_create') }}"
+      method="GET" role="form">
+  <button type="submit" class="btn btn-primary btn-block">
+    <span class="glyphicon glyphicon-plus"></span>
+    Create
+  </button>
+</form>
+{% end %} {# if am_admin #}
+{% end %} {# block action_content #}
+
+{% block javascript_code %}
+<script>
+  $(function() {
+    $("#files").DataTable( {
+      "pagingType": "full_numbers",
+      "order": [[2, "desc"]],
+      "columnDefs": [
+      {
+        "targets"  : 1,
+        "orderable": false,
+      }],
+    });
+  });
+</script>
+{% end %}

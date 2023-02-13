@@ -1,26 +1,11 @@
 "Message to account email address; store and send."
 
 import email.message
-import logging
 import smtplib
 
 from orderportal import constants, settings
 from orderportal import saver
 from orderportal import utils
-
-
-DESIGN_DOC = {
-    "views": {
-        "recipient": {
-            "reduce": "_count",
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'message') return;
-    for (var i=0; i<doc.recipients.length; i++) {
-	emit([doc.recipients[i], doc.modified], 1);
-    };
-}"""}
-    }
-}
 
 
 class SafeDict(dict):
@@ -110,12 +95,12 @@ class MessageSaver(saver.Saver):
             self.handle_error(error)
 
     def handle_error(self, error):
-        "Convert into a better error message to display."
+        "Convert into a nicer error message to display."
         try:
-            if self.rqh.is_admin():
+            if self.rqh.am_admin():
                 msg = str(error)
             else:
-                logging.error(f"Email failure: {error}")
+                self.rqh.logger.error(f"Email failure: {error}")
                 msg = "Contact the admin."
         except AttributeError: # If rqh is None.
             msg = str(error)

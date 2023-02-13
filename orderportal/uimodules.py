@@ -1,10 +1,12 @@
 "UI modules for tornado."
 
 import json
+import logging
 
+import htmlgenerator as hg
 import tornado.web
 
-from orderportal import constants, parameters
+from orderportal import constants, settings
 from orderportal import utils
 
 ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""
@@ -92,19 +94,26 @@ class Markdown(tornado.web.UIModule):
 
 
 class Text(tornado.web.UIModule):
-    "Process the display Markdown text message fetched from the parameters and output."
+    "Process the display Markdown text message fetched from the settings and output."
 
-    def render(self, name):
+    def render(self, name, origin=None):
         try:
-            text = parameters[constants.DISPLAY][name]["text"]
+            text = settings[constants.DISPLAY][name]["text"]
             if not text:
                 raise KeyError
         except KeyError:
-            if self.handler.is_admin():
+            if self.handler.am_admin():
                 text = "*No text defined.*"
             else:
                 return ""
-        return utils.markdown2html(text, safe=True)
+        if origin and self.handler.am_admin():
+            a = hg.A(hg.SPAN(_class="glyphicon glyphicon-edit"), " Edit",
+                     href=self.handler.reverse_url("text_edit", name, origin=origin),
+                     _class="btn btn-primary btn-xs", role="button")
+            div = hg.DIV(hg.mark_safe(utils.markdown2html(text, safe=True)), a)
+            return hg.render(div, {})
+        else:
+            return utils.markdown2html(text, safe=True)
 
 
 class Json(tornado.web.UIModule):
@@ -261,3 +270,63 @@ class TableRowsEdit(tornado.web.UIModule):
                 result.append("</tr>")
             result.append("</tbody>")
         return "\n".join(result)
+
+
+class CancelButton(tornado.web.UIModule):
+    "Display a standard cancel button."
+
+    def render(self, url):
+        div = hg.DIV(
+            hg.BUTTON(
+                hg.SPAN(_class="glyphicon glyphicon-remove"),
+                " Cancel",
+                type="submit",
+                _class="btn btn-default btn-block"
+            ),
+            _class="form-group")
+        form = hg.FORM(div, action=url, method="GET", role="form")
+        return hg.render(form, {})
+
+
+class Form(tornado.web.UIModule):
+    "Display a form with the given fields. Parse the values from the submitted form."
+
+    def render(self, url, fields, values=None, errors=None):
+        "Output HTML for the fields in a form."
+        if values is None:
+            values = {}
+        if errors is None:
+            errors = {}
+        rows = ["\n",
+                hg.INPUT(type="hidden", name="_xsrf", 
+                         value=self.handler.xsrf_token.decode()),
+                "\n"]
+        for field in fields:
+            rows.append(hg.DIV(
+                hg.DIV(field["identifier"], _class="col-md-2"),
+                hg.DIV(field["type"],_class="col-md-10"),
+                _class="row form-group"))
+            rows.append("\n")
+        rows.append(hg.DIV(
+            hg.DIV(
+                hg.BUTTON(hg.SPAN(_class="glyphicon glyphicon-floppy-disk"),
+                          " Save",
+                          type="submit",
+                          _class="btn btn-success btn-block"),
+                _class="col-md-offset-2 col-md-3"),
+            _class="row form-group")
+                    )
+        return hg.render(hg.FORM(*rows, method="POST", role="form", action=url), {})
+
+    def get_checkbox(self, field, value, error):
+        return hg.DIV(
+            
+            )
+
+    def parse(self, fields):
+        "Parse the form input values."
+        values = {}
+        errors = {}
+        for field in fields:
+            values[field["identifier"]] = "some value"
+        return values, errors

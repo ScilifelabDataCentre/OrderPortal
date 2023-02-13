@@ -12,28 +12,29 @@ import urllib.parse
 import couchdb2
 import tornado.web
 
-from orderportal import constants, settings, parameters
+from orderportal import constants, settings
 from orderportal import utils
+import orderportal.database
 
 
 class RequestHandler(tornado.web.RequestHandler):
     "Base request handler."
 
     def prepare(self):
-        "Get the database connection."
-        self.db = utils.get_db()
+        "Get the database connection and logger."
+        self.db = orderportal.database.get_db()
+        self.logger = logging.getLogger("orderportal")
 
     def get_template_namespace(self):
         "Set the items accessible within the template."
         result = super(RequestHandler, self).get_template_namespace()
         result["constants"] = constants
         result["settings"] = settings
-        result["parameters"] = parameters
         result["terminology"] = utils.terminology
         result["absolute_reverse_url"] = self.absolute_reverse_url
         result["order_reverse_url"] = self.order_reverse_url
-        result["is_staff"] = self.is_staff()
-        result["is_admin"] = self.is_admin()
+        result["am_staff"] = self.am_staff()
+        result["am_admin"] = self.am_admin()
         result["error"] = urllib.parse.unquote_plus(self.get_cookie("error", ""))
         self.clear_cookie("error")
         result["message"] = urllib.parse.unquote_plus(self.get_cookie("message", ""))
@@ -136,7 +137,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 except ValueError:
                     return None
         if account.get("status") == constants.DISABLED:
-            logging.info("Account %s DISABLED", account["email"])
+            self.logger.info("Account %s DISABLED", account["email"])
             return None
         return account
 
@@ -153,7 +154,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 account = self.get_entity_view("account", "api_key", api_key)
             except tornado.web.HTTPError:
                 raise ValueError
-            logging.info("API key login: account %s", account["email"])
+            self.logger.info("API key login: account %s", account["email"])
             return account
 
     def get_current_user_session(self):
@@ -170,7 +171,7 @@ class RequestHandler(tornado.web.RequestHandler):
         # Check if login session is invalidated.
         if account.get("login") is None:
             raise ValueError
-        logging.debug("Session authentication: %s", account["email"])
+        self.logger.debug("Session authentication: %s", account["email"])
         return account
 
     def get_current_user_basic(self):
@@ -193,19 +194,19 @@ class RequestHandler(tornado.web.RequestHandler):
                 raise ValueError
         except (IndexError, ValueError, TypeError):
             raise ValueError
-        logging.debug("Basic auth login: account %s", account["email"])
+        self.logger.debug("Basic auth login: account %s", account["email"])
         return account
 
     def is_owner(self, entity):
         "Does the current user own the given entity?"
         return self.current_user and entity["owner"] == self.current_user["email"]
 
-    def is_admin(self):
+    def am_admin(self):
         "Is the current user admin?"
         # Not a property, since the above is not.
         return self.current_user and self.current_user["role"] == constants.ADMIN
 
-    def is_staff(self):
+    def am_staff(self):
         "Is the current user staff or admin?"
         # Not a property, since the above is not.
         return self.current_user and self.current_user["role"] in (
@@ -215,12 +216,12 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def check_admin(self):
         "Check if current user is admin."
-        if not self.is_admin():
+        if not self.am_admin():
             raise tornado.web.HTTPError(403, reason="Role 'admin' is required")
 
     def check_staff(self):
         "Check if current user is staff or admin."
-        if not self.is_staff():
+        if not self.am_staff():
             raise tornado.web.HTTPError(
                 403, reason="Role 'admin' or 'staff' is required"
             )
@@ -452,7 +453,7 @@ class RequestHandler(tornado.web.RequestHandler):
         try:
             return self.cache_all_accounts
         except AttributeError:
-            logging.debug("Getting all accounts into request cache.")
+            self.logger.debug("Getting all accounts into request cache.")
             self.cache_all_accounts = {}
             for row in self.db.view("account", "email", include_docs=True):
                 self.cache_all_accounts[row.key] = row.doc

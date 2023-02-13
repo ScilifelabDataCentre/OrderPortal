@@ -48,11 +48,10 @@
               </a>
             </li>
             {% if current_user %}
-            {% if is_staff %}
+            {% if am_staff %}
             <li>
               <a href="{{ reverse_url('orders') }}">
-                {{ terminology('Orders') }}
-              </a>
+                {{ terminology('Orders') }}</a>
             </li>
             {% else %}
             <li>
@@ -60,34 +59,36 @@
                 My {{ terminology('orders') }}
               </a>
             </li>
-            {% end %} {# if is_staff #}
+            {% end %} {# if am_staff #}
             {% end %} {# if current_user #}
 
-            {% if is_admin %}
+            {% if am_admin %}
             <li><a href="{{ reverse_url('forms') }}">Forms</a></li>
-            {% end %} {# if is_admin #}
+            {% end %} {# if am_admin #}
 
-            {% if is_staff %}
+            {% if am_staff %}
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                Accounts
-                <span class="caret"></span>
-              </a>
+                Accounts <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li>
                   <a href="{{ reverse_url('accounts') }}">All accounts</a>
                 </li>
                 <li>
-                  <a href="{{ reverse_url('accounts', role='admin') }}">All admin accounts</a>
+                  <a href="{{ reverse_url('accounts', status='pending') }}">
+                    Pending accounts</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('accounts', role='admin') }}">
+                    Admin accounts</a>
                 </li>
                 <li>
                   <a href="{{ reverse_url('groups') }}">All groups</a>
                 </li>
-                {% if is_staff %}
+                {% if am_staff %}
                 <li>
                   <a href="{{ reverse_url('register') }}">
-                    Register new account
-                  </a>
+                    Register new account</a>
                 </li>
                 <li>
                   <a href="{{ reverse_url('reset') }}">Reset password</a>
@@ -95,28 +96,25 @@
                 <li>
                   <a href="{{ reverse_url('password') }}">Set password</a>
                 </li>
-                {% end %} {# if is_staff #}
+                {% end %} {# if am_staff #}
               </ul>
             </li>
-            {% end %} {# if is_staff #}
+            {% end %} {# if am_staff #}
 
             {% if settings['DISPLAY_MENU_INFORMATION'] %}
             <li class="dropdown">
               <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                Information
-                <span class="caret"></span>
-              </a>
+                Information <span class="caret"></span></a>
               <ul class="dropdown-menu">
-                {% if is_admin %}
+                {% if am_admin %}
                 <li>
                   <a href="{{ reverse_url('infos') }}">All info pages</a>
                 </li>
-                {% end %} {# if is_admin #}
+                {% end %} {# if am_admin #}
                 {% for n, t in infos %}
                 <li>
                   <a href="{{ reverse_url('info', n) }}">
-                    {{ t or n }}
-                  </a>
+                    {{ t or n }}</a>
                 </li>
                 {% end %}
               </ul>
@@ -129,11 +127,10 @@
             </li>
             {% end %}
 
-            {% if is_admin %}
+            {% if am_admin %}
             <li class="dropdown">
-              <a class="dropdown-toggle" data-toggle="dropdown" href="#">Admin
-                <span class="caret"></span>
-              </a>
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                Admin <span class="caret"></span></a>
               <ul class="dropdown-menu">
                 <li>
                   <a href="{{ reverse_url('files') }}">Documents</a>
@@ -168,7 +165,7 @@
                 </li>
               </ul>
             </li>
-            {% end %} {# if is_admin #}
+            {% end %} {# if am_admin #}
 
             {% if settings['DISPLAY_MENU_CONTACT'] %}
             <li>
@@ -236,12 +233,12 @@
       <div class="row">
         <div class="col-md-12">
           <div class="lead alert alert-danger" style="margin: 4px;" role="alert">
-            {% if is_admin %}
+            {% if am_admin %}
             <a href="{{ reverse_url('text_edit', 'alert', origin=reverse_url('home')) }}"
                class="btn btn-primary btn-xs pull-right" role="button">
               <span class="glyphicon glyphicon-edit"></span> Edit
             </a>
-            {% end %}
+            {% end %} {# if am_admin #}
             {% raw alert %}
           </div>
         </div>

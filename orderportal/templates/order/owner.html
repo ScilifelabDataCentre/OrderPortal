@@ -1,0 +1,63 @@
+{# Order change owner page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}
+Change owner of {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
+{% end %}
+
+{% block body_title %}
+Change owner of {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
+{% end %}
+
+{% block action_content %}
+{% module CancelButton(reverse_url('order', order['_id'])) %}
+{% end %} {# block action_content #}
+
+{% block main_content %}
+<form action="{{ reverse_url('order_owner', order['_id']) }}"
+      id="__order_edit__" class="allow_leaving_without_question"
+      method="POST" role="form">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-12">
+        <label class="control-label" for="owner">Owner</label>
+        {% if am_staff %}
+        <input type="text" class="form-control"
+               name="owner" id="owner"
+               value="{{ order['owner'] }}">
+        {% elif colleagues %}
+        <select class="form-control" name="owner" id="owner">
+          {% for colleague in colleagues %}
+            <option {{ colleague == current_user['email'] and 'selected' or '' }}>{{ colleague }}</option>
+          {% end %} {# if am_staff #}
+        </select>
+        {% else %}
+        <p id="owner" class="form-control-static">{{ order['owner'] }}</p>
+        {% end %}
+      </div>
+    </div>
+    <span class="help-block extra-indent">
+      {% if am_staff %}
+      Change the owner of the {{ terminology('order') }} by giving the email
+      address of the new owner's account.
+      {% elif colleagues %}
+      The owner of the {{ terminology('order') }} may be changed to an account
+      in your group(s).
+      Give the email address of the new owner's account.
+      <strong>NOTE:</strong>
+      You will then no longer be able to edit the {{ terminology('order') }}.
+      {% end %} {# if am_staff #}
+    </span>
+  </div>
+  
+  <div class="row" style="padding-bottom: 1em;">
+    <div class="col-md-3">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+    </div>
+  </div>
+</form>
+{% end %} {# block main_content #}

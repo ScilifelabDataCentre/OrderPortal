@@ -2,6 +2,7 @@ certifi==2022.12.7
 charset-normalizer==2.0.7
 click==8.0.3
 CouchDB2==1.13.0
+htmlgenerator==1.2.27
 idna==3.3
 Markdown==3.3.4
 PyYAML==6.0

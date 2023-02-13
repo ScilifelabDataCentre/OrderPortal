@@ -1,17 +1,18 @@
 "OrderPortal web application server."
 
 import logging
-import os
-import sys
+import os.path
 
 import tornado.web
 import tornado.ioloop
 
-from orderportal import constants, settings, parameters
+from orderportal import constants, settings
 from orderportal import utils
 
 import orderportal.account
 import orderportal.admin
+import orderportal.config
+import orderportal.database
 import orderportal.event
 import orderportal.file
 import orderportal.form
@@ -25,17 +26,13 @@ import orderportal.uimodules
 
 
 def main():
-    if len(sys.argv) == 2:
-        filepath = sys.argv[1]
-    else:
-        filepath = None
-    utils.load_settings(filepath=filepath)
-    db = utils.get_db()
-    utils.load_design_documents(db)
+    orderportal.config.load_settings_from_file()
+    db = orderportal.database.get_db()
+    orderportal.database.update_design_documents(db)
     orderportal.admin.update_meta_documents(db)
     orderportal.admin.update_text_documents(db)
     orderportal.admin.load_texts(db)
-    orderportal.admin.load_parameters(db)
+    orderportal.config.load_settings_from_db(db)
 
     url = tornado.web.url
     handlers = [
@@ -260,8 +257,8 @@ def main():
         ),
         url(
             r"/form/([0-9a-f]{32})/aggregate",
-            orderportal.form.FormOrdersAggregate,
-            name="form_orders_aggregate",
+            orderportal.form.FormAggregate,
+            name="form_aggregate",
         ),
         url(r"/news", orderportal.news.News, name="news"),
         url(r"/new", orderportal.news.NewsCreate, name="news_create"),
@@ -326,6 +323,11 @@ def main():
             name="admin_order_messages",
         ),
         url(
+            r"/admin/account",
+            orderportal.admin.Account,
+            name="admin_account",
+        ),
+        url(
             r"/admin/account_messages",
             orderportal.admin.AccountMessages,
             name="admin_account_messages",
@@ -342,7 +344,6 @@ def main():
             name="admin_document"
         ),
         url(r"/admin/settings", orderportal.admin.Settings, name="admin_settings"),
-        url(r"/admin/debug_email", orderportal.admin.DebugEmail, name="admin_debug_email"),
         url(r"/search", orderportal.search.Search, name="search"),
         url(
             r"/site/([^/]+)",
@@ -367,18 +368,14 @@ def main():
     )
 
     # Add href URLs for the status icons.
-    for key, value in parameters["ORDER_STATUSES_LOOKUP"].items():
+    for key, value in settings["ORDER_STATUSES_LOOKUP"].items():
         value["href"] = f"/static/{key}.png"
 
     application.listen(settings["PORT"], xheaders=True)
     url = settings["BASE_URL"]
     if settings["BASE_URL_PATH_PREFIX"]:
         url += settings["BASE_URL_PATH_PREFIX"]
-    pid = os.getpid()
-    if settings["PIDFILE"]:
-        with open(settings["PIDFILE"], "w") as pf:
-            pf.write(str(pid))
-    logging.info(f"web server PID {pid} at {url}")
+    logging.getLogger("orderportal").info(f"web server at {url}")
 
     tornado.ioloop.IOLoop.instance().start()
 

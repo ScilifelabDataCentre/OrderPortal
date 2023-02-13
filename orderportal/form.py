@@ -1,37 +1,14 @@
 "Forms are templates for orders."
 
 import json
-import logging
 
 import tornado.web
 
-from orderportal import constants, settings, parameters
+from orderportal import constants, settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.fields import Fields
 from orderportal.requesthandler import RequestHandler, ApiV1Mixin
-
-
-DESIGN_DOC = {
-    "views": {
-        "all": {
-            "reduce": "_count",
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'form') return;
-    emit(doc.modified, null);
-}"""},
-        "enabled": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'form') return;
-    if (doc.status === 'enabled') emit(doc.modified, doc.title);
-}"""},
-        "modified": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'form') return;
-    emit(doc.modified, doc.title);
-}"""}
-    }
-}
 
 
 class FormSaver(saver.Saver):
@@ -111,7 +88,7 @@ class Forms(FormMixin, RequestHandler):
         account_names = self.get_accounts_name()
         counts = dict([(f["_id"], self.get_order_count(f)) for f in forms])
         self.render(
-            "forms.html",
+            "form/list.html",
             title=title,
             forms=forms,
             account_names=account_names,
@@ -127,7 +104,7 @@ class Form(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.render(
-            "form.html",
+            "form/display.html",
             form=form,
             order_count=self.get_order_count(form),
             fields=Fields(form),
@@ -226,7 +203,7 @@ class FormCreate(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("form_create.html")
+        self.render("form/create.html")
 
     @tornado.web.authenticated
     def post(self):
@@ -274,7 +251,7 @@ class FormEdit(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_entity(iuid, doctype=constants.FORM)
         self.render(
-            "form_edit.html", title="Edit form '{0}'".format(form["title"]), form=form
+            "form/edit.html", title="Edit form '{0}'".format(form["title"]), form=form
         )
 
     @tornado.web.authenticated
@@ -312,7 +289,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
             identifiers.update(self._get_identifiers(row.doc["fields"]))
         identifiers.difference_update(self._get_identifiers(form["fields"]))
         self.render(
-            "field_create.html",
+            "form/field_create.html",
             title="Create field in form '{0}'".format(form["title"]),
             form=form,
             fields=Fields(form),
@@ -366,7 +343,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
             self.see_other("form", form["_id"], error="No such field.")
             return
         self.render(
-            "field_edit.html",
+            "form/field_edit.html",
             form=form,
             field=field,
             fields=fields,
@@ -549,11 +526,11 @@ class FormOrders(RequestHandler):
         orders = [r.doc for r in view]
         account_names = self.get_accounts_name()
         self.render(
-            "form_orders.html", form=form, orders=orders, account_names=account_names
+            "form/orders.html", form=form, orders=orders, account_names=account_names
         )
 
 
-class FormOrdersAggregate(RequestHandler):
+class FormAggregate(RequestHandler):
     "Aggregate data from all orders for the form into a CSV file."
 
     TITLES = dict(_id="Order IUID", email="Owner email")
@@ -569,7 +546,7 @@ class FormOrdersAggregate(RequestHandler):
         table_fields = [f for f in fields if f["type"] == constants.TABLE]
         fields = [f for f in fields if f["type"] != constants.TABLE]
         self.render(
-            "form_orders_aggregate.html",
+            "form/aggregate.html",
             form=form,
             fields=fields,
             table_fields=table_fields,
@@ -583,7 +560,7 @@ class FormOrdersAggregate(RequestHandler):
         order_fields = self.get_arguments("order")
         if not ("iuid" in order_fields or "identifier" in order_fields):
             self.see_other(
-                "form_orders_aggregate",
+                "form_aggregate",
                 form["_id"],
                 error="IUID or identifier must be included.",
             )

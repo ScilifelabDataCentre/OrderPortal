@@ -1,0 +1,61 @@
+{# Database display page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Database{% end %}
+{% block body_title %}Database{% end %}
+
+{% block content %}
+<h3>Search OrderPortal CouchDB database</h3>
+<div class="row">
+  <div class="col-md-8">
+    <form action="{{ reverse_url('admin_database') }}"
+          method="GET" role="form" class="form-inline">
+      <div class="form-group">
+        <div class="input-group">
+          <div class="input-group-addon">Find document</div>
+          <input type="text" name="identifier" id="identifier"
+                 class="form-control" size="40" placeholder="Identifier"
+                 value="{{ identifier }}">
+          <div class="input-group-btn">
+            <button class="btn btn-primary" type="submit">Lookup</button>
+          </div>
+        </div>
+        <div class="help-block">
+          Lookup a CouchDB document given an identifier. The
+          identifier may be an account email or API key, or a file
+          name, info name, order identifier, or '_id' of the CouchDB
+          document.
+        </div>
+      </div>
+    </form>
+  </div>
+  {% if doc %}
+  <div class="col-md col-md-offset-1">
+    <a href="{{ reverse_url('admin_document', doc['_id']) }}"
+       class="btn btn-primary">
+      Download {{ doc['_id'] }}
+    </a>
+  </div>
+  {% end %}
+</div>
+
+<h3>Document counts in the OrderPortal CouchDBdatabase</h3>
+{% module Json(counts) %}
+
+<h3>OrderPortal CouchDB database info</h3>
+{% module Json(db_info) %}
+
+<h3>CouchDB server</h3>
+{% module Json(server_data) %}
+
+<h3>All databases in CouchDB server</h3>
+{{ ", ".join([str(d) for d in databases]) }}
+
+<h3>CouchDB system stats</h3>
+{% module Json(system_stats) %}
+
+<h3>CouchDB node stats</h3>
+{% module Json(node_stats) %}
+
+{% end %} {# block content #}

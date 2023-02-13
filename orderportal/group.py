@@ -1,7 +1,5 @@
 "Group pages; accounts which are able to see all orders of each other."
 
-import logging
-
 import tornado.web
 
 import orderportal
@@ -9,37 +7,6 @@ from orderportal import constants, settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
-
-
-DESIGN_DOC = {
-    "views": {
-        "invited": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'group') return;
-    for (var i=0; i<doc.invited.length; i++) {
-	emit(doc.invited[i], doc.name);
-    };
-}"""},
-        "member": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'group') return;
-    for (var i=0; i<doc.members.length; i++) {
-	emit(doc.members[i], doc.name);
-    };
-}"""},
-        "modified": {
-            "reduce": "_count",
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'group') return;
-    emit(doc.modified, 1);
-}"""},
-        "owner": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'group') return;
-    emit(doc.owner, doc.name);
-}"""}
-    }
-}
 
 
 class GroupSaver(saver.Saver):
@@ -53,13 +20,13 @@ class GroupMixin(object):
             return
         if self.current_user["email"] in group["members"]:
             return
-        if self.is_staff():
+        if self.am_staff():
             return
         raise ValueError("you may not read the group")
 
     def allow_edit(self, group):
         "Is the group editable by the current user?"
-        if self.is_admin():
+        if self.am_admin():
             return True
         if self.is_owner(group):
             return True
@@ -82,7 +49,7 @@ class Group(GroupMixin, RequestHandler):
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        self.render("group.html", group=group, allow_edit=self.allow_edit(group))
+        self.render("group/display.html", group=group, allow_edit=self.allow_edit(group))
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -107,7 +74,7 @@ class GroupCreate(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
-        self.render("group_create.html")
+        self.render("group/create.html")
 
     @tornado.web.authenticated
     def post(self):
@@ -135,7 +102,7 @@ class GroupEdit(GroupMixin, RequestHandler):
     def get(self, iuid):
         group = self.get_entity(iuid, doctype=constants.GROUP)
         self.check_editable(group)
-        self.render("group_edit.html", group=group)
+        self.render("group/edit.html", group=group)
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -237,4 +204,4 @@ class Groups(RequestHandler):
             "group", "modified", descending=True, reduce=False, include_docs=True
         )
         groups = [r.doc for r in view]
-        self.render("groups.html", groups=groups)
+        self.render("group/list.html", groups=groups)

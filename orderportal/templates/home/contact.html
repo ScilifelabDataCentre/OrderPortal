@@ -1,0 +1,23 @@
+{# Contact information. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Contact{% end %}
+{% block body_title %}Contact{% end %}
+
+{% block main_content %}
+{% module Text('contact') %}
+{% end %}
+
+{% block action_content %}
+{% if am_admin %}
+<form action="{{ reverse_url('text_edit', 'contact') }}"
+      method="GET" role="form">
+  <input type="hidden" name="origin" value="{{ reverse_url('contact') }}">
+  <button type="submit" class="btn btn-primary btn-block">
+    <span class="glyphicon glyphicon-edit"></span>
+    Edit
+  </button>
+</form>
+{% end %} {# if am_admin #}
+{% end %} {# block action_content #}

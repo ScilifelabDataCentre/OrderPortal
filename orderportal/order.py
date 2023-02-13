@@ -2,7 +2,6 @@
 
 import io
 import json
-import logging
 import os.path
 import re
 import traceback
@@ -12,78 +11,12 @@ import zipfile
 import couchdb2
 import tornado.web
 
-from orderportal import constants, settings, parameters
+from orderportal import constants, settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.fields import Fields
 from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler, ApiV1Mixin
-
-
-DESIGN_DOC = {
-    "views": {
-        "form": {
-            "reduce": "_count",
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'order') return;
-    emit([doc.form, doc.modified], 1);
-}"""},
-        "identifier": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'order') return;
-    if (!doc.identifier) return;
-    emit(doc.identifier, doc.title);
-}"""},
-        "keyword": {      # order/keyword
-            # NOTE: The 'map' function body is modified in utils.load_design_documents.
-            "map": """function(doc) {{
-    if (doc.orderportal_doctype !== 'order') return;
-    var cleaned = doc.title.replace(/[{delims_lint}]/g, " ").toLowerCase();
-    var words = cleaned.split(/\s+/);
-    words.forEach(function(word) {{
-        if (word.length >= 2 && !lint[word]) emit(word, doc.title);
-    }});
-}};
-var lint = {lint};
-"""},
-        "modified": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'order') return;
-    emit(doc.modified, doc.title);
-}"""},
-        "owner": {
-            "reduce": "_count",
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'order') return;
-    emit([doc.owner, doc.modified], 1);
-}"""},
-        "status": {
-            "reduce": "_count",
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'order') return;
-    emit([doc.status, doc.modified], 1);
-}"""},
-        "tag": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'order') return;
-    if (!doc.tags) return;
-    doc.tags.forEach(function(tag) {
-	emit(tag.toLowerCase(), doc.title);
-	var parts = tag.split(':');
-	if (parts.length === 2) {
-	    emit(parts[1].toLowerCase(), doc.title);
-	};
-    });
-}"""},
-        "year_submitted": {
-            "reduce": "_count",
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'order') return;
-    if (!doc.history.submitted) return;
-    emit(doc.history.submitted.split('-')[0], 1);
-}"""}
-    }
-}
 
 
 class OrderSaver(saver.Saver):
@@ -113,7 +46,7 @@ class OrderSaver(saver.Saver):
         self["form"] = form["_id"]
         self["title"] = title
         self["fields"] = dict([(f["identifier"], None) for f in self.fields])
-        self.set_status(parameters["ORDER_STATUS_INITIAL"]["identifier"])
+        self.set_status(settings["ORDER_STATUS_INITIAL"]["identifier"])
         # Set the order identifier if its format defined.
         # Allow also for disabled, since admin may clone such orders.
         if form["status"] in (constants.ENABLED, constants.DISABLED):
@@ -193,7 +126,7 @@ class OrderSaver(saver.Saver):
         "Set the new status of the order."
         if self.get("status") == new:
             return
-        if new not in parameters["ORDER_STATUSES_LOOKUP"]:
+        if new not in settings["ORDER_STATUSES_LOOKUP"]:
             raise ValueError(f"invalid status '{new}'")
         if "status" in self.doc:
             targets = self.rqh.get_targets(self.doc)
@@ -217,7 +150,7 @@ class OrderSaver(saver.Saver):
             if not isinstance(s, str):
                 raise ValueError("tags list item is not a string")
         # Allow staff to add prefixed tags.
-        if self.rqh.is_staff():
+        if self.rqh.am_staff():
             for pos, tag in enumerate(tags):
                 parts = tag.split(":", 1)
                 for part in parts:
@@ -271,7 +204,7 @@ class OrderSaver(saver.Saver):
         # and except for multiselect: there a missing value means empty list.
         for field in self.fields:
             # Field not displayed or not writeable must not be changed.
-            if not self.rqh.is_staff() and (
+            if not self.rqh.am_staff() and (
                 field["restrict_read"] or field["restrict_write"]
             ):
                 continue
@@ -514,7 +447,7 @@ class OrderSaver(saver.Saver):
                 or (isinstance(date, str) and constants.DATE_RX.match(date))
             ):
                 raise ValueError("invalid date in history data")
-            if not status in parameters["ORDER_STATUSES_LOOKUP"]:
+            if not status in settings["ORDER_STATUSES_LOOKUP"]:
                 raise ValueError("invalid status in history data")
             self["history"][status] = date
 
@@ -631,7 +564,7 @@ class OrderMixin(object):
         "Is the order readable by the current user?"
         if self.is_owner(order):
             return True
-        if self.is_staff():
+        if self.am_staff():
             return True
         if self.is_colleague(order["owner"]):
             return True
@@ -645,11 +578,11 @@ class OrderMixin(object):
 
     def allow_edit(self, order):
         "Is the order editable by the current user?"
-        if self.is_admin():
+        if self.am_admin():
             return True
-        status = parameters["ORDER_STATUSES_LOOKUP"][order["status"]]
+        status = settings["ORDER_STATUSES_LOOKUP"][order["status"]]
         edit = status.get("edit", [])
-        if self.is_staff() and constants.STAFF in edit:
+        if self.am_staff() and constants.STAFF in edit:
             return True
         if self.is_owner(order) and constants.USER in edit:
             return True
@@ -663,11 +596,11 @@ class OrderMixin(object):
 
     def allow_attach(self, order):
         "May the current user may attach a file to the order?"
-        if self.is_admin():
+        if self.am_admin():
             return True
-        status = parameters["ORDER_STATUSES_LOOKUP"][order["status"]]
+        status = settings["ORDER_STATUSES_LOOKUP"][order["status"]]
         attach = status.get("attach", [])
-        if self.is_staff() and constants.STAFF in attach:
+        if self.am_staff() and constants.STAFF in attach:
             return True
         if self.is_owner(order) and constants.USER in attach:
             return True
@@ -712,7 +645,7 @@ class OrderMixin(object):
         result = []
         for field in fields:
             # Check if field may not be viewed by the current user.
-            if field["restrict_read"] and not self.is_staff():
+            if field["restrict_read"] and not self.am_staff():
                 continue
             # Is there a visibility condition? If so, check it.
             fid = field.get("visible_if_field")
@@ -740,17 +673,17 @@ class OrderMixin(object):
 
     def get_targets(self, order):
         "Get the allowed status transition targets as status lookup items."
-        targets = parameters["ORDER_TRANSITIONS"].get(order["status"], dict())
+        targets = settings["ORDER_TRANSITIONS"].get(order["status"], dict())
         result = []
         for key, transition in targets.items():
             if transition.get("require_valid") and order["invalid"]: continue
             permission = transition["permission"]
-            if ((self.is_admin() and constants.ADMIN in permission)
-                or (self.is_staff() and constants.STAFF in permission)
+            if ((self.am_admin() and constants.ADMIN in permission)
+                or (self.am_staff() and constants.STAFF in permission)
                 or (self.is_owner(order) and constants.USER in permission)
             ):
                 try:            # Defensive: only allow enabled statuses as targets.
-                    result.append(parameters["ORDER_STATUSES_LOOKUP"][key])
+                    result.append(settings["ORDER_STATUSES_LOOKUP"][key])
                 except KeyError:
                     pass
         return result
@@ -765,7 +698,7 @@ class OrderMixin(object):
         Special case: Admin can clone an order even if its form is disabled.
         """
         form = self.get_form(order["form"])
-        if self.is_admin():
+        if self.am_admin():
             return form["status"] in (
                 constants.ENABLED,
                 constants.TESTING,
@@ -839,7 +772,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
             data["report"]["timestamp"] = order["report"]["timestamp"]
             data["report"]["link"] = dict(href=URL("order_report_api", order["_id"]))
         data["history"] = dict()
-        for s in parameters["ORDER_STATUSES"]:
+        for s in settings["ORDER_STATUSES"]:
             key = s["identifier"]
             data["history"][key] = order["history"].get(key)
         data["tags"] = order.get("tags", [])
@@ -891,23 +824,6 @@ def convert_to_strings(doc):
 
 class OrderCreate(OrderMixin, RequestHandler):
     "Create a new order."
-
-    # Do not use auth decorator: Instead show error message if not logged in.
-    def get(self):
-        try:
-            if not self.current_user:
-                raise ValueError(
-                    "You need to be logged in to create {0}."
-                    " Register to get an account if you don't have one.".format(
-                        utils.terminology("order")
-                    )
-                )
-            self.check_creation_enabled()
-            form = self.get_form(self.get_argument("form"), check=True)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
-        else:
-            self.render("order_create.html", form=form)
 
     @tornado.web.authenticated
     def post(self):
@@ -980,15 +896,15 @@ class Order(OrderMixin, RequestHandler):
             )
             files.sort(key=lambda i: i["filename"].lower())
         self.render(
-            "order.html",
+            "order/display.html",
             title="{0} '{1}'".format(utils.terminology("Order"), order["title"]),
             order=order,
             account_names=self.get_accounts_name([order["owner"]]),
-            status=parameters["ORDER_STATUSES_LOOKUP"][order["status"]],
+            status=settings["ORDER_STATUSES_LOOKUP"][order["status"]],
             form=form,
             fields=form["fields"],
             attached_files=files,
-            allow_edit=self.is_admin() or self.allow_edit(order),
+            allow_edit=self.am_admin() or self.allow_edit(order),
             allow_clone=self.allow_clone(order),
             allow_attach=self.allow_attach(order),
             targets=self.get_targets(order),
@@ -1062,7 +978,7 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
                     saver.update_fields(data=data["fields"])
                 except KeyError:
                     pass
-                if self.is_admin():
+                if self.am_admin():
                     try:
                         saver.set_history(data["history"])
                     except KeyError:
@@ -1116,10 +1032,10 @@ class OrderCsv(OrderMixin, RequestHandler):
         writer.writerow(("", "University", account.get("university") or "-"))
         writer.writerow(("", "Department", account.get("department") or "-"))
         writer.writerow(("", "PI", account.get("pi") and "Yes" or "No"))
-        if parameters.get("ACCOUNT_FUNDER_INFO_GENDER"):
+        if settings.get("ACCOUNT_FUNDER_INFO_GENDER"):
             writer.writerow(("", "Gender", account.get("gender", "-").capitalize()))
         writer.writerow(("Status", order["status"]))
-        for i, s in enumerate(parameters["ORDER_STATUSES"]):
+        for i, s in enumerate(settings["ORDER_STATUSES"]):
             key = s["identifier"]
             writer.writerow(
                 (i == 0 and "History" or "", key, order["history"].get(key, "-"))
@@ -1266,7 +1182,7 @@ class OrderEdit(OrderMixin, RequestHandler):
         colleagues = sorted(self.get_account_colleagues(self.current_user["email"]))
         form = self.get_form(order["form"])
         fields = Fields(form)
-        if self.is_staff():
+        if self.am_staff():
             tags = order.get("tags", [])
         else:
             tags = [t for t in order.get("tags", []) if not ":" in t]
@@ -1309,7 +1225,7 @@ class OrderEdit(OrderMixin, RequestHandler):
             tableinput.append("</tr>")
             tableinputs[field["identifier"]] = "".join(tableinput)
         self.render(
-            "order_edit.html",
+            "order/edit.html",
             title="Edit {0} '{1}'".format(
                 utils.terminology("order"), order["title"] or "[no title]"
             ),
@@ -1366,7 +1282,7 @@ class OrderOwner(OrderMixin, RequestHandler):
             self.see_other("home", error=str(msg))
             return
         self.render(
-            "order_owner.html",
+            "order/owner.html",
             title="Change owner of {0} '{1}'".format(
                 utils.terminology("order"), order["title"] or "[no title]"
             ),
@@ -1571,7 +1487,7 @@ class OrderReport(OrderMixin, RequestHandler):
         content_type = order["_attachments"][constants.SYSTEM_REPORT]["content_type"]
         if report.get("inline"):
             self.render(
-                "order_report.html",
+                "order/report.html",
                 order=order,
                 content=outfile.read(),
                 content_type=content_type,
@@ -1644,7 +1560,7 @@ class OrderReportEdit(OrderMixin, RequestHandler):
     def get(self, iuid):
         self.check_admin()
         order = self.get_entity(iuid, doctype=constants.ORDER)
-        self.render("order_report_edit.html", order=order)
+        self.render("order/report_edit.html", order=order)
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -1679,7 +1595,7 @@ class Orders(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         # Ordinary users are not allowed to see the complete orders list.
-        if not self.is_staff():
+        if not self.am_staff():
             self.see_other("account_orders", self.current_user["email"])
             return
         # Count orders per year submitted.
@@ -1695,38 +1611,38 @@ class Orders(RequestHandler):
         else:
             all_count = r.value
         # Account info lookups; dummies if not used.
-        if parameters["ORDERS_LIST_OWNER_UNIVERSITY"]:
+        if settings["ORDERS_LIST_OWNER_UNIVERSITY"]:
             accounts_university = self.get_accounts_university()
         else:
             accounts_university = None
-        if parameters["ORDERS_LIST_OWNER_DEPARTMENT"]:
+        if settings["ORDERS_LIST_OWNER_DEPARTMENT"]:
             accounts_department = self.get_accounts_department()
         else:
             accounts_department = None
-        if parameters["ORDERS_LIST_OWNER_GENDER"]:
+        if settings["ORDERS_LIST_OWNER_GENDER"]:
             accounts_gender = self.get_accounts_gender()
         else:
             accounts_gender = None
         # Default ordering by the 'modified' column.
-        if parameters["DEFAULT_ORDER_COLUMN"] == "modified":
+        if settings["DEFAULT_ORDER_COLUMN"] == "modified":
             order_column = (
                 5
-                + int(parameters["ORDERS_LIST_TAGS"]) # boolean
-                + len(parameters["ORDERS_LIST_FIELDS"]) # list
-                + len(parameters["ORDERS_LIST_STATUSES"]) # list
+                + int(settings["ORDERS_LIST_TAGS"]) # boolean
+                + len(settings["ORDERS_LIST_FIELDS"]) # list
+                + len(settings["ORDERS_LIST_STATUSES"]) # list
             )
-            if parameters["ORDERS_LIST_OWNER_UNIVERSITY"]:
+            if settings["ORDERS_LIST_OWNER_UNIVERSITY"]:
                 order_column += 1
-            if parameters["ORDERS_LIST_OWNER_DEPARTMENT"]:
+            if settings["ORDERS_LIST_OWNER_DEPARTMENT"]:
                 order_column += 1
-            if parameters["ORDERS_LIST_OWNER_GENDER"]:
+            if settings["ORDERS_LIST_OWNER_GENDER"]:
                 order_column += 1
         # Otherwise default ordering by the identifier column.
         else:
             order_column = 0
         self.set_filter()
         self.render(
-            "orders.html",
+            "order/list.html",
             forms_lookup=self.get_forms_lookup(),
             years=years,
             filter=self.filter,
@@ -1755,10 +1671,10 @@ class Orders(RequestHandler):
                      for email, account in self.get_all_accounts().items()])
 
     def set_filter(self):
-        "Set the filter parameters dictionary."
+        "Set the filter settings dictionary."
         self.filter = dict()
         for key in ["status", "form_id", "owner"] + [
-                f["identifier"] for f in parameters["ORDERS_FILTER_FIELDS"]
+                f["identifier"] for f in settings["ORDERS_FILTER_FIELDS"]
         ]:
             try:
                 value = self.get_argument(key)
@@ -1774,7 +1690,7 @@ class Orders(RequestHandler):
         orders = self.filter_by_status(self.filter.get("status"))
         orders = self.filter_by_form(self.filter.get("form_id"), orders=orders)
         orders = self.filter_by_owner(self.filter.get("owner"), orders=orders)
-        for f in parameters["ORDERS_FILTER_FIELDS"]:
+        for f in settings["ORDERS_FILTER_FIELDS"]:
             orders = self.filter_by_field(
                 f["identifier"], self.filter.get(f["identifier"]), orders=orders
             )
@@ -1866,11 +1782,11 @@ class Orders(RequestHandler):
                     "modified",
                     include_docs=True,
                     descending=True,
-                    limit=parameters["DISPLAY_ORDERS_MOST_RECENT"],
+                    limit=settings["DISPLAY_ORDERS_MOST_RECENT"],
                 )
                 orders = [r.doc for r in view]
             else:
-                orders = orders[: parameters["DISPLAY_ORDERS_MOST_RECENT"]]
+                orders = orders[: settings["DISPLAY_ORDERS_MOST_RECENT"]]
 
         elif year == "all":
             if orders is None:
@@ -1918,7 +1834,7 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
                 order, account_names=account_names, forms_lookup=forms_lookup
             )
             data["fields"] = dict()
-            for key in parameters["ORDERS_LIST_FIELDS"]:
+            for key in settings["ORDERS_LIST_FIELDS"]:
                 data["fields"][key] = order["fields"].get(key)
             result["items"].append(data)
             result["invalid"] = order["invalid"]
@@ -1931,7 +1847,7 @@ class OrdersCsv(Orders):
     @tornado.web.authenticated
     def get(self):
         # Ordinary users are not allowed to see the overall orders list.
-        if not self.is_staff():
+        if not self.am_staff():
             self.see_other("account_orders", self.current_user["email"])
             return
         self.set_filter()
@@ -1950,19 +1866,19 @@ class OrdersCsv(Orders):
             "Owner URL",
         ]
         # Account info lookups for optional columns.
-        if parameters["ORDERS_LIST_OWNER_UNIVERSITY"]:
+        if settings["ORDERS_LIST_OWNER_UNIVERSITY"]:
             row.append("Owner university")
             accounts_university = self.get_accounts_university()
-        if parameters["ORDERS_LIST_OWNER_DEPARTMENT"]:
+        if settings["ORDERS_LIST_OWNER_DEPARTMENT"]:
             row.append("Owner department")
             accounts_department = self.get_accounts_department()
-        if parameters["ORDERS_LIST_OWNER_GENDER"]:
+        if settings["ORDERS_LIST_OWNER_GENDER"]:
             row.append("Owner gender")
             accounts_gender = self.get_accounts_gender()
         row.append("Tags")
-        row.extend(parameters["ORDERS_LIST_FIELDS"])
+        row.extend(settings["ORDERS_LIST_FIELDS"])
         row.append("Status")
-        row.extend([s.capitalize() for s in parameters["ORDERS_LIST_STATUSES"]])
+        row.extend([s.capitalize() for s in settings["ORDERS_LIST_STATUSES"]])
         row.append("Modified")
         writer.writerow(row)
         account_names = self.get_accounts_name()
@@ -1981,20 +1897,20 @@ class OrdersCsv(Orders):
                 account_names[order["owner"]],
                 self.absolute_reverse_url("account", order["owner"]),
             ]
-            if parameters["ORDERS_LIST_OWNER_UNIVERSITY"]:
+            if settings["ORDERS_LIST_OWNER_UNIVERSITY"]:
                 row.append(accounts_university[order["owner"]])
-            if parameters["ORDERS_LIST_OWNER_DEPARTMENT"]:
+            if settings["ORDERS_LIST_OWNER_DEPARTMENT"]:
                 row.append(accounts_department[order["owner"]])
-            if parameters["ORDERS_LIST_OWNER_GENDER"]:
+            if settings["ORDERS_LIST_OWNER_GENDER"]:
                 row.append(accounts_gender[order["owner"]])
             row.append(", ".join(order.get("tags", [])))
-            for f in parameters["ORDERS_LIST_FIELDS"]:
+            for f in settings["ORDERS_LIST_FIELDS"]:
                 value = order["fields"].get(f)
                 if isinstance(value, list):
                     value = ", ".join([str(i) for i in value])
                 row.append(value)
             row.append(order["status"])
-            for s in parameters["ORDERS_LIST_STATUSES"]:
+            for s in settings["ORDERS_LIST_STATUSES"]:
                 row.append(order["history"].get(s))
             row.append(order["modified"])
             writer.writerow(row)

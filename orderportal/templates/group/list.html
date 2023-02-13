@@ -1,0 +1,63 @@
+{# List of groups. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Groups{% end %}
+{% block body_title %}Groups{% end %}
+
+{% block search_field %}
+{% end %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <table id="groups" class="table table-striped table-condensed">
+      <thead>
+        <tr>
+          <th>Group</th>
+          <th>Owner</th>
+          <th>Members</th>
+          <th>Modified</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for group in groups %}
+        <tr>
+          <td>
+            <a href="{{ reverse_url('group', group['_id']) }}">
+              {% module Entity(group) %}
+            </a>
+          </td>
+          <td>
+            <a href="{{ reverse_url('account', group['owner']) }}">
+              {{ group['owner'] }}
+            </a>
+          </td>
+          <td>
+            {% for member in group['members'] %}
+            <a href="{{ reverse_url('account', member) }}">
+              {{ member }}
+            </a>
+            <br>
+            {% end %}
+          </td>
+          <td class="localtime nobr">{{ group['modified'] }}</td>
+        </tr>
+        {% end %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% end %} {# block content #}
+
+{% block javascript_code %}
+<script>
+$(function() {
+  $("#groups").DataTable( {
+    "pagingType": "full_numbers",
+    "pageLength": 25,
+    "order": [[3, "desc"]],
+  });
+});
+</script>
+{% end %} {# block javascript_code #}

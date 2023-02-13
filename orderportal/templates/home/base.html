@@ -1,0 +1,177 @@
+{# Base page for other home page variants. #}
+
+{% extends "../base.html" %}
+
+{% block body_header %}
+<div class="row">
+  <div class="col-md-4">
+    <img class="img-responsive" style="margin-top: 20px"
+         title="{{ settings['SITE_NAME'] }}"
+         src="{{ reverse_url('site', settings['SITE_HOME_ICON']) }}">
+  </div>
+  <div class="col-md-8">
+    <h2>{{ settings['SITE_NAME'] }}</h2>
+    {% module Text('header', origin=reverse_url('home')) %}
+  </div>
+</div>
+<br>
+{% end %} {# block body_header #}
+
+{% block content %}
+
+<div class="row">
+
+  <div class="col-md-6">
+    {% block content_left %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <span class="glyphicon glyphicon-user"></span> Login
+      </div>
+      <div class="panel-body">
+        <form action="{{ reverse_url('login') }}" method="POST" role="form">
+          {% module xsrf_form_html() %}
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="text" name="email"
+                   class="form-control" 
+                   placeholder="Email address of account">
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" name="password"
+                   class="form-control">
+          </div>
+          <div class="form-group"> 
+            <button type="submit"
+                    class="btn btn-info btn-block">
+              <span class="glyphicon glyphicon-log-in"></span> Login
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <div>
+          <a href="{{ reverse_url('register') }}" role="button"
+             class="btn btn-success btn-block">
+            <span class="glyphicon glyphicon-user"></span> Register account
+          </a>
+        </div>
+        <br>
+        <div>
+          <a href="{{ reverse_url('reset') }}" role="button"
+             class="btn btn-warning btn-block">
+            <span class="glyphicon glyphicon-step-backward"></span> Reset password
+          </a>
+        </div>
+        <br>
+        <div>
+          <a href="{{ reverse_url('password') }}" role="button"
+             class="btn btn-danger btn-block">
+            <span class="glyphicon glyphicon-lock"></span> Set password
+          </a>
+        </div>
+      </div>
+    </div>
+    {% end %} {# block content_left #}
+  </div>
+
+  <div class="col-md-6">
+    {% block content_right %}
+
+    <div class="panel-group">
+      {% if forms %}
+      {% for form in forms %}
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          {{ form['title'] }}
+          <div class="form-group pull-right">
+            <form action="{{ reverse_url('order_create') }}" method="POST">
+              {% module xsrf_form_html() %}
+              <button type="submit" class="btn btn-default btn-xs"
+                      {% if not current_user %}
+                      disabled="disabled"
+                      title="You must be logged in to create {{ terminology('order') }}."
+                      {% end %}
+                      >
+                <span class="glyphicon glyphicon-plus"></span>
+                Create {{ terminology('order') }}
+              </button>
+              <input type="hidden" name="form" value="{{ form['_id'] }}">
+            </form>
+          </div>
+        </div>
+        <div class="panel-body">
+          {% module Markdown(form.get('description')) %}
+        </div>
+      </div>
+      {% end %} {# for form in forms #}
+      {% elif forms is None %}
+      <i>{{ terminology('Order') }} creation is not allowed for account with role 'user'.</i>
+      {% else %}
+      <i>No {{ terminology('order') }} forms have been enabled.</i>
+      {% end %} {# if forms #}
+    </div>
+
+    {% end %} {# block content_right #}
+  </div>
+
+</div>
+
+<div class="row">
+
+  {% if settings['DISPLAY_NEWS'] %}
+  <div class="{{ settings['DISPLAY_EVENTS'] and 'col-md-6' or 'col-md-12' }}">
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <span class="glyphicon glyphicon-info-sign"></span> Recent news
+        {% if am_admin %}
+        &nbsp;
+        <button type="button" class="btn btn-info btn-xs"
+                data-toggle="modal" data-target="#news_create">
+          <span class="glyphicon glyphicon-plus"></span> Create entry
+        </button>
+        {% end %} {# if am_admin #}
+        <a class="btn btn-info btn-xs pull-right" role="button"
+           href="{{ reverse_url('news') }}">All news</a>
+      </div>
+      <div class="panel-body">
+        {% include '../news/list.html' %}
+      </div>
+    </div>
+  </div>
+  {% end %}
+
+  {% if settings['DISPLAY_EVENTS'] %}
+  <div class="{{ settings['DISPLAY_NEWS'] and 'col-md-6' or 'col-md-12' }}">
+    <div class="panel panel-success">
+      <div class="panel-heading">
+        <span class="glyphicon glyphicon-calendar"></span> Upcoming events
+        {% if am_admin %}
+        &nbsp;
+        <button type="button"
+                class="btn btn-success btn-xs"
+                data-toggle="modal" data-target="#event_create">
+          <span class="glyphicon glyphicon-plus"></span> Create entry
+        </button>
+        {% end %}{# if am_admin #}
+        <a class="btn btn-success btn-xs pull-right" role="button"
+           href="{{ reverse_url('events') }}">All events</a>
+      </div>
+      <div class="panel-body">
+        {% include '../event/list.html' %}
+      </div>
+    </div>
+  </div>
+  {% end %}
+
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    {% module Text('general', origin=reverse_url('home')) %}
+  </div>
+</div>
+
+{% end %} {# block content #}

@@ -1,23 +1,11 @@
 "Event list handling; meeting and seminar announcements for home page."
 
-import logging
 import tornado.web
 
 from orderportal import constants, settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
-
-
-DESIGN_DOC = {
-    "views": {
-        "date": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'event') return;
-    emit(doc.date, doc.title);
-}"""}
-    }
-}
 
 
 class EventSaver(saver.Saver):
@@ -28,7 +16,7 @@ class Events(RequestHandler):
     "List of all events."
 
     def get(self):
-        self.render("events.html", events=self.get_events())
+        self.render("event/all.html", events=self.get_events())
 
 
 class EventCreate(RequestHandler):

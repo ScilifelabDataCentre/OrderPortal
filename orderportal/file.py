@@ -1,6 +1,5 @@
 "File (a.k.a document) pages; uploaded files."
 
-import logging
 import os.path
 
 import tornado.web
@@ -10,17 +9,6 @@ from orderportal import constants, settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
-
-
-DESIGN_DOC = {
-    "views": {
-        "name": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'file') return;
-    emit(doc.name, null);
-}"""}
-    }
-}
 
 
 class FileSaver(saver.Saver):
@@ -64,7 +52,7 @@ class Files(RequestHandler):
     def get(self):
         files = [r.doc for r in self.db.view("file", "name", include_docs=True)]
         files.sort(key=lambda i: i["modified"], reverse=True)
-        self.render("files.html", files=files)
+        self.render("file/list.html", files=files)
 
 
 class File(RequestHandler):
@@ -88,7 +76,7 @@ class FileMeta(RequestHandler):
 
     def get(self, name):
         file = self.get_entity_view("file", "name", name)
-        self.render("file_meta.html", file=file)
+        self.render("file/meta.html", file=file)
 
 
 class FileCreate(RequestHandler):
@@ -97,7 +85,7 @@ class FileCreate(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("file_create.html")
+        self.render("file/create.html")
 
     @tornado.web.authenticated
     def post(self):
@@ -130,7 +118,7 @@ class FileEdit(RequestHandler):
     def get(self, name):
         self.check_admin()
         file = self.get_entity_view("file", "name", name)
-        self.render("file_edit.html", file=file)
+        self.render("file/edit.html", file=file)
 
     @tornado.web.authenticated
     def post(self, name):

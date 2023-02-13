@@ -3,5 +3,5 @@
 *.bak
 *.yaml
 *.json
-site
+site*
 !site_template/*.yaml

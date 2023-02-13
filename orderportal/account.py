@@ -1,12 +1,9 @@
 "Account and login pages."
 
-import csv
-import logging
-
 import tornado.web
 
 import orderportal
-from orderportal import constants, settings, parameters
+from orderportal import constants, settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.order import OrderApiV1Mixin
@@ -15,42 +12,15 @@ from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler
 
 
-DESIGN_DOC = {
-    "views": {
-        "all": {
-            "reduce": "_count",
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'account') return;
-    emit(doc.modified, null);
-}"""},
-        "api_key": {
-            "map": """function(doc) { 
-    if (doc.orderportal_doctype !== 'account') return;
-    if (!doc.api_key) return;
-    emit(doc.api_key, doc.email);
-}"""},
-        "email": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'account') return;
-    emit(doc.email, [doc.first_name, doc.last_name]);
-}"""},
-        "role": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'account') return;
-    emit(doc.role, doc.email);
-}"""},
-        "status": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'account') return;
-    emit(doc.status, doc.email);
-}"""},
-        "university": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'account') return;
-    emit(doc.university, doc.email);
-}"""}
-    }
-}
+def check_password(password):
+    """Check that the password is long and complex enough.
+    Raise ValueError otherwise."""
+    if len(password) < settings["MIN_PASSWORD_LENGTH"]:
+        raise ValueError(
+            "Password must be at least {0} characters long.".format(
+                settings["MIN_PASSWORD_LENGTH"]
+            )
+        )
 
 
 class AccountSaver(saver.Saver):
@@ -73,9 +43,9 @@ class AccountSaver(saver.Saver):
         self["password"] = None
 
     def set_password(self, new):
-        utils.check_password(new)
+        check_password(new)
         self["code"] = None
-        # Bypass ordinary 'set'; avoid logging password, even if hashed.
+        # Bypass ordinary 'set'; avoid saving password, even if hashed.
         self.doc["password"] = utils.hashed_password(new)
         self.changed["password"] = "******"
 
@@ -104,7 +74,7 @@ class Accounts(RequestHandler):
     def get(self):
         self.check_staff()
         self.set_filter()
-        self.render("accounts.html", accounts=self.get_accounts(), filter=self.filter)
+        self.render("account/list.html", accounts=self.get_accounts(), filter=self.filter)
 
     def set_filter(self):
         "Set the filter parameters dictionary."
@@ -345,7 +315,7 @@ class AccountMixin(object):
         "Is the account readable by the current user?"
         if self.is_owner(account):
             return True
-        if self.is_staff():
+        if self.am_staff():
             return True
         if self.is_colleague(account["email"]):
             return True
@@ -361,7 +331,7 @@ class AccountMixin(object):
         "Is the account editable by the current user?"
         if self.is_owner(account):
             return True
-        if self.is_staff():
+        if self.am_staff():
             return True
         return False
 
@@ -399,12 +369,12 @@ class Account(AccountMixin, RequestHandler):
             latest_activity = key[1]
         except IndexError:
             latest_activity = None
-        if self.is_staff() or self.current_user["email"] == account["email"]:
+        if self.am_staff() or self.current_user["email"] == account["email"]:
             invitations = self.get_invitations(account["email"])
         else:
             invitations = []
         self.render(
-            "account.html",
+            "account/display.html",
             account=account,
             groups=self.get_account_groups(account["email"]),
             latest_activity=latest_activity,
@@ -544,7 +514,7 @@ class AccountOrdersMixin(object):
         "Is the account readable by the current user?"
         if account["email"] == self.current_user["email"]:
             return True
-        if self.is_staff():
+        if self.am_staff():
             return True
         if self.is_colleague(account["email"]):
             return True
@@ -584,13 +554,13 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
             self.see_other("home", error=str(msg))
             return
         # Default ordering by the 'modified' column.
-        if parameters["DEFAULT_ORDER_COLUMN"] == "modified":
+        if settings["DEFAULT_ORDER_COLUMN"] == "modified":
             order_column = (
-                int(parameters["ORDERS_LIST_TAGS"]) # boolean
-                + len(parameters["ORDERS_LIST_FIELDS"]) # list
-                + len(parameters["ORDERS_LIST_STATUSES"]) # list
+                int(settings["ORDERS_LIST_TAGS"]) # boolean
+                + len(settings["ORDERS_LIST_FIELDS"]) # list
+                + len(settings["ORDERS_LIST_STATUSES"]) # list
             )
-            if self.is_staff():
+            if self.am_staff():
                 order_column += 1
         # Otherwise default ordering by the identifier column.
         else:
@@ -605,7 +575,7 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
         )
         orders = [r.doc for r in view]
         self.render(
-            "account_orders.html",
+            "account/orders.html",
             forms_lookup=self.get_forms_lookup(),
             orders=orders,
             account=account,
@@ -666,19 +636,19 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
             self.see_other("home", error=str(msg))
             return
         # Default ordering by the 'modified' column.
-        if parameters["DEFAULT_ORDER_COLUMN"] == "modified":
+        if settings["DEFAULT_ORDER_COLUMN"] == "modified":
             order_column = (
-                int(parameters["ORDERS_LIST_TAGS"]) # boolean
-                + len(parameters["ORDERS_LIST_FIELDS"]) # list
-                + len(parameters["ORDERS_LIST_STATUSES"]) # list
+                int(settings["ORDERS_LIST_TAGS"]) # boolean
+                + len(settings["ORDERS_LIST_FIELDS"]) # list
+                + len(settings["ORDERS_LIST_STATUSES"]) # list
             )
-            if self.is_staff():
+            if self.am_staff():
                 order_column += 1
         # Otherwise default ordering by the identifier column.
         else:
             order_column = 0
         self.render(
-            "account_groups_orders.html",
+            "account/groups_orders.html",
             account=account,
             forms_lookup=self.get_forms_lookup(),
             orders=self.get_group_orders(account),
@@ -761,7 +731,7 @@ class AccountMessages(AccountMixin, RequestHandler):
             include_docs=True,
         )
         messages = [r.doc for r in view]
-        self.render("account_messages.html", account=account, messages=messages)
+        self.render("account/messages.html", account=account, messages=messages)
 
 
 class AccountEdit(AccountMixin, RequestHandler):
@@ -775,7 +745,7 @@ class AccountEdit(AccountMixin, RequestHandler):
         except ValueError as msg:
             self.see_other("account", account["email"], error=str(msg))
             return
-        self.render("account_edit.html", account=account)
+        self.render("account/edit.html", account=account)
 
     @tornado.web.authenticated
     def post(self, email):
@@ -788,7 +758,7 @@ class AccountEdit(AccountMixin, RequestHandler):
         try:
             with AccountSaver(doc=account, rqh=self) as saver:
                 # Only admin (not staff!) may change role of an account.
-                if self.is_admin():
+                if self.am_admin():
                     role = self.get_argument("role")
                     if role not in constants.ACCOUNT_ROLES:
                         raise ValueError("Invalid role.")
@@ -858,7 +828,7 @@ class Login(LoginMixin, RequestHandler):
     "Login to a account account. Set a secure cookie."
 
     def get(self):
-        self.render("login.html")
+        self.render("account/login.html")
 
     def post(self):
         """Login to a account account. Set a secure cookie.
@@ -889,7 +859,7 @@ class Login(LoginMixin, RequestHandler):
             )
             # Disable account if too many recent login failures.
             if len(list(view)) > settings["LOGIN_MAX_FAILURES"]:
-                logging.warning(
+                self.logger.warning(
                     f"account {account['email']} has been disabled due to too many login failures"
                 )
                 with AccountSaver(doc=account, rqh=self) as saver:
@@ -897,7 +867,7 @@ class Login(LoginMixin, RequestHandler):
                     saver.erase_password()
                 msg = "Too many failed login attempts: Your account has been disabled. Contact the admin"
                 # Prepare email message about being disabled.
-                text = parameters[constants.ACCOUNT][constants.DISABLED]
+                text = settings[constants.ACCOUNT][constants.DISABLED]
                 with MessageSaver(rqh=self) as saver:
                     saver.create(text)
                     saver.send(self.get_recipients(text, account))
@@ -910,7 +880,7 @@ class Login(LoginMixin, RequestHandler):
             msg = "Account is disabled. Contact the admin."
             self.see_other("home", error=msg)
             return
-        logging.debug(f"Basic auth login: account {account['email']}")
+        self.logger.debug(f"Basic auth login: account {account['email']}")
         self.do_login(account)
         if account.get("update_info"):
             self.see_other(
@@ -936,7 +906,7 @@ class Reset(LoginMixin, RequestHandler):
     "Reset the password of an account."
 
     def get(self):
-        self.render("reset.html", email=self.get_argument("email", ""))
+        self.render("account/reset.html", email=self.get_argument("email", ""))
 
     def post(self):
         URL = self.absolute_reverse_url
@@ -958,7 +928,7 @@ class Reset(LoginMixin, RequestHandler):
                 return
             with AccountSaver(doc=account, rqh=self) as saver:
                 saver.reset_password()
-            text = parameters[constants.ACCOUNT][constants.RESET]
+            text = settings[constants.ACCOUNT][constants.RESET]
             try:
                 with MessageSaver(rqh=self) as saver:
                     saver.create(
@@ -991,7 +961,7 @@ class Password(LoginMixin, RequestHandler):
 
     def get(self):
         self.render(
-            "password.html",
+            "account/password.html",
             title="Set your password",
             email=self.get_argument("email", default=""),
             code=self.get_argument("code", default=""),
@@ -1003,7 +973,7 @@ class Password(LoginMixin, RequestHandler):
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        if not self.is_staff() and (account.get("code") != self.get_argument("code")):
+        if not self.am_staff() and (account.get("code") != self.get_argument("code")):
             self.see_other(
                 "home",
                 error="Either the email address or the code for setting password was"
@@ -1012,7 +982,7 @@ class Password(LoginMixin, RequestHandler):
             return
         password = self.get_argument("password", "")
         try:
-            utils.check_password(password)
+            check_password(password)
         except ValueError as msg:
             self.see_other(
                 "password",
@@ -1063,7 +1033,7 @@ class Register(RequestHandler):
             values[key] = self.get_argument(key, None)
         for key in self.ADDRESS_KEYS:
             values["invoice_" + key] = self.get_argument("invoice_" + key, None)
-        self.render("register.html", values=values)
+        self.render("account/register.html", values=values)
 
     def post(self):
         try:
@@ -1109,7 +1079,7 @@ class Register(RequestHandler):
                 saver["owner"] = saver["email"]
                 saver["role"] = constants.USER
                 saver["api_key"] = utils.get_iuid()
-                if self.is_staff():
+                if self.am_staff():
                     saver["status"] = constants.ENABLED
                     saver.reset_password()
                 else:
@@ -1128,10 +1098,10 @@ class Register(RequestHandler):
             self.see_other("register", error=str(msg), **kwargs)
             return
         account = saver.doc
-        text = parameters[constants.ACCOUNT][account["status"]]
+        text = settings[constants.ACCOUNT][account["status"]]
         # Allow staff to avoid sending email to the person when registering an account.
         if not (
-            self.is_staff()
+            self.am_staff()
             and not utils.to_bool(self.get_argument("send_email", False))
         ):
             try:
@@ -1151,7 +1121,7 @@ class Register(RequestHandler):
                 self.set_message_flash(str(error))
             except ValueError as error:
                 self.set_error_flash(str(error))
-        if self.is_staff():
+        if self.am_staff():
             self.see_other("account", account["email"])
         else:
             self.see_other("registered")
@@ -1161,7 +1131,7 @@ class Registered(RequestHandler):
     "Successful registration. Display message."
 
     def get(self):
-        self.render("registered.html")
+        self.render("account/registered.html")
 
 
 class AccountEnable(RequestHandler):
@@ -1178,7 +1148,7 @@ class AccountEnable(RequestHandler):
         with AccountSaver(account, rqh=self) as saver:
             saver["status"] = constants.ENABLED
             saver.reset_password()
-        text = parameters[constants.ACCOUNT][constants.ENABLED]
+        text = settings[constants.ACCOUNT][constants.ENABLED]
         with MessageSaver(rqh=self) as saver:
             saver.create(
                 text,
