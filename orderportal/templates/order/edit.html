@@ -11,6 +11,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 {% end %}
 
 {% block content %}
+{# Special case; UIModule CancelButton doesn't fit here. #}
 <div class="row">
   <div class="col-md-2 col-md-offset-10">
     <form action="{{ reverse_url('order', order['_id']) }}"

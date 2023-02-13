@@ -10,19 +10,11 @@ Change owner of {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 Change owner of {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 {% end %}
 
-{% block content %}
-<div class="row">
-  <div class="col-md-2 col-md-offset-10">
-    <form action="{{ reverse_url('order', order['_id']) }}"
-          method="GET" role="form" class="allow_leaving_without_question">
-      <div class="form-group">
-        <button type="submit" class="btn btn-default btn-block">
-          <span class="glyphicon glyphicon-remove"></span> Cancel</button>
-      </div>
-    </form>
-  </div>
-</div>
+{% block action_content %}
+{% module CancelButton(reverse_url('order', order['_id'])) %}
+{% end %} {# block action_content #}
 
+{% block main_content %}
 <form action="{{ reverse_url('order_owner', order['_id']) }}"
       id="__order_edit__" class="allow_leaving_without_question"
       method="POST" role="form">
@@ -30,7 +22,7 @@ Change owner of {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 
   <div class="form-group">
     <div class="row">
-      <div class="col-md-9">
+      <div class="col-md-12">
         <label class="control-label" for="owner">Owner</label>
         {% if is_staff %}
         <input type="text" class="form-control"
@@ -68,4 +60,4 @@ Change owner of {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
     </div>
   </div>
 </form>
-{% end %} {# block content #}
+{% end %} {# block main_content #}

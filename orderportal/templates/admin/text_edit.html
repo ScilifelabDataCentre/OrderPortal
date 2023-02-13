@@ -5,6 +5,10 @@
 {% block head_title %}Edit text '{{ text['name'] }}'{% end %}
 {% block body_title %}Edit text '{{ text['name'] }}'{% end %}
 
+{% block action_content %}
+{% module CancelButton(origin) %}
+{% end %} {# block action_content #}
+
 {% block main_content %}
 <form action="{{ reverse_url('text_edit', text['name']) }}"
       method="POST" role="form">
@@ -53,14 +57,3 @@
 
 </form>
 {% end %} {# block main_content #}
-
-{% block action_content %}
-<form action="{{ origin }}"
-      method="GET" role="form">
-  <div class="form-group">
-    <label class="control-label"></label>
-    <button type="submit" class="btn btn-default btn-block">
-      <span class="glyphicon glyphicon-remove"></span> Cancel</button>
-  </div>
-</form>
-{% end %} {# block action_content #}

@@ -11,6 +11,10 @@ Edit {% module Icon('order') %}
 {{ terminology('order') }} report: {{ order['title'] }}
 {% end %}
 
+{% block action_content %}
+{% module CancelButton(reverse_url('order', order['_id'])) %}
+{% end %} {# block action_content #}
+
 {% block main_content %}
 <form action="{{ reverse_url('order_report_edit', order['_id']) }}"
       method="POST" role="form" enctype="multipart/form-data">
@@ -37,17 +41,3 @@ Edit {% module Icon('order') %}
 
 </form>
 {% end %} {# block main_content #}
-
-{% block action_content %}
-<form action="{{ reverse_url('order', order['_id']) }}" method="GET" role="form">
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <label class="control-label"></label>
-        <button type="submit" class="btn btn-default btn-block">
-          <span class="glyphicon glyphicon-remove"></span> Cancel</button>
-      </div>
-    </div>
-  </div>
-</form>
-{% end %} {# block action_content #}

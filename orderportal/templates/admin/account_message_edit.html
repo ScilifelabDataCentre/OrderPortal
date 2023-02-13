@@ -5,6 +5,10 @@
 {% block head_title %}Edit account message '{{ text['name'] }}'{% end %}
 {% block body_title %}Edit account message '{{ text['name'] }}'{% end %}
 
+{% block action_content %}
+{% module CancelButton(reverse_url('admin_account_messages')) %}
+{% end %} {# block action_content #}
+
 {% block main_content %}
 <form action="{{ reverse_url('admin_account_message_edit', text['name']) }}"
       method="POST" role="form">
@@ -76,10 +80,3 @@
 </form>
 
 {% end %} {# block main_content #}
-
-{% block action_content %}
-<a href="{{ reverse_url('admin_account_messages') }}"
-   role="button" class="btn btn-default btn-block">
-  <span class="glyphicon glyphicon-remove"></span> Cancel
-</a>
-{% end %} {# block action_content #}

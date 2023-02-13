@@ -5,8 +5,11 @@
 {% block head_title %}Edit information page '{{ info['name'] }}'{% end %}
 {% block body_title %}Edit information page '{{ info['name'] }}'{% end %}
 
-{% block main_content %}
+{% block action_content %}
+{% module CancelButton(reverse_url('info', info['name'])) %}
+{% end %} {# block action_content #}
 
+{% block main_content %}
 <form action="{{ reverse_url('info_edit', info['name']) }}" method="POST" role="form">
   {% module xsrf_form_html() %}
 
@@ -61,20 +64,6 @@
     </div>
   </div>
 </form>
-
-<form action="{{ reverse_url('info', info['name']) }}"
-      method="GET" role="form" style="margin-top: 20px;">
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <label class="control-label"></label>
-        <button type="submit" class="btn btn-default btn-block">
-          <span class="glyphicon glyphicon-remove"></span> Cancel</button>
-      </div>
-    </div>
-  </div>
-</form>
-
 {% end %} {# block main_content #}
 
 {% block javascript_autofocus %}

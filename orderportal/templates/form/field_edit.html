@@ -10,6 +10,21 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
 Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] }}'
 {% end %}
 
+{% block action_content %}
+{% module CancelButton(reverse_url('form', form['_id'])) %}
+<form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
+      method="POST" role="form">
+  {% module xsrf_form_html() %}
+  <div class="form-group">
+    <input type="hidden" name="_http_method" value="delete">
+    <button type="submit" class="btn btn-danger btn-block"
+            onclick="return confirm('Cannot be undone! Really delete?');">
+      <span class="glyphicon glyphicon-trash"></span>  Delete
+    </button>
+  </div>
+</form>
+{% end %} {# block action_content #}
+
 {% block main_content %}
 <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
       method="POST" role="form">
@@ -260,7 +275,7 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
           Details
         </button>
         <div id="_details_table" class="collapse">
-          {% include 'form/details_table.html' %}
+          {% include 'details_table.html' %}
         </div>
       </div>
     </div>
@@ -451,37 +466,6 @@ Edit {{ field['type'] }} field '{{ field['identifier'] }}' in '{{ form['title'] 
     </div>
   </div>
 
-</form>
-
-<form action="{{ reverse_url('form', form['_id']) }}"
-      method="GET" role="form" style="margin-top: 20px;">
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <label class="control-label"></label>
-        <button type="submit" class="btn btn-default btn-block">
-          <span class="glyphicon glyphicon-remove"></span> Cancel</button>
-      </div>
-    </div>
-  </div>
-</form>
-
-<form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
-      method="POST" role="form" style="margin-top: 20px;">
-  {% module xsrf_form_html() %}
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <label class="control-label"></label>
-        <input type="hidden" name="_http_method" value="delete">
-        <button type="submit" class="btn btn-danger btn-block"
-                onclick="return confirm('Cannot be undone! Really delete?');">
-          <span class="glyphicon glyphicon-trash"></span>
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
 </form>
 {% end %} {# block main_content #}
 

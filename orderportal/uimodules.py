@@ -1,7 +1,9 @@
 "UI modules for tornado."
 
 import json
+import logging
 
+import htmlgenerator as hg
 import tornado.web
 
 from orderportal import constants, settings
@@ -261,3 +263,68 @@ class TableRowsEdit(tornado.web.UIModule):
                 result.append("</tr>")
             result.append("</tbody>")
         return "\n".join(result)
+
+
+class CancelButton(tornado.web.UIModule):
+    "Display a standard cancel button."
+
+    def render(self, url, within_row=False):
+        button = hg.BUTTON(
+            hg.SPAN(_class="glyphicon glyphicon-remove"),
+            " Cancel",
+            type="submit",
+            _class="btn btn-default btn-block"
+        )
+        if within_row:
+            div = hg.DIV(hg.DIV(hg.DIV(button,
+                                       _class="form-group"),
+                                _class="col-md-3"),
+                        _class="row")
+        else:
+            div = hg.DIV(button, _class="form-group")
+        form = hg.FORM(div, action=url, method="GET", role="form")
+        return hg.render(form, {})
+
+
+class Form(tornado.web.UIModule):
+    "Display a form with the given fields. Parse the values from the submitted form."
+
+    def render(self, url, fields, values=None, errors=None):
+        "Output HTML for the fields in a form."
+        if values is None:
+            values = {}
+        if errors is None:
+            errors = {}
+        rows = ["\n",
+                hg.INPUT(type="hidden", name="_xsrf", 
+                         value=self.handler.xsrf_token.decode()),
+                "\n"]
+        for field in fields:
+            rows.append(hg.DIV(
+                hg.DIV(field["identifier"], _class="col-md-2"),
+                hg.DIV(field["type"],_class="col-md-10"),
+                _class="row form-group"))
+            rows.append("\n")
+        rows.append(hg.DIV(
+            hg.DIV(
+                hg.BUTTON(hg.SPAN(_class="glyphicon glyphicon-floppy-disk"),
+                          " Save",
+                          type="submit",
+                          _class="btn btn-success btn-block"),
+                _class="col-md-offset-2 col-md-3"),
+            _class="row form-group")
+                    )
+        return hg.render(hg.FORM(*rows, method="POST", role="form", action=url), {})
+
+    def get_checkbox(self, field, value, error):
+        return hg.DIV(
+            
+            )
+
+    def parse(self, fields):
+        "Parse the form input values."
+        values = {}
+        errors = {}
+        for field in fields:
+            values[field["identifier"]] = "some value"
+        return values, errors

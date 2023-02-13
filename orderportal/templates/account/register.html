@@ -498,19 +498,7 @@
   </div>
 </div>
 
-<form action="{{ reverse_url('home') }}"
-      method="GET" role="form">
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <label class="control-label"></label>
-        <button type="submit" class="btn btn-default btn-block">
-          <span class="glyphicon glyphicon-remove"></span> Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-</form>
+{% module CancelButton(reverse_url('home'), within_row=True) %}
 
 {% end %} {# if not is_staff and not settings['ACCOUNT_REGISTRATION_OPEN'] #}
 

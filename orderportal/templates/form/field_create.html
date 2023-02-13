@@ -5,8 +5,11 @@
 {% block head_title %}Create field in form '{{ form['title'] }}'{% end %}
 {% block body_title %}Create field in form '{{ form['title'] }}'{% end %}
 
-{% block main_content %}
+{% block action_content %}
+{% module CancelButton(reverse_url('form', form['_id'])) %}
+{% end %} {# block action_content #}
 
+{% block main_content %}
 <form action="{{ reverse_url('field_create', form['_id']) }}"
       method="POST" role="form">
   {% module xsrf_form_html() %}
@@ -104,7 +107,7 @@
           Details
         </button>
         <div id="_details_datatypes" class="collapse">
-          {% include 'form/details_datatypes.html' %}
+          {% include 'details_datatypes.html' %}
         </div>
       </div>
     </div>
@@ -220,7 +223,7 @@
           Details
         </button>
         <div id="_details_table" class="collapse">
-          {% include 'form/details_table.html' %}
+          {% include 'details_table.html' %}
         </div>
       </div>
     </div>
@@ -349,20 +352,6 @@
   </div>
 
 </form>
-
-<form action="{{ reverse_url('form', form['_id']) }}"
-      method="GET" role="form" style="margin-top: 20px;">
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <label class="control-label"></label>
-        <button type="submit" class="btn btn-default btn-block">
-          <span class="glyphicon glyphicon-remove"></span> Cancel</button>
-      </div>
-    </div>
-  </div>
-</form>
-
 {% end %} {# block main_content #}
 
 {% block javascript_code %}

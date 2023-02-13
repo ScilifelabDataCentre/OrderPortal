@@ -20,6 +20,7 @@ from orderportal import utils
 from orderportal.requesthandler import RequestHandler
 import orderportal.config
 import orderportal.database
+import orderportal.uimodules
 
 
 class MetaSaver(saver.Saver):
@@ -465,15 +466,21 @@ class OrderTransitionsEdit(RequestHandler):
 class OrdersList(RequestHandler):
     "Orders list configuration."
 
+    fields = [dict(identifier="id1", type="line")]
+
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin/orders_list.html")
+        self.render("admin/orders_list.html", fields=self.fields)
 
     @tornado.web.authenticated
     def post(self):
+        logger = logging.getLogger("orderportal")
         self.check_admin()
         doc = self.db["orders_list"]
+        # form = orderportal.uimodules.Form(self)
+        # values, errors = form.parse(self.fields)
+        # logger.info(f"{values=}, {errors=}")
         with MetaSaver(doc=doc, rqh=self) as saver:
             saver["owner_university"] = utils.to_bool(self.get_argument("owner_university", False))
             saver["owner_department"] = utils.to_bool(self.get_argument("owner_department", False))
@@ -555,7 +562,7 @@ class Account(RequestHandler):
     def post(self):
         self.check_admin()
         self.set_message_flash("Saved configuration.")
-        self.see_other("admin_orders_list")
+        self.see_other("admin_account")
     
 
 class AccountMessages(RequestHandler):
