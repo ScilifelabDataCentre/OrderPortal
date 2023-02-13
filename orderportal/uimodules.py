@@ -268,20 +268,15 @@ class TableRowsEdit(tornado.web.UIModule):
 class CancelButton(tornado.web.UIModule):
     "Display a standard cancel button."
 
-    def render(self, url, within_row=False):
-        button = hg.BUTTON(
-            hg.SPAN(_class="glyphicon glyphicon-remove"),
-            " Cancel",
-            type="submit",
-            _class="btn btn-default btn-block"
-        )
-        if within_row:
-            div = hg.DIV(hg.DIV(hg.DIV(button,
-                                       _class="form-group"),
-                                _class="col-md-3"),
-                        _class="row")
-        else:
-            div = hg.DIV(button, _class="form-group")
+    def render(self, url):
+        div = hg.DIV(
+            hg.BUTTON(
+                hg.SPAN(_class="glyphicon glyphicon-remove"),
+                " Cancel",
+                type="submit",
+                _class="btn btn-default btn-block"
+            ),
+            _class="form-group")
         form = hg.FORM(div, action=url, method="GET", role="form")
         return hg.render(form, {})
 

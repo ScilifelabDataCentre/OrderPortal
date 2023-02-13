@@ -5,15 +5,14 @@
 {% block head_title %}Register new account{% end %}
 {% block body_title %}Register new account{% end %}
 
+
+{% block action_content %}
+{% module CancelButton(reverse_url('home')) %}
+{% end %} {# block action_content #}
+
 {% block main_content %}
 
-{% if not is_staff and not settings['ACCOUNT_REGISTRATION_OPEN'] %}
-
-<div class="lead alert alert-warning">
-  User registration has been switched off. Contact the admin of the site.
-</div>
-
-{% else %}
+{% if settings['ACCOUNT_REGISTRATION_OPEN'] or is_staff %}
 
 <div class="row">
   <div class="col-md-11">
@@ -498,8 +497,10 @@
   </div>
 </div>
 
-{% module CancelButton(reverse_url('home'), within_row=True) %}
-
-{% end %} {# if not is_staff and not settings['ACCOUNT_REGISTRATION_OPEN'] #}
+{% else %} {# if settings['ACCOUNT_REGISTRATION_OPEN'] or is_staff #}
+<div class="lead alert alert-warning">
+  User registration has been switched off. Contact the admin of the site.
+</div>
+{% end %} {# if settings['ACCOUNT_REGISTRATION_OPEN'] or is_staff #}
 
 {% end %} {# block main_content #}

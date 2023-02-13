@@ -5,6 +5,10 @@
 {% block head_title %}Reset password{% end %}
 {% block body_title %}Reset password{% end %}
 
+{% block action_content %}
+{% module CancelButton(reverse_url('home')) %}
+{% end %} {# block action_content #}
+
 {% block main_content %}
 
 <div class="well">
@@ -51,8 +55,4 @@
   </div>
 
 </form>
-
-<br>
-{% module CancelButton(reverse_url('home'), within_row=True) %}
-
 {% end %} {# block main_content #}
