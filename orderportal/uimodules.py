@@ -96,7 +96,7 @@ class Markdown(tornado.web.UIModule):
 class Text(tornado.web.UIModule):
     "Process the display Markdown text message fetched from the settings and output."
 
-    def render(self, name):
+    def render(self, name, origin=None):
         try:
             text = settings[constants.DISPLAY][name]["text"]
             if not text:
@@ -106,7 +106,14 @@ class Text(tornado.web.UIModule):
                 text = "*No text defined.*"
             else:
                 return ""
-        return utils.markdown2html(text, safe=True)
+        if origin and self.handler.am_admin():
+            a = hg.A(hg.SPAN(_class="glyphicon glyphicon-edit"), " Edit",
+                     href=self.handler.reverse_url("text_edit", name, origin=origin),
+                     _class="btn btn-primary btn-xs", role="button")
+            div = hg.DIV(hg.mark_safe(utils.markdown2html(text, safe=True)), a)
+            return hg.render(div, {})
+        else:
+            return utils.markdown2html(text, safe=True)
 
 
 class Json(tornado.web.UIModule):

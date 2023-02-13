@@ -7,21 +7,8 @@
 
 {% block main_content %}
 {% if settings['ACCOUNT_REGISTRATION_OPEN'] or am_staff %}
-<div class="row">
-  <div class="col-md-11">
-    <div class="well">
-      {% module Text('register') %}
-      {% if am_admin %}
-      <form action="{{ reverse_url('text_edit', 'register') }}"
-            method="GET" role="form">
-        <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
-        <button type="submit" class="btn btn-primary btn-xs">
-          <span class="glyphicon glyphicon-edit"></span> Edit
-        </button>
-      </form>
-      {% end %}
-    </div>
-  </div>
+<div class="well">
+  {% module Text('register', origin=reverse_url('register')) %}
 </div>
 
 <form action="{{ reverse_url('register') }}"
@@ -473,21 +460,8 @@
 
 </form>
 
-<div class="row">
-  <div class="col-md-11">
-    <div class="well">
-      {% module Text('privacy_policy') %}
-      {% if am_admin %}
-      <form action="{{ reverse_url('text_edit', 'privacy_policy') }}"
-            method="GET" role="form">
-        <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
-        <button type="submit" class="btn btn-primary btn-xs">
-          <span class="glyphicon glyphicon-edit"></span> Edit
-        </button>
-      </form>
-      {% end %}
-    </div>
-  </div>
+<div class="well">
+  {% module Text('privacy_policy', origin=reverse_url('register')) %}
 </div>
 
 {% else %} {# if settings['ACCOUNT_REGISTRATION_OPEN'] or am_staff #}

@@ -12,7 +12,8 @@
 {% end %}
 
 {% block main_content %}
-{% module Text('privacy_policy') %}
+{% module Text('privacy_policy', origin=reverse_url('account', account['email'])) %}
+
 <table class="table-condensed table-fields">
   <tr>
     <th>First name</th>
