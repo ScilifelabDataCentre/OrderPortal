@@ -11,143 +11,6 @@
 </a>
 {% end %}
 
-{% block action_content %}
-
-{% if current_user['email'] == account['email'] %}
-<p>
-  <form action="{{ reverse_url('logout') }}"
-        method="POST" role="form">
-    {% module xsrf_form_html() %}
-    <button type="submit"
-            title="Logout"
-            class="btn btn-default btn-block">
-      <span class="glyphicon glyphicon-log-out"></span>
-      Logout
-    </button>
-  </form>
-</p>
-{% end %} {# if current_user['email'] == account['email'] #}
-
-{% if is_staff or current_user['email'] == account['email'] %}
-<p>
-  <div>
-    <a href="{{ reverse_url('account_edit', account['email']) }}"
-       role="button"
-       class="btn btn-primary btn-block">
-      <span class="glyphicon glyphicon-edit"></span>
-      Edit
-    </a>
-  </div>
-</p>
-{% end %}
-
-{% if current_user['email'] == account['email'] %}
-<p>
-  <div>
-    <a href="{{ reverse_url('group_create') }}"
-       role="button"
-       class="btn btn-success btn-block">
-      <span class="glyphicon glyphicon-plus"></span>
-      Create group
-    </a>
-  </div>
-</p>
-{% end %} {# is_staff or if current_user['email'] == account['email'] #}
-
-{% if is_staff or current_user['email'] == account['email'] %}
-<p>
-  <div>
-    <a href="{{ reverse_url('reset', email=account['email']) }}"
-       role="button"
-       class="btn btn-warning btn-block">
-      <span class="glyphicon glyphicon-step-backward"></span>
-      Reset password
-    </a>
-  </div>
-</p>
-{% end %} {# if is_staff or current_user['email'] == account['email'] #}
-
-{% if is_staff %}
-<p>
-  <div>
-    <a href="{{ reverse_url('password', email=account['email']) }}"
-       role="button"
-       class="btn btn-warning btn-block">
-      <span class="glyphicon glyphicon-eye-open"></span>
-      Set password
-    </a>
-  </div>
-</p>
-{% end %} {# if is_staff #}
-
-{% if is_staff and current_user['email'] != account['email'] %}
-
-<p>
-  <form action="{{ reverse_url('account_update_info', account['email']) }}"
-        method="POST" role="form">
-    {% module xsrf_form_html() %}
-    <div class="form-group">
-      <button type="submit"
-              class="btn btn-warning btn-block"
-              {{ account.get('update_info') and 'disabled' or ''}}>
-        <span class="glyphicon glyphicon-exclamation-sign"></span>
-        Request update
-      </button>
-    </div>
-  </form>
-</p>
-
-{% if account['status'] != constants.ENABLED %}
-<p>
-  <form action="{{ reverse_url('account_enable', account['email']) }}"
-        method="POST" role="form">
-    {% module xsrf_form_html() %}
-    <div class="form-group">
-      <button type="submit" class="btn btn-success btn-block">
-        <span class="glyphicon glyphicon-ok"></span>
-        Enable
-      </button>
-    </div>
-  </form>
-</p>
-{% end %} {# if account['status'] != constants.ENABLED #}
-
-{% if account['status'] != constants.DISABLED %}
-<p>
-  <form action="{{ reverse_url('account_disable', account['email']) }}"
-        method="POST" role="form">
-    {% module xsrf_form_html() %}
-    <div class="form-group">
-      <button type="submit" class="btn btn-danger btn-block"
-              onclick="return confirm('Really disable?');">
-        <span class="glyphicon glyphicon-ban-circle"></span>
-        Disable
-      </button>
-    </div>
-  </form>
-</p>
-{% end %} {# if account['status'] != constants.DISABLED #}
-
-{% if allow_delete %}
-<p>
-  <form action="{{ reverse_url('account', account['email']) }}"
-        method="POST" role="form">
-    {% module xsrf_form_html() %}
-    <div class="form-group">
-      <input type="hidden" name="_http_method" value="delete">
-      <button type="submit" class="btn btn-danger btn-block"
-              onclick="return confirm('Cannot be undone! Really delete?');">
-        <span class="glyphicon glyphicon-trash"></span>
-        Delete
-      </button>
-    </div>
-  </form>
-</p>
-{% end %} {# if allow_delete #}
-
-{% end %} {# if is_staff and current_user['email'] != account['email'] #}
-{% end %} {# block action_content #}
-
 {% block main_content %}
 {% module Text('privacy_policy') %}
 <table class="table-condensed table-fields">
@@ -167,7 +30,7 @@
     <th>Status</th>
     <td>{% module Icon(account['status'], label=True) %}</td>
   </tr>
-  {% if is_admin %}
+  {% if am_admin %}
   <tr>
     <th>Code for setting password</th>
     <td>
@@ -180,7 +43,7 @@
       {% end %}
     </td>
   </tr>
-  {% end %} {# if is_admin #}
+  {% end %} {# if am_admin #}
   <tr>
     <th>Groups</th>
     <td>
@@ -446,4 +309,140 @@
     <td>{{ account['_id'] }}</td>
   </tr>
 </table>
-{% end %} {# block content #}
+{% end %} {# block main_content #}
+
+{% block action_content %}
+{% if current_user['email'] == account['email'] %}
+<p>
+  <form action="{{ reverse_url('logout') }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <button type="submit"
+            title="Logout"
+            class="btn btn-default btn-block">
+      <span class="glyphicon glyphicon-log-out"></span>
+      Logout
+    </button>
+  </form>
+</p>
+{% end %} {# if current_user['email'] == account['email'] #}
+
+{% if am_staff or current_user['email'] == account['email'] %}
+<p>
+  <div>
+    <a href="{{ reverse_url('account_edit', account['email']) }}"
+       role="button"
+       class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-edit"></span>
+      Edit
+    </a>
+  </div>
+</p>
+{% end %}
+
+{% if current_user['email'] == account['email'] %}
+<p>
+  <div>
+    <a href="{{ reverse_url('group_create') }}"
+       role="button"
+       class="btn btn-success btn-block">
+      <span class="glyphicon glyphicon-plus"></span>
+      Create group
+    </a>
+  </div>
+</p>
+{% end %} {# am_staff or if current_user['email'] == account['email'] #}
+
+{% if am_staff or current_user['email'] == account['email'] %}
+<p>
+  <div>
+    <a href="{{ reverse_url('reset', email=account['email']) }}"
+       role="button"
+       class="btn btn-warning btn-block">
+      <span class="glyphicon glyphicon-step-backward"></span>
+      Reset password
+    </a>
+  </div>
+</p>
+{% end %} {# if am_staff or current_user['email'] == account['email'] #}
+
+{% if am_staff %}
+<p>
+  <div>
+    <a href="{{ reverse_url('password', email=account['email']) }}"
+       role="button"
+       class="btn btn-warning btn-block">
+      <span class="glyphicon glyphicon-eye-open"></span>
+      Set password
+    </a>
+  </div>
+</p>
+{% end %} {# if am_staff #}
+
+{% if am_staff and current_user['email'] != account['email'] %}
+
+<p>
+  <form action="{{ reverse_url('account_update_info', account['email']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <button type="submit"
+              class="btn btn-warning btn-block"
+              {{ account.get('update_info') and 'disabled' or ''}}>
+        <span class="glyphicon glyphicon-exclamation-sign"></span>
+        Request update
+      </button>
+    </div>
+  </form>
+</p>
+
+{% if account['status'] != constants.ENABLED %}
+<p>
+  <form action="{{ reverse_url('account_enable', account['email']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-ok"></span>
+        Enable
+      </button>
+    </div>
+  </form>
+</p>
+{% end %} {# if account['status'] != constants.ENABLED #}
+
+{% if account['status'] != constants.DISABLED %}
+<p>
+  <form action="{{ reverse_url('account_disable', account['email']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <button type="submit" class="btn btn-danger btn-block"
+              onclick="return confirm('Really disable?');">
+        <span class="glyphicon glyphicon-ban-circle"></span>
+        Disable
+      </button>
+    </div>
+  </form>
+</p>
+{% end %} {# if account['status'] != constants.DISABLED #}
+
+{% if allow_delete %}
+<p>
+  <form action="{{ reverse_url('account', account['email']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <div class="form-group">
+      <input type="hidden" name="_http_method" value="delete">
+      <button type="submit" class="btn btn-danger btn-block"
+              onclick="return confirm('Cannot be undone! Really delete?');">
+        <span class="glyphicon glyphicon-trash"></span>
+        Delete
+      </button>
+    </div>
+  </form>
+</p>
+{% end %} {# if allow_delete #}
+
+{% end %} {# if am_staff and current_user['email'] != account['email'] #}
+{% end %} {# block action_content #}

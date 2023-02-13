@@ -9,7 +9,7 @@
       <strong>{{ event.get('title') or '[no title]' }}</strong>
       {% module Markdown(event.get('text')) %}
     </td>
-    {% if is_admin %}
+    {% if am_admin %}
     <td class="text-right" width="10%">
       <button type="button" class="btn btn-primary btn-xs btn-block"
               data-toggle="modal" data-target="#{{ event['_id'] }}">
@@ -28,7 +28,7 @@
         </button>
       </form>
     </td>
-    {% end %}{# if is_admin #}
+    {% end %}{# if am_admin #}
   </tr>
   {% end %} {# for event in events #}
 </table>
@@ -36,7 +36,7 @@
 <em>Currently none. Check again later.</em>
 {% end %} {# if events #}
 
-{% if is_admin %}
+{% if am_admin %}
 
 {# Modals for editing event items. #}
 {% for pos, event in enumerate(events) %}
@@ -195,4 +195,4 @@
 
   </div>
 </div>
-{% end %} {# if is_admin #}
+{% end %} {# if am_admin #}

@@ -24,7 +24,7 @@ Change owner of {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
     <div class="row">
       <div class="col-md-12">
         <label class="control-label" for="owner">Owner</label>
-        {% if is_staff %}
+        {% if am_staff %}
         <input type="text" class="form-control"
                name="owner" id="owner"
                value="{{ order['owner'] }}">
@@ -32,7 +32,7 @@ Change owner of {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
         <select class="form-control" name="owner" id="owner">
           {% for colleague in colleagues %}
             <option {{ colleague == current_user['email'] and 'selected' or '' }}>{{ colleague }}</option>
-          {% end %}
+          {% end %} {# if am_staff #}
         </select>
         {% else %}
         <p id="owner" class="form-control-static">{{ order['owner'] }}</p>
@@ -40,7 +40,7 @@ Change owner of {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
       </div>
     </div>
     <span class="help-block extra-indent">
-      {% if is_staff %}
+      {% if am_staff %}
       Change the owner of the {{ terminology('order') }} by giving the email
       address of the new owner's account.
       {% elif colleagues %}
@@ -49,7 +49,7 @@ Change owner of {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
       Give the email address of the new owner's account.
       <strong>NOTE:</strong>
       You will then no longer be able to edit the {{ terminology('order') }}.
-      {% end %}
+      {% end %} {# if am_staff #}
     </span>
   </div>
   

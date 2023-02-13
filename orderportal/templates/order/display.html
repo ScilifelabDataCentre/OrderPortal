@@ -115,7 +115,7 @@
         <td colspan="2">{% module NoneStr(order.get('identifier'), '-') %}</td>
       </tr>
 
-      {% if is_admin %}
+      {% if am_admin %}
       <tr>
         <th>{{ terminology('Order') }} form</th>
         <td>
@@ -124,7 +124,7 @@
           </a>
         </td>
       </tr>
-      {% end %}
+      {% end %} {# if am_admin #}
 
       <tr>
         <th>Owner</th>
@@ -135,7 +135,7 @@
           ({{ order['owner'] }})
         </td>
       </tr>
-      {% if settings['ORDER_TAGS'] and (is_staff or settings['ORDER_USER_TAGS']) %}
+      {% if settings['ORDER_TAGS'] and (am_staff or settings['ORDER_USER_TAGS']) %}
       <tr>
         <th>Keywords (tags)</th>
         <td>{% module Tags(order.get('tags', [])) %}</td>
@@ -175,14 +175,14 @@
           {% else %}
           -
           {% end %}
-          {% if is_admin %}
+          {% if am_admin %}
           <a href="{{ reverse_url('order_report_edit', order['_id']) }}"
              class="btn btn-primary btn-xs"
              role="button">
             <span class="glyphicon glyphicon-edit"></span>
             Edit
           </a>
-          {% end %}
+          {% end %} {# if am_admin #}
         </td>
       </tr>
       {% end %} {# if settings['ORDER_REPORT'] #}
@@ -281,7 +281,7 @@
     <col> 
   </colgroup>
 {# Recursion: 'include' cannot be used! #}
-{% module Template('order/fields.html', fields=fields, order=order, is_staff=is_staff) %}
+{% module Template('order/fields.html', fields=fields, order=order, am_staff=am_staff) %}
 </table>
 
 {% if allow_attach %}

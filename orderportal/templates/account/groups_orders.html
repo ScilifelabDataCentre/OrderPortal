@@ -23,7 +23,6 @@
 {% end %}
 
 {% block content %}
-
 <div class="row">
   <div class="col-md-4 col-md-offset-6">
     <a href="{{ reverse_url('account_orders', account['email']) }}">
@@ -43,9 +42,9 @@
         <tr>
           <th>{% module Icon('order', label=True) %}</th>
           <th width="30%">Title</th>
-          {% if is_staff %}
+          {% if am_staff %}
           <th>{% module Icon('form', label=True) %}</th>
-          {% end %} {# if is_staff #}
+          {% end %} {# if am_staff #}
           <th>{% module Icon('account', label=True, title='Owner') %}</th>
           {% if settings['ORDERS_LIST_TAGS'] %}
           <th width="5%">Keywords (tags)</th>
@@ -65,13 +64,13 @@
         <tr>
           <td>{% module Entity(order, icon=False) %}</td>
           <td>{{ order.get('title') or '[no title]' }}</td>
-          {% if is_staff %}
+          {% if am_staff %}
           <td>
             <a href="{{ reverse_url('form', order['form']) }}">
               {{ forms_lookup[order['form']]['title'] }}
             </a>
           </td>
-          {% end %} {# if is_staff #}
+          {% end %} {# if am_staff #}
           {% if settings['ORDERS_LIST_TAGS'] %}
           <td>{% module Tags(order.get('tags', [])) %}</td>
           {% end %}

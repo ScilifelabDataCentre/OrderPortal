@@ -150,7 +150,7 @@ class OrderSaver(saver.Saver):
             if not isinstance(s, str):
                 raise ValueError("tags list item is not a string")
         # Allow staff to add prefixed tags.
-        if self.rqh.is_staff():
+        if self.rqh.am_staff():
             for pos, tag in enumerate(tags):
                 parts = tag.split(":", 1)
                 for part in parts:
@@ -204,7 +204,7 @@ class OrderSaver(saver.Saver):
         # and except for multiselect: there a missing value means empty list.
         for field in self.fields:
             # Field not displayed or not writeable must not be changed.
-            if not self.rqh.is_staff() and (
+            if not self.rqh.am_staff() and (
                 field["restrict_read"] or field["restrict_write"]
             ):
                 continue
@@ -564,7 +564,7 @@ class OrderMixin(object):
         "Is the order readable by the current user?"
         if self.is_owner(order):
             return True
-        if self.is_staff():
+        if self.am_staff():
             return True
         if self.is_colleague(order["owner"]):
             return True
@@ -578,11 +578,11 @@ class OrderMixin(object):
 
     def allow_edit(self, order):
         "Is the order editable by the current user?"
-        if self.is_admin():
+        if self.am_admin():
             return True
         status = settings["ORDER_STATUSES_LOOKUP"][order["status"]]
         edit = status.get("edit", [])
-        if self.is_staff() and constants.STAFF in edit:
+        if self.am_staff() and constants.STAFF in edit:
             return True
         if self.is_owner(order) and constants.USER in edit:
             return True
@@ -596,11 +596,11 @@ class OrderMixin(object):
 
     def allow_attach(self, order):
         "May the current user may attach a file to the order?"
-        if self.is_admin():
+        if self.am_admin():
             return True
         status = settings["ORDER_STATUSES_LOOKUP"][order["status"]]
         attach = status.get("attach", [])
-        if self.is_staff() and constants.STAFF in attach:
+        if self.am_staff() and constants.STAFF in attach:
             return True
         if self.is_owner(order) and constants.USER in attach:
             return True
@@ -645,7 +645,7 @@ class OrderMixin(object):
         result = []
         for field in fields:
             # Check if field may not be viewed by the current user.
-            if field["restrict_read"] and not self.is_staff():
+            if field["restrict_read"] and not self.am_staff():
                 continue
             # Is there a visibility condition? If so, check it.
             fid = field.get("visible_if_field")
@@ -678,8 +678,8 @@ class OrderMixin(object):
         for key, transition in targets.items():
             if transition.get("require_valid") and order["invalid"]: continue
             permission = transition["permission"]
-            if ((self.is_admin() and constants.ADMIN in permission)
-                or (self.is_staff() and constants.STAFF in permission)
+            if ((self.am_admin() and constants.ADMIN in permission)
+                or (self.am_staff() and constants.STAFF in permission)
                 or (self.is_owner(order) and constants.USER in permission)
             ):
                 try:            # Defensive: only allow enabled statuses as targets.
@@ -698,7 +698,7 @@ class OrderMixin(object):
         Special case: Admin can clone an order even if its form is disabled.
         """
         form = self.get_form(order["form"])
-        if self.is_admin():
+        if self.am_admin():
             return form["status"] in (
                 constants.ENABLED,
                 constants.TESTING,
@@ -904,7 +904,7 @@ class Order(OrderMixin, RequestHandler):
             form=form,
             fields=form["fields"],
             attached_files=files,
-            allow_edit=self.is_admin() or self.allow_edit(order),
+            allow_edit=self.am_admin() or self.allow_edit(order),
             allow_clone=self.allow_clone(order),
             allow_attach=self.allow_attach(order),
             targets=self.get_targets(order),
@@ -978,7 +978,7 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
                     saver.update_fields(data=data["fields"])
                 except KeyError:
                     pass
-                if self.is_admin():
+                if self.am_admin():
                     try:
                         saver.set_history(data["history"])
                     except KeyError:
@@ -1182,7 +1182,7 @@ class OrderEdit(OrderMixin, RequestHandler):
         colleagues = sorted(self.get_account_colleagues(self.current_user["email"]))
         form = self.get_form(order["form"])
         fields = Fields(form)
-        if self.is_staff():
+        if self.am_staff():
             tags = order.get("tags", [])
         else:
             tags = [t for t in order.get("tags", []) if not ":" in t]
@@ -1595,7 +1595,7 @@ class Orders(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         # Ordinary users are not allowed to see the complete orders list.
-        if not self.is_staff():
+        if not self.am_staff():
             self.see_other("account_orders", self.current_user["email"])
             return
         # Count orders per year submitted.
@@ -1847,7 +1847,7 @@ class OrdersCsv(Orders):
     @tornado.web.authenticated
     def get(self):
         # Ordinary users are not allowed to see the overall orders list.
-        if not self.is_staff():
+        if not self.am_staff():
             self.see_other("account_orders", self.current_user["email"])
             return
         self.set_filter()

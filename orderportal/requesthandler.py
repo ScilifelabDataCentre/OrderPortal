@@ -33,8 +33,8 @@ class RequestHandler(tornado.web.RequestHandler):
         result["terminology"] = utils.terminology
         result["absolute_reverse_url"] = self.absolute_reverse_url
         result["order_reverse_url"] = self.order_reverse_url
-        result["is_staff"] = self.is_staff()
-        result["is_admin"] = self.is_admin()
+        result["am_staff"] = self.am_staff()
+        result["am_admin"] = self.am_admin()
         result["error"] = urllib.parse.unquote_plus(self.get_cookie("error", ""))
         self.clear_cookie("error")
         result["message"] = urllib.parse.unquote_plus(self.get_cookie("message", ""))
@@ -201,12 +201,12 @@ class RequestHandler(tornado.web.RequestHandler):
         "Does the current user own the given entity?"
         return self.current_user and entity["owner"] == self.current_user["email"]
 
-    def is_admin(self):
+    def am_admin(self):
         "Is the current user admin?"
         # Not a property, since the above is not.
         return self.current_user and self.current_user["role"] == constants.ADMIN
 
-    def is_staff(self):
+    def am_staff(self):
         "Is the current user staff or admin?"
         # Not a property, since the above is not.
         return self.current_user and self.current_user["role"] in (
@@ -216,12 +216,12 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def check_admin(self):
         "Check if current user is admin."
-        if not self.is_admin():
+        if not self.am_admin():
             raise tornado.web.HTTPError(403, reason="Role 'admin' is required")
 
     def check_staff(self):
         "Check if current user is staff or admin."
-        if not self.is_staff():
+        if not self.am_staff():
             raise tornado.web.HTTPError(
                 403, reason="Role 'admin' or 'staff' is required"
             )

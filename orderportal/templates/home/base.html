@@ -11,12 +11,12 @@
   </div>
   <div class="col-md-8">
     <h2>{{ settings['SITE_NAME'] }}</h2>
-    {% if is_admin %}
+    {% if am_admin %}
     <a href="{{ reverse_url('text_edit', 'header', origin=reverse_url('home')) }}"
        class="btn btn-primary btn-xs pull-right" role="button">
       <span class="glyphicon glyphicon-edit"></span> Edit
     </a>
-    {% end %}
+    {% end %} {# if am_admin #}
     {% module Text('header') %}
   </div>
 </div>
@@ -132,13 +132,13 @@
     <div class="panel panel-info">
       <div class="panel-heading">
         <span class="glyphicon glyphicon-info-sign"></span> Recent news
-        {% if is_admin %}
+        {% if am_admin %}
         &nbsp;
         <button type="button" class="btn btn-info btn-xs"
                 data-toggle="modal" data-target="#news_create">
           <span class="glyphicon glyphicon-plus"></span> Create entry
         </button>
-        {% end %} {# if is_admin #}
+        {% end %} {# if am_admin #}
         <a class="btn btn-info btn-xs pull-right" role="button"
            href="{{ reverse_url('news') }}">All news</a>
       </div>
@@ -154,14 +154,14 @@
     <div class="panel panel-success">
       <div class="panel-heading">
         <span class="glyphicon glyphicon-calendar"></span> Upcoming events
-        {% if is_admin %}
+        {% if am_admin %}
         &nbsp;
         <button type="button"
                 class="btn btn-success btn-xs"
                 data-toggle="modal" data-target="#event_create">
           <span class="glyphicon glyphicon-plus"></span> Create entry
         </button>
-        {% end %}{# if is_admin #}
+        {% end %}{# if am_admin #}
         <a class="btn btn-success btn-xs pull-right" role="button"
            href="{{ reverse_url('events') }}">All events</a>
       </div>
@@ -177,12 +177,12 @@
 <div class="row">
   <div class="col-md-12">
     <div class="panel-body">
-      {% if is_admin %}
+      {% if am_admin %}
       <a href="{{ reverse_url('text_edit', 'general', origin=reverse_url('home')) }}"
          class="btn btn-primary btn-xs pull-right" role="button">
         <span class="glyphicon glyphicon-edit"></span> Edit
       </a>
-      {% end %}
+      {% end %} {# if am_admin #}
       {% module Text('general') %}
     </div>
   </div>

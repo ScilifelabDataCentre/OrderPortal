@@ -67,14 +67,14 @@
         <th>Invited</th>
         <td>
           {% for email in group['invited'] %}
-            {% if is_staff %}
+            {% if am_staff %}
             <a href="{{ reverse_url('account', email) }}">
               {% module Icon('account') %}
               {{ email }}
             </a>
-            {% else %}
+            {% else %} {# if am_staff #}
             {{ email }}
-            {% end %}
+            {% end %} {# if am_staff #}
             <br>
           {% end %}
         </td>

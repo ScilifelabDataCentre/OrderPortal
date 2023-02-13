@@ -3,7 +3,7 @@
 {% for field in fields %}
 
 {# Check if field may not be read or edited. #}
-{% if (field['restrict_read'] or field['restrict_write']) and not is_staff %}
+{% if (field['restrict_read'] or field['restrict_write']) and not am_staff %}
 {% continue %}
 {% end %}
 
@@ -58,7 +58,7 @@
     </div>
     <div class="panel-body">
       {# Recursion: 'include' cannot be used! #}
-      {% module Template('order/fields_edit.html', order=order, fields=field['fields'], is_staff=is_staff, hidden_fields=hidden_fields, tableinputs=tableinputs) %}
+      {% module Template('order/fields_edit.html', order=order, fields=field['fields'], am_staff=am_staff, hidden_fields=hidden_fields, tableinputs=tableinputs) %}
     </div>
   </div>
 </div>

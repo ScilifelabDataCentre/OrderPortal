@@ -10,7 +10,7 @@
 {% end %} 
 
 {% block action_content %}
-{% if is_admin %}
+{% if am_admin %}
 <p>
   <form action="{{ reverse_url('info_edit', info['name']) }}"
         method="GET" role="form">
@@ -28,7 +28,7 @@
       <span class="glyphicon glyphicon-trash"></span> Delete</button>
   </form>
 </p>
-{% end %} {# if is_admin #}
+{% end %} {# if am_admin #}
 
 <p>
   <div>

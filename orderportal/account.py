@@ -1,7 +1,5 @@
 "Account and login pages."
 
-import csv
-
 import tornado.web
 
 import orderportal
@@ -317,7 +315,7 @@ class AccountMixin(object):
         "Is the account readable by the current user?"
         if self.is_owner(account):
             return True
-        if self.is_staff():
+        if self.am_staff():
             return True
         if self.is_colleague(account["email"]):
             return True
@@ -333,7 +331,7 @@ class AccountMixin(object):
         "Is the account editable by the current user?"
         if self.is_owner(account):
             return True
-        if self.is_staff():
+        if self.am_staff():
             return True
         return False
 
@@ -371,7 +369,7 @@ class Account(AccountMixin, RequestHandler):
             latest_activity = key[1]
         except IndexError:
             latest_activity = None
-        if self.is_staff() or self.current_user["email"] == account["email"]:
+        if self.am_staff() or self.current_user["email"] == account["email"]:
             invitations = self.get_invitations(account["email"])
         else:
             invitations = []
@@ -516,7 +514,7 @@ class AccountOrdersMixin(object):
         "Is the account readable by the current user?"
         if account["email"] == self.current_user["email"]:
             return True
-        if self.is_staff():
+        if self.am_staff():
             return True
         if self.is_colleague(account["email"]):
             return True
@@ -562,7 +560,7 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
                 + len(settings["ORDERS_LIST_FIELDS"]) # list
                 + len(settings["ORDERS_LIST_STATUSES"]) # list
             )
-            if self.is_staff():
+            if self.am_staff():
                 order_column += 1
         # Otherwise default ordering by the identifier column.
         else:
@@ -644,7 +642,7 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
                 + len(settings["ORDERS_LIST_FIELDS"]) # list
                 + len(settings["ORDERS_LIST_STATUSES"]) # list
             )
-            if self.is_staff():
+            if self.am_staff():
                 order_column += 1
         # Otherwise default ordering by the identifier column.
         else:
@@ -760,7 +758,7 @@ class AccountEdit(AccountMixin, RequestHandler):
         try:
             with AccountSaver(doc=account, rqh=self) as saver:
                 # Only admin (not staff!) may change role of an account.
-                if self.is_admin():
+                if self.am_admin():
                     role = self.get_argument("role")
                     if role not in constants.ACCOUNT_ROLES:
                         raise ValueError("Invalid role.")
@@ -975,7 +973,7 @@ class Password(LoginMixin, RequestHandler):
         except ValueError as msg:
             self.see_other("home", error=str(msg))
             return
-        if not self.is_staff() and (account.get("code") != self.get_argument("code")):
+        if not self.am_staff() and (account.get("code") != self.get_argument("code")):
             self.see_other(
                 "home",
                 error="Either the email address or the code for setting password was"
@@ -1081,7 +1079,7 @@ class Register(RequestHandler):
                 saver["owner"] = saver["email"]
                 saver["role"] = constants.USER
                 saver["api_key"] = utils.get_iuid()
-                if self.is_staff():
+                if self.am_staff():
                     saver["status"] = constants.ENABLED
                     saver.reset_password()
                 else:
@@ -1103,7 +1101,7 @@ class Register(RequestHandler):
         text = settings[constants.ACCOUNT][account["status"]]
         # Allow staff to avoid sending email to the person when registering an account.
         if not (
-            self.is_staff()
+            self.am_staff()
             and not utils.to_bool(self.get_argument("send_email", False))
         ):
             try:
@@ -1123,7 +1121,7 @@ class Register(RequestHandler):
                 self.set_message_flash(str(error))
             except ValueError as error:
                 self.set_error_flash(str(error))
-        if self.is_staff():
+        if self.am_staff():
             self.see_other("account", account["email"])
         else:
             self.see_other("registered")

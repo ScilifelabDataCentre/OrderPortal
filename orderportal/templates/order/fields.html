@@ -3,7 +3,7 @@
 {% for field in fields %}
 
 {# Check if field may not be viewed by the current user. #}
-{% if field['restrict_read'] and not is_staff %}
+{% if field['restrict_read'] and not am_staff %}
 {% continue %}
 {% end %}
 
@@ -79,7 +79,8 @@
        class="collapse {{ field.get('initial_display') and 'in' or '' }}">
 {% end %}
 
-  {% module Template('order/fields.html', order=order, fields=field['fields'], is_staff=is_staff) %}
+  {# Recursion: 'include' cannot be used! #}
+  {% module Template('order/fields.html', order=order, fields=field['fields'], am_staff=am_staff) %}
 
 {% if field['depth'] == 0 %}
 </tbody>

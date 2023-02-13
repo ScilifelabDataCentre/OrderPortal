@@ -74,7 +74,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
     </div>
   </div>
 
-  {% if is_admin %}
+  {% if am_admin %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
@@ -87,9 +87,9 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
       </div>
     </div>
   </div>
-  {% end %}
+  {% end %} {# if am_admin #}
 
-  {% if settings['ORDER_TAGS'] and (is_staff or settings['ORDER_USER_TAGS']) %}
+  {% if settings['ORDER_TAGS'] and (am_staff or settings['ORDER_USER_TAGS']) %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
@@ -108,7 +108,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
         A keyword must look like an identifier: It begins with a letter and
         continues with letters, digits and/or underscore '_'. Blank or comma
         ',' separates keywords from one another.
-        {% if is_staff %}
+        {% if am_staff %}
         <br>
         Staff may use namespace prefixes, e.g. "project_id:P12345".
         {% end %}
@@ -140,7 +140,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   {% end %} {#if settings.get('ORDER_LINKS') #}
 
   {# Recursion: 'include' cannot be used! #}
-  {% module Template('order/fields_edit.html', fields=fields, order=order, is_staff=is_staff, hidden_fields=hidden_fields, tableinputs=tableinputs) %}
+  {% module Template('order/fields_edit.html', fields=fields, order=order, am_staff=am_staff, hidden_fields=hidden_fields, tableinputs=tableinputs) %}
 
   <div>
     {# Fields must be allowed to influence others, even when hidden. #}

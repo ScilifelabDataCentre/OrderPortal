@@ -97,7 +97,7 @@ class MessageSaver(saver.Saver):
     def handle_error(self, error):
         "Convert into a nicer error message to display."
         try:
-            if self.rqh.is_admin():
+            if self.rqh.am_admin():
                 msg = str(error)
             else:
                 self.rqh.logger.error(f"Email failure: {error}")

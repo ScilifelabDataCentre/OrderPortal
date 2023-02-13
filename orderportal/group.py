@@ -20,13 +20,13 @@ class GroupMixin(object):
             return
         if self.current_user["email"] in group["members"]:
             return
-        if self.is_staff():
+        if self.am_staff():
             return
         raise ValueError("you may not read the group")
 
     def allow_edit(self, group):
         "Is the group editable by the current user?"
-        if self.is_admin():
+        if self.am_admin():
             return True
         if self.is_owner(group):
             return True

@@ -102,7 +102,7 @@ class Text(tornado.web.UIModule):
             if not text:
                 raise KeyError
         except KeyError:
-            if self.handler.is_admin():
+            if self.handler.am_admin():
                 text = "*No text defined.*"
             else:
                 return ""

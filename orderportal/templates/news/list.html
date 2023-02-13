@@ -9,7 +9,7 @@
       ({{ news['modified'].split('T')[0] }})
       {% module Markdown(news.get('text')) %}
     </td>
-    {% if is_admin %}
+    {% if am_admin %}
     <td class="text-right" width="10%">
       <button type="button" class="btn btn-primary btn-xs btn-block"
               data-toggle="modal" data-target="#{{ news['_id'] }}">
@@ -28,7 +28,7 @@
         </button>
       </form>
     </td>
-    {% end %}{# if is_admin #}
+    {% end %}{# if am_admin #}
   </tr>
   {% end %} {# for news in news_items #}
 </table>
@@ -36,7 +36,7 @@
 <i>Currently none. Check again later.</i>
 {% end %} {# if news_items #}
 
-{% if is_admin %}
+{% if am_admin %}
 
 {# Modals for editing news items. #}
 {% for pos, news in enumerate(news_items) %}
@@ -149,4 +149,4 @@
 
   </div>
 </div>
-{% end %} {# if is_admin #}
+{% end %} {# if am_admin #}

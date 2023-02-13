@@ -16,7 +16,7 @@
   </thead>
   <tbody>
     {% for file in files %}
-    {% if is_admin or not file.get('hidden') %}
+    {% if am_admin or not file.get('hidden') %}
     <tr>
       <td>
         <h4>
@@ -59,7 +59,7 @@
 {% end %} {# block main_content #}
 
 {% block action_content %}
-{% if is_admin %}
+{% if am_admin %}
 <form action="{{ reverse_url('file_create') }}"
       method="GET" role="form">
   <button type="submit" class="btn btn-primary btn-block">
@@ -67,7 +67,7 @@
     Create
   </button>
 </form>
-{% end %} {# if is_admin #}
+{% end %} {# if am_admin #}
 {% end %} {# block action_content #}
 
 {% block javascript_code %}

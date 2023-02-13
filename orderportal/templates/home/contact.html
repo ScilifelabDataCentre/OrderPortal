@@ -10,7 +10,7 @@
 {% end %}
 
 {% block action_content %}
-{% if is_admin %}
+{% if am_admin %}
 <form action="{{ reverse_url('text_edit', 'contact') }}"
       method="GET" role="form">
   <input type="hidden" name="origin" value="{{ reverse_url('contact') }}">
@@ -19,5 +19,5 @@
     Edit
   </button>
 </form>
-{% end %}
+{% end %} {# if am_admin #}
 {% end %} {# block action_content #}

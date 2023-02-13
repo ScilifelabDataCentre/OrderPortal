@@ -5,20 +5,13 @@
 {% block head_title %}Register new account{% end %}
 {% block body_title %}Register new account{% end %}
 
-
-{% block action_content %}
-{% module CancelButton(reverse_url('home')) %}
-{% end %} {# block action_content #}
-
 {% block main_content %}
-
-{% if settings['ACCOUNT_REGISTRATION_OPEN'] or is_staff %}
-
+{% if settings['ACCOUNT_REGISTRATION_OPEN'] or am_staff %}
 <div class="row">
   <div class="col-md-11">
     <div class="well">
       {% module Text('register') %}
-      {% if is_admin %}
+      {% if am_admin %}
       <form action="{{ reverse_url('text_edit', 'register') }}"
             method="GET" role="form">
         <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
@@ -453,7 +446,7 @@
     </div>
   </div>
   
-  {% if is_staff %}
+  {% if am_staff %}
   <div class="form-group">
     <div class="row">
       <div class="col-md-8">
@@ -465,7 +458,7 @@
       </div>
     </div>
   </div>
-  {% end %} {# if is_staff #}
+  {% end %} {# if am_staff #}
   
   <div class="form-group">
     <div class="row">
@@ -484,7 +477,7 @@
   <div class="col-md-11">
     <div class="well">
       {% module Text('privacy_policy') %}
-      {% if is_admin %}
+      {% if am_admin %}
       <form action="{{ reverse_url('text_edit', 'privacy_policy') }}"
             method="GET" role="form">
         <input type="hidden" name="origin" value="{{ reverse_url('register') }}">
@@ -497,10 +490,13 @@
   </div>
 </div>
 
-{% else %} {# if settings['ACCOUNT_REGISTRATION_OPEN'] or is_staff #}
+{% else %} {# if settings['ACCOUNT_REGISTRATION_OPEN'] or am_staff #}
 <div class="lead alert alert-warning">
   User registration has been switched off. Contact the admin of the site.
 </div>
-{% end %} {# if settings['ACCOUNT_REGISTRATION_OPEN'] or is_staff #}
-
+{% end %} {# if settings['ACCOUNT_REGISTRATION_OPEN'] or am_staff #}
 {% end %} {# block main_content #}
+
+{% block action_content %}
+{% module CancelButton(reverse_url('home')) %}
+{% end %} {# block action_content #}

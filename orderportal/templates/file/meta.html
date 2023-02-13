@@ -9,7 +9,7 @@ Document {% module Icon('file') %} {{ file.get('title') or file['name'] }}
 {% end %}
 
 {% block action_content %}
-{% if is_admin %}
+{% if am_admin %}
 <p>
   {% module CancelButton(reverse_url('files')) %}
 </p>
@@ -34,7 +34,7 @@ Document {% module Icon('file') %} {{ file.get('title') or file['name'] }}
     </button>
   </form>
 </p>
-{% end %}
+{% end %} {# if am_admin #}
 {% end %} {# block action_content #}
 
 {% block main_content %}
