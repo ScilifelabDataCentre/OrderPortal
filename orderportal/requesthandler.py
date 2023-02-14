@@ -249,7 +249,6 @@ class RequestHandler(tornado.web.RequestHandler):
         May include admin and staff.
         """
         result = []
-        print(text)
         if constants.USER in text["recipients"]:
             result.append(account["email"])
         if constants.ADMIN in text["recipients"]:

@@ -28,20 +28,17 @@ class AccountSaver(saver.Saver):
             )
         self["email"] = email
 
-    def erase_password(self):
-        self["password"] = None
-
-    def set_password(self, new):
+    def set_password(self, password):
         if len(password) < settings["MIN_PASSWORD_LENGTH"]:
             raise ValueError(f"Password must be at least {settings['MIN_PASSWORD_LENGTH']} characters long.")
         self["code"] = None
         # Bypass ordinary 'set'; avoid saving password, even if hashed.
-        self.doc["password"] = utils.hashed_password(new)
+        self.doc["password"] = utils.hashed_password(password)
         self.changed["password"] = "******"
 
     def reset_password(self):
-        "Invalidate any previous password and set activation code."
-        self.erase_password()
+        "Remove the previous password and set activation code."
+        self["password"] = None
         self["code"] = utils.get_iuid()
 
     def check_required(self):
@@ -854,7 +851,7 @@ class Login(LoginMixin, RequestHandler):
                 )
                 with AccountSaver(doc=account, rqh=self) as saver:
                     saver["status"] = constants.DISABLED
-                    saver.erase_password()
+                    saver.reset_password()
                 msg = "Too many failed login attempts: Your account has been disabled. Contact the admin"
                 # Prepare email message about being disabled.
                 text = settings[constants.ACCOUNT][constants.DISABLED]
@@ -1068,15 +1065,14 @@ class Register(RequestHandler):
                     raise ValueError("Email is required.")
                 saver.set_email(email)
                 saver.check_required()
+                saver.reset_password()
                 saver["owner"] = saver["email"]
                 saver["role"] = constants.USER
                 saver["api_key"] = utils.get_iuid()
                 if self.am_staff():
                     saver["status"] = constants.ENABLED
-                    saver.reset_password()
                 else:
                     saver["status"] = constants.PENDING
-                    saver.erase_password()
         except ValueError as msg:
             kwargs = dict()
             for key in self.KEYS:
@@ -1091,28 +1087,31 @@ class Register(RequestHandler):
             return
         account = saver.doc
         text = settings[constants.ACCOUNT][account["status"]]
+
         # Allow staff to avoid sending email to the person when registering an account.
-        if not (
+        if (
             self.am_staff()
             and not utils.to_bool(self.get_argument("send_email", False))
         ):
-            try:
-                with MessageSaver(rqh=self) as saver:
-                    saver.create(
-                        text,
-                        account=account["email"],
-                        url=self.absolute_reverse_url("account", account["email"]),
-                        password_url=self.absolute_reverse_url("password"),
-                        password_code_url=self.absolute_reverse_url(
-                            "password", email=account["email"], code=account["code"]
-                        ),
-                        code=account["code"],
-                    )
-                    saver.send(self.get_recipients(text, account))
-            except KeyError as error:
-                self.set_message_flash(str(error))
-            except ValueError as error:
-                self.set_error_flash(str(error))
+            self.see_other("account", account["email"])
+            return
+
+        # Normal case: send email message to address of new account with info.
+        try:
+            with MessageSaver(rqh=self) as saver:
+                saver.create(
+                    text,
+                    account=account["email"],
+                    url=self.absolute_reverse_url("account", account["email"]),
+                    password_url=self.absolute_reverse_url("password"),
+                    password_code_url=self.absolute_reverse_url(
+                        "password", email=account["email"], code=account["code"]
+                    ),
+                    code=account["code"],
+                )
+                saver.send(self.get_recipients(text, account))
+        except (KeyError, ValueError) as error:
+            self.set_error_flash(str(error))
         if self.am_staff():
             self.see_other("account", account["email"])
         else:
@@ -1168,7 +1167,7 @@ class AccountDisable(RequestHandler):
             return
         with AccountSaver(account, rqh=self) as saver:
             saver["status"] = constants.DISABLED
-            saver.erase_password()
+            saver.reset_password()
         # No message sent here.Only done when user has too many login failures; above.
         self.see_other("account", account["email"])
 
