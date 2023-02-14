@@ -1192,8 +1192,8 @@ class OrderEdit(OrderMixin, RequestHandler):
                 links.append(link["href"])
             else:
                 links.append(f"{link['href']} {link['title']}")
-        # XXX Currently, multiselect fields are not handled correctly.
-        #     Too much effort; leave as is for the time being.
+        # NOTE: Currently, multiselect fields are not handled correctly.
+        #       Too much effort; leave as is for the time being.
         hidden_fields = set(
             [f["identifier"] for f in fields.flatten() if f["type"] != "multiselect"]
         )
@@ -1455,7 +1455,7 @@ class OrderFile(OrderMixin, RequestHandler):
         with OrderSaver(doc=order, rqh=self) as saver:
             for key in order["fields"]:
                 # Remove the field value if it is the filename.
-                # XXX Slightly dangerous: may delete a value that happens to
+                # NOTE: Slightly dangerous: may delete a value that happens to
                 # be identical to the filename. Shouldn't be too commmon...
                 if order["fields"][key] == filename:
                     order["fields"][key] = None

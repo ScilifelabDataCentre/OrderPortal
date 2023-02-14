@@ -189,9 +189,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 raise ValueError
             auth = base64.b64decode(auth[1])
             email, password = auth.split(":", 1)
-            account = self.get_account(email)
-            if utils.hashed_password(password) != account.get("password"):
-                raise ValueError
+            account = self.get_account(email, password=password)
         except (IndexError, ValueError, TypeError):
             raise ValueError
         self.logger.debug("Basic auth login: account %s", account["email"])
@@ -382,7 +380,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_account(self, email, password=None):
         """Get the account identified by the email address.
-        Check the password, if given. XXX not implemented.
+        Check the password, if given.
         Raise ValueError if no such account or wrong password.
         """
         try:
@@ -390,7 +388,9 @@ class RequestHandler(tornado.web.RequestHandler):
         except tornado.web.HTTPError:
             raise ValueError(f"Sorry, no such account: '{email}'")
         if password:
-            pass
+            from orderportal.account import hashed_password
+            if hashed_password(password) != account.get("password"):
+                raise ValueError("Sorry, invalid password.")
         return account
 
     def get_account_order_count(self, email):

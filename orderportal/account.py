@@ -1,5 +1,7 @@
 "Account and login pages."
 
+import hashlib
+
 import tornado.web
 
 import orderportal
@@ -10,6 +12,14 @@ from orderportal.order import OrderApiV1Mixin
 from orderportal.group import GroupSaver
 from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler
+
+
+def hashed_password(password):
+    "Return the password in hashed form."
+    sha256 = hashlib.sha256()
+    sha256.update(settings["PASSWORD_SALT"].encode())
+    sha256.update(password.encode())
+    return sha256.hexdigest()
 
 
 class AccountSaver(saver.Saver):
@@ -33,7 +43,7 @@ class AccountSaver(saver.Saver):
             raise ValueError(f"Password must be at least {settings['MIN_PASSWORD_LENGTH']} characters long.")
         self["code"] = None
         # Bypass ordinary 'set'; avoid saving password, even if hashed.
-        self.doc["password"] = utils.hashed_password(password)
+        self.doc["password"] = hashed_password(password)
         self.changed["password"] = "******"
 
     def reset_password(self):
@@ -828,13 +838,16 @@ class Login(LoginMixin, RequestHandler):
         except tornado.web.MissingArgumentError:
             self.see_other("home", error="Missing email or password argument.")
             return
-        msg = "Sorry, no such account or invalid password."
         try:
             account = self.get_account(email)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=str(error))
             return
-        if utils.hashed_password(password) != account.get("password"):
+        if not account.get("status") == constants.ENABLED:
+            self.see_other("home", error="Account is disabled. Contact the admin.")
+            return
+        if hashed_password(password) != account.get("password"):
+            self.set_error_flash("Sorry, no such account or invalid password.")
             utils.log(
                 self.db, self, account, changed=dict(login_failure=account["email"])
             )
@@ -852,20 +865,13 @@ class Login(LoginMixin, RequestHandler):
                 with AccountSaver(doc=account, rqh=self) as saver:
                     saver["status"] = constants.DISABLED
                     saver.reset_password()
-                msg = "Too many failed login attempts: Your account has been disabled. Contact the admin"
                 # Prepare email message about being disabled.
                 text = settings[constants.ACCOUNT][constants.DISABLED]
                 with MessageSaver(rqh=self) as saver:
                     saver.create(text)
                     saver.send(self.get_recipients(text, account))
-            self.see_other("home", error=msg)
-            return
-        try:
-            if not account.get("status") == constants.ENABLED:
-                raise ValueError
-        except ValueError:
-            msg = "Account is disabled. Contact the admin."
-            self.see_other("home", error=msg)
+                self.set_error_flash("Too many failed login attempts: Your account has been disabled. Contact the admin")
+            self.see_other("home", error)
             return
         self.logger.debug(f"Basic auth login: account {account['email']}")
         self.do_login(account)
@@ -876,8 +882,6 @@ class Login(LoginMixin, RequestHandler):
                 message="Please review and update your account information.",
             )
             return
-        # Not quite right: should be an absolute URL to redirect.
-        # But seems to work anyway.
         self.see_other("home")
 
 class Logout(LoginMixin, RequestHandler):
