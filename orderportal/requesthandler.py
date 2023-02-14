@@ -189,9 +189,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 raise ValueError
             auth = base64.b64decode(auth[1])
             email, password = auth.split(":", 1)
-            account = self.get_account(email)
-            if utils.hashed_password(password) != account.get("password"):
-                raise ValueError
+            account = self.get_account(email, password=password)
         except (IndexError, ValueError, TypeError):
             raise ValueError
         self.logger.debug("Basic auth login: account %s", account["email"])
@@ -249,7 +247,6 @@ class RequestHandler(tornado.web.RequestHandler):
         May include admin and staff.
         """
         result = []
-        print(text)
         if constants.USER in text["recipients"]:
             result.append(account["email"])
         if constants.ADMIN in text["recipients"]:
@@ -381,14 +378,20 @@ class RequestHandler(tornado.web.RequestHandler):
             infile.close()
         return data
 
-    def get_account(self, email):
+    def get_account(self, email, password=None):
         """Get the account identified by the email address.
-        Raise ValueError if no such account.
+        Check the password, if given.
+        Raise ValueError if no such account or wrong password.
         """
         try:
-            return self.get_entity_view("account", "email", email.strip().lower())
+            account = self.get_entity_view("account", "email", email.strip().lower())
         except tornado.web.HTTPError:
             raise ValueError(f"Sorry, no such account: '{email}'")
+        if password:
+            from orderportal.account import hashed_password
+            if hashed_password(password) != account.get("password"):
+                raise ValueError("Sorry, invalid password.")
+        return account
 
     def get_account_order_count(self, email):
         "Get the number of orders for the account."

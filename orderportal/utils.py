@@ -2,7 +2,6 @@
 
 import csv
 import datetime
-import hashlib
 import io
 import mimetypes
 import uuid
@@ -13,7 +12,6 @@ import markdown
 import tornado.web
 import tornado.escape
 import xlsxwriter
-import yaml
 
 from orderportal import constants, settings
 
@@ -127,14 +125,6 @@ def get_json(id, type):
     return result
 
 
-def hashed_password(password):
-    "Return the password in hashed form."
-    sha256 = hashlib.sha256()
-    sha256.update(settings["PASSWORD_SALT"].encode())
-    sha256.update(password.encode())
-    return sha256.hexdigest()
-
-
 def log(db, rqh, entity, changed=dict()):
     "Add a log entry for the change of the given entity."
     entry = dict(
@@ -226,14 +216,14 @@ class XlsxWriter(object):
         return self.xlsxbuffer.getvalue()
 
 
-class Fieldform:
-    "Input form handling."
+class Form:
+    "Input form handling. XXX in development"
 
     def __init__(self, fields):
         self.fields = fields
 
     def html_edit(self, xsrf_token):
-        "Return HTML for the edit form."
+        "Return the HTML form for editing the values."
         rows = [hg.INPUT(type="hidden", name="_xsrf", value=xsrf_token)]
         for field in self.fields:
             rows.append(hg.DIV(
@@ -253,4 +243,4 @@ class Fieldform:
 
     def parse(self, form):
         "Parse out the results for the submitted form."
-
+        raise NotImplementedError

@@ -7,7 +7,7 @@ from orderportal import utils
 
 
 class Fields(object):
-    "Handle fields in a form."
+    "Handle fields in an OrderPortal form."
 
     def __init__(self, form):
         "Set reference to the form containing the fields, and set up lookup."
@@ -112,7 +112,7 @@ class Fields(object):
             values = rqh.get_argument("table", "").split("\n")
             values = [v.strip() for v in values]
             values = [v for v in values if v]
-            # XXX Should do sanity check of each line: "header|type|values"
+            # NOTE: Should really do sanity check of each line: "header|type|values"
             new["table"] = values
         # Set the group which the field is a member of.
         group = rqh.get_argument("group", None)

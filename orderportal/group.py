@@ -96,7 +96,7 @@ class GroupCreate(RequestHandler):
 
 
 class GroupEdit(GroupMixin, RequestHandler):
-    "Edit group page."
+    "Edit group."
 
     @tornado.web.authenticated
     def get(self, iuid):
@@ -108,37 +108,37 @@ class GroupEdit(GroupMixin, RequestHandler):
     def post(self, iuid):
         group = self.get_entity(iuid, doctype=constants.GROUP)
         self.check_editable(group)
-        with GroupSaver(doc=group, rqh=self) as saver:
-            old_members = set(group["members"])
-            old_invited = set(group["invited"])
-            saver["name"] = self.get_argument("name", "") or "[no name]"
-            owner = self.get_account(self.get_argument("owner"))
-            if owner["email"] not in old_members:
-                raise ValueError("new owner not among current members")
-            saver["owner"] = owner["email"]
-            members = set()
-            invited = set()
-            value = self.get_argument("members", "").replace(",", " ").strip()
-            for email in value.split():
-                try:
+        try:
+            with GroupSaver(doc=group, rqh=self) as saver:
+                old_members = set(group["members"])
+                old_invited = set(group["invited"])
+                saver["name"] = self.get_argument("name", "") or "[no name]"
+                owner = self.get_account(self.get_argument("owner"))
+                if owner["email"] not in old_members:
+                    raise ValueError("new owner not among current members")
+                saver["owner"] = owner["email"]
+                members = set()
+                invited = set()
+                value = self.get_argument("members", "").replace(",", " ").strip()
+                for email in value.split():
                     account = self.get_account(email)
-                except ValueError:
-                    pass
-                else:
                     if account["email"] in old_members:
                         members.add(account["email"])
                     else:
                         invited.add(account["email"])
                     if account["email"] in old_invited:
                         invited.add(account["email"])
-            members.add(owner["email"])
-            saver["members"] = sorted(members)
-            saver["invited"] = sorted(invited)
-        self.see_other("group", saver.doc["_id"])
+                members.add(owner["email"])
+                saver["members"] = sorted(members)
+                saver["invited"] = sorted(invited)
+        except ValueError as error:
+            self.see_other("group", saver.doc["_id"], error=str(error))
+        else:
+            self.see_other("group", saver.doc["_id"])
 
 
 class GroupLogs(GroupMixin, RequestHandler):
-    "Group log entries page."
+    "Display group log entries."
 
     @tornado.web.authenticated
     def get(self, iuid):
