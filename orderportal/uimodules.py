@@ -291,37 +291,48 @@ class CancelButton(tornado.web.UIModule):
 class Form(tornado.web.UIModule):
     "Display a form with the given fields. Parse the values from the submitted form."
 
-    def render(self, url, fields, values=None, errors=None):
+    def render(self, url, fields, values=None, errors=None, left=2):
         "Output HTML for the fields in a form."
-        if values is None:
-            values = {}
-        if errors is None:
-            errors = {}
+        self.values = values or {}
+        self.errors = errors or {}
+        self.left = left
+        self.right = 12 - left
         rows = ["\n",
                 hg.INPUT(type="hidden", name="_xsrf", 
                          value=self.handler.xsrf_token.decode()),
                 "\n"]
         for field in fields:
+            input = getattr(self, f"input_{field['type']}")(field)
             rows.append(hg.DIV(
-                hg.DIV(field["identifier"], _class="col-md-2"),
-                hg.DIV(field["type"],_class="col-md-10"),
-                _class="row form-group"))
+                hg.LABEL(field["title"],
+                         _class=f"col-md-{self.left} control-label",
+                         _for=field["identifier"]),
+                hg.DIV(input, _class=f"col-md-{self.right}"),
+                _class="form-group"))
             rows.append("\n")
-        rows.append(hg.DIV(
-            hg.DIV(
-                hg.BUTTON(hg.SPAN(_class="glyphicon glyphicon-floppy-disk"),
-                          " Save",
-                          type="submit",
-                          _class="btn btn-success btn-block"),
-                _class="col-md-offset-2 col-md-3"),
-            _class="row form-group")
-                    )
-        return hg.render(hg.FORM(*rows, method="POST", role="form", action=url), {})
+        rows.append(self.row_save_button())
+        return hg.render(hg.FORM(*rows, method="POST", role="form", action=url,
+                                 _class="form-horizontal"), {})
 
-    def get_checkbox(self, field, value, error):
-        return hg.DIV(
-            
-            )
+    def row_save_button(self):
+        return hg.DIV(hg.DIV(
+            hg.BUTTON(hg.SPAN(_class="glyphicon glyphicon-floppy-disk"),
+                      " Save",
+                      type="submit",
+                      _class="btn btn-success btn-block"),
+            _class=f"col-md-offset-{self.left} col-md-3"),
+                      _class="form-group")
+
+    def input_checkbox(self, field):
+        value = self.values.get(field["identifier"])
+        error = self.errors.get(field["identifier"])
+        input = hg.INPUT(type="checkbox",
+                         id=field["identifier"],
+                         name=field["identifier"])
+        if value is not None:
+            input.attributes["value"] = value
+        return hg.DIV(hg.LABEL(input, field.get("label") or ""),
+                      _class="checkbox")
 
     def parse(self, fields):
         "Parse the form input values."

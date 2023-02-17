@@ -7,7 +7,6 @@ import mimetypes
 import uuid
 
 import couchdb2
-import htmlgenerator as hg
 import markdown
 import tornado.web
 import tornado.escape
@@ -214,33 +213,3 @@ class XlsxWriter(object):
         self.workbook.close()
         self.xlsxbuffer.seek(0)
         return self.xlsxbuffer.getvalue()
-
-
-class Form:
-    "Input form handling. XXX in development"
-
-    def __init__(self, fields):
-        self.fields = fields
-
-    def html_edit(self, xsrf_token):
-        "Return the HTML form for editing the values."
-        rows = [hg.INPUT(type="hidden", name="_xsrf", value=xsrf_token)]
-        for field in self.fields:
-            rows.append(hg.DIV(
-                hg.DIV(field["identifier"], _class="col-md-2"),
-                hg.DIV(field["type"],_class="col-md-10"),
-                _class="row form-group"))
-        rows.append(hg.DIV(
-            hg.DIV(
-                hg.BUTTON(hg.SPAN(_class="glyphicon glyphicon-floppy-disk"),
-                          " Save",
-                          type="submit",
-                          _class="btn btn-success btn-block"),
-                _class="offset-md-2 col-md-3"),
-            _class="row form-group")
-                    )
-        return hg.render(hg.FORM(*rows, method="POST", role="form", action="/"), {})
-
-    def parse(self, form):
-        "Parse out the results for the submitted form."
-        raise NotImplementedError

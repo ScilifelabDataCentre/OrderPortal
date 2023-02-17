@@ -466,7 +466,17 @@ class OrderTransitionsEdit(RequestHandler):
 class OrdersList(RequestHandler):
     "Orders list configuration."
 
-    fields = [dict(identifier="id1", type="line")]
+    fields = [
+        dict(identifier="owner_university", type="checkbox",
+             title="Order owner university",
+             label="Yes, display the university of the project owner."),
+        dict(identifier="owner_department", type="checkbox",
+             title="Order owner department",
+             label="Yes, display the department of the project owner."),
+        dict(identifier="owner_gender", type="checkbox",
+             title="Order owner gender",
+             label="Yes, display the gender of the project owner.")
+    ]
 
     @tornado.web.authenticated
     def get(self):
