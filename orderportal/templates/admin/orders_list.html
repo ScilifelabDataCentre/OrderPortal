@@ -10,8 +10,6 @@
 {% end %} {# block action_content #}
 
 {% block main_content %}
-{% module Form(reverse_url('admin_orders_list'), fields) %}
-
 <form action="{{ reverse_url('admin_orders_list') }}" method="POST" role="form">
   {% module xsrf_form_html() %}
 
