@@ -466,31 +466,15 @@ class OrderTransitionsEdit(RequestHandler):
 class OrdersList(RequestHandler):
     "Orders list configuration."
 
-    fields = [
-        dict(identifier="owner_university", type="checkbox",
-             title="Order owner university",
-             label="Yes, display the university of the project owner."),
-        dict(identifier="owner_department", type="checkbox",
-             title="Order owner department",
-             label="Yes, display the department of the project owner."),
-        dict(identifier="owner_gender", type="checkbox",
-             title="Order owner gender",
-             label="Yes, display the gender of the project owner.")
-    ]
-
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin/orders_list.html", fields=self.fields)
+        self.render("admin/orders_list.html")
 
     @tornado.web.authenticated
     def post(self):
-        logger = logging.getLogger("orderportal")
         self.check_admin()
         doc = self.db["orders_list"]
-        # form = orderportal.uimodules.Form(self)
-        # values, errors = form.parse(self.fields)
-        # logger.info(f"{values=}, {errors=}")
         with MetaSaver(doc=doc, rqh=self) as saver:
             saver["owner_university"] = utils.to_bool(self.get_argument("owner_university", False))
             saver["owner_department"] = utils.to_bool(self.get_argument("owner_department", False))
