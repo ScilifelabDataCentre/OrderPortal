@@ -9,6 +9,6 @@ RUN mkdir /code/site
 WORKDIR /code/orderportal
 ENV PYTHONPATH /code
 
-CMD ["python3", "app_orderportal.py"]
+CMD ["python3", "main.py"]
 
 VOLUME ["/code/site"]
