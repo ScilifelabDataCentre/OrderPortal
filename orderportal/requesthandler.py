@@ -27,7 +27,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_template_namespace(self):
         "Set the items accessible within the template."
-        result = super(RequestHandler, self).get_template_namespace()
+        result = super().get_template_namespace()
         result["constants"] = constants
         result["settings"] = settings
         result["terminology"] = utils.terminology
@@ -74,7 +74,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def reverse_url(self, name, *args, **query):
         "Allow adding query arguments to the URL."
-        url = super(RequestHandler, self).reverse_url(name, *args)
+        url = super().reverse_url(name, *args)
         url = url.rstrip("?")  # tornado bug? left-over '?' sometimes
         if settings["BASE_URL_PATH_PREFIX"]:
             url = settings["BASE_URL_PATH_PREFIX"] + url
@@ -85,7 +85,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def static_url(self, path, include_host=None, **kwargs):
         "Returns the URL for a static resource."
-        url = super(RequestHandler, self).static_url(
+        url = super().static_url(
             path, include_host=include_host, **kwargs
         )
         if settings["BASE_URL_PATH_PREFIX"]:
@@ -500,7 +500,7 @@ class RequestHandler(tornado.web.RequestHandler):
             self.db.delete(row.doc)
 
 
-class ApiV1Mixin(object):
+class ApiV1Mixin:
     "Mixin containing some API methods; JSON generation."
 
     def cleanup(self, doc):

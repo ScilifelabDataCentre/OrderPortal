@@ -161,7 +161,7 @@ class FileDownload(File):
     "Download the file."
 
     def get(self, name):
-        super(FileDownload, self).get(name)
+        super().get(name)
         ext = utils.get_filename_extension(self.doc["content_type"])
         if ext:
             name += ext

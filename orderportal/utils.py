@@ -171,7 +171,7 @@ def parse_field_table_column(coldef):
         return result
 
 
-class CsvWriter(object):
+class CsvWriter:
     "Write rows serially to a CSV file."
 
     def __init__(self, worksheet="Main"):
@@ -188,7 +188,7 @@ class CsvWriter(object):
         return self.csvbuffer.getvalue()
 
 
-class XlsxWriter(object):
+class XlsxWriter:
     "Write rows serially to an XLSX file."
 
     def __init__(self, worksheet="Main"):

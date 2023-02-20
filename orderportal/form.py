@@ -15,7 +15,7 @@ class FormSaver(saver.Saver):
     doctype = constants.FORM
 
     def initialize(self):
-        super(FormSaver, self).initialize()
+        super().initialize()
         self.doc["fields"] = []
         self.doc["ordinal"] = 0
 
@@ -50,9 +50,13 @@ class FormSaver(saver.Saver):
         self.changed["fields"] = dict(identifier=identifier, action="deleted")
 
 
-class FormMixin(object):
+class FormMixin:
     "Mixin providing various methods."
 
+    def get_form(self, iuid):
+        "Return the form for the IUID."
+        return self.get_entity(iuid, doctype=constants.FORM
+)
     def allow_edit_fields(self, form):
         "Are the form fields editable? Checks status only."
         return form["status"] == constants.PENDING
@@ -102,7 +106,7 @@ class Form(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         self.render(
             "form/display.html",
             form=form,
