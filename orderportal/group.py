@@ -13,7 +13,7 @@ class GroupSaver(saver.Saver):
     doctype = constants.GROUP
 
 
-class GroupMixin(object):
+class GroupMixin:
     def check_readable(self, group):
         "Check if current user may read the group."
         if self.is_owner(group):

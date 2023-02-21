@@ -6,7 +6,7 @@ from orderportal import constants, settings
 from orderportal import utils
 
 
-class Fields(object):
+class Fields:
     "Handle fields in an OrderPortal form."
 
     def __init__(self, form):

@@ -24,7 +24,7 @@ class OrderSaver(saver.Saver):
 
     def initialize(self):
         "Set the initial values for the new order. Create history field."
-        super(OrderSaver, self).initialize()
+        super().initialize()
         self["history"] = {}
 
     def setup(self):
@@ -545,7 +545,7 @@ class OrderSaver(saver.Saver):
             self.rqh.set_error_flash(str(error))
 
 
-class OrderMixin(object):
+class OrderMixin:
     "Mixin for various useful methods."
 
     def get_order(self, iuid):
@@ -867,7 +867,7 @@ class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
 
 
 class Order(OrderMixin, RequestHandler):
-    "Order page."
+    "Order display, or delete the order."
 
     @tornado.web.authenticated
     def get(self, iuid):
@@ -921,11 +921,11 @@ class Order(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def delete(self, iuid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         try:
             self.check_editable(order)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("order", order["_id"], error=str(error))
             return
         self.delete_logs(order["_id"])
         self.db.delete(order)
@@ -1146,19 +1146,19 @@ class OrderZip(OrderApiV1Mixin, OrderCsv):
 
 
 class OrderLogs(OrderMixin, RequestHandler):
-    "Order log entries page."
+    "Order log entries display."
 
     @tornado.web.authenticated
     def get(self, iuid):
         try:
             order = self.get_order(iuid)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=str(error))
             return
         try:
             self.check_readable(order)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=str(error))
             return
         title = "Logs for {0} '{1}'".format(
             utils.terminology("order"), order["title"] or "[no title]"
@@ -1169,15 +1169,15 @@ class OrderLogs(OrderMixin, RequestHandler):
 
 
 class OrderEdit(OrderMixin, RequestHandler):
-    "Page for editing an order."
+    "Edit an order."
 
     @tornado.web.authenticated
     def get(self, iuid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         try:
             self.check_editable(order)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("order", order["_id"], error=str(error))
             return
         colleagues = sorted(self.get_account_colleagues(self.current_user["email"]))
         form = self.get_form(order["form"])
@@ -1241,11 +1241,11 @@ class OrderEdit(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         try:
             self.check_editable(order)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("order", order["_id"], error=str(error))
             return
         flag = self.get_argument("__save__", None)
         try:
@@ -1274,12 +1274,12 @@ class OrderOwner(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         colleagues = sorted(self.get_account_colleagues(self.current_user["email"]))
         try:
             self.check_editable(order)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("order", order["_id"], error=str(error))
             return
         self.render(
             "order/owner.html",
@@ -1292,11 +1292,11 @@ class OrderOwner(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         try:
             self.check_editable(order)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("order", order["_id"], error=str(error))
             return
         try:
             owner = self.get_argument("owner")
@@ -1323,11 +1323,11 @@ class OrderClone(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         try:
             self.check_readable(order)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=str(error))
             return
         if not self.allow_clone(order):
             raise ValueError(
@@ -1370,7 +1370,7 @@ class OrderTransition(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def post(self, iuid, targetid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         try:
             for target in self.get_targets(order):
                 if target["identifier"] == targetid:
@@ -1388,7 +1388,7 @@ class OrderTransitionApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
     "Change the status of an order by an API call."
 
     def post(self, iuid, targetid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         try:
             self.check_editable(order)
             with OrderSaver(doc=order, rqh=self) as saver:
@@ -1405,11 +1405,11 @@ class OrderFile(OrderMixin, RequestHandler):
     def get(self, iuid, filename=None):
         if filename is None:
             raise tornado.web.HTTPError(400)
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         try:
             self.check_readable(order)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=str(error))
             return
         outfile = self.db.get_attachment(order, filename)
         if outfile is None:
@@ -1430,7 +1430,7 @@ class OrderFile(OrderMixin, RequestHandler):
         if self.get_argument("_http_method", None) == "delete":
             self.delete(iuid, filename)
             return
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         self.check_attachable(order)
         try:
             infile = self.request.files["file"][0]
@@ -1449,7 +1449,7 @@ class OrderFile(OrderMixin, RequestHandler):
             raise tornado.web.HTTPError(400)
         if filename.startswith(constants.SYSTEM):
             raise tornado.web.HTTPError(400, reason="Reserved filename.")
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         self.check_attachable(order)
         fields = Fields(self.get_form(order["form"]))
         with OrderSaver(doc=order, rqh=self) as saver:
@@ -1474,7 +1474,7 @@ class OrderReport(OrderMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         self.check_readable(order)
         try:
             report = order["report"]
@@ -1507,7 +1507,7 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
     "Order report API: get or set."
 
     def get(self, iuid):
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         try:
             self.check_readable(order)
         except ValueError as msg:
@@ -1534,7 +1534,7 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             self.check_admin()
         except ValueError as msg:
             raise tornado.web.HTTPError(403, reason=str(msg))
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         with OrderSaver(doc=order, rqh=self) as saver:
             content_type = (
                 self.request.headers.get("content-type") or constants.BIN_MIMETYPE
@@ -1559,13 +1559,13 @@ class OrderReportEdit(OrderMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         self.check_admin()
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         self.render("order/report_edit.html", order=order)
 
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_admin()
-        order = self.get_entity(iuid, doctype=constants.ORDER)
+        order = self.get_order(iuid)
         with OrderSaver(doc=order, rqh=self) as saver:
             try:
                 infile = self.request.files["report"][0]

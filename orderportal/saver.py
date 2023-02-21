@@ -7,7 +7,7 @@ from orderportal import constants
 from orderportal import utils
 
 
-class Saver(object):
+class Saver:
     "Context manager saving the data for the document."
 
     doctype = None

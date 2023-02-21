@@ -7,7 +7,7 @@ import os.path
 import re
 import sys
 
-__version__ = "8.0.1"
+__version__ = "9.0.1"
 
 
 class Constants:
@@ -68,9 +68,10 @@ class Constants:
     INFO = "info"
     FILE = "file"
     MESSAGE = "message"
+    REPORT = "report"
     LOG = "log"
     META = "meta"
-    ENTITIES = frozenset([ACCOUNT, GROUP, FORM, ORDER, INFO, FILE, MESSAGE])
+    ENTITIES = frozenset([ACCOUNT, GROUP, FORM, ORDER, INFO, FILE, MESSAGE, REPORT])
 
     # System attachments to order.
     SYSTEM = "system"
@@ -88,7 +89,7 @@ class Constants:
     ### TEXT = "text" Already defined above.
     DATE = "date"
     TABLE = "table"
-    ### GROUP   = 'group'
+    ### GROUP   = 'group' Already defined above.
     ### FILE    = 'file' Already defined above.
     TYPES = [
         STRING,
