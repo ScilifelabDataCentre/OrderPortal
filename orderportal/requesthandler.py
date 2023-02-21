@@ -54,11 +54,11 @@ class RequestHandler(tornado.web.RequestHandler):
         using HTTP status 303 See Other."""
         query = kwargs.copy()
         try:
-            self.set_error_flash(query.pop("error"))
+            self.set_error_flash(str(query.pop("error")))
         except KeyError:
             pass
         try:
-            self.set_message_flash(query.pop("message"))
+            self.set_message_flash(str(query.pop("message")))
         except KeyError:
             pass
         url = self.absolute_reverse_url(name, *args, **query)
@@ -355,28 +355,6 @@ class RequestHandler(tornado.web.RequestHandler):
             kwargs["descending"] = True
         view = self.db.view("event", "date", **kwargs)
         return [r.doc for r in view]
-
-    def get_entity_attachment_filename(self, entity):
-        """Return the filename of the attachment for the given entity.
-        Raise KeyError if no attachment.
-        """
-        return list(entity["_attachments"].keys())[0]
-
-    def get_entity_attachment_data(self, entity):
-        """Return the data of the attachment for the given entity.
-        Return None if attachment has no data, or no attachment.
-        """
-        try:
-            filename = self.get_entity_attachment_filename(entity)
-        except KeyError:
-            return None
-        infile = self.db.get_attachment(entity, filename)
-        if infile is None:  # When file is empty
-            data = None
-        else:
-            data = infile.read()
-            infile.close()
-        return data
 
     def get_account(self, email, password=None):
         """Get the account identified by the email address.

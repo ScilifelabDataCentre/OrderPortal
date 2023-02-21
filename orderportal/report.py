@@ -20,12 +20,8 @@ class ReportMixin:
     "Mixin for various useful methods."
 
     def get_report(self, iuid):
-        """Get the report for the IUID.
-        Raise ValueError if no such report."""
-        try:  # Next try report doc IUID.
-            return self.get_entity(iuid, doctype=constants.REPORT)
-        except tornado.web.HTTPError:
-            raise ValueError("Sorry, no such report")
+        "Get the report for the IUID."
+        return self.get_entity(iuid, doctype=constants.REPORT)
 
     def allow_read(self, report):
         "Is the report readable by the current user?"
@@ -74,8 +70,8 @@ class ReportCreate(RequestHandler):
                 saver.create(form)
                 saver.autopopulate()
                 saver.check_fields_validity()
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
         else:
             self.see_other("report_edit", saver.doc["_id"])
 
@@ -95,13 +91,12 @@ class ReportLogs(ReportMixin, RequestHandler):
     def get(self, iuid):
         try:
             report = self.get_report(iuid)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
-            return
+        except ValueError as error:
+            self.see_other("home", error="Sorry, no such report.")
         try:
             self.check_readable(report)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
         title = "Logs for {0} '{1}'".format(
             utils.terminology("report"), report["title"] or "[no title]"
@@ -119,7 +114,7 @@ class ReportEdit(RequestHandler):
         report = self.get_report(iuid)
         try:
             self.check_editable(report)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
         raise NotImplementedError

@@ -2,6 +2,7 @@
 
 import os.path
 
+import couchdb2
 import tornado.web
 
 import orderportal
@@ -59,9 +60,13 @@ class File(RequestHandler):
     "Return the file data."
 
     def get(self, name):
-        self.doc = self.get_entity_view("file", "name", name)
-        filename = list(self.doc["_attachments"].keys())[0]
-        outfile = self.db.get_attachment(self.doc, filename)
+        try:
+            self.doc = self.get_entity_view("file", "name", name)
+            filename = list(self.doc["_attachments"].keys())[0]
+            outfile = self.db.get_attachment(self.doc, filename)
+        except (tornado.web.HTTPError, IndexError, couchdb2.NotFoundError):
+            self.see_other("home", error="Sorry, no such file.")
+            return
         if outfile is None:
             self.write("")
         else:
@@ -105,8 +110,8 @@ class FileCreate(RequestHandler):
                 saver["title"] = self.get_argument("title", None)
                 saver["hidden"] = utils.to_bool(self.get_argument("hidden", False))
                 saver["description"] = self.get_argument("description", None)
-        except ValueError as msg:
-            self.see_other("files", error=str(msg))
+        except ValueError as error:
+            self.see_other("files", error=error)
         else:
             self.see_other("files")
 

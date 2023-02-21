@@ -97,14 +97,12 @@ class MessageSaver(saver.Saver):
     def handle_error(self, error):
         "Convert into a nicer error message to display."
         try:
-            if self.rqh.am_admin():
-                msg = str(error)
-            else:
+            if not self.rqh.am_admin():
                 self.rqh.logger.error(f"Email failure: {error}")
-                msg = "Contact the admin."
+                error = "Contact the admin."
         except AttributeError: # If rqh is None.
-            msg = str(error)
-        raise ValueError(f"The operation succeeded, but no email could be sent; problem with the email server. {msg}")
+            pass
+        raise ValueError(f"The operation succeeded, but no email could be sent; problem with the email server. {error}")
 
     def post_process(self):
         try:

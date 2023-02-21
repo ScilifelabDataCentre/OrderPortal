@@ -77,8 +77,8 @@ class Entity(tornado.web.UIModule):
             alt = doctype.capitalize()
             try:
                 url = self.handler.reverse_url(doctype, iuid)
-            except KeyError as msg:
-                raise KeyError(str(msg) + ":", doctype)
+            except KeyError as error:
+                raise KeyError(f"{error}: {doctype}")
         if icon and icon_url:
             icon = ICON_TEMPLATE.format(url=icon_url, alt=alt, title=alt)
             return f"""<a href="{url}">{icon} {title}</a>"""

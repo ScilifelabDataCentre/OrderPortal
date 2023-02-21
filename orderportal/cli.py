@@ -245,6 +245,22 @@ def output(identifier):
         raise click.ClickException("No such item in the database.")
     click.echo(json.dumps(doc, ensure_ascii=False, indent=2))
 
+@cli.command()
+@click.option('-v', '--verbose', count=True)
+def count_reports(verbose):
+    "Count the number of orders that have an old-style report attached."
+    db = orderportal.database.get_db()
+    view = db.view("order", "identifier", reduce=False, include_docs=True)
+    order_count = 0
+    report_count = 0
+    for row in view:
+        order_count += 1
+        if row.doc.get("report"):
+            if verbose:
+                click.echo(row.doc["identifier"])
+            report_count += 1
+    click.echo(f"{order_count} orders, of which {report_count} have old-style reports.")
+
 
 if __name__ == "__main__":
     cli()
