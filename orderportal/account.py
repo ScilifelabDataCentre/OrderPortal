@@ -871,7 +871,7 @@ class Login(LoginMixin, RequestHandler):
                     saver.create(text)
                     saver.send(self.get_recipients(text, account))
                 self.set_error_flash("Too many failed login attempts: Your account has been disabled. Contact the admin")
-            self.see_other("home", error)
+            self.see_other("home")
             return
         self.logger.debug(f"Basic auth login: account {account['email']}")
         self.do_login(account)
