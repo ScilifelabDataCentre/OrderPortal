@@ -697,7 +697,9 @@ class AccountLogs(AccountMixin, RequestHandler):
         except ValueError as error:
             self.see_other("home", error=error)
             return
-        self.render("logs.html", entity=account, logs=self.get_logs(account["_id"]))
+        self.render("logs.html",
+                    title=f"Logs account '{account['email']}'",
+                    logs=self.get_logs(account["_id"]))
 
 
 class AccountMessages(AccountMixin, RequestHandler):

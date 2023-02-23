@@ -1141,12 +1141,8 @@ class OrderLogs(OrderMixin, RequestHandler):
         except ValueError as error:
             self.see_other("home", error=error)
             return
-        title = "Logs for {0} '{1}'".format(
-            utils.terminology("order"), order["title"] or "[no title]"
-        )
-        self.render(
-            "logs.html", title=title, entity=order, logs=self.get_logs(order["_id"])
-        )
+        title = f"Logs {utils.terminology('order')} '{order['title'] or '[no title]'}'"
+        self.render("logs.html", title=title, logs=self.get_logs(order["_id"]))
 
 
 class OrderEdit(OrderMixin, RequestHandler):

@@ -6,19 +6,17 @@
     <title>{% block head_title %}{{ settings['SITE_NAME'] }}{% end %}</title>
     <link rel="shortcut icon"
           href="{{ reverse_url('site', settings['SITE_FAVICON']) }}">
+    <link rel="stylesheet"
+          href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" crossorigin="anonymous"
           href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" 
           integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu">
     <link rel="stylesheet"
-          href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet"
-          href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css">
-    {% block css_page %}
+          href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css">       {% block css_page %}
     {% end %}
     <link rel="stylesheet" href="{{ static_url('mods.css') }}">
     {% if settings['SITE_CSS_FILE'] %}
-    <link rel="stylesheet"
-          href="{{ reverse_url('site', settings['SITE_CSS_FILE']) }}">
+ <link rel="stylesheet" href="{{ reverse_url('site', settings['SITE_CSS_FILE']) }}">
     {% end %}
   </head>
 
@@ -331,13 +329,16 @@
             integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ"
             crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"
+            integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+            crossorigin="anonymous"></script>
+    <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
     <script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.11/js/dataTables.bootstrap.min.js"></script>
     <script>
       $.datepicker.setDefaults({dateFormat: "yy-mm-dd"});
       $(function(){ $(".datepicker").datepicker(); });
     </script>
-    <script src="{{ static_url('jquery.localtime-0.9.1.min.js') }}"></script>
 
     {% block javascript_autofocus %}
     <script>

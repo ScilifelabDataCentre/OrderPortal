@@ -119,7 +119,6 @@ class InfoLogs(RequestHandler):
         info = self.get_entity_view("info", "name", name)
         self.render(
             "logs.html",
-            title="Logs for info '{0}'".format(name),
-            entity=info,
+            title=f"Logs info '{name}'",
             logs=self.get_logs(info["_id"]),
         )

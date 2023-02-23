@@ -199,8 +199,7 @@ class FormLogs(FormMixin, RequestHandler):
         form = self.get_form(iuid)
         self.render(
             "logs.html",
-            title="Logs for form '{0}'".format(form["title"]),
-            entity=form,
+            title=f"Logs form '{form['title']}'",
             logs=self.get_logs(form["_id"]),
         )
 

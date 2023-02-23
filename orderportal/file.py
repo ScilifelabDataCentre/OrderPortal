@@ -76,6 +76,17 @@ class File(RequestHandler):
             self.set_header("Content-Type", self.doc["content_type"])
 
 
+class FileDownload(File):
+    "Download the file."
+
+    def get(self, name):
+        super().get(name)
+        ext = utils.get_filename_extension(self.doc["content_type"])
+        if ext:
+            name += ext
+        self.set_header("Content-Disposition", f'attachment; filename="{name}"')
+
+
 class FileCreate(RequestHandler):
     "Create a new file page."
 
@@ -154,17 +165,6 @@ class FileEditApiV1(FileEdit):
         pass
 
 
-class FileDownload(File):
-    "Download the file."
-
-    def get(self, name):
-        super().get(name)
-        ext = utils.get_filename_extension(self.doc["content_type"])
-        if ext:
-            name += ext
-        self.set_header("Content-Disposition", f'attachment; filename="{name}"')
-
-
 class FileLogs(RequestHandler):
     "File log entries page."
 
@@ -172,7 +172,6 @@ class FileLogs(RequestHandler):
         file = self.get_entity(iuid, doctype=constants.FILE)
         self.render(
             "logs.html",
-            title=f"Logs for document '{file['name']}'",
-            entity=file,
+            title=f"Logs file '{file['name']}'",
             logs=self.get_logs(file["_id"]),
         )
