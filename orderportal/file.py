@@ -76,14 +76,6 @@ class File(RequestHandler):
             self.set_header("Content-Type", self.doc["content_type"])
 
 
-class FileMeta(RequestHandler):
-    "Display meta page for a file with buttons."
-
-    def get(self, name):
-        file = self.get_entity_view("file", "name", name)
-        self.render("file/meta.html", file=file)
-
-
 class FileCreate(RequestHandler):
     "Create a new file page."
 
@@ -180,7 +172,7 @@ class FileLogs(RequestHandler):
         file = self.get_entity(iuid, doctype=constants.FILE)
         self.render(
             "logs.html",
-            title="Logs for document '%s'" % (file.get("title") or file["name"]),
+            title=f"Logs for document '{file['name']}'",
             entity=file,
             logs=self.get_logs(file["_id"]),
         )

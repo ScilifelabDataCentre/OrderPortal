@@ -7,7 +7,7 @@ import os.path
 import re
 import sys
 
-__version__ = "9.0.2"
+__version__ = "9.1.0"
 
 
 class Constants:
@@ -195,7 +195,6 @@ class Constants:
         "application/vnd.openxmlformats-officedocument.presentationml.presentation": "ppt.png",
     }
     DEFAULT_CONTENT_TYPE_ICON = "binary.png"
-    VIEWABLE_CONTENT_TYPES = set([TEXT_MIMETYPE, JSON_MIMETYPE, CSV_MIMETYPE, PDF_MIMETYPE])
 
     COUNTRIES = dict([
         ("AF", "Afghanistan"),

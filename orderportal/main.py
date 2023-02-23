@@ -274,7 +274,6 @@ def main():
         url(r"/files", orderportal.file.Files, name="files"),
         url(r"/file", orderportal.file.FileCreate, name="file_create"),
         url(r"/file/([^/]+)", orderportal.file.File, name="file"),
-        url(r"/file/([^/]+)/meta", orderportal.file.FileMeta, name="file_meta"),
         url(r"/file/([^/]+)/edit", orderportal.file.FileEdit, name="file_edit"),
         url(
             r"/api/v1/file/([^/]+)/edit",

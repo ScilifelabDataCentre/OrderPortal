@@ -63,11 +63,6 @@ class Entity(tornado.web.UIModule):
             title = entity.get("title") or entity["name"]
             alt = doctype
             url = self.handler.reverse_url("info", entity["name"])
-        elif doctype == constants.FILE:
-            icon_url = self.handler.static_url("file.png")
-            title = entity["name"]
-            alt = doctype
-            url = self.handler.reverse_url("file_meta", entity["name"])
         else:
             icon_url = self.handler.static_url(doctype + ".png")
             iuid = entity["_id"]
