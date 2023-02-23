@@ -151,6 +151,8 @@ class Constants:
     FORM_STATUSES = [PENDING, TESTING, ENABLED, DISABLED]
 
     # Hard-wired order statuses; must always be present.
+    # Other statuses are defined initially in admin.DEFAULT_ORDER_STATUSES,
+    # and stored in a meta document 'order_statuses' in the database.
     PREPARATION = "preparation"
     SUBMITTED = "submitted"
 

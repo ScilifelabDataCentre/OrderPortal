@@ -312,12 +312,9 @@
         </div>
         <div class="col-md-6 text-center">
           {% if current_user %}
-          Privacy policy (GDPR): See
-          <a href="{{ reverse_url('account', current_user['email']) }}">
-            your account page</a>.
           A session cookie is used solely to handle your login status.
           {% else %}
-          Session cookies are <b>not</b> used for anonymous users.
+          No session cookie is used for anonymous users.
           {% end %}
         </div>
         <div class="col-md-3">
