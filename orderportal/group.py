@@ -14,7 +14,6 @@ class GroupSaver(saver.Saver):
 
 
 class GroupMixin:
-
     def get_group(self, iuid):
         "Return the group for the IUID."
         return self.get_entity(iuid, doctype=constants.GROUP)
@@ -54,7 +53,9 @@ class Group(GroupMixin, RequestHandler):
         except ValueError as error:
             self.see_other("home", error=error)
             return
-        self.render("group/display.html", group=group, allow_edit=self.allow_edit(group))
+        self.render(
+            "group/display.html", group=group, allow_edit=self.allow_edit(group)
+        )
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -155,8 +156,7 @@ class GroupLogs(GroupMixin, RequestHandler):
             return
         self.render(
             "logs.html",
-            title=f"group {group['name']}",
-            entity=group,
+            title=f"Logs for group {group['name']}",
             logs=self.get_logs(group["_id"]),
         )
 

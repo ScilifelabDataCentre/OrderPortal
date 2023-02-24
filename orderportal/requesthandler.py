@@ -85,9 +85,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def static_url(self, path, include_host=None, **kwargs):
         "Returns the URL for a static resource."
-        url = super().static_url(
-            path, include_host=include_host, **kwargs
-        )
+        url = super().static_url(path, include_host=include_host, **kwargs)
         if settings["BASE_URL_PATH_PREFIX"]:
             parts = urllib.parse.urlparse(url)
             path = settings["BASE_URL_PATH_PREFIX"] + parts.path
@@ -273,7 +271,8 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_next_counter(self, doctype):
         "Get the next counter number for the doctype."
-        from orderportal.admin import MetaSaver # To avoid circular import.
+        from orderportal.admin import MetaSaver  # To avoid circular import.
+
         while True:
             try:
                 doc = self.db[doctype]  # Doc must be reloaded each iteration
@@ -321,8 +320,12 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_texts(self, type):
         "Return all texts of the given type."
-        result = [row.doc for row in self.db.view("text", "type", key=type,
-                                                  reduce=False, include_docs=True)]
+        result = [
+            row.doc
+            for row in self.db.view(
+                "text", "type", key=type, reduce=False, include_docs=True
+            )
+        ]
         result.sort(key=lambda d: d["name"])
         return result
 
@@ -330,8 +333,12 @@ class RequestHandler(tornado.web.RequestHandler):
         """Get the requested text by type and name.
         Raise KeyError if not found.
         """
-        docs = [row.doc for row in self.db.view("text", "type", key=type,
-                                                 reduce=False, include_docs=True)]
+        docs = [
+            row.doc
+            for row in self.db.view(
+                "text", "type", key=type, reduce=False, include_docs=True
+            )
+        ]
         for doc in docs:
             if doc["name"] == name:
                 return doc
@@ -367,6 +374,7 @@ class RequestHandler(tornado.web.RequestHandler):
             raise ValueError(f"Sorry, no such account: '{email}'")
         if password:
             from orderportal.account import hashed_password
+
             if hashed_password(password) != account.get("password"):
                 raise ValueError("Sorry, invalid password.")
         return account

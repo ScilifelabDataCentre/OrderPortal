@@ -65,7 +65,9 @@ def update_meta_documents(db):
 
         # Load the legacy site ORDER_STATUSES_FILE, if any defined.
         try:
-            filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_STATUSES_FILE"])
+            filepath = os.path.join(
+                settings["SITE_DIR"], settings["ORDER_STATUSES_FILE"]
+            )
             with open(filepath) as infile:
                 legacy_statuses = yaml.safe_load(infile)
             logger.info(f"loaded legacy order statuses from file '{filepath}'")
@@ -92,7 +94,9 @@ def update_meta_documents(db):
 
         # Load the legacy site ORDER_TRANSITIONS_FILE, if any defined.
         try:
-            filepath = os.path.join(settings["SITE_DIR"], settings["ORDER_TRANSITIONS_FILE"])
+            filepath = os.path.join(
+                settings["SITE_DIR"], settings["ORDER_TRANSITIONS_FILE"]
+            )
             with open(filepath) as infile:
                 legacy_transitions = yaml.safe_load(infile)
             logger.info(f"loaded legacy order transitions from file '{filepath}'")
@@ -107,23 +111,27 @@ def update_meta_documents(db):
             # NOTE: the legacy setup had a different layout.
             for legacy_trans in legacy_transitions:
                 # Skip any unknown source statuses.
-                if legacy_trans["source"] not in lookup: continue
+                if legacy_trans["source"] not in lookup:
+                    continue
                 for target in legacy_trans["targets"]:
                     # Skip any unknown target statuses.
-                    if target not in lookup: continue
+                    if target not in lookup:
+                        continue
                     value = dict(permission=legacy_trans["permission"])
                     if legacy_trans.get("require") == "valid":
                         value["require_valid"] = True
-                    settings["ORDER_TRANSITIONS"][legacy_trans["source"]][target] = value
+                    settings["ORDER_TRANSITIONS"][legacy_trans["source"]][
+                        target
+                    ] = value
 
         initial = None
         for status in settings["ORDER_STATUSES"]:
             if status.get("initial"):
-                if initial:         # There must one and only one initial status.
+                if initial:  # There must one and only one initial status.
                     status.pop("initial")
                 else:
                     initial = status
-        if initial is None:   # Set the status PREPARATION to initial, if none defined.
+        if initial is None:  # Set the status PREPARATION to initial, if none defined.
             lookup[constants.PREPARATION]["status"] = True
 
         # Save current setup into database.
@@ -163,7 +171,9 @@ def update_meta_documents(db):
             saver["tags"] = settings.get("ORDERS_LIST_TAGS", False)
             saver["statuses"] = settings.get("ORDERS_LIST_STATUSES", list())
             # This was screwed up before version 7.0.8
-            saver["fields"] = [d["identifier"] for d in settings.get("ORDERS_LIST_FIELDS", list())]
+            saver["fields"] = [
+                d["identifier"] for d in settings.get("ORDERS_LIST_FIELDS", list())
+            ]
             saver["max_most_recent"] = settings.get("DISPLAY_ORDERS_MOST_RECENT", 500)
             saver["default_order_column"] = "modified"
             saver["default_order_sort"] = "desc"
@@ -194,9 +204,13 @@ def update_text_documents(db):
     loaded = False
     for text in DEFAULT_TEXTS_DISPLAY:
         # Due to the problem lower down, have to use a bespoke docs fetch here.
-        docs = [row.doc for row in db.view("text", "name", key=text["name"],
-                                           reduce=False, include_docs=True)]
-        if len(docs) == 0:       # No document in db; add it from defaults.
+        docs = [
+            row.doc
+            for row in db.view(
+                "text", "name", key=text["name"], reduce=False, include_docs=True
+            )
+        ]
+        if len(docs) == 0:  # No document in db; add it from defaults.
             with TextSaver(db=db) as saver:
                 saver["type"] = constants.DISPLAY
                 saver["name"] = text["name"]
@@ -204,12 +218,12 @@ def update_text_documents(db):
                 saver["text"] = text["text"]
             loaded = True
         elif len(docs) == 1:
-            if not docs[0].get("type"): # Fix previous mistake.
+            if not docs[0].get("type"):  # Fix previous mistake.
                 with TextSaver(doc=docs[0], db=db) as saver:
                     saver["type"] = constants.DISPLAY
         elif len(docs) > 1:
-            newest = docs[0]     # Deal with the consequence of a previous mistake.
-            for doc in docs[1:]: # When more than one copy, then remove the older ones.
+            newest = docs[0]  # Deal with the consequence of a previous mistake.
+            for doc in docs[1:]:  # When more than one copy, then remove the older ones.
                 if doc["modified"] > newest["modified"]:
                     newest = doc
             for doc in docs:
@@ -223,8 +237,9 @@ def update_text_documents(db):
 
     ### As of version 7.0.4, the one-line description of a text is in the document.
     ### Defensive; This may have been done above, but not for certain.
-    docs = [row.doc for row in db.view("text", "type", constants.DISPLAY,
-                                       include_docs=True)]
+    docs = [
+        row.doc for row in db.view("text", "type", constants.DISPLAY, include_docs=True)
+    ]
     lookup = dict([(d["name"], d) for d in docs])
     for text in DEFAULT_TEXTS_DISPLAY:
         try:
@@ -232,7 +247,7 @@ def update_text_documents(db):
         except KeyError:
             pass
         else:
-            if "description" not in doc: # Update to version 7.0.4
+            if "description" not in doc:  # Update to version 7.0.4
                 with TextSaver(doc, db=db) as saver:
                     saver["type"] = constants.DISPLAY
                     saver["description"] = text["description"]
@@ -241,15 +256,16 @@ def update_text_documents(db):
     ### status changes are stored in the database as texts.
     ### NOTE: The account messages YAML file is ignored! It is unlikely
     ### to have been customized by anyone. The default is used.
-    docs = [row.doc for row in db.view("text", "type", constants.ACCOUNT,
-                                       include_docs=True)]
+    docs = [
+        row.doc for row in db.view("text", "type", constants.ACCOUNT, include_docs=True)
+    ]
     lookup = dict([(d["status"], d) for d in docs])
     loaded = False
     for text in DEFAULT_TEXTS_ACCOUNT:
         if text["status"] not in lookup:
             with TextSaver(db=db) as saver:
                 saver["type"] = constants.ACCOUNT
-                saver["name"] = text["status"] # Yes, the status only.
+                saver["name"] = text["status"]  # Yes, the status only.
                 saver["status"] = text["status"]
                 saver["description"] = text["description"]
                 saver["recipients"] = text["recipients"]
@@ -322,12 +338,14 @@ class OrderStatuses(RequestHandler):
             "order", "status", group_level=1, startkey=[""], endkey=[constants.CEILING]
         )
         counts = dict([(r.key[0], r.value) for r in view])
-        self.render("admin/order_statuses.html",
-                    enabled=enabled,
-                    not_enabled=not_enabled,
-                    sources=settings["ORDER_TRANSITIONS"],
-                    targets=targets,
-                    counts=counts)
+        self.render(
+            "admin/order_statuses.html",
+            enabled=enabled,
+            not_enabled=not_enabled,
+            sources=settings["ORDER_TRANSITIONS"],
+            targets=targets,
+            counts=counts,
+        )
 
 
 class OrderStatusEnable(RequestHandler):
@@ -337,7 +355,8 @@ class OrderStatusEnable(RequestHandler):
     def post(self, status_id):
         self.check_admin()
         for status in settings["ORDER_STATUSES"]:
-            if status["identifier"] == status_id: break
+            if status["identifier"] == status_id:
+                break
         else:
             self.see_other("admin_order_statuses", error="No such order status.")
             return
@@ -347,7 +366,7 @@ class OrderStatusEnable(RequestHandler):
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
         orderportal.config.load_settings_from_db(self.db)
         self.see_other("admin_order_statuses")
-        
+
 
 class OrderStatusEdit(RequestHandler):
     "Edit an order status."
@@ -381,12 +400,12 @@ class OrderStatusEdit(RequestHandler):
             for s in settings["ORDER_STATUSES_LOOKUP"].values():
                 s["initial"] = False
             status["initial"] = True
-        status["edit"] = ["admin"] # Is always allowed.
+        status["edit"] = ["admin"]  # Is always allowed.
         if utils.to_bool(self.get_argument("edit_staff", False)):
             status["edit"].append("staff")
         if utils.to_bool(self.get_argument("edit_user", False)):
             status["edit"].append("user")
-        status["attach"] = ["admin"] # Is always allowed.
+        status["attach"] = ["admin"]  # Is always allowed.
         if utils.to_bool(self.get_argument("attach_staff", False)):
             status["attach"].append("staff")
         if utils.to_bool(self.get_argument("attach_user", False)):
@@ -414,12 +433,15 @@ class OrderTransitionsEdit(RequestHandler):
             for target in targets.keys():
                 if target not in settings["ORDER_STATUSES_LOOKUP"]:
                     targets.pop(target)
-            new_targets = [t for t in settings["ORDER_STATUSES_LOOKUP"].keys()
-                           if t != status_id]
-            self.render("admin/order_transitions_edit.html",
-                        status=status,
-                        targets=targets,
-                        new_targets=new_targets)
+            new_targets = [
+                t for t in settings["ORDER_STATUSES_LOOKUP"].keys() if t != status_id
+            ]
+            self.render(
+                "admin/order_transitions_edit.html",
+                status=status,
+                targets=targets,
+                new_targets=new_targets,
+            )
 
     @tornado.web.authenticated
     def post(self, status_id):
@@ -431,7 +453,9 @@ class OrderTransitionsEdit(RequestHandler):
             source = settings["ORDER_STATUSES_LOOKUP"][status_id]
             target = settings["ORDER_STATUSES_LOOKUP"][self.get_argument("target")]
         except (tornado.web.MissingArgumentError, KeyError):
-            self.see_other("admin_order_statuses", error="Invalid or missing order status.")
+            self.see_other(
+                "admin_order_statuses", error="Invalid or missing order status."
+            )
             return
         permission = self.get_arguments("permission")
         if not permission:
@@ -440,7 +464,9 @@ class OrderTransitionsEdit(RequestHandler):
         value = dict(permission=permission)
         if utils.to_bool(self.get_argument("require_valid", False)):
             value["require_valid"] = True
-        settings["ORDER_TRANSITIONS"][source["identifier"]][target["identifier"]] = value
+        settings["ORDER_TRANSITIONS"][source["identifier"]][
+            target["identifier"]
+        ] = value
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
@@ -452,9 +478,13 @@ class OrderTransitionsEdit(RequestHandler):
         try:
             source = settings["ORDER_STATUSES_LOOKUP"][status_id]
             target = settings["ORDER_STATUSES_LOOKUP"][self.get_argument("target")]
-            settings["ORDER_TRANSITIONS"][source["identifier"]].pop(target["identifier"])
+            settings["ORDER_TRANSITIONS"][source["identifier"]].pop(
+                target["identifier"]
+            )
         except (tornado.web.MissingArgumentError, KeyError):
-            self.see_other("admin_order_statuses", error="Invalid or missing order status.")
+            self.see_other(
+                "admin_order_statuses", error="Invalid or missing order status."
+            )
             return
         with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
@@ -476,13 +506,22 @@ class OrdersList(RequestHandler):
         self.check_admin()
         doc = self.db["orders_list"]
         with MetaSaver(doc=doc, rqh=self) as saver:
-            saver["owner_university"] = utils.to_bool(self.get_argument("owner_university", False))
-            saver["owner_department"] = utils.to_bool(self.get_argument("owner_department", False))
+            saver["owner_university"] = utils.to_bool(
+                self.get_argument("owner_university", False)
+            )
+            saver["owner_department"] = utils.to_bool(
+                self.get_argument("owner_department", False)
+            )
             if settings.get("ACCOUNT_FUNDER_INFO_GENDER"):
-                saver["owner_gender"] = utils.to_bool(self.get_argument("owner_gender", False))
+                saver["owner_gender"] = utils.to_bool(
+                    self.get_argument("owner_gender", False)
+                )
             saver["tags"] = utils.to_bool(self.get_argument("tags", False))
-            saver["statuses"] = [s for s in self.get_arguments("statuses")
-                                 if s in settings["ORDER_STATUSES_LOOKUP"]]
+            saver["statuses"] = [
+                s
+                for s in self.get_arguments("statuses")
+                if s in settings["ORDER_STATUSES_LOOKUP"]
+            ]
             saver["fields"] = self.get_argument("fields", "").strip().split()
             # Lookup of filters with identifier as key.
             filters = dict([(f["identifier"], f) for f in doc["filters"]])
@@ -496,8 +535,9 @@ class OrdersList(RequestHandler):
                     value = yaml.safe_load(value)
                     if not isinstance(value, dict):
                         raise ValueError
-                    filter = dict(identifier=value["identifier"],
-                                  values=value["values"])
+                    filter = dict(
+                        identifier=value["identifier"], values=value["values"]
+                    )
                     if not isinstance(filter["identifier"], str):
                         raise ValueError
                     if not isinstance(filter["values"], list):
@@ -512,7 +552,7 @@ class OrdersList(RequestHandler):
                     filters[filter["identifier"]] = filter
             except (KeyError, ValueError, yaml.YAMLError):
                 self.set_error_flash("Invalid YAML for 'Orders filter field'; ignored.")
-            saver["filters"] =  list(filters.values())
+            saver["filters"] = list(filters.values())
             try:
                 value = int(self.get_argument("orders_most_recent"))
                 if value < 10:
@@ -551,13 +591,13 @@ class Account(RequestHandler):
     def get(self):
         self.check_admin()
         self.render("admin/account_config.html")
-    
+
     @tornado.web.authenticated
     def post(self):
         self.check_admin()
         self.set_message_flash("Saved configuration.")
         self.see_other("admin_account")
-    
+
 
 class AccountMessages(RequestHandler):
     "Page for displaying account messages configuration."
@@ -565,8 +605,12 @@ class AccountMessages(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        docs = [row.doc for row in self.db.view("text", "type", key=constants.ACCOUNT,
-                                                 reduce=False, include_docs=True)]
+        docs = [
+            row.doc
+            for row in self.db.view(
+                "text", "type", key=constants.ACCOUNT, reduce=False, include_docs=True
+            )
+        ]
         docs.sort(key=lambda t: t["status"])
         self.render("admin/account_messages.html", texts=docs)
 
@@ -577,8 +621,10 @@ class AccountMessageEdit(RequestHandler):
     @tornado.web.authenticated
     def get(self, name):
         self.check_admin()
-        self.render("admin/account_message_edit.html",
-                    text=self.get_text(constants.ACCOUNT, name))
+        self.render(
+            "admin/account_message_edit.html",
+            text=self.get_text(constants.ACCOUNT, name),
+        )
 
     @tornado.web.authenticated
     def post(self, name):
@@ -599,15 +645,17 @@ class Database(RequestHandler):
         self.check_admin()
         server = orderportal.database.get_server()
         identifier = self.get_argument("identifier", "")
-        self.render("admin/database.html",
-                    identifier=identifier,
-                    doc=orderportal.database.lookup_document(self.db, identifier),
-                    counts=orderportal.database.get_counts(self.db),
-                    db_info=self.db.get_info(),
-                    server_data=server(),
-                    databases=list(server),
-                    system_stats=server.get_node_system(),
-                    node_stats=server.get_node_stats())
+        self.render(
+            "admin/database.html",
+            identifier=identifier,
+            doc=orderportal.database.lookup_document(self.db, identifier),
+            counts=orderportal.database.get_counts(self.db),
+            db_info=self.db.get_info(),
+            server_data=server(),
+            databases=list(server),
+            system_stats=server.get_node_system(),
+            node_stats=server.get_node_stats(),
+        )
 
 
 class Document(RequestHandler):
@@ -660,7 +708,7 @@ class Settings(RequestHandler):
 
 DEFAULT_ORDER_STATUSES = [
     dict(
-        identifier=constants.PREPARATION, # Hard-wired! Must be present and enabled.
+        identifier=constants.PREPARATION,  # Hard-wired! Must be present and enabled.
         enabled=True,
         description="The order has been created and is being edited by the user.",
         edit=["user", "staff", "admin"],
@@ -668,7 +716,7 @@ DEFAULT_ORDER_STATUSES = [
         action="Prepare",
     ),
     dict(
-        identifier=constants.SUBMITTED, # Hard-wired! Must be present and enabled.
+        identifier=constants.SUBMITTED,  # Hard-wired! Must be present and enabled.
         enabled=True,
         description="The order has been submitted by the user for consideration.",
         edit=["staff", "admin"],
@@ -819,21 +867,26 @@ DEFAULT_ORDER_STATUSES = [
 
 
 # Minimal, since only 'preparation' and 'submitted' are guaranteed to be enabled.
-DEFAULT_ORDER_TRANSITIONS = dict([(s["identifier"], dict())
-                                  for s in DEFAULT_ORDER_STATUSES])
-DEFAULT_ORDER_TRANSITIONS[constants.PREPARATION][constants.SUBMITTED] = \
-    dict(permission=["admin", "staff", "user"], require_valid=True)
+DEFAULT_ORDER_TRANSITIONS = dict(
+    [(s["identifier"], dict()) for s in DEFAULT_ORDER_STATUSES]
+)
+DEFAULT_ORDER_TRANSITIONS[constants.PREPARATION][constants.SUBMITTED] = dict(
+    permission=["admin", "staff", "user"], require_valid=True
+)
 
 
 # Texts shown in some web pages.
 DEFAULT_TEXTS_DISPLAY = [
-    dict(name="header",
-         description="Header on portal home page.",
-         text="""This is a portal for placing orders. You need to have an account and
-be logged in to create, edit, submit and view orders."""),
-    dict(name="register",
-         description="Registration page text.",
-         text="""In order to place orders, you must have registered an account in this system.
+    dict(
+        name="header",
+        description="Header on portal home page.",
+        text="""This is a portal for placing orders. You need to have an account and
+be logged in to create, edit, submit and view orders.""",
+    ),
+    dict(
+        name="register",
+        description="Registration page text.",
+        text="""In order to place orders, you must have registered an account in this system.
 Your email address is the account name in this portal.
 
 The administrator of the portal will review your account details,
@@ -854,12 +907,14 @@ individuals with regard to the processing of personal data.
 
 By submitting you acknowledge that you have read and understood the
 foregoing and consent to the uses of your information as set out
-above."""),
+above.""",
+    ),
     dict(
         name="registered",
         description="Text on page after registration.",
         text="""An activation email will be sent to you from the administrator
-when your account has been enabled. This may take some time."""),
+when your account has been enabled. This may take some time.""",
+    ),
     dict(
         name="reset",
         description="Password reset page text.",
@@ -870,7 +925,8 @@ to you. **This may take a couple of minutes! Check your spam filter.**
 
 The email contains a one-time code for setting a new password, and a link
 to the relevant page. If you loose this code, simply do reset again.
-"""),
+""",
+    ),
     dict(
         name="password",
         description="Password setting page text.",
@@ -879,23 +935,28 @@ was contained in the URL sent to you by email. **Note that it takes a couple
 of minutes for the email to reach you.**
 
 If the code does not work, it may have been overwritten or already been used.
-Go to [the reset page](/reset) to obtain a new code."""),
+Go to [the reset page](/reset) to obtain a new code.""",
+    ),
     dict(
         name="general",
         description="General information on portal home page.",
-        text="[Add general information about the facility.]"),
+        text="[Add general information about the facility.]",
+    ),
     dict(
         name="contact",
         description="Contact page text.",
-        text="[Add information on how to contact the facility.]"),
+        text="[Add information on how to contact the facility.]",
+    ),
     dict(
         name="about",
         description="Text on the about us page.",
-        text="[Add information about this site.]"),
+        text="[Add information about this site.]",
+    ),
     dict(
         name="alert",
         description="Alert text at the top of every page.",
-        text="**NOTE**: This site has not yet been configured."),
+        text="**NOTE**: This site has not yet been configured.",
+    ),
     dict(
         name="privacy_policy",
         description="Privacy policy statement; GDPR, etc.",
@@ -917,25 +978,29 @@ information as set out above.
 
 All your personal data is reachable via links from this page and the
 pages for all your orders (link below). The logs for your account
-and orders contains the records of all changes to those items."""),
+and orders contains the records of all changes to those items.""",
+    ),
 ]
 
 
 # Message templates for account status changes.
 DEFAULT_TEXTS_ACCOUNT = [
-    dict(status=constants.PENDING,
-         description="Message to admin about a pending account.",
-         recipients=[constants.ADMIN],
-         subject="An account {account} in the {site} is pending approval.",
-         text="""An account {account} in the {site} is pending approval.
+    dict(
+        status=constants.PENDING,
+        description="Message to admin about a pending account.",
+        recipients=[constants.ADMIN],
+        subject="An account {account} in the {site} is pending approval.",
+        text="""An account {account} in the {site} is pending approval.
 
 Go to {url} to view and enable it.
-"""),
-    dict(status=constants.ENABLED,
-         description="Message to user about enabled account.",
-         recipients=[constants.USER],
-         subject="Your account in the {site} has been enabled.",
-         text="""Your account {account} in the {site} has been enabled.
+""",
+    ),
+    dict(
+        status=constants.ENABLED,
+        description="Message to user about enabled account.",
+        recipients=[constants.USER],
+        subject="Your account in the {site} has been enabled.",
+        text="""Your account {account} in the {site} has been enabled.
 
 However, you will first have to set your password for the account.
 
@@ -948,13 +1013,14 @@ If you have any questions, contact {support}
 
 Yours sincerely,
 The {site} administrators.
-"""),
-
-    dict(status=constants.RESET,
-         description="Message to user about password reset.",
-         recipients=[constants.USER],
-         subject="The password has been reset for your account in the {site}.",
-         text="""The password has been reset for your account {account} in the {site}.
+""",
+    ),
+    dict(
+        status=constants.RESET,
+        description="Message to user about password reset.",
+        recipients=[constants.USER],
+        subject="The password has been reset for your account in the {site}.",
+        text="""The password has been reset for your account {account} in the {site}.
 
 Go to {password_code_url} to set a new password.
 
@@ -965,17 +1031,20 @@ If you have any questions, contact {support}
 
 Yours sincerely,
 The {site} administrators.
-"""),
-    dict(status=constants.DISABLED,
-         description="Message to user about disabled account.",
-         recipients=[constants.USER],
-         subject="Your account in the {site} has been disabled.",
-         text="""Your account has been disabled.
+""",
+    ),
+    dict(
+        status=constants.DISABLED,
+        description="Message to user about disabled account.",
+        recipients=[constants.USER],
+        subject="Your account in the {site} has been disabled.",
+        text="""Your account has been disabled.
 This may be due to too many recent failed login attempts.
 
 To resolve this, please contact {support}
 
 Yours sincerely,
 The {site} administrators.
-""")
+""",
+    ),
 ]

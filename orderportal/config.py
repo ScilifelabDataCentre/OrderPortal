@@ -50,8 +50,15 @@ def load_settings_from_file():
     logger.info(f"tornado debug: {settings['TORNADO_DEBUG']}")
 
     # Check some settings.
-    for key in ["BASE_URL", "DATABASE_SERVER", "DATABASE_NAME", "DATABASE_ACCOUNT",
-                "DATABASE_PASSWORD", "COOKIE_SECRET", "PASSWORD_SALT"]:
+    for key in [
+        "BASE_URL",
+        "DATABASE_SERVER",
+        "DATABASE_NAME",
+        "DATABASE_ACCOUNT",
+        "DATABASE_PASSWORD",
+        "COOKIE_SECRET",
+        "PASSWORD_SALT",
+    ]:
         if not settings[key]:
             raise ValueError(f"settings['{key}'] has invalid value.")
     if len(settings["COOKIE_SECRET"]) < 10:
@@ -150,8 +157,7 @@ def load_settings_from_db(db):
 
     # Lookup for the enabled statuses.
     settings["ORDER_STATUSES_LOOKUP"] = dict(
-        [(s["identifier"], s)
-         for s in settings["ORDER_STATUSES"] if s.get("enabled")]
+        [(s["identifier"], s) for s in settings["ORDER_STATUSES"] if s.get("enabled")]
     )
 
     # Find the initial status.

@@ -66,16 +66,13 @@ def counts():
 
 @cli.command()
 @click.option(
-    "-d",
-    "--dumpfile",
-    type=str,
-    help="The path of the Orderportal database dump file."
+    "-d", "--dumpfile", type=str, help="The path of the Orderportal database dump file."
 )
 @click.option(
     "-D",
     "--dumpdir",
     type=str,
-    help="The directory to write the dump file in, using the standard name."
+    help="The directory to write the dump file in, using the standard name.",
 )
 @click.option(
     "--progressbar/--no-progressbar", default=True, help="Display a progressbar."
@@ -104,7 +101,7 @@ def undump(dumpfile, progressbar):
         db = orderportal.database.get_db()
     except KeyError as error:
         raise click.ClickException(str(error))
-    utils.load_design_documents(db) # Just in case; probably not really needed.
+    utils.load_design_documents(db)  # Just in case; probably not really needed.
     if (
         orderportal.database.get_count(db, "account", "all") != 0
         or orderportal.database.get_count(db, "form", "all") != 0
@@ -137,7 +134,7 @@ def undump(dumpfile, progressbar):
             db.put(doc)
     for doc in text_docs:
         if len(db.view("text", "name", key=doc["name"])) == 0:
-               db.put(doc)
+            db.put(doc)
     # And finally update the formats of some meta documents.
     orderportal.admin.update_meta_documents(db)
     click.echo(f"Loaded {ndocs} documents and {nfiles} files.")
@@ -240,13 +237,16 @@ def output(identifier):
     The identifier may be an account email, account API key, file name, info name,
     order identifier, or '_id' of the CouchDB document.
     """
-    doc = orderportal.database.lookup_document(orderportal.database.get_db(), identifier)
+    doc = orderportal.database.lookup_document(
+        orderportal.database.get_db(), identifier
+    )
     if doc is None:
         raise click.ClickException("No such item in the database.")
     click.echo(json.dumps(doc, ensure_ascii=False, indent=2))
 
+
 @cli.command()
-@click.option('-v', '--verbose', count=True)
+@click.option("-v", "--verbose", count=True)
 def count_reports(verbose):
     "Count the number of orders that have an old-style report attached."
     db = orderportal.database.get_db()

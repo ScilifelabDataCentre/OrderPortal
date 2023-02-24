@@ -102,9 +102,13 @@ class Text(tornado.web.UIModule):
             else:
                 return ""
         if origin and self.handler.am_admin():
-            a = hg.A(hg.SPAN(_class="glyphicon glyphicon-edit"), " Edit",
-                     href=self.handler.reverse_url("text_edit", name, origin=origin),
-                     _class="btn btn-primary btn-xs", role="button")
+            a = hg.A(
+                hg.SPAN(_class="glyphicon glyphicon-edit"),
+                " Edit",
+                href=self.handler.reverse_url("text_edit", name, origin=origin),
+                _class="btn btn-primary btn-xs",
+                role="button",
+            )
             div = hg.DIV(hg.mark_safe(utils.markdown2html(text, safe=True)), a)
             return hg.render(div, {})
         else:
@@ -271,13 +275,10 @@ class CancelButton(tornado.web.UIModule):
     "Display a standard cancel button."
 
     def render(self, url):
-        div = hg.DIV(
-            hg.BUTTON(
-                hg.SPAN(_class="glyphicon glyphicon-remove"),
-                " Cancel",
-                type="submit",
-                _class="btn btn-default btn-block"
-            ),
-            _class="form-group")
-        form = hg.FORM(div, action=url, method="GET", role="form")
-        return hg.render(form, {})
+        a = hg.A(
+            hg.SPAN(_class="glyphicon glyphicon-remove"),
+            " Cancel",
+            href=url,
+            _class="btn btn-default btn-block",
+        )
+        return hg.render(a, {})

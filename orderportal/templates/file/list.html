@@ -25,6 +25,7 @@
       <thead>
         <tr>
           <th>Document</th>
+          <th></th>
           <th>Description</th>
           <th>Modified</th>
           <th></th>
@@ -40,9 +41,16 @@
         {% if am_admin or not file.get('hidden') %}
         <tr>
           <td>
-            <a href="{{ reverse_url('file_download', file['name']) }}">
+            <a href="{{ reverse_url('file', file['name']) }}">
               {% module ContentType(file['content_type']) %}
               {{ file.get('title') or file['name'] }}
+            </a>
+          </td>
+          <td>
+            <a href="{{ reverse_url('file_download', file['name']) }}"
+               role="button" class="btn btn-xs btn-primary">
+              <span class="glyphicon glyphicon-download-alt"></span>
+              Download
             </a>
           </td>
 
@@ -75,7 +83,7 @@
               <input type="hidden" name="_http_method" value="delete">
               <button type="submit" class="btn btn-danger btn-xs"
                       onclick="return confirm('Cannot be undone! Really delete?');">
-                <span class="glyphicon glyphicon-floppy-trash"></span>
+                <span class="glyphicon glyphicon-trash"></span>
                 Delete
               </button>
             </form>
@@ -119,20 +127,24 @@
         order: [[2, "desc"]],
         columnDefs: [
           {
+              targets  : 1,
+              orderable: false,
+          },
+          {
               targets  : 3,
               orderable: false,
           }
             {% if am_admin %}
             ,{
-                targets  : 4,
-                orderable: false,
-            },
-            {
                 targets  : 5,
                 orderable: false,
             },
             {
                 targets  : 6,
+                orderable: false,
+            },
+            {
+                targets  : 7,
                 orderable: false,
             }
             {% end %}

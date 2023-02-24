@@ -673,13 +673,15 @@ class OrderMixin:
         targets = settings["ORDER_TRANSITIONS"].get(order["status"], dict())
         result = []
         for key, transition in targets.items():
-            if transition.get("require_valid") and order["invalid"]: continue
+            if transition.get("require_valid") and order["invalid"]:
+                continue
             permission = transition["permission"]
-            if ((self.am_admin() and constants.ADMIN in permission)
+            if (
+                (self.am_admin() and constants.ADMIN in permission)
                 or (self.am_staff() and constants.STAFF in permission)
                 or (self.is_owner(order) and constants.USER in permission)
             ):
-                try:            # Defensive: only allow enabled statuses as targets.
+                try:  # Defensive: only allow enabled statuses as targets.
                     result.append(settings["ORDER_STATUSES_LOOKUP"][key])
                 except KeyError:
                     pass
@@ -871,7 +873,9 @@ class Order(OrderMixin, RequestHandler):
         try:
             order = self.get_order(iuid)
         except tornado.web.HTTPError:
-            self.see_other("home", error=f"Sorry, no such {utils.terminology('order')}.")
+            self.see_other(
+                "home", error=f"Sorry, no such {utils.terminology('order')}."
+            )
             return
         try:
             self.check_readable(order)
@@ -1011,9 +1015,9 @@ class OrderCsv(OrderMixin, RequestHandler):
         writer.writerow(("", "Version", form.get("version") or "-"))
         writer.writerow(("", "IUID", form["_id"]))
         account = self.get_account(order["owner"])
-        name = ", ".join([n for n in [account.get("last_name"),
-                                      account.get("first_name")]
-                          if n])
+        name = ", ".join(
+            [n for n in [account.get("last_name"), account.get("first_name")] if n]
+        )
         writer.writerow(("Owner", "Name", name))
         writer.writerow(("", "URL", URL("account", account["email"])))
         writer.writerow(("", "Email", order["owner"]))
@@ -1099,7 +1103,9 @@ class OrderXlsx(OrderCsv):
     def write_finish(self, order):
         self.set_header("Content-Type", constants.XLSX_MIMETYPE)
         filename = order.get("identifier") or order["_id"]
-        self.set_header("Content-Disposition", f'attachment; filename="{filename}.xlsx"')
+        self.set_header(
+            "Content-Disposition", f'attachment; filename="{filename}.xlsx"'
+        )
 
 
 class OrderZip(OrderApiV1Mixin, OrderCsv):
@@ -1264,7 +1270,7 @@ class OrderOwner(OrderMixin, RequestHandler):
                 utils.terminology("order"), order["title"] or "[no title]"
             ),
             order=order,
-            colleagues=colleagues
+            colleagues=colleagues,
         )
 
     @tornado.web.authenticated
@@ -1284,7 +1290,7 @@ class OrderOwner(OrderMixin, RequestHandler):
                 saver["owner"] = account["email"]
         except tornado.web.MissingArgumentError:
             pass
-        except ValueError as error: # No such account.
+        except ValueError as error:  # No such account.
             self.set_error_flash(error)
         self.set_message_flash(
             "Changed owner of {0}.".format(utils.terminology("Order"))
@@ -1515,7 +1521,8 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             )
             saver["report"] = dict(
                 timestamp=utils.timestamp(),
-                inline=content_type in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE),
+                inline=content_type
+                in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE),
             )
             saver.files.append(
                 dict(
@@ -1601,9 +1608,9 @@ class Orders(RequestHandler):
         if settings["DEFAULT_ORDER_COLUMN"] == "modified":
             order_column = (
                 5
-                + int(settings["ORDERS_LIST_TAGS"]) # boolean
-                + len(settings["ORDERS_LIST_FIELDS"]) # list
-                + len(settings["ORDERS_LIST_STATUSES"]) # list
+                + int(settings["ORDERS_LIST_TAGS"])  # boolean
+                + len(settings["ORDERS_LIST_FIELDS"])  # list
+                + len(settings["ORDERS_LIST_STATUSES"])  # list
             )
             if settings["ORDERS_LIST_OWNER_UNIVERSITY"]:
                 order_column += 1
@@ -1631,24 +1638,36 @@ class Orders(RequestHandler):
 
     def get_accounts_university(self):
         "Get dictionary with email as key and university as value."
-        return dict([(email, account.get("university"))
-                     for email, account in self.get_all_accounts().items()])
+        return dict(
+            [
+                (email, account.get("university"))
+                for email, account in self.get_all_accounts().items()
+            ]
+        )
 
     def get_accounts_department(self):
         "Get dictionary with email as key and department as value."
-        return dict([(email, account.get("department"))
-                     for email, account in self.get_all_accounts().items()])
+        return dict(
+            [
+                (email, account.get("department"))
+                for email, account in self.get_all_accounts().items()
+            ]
+        )
 
     def get_accounts_gender(self):
         "Get dictionary with email as key and gender as value."
-        return dict([(email, account.get("gender"))
-                     for email, account in self.get_all_accounts().items()])
+        return dict(
+            [
+                (email, account.get("gender"))
+                for email, account in self.get_all_accounts().items()
+            ]
+        )
 
     def set_filter(self):
         "Set the filter settings dictionary."
         self.filter = dict()
         for key in ["status", "form_id", "owner"] + [
-                f["identifier"] for f in settings["ORDERS_FILTER_FIELDS"]
+            f["identifier"] for f in settings["ORDERS_FILTER_FIELDS"]
         ]:
             try:
                 value = self.get_argument(key)

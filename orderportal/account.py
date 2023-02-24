@@ -40,7 +40,9 @@ class AccountSaver(saver.Saver):
 
     def set_password(self, password):
         if len(password) < settings["MIN_PASSWORD_LENGTH"]:
-            raise ValueError(f"Password must be at least {settings['MIN_PASSWORD_LENGTH']} characters long.")
+            raise ValueError(
+                f"Password must be at least {settings['MIN_PASSWORD_LENGTH']} characters long."
+            )
         self["code"] = None
         # Bypass ordinary 'set'; avoid saving password, even if hashed.
         self.doc["password"] = hashed_password(password)
@@ -71,7 +73,9 @@ class Accounts(RequestHandler):
     def get(self):
         self.check_staff()
         self.set_filter()
-        self.render("account/list.html", accounts=self.get_accounts(), filter=self.filter)
+        self.render(
+            "account/list.html", accounts=self.get_accounts(), filter=self.filter
+        )
 
     def set_filter(self):
         "Set the filter parameters dictionary."
@@ -102,9 +106,9 @@ class Accounts(RequestHandler):
         counts = dict([(r.key[0], r.value) for r in view])
         for account in accounts:
             account["order_count"] = counts.get(account["email"], 0)
-            account["name"] = ", ".join([n for n in [account.get("last_name"),
-                                                     account.get("first_name")]
-                                         if n])
+            account["name"] = ", ".join(
+                [n for n in [account.get("last_name"), account.get("first_name")] if n]
+            )
         return accounts
 
     def filter_by_university(self, university, accounts=None):
@@ -553,9 +557,9 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
         # Default ordering by the 'modified' column.
         if settings["DEFAULT_ORDER_COLUMN"] == "modified":
             order_column = (
-                int(settings["ORDERS_LIST_TAGS"]) # boolean
-                + len(settings["ORDERS_LIST_FIELDS"]) # list
-                + len(settings["ORDERS_LIST_STATUSES"]) # list
+                int(settings["ORDERS_LIST_TAGS"])  # boolean
+                + len(settings["ORDERS_LIST_FIELDS"])  # list
+                + len(settings["ORDERS_LIST_STATUSES"])  # list
             )
             if self.am_staff():
                 order_column += 1
@@ -635,9 +639,9 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
         # Default ordering by the 'modified' column.
         if settings["DEFAULT_ORDER_COLUMN"] == "modified":
             order_column = (
-                int(settings["ORDERS_LIST_TAGS"]) # boolean
-                + len(settings["ORDERS_LIST_FIELDS"]) # list
-                + len(settings["ORDERS_LIST_STATUSES"]) # list
+                int(settings["ORDERS_LIST_TAGS"])  # boolean
+                + len(settings["ORDERS_LIST_FIELDS"])  # list
+                + len(settings["ORDERS_LIST_STATUSES"])  # list
             )
             if self.am_staff():
                 order_column += 1
@@ -697,9 +701,11 @@ class AccountLogs(AccountMixin, RequestHandler):
         except ValueError as error:
             self.see_other("home", error=error)
             return
-        self.render("logs.html",
-                    title=f"Logs account '{account['email']}'",
-                    logs=self.get_logs(account["_id"]))
+        self.render(
+            "logs.html",
+            title=f"Logs account '{account['email']}'",
+            logs=self.get_logs(account["_id"]),
+        )
 
 
 class AccountMessages(AccountMixin, RequestHandler):
@@ -809,7 +815,6 @@ class AccountEdit(AccountMixin, RequestHandler):
 
 
 class LoginMixin:
-
     def do_login(self, account):
         self.set_secure_cookie(
             constants.USER_COOKIE,
@@ -872,7 +877,9 @@ class Login(LoginMixin, RequestHandler):
                 with MessageSaver(rqh=self) as saver:
                     saver.create(text)
                     saver.send(self.get_recipients(text, account))
-                self.set_error_flash("Too many failed login attempts: Your account has been disabled. Contact the admin")
+                self.set_error_flash(
+                    "Too many failed login attempts: Your account has been disabled. Contact the admin"
+                )
             self.see_other("home")
             return
         self.logger.debug(f"Basic auth login: account {account['email']}")
@@ -885,6 +892,7 @@ class Login(LoginMixin, RequestHandler):
             )
             return
         self.see_other("home")
+
 
 class Logout(LoginMixin, RequestHandler):
     "Logout; unset the secure cookie, and invalidate login session."
@@ -968,7 +976,7 @@ class Password(LoginMixin, RequestHandler):
             self.see_other(
                 "home",
                 error="Either the email address or the code for setting password was"
-                " wrong.Try to request a new code using the 'Reset password' button."
+                " wrong.Try to request a new code using the 'Reset password' button.",
             )
             return
 
@@ -990,7 +998,7 @@ class Password(LoginMixin, RequestHandler):
                 "password",
                 email=self.get_argument("email") or "",
                 code=self.get_argument("code") or "",
-                error=error
+                error=error,
             )
             return
 
@@ -1093,9 +1101,8 @@ class Register(RequestHandler):
         text = settings[constants.ACCOUNT][account["status"]]
 
         # Allow staff to avoid sending email to the person when registering an account.
-        if (
-            self.am_staff()
-            and not utils.to_bool(self.get_argument("send_email", False))
+        if self.am_staff() and not utils.to_bool(
+            self.get_argument("send_email", False)
         ):
             self.see_other("account", account["email"])
             return

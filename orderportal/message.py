@@ -100,9 +100,11 @@ class MessageSaver(saver.Saver):
             if not self.rqh.am_admin():
                 self.rqh.logger.error(f"Email failure: {error}")
                 error = "Contact the admin."
-        except AttributeError: # If rqh is None.
+        except AttributeError:  # If rqh is None.
             pass
-        raise ValueError(f"The operation succeeded, but no email could be sent; problem with the email server. {error}")
+        raise ValueError(
+            f"The operation succeeded, but no email could be sent; problem with the email server. {error}"
+        )
 
     def post_process(self):
         try:

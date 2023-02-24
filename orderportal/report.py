@@ -98,12 +98,8 @@ class ReportLogs(ReportMixin, RequestHandler):
         except ValueError as error:
             self.see_other("home", error=error)
             return
-        title = "Logs for {0} '{1}'".format(
-            utils.terminology("report"), report["title"] or "[no title]"
-        )
-        self.render(
-            "logs.html", title=title, entity=report, logs=self.get_logs(report["_id"])
-        )
+        title = f"Logs for report '{report['title'] or '[no title]'}'"
+        self.render("logs.html", title=title, logs=self.get_logs(report["_id"]))
 
 
 class ReportEdit(RequestHandler):
