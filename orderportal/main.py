@@ -274,24 +274,20 @@ def main():
         url(r"/files", orderportal.file.Files, name="files"),
         url(r"/file", orderportal.file.FileCreate, name="file_create"),
         url(r"/file/([^/]+)", orderportal.file.File, name="file"),
-        url(r"/file/([^/]+)/meta", orderportal.file.FileMeta, name="file_meta"),
+        url(
+            r"/file/([^/]+)/download",
+            orderportal.file.FileDownload,
+            name="file_download",
+        ),
         url(r"/file/([^/]+)/edit", orderportal.file.FileEdit, name="file_edit"),
         url(
             r"/api/v1/file/([^/]+)/edit",
             orderportal.file.FileEditApiV1,
             name="file_edit_api",
         ),
-        url(
-            r"/file/([^/]+)/download",
-            orderportal.file.FileDownload,
-            name="file_download",
-        ),
         url(r"/file/([0-9a-f]{32})/logs", orderportal.file.FileLogs, name="file_logs"),
         url(r"/admin/texts", orderportal.admin.Texts, name="texts"),
-        url(
-            r"/admin/text/([^/]+)",
-            orderportal.admin.TextEdit,
-            name="text_edit"),
+        url(r"/admin/text/([^/]+)", orderportal.admin.TextEdit, name="text_edit"),
         url(
             r"/admin/order_statuses",
             orderportal.admin.OrderStatuses,
@@ -338,11 +334,7 @@ def main():
             name="admin_account_message_edit",
         ),
         url(r"/admin/database", orderportal.admin.Database, name="admin_database"),
-        url(
-            r"/admin/document/(.+)",
-            orderportal.admin.Document,
-            name="admin_document"
-        ),
+        url(r"/admin/document/(.+)", orderportal.admin.Document, name="admin_document"),
         url(r"/admin/settings", orderportal.admin.Settings, name="admin_settings"),
         url(r"/search", orderportal.search.Search, name="search"),
         url(

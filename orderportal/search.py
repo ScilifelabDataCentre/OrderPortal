@@ -54,8 +54,13 @@ class Search(RequestHandler):
         if id_sets:
             for id in reduce(lambda i, j: i.union(j), id_sets):
                 orders[id] = self.get_entity(id, doctype=constants.ORDER)
-        term = "".join([c in settings["ORDERS_SEARCH_DELIMS_LINT"] and " " or c
-                        for c in orig]).strip().lower()
+        term = (
+            "".join(
+                [c in settings["ORDERS_SEARCH_DELIMS_LINT"] and " " or c for c in orig]
+            )
+            .strip()
+            .lower()
+        )
         parts = [
             part
             for part in term.split()

@@ -40,7 +40,9 @@ class AccountSaver(saver.Saver):
 
     def set_password(self, password):
         if len(password) < settings["MIN_PASSWORD_LENGTH"]:
-            raise ValueError(f"Password must be at least {settings['MIN_PASSWORD_LENGTH']} characters long.")
+            raise ValueError(
+                f"Password must be at least {settings['MIN_PASSWORD_LENGTH']} characters long."
+            )
         self["code"] = None
         # Bypass ordinary 'set'; avoid saving password, even if hashed.
         self.doc["password"] = hashed_password(password)
@@ -71,7 +73,9 @@ class Accounts(RequestHandler):
     def get(self):
         self.check_staff()
         self.set_filter()
-        self.render("account/list.html", accounts=self.get_accounts(), filter=self.filter)
+        self.render(
+            "account/list.html", accounts=self.get_accounts(), filter=self.filter
+        )
 
     def set_filter(self):
         "Set the filter parameters dictionary."
@@ -102,9 +106,9 @@ class Accounts(RequestHandler):
         counts = dict([(r.key[0], r.value) for r in view])
         for account in accounts:
             account["order_count"] = counts.get(account["email"], 0)
-            account["name"] = ", ".join([n for n in [account.get("last_name"),
-                                                     account.get("first_name")]
-                                         if n])
+            account["name"] = ", ".join(
+                [n for n in [account.get("last_name"), account.get("first_name")] if n]
+            )
         return accounts
 
     def filter_by_university(self, university, accounts=None):
@@ -347,8 +351,8 @@ class Account(AccountMixin, RequestHandler):
         try:
             account = self.get_account(email)
             self.check_readable(account)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
         account["order_count"] = self.get_account_order_count(account["email"])
         view = self.db.view(
@@ -450,12 +454,12 @@ class AccountApiV1(AccountMixin, RequestHandler):
         URL = self.absolute_reverse_url
         try:
             account = self.get_account(email)
-        except ValueError as msg:
-            raise tornado.web.HTTPError(404, reason=str(msg))
+        except ValueError as error:
+            raise tornado.web.HTTPError(404, reason=error)
         try:
             self.check_readable(account)
-        except ValueError as msg:
-            raise tornado.web.HTTPError(403, reason=str(msg))
+        except ValueError as error:
+            raise tornado.web.HTTPError(403, reason=error)
         data = utils.get_json(URL("account", email), "account")
         data["email"] = account["email"]
         name = last_name = account.get("last_name")
@@ -547,15 +551,15 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
         try:
             account = self.get_account(email)
             self.check_readable(account)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
         # Default ordering by the 'modified' column.
         if settings["DEFAULT_ORDER_COLUMN"] == "modified":
             order_column = (
-                int(settings["ORDERS_LIST_TAGS"]) # boolean
-                + len(settings["ORDERS_LIST_FIELDS"]) # list
-                + len(settings["ORDERS_LIST_STATUSES"]) # list
+                int(settings["ORDERS_LIST_TAGS"])  # boolean
+                + len(settings["ORDERS_LIST_FIELDS"])  # list
+                + len(settings["ORDERS_LIST_STATUSES"])  # list
             )
             if self.am_staff():
                 order_column += 1
@@ -591,12 +595,12 @@ class AccountOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandler):
         URL = self.absolute_reverse_url
         try:
             account = self.get_account(email)
-        except ValueError as msg:
-            raise tornado.web.HTTPError(404, reason=str(msg))
+        except ValueError as error:
+            raise tornado.web.HTTPError(404, reason=error)
         try:
             self.check_readable(account)
-        except ValueError as msg:
-            raise tornado.web.HTTPError(403, reason=str(msg))
+        except ValueError as error:
+            raise tornado.web.HTTPError(403, reason=error)
         account_names = self.get_accounts_name()
         forms_lookup = self.get_forms_lookup()
         data = utils.get_json(URL("account_orders", account["email"]), "account orders")
@@ -629,15 +633,15 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
         try:
             account = self.get_account(email)
             self.check_readable(account)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
         # Default ordering by the 'modified' column.
         if settings["DEFAULT_ORDER_COLUMN"] == "modified":
             order_column = (
-                int(settings["ORDERS_LIST_TAGS"]) # boolean
-                + len(settings["ORDERS_LIST_FIELDS"]) # list
-                + len(settings["ORDERS_LIST_STATUSES"]) # list
+                int(settings["ORDERS_LIST_TAGS"])  # boolean
+                + len(settings["ORDERS_LIST_FIELDS"])  # list
+                + len(settings["ORDERS_LIST_STATUSES"])  # list
             )
             if self.am_staff():
                 order_column += 1
@@ -662,12 +666,12 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandl
         URL = self.absolute_reverse_url
         try:
             account = self.get_account(email)
-        except ValueError as msg:
-            raise tornado.web.HTTPError(404, reason=str(msg))
+        except ValueError as error:
+            raise tornado.web.HTTPError(404, reason=error)
         try:
             self.check_readable(account)
-        except ValueError as msg:
-            raise tornado.web.HTTPError(403, reason=str(msg))
+        except ValueError as error:
+            raise tornado.web.HTTPError(403, reason=error)
         account_names = self.get_accounts_name()
         forms_lookup = self.get_forms_lookup()
         data = utils.get_json(
@@ -694,10 +698,14 @@ class AccountLogs(AccountMixin, RequestHandler):
         try:
             account = self.get_account(email)
             self.check_readable(account)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
-        self.render("logs.html", entity=account, logs=self.get_logs(account["_id"]))
+        self.render(
+            "logs.html",
+            title=f"Logs account '{account['email']}'",
+            logs=self.get_logs(account["_id"]),
+        )
 
 
 class AccountMessages(AccountMixin, RequestHandler):
@@ -709,8 +717,8 @@ class AccountMessages(AccountMixin, RequestHandler):
         try:
             account = self.get_account(email)
             self.check_readable(account)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
         view = self.db.view(
             "message",
@@ -739,8 +747,8 @@ class AccountEdit(AccountMixin, RequestHandler):
         try:
             account = self.get_account(email)
             self.check_editable(account)
-        except ValueError as msg:
-            self.see_other("account", account["email"], error=str(msg))
+        except ValueError as error:
+            self.see_other("account", account["email"], error=error)
             return
         self.render("account/edit.html", account=account)
 
@@ -749,8 +757,8 @@ class AccountEdit(AccountMixin, RequestHandler):
         try:
             account = self.get_account(email)
             self.check_editable(account)
-        except ValueError as msg:
-            self.see_other("account_edit", account["email"], error=str(msg))
+        except ValueError as error:
+            self.see_other("account_edit", account["email"], error=error)
             return
         try:
             with AccountSaver(doc=account, rqh=self) as saver:
@@ -800,14 +808,13 @@ class AccountEdit(AccountMixin, RequestHandler):
                     saver["api_key"] = utils.get_iuid()
                 saver["update_info"] = False
                 saver.check_required()
-        except ValueError as msg:
-            self.see_other("account_edit", account["email"], error=str(msg))
+        except ValueError as error:
+            self.see_other("account_edit", account["email"], error=error)
         else:
             self.see_other("account", account["email"])
 
 
 class LoginMixin:
-
     def do_login(self, account):
         self.set_secure_cookie(
             constants.USER_COOKIE,
@@ -841,7 +848,7 @@ class Login(LoginMixin, RequestHandler):
         try:
             account = self.get_account(email)
         except ValueError as error:
-            self.see_other("home", error=str(error))
+            self.see_other("home", error=error)
             return
         if not account.get("status") == constants.ENABLED:
             self.see_other("home", error="Account is disabled. Contact the admin.")
@@ -870,7 +877,9 @@ class Login(LoginMixin, RequestHandler):
                 with MessageSaver(rqh=self) as saver:
                     saver.create(text)
                     saver.send(self.get_recipients(text, account))
-                self.set_error_flash("Too many failed login attempts: Your account has been disabled. Contact the admin")
+                self.set_error_flash(
+                    "Too many failed login attempts: Your account has been disabled. Contact the admin"
+                )
             self.see_other("home")
             return
         self.logger.debug(f"Basic auth login: account {account['email']}")
@@ -883,6 +892,7 @@ class Login(LoginMixin, RequestHandler):
             )
             return
         self.see_other("home")
+
 
 class Logout(LoginMixin, RequestHandler):
     "Logout; unset the secure cookie, and invalidate login session."
@@ -936,10 +946,8 @@ class Reset(LoginMixin, RequestHandler):
                     # Log out the user if same as the account that was reset.
                     if self.current_user == account:
                         self.do_logout()
-            except KeyError as error:
-                self.see_other("home", message=str(error))
             except ValueError as error:
-                self.see_other("home", error=str(error))
+                self.see_other("home", error=error)
             else:
                 self.see_other(
                     "home",
@@ -961,14 +969,14 @@ class Password(LoginMixin, RequestHandler):
     def post(self):
         try:
             account = self.get_account(self.get_argument("email", ""))
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
         if not self.am_staff() and (account.get("code") != self.get_argument("code")):
             self.see_other(
                 "home",
                 error="Either the email address or the code for setting password was"
-                " wrong.Try to request a new code using the 'Reset password' button."
+                " wrong.Try to request a new code using the 'Reset password' button.",
             )
             return
 
@@ -990,7 +998,7 @@ class Password(LoginMixin, RequestHandler):
                 "password",
                 email=self.get_argument("email") or "",
                 code=self.get_argument("code") or "",
-                error=str(error)
+                error=error,
             )
             return
 
@@ -1077,7 +1085,7 @@ class Register(RequestHandler):
                     saver["status"] = constants.ENABLED
                 else:
                     saver["status"] = constants.PENDING
-        except ValueError as msg:
+        except ValueError as error:
             kwargs = dict()
             for key in self.KEYS:
                 kwargs[key] = saver.get(key) or ""
@@ -1087,15 +1095,14 @@ class Register(RequestHandler):
                 kwargs["invoice_" + key] = (
                     saver.get("invoice_address", {}).get(key) or ""
                 )
-            self.see_other("register", error=str(msg), **kwargs)
+            self.see_other("register", error=error, **kwargs)
             return
         account = saver.doc
         text = settings[constants.ACCOUNT][account["status"]]
 
         # Allow staff to avoid sending email to the person when registering an account.
-        if (
-            self.am_staff()
-            and not utils.to_bool(self.get_argument("send_email", False))
+        if self.am_staff() and not utils.to_bool(
+            self.get_argument("send_email", False)
         ):
             self.see_other("account", account["email"])
             return
@@ -1115,7 +1122,7 @@ class Register(RequestHandler):
                 )
                 saver.send(self.get_recipients(text, account))
         except (KeyError, ValueError) as error:
-            self.set_error_flash(str(error))
+            self.set_error_flash(error)
         if self.am_staff():
             self.see_other("account", account["email"])
         else:
@@ -1137,8 +1144,8 @@ class AccountEnable(RequestHandler):
         self.check_staff()
         try:
             account = self.get_account(email)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
         with AccountSaver(account, rqh=self) as saver:
             saver["status"] = constants.ENABLED
@@ -1166,8 +1173,8 @@ class AccountDisable(RequestHandler):
         self.check_staff()
         try:
             account = self.get_account(email)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
         with AccountSaver(account, rqh=self) as saver:
             saver["status"] = constants.DISABLED
@@ -1184,8 +1191,8 @@ class AccountUpdateInfo(RequestHandler):
         self.check_staff()
         try:
             account = self.get_account(email)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
         if not account.get("update_info"):
             with AccountSaver(account, rqh=self) as saver:

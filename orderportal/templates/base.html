@@ -12,13 +12,11 @@
           href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" 
           integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu">
     <link rel="stylesheet"
-          href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css">
-    {% block css_page %}
+          href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css">       {% block css_page %}
     {% end %}
     <link rel="stylesheet" href="{{ static_url('mods.css') }}">
     {% if settings['SITE_CSS_FILE'] %}
-    <link rel="stylesheet"
-          href="{{ reverse_url('site', settings['SITE_CSS_FILE']) }}">
+ <link rel="stylesheet" href="{{ reverse_url('site', settings['SITE_CSS_FILE']) }}">
     {% end %}
   </head>
 
@@ -312,12 +310,9 @@
         </div>
         <div class="col-md-6 text-center">
           {% if current_user %}
-          Privacy policy (GDPR): See
-          <a href="{{ reverse_url('account', current_user['email']) }}">
-            your account page</a>.
           A session cookie is used solely to handle your login status.
           {% else %}
-          Session cookies are <b>not</b> used for anonymous users.
+          No session cookie is used for anonymous users.
           {% end %}
         </div>
         <div class="col-md-3">

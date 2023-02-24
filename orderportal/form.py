@@ -55,8 +55,8 @@ class FormMixin:
 
     def get_form(self, iuid):
         "Return the form for the IUID."
-        return self.get_entity(iuid, doctype=constants.FORM
-)
+        return self.get_entity(iuid, doctype=constants.FORM)
+
     def allow_edit_fields(self, form):
         "Are the form fields editable? Checks status only."
         return form["status"] == constants.PENDING
@@ -106,7 +106,11 @@ class Form(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         self.check_admin()
-        form = self.get_form(iuid)
+        try:
+            form = self.get_form(iuid)
+        except tornado.web.HTTPError:
+            self.see_other("home", error="Sorry, no such form.")
+            return
         self.render(
             "form/display.html",
             form=form,
@@ -130,7 +134,7 @@ class Form(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def delete(self, iuid):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         if not self.allow_delete(form):
             self.see_other("form", form["_id"], error="Form cannot be deleted.")
             return
@@ -186,23 +190,22 @@ class FormApiV1(ApiV1Mixin, Form):
         self.write(data)
 
 
-class FormLogs(RequestHandler):
-    "Form log entries page."
+class FormLogs(FormMixin, RequestHandler):
+    "Form log entries display."
 
     @tornado.web.authenticated
     def get(self, iuid):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         self.render(
             "logs.html",
-            title="Logs for form '{0}'".format(form["title"]),
-            entity=form,
+            title=f"Logs form '{form['title']}'",
             logs=self.get_logs(form["_id"]),
         )
 
 
 class FormCreate(RequestHandler):
-    "Page for creating an form. Allows for importing fields from form JSON."
+    "Create a form. Allows for importing fields from form JSON."
 
     @tornado.web.authenticated
     def get(self):
@@ -230,8 +233,8 @@ class FormCreate(RequestHandler):
                     raise ValueError("Imported JSON is not a form.")
             except (KeyError, IndexError):
                 pass
-            except Exception as msg:
-                self.see_other("home", error="Error importing form: %s" % msg)
+            except Exception as error:
+                self.see_other("home", error=f"Error importing form: {error}")
                 return
             else:
                 if not saver["version"]:
@@ -253,7 +256,7 @@ class FormEdit(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         self.render(
             "form/edit.html", title="Edit form '{0}'".format(form["title"]), form=form
         )
@@ -261,7 +264,7 @@ class FormEdit(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         with FormSaver(doc=form, rqh=self) as saver:
             saver["title"] = self.get_argument("title") or "[no title]"
             saver["version"] = self.get_argument("version", None)
@@ -281,11 +284,11 @@ class FormFieldCreate(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         try:
             self.check_edit_fields(form)
-        except ValueError as msg:
-            self.see_other("form", form["_id"], error=str(msg))
+        except ValueError as error:
+            self.see_other("form", form["_id"], error=error)
             return
         # Get existing field identifiers
         identifiers = set()
@@ -313,17 +316,17 @@ class FormFieldCreate(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         try:
             self.check_edit_fields(form)
-        except ValueError as msg:
-            self.see_other("form", form["_id"], error=str(msg))
+        except ValueError as error:
+            self.see_other("form", form["_id"], error=error)
             return
         try:
             with FormSaver(doc=form, rqh=self) as saver:
                 saver.add_field()
-        except ValueError as msg:
-            self.see_other("form", form["_id"], error=str(msg))
+        except ValueError as error:
+            self.see_other("form", form["_id"], error=error)
         else:
             self.see_other("form", form["_id"])
 
@@ -334,11 +337,11 @@ class FormFieldEdit(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid, identifier):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         try:
             self.check_edit_fields(form)
-        except ValueError as msg:
-            self.see_other("form", form["_id"], error=str(msg))
+        except ValueError as error:
+            self.see_other("form", form["_id"], error=error)
             return
         fields = Fields(form)
         try:
@@ -361,34 +364,34 @@ class FormFieldEdit(FormMixin, RequestHandler):
             self.delete(iuid, identifier)
             return
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         try:
             self.check_edit_fields(form)
-        except ValueError as msg:
-            self.see_other("form", form["_id"], error=str(msg))
+        except ValueError as error:
+            self.see_other("form", form["_id"], error=error)
             return
         try:
             with FormSaver(doc=form, rqh=self) as saver:
                 saver.update_field(identifier)
-        except ValueError as msg:
-            self.see_other("form", form["_id"], error=str(msg))
+        except ValueError as error:
+            self.see_other("form", form["_id"], error=error)
         else:
             self.see_other("form", form["_id"])
 
     @tornado.web.authenticated
     def delete(self, iuid, identifier):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         try:
             self.check_edit_fields(form)
-        except ValueError as msg:
-            self.see_other("form", form["_id"], error=str(msg))
+        except ValueError as error:
+            self.see_other("form", form["_id"], error=error)
             return
         try:
             with FormSaver(doc=form, rqh=self) as saver:
                 saver.delete_field(identifier)
-        except ValueError as msg:
-            self.see_other("form", form["_id"], error=str(msg))
+        except ValueError as error:
+            self.see_other("form", form["_id"], error=error)
         else:
             self.see_other("form", form["_id"])
 
@@ -401,7 +404,7 @@ class FormFieldEditDescr(FormMixin, RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid, identifier):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         with FormSaver(doc=form, rqh=self) as saver:
             name = "{0}/label".format(identifier)
             saver.fields[identifier]["label"] = self.get_argument(name, "")
@@ -428,7 +431,7 @@ class FormClone(RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         with FormSaver(rqh=self) as saver:
             saver["title"] = "Clone of {0}".format(form["title"])
             saver["version"] = form.get("version")
@@ -448,7 +451,7 @@ class FormPending(RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         if form["status"] != constants.TESTING:
             raise ValueError("Form does not have status testing.")
         with FormSaver(doc=form, rqh=self) as saver:
@@ -473,7 +476,7 @@ class FormTesting(RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         if form["status"] != constants.PENDING:
             raise ValueError("Form does not have status pending.")
         with FormSaver(doc=form, rqh=self) as saver:
@@ -488,7 +491,7 @@ class FormEnable(RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         if form["status"] == constants.PENDING:
             with FormSaver(doc=form, rqh=self) as saver:
                 if not form.get("version"):
@@ -504,7 +507,7 @@ class FormDisable(RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_admin()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         if form["status"] == constants.ENABLED:
             with FormSaver(doc=form, rqh=self) as saver:
                 saver["status"] = constants.DISABLED
@@ -517,7 +520,7 @@ class FormOrders(RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         self.check_staff()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         view = self.db.view(
             "order",
             "form",
@@ -542,7 +545,7 @@ class FormAggregate(RequestHandler):
     @tornado.web.authenticated
     def get(self, iuid):
         self.check_staff()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
         fields = Fields(form).flatten()
         # Remove group fields
         fields = [f for f in fields if f["type"] != constants.GROUP]
@@ -559,7 +562,7 @@ class FormAggregate(RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_staff()
-        form = self.get_entity(iuid, doctype=constants.FORM)
+        form = self.get_form(iuid)
 
         order_fields = self.get_arguments("order")
         if not ("iuid" in order_fields or "identifier" in order_fields):

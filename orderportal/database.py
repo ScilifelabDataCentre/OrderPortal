@@ -15,6 +15,7 @@ def get_server():
         kwargs["password"] = settings["DATABASE_PASSWORD"]
     return couchdb2.Server(**kwargs)
 
+
 def get_db():
     "Return the handle for the CouchDB database."
     return get_server()[settings["DATABASE_NAME"]]
@@ -23,7 +24,7 @@ def get_db():
 def update_design_documents(db):
     "Ensure that all CouchDB design documents are up to date."
     logger = logging.getLogger("orderportal")
-    
+
     if db.put_design("account", ACCOUNT_DESIGN_DOC):
         logger.info("Updated 'account' design document.")
     if db.put_design("event", EVENT_DESIGN_DOC):
@@ -48,7 +49,9 @@ def update_design_documents(db):
     mapfunc = ORDER_DESIGN_DOC["views"]["keyword"]["map"]
     delims_lint = "".join(settings["ORDERS_SEARCH_DELIMS_LINT"])
     lint = "{%s}" % ", ".join(["'%s': 1" % w for w in settings["ORDERS_SEARCH_LINT"]])
-    ORDER_DESIGN_DOC["views"]["keyword"]["map"] = mapfunc.format(delims_lint=delims_lint, lint=lint)
+    ORDER_DESIGN_DOC["views"]["keyword"]["map"] = mapfunc.format(
+        delims_lint=delims_lint, lint=lint
+    )
     if db.put_design("order", ORDER_DESIGN_DOC):
         logger.info("Updated 'order' design document.")
     if db.put_design("text", TEXT_DESIGN_DOC):
@@ -69,10 +72,12 @@ def get_count(db, designname, viewname, key=None):
 
 def get_counts(db):
     "Get the counts for the most important types of entities in the database."
-    return dict(n_orders=get_count(db, "order", "status"),
-                n_forms=get_count(db, "form", "all"),
-                n_accounts=get_count(db, "account", "all"),
-                n_documents=len(db))
+    return dict(
+        n_orders=get_count(db, "order", "status"),
+        n_forms=get_count(db, "form", "all"),
+        n_accounts=get_count(db, "account", "all"),
+        n_documents=len(db),
+    )
 
 
 def lookup_document(db, identifier):
@@ -80,7 +85,7 @@ def lookup_document(db, identifier):
     The identifier may be an account email, account API key, file name, info name,
     order identifier, or '_id' of the CouchDB document.
     """
-    if not identifier:          # If empty string, database info is returned.
+    if not identifier:  # If empty string, database info is returned.
         return None
     for designname, viewname in [
         ("account", "email"),
@@ -104,7 +109,6 @@ def lookup_document(db, identifier):
         return None
 
 
-
 ACCOUNT_DESIGN_DOC = {
     "views": {
         "all": {
@@ -112,33 +116,39 @@ ACCOUNT_DESIGN_DOC = {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.modified, null);
-}"""},
+}""",
+        },
         "api_key": {
             "map": """function(doc) { 
     if (doc.orderportal_doctype !== 'account') return;
     if (!doc.api_key) return;
     emit(doc.api_key, doc.email);
-}"""},
+}"""
+        },
         "email": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.email, [doc.first_name, doc.last_name]);
-}"""},
+}"""
+        },
         "role": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.role, doc.email);
-}"""},
+}"""
+        },
         "status": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.status, doc.email);
-}"""},
+}"""
+        },
         "university": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.university, doc.email);
-}"""}
+}"""
+        },
     }
 }
 
@@ -148,7 +158,8 @@ EVENT_DESIGN_DOC = {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'event') return;
     emit(doc.date, doc.title);
-}"""}
+}"""
+        }
     }
 }
 
@@ -158,7 +169,8 @@ FILE_DESIGN_DOC = {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'file') return;
     emit(doc.name, null);
-}"""}
+}"""
+        }
     }
 }
 
@@ -169,17 +181,20 @@ FORM_DESIGN_DOC = {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'form') return;
     emit(doc.modified, null);
-}"""},
+}""",
+        },
         "enabled": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'form') return;
     if (doc.status === 'enabled') emit(doc.modified, doc.title);
-}"""},
+}"""
+        },
         "modified": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'form') return;
     emit(doc.modified, doc.title);
-}"""}
+}"""
+        },
     }
 }
 
@@ -191,25 +206,29 @@ GROUP_DESIGN_DOC = {
     for (var i=0; i<doc.invited.length; i++) {
 	emit(doc.invited[i], doc.name);
     };
-}"""},
+}"""
+        },
         "member": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'group') return;
     for (var i=0; i<doc.members.length; i++) {
 	emit(doc.members[i], doc.name);
     };
-}"""},
+}"""
+        },
         "modified": {
             "reduce": "_count",
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'group') return;
     emit(doc.modified, 1);
-}"""},
+}""",
+        },
         "owner": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'group') return;
     emit(doc.owner, doc.name);
-}"""}
+}"""
+        },
     }
 }
 
@@ -219,12 +238,14 @@ INFO_DESIGN_DOC = {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'info') return;
     if (doc.menu) emit(doc.menu, [doc.name, doc.title]);
-}"""},
+}"""
+        },
         "name": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'info') return;
     emit(doc.name, null);
-}"""}
+}"""
+        },
     }
 }
 
@@ -235,18 +256,21 @@ LOG_DESIGN_DOC = {
     if (doc.orderportal_doctype !== 'log') return;
     if (!doc.account) return;
     emit([doc.account, doc.modified], null);
-}"""},
+}"""
+        },
         "entity": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'log') return;
     emit([doc.entity, doc.modified], null);
-}"""},
+}"""
+        },
         "login_failure": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'log') return;
     if (!doc.changed.login_failure) return;
     emit([doc.entity, doc.modified], doc.changed.login_failure);
-}"""}
+}"""
+        },
     }
 }
 
@@ -259,7 +283,8 @@ MESSAGE_DESIGN_DOC = {
     for (var i=0; i<doc.recipients.length; i++) {
 	emit([doc.recipients[i], doc.modified], 1);
     };
-}"""}
+}""",
+        }
     }
 }
 
@@ -269,7 +294,8 @@ META_DESIGN_DOC = {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'meta') return;
     emit(doc._id, null);
-}"""}
+}"""
+        }
     }
 }
 
@@ -279,7 +305,8 @@ NEWS_DESIGN_DOC = {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'news') return;
     emit(doc.modified, null);
-}"""}
+}"""
+        }
     }
 }
 
@@ -290,14 +317,16 @@ ORDER_DESIGN_DOC = {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     emit([doc.form, doc.modified], 1);
-}"""},
+}""",
+        },
         "identifier": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     if (!doc.identifier) return;
     emit(doc.identifier, doc.title);
-}"""},
-        "keyword": {      # order/keyword
+}"""
+        },
+        "keyword": {  # order/keyword
             # NOTE: The 'map' function body is modified in utils.load_design_documents.
             "map": """function(doc) {{
     if (doc.orderportal_doctype !== 'order') return;
@@ -308,24 +337,28 @@ ORDER_DESIGN_DOC = {
     }});
 }};
 var lint = {lint};
-"""},
+"""
+        },
         "modified": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     emit(doc.modified, doc.title);
-}"""},
+}"""
+        },
         "owner": {
             "reduce": "_count",
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     emit([doc.owner, doc.modified], 1);
-}"""},
+}""",
+        },
         "status": {
             "reduce": "_count",
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     emit([doc.status, doc.modified], 1);
-}"""},
+}""",
+        },
         "tag": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
@@ -337,14 +370,16 @@ var lint = {lint};
 	    emit(parts[1].toLowerCase(), doc.title);
 	};
     });
-}"""},
+}"""
+        },
         "year_submitted": {
             "reduce": "_count",
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
     if (!doc.history.submitted) return;
     emit(doc.history.submitted.split('-')[0], 1);
-}"""}
+}""",
+        },
     }
 }
 
@@ -354,11 +389,13 @@ TEXT_DESIGN_DOC = {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'text') return;
     emit(doc.name, doc.modified);
-}"""},
+}"""
+        },
         "type": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'text') return;
     emit(doc.type, doc.modified);
-}"""}
+}"""
+        },
     }
 }

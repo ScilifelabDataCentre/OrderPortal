@@ -14,6 +14,10 @@ class GroupSaver(saver.Saver):
 
 
 class GroupMixin:
+    def get_group(self, iuid):
+        "Return the group for the IUID."
+        return self.get_entity(iuid, doctype=constants.GROUP)
+
     def check_readable(self, group):
         "Check if current user may read the group."
         if self.is_owner(group):
@@ -46,10 +50,12 @@ class Group(GroupMixin, RequestHandler):
         group = self.get_entity(iuid, doctype=constants.GROUP)
         try:
             self.check_readable(group)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
-        self.render("group/display.html", group=group, allow_edit=self.allow_edit(group))
+        self.render(
+            "group/display.html", group=group, allow_edit=self.allow_edit(group)
+        )
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -132,7 +138,7 @@ class GroupEdit(GroupMixin, RequestHandler):
                 saver["members"] = sorted(members)
                 saver["invited"] = sorted(invited)
         except ValueError as error:
-            self.see_other("group", saver.doc["_id"], error=str(error))
+            self.see_other("group", saver.doc["_id"], error=error)
         else:
             self.see_other("group", saver.doc["_id"])
 
@@ -145,13 +151,12 @@ class GroupLogs(GroupMixin, RequestHandler):
         group = self.get_entity(iuid, doctype=constants.GROUP)
         try:
             self.check_readable(group)
-        except ValueError as msg:
-            self.see_other("home", error=str(msg))
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
         self.render(
             "logs.html",
-            title="Logs for group '{0}'".format(group["name"]),
-            entity=group,
+            title=f"Logs for group {group['name']}",
             logs=self.get_logs(group["_id"]),
         )
 

@@ -69,22 +69,6 @@ def to_bool(value):
     raise ValueError("invalid boolean: '{0}'".format(value))
 
 
-def convert(type, value):
-    "Convert the string representation to the given type."
-    if value is None:
-        return None
-    if value == "":
-        return None
-    if type == "int":
-        return int(value)
-    elif type == "float":
-        return float(value)
-    elif type == "boolean":
-        return to_bool(value)
-    else:
-        return value
-
-
 def markdown2html(text, safe=False):
     "Process the text from Markdown to HTML."
     text = text or ""

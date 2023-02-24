@@ -63,7 +63,11 @@ class Info(RequestHandler):
     "Information page."
 
     def get(self, name):
-        info = self.get_entity_view("info", "name", name)
+        try:
+            info = self.get_entity_view("info", "name", name)
+        except tornado.web.HTTPError:
+            self.see_other("home", error="Sorry, no such info item.")
+            return
         self.render("info/display.html", info=info)
 
     @tornado.web.authenticated
@@ -115,7 +119,6 @@ class InfoLogs(RequestHandler):
         info = self.get_entity_view("info", "name", name)
         self.render(
             "logs.html",
-            title="Logs for info '{0}'".format(name),
-            entity=info,
+            title=f"Logs info '{name}'",
             logs=self.get_logs(info["_id"]),
         )

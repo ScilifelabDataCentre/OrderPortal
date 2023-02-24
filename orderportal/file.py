@@ -2,6 +2,7 @@
 
 import os.path
 
+import couchdb2
 import tornado.web
 
 import orderportal
@@ -59,9 +60,13 @@ class File(RequestHandler):
     "Return the file data."
 
     def get(self, name):
-        self.doc = self.get_entity_view("file", "name", name)
-        filename = list(self.doc["_attachments"].keys())[0]
-        outfile = self.db.get_attachment(self.doc, filename)
+        try:
+            self.doc = self.get_entity_view("file", "name", name)
+            filename = list(self.doc["_attachments"].keys())[0]
+            outfile = self.db.get_attachment(self.doc, filename)
+        except (tornado.web.HTTPError, IndexError, couchdb2.NotFoundError):
+            self.see_other("home", error="Sorry, no such file.")
+            return
         if outfile is None:
             self.write("")
         else:
@@ -71,12 +76,15 @@ class File(RequestHandler):
             self.set_header("Content-Type", self.doc["content_type"])
 
 
-class FileMeta(RequestHandler):
-    "Display meta page for a file with buttons."
+class FileDownload(File):
+    "Download the file."
 
     def get(self, name):
-        file = self.get_entity_view("file", "name", name)
-        self.render("file/meta.html", file=file)
+        super().get(name)
+        ext = utils.get_filename_extension(self.doc["content_type"])
+        if ext:
+            name += ext
+        self.set_header("Content-Disposition", f'attachment; filename="{name}"')
 
 
 class FileCreate(RequestHandler):
@@ -105,8 +113,8 @@ class FileCreate(RequestHandler):
                 saver["title"] = self.get_argument("title", None)
                 saver["hidden"] = utils.to_bool(self.get_argument("hidden", False))
                 saver["description"] = self.get_argument("description", None)
-        except ValueError as msg:
-            self.see_other("files", error=str(msg))
+        except ValueError as error:
+            self.see_other("files", error=error)
         else:
             self.see_other("files")
 
@@ -157,17 +165,6 @@ class FileEditApiV1(FileEdit):
         pass
 
 
-class FileDownload(File):
-    "Download the file."
-
-    def get(self, name):
-        super().get(name)
-        ext = utils.get_filename_extension(self.doc["content_type"])
-        if ext:
-            name += ext
-        self.set_header("Content-Disposition", f'attachment; filename="{name}"')
-
-
 class FileLogs(RequestHandler):
     "File log entries page."
 
@@ -175,7 +172,6 @@ class FileLogs(RequestHandler):
         file = self.get_entity(iuid, doctype=constants.FILE)
         self.render(
             "logs.html",
-            title="Logs for document '%s'" % (file.get("title") or file["name"]),
-            entity=file,
+            title=f"Logs file '{file['name']}'",
             logs=self.get_logs(file["_id"]),
         )

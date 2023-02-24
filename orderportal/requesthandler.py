@@ -54,11 +54,11 @@ class RequestHandler(tornado.web.RequestHandler):
         using HTTP status 303 See Other."""
         query = kwargs.copy()
         try:
-            self.set_error_flash(query.pop("error"))
+            self.set_error_flash(str(query.pop("error")))
         except KeyError:
             pass
         try:
-            self.set_message_flash(query.pop("message"))
+            self.set_message_flash(str(query.pop("message")))
         except KeyError:
             pass
         url = self.absolute_reverse_url(name, *args, **query)
@@ -85,9 +85,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def static_url(self, path, include_host=None, **kwargs):
         "Returns the URL for a static resource."
-        url = super().static_url(
-            path, include_host=include_host, **kwargs
-        )
+        url = super().static_url(path, include_host=include_host, **kwargs)
         if settings["BASE_URL_PATH_PREFIX"]:
             parts = urllib.parse.urlparse(url)
             path = settings["BASE_URL_PATH_PREFIX"] + parts.path
@@ -273,7 +271,8 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_next_counter(self, doctype):
         "Get the next counter number for the doctype."
-        from orderportal.admin import MetaSaver # To avoid circular import.
+        from orderportal.admin import MetaSaver  # To avoid circular import.
+
         while True:
             try:
                 doc = self.db[doctype]  # Doc must be reloaded each iteration
@@ -321,8 +320,12 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_texts(self, type):
         "Return all texts of the given type."
-        result = [row.doc for row in self.db.view("text", "type", key=type,
-                                                  reduce=False, include_docs=True)]
+        result = [
+            row.doc
+            for row in self.db.view(
+                "text", "type", key=type, reduce=False, include_docs=True
+            )
+        ]
         result.sort(key=lambda d: d["name"])
         return result
 
@@ -330,8 +333,12 @@ class RequestHandler(tornado.web.RequestHandler):
         """Get the requested text by type and name.
         Raise KeyError if not found.
         """
-        docs = [row.doc for row in self.db.view("text", "type", key=type,
-                                                 reduce=False, include_docs=True)]
+        docs = [
+            row.doc
+            for row in self.db.view(
+                "text", "type", key=type, reduce=False, include_docs=True
+            )
+        ]
         for doc in docs:
             if doc["name"] == name:
                 return doc
@@ -356,28 +363,6 @@ class RequestHandler(tornado.web.RequestHandler):
         view = self.db.view("event", "date", **kwargs)
         return [r.doc for r in view]
 
-    def get_entity_attachment_filename(self, entity):
-        """Return the filename of the attachment for the given entity.
-        Raise KeyError if no attachment.
-        """
-        return list(entity["_attachments"].keys())[0]
-
-    def get_entity_attachment_data(self, entity):
-        """Return the data of the attachment for the given entity.
-        Return None if attachment has no data, or no attachment.
-        """
-        try:
-            filename = self.get_entity_attachment_filename(entity)
-        except KeyError:
-            return None
-        infile = self.db.get_attachment(entity, filename)
-        if infile is None:  # When file is empty
-            data = None
-        else:
-            data = infile.read()
-            infile.close()
-        return data
-
     def get_account(self, email, password=None):
         """Get the account identified by the email address.
         Check the password, if given.
@@ -389,6 +374,7 @@ class RequestHandler(tornado.web.RequestHandler):
             raise ValueError(f"Sorry, no such account: '{email}'")
         if password:
             from orderportal.account import hashed_password
+
             if hashed_password(password) != account.get("password"):
                 raise ValueError("Sorry, invalid password.")
         return account

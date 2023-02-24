@@ -10,10 +10,10 @@ some additional information.
 Background
 ----------
 
-The OrderPortal system allows nearly any type of form-based submission
-of information. It was designed to work for any type of service
-facility that handles discrete orders or project proposals, reports,
-etc.
+The OrderPortal system allows form-based submission of information. It
+was designed to work for service facilities that handles discrete
+orders or project proposals, reports, etc. It has also been used as a
+system to gather reports from researchers and research units.
 
 The OrderPortal system was originally created to satisfy the needs of the
 [National Genomics Infrastructure (NGI) Sweden](https://ngisweden.scilifelab.se/),
@@ -24,7 +24,7 @@ the samples according to the order from the researcher.
 The OrderPortal system is not hardcoded for any specific area such as
 DNA sequencing. On the contrary, considerable effort has gone into
 making sure the design is as general as possible within the scope of
-the problem it is intended to solve.
+the basic problem it is intended to solve.
 
 Since the system is general in character, the installation of it
 requires specific configuration settings to suite your particular
@@ -33,12 +33,14 @@ needs.
 Features
 --------
 
-* Allow users to register an account, which is approved by the facility staff.
-* Allow the user to specify an order according to a predefined form.
-* Allow the user to submit the order to the facility.
-* Let the facility staff keep track of review and agreements.
-* The facility staff can review, accept or decline an order.
+* Allow users to register an account, which is enabled by the facility staff.
+* Allows the system administrators to create predefined forms with a
+  specific set of input fields.
+* Allow the user to specify an order according to one of the predefined forms.
 * Allow input from the user of required project data, such as sample sheets.
+* Allow the user to submit the order to the facility.
+* The facility staff can review, accept or decline an order.
+* Let the facility staff keep track of review and agreements.
 * Allow attaching various documents to an order.
 * Display project status reports.
 * Allow keeping track of Key Performance Indicators (KPIs), facilitating
@@ -53,35 +55,37 @@ external to the service facility, and may or may not be the Principal
 Investigator (PI) for one or more projects.
 
 An order is created from a template which is called a **form** in this
-system. The facility administrators must set up and publish the order
-forms for a researcher to be able to create an order. Each form
-defines the fields for data to be input by the researcher.
+system. The system administrators must set up and publish the forms
+for a researcher to be able to create an order. Each form defines the
+fields for data to be input by the researcher.
 
 The OrderPortal system is designed for only one facility, displaying
 up to about 8 different order forms. There is no hard limit to the
 number of simultaneously published forms, but the current design does
-not work well with more than 8 forms. If an organization has different
-facilities requiring different sets of forms, then it is best to set
-up different instances of the OrderPortal system, with different
-back-end database instances.
+not work well with more than about 8 forms. If an organization has
+different facilities requiring different sets of forms, then it may be
+better to set up different instances of the OrderPortal system, with
+different back-end database instances.
 
 The design of an order form is fairly general; there is nothing that
 is hardcoded for specific domains of science. The content of the order
 forms consists of a different fields for different types of input
-data. The order forms are defined by the facility administrators. An
+data. The order forms are defined by the system administrators. An
 order form can be used only when it has been enabled. An outdated
-order form can be disabled; its orders will still be accessible.
+order form can be disabled; its orders will still be accessible for
+processing. No new orders can be created from a disabled form.
 
-A user account is defined within each OrderPortal instance.  The email
-address of the user is used as the user account identifier.
+A **user account** is defined within each OrderPortal instance. The email
+address of the user is the user account identifier. This means that if
+a user changes email address, a new account will have to be created.
 
 Customisation of site logo and title is possible, and the information
-pages are under control of the facility administrators.
+pages are under control of the system administrators.
 
 The order form
 --------------
 
-The order form fields are fully configurable by the facility
+The order form fields are fully configurable by the system
 administrators via the web interface. The field definitions are
 generic, and allow order forms to be designed for a wide variety of
 input data.
@@ -98,36 +102,38 @@ previously created orders.
 Basic info pages
 ----------------
 
-There is a very basic information page subsystem. This is certainly
-not a full-fledged wiki.  All administrators in the system can edit
-these pages via the web interface. This feature can be disabled by
-modifying the settings.
+There is a very basic information page subsystem, intended to allow
+displaying information about the orders and/or the facility to the
+user or the general public. It is not a full-fledged wiki.  The system
+administrators can edit these pages via the web interface. This
+feature can be disabled by modifying the settings.
 
 Facility
 --------
 
 The term facility is used for the organisation providing the service
-specified by the order form. One instance (database) of the system
-handles one facility. All entities in the database belong to one and
-only one facility.
+specified by the order forms. A basic design principle is that one
+instance of the OrderPortal system handles one facility. All entities
+in the database back-end for the OrderPortal instance belong to one
+and only one facility.
 
 There are three reasons for this design choice:
 
 1. Security between facilities. The existence and contents of a
    particular project in one facility must not be visible to the
    administrators or staff of another facility. This is a strict requirement
-   for some facilities, and it is easier to implement if the databases
+   for some facilities, and it is easier to implement if the database instance
    for each facility is separate from one another.
 
 2. The styling of an order portal is much easier to implement if each
-   facility has its own portal instance.
+   facility has its own OrderPortal instance.
 
 3. The introduction, or elimination, of a facility in the overall
    organisation becomes much easier if every instance of the system is
    independent of the other.
 
 One drawback with this design choice is that it complicates the
-communication between and linking of different but related projects in
+communication between, and linking of, different but related projects in
 different facilities.
 
 
@@ -137,30 +143,34 @@ Users
 A user is an account in the system. Almost all operation require that
 the user is logged in. The email address is the user account identifier.
 
-There are three kinds of users (roles):
+There are three kinds (=roles) of users:
 
 1. User: An external scientist, who uses the portal to place one or
    more orders, and to follow the progress of their own orders. The
    "customer" of the facility.
 
-2. Staff: Facility staff, who may view all orders, but not change anything.
+2. Staff: Facility staff, who may view all orders, but are not allowed
+   to change vary much.
 
-3. Admin: Facility administrators, a.k.a. project coordinators, who
-   are allowed to view and edit all aspects of the system that can be
-   modified via the web interface. This includes processing orders,
-   modifying the order fields, and handling user accounts.
+3. Admin: System administrators who are allowed to view and edit all
+   aspects of the OrderPortal system that can be modified via the web
+   interface. This includes processing orders, modifying the order
+   fields, and handling user accounts. Often, the project coordinators
+   of the facility are designated as system administrators, since they
+   will be using the system to keep track of incoming orders
+   (projects).
 
 User accounts can be set as disabled, for example if the person leaves
 her position, or as a means of blocking invalid use. Deletion of a
 user account is not allowed, to allow full traceability of old
-orders. An account can always be enabled again.
+orders. An account can be re-enabled.
 
 An external scientist applies for a user account by providing the
 relevant information. Such an account is created with a status of
-"pending". The administrator reviews the pending user account and enables it
-if it appears legitimate. The user gets an email about the account
-having been enabled and with instructions on how to set the password
-for it.
+"pending". The system administrator reviews the pending user account and
+enables it if it appears legitimate. The user gets an email about the
+account having been enabled and with instructions on how to set the
+password for it.
 
 Some configuration operations (settings variables) can only be done on
 the command line on the machine hosting the system.
@@ -172,19 +182,42 @@ Access privileges
 The user can place orders as soon has she has logged in.
 
 A user is allowed to specify which other users will be able to access
-to her orders. Access can also be granted to specific users for each
-individual order.
+to her orders. Access can also be granted by a user to other specific
+users for each individual order.
 
 
 Order: form and fields
 ----------------------
 
-The administrator designs the forms and their set of fields which
-determine what the user must fill in for an order. The administrator
-can clone a form in order to make a new variant. Old forms can be
-disabled, and new forms enabled, as needed.
+The system administrators design the forms by setting up the fields
+which determine what the user must fill in for an order. The system
+administrators can clone a form in order to make a new variant of
+it. Old forms can be disabled, and new forms enabled, as needed.
 
-Adding a field in a new form requires deciding on the followin parameters:
+Once a form has been enabled, its fields cannot be changed, except for
+editing the help texts. When an order is created, its fields
+definitions are copied from the form. Once an order has been created,
+its fields and selected options are effectively frozen, and remain
+fixed. Only the values of the fields may be changed, not the
+definition of them.
+
+This is a major design limitation of the OrderPortal system, which
+must be kept in mind when planning and implementing the content of the
+forms. The following routine has been used with good results:
+
+1. For a new form, create and edit the input fields that it defines for an order.
+2. Set the version marker for the form, using some reasonable
+   convention, such as a version number, or a date.
+3. Enable it.
+4. When an update of the form is required, make a clone of it.
+5. Edit the fields of the clone to make the changes.
+6. Set a new version marker, keeping the title of the new form
+   unchanged compared to the old. To the users it will look like just
+   an updated form, not a new one.
+7. Enable the new form.
+8. Disable the old form.
+
+Adding a field in a new form requires deciding on the following parameters:
 
 - Field identifier
 - Field data type
@@ -194,12 +227,6 @@ Adding a field in a new form requires deciding on the followin parameters:
 - Hierarchy and order, including conditional visibility
 - Visibility to the user; some fields may be visible only to the staff
 
-When an order is created, its fields definitions are copied from the
-form. Thus, an order is always self-contained. Once an order has been
-created, its fields and selected options are effectively frozen, and
-remain fixed. Only the values of the fields may be changed, not the
-definition of them.
-
 A field may be conditional, meaning that it is displayed only of some
 other field has been assigned a specific value. This is necessary for
 orders where the relevant fields depend on some high-level choice,
@@ -208,17 +235,19 @@ such a type of technology to use for a project.
 Order
 -----
 
-An order contains a copy of all fields from its form. It belongs to a
-user. It is editable by the user until it has been submitted for
-approval by the facility staff.
+An order contains a copy of all fields from its form. It belongs to
+one and only one user. It is editable by the user until it has been
+submitted.
 
-An order may contain fields which require a value. An order lacking a
-required value can be saved, but it cannot be submitted. This allows
-the user to create and fill in orders only partially, and to return to
-the order at a later date to complete it.
+An order usually contains fields which require a value. An order
+lacking a required value can be saved, but it cannot be
+submitted. This allows the user to create and fill in an order
+partially and save it. Then, at a later data, she can return to the
+order to complete it and then submit it.
 
-An order can have one and only one status. The available statuses are listed
-in the table. Only the statuses PREPARATION and SUBMITTED are enabled by default.
+An order can have one and only one status. The available statuses are
+listed in the table. Only the statuses PREPARATION and SUBMITTED are
+enabled by default.
 
 | State       | Semantics                                                     |
 |-------------|---------------------------------------------------------------|
@@ -245,29 +274,39 @@ in the table. Only the statuses PREPARATION and SUBMITTED are enabled by default
 | ARCHIVED    | The order has been archived.                                  |
 | UNDEFINED   | The order has an undefined or unknown status.                 |
 
-Statuses can be enabled by the admin. Once enabled, a status cannot be
-disabled. The description of the semantic of a status can be edited by the
-admin.
+Statuses can be enabled by the system administrators. Once enabled, a
+status cannot be disabled. The reason for this is that already
+existing orders may be in a specific status, or have a specific status
+recorded in its history, and removing such a status would introduce
+inconsistencies. The description of the semantic of a status can be
+edited by the system administrators.
 
-Transitions between the statuses can be edited by the admin. The only
-transition enabled by default is the one from PREPARATION to SUBMITTED.
+Transitions between the statuses can be edited by the system
+administrators. The only transition enabled by default is the one from
+PREPARATION to SUBMITTED.
 
 Typically, enabling statuses and transitions should be done as part of
 the configuration and testing phase before the instance is launched
-into production. In general, it is a good idea to keep the number of
-enabled statuses at a minimum. Transitions should be set to those that
-are sensible given the typical workflow. Allowing too many transitions
-can lead to confusion.  Since transitions can be enabled and disabled
-at will by the admin, it is always in principle possible (if
-cumbersome) to 'rescue' and order which has been put in an incorrect
-status.
+into production. Here are some general guidelines:
+
+- It is a good idea to keep the number of enabled statuses at a minimum.
+  Since a status that has been enabled cannot be disabled, one should avoid
+  cluttering the system with unnecessary statuses.
+- Transitions should be set to those that are sensible given the typical workflow.
+- Allowing too many transitions can lead to confusion and should be avoided.
+- However, setting up transitions can be done freely, since they can be
+  removed later without any problem.
+- Since transitions can be enabled and disabled at will by the system
+  administrators, it is always in principle possible (if cumbersome) to
+  'rescue' an order which has been put in an incorrect status.
 
 Interface
 ---------
 
-There are two main interfaces to the system, the web and the API. The
-web interface behaves slightly differently depending on the role of
-the user account logged in.
+There are three main interfaces to the system, the web, the API (Application Programming Interface) and the CLI (Command-Line Interface).
+
+The web interface behaves slightly differently depending on the role
+of the user account logged in.
 
 ### User web interface
 
@@ -283,7 +322,7 @@ to status and other parameters.
 
 ### Administrator web interface
 
-For administrators only, this interface enables editing orders, users and
+For system administrators only, this interface enables editing orders, users and
 fields. This includes the ability to move orders along into different
 statuses.
 
@@ -294,6 +333,13 @@ based on RESTful principles using JSON and linked data to allow other
 systems to access and/or modify various data entities in the portal.
 
 The API is currently fairly limited.
+
+### The Command Line Interface (CLI).
+
+The CLI allows system various maintenance operations, such as backup, account
+creation and such. It is executed on the command line of the machine which hosts
+the OrderPortal instance. This means that only users with accounts of sufficient
+privilege on this machine can use it. See below for more information.
 
 Attached files
 --------------
@@ -361,11 +407,11 @@ Create the `site` subdirectory for your instance by copying the
     $ cd OrderPortal
     $ sudo -u nginx cp -r site_template site
 
-The OrderPortal server and the CLI must be executed in a Python
-environment where all the required dependencies have been installed,
-as specified by the file `requirements.txt`.  It is recommended that a
-virtual environment is created for this. Refer to the Python
-documentation.
+The OrderPortal server and the CLI (command-line interface) must be
+executed in a Python environment where all the required dependencies
+have been installed, as specified by the file `requirements.txt`.  It
+is recommended that a virtual environment is created for this. Refer
+to the Python documentation.
 
 Download and install the required third-party Python modules using the
 `requirements.txt` file as approprate for your Python environment.
@@ -402,12 +448,12 @@ here.
 Set the correct values for the CouchDB variables in the `site/settings.yaml` file
 (see above). Otherwise the following operations will fail.
 
-Create the database in CouchDB using the command-line interface utility (CLI).
+Create the database in CouchDB using the command-line interface (CLI).
 
     $ cd /var/www/apps/xyz/OrderPortal/orderportal
     $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py create-database
 
-Create the first OrderPortal admin account in the database using the CLI:
+Create the first OrderPortal system administrator account in the database using the CLI:
 
     $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py admin
 
@@ -433,11 +479,11 @@ See the `--help` option of the CLI.
 
 ### Updates
 
-To update the source code, simply download the latest release, unpack the `tar.gz`
-file, and move the `OrderPortal` directory tree to the correct location.
-Ensure that you keep your `site` directory, and that it is placed in the
-same location as before.
+To update the source code, simply download the latest release, unpack
+the `tar.gz` file, and move the `OrderPortal` directory tree to the
+correct location.  Ensure that you keep your `site` directory, and
+that it is placed in the same location as before.
 
-Since OrderPortal version 3.6.19, the CouchDB design documents
-(indexes) are automatically updated when the `tornado` server is
-restarted.
+Since OrderPortal version 3.6.19, the CouchDB design documents (which
+defined the indexes) are automatically updated when the `tornado`
+server is restarted.
