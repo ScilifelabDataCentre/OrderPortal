@@ -103,25 +103,21 @@
   </form>
 </p>
 <p>
-  <form action="{{ reverse_url('form_aggregate', form['_id']) }}"
-        method="GET" role="form">
-    <button type="submit" class="btn btn-info btn-block">
-      <span class="glyphicon glyphicon-th"></span> Aggregate
-    </button>
-  </form>
+  <a href="{{ reverse_url('form_aggregate', form['_id']) }}"
+     class="btn btn-info btn-block" role="button">
+    <span class="glyphicon glyphicon-th"></span> Aggregate
+  </a>
 </p>
 {% end %} {# block action_content #}
 
 {% block main_content %}
 <div class="panel panel-default">
   <div class="panel-body">
-    <form action="{{ reverse_url('form_edit', form['_id']) }}"
-          method="GET" role="form" class="panel-form pull-right">
-      <button type="submit" class="btn btn-primary">
-        <span class="glyphicon glyphicon-edit"></span>
-        Edit
-      </button>
-    </form>
+    <a href="{{ reverse_url('form_edit', form['_id']) }}"
+       role="button" class="btn btn-primary panel-form pull-right">
+      <span class="glyphicon glyphicon-edit"></span> Edit
+    </a>
+
     <table class="table-condensed table-fields">
       <tr>
         <th>Version</th>
@@ -183,13 +179,10 @@
   <div class="panel-heading">
     Fields
     {% if allow_edit_fields %}
-    <form action="{{ reverse_url('field_create', form['_id']) }}"
-          method="GET" role="form" class="pull-right">
-      <button type="submit" class="btn btn-primary btn-xs">
-        <span class="glyphicon glyphicon-plus"></span>
-        Create field
-      </button>
-    </form>
+    <a href="{{ reverse_url('field_create', form['_id']) }}"
+       role="button" class="btn btn-primary btn-xs pull-right">
+      <span class="glyphicon glyphicon-plus"></span> Create field
+    </a>
     {% end %}
   </div>
 
@@ -203,6 +196,7 @@
         <th width="5%">Visible</th>
         <th width="5%">Restrictions</th>
         <th width="45%">Description</th>
+        <th></th>
       </tr>
       {% for field in fields %}
       <tr>
@@ -258,21 +252,17 @@
         <td>{% module Markdown(field.get('description')) %}</td>
         <td>
           {% if allow_edit_fields %}
-          <form action="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
-                method="GET" role="form">
-            <button type="submit" class="btn btn-primary btn-xs">
-              <span class="glyphicon glyphicon-edit"></span>
-              Edit
-            </button>
-          </form>
-        {% else %}
-        {# Allow edit of non-data properties when not editable. #}
+          <a href="{{ reverse_url('field_edit', form['_id'], field['identifier']) }}"
+             role="button" class="btn btn-primary btn-xs">
+            <span class="glyphicon glyphicon-edit"></span> Edit
+          </a>
+          {% else %}
+          {# Allow edit of non-data properties when not editable. #}
           <button type="button" class="btn btn-primary btn-xs"
                   data-toggle="modal" data-target="#{{ field['identifier'] }}">
-            <span class="glyphicon glyphicon-edit"></span>
-            Edit
+            <span class="glyphicon glyphicon-edit"></span> Edit
           </button>
-        {% end %} {# if allow_edit_fields #}
+          {% end %} {# if allow_edit_fields #}
         </td>
       </tr>
       {% end %}
@@ -283,13 +273,10 @@
   <div class="panel-footer">
     &nbsp;
     {% if allow_edit_fields %}
-    <form action="{{ reverse_url('field_create', form['_id']) }}"
-          method="GET" role="form" class="pull-right">
-      <button type="submit" class="btn btn-primary btn-xs">
-        <span class="glyphicon glyphicon-plus"></span>
-        Create field
-      </button>
-    </form>
+    <a href="{{ reverse_url('field_create', form['_id']) }}"
+       role="button" class="btn btn-primary btn-xs pull-right">
+      <span class="glyphicon glyphicon-plus"></span> Create field
+    </a>
     {% end %}
   </div>
 </div>

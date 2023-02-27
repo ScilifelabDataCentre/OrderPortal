@@ -32,20 +32,17 @@
 {% block action_content %}
 
 {% if allow_edit %}
-<p>
-  <form action="{{ reverse_url('order_edit', order['_id']) }}" method="GET" role="form">
-    <button type="submit" class="btn btn-lg btn-primary btn-block">
-      <span class="glyphicon glyphicon-edit"></span> Edit
-    </button>
-  </form>
+<p style="padding-top: 10px;">
+  <a href="{{ reverse_url('order_edit', order['_id']) }}"
+     class="btn btn-lg btn-primary btn-block" role="button">
+    <span class="glyphicon glyphicon-edit"></span> Edit
+  </a>
 </p>
 <p>
-  <form action="{{ reverse_url('order_owner', order['_id']) }}"
-        method="GET" role="form">
-    <button type="submit" class="btn btn-primary btn-block">
-      <span class="glyphicon glyphicon-user"></span> Change owner
-    </button>
-  </form>
+  <a href="{{ reverse_url('order_owner', order['_id']) }}"
+     class="btn btn-primary btn-block" role="button">
+    <span class="glyphicon glyphicon-user"></span> Change owner
+  </a>
 </p>
 <p>
   <form action="{{ reverse_url('order', order['_id']) }}" method="POST" role="form">

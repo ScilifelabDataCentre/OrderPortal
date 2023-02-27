@@ -12,11 +12,10 @@
 {% block action_content %}
 {% if am_admin %}
 <p>
-  <form action="{{ reverse_url('info_edit', info['name']) }}"
-        method="GET" role="form">
-    <button type="submit" class="btn btn-primary btn-block">
-          <span class="glyphicon glyphicon-edit"></span> Edit</button>
-      </form>
+  <a href="{{ reverse_url('info_edit', info['name']) }}"
+     class="btn btn-primary btn-block" role="button">
+    <span class="glyphicon glyphicon-edit"></span> Edit
+  </a>
 </p>
 <p>
   <form action="{{ reverse_url('info', info['name']) }}"
@@ -32,11 +31,9 @@
 
 <p>
   <div>
-    {% for n, t in infos %}
+    {% for name, info_title in infos %}
     <li>
-      <a href="{{ reverse_url('info', n) }}">
-        {{ t or n }}
-      </a>
+      <a href="{{ reverse_url('info', name) }}">{{ info_title or name }}</a>
     </li>
     {% end %}
   </div>

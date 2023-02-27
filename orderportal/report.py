@@ -1,6 +1,6 @@
 "An order may have reports attached, which should got through a workflow for approval."
 
-# XXX Working!
+# XXX On-going work
 
 ### Real example: https://ngisweden.scilifelab.se/orders/order/5152fb14a8f0466bb1fdf95c6603a542/report
 

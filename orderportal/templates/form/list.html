@@ -1,4 +1,4 @@
-{# Forms list page. #}
+{# List of all forms. #}
 
 {% extends "../base.html" %}
 
@@ -9,7 +9,17 @@
 <div class="container-fluid">
 {% end %}
 
-{% block main_content %}
+{% block content %}
+<div class="row">
+  <div class="col-md-offset-10 col-md-2">
+    <a href="{{ reverse_url('form_create') }}"
+       role="button" class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-plus"></span> Create
+    </a>
+  </div>
+</div>
+<br>
+
 <table id="forms" class="table table-striped table-condensed">
   <thead>
     <tr>
@@ -52,19 +62,7 @@
     {% end %}
   </tbody>
 </table>
-{% end %} {# block main_content #}
-
-{% block action_content %}
-<form action="{{ reverse_url('form_create') }}"
-      method="GET" role="form">
-  <div class="form-group">
-    <button type="submit" class="btn btn-primary btn-block">
-      <span class="glyphicon glyphicon-plus"></span>
-      Create form
-    </button>
-  </div>
-</form>
-{% end %} {# block action_content #}
+{% end %} {# block content #}
 
 {% block javascript_code %}
 <script>

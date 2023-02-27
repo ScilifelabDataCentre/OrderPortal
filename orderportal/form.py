@@ -425,7 +425,7 @@ class FormFieldEditDescr(FormMixin, RequestHandler):
         self.see_other("form", form["_id"])
 
 
-class FormClone(RequestHandler):
+class FormClone(FormMixin, RequestHandler):
     "Make a clone of a form."
 
     @tornado.web.authenticated
@@ -443,7 +443,7 @@ class FormClone(RequestHandler):
         self.see_other("form_edit", saver.doc["_id"])
 
 
-class FormPending(RequestHandler):
+class FormPending(FormMixin, RequestHandler):
     """Change status from testing to pending.
     To allow editing after testing.
     All test orders for this form are deleted."""
@@ -469,7 +469,7 @@ class FormPending(RequestHandler):
         self.see_other("form", iuid)
 
 
-class FormTesting(RequestHandler):
+class FormTesting(FormMixin, RequestHandler):
     """Change status from pending to testing.
     To allow testing making orders from the form."""
 
@@ -484,7 +484,7 @@ class FormTesting(RequestHandler):
         self.see_other("form", iuid)
 
 
-class FormEnable(RequestHandler):
+class FormEnable(FormMixin, RequestHandler):
     """Change status from pending to enabled.
     Allows users to make orders from the form."""
 
@@ -500,7 +500,7 @@ class FormEnable(RequestHandler):
         self.see_other("form", iuid)
 
 
-class FormDisable(RequestHandler):
+class FormDisable(FormMixin, RequestHandler):
     """Change status from enabled to disabled.
     Disable making orders from the form."""
 
@@ -514,7 +514,7 @@ class FormDisable(RequestHandler):
         self.see_other("form", iuid)
 
 
-class FormOrders(RequestHandler):
+class FormOrders(FormMixin, RequestHandler):
     "Page for a list of all orders for a given form."
 
     @tornado.web.authenticated
@@ -537,7 +537,7 @@ class FormOrders(RequestHandler):
         )
 
 
-class FormAggregate(RequestHandler):
+class FormAggregate(FormMixin, RequestHandler):
     "Aggregate data from all orders for the form into a CSV file."
 
     TITLES = dict(_id="Order IUID", email="Owner email")
