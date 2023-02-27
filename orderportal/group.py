@@ -14,6 +14,8 @@ class GroupSaver(saver.Saver):
 
 
 class GroupMixin:
+    "Mixin providing various methods."
+
     def get_group(self, iuid):
         "Return the group for the IUID."
         return self.get_entity(iuid, doctype=constants.GROUP)
@@ -47,7 +49,7 @@ class Group(GroupMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
-        group = self.get_entity(iuid, doctype=constants.GROUP)
+        group = self.get_group(iuid)
         try:
             self.check_readable(group)
         except ValueError as error:
@@ -68,7 +70,7 @@ class Group(GroupMixin, RequestHandler):
 
     @tornado.web.authenticated
     def delete(self, iuid):
-        group = self.get_entity(iuid, doctype=constants.GROUP)
+        group = self.get_group(iuid)
         self.check_editable(group)
         self.delete_logs(group["_id"])
         self.db.delete(group)
@@ -106,13 +108,13 @@ class GroupEdit(GroupMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
-        group = self.get_entity(iuid, doctype=constants.GROUP)
+        group = self.get_group(iuid)
         self.check_editable(group)
         self.render("group/edit.html", group=group)
 
     @tornado.web.authenticated
     def post(self, iuid):
-        group = self.get_entity(iuid, doctype=constants.GROUP)
+        group = self.get_group(iuid)
         self.check_editable(group)
         try:
             with GroupSaver(doc=group, rqh=self) as saver:
@@ -148,7 +150,7 @@ class GroupLogs(GroupMixin, RequestHandler):
 
     @tornado.web.authenticated
     def get(self, iuid):
-        group = self.get_entity(iuid, doctype=constants.GROUP)
+        group = self.get_group(iuid)
         try:
             self.check_readable(group)
         except ValueError as error:
@@ -161,12 +163,12 @@ class GroupLogs(GroupMixin, RequestHandler):
         )
 
 
-class GroupAccept(RequestHandler):
+class GroupAccept(GroupMixin, RequestHandler):
     "Accept group invitation. Only the user himself can do this."
 
     @tornado.web.authenticated
     def post(self, iuid):
-        group = self.get_entity(iuid, doctype=constants.GROUP)
+        group = self.get_group(iuid)
         with GroupSaver(doc=group, rqh=self) as saver:
             invited = set(group["invited"])
             try:
@@ -182,12 +184,12 @@ class GroupAccept(RequestHandler):
         self.see_other("account", self.current_user["email"])
 
 
-class GroupDecline(RequestHandler):
+class GroupDecline(GroupMixin, RequestHandler):
     "Decline group invitation or membership. Only the user himself can do this."
 
     @tornado.web.authenticated
     def post(self, iuid):
-        group = self.get_entity(iuid, doctype=constants.GROUP)
+        group = self.get_group(iuid)
         with GroupSaver(doc=group, rqh=self) as saver:
             invited = set(group["invited"])
             invited.discard(self.current_user["email"])
