@@ -14,15 +14,11 @@ class GroupSaver(saver.Saver):
 
 
 class GroupMixin:
-    "Mixin providing various methods."
-
-    def get_group(self, iuid):
-        "Return the group for the IUID."
-        return self.get_entity(iuid, doctype=constants.GROUP)
+    "Mixin for access check methods."
 
     def check_readable(self, group):
         "Check if current user may read the group."
-        if self.is_owner(group):
+        if self.am_owner(group):
             return
         if self.current_user["email"] in group["members"]:
             return
@@ -34,7 +30,7 @@ class GroupMixin:
         "Is the group editable by the current user?"
         if self.am_admin():
             return True
-        if self.is_owner(group):
+        if self.am_owner(group):
             return True
         return False
 

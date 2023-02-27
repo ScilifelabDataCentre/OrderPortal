@@ -60,7 +60,7 @@ class InfoCreate(RequestHandler):
 
 
 class Info(RequestHandler):
-    "Information page."
+    "Display an information page."
 
     def get(self, name):
         try:
@@ -88,7 +88,7 @@ class Info(RequestHandler):
 
 
 class InfoEdit(RequestHandler):
-    "Edit the information page."
+    "Edit an information page."
 
     @tornado.web.authenticated
     def get(self, name):
@@ -111,7 +111,7 @@ class InfoEdit(RequestHandler):
 
 
 class InfoLogs(RequestHandler):
-    "Info log entries page."
+    "Display information log entries."
 
     @tornado.web.authenticated
     def get(self, name):

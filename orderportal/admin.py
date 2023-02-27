@@ -289,7 +289,14 @@ class Texts(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin/texts.html", texts=self.get_texts(constants.DISPLAY))
+        texts = [
+            row.doc
+            for row in self.db.view(
+                "text", "type", key=constants.DISPLAY, reduce=False, include_docs=True
+            )
+        ]
+        texts.sort(key=lambda d: d["name"])
+        self.render("admin/texts.html", texts=texts)
 
 
 class TextEdit(RequestHandler):

@@ -193,7 +193,7 @@ class RequestHandler(tornado.web.RequestHandler):
         self.logger.debug("Basic auth login: account %s", account["email"])
         return account
 
-    def is_owner(self, entity):
+    def am_owner(self, entity):
         "Does the current user own the given entity?"
         return self.current_user and entity["owner"] == self.current_user["email"]
 
@@ -318,16 +318,23 @@ class RequestHandler(tornado.web.RequestHandler):
         else:
             raise tornado.web.HTTPError(404, reason=reason)
 
-    def get_texts(self, type):
-        "Return all texts of the given type."
-        result = [
-            row.doc
-            for row in self.db.view(
-                "text", "type", key=type, reduce=False, include_docs=True
-            )
-        ]
-        result.sort(key=lambda d: d["name"])
-        return result
+    def get_order(self, iuid):
+        "Get the order for the identifier or IUID."
+        try:  # First try order identifier.
+            order = self.get_entity_view("order", "identifier", iuid)
+        except tornado.web.HTTPError:
+            # Next try order doc IUID.
+            order = self.get_entity(iuid, doctype=constants.ORDER)
+        return order
+
+    def get_form(self, iuid):
+        "Get the form given by its IUID."
+        return self.get_entity(iuid, doctype=constants.FORM)
+
+    def get_forms_lookup(self):
+        "Get all forms as a lookup with form iuid as key, form doc as value."
+        view = self.db.view("form", "modified", descending=True, include_docs=True)
+        return dict([(r.id, r.doc) for r in view])
 
     def get_text(self, type, name):
         """Get the requested text by type and name.
@@ -410,9 +417,8 @@ class RequestHandler(tornado.web.RequestHandler):
         view = self.db.view("group", "invited", key=email, include_docs=True)
         return [r.doc for r in view]
 
-    def is_colleague(self, email):
-        """Is the user with the given email address
-        in the same group as the current user?"""
+    def am_colleague(self, email):
+        "Is the user with the email address in the same group as the current user?"
         if not self.current_user:
             return False
         return self.current_user["email"] in self.get_account_colleagues(email)
@@ -448,10 +454,9 @@ class RequestHandler(tornado.web.RequestHandler):
                 self.cache_all_accounts[row.key] = row.doc
             return self.cache_all_accounts
 
-    def get_forms_lookup(self):
-        "Get all forms as a lookup with form iuid as key, form doc as value."
-        view = self.db.view("form", "modified", descending=True, include_docs=True)
-        return dict([(r.id, r.doc) for r in view])
+    def get_group(self, iuid):
+        "Return the group for the IUID."
+        return self.get_entity(iuid, doctype=constants.GROUP)
 
     def get_logs(self, iuid, limit=settings["DISPLAY_DEFAULT_MAX_LOG"] + 1):
         "Return the event log documents for the given entity iuid."

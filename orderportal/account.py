@@ -314,11 +314,11 @@ class AccountMixin:
 
     def allow_read(self, account):
         "Is the account readable by the current user?"
-        if self.is_owner(account):
+        if self.am_owner(account):
             return True
         if self.am_staff():
             return True
-        if self.is_colleague(account["email"]):
+        if self.am_colleague(account["email"]):
             return True
         return False
 
@@ -330,7 +330,7 @@ class AccountMixin:
 
     def allow_edit(self, account):
         "Is the account editable by the current user?"
-        if self.is_owner(account):
+        if self.am_owner(account):
             return True
         if self.am_staff():
             return True
@@ -517,7 +517,7 @@ class AccountOrdersMixin:
             return True
         if self.am_staff():
             return True
-        if self.is_colleague(account["email"]):
+        if self.am_colleague(account["email"]):
             return True
         return False
 

@@ -25,11 +25,11 @@ class ReportMixin:
 
     def allow_read(self, report):
         "Is the report readable by the current user?"
-        if self.is_owner(report):
+        if self.am_owner(report):
             return True
         if self.am_staff():
             return True
-        if self.is_colleague(report["owner"]):
+        if self.am_colleague(report["owner"]):
             return True
         return False
 
@@ -47,7 +47,7 @@ class ReportMixin:
         edit = status.get("edit", [])
         if self.am_staff() and constants.STAFF in edit:
             return True
-        if self.is_owner(report) and constants.USER in edit:
+        if self.am_owner(report) and constants.USER in edit:
             return True
         return False
 
@@ -65,11 +65,9 @@ class ReportCreate(RequestHandler):
     def post(self):
         try:
             self.check_creation_enabled()
-            form = self.get_form(self.get_argument("form"), check=True)
+            order = self.get_order(self.get_argument("order"))
             with ReportSaver(rqh=self) as saver:
-                saver.create(form)
-                saver.autopopulate()
-                saver.check_fields_validity()
+                pass
         except ValueError as error:
             self.see_other("home", error=error)
         else:

@@ -51,11 +51,7 @@ class FormSaver(saver.Saver):
 
 
 class FormMixin:
-    "Mixin providing various methods."
-
-    def get_form(self, iuid):
-        "Return the form for the IUID."
-        return self.get_entity(iuid, doctype=constants.FORM)
+    "Mixin for access check methods."
 
     def allow_edit_fields(self, form):
         "Are the form fields editable? Checks status only."

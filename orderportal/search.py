@@ -1,6 +1,5 @@
 "Search orders page."
 
-import pprint
 import urllib.parse
 
 import couchdb2
@@ -31,11 +30,11 @@ class Search(RequestHandler):
         # Try order IUIDs
         for iuid in parts:
             try:
-                order = self.get_entity(iuid, doctype=constants.ORDER)
+                order = self.get_order(iuid)
             except tornado.web.HTTPError:
                 pass
             else:
-                orders[order.get("identifier") or iuid] = order
+                orders[order["_id"]] = order
         # Search order identifier; exact match
         id_sets = []
         for part in parts:
@@ -44,7 +43,7 @@ class Search(RequestHandler):
             )
         if id_sets:
             for id in reduce(lambda i, j: i.union(j), id_sets):
-                orders[id] = self.get_entity(id, doctype=constants.ORDER)
+                orders[id] = self.get_order(id)
         # Seach order tags; exact match
         term = "".join([c in ",;'" and " " or c for c in orig]).strip().lower()
         parts = term.split()
@@ -53,7 +52,7 @@ class Search(RequestHandler):
             id_sets.append(set([r.id for r in self.db.view("order", "tag", key=part)]))
         if id_sets:
             for id in reduce(lambda i, j: i.union(j), id_sets):
-                orders[id] = self.get_entity(id, doctype=constants.ORDER)
+                orders[id] = self.get_order(id)
         term = (
             "".join(
                 [c in settings["ORDERS_SEARCH_DELIMS_LINT"] and " " or c for c in orig]
@@ -86,7 +85,8 @@ class Search(RequestHandler):
             # All words must exist in title
             id_set = reduce(lambda i, j: i.intersection(j), id_sets)
             for id in reduce(lambda i, j: i.intersection(j), id_sets):
-                orders[id] = self.get_entity(id, doctype=constants.ORDER)
+
+                orders[id] = self.get_order(id)
         # Convert to list; keep the orders that are readable by the user.
         if self.am_staff():
             orders = list(orders.values())
@@ -94,7 +94,7 @@ class Search(RequestHandler):
             orders = [
                 i
                 for i in list(orders.values())
-                if self.is_owner(i) or self.is_colleague(i["owner"])
+                if self.am_owner(i) or self.am_colleague(i["owner"])
             ]
         self.render(
             "search.html",

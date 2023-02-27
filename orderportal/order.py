@@ -546,24 +546,15 @@ class OrderSaver(saver.Saver):
 
 
 class OrderMixin:
-    "Mixin for various useful methods."
-
-    def get_order(self, iuid):
-        "Get the order for the identifier or IUID."
-        try:  # First try order identifier.
-            order = self.get_entity_view("order", "identifier", iuid)
-        except tornado.web.HTTPError:
-            # Next try order doc IUID.
-            order = self.get_entity(iuid, doctype=constants.ORDER)
-        return order
+    "Mixin for access check methods."
 
     def allow_read(self, order):
         "Is the order readable by the current user?"
-        if self.is_owner(order):
+        if self.am_owner(order):
             return True
         if self.am_staff():
             return True
-        if self.is_colleague(order["owner"]):
+        if self.am_colleague(order["owner"]):
             return True
         return False
 
@@ -581,7 +572,7 @@ class OrderMixin:
         edit = status.get("edit", [])
         if self.am_staff() and constants.STAFF in edit:
             return True
-        if self.is_owner(order) and constants.USER in edit:
+        if self.am_owner(order) and constants.USER in edit:
             return True
         return False
 
@@ -599,7 +590,7 @@ class OrderMixin:
         attach = status.get("attach", [])
         if self.am_staff() and constants.STAFF in attach:
             return True
-        if self.is_owner(order) and constants.USER in attach:
+        if self.am_owner(order) and constants.USER in attach:
             return True
         return False
 
@@ -624,14 +615,6 @@ class OrderMixin:
             raise ValueError(
                 f"{term} creation is not allowed for account with role 'user'."
             )
-
-    def get_form(self, iuid, check=False):
-        "Get the form given by its IUID. Optionally check that it is enabled."
-        form = self.get_entity(iuid, doctype=constants.FORM)
-        if check:
-            if form["status"] not in (constants.ENABLED, constants.TESTING):
-                raise ValueError("form is not available for creation")
-        return form
 
     def get_fields(self, order, depth=0, fields=None):
         """Return a list of dictionaries, each of which
@@ -679,7 +662,7 @@ class OrderMixin:
             if (
                 (self.am_admin() and constants.ADMIN in permission)
                 or (self.am_staff() and constants.STAFF in permission)
-                or (self.is_owner(order) and constants.USER in permission)
+                or (self.am_owner(order) and constants.USER in permission)
             ):
                 try:  # Defensive: only allow enabled statuses as targets.
                     result.append(settings["ORDER_STATUSES_LOOKUP"][key])
@@ -828,7 +811,9 @@ class OrderCreate(OrderMixin, RequestHandler):
     def post(self):
         try:
             self.check_creation_enabled()
-            form = self.get_form(self.get_argument("form"), check=True)
+            form = self.get_form(self.get_argument("form"))
+            if form["status"] not in (constants.ENABLED, constants.TESTING):
+                raise ValueError("form is not available for creation")
             with OrderSaver(rqh=self) as saver:
                 saver.create(form)
                 saver.autopopulate()
@@ -854,7 +839,9 @@ class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             iuid = data.get("form")
             if not iuid:
                 raise ValueError("no form IUID given")
-            form = self.get_form(iuid, check=True)
+            form = self.get_form(iuid)
+            if form["status"] not in (constants.ENABLED, constants.TESTING):
+                raise ValueError("form is not available for creation")
             with OrderSaver(rqh=self) as saver:
                 saver.create(form, title=data.get("title"))
                 saver.autopopulate()
