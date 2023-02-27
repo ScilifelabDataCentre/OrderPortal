@@ -3,16 +3,19 @@
 {% extends "../base.html" %}
 
 {% block head_title %}Documents{% end %}
-{% block body_title %}{% module Icon('file') %} Documents{% end %}
+{% block body_title %}Documents{% end %}
+
+{% block container %}
+<div class="container-fluid">
+{% end %}
 
 {% block content %}
 {% if am_admin %}
 <div class="row">
-  <div class="col-md-2">
+  <div class="col-md-offset-10 col-md-2">
     <a href="{{ reverse_url('file_create') }}"
        role="button" class="btn btn-primary btn-block">
-      <span class="glyphicon glyphicon-plus"></span>
-      Create
+      <span class="glyphicon glyphicon-plus"></span> Create
     </a>
   </div>
 </div>
@@ -103,20 +106,6 @@
     </table>    
   </div>
 </div>
-
-{% if am_admin %}
-<div class="row">
-  <div class="col-md-2">
-    <a href="{{ reverse_url('file_create') }}"
-       role="button" class="btn btn-primary btn-block">
-      <span class="glyphicon glyphicon-plus"></span>
-      Create
-    </a>
-  </div>
-</div>
-<br>
-{% end %} {# if am_admin #}
-
 {% end %} {# block content #}
 
 {% block javascript_code %}

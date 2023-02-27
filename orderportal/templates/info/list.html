@@ -5,7 +5,23 @@
 {% block head_title %}Information pages{% end %}
 {% block body_title %}Information pages{% end %}
 
-{% block main_content %}
+{% block container %}
+<div class="container-fluid">
+{% end %}
+
+{% block content %}
+{% if am_admin %}
+<div class="row">
+  <div class="col-md-offset-10 col-md-2">
+    <a href="{{ reverse_url('info_create') }}"
+       class="btn btn-primary btn-block" role="form">
+      <span class="glyphicon glyphicon-plus"></span> Create
+    </a>
+  </div>
+</div>
+<br>
+{% end %} {# if am_admin #}
+
 <table class="table table-striped table-condensed">
   <tr>
     <th>Name</th>
@@ -31,14 +47,4 @@
   </tr>
   {% end %}
 </table>
-{% end %}{# block main_content #}
-
-{% block action_content %}
-{% if am_admin %}
-<form action="{{ reverse_url('info_create') }}"
-      method="GET" role="form">
-  <button type="submit" class="btn btn-primary btn-block">
-    <span class="glyphicon glyphicon-plus"></span> Create</button>
-</form>
-{% end %} {# if am_admin #}
-{% end %} {# block action_content #}
+{% end %}{# block content #}

@@ -16,12 +16,11 @@ Edit {% module Icon('group') %} {{ group['name'] }}
 <div class="well">
   A member of a group may read <strong>any</strong> {{ terminology('order') }}
   of another member of that group. This feature is therefore suitable
-  for true working groups, but <strong>not</strong> for the occasional
-  collaboration.
+  for true working groups, but <strong>not</strong> for granting access
+  to the occasional collaborative project.
 </div>
 
-<form action="{{ reverse_url('group_edit', group['_id']) }}"
-      method="POST" role="form">
+<form action="{{ reverse_url('group_edit', group['_id']) }}" method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <div class="form-group">

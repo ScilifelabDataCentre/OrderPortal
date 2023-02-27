@@ -10,23 +10,21 @@
 {{ terminology('Orders') }} for form {% module Entity(form, icon=False) %}
 {% end %}
 
-{% block action_content %}
-<p>
-  <form action="{{ reverse_url('form_aggregate', form['_id']) }}"
-        method="GET" role="form">
-    <button type="submit" class="btn btn-info btn-block">
-      <span class="glyphicon glyphicon-th"></span>
-      Aggregate
-    </button>
-  </form>
-</p>
-{% end %} {# block action_content #}
-
 {% block container %}
 <div class="container-fluid">
 {% end %}
 
-{% block main_content %}
+{% block content %}
+<div class="row">
+  <div class="col-md-offset-10 col-md-2">
+    <a href="{{ reverse_url('form_aggregate', form['_id']) }}"
+       class="btn btn-info btn-block" role="button">
+      <span class="glyphicon glyphicon-th"></span> Aggregate
+    </a>
+  </div>
+</div>
+<br>
+
 <div class="row">
   <div class="col-md-12">
     <table id="orders" class="table table-striped table-condensed">
@@ -57,7 +55,7 @@
     </table>
   </div>
 </div>
-{% end %} {# block main_content #}
+{% end %} {# block content #}
 
 {% block javascript_code %}
 <script>

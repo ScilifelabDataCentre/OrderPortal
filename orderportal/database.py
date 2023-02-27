@@ -54,6 +54,8 @@ def update_design_documents(db):
     )
     if db.put_design("order", ORDER_DESIGN_DOC):
         logger.info("Updated 'order' design document.")
+    if db.put_design("report", REPORT_DESIGN_DOC):
+        logger.info("Updated 'report' design document.")
     if db.put_design("text", TEXT_DESIGN_DOC):
         logger.info("Updated 'text' design document.")
 
@@ -379,6 +381,17 @@ var lint = {lint};
     if (!doc.history.submitted) return;
     emit(doc.history.submitted.split('-')[0], 1);
 }""",
+        },
+    }
+}
+
+REPORT_DESIGN_DOC = {
+    "views": {
+        "order": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'report') return;
+    emit(doc.order, doc.modified);
+}"""
         },
     }
 }

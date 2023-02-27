@@ -12,15 +12,14 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 
 {% block content %}
 {# Special case; UIModule CancelButton doesn't fit here. #}
+{# A form is required to let the class 'allow_leaving_without_question' do its job. #}
 <div class="row">
-  <div class="col-md-2 col-md-offset-10">
+  <div class="col-md-3 col-md-offset-9">
     <form action="{{ reverse_url('order', order['_id']) }}"
-          method="GET" role="form" class="allow_leaving_without_question">
-      <div class="form-group" style="margin-bottom: 4px;">
-        <button type="submit" class="btn btn-default btn-block">
-          <span class="glyphicon glyphicon-remove"></span> Cancel
-        </button>
-      </div>
+          method="GET" role="form" style="margin-top: 20px;"
+          class="allow_leaving_without_question">
+      <button type="submit" class="btn btn-default btn-block">
+        <span class="glyphicon glyphicon-remove"></span> Cancel</button>
     </form>
   </div>
 </div>
@@ -177,18 +176,17 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   {% module Markdown(form.get('disclaimer')) %}
 </form>
 
-<form action="{{ reverse_url('order', order['_id']) }}"
-      method="GET" role="form" style="margin-top: 20px;"
-      class="allow_leaving_without_question">
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <button type="submit" class="btn btn-default btn-block">
-          <span class="glyphicon glyphicon-remove"></span> Cancel</button>
-      </div>
-    </div>
+{# A form is required to let the class 'allow_leaving_without_question' do its job. #}
+<div class="row">
+  <div class="col-md-3">
+    <form action="{{ reverse_url('order', order['_id']) }}"
+          method="GET" role="form" style="margin-top: 20px;"
+          class="allow_leaving_without_question">
+      <button type="submit" class="btn btn-default btn-block">
+        <span class="glyphicon glyphicon-remove"></span> Cancel</button>
+    </form>
   </div>
-</form>
+</div>
 {% end %} {# block content #}
 
 {% block javascript_autofocus %}
