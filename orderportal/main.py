@@ -21,6 +21,7 @@ import orderportal.home
 import orderportal.info
 import orderportal.news
 import orderportal.order
+import orderportal.report
 import orderportal.search
 import orderportal.uimodules
 
@@ -113,6 +114,18 @@ def main():
         url(r"/api/v1/orders", orderportal.order.OrdersApiV1, name="orders_api"),
         url(r"/orders.csv", orderportal.order.OrdersCsv, name="orders_csv"),
         url(r"/orders.xlsx", orderportal.order.OrdersXlsx, name="orders_xlsx"),
+        url(r"/report", orderportal.report.ReportCreate, name="report_create"),
+        url(r"/report/([0-9a-f]{32})", orderportal.report.Report, name="report"),
+        url(
+            r"/report/([0-9a-f]{32})/edit",
+            orderportal.report.ReportEdit,
+            name="report_edit"
+        ),
+        url(
+            r"/report/([0-9a-f]{32})/logs",
+            orderportal.report.ReportLogs,
+            name="report_logs"
+        ),
         url(r"/accounts", orderportal.account.Accounts, name="accounts"),
         url(
             r"/api/v1/accounts", orderportal.account.AccountsApiV1, name="accounts_api"

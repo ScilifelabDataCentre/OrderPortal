@@ -11,7 +11,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 {% end %}
 
 {% block content %}
-{# Special case; UIModule CancelButton doesn't fit here. #}
+{# Special case; UIModule CancelButton is not appropriate here. #}
 {# A form is required to let the class 'allow_leaving_without_question' do its job. #}
 <div class="row">
   <div class="col-md-3 col-md-offset-9">
@@ -176,6 +176,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   {% module Markdown(form.get('disclaimer')) %}
 </form>
 
+{# Special case; UIModule CancelButton is not appropriate here. #}
 {# A form is required to let the class 'allow_leaving_without_question' do its job. #}
 <div class="row">
   <div class="col-md-3">

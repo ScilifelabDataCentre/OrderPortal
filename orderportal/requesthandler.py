@@ -51,7 +51,8 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def see_other(self, name, *args, **kwargs):
         """Redirect to the absolute URL given by name
-        using HTTP status 303 See Other."""
+        using HTTP status 303 See Other.
+        """
         query = kwargs.copy()
         try:
             self.set_error_flash(str(query.pop("error")))
@@ -335,6 +336,10 @@ class RequestHandler(tornado.web.RequestHandler):
         "Get all forms as a lookup with form iuid as key, form doc as value."
         view = self.db.view("form", "modified", descending=True, include_docs=True)
         return dict([(r.id, r.doc) for r in view])
+
+    def get_report(self, iuid):
+        "Get the report for the IUID."
+        return self.get_entity(iuid, doctype=constants.REPORT)
 
     def get_text(self, type, name):
         """Get the requested text by type and name.

@@ -122,10 +122,7 @@ class Form(FormMixin, RequestHandler):
         if self.get_argument("_http_method", None) == "delete":
             self.delete(iuid)
             return
-        self.check_admin()
-        raise tornado.web.HTTPError(
-            405, reason="Internal problem; POST only allowed for DELETE."
-        )
+        raise tornado.web.HTTPError(405, reason="POST only allowed for DELETE.")
 
     @tornado.web.authenticated
     def delete(self, iuid):

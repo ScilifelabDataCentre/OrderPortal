@@ -1,0 +1,53 @@
+{# Create a report for an order. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}
+Create a report for {{ terminology('order') }} {{ order['title'] }}
+{% end %}
+
+{% block body_title %}
+Create a report for {{ terminology('order') }}: {{ order['title'] }}
+{% end %}
+
+{% block action_content %}
+{% module CancelButton(reverse_url('order', order['_id'])) %}
+{% end %} {# block action_content #}
+
+{% block main_content %}
+<form action="{{ reverse_url('report_create') }}"
+      method="POST" role="form" enctype="multipart/form-data">
+  {% module xsrf_form_html() %}
+  <input type="hidden" name="order" value="{{ order['_id'] }}">
+
+  <div class="form-group has-feedback">
+    <div class="row">
+      <div class="col-md-9">
+        <label for="report">Report file</label>
+        <input type="file" name="report" id="report" class="form-control">
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 help-block">
+        The report file to upload. An HTML file will be displayed
+        in-line when clicking the link to it; other content types will
+        be downloaded as a file.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-3">
+        <label class="control-label"></label>
+        <button type="submit" class="btn btn-success btn-block">
+          <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+      </div>
+    </div>
+  </div>
+
+</form>
+{% end %} {# block main_content #}

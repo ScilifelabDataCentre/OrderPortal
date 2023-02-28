@@ -191,16 +191,6 @@
               <li id="logged-in">
                 {% module Entity(current_user, icon=False) %}
               </li>
-              <li>
-                <form action="{{ reverse_url('logout') }}"
-                      method="POST" role="form" class="navbar-form">
-                  {% module xsrf_form_html() %}
-                  <button type="submit" title="Logout"
-                          class="btn btn-default btn-sm">
-                    <span class="glyphicon glyphicon-log-out"></span>
-                  </button>
-                </form>
-              </li>
               {% end %} {# if current_user #}
               {% block search_field %}
               {% if current_user %}

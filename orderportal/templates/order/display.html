@@ -156,7 +156,64 @@
           ({{ status['description'] }})
         </td>
       </tr>
-      {% if settings['ORDER_REPORT'] %}
+      {% if settings['ORDER_REPORTS'] %}
+      <tr>
+        <th>Reports</th>
+        <td>
+          <table class="table table-condensed" style="margin-bottom: 0px;">
+            <thead>
+              <tr>
+                <th style="text-align: left;">File</th>
+                <th style="text-align: left;">Modified</th>
+                {% if am_staff %}
+                <th style="text-align: left;">Status</th>
+                <th></th>
+                {% end %} {# if am_staff #}
+              </tr>
+            </thead>
+            <tbody>
+              {% if reports %}
+              {% for report in reports %}
+              <tr>
+                <td>
+                  <a href="{{ reverse_url('report', report['_id']) }}">
+                    {{ report['name'] }}
+                  </a>
+                </td>
+                <td class="localtime">{{ report['modified'] }}</td>
+                {% if am_staff %}
+                <td>{% module Icon(report['status'], label=True) %}</td>
+                <td>
+                  <a href="{{ reverse_url('report_edit', report['_id']) }}"
+                     role="button" class="btn btn-primary btn-xs">
+                    <span class="glyphicon glyphicon-edit"></span> Edit
+                  </a>
+                </td>
+                {% end %} {# if am_staff #}
+              </tr>
+              {% end %} {# for report in reports #}
+              {% else %}
+              <tr>
+                <td colspan="2">[no reports]</td>
+              </tr>
+              {% end %}
+              {% if am_staff %}
+              <td>
+                <form action="{{ reverse_url('report_create') }}"
+                      method="GET" role="form">
+                  <input type="hidden" name="order" value="{{ order['_id'] }}">
+                  <div class="form-group" style="margin-bottom: 0px;">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                      <span class="glyphicon glyphicon-plus-sign"></span> Add report
+                    </button>
+                  </div>
+                </form>
+              </td>
+              {% end %} {# if am_staff #}
+            </tbody>
+          </table>
+        </td>
+      </tr>
       <tr>
         <th>Report</th>
         <td>
@@ -182,7 +239,7 @@
           {% end %} {# if am_admin #}
         </td>
       </tr>
-      {% end %} {# if settings['ORDER_REPORT'] #}
+      {% end %} {# if settings['ORDER_REPORTS'] #}
       <tr>
         <th>History</th>
         <td>

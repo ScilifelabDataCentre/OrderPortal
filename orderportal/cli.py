@@ -247,8 +247,8 @@ def output(identifier):
 
 @cli.command()
 @click.option("-v", "--verbose", count=True)
-def count_reports(verbose):
-    "Count the number of orders that have an old-style report attached."
+def reports(verbose):
+    "Display information about orders with reports."
     db = orderportal.database.get_db()
     view = db.view("order", "identifier", reduce=False, include_docs=True)
     order_count = 0
@@ -257,7 +257,7 @@ def count_reports(verbose):
         order_count += 1
         if row.doc.get("report"):
             if verbose:
-                click.echo(row.doc["identifier"])
+                click.echo(f"{row.doc['identifier']} old-style report")
             report_count += 1
     click.echo(f"{order_count} orders, of which {report_count} have old-style reports.")
 

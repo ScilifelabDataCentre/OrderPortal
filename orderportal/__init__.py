@@ -146,15 +146,22 @@ class Constants:
     ADMIN = "admin"
     ACCOUNT_ROLES = [USER, STAFF, ADMIN]
 
-    # Form status; hard-wired!
+    # Form statuses; hard-wired!
     TESTING = "testing"
     FORM_STATUSES = [PENDING, TESTING, ENABLED, DISABLED]
 
-    # Hard-wired order statuses; must always be present.
-    # Other statuses are defined initially in admin.DEFAULT_ORDER_STATUSES,
-    # and stored in a meta document 'order_statuses' in the database.
+    # These order statuses are hard-wired; must always be present!
+    # Other order statuses are defined initially in admin.DEFAULT_ORDER_STATUSES,
+    # and stored in a meta document 'order_statuses' in the database,
+    # which is where it is stored whether they are enabled or not.
     PREPARATION = "preparation"
     SUBMITTED = "submitted"
+
+    # Report statuses; hard-wired!
+    # PREPARATION = "preparation" Already defined above.
+    REVIEW = "review"
+    PUBLISHED = "published"
+    REPORT_STATUSES = [PREPARATION, REVIEW, PUBLISHED]
 
     # Content types (MIME types).
     HTML_MIMETYPE = "text/html"
@@ -443,7 +450,7 @@ DEFAULT_SETTINGS = dict(
     ORDER_TAGS=True,
     ORDER_USER_TAGS=True,
     ORDER_LINKS=True,
-    ORDER_REPORT=True,
+    ORDER_REPORTS=True,
     ORDERS_SEARCH_DELIMS_LINT=[":", ",", ";", "'"],
     ORDERS_SEARCH_LINT=["an", "to", "in", "on", "of", "and", "the", "is", "was", "not"],
     ACCOUNT_REGISTRATION_OPEN=True,

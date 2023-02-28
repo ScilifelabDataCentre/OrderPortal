@@ -870,6 +870,9 @@ class Order(OrderMixin, RequestHandler):
             self.see_other("home", error=error)
             return
         form = self.get_form(order["form"])
+        
+        reports = [r.doc for r in self.db.view("report", "order", include_docs=True)]
+        reports.sort(key=lambda r: r['modified'], reverse=True)
         files = []
         for filename in order.get("_attachments", []):
             if filename.startswith(constants.SYSTEM):
@@ -891,6 +894,7 @@ class Order(OrderMixin, RequestHandler):
             status=settings["ORDER_STATUSES_LOOKUP"][order["status"]],
             form=form,
             fields=form["fields"],
+            reports=reports,
             attached_files=files,
             allow_edit=self.am_admin() or self.allow_edit(order),
             allow_clone=self.allow_clone(order),
@@ -903,9 +907,7 @@ class Order(OrderMixin, RequestHandler):
         if self.get_argument("_http_method", None) == "delete":
             self.delete(iuid)
             return
-        raise tornado.web.HTTPError(
-            405, reason="Internal problem; POST only allowed for DELETE."
-        )
+        raise tornado.web.HTTPError(405, reason="POST only allowed for DELETE.")
 
     @tornado.web.authenticated
     def delete(self, iuid):
