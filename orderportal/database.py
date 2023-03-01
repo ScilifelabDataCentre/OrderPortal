@@ -382,6 +382,13 @@ var lint = {lint};
     emit(doc.history.submitted.split('-')[0], 1);
 }""",
         },
+        "obsolete_report": {    # To allow updating of obsolete report implementation.
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'order') return;
+    if (!doc.report) return;
+    emit(doc.identifier, null);
+}""",
+        },
     }
 }
 
