@@ -102,7 +102,7 @@ class Saver:
         self.doc["modified"] = utils.timestamp()
 
     def post_process(self):
-        "Perform any actions after having saved the document."
+        "Perform any actions after having saved the document. To be redefined."
         pass
 
     def log(self):

@@ -108,6 +108,18 @@ def get_json(id, type):
     return result
 
 
+def get_order_url(order):
+    "Synthesize absolute order URL when 'rqh' is not available."
+    try:
+        identifier = order["identifier"]
+    except KeyError:
+        identifier = order["_id"]
+    path = f"/order/{identifier}"
+    if settings["BASE_URL_PATH_PREFIX"]:
+        path = settings["BASE_URL_PATH_PREFIX"] + path
+    return settings["BASE_URL"].rstrip("/") + path
+
+
 def log(db, rqh, entity, changed=dict()):
     "Add a log entry for the change of the given entity."
     entry = dict(

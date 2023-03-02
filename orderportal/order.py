@@ -11,7 +11,8 @@ import zipfile
 import couchdb2
 import tornado.web
 
-from orderportal import constants, settings
+from orderportal import constants
+from orderportal import settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.fields import Fields
@@ -452,6 +453,7 @@ class OrderSaver(saver.Saver):
             self["history"][status] = date
 
     def post_process(self):
+        "Wrap up attachments delete/store, and send message if so set up."
         self.modify_attachments()
         if self.changed_status:
             self.send_message()
@@ -476,71 +478,40 @@ class OrderSaver(saver.Saver):
                     content_type=file["content_type"],
                 )
 
-    def get_order_url(self, order):
-        """Member rqh is not available when used from a stand-alone script,
-        so self.rqh.order_reverse_url cannot be used.
-        The URL has to be synthesized explicitly here."""
-        try:
-            identifier = order["identifier"]
-        except KeyError:
-            identifier = order["_id"]
-        path = "/order/{0}".format(identifier)
-        if settings["BASE_URL_PATH_PREFIX"]:
-            path = settings["BASE_URL_PATH_PREFIX"] + path
-        return settings["BASE_URL"].rstrip("/") + path
-
-    def get_account(self, email):
-        "Get the account document for the given email."
-        result = self.db.view("account", "email", key=email, include_docs=True)
-        rows = list(result)
-        if len(rows) == 1:
-            return rows[0].doc
-        else:
-            return None
-
     def send_message(self):
         "Send a message after status change."
         try:
-            template = settings["ORDER_MESSAGES"][self.doc["status"]]
+            text_template = settings["ORDER_MESSAGES"][self.doc["status"]]
         except (couchdb2.NotFoundError, KeyError):
             return
         recipients = set()
-        owner = self.get_account(self.doc["owner"])
-        # Owner account may have been deleted.
-        if owner:
-            email = owner["email"].strip().lower()
-            if "owner" in template["recipients"]:
-                recipients = set([owner["email"]])
-            if "group" in template["recipients"]:
-                for row in self.db.view(
-                    "group", "member", include_docs=True, key=email
-                ):
-                    for member in row.doc["members"]:
-                        account = self.get_account(member)
-                        if account and account["status"] == constants.ENABLED:
-                            recipients.add(account["email"])
-        if constants.ADMIN in template["recipients"]:
-            # Can't use 'get_admins', not available here.
-            result = self.db.view(
-                "account", "role", key=constants.ADMIN, include_docs=True
-            )
-            admins = [r.doc for r in result]
-            for admin in admins:
+        try:
+            owner = self.rqh.get_account(self.doc["owner"])
+        except ValueError:  # Owner account may have been deleted.
+            pass
+        else:
+            email = owner["email"]
+            if "owner" in text_template["recipients"]:
+                recipients.add(owner["email"])
+            if constants.GROUP in text_template["recipients"]:
+                for colleague in self.rqh.get_colleagues(owner["email"]):
+                    if colleague["status"] == constants.ENABLED:
+                        recipients.add(colleague["email"])
+        if constants.ADMIN in text_template["recipients"]:
+            for admin in self.rqh.get_admins():
                 if admin["status"] == constants.ENABLED:
                     recipients.add(admin["email"])
         try:
             with MessageSaver(rqh=self.rqh) as saver:
                 saver.create(
-                    template,
+                    text_template,
                     owner=self.doc["owner"],
                     title=self.doc["title"],
                     identifier=self.doc.get("identifier") or self.doc["_id"],
-                    url=self.get_order_url(self.doc),
+                    url=utils.get_order_url(self.doc),
                     tags=", ".join(self.doc.get("tags", [])),
                 )
                 saver.send(list(recipients))
-        except KeyError as error:
-            self.rqh.set_message_flash(error)
         except ValueError as error:
             self.rqh.set_error_flash(error)
 

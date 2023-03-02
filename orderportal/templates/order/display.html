@@ -160,6 +160,7 @@
       <tr>
         <th>Reports</th>
         <td>
+          {% if reports %}
           <table class="table table-condensed" style="margin-bottom: 0px;">
             <thead>
               <tr>
@@ -172,7 +173,6 @@
               </tr>
             </thead>
             <tbody>
-              {% if reports %}
               {% for report in reports %}
               <tr>
                 <td>
@@ -192,26 +192,20 @@
                 {% end %} {# if am_staff #}
               </tr>
               {% end %} {# for report in reports #}
-              {% else %}
-              <tr>
-                <td colspan="2">[no reports]</td>
-              </tr>
-              {% end %}
-              {% if am_staff %}
-              <td>
-                <form action="{{ reverse_url('report_create') }}"
-                      method="GET" role="form">
-                  <input type="hidden" name="order" value="{{ order['_id'] }}">
-                  <div class="form-group" style="margin-bottom: 0px;">
-                    <button type="submit" class="btn btn-primary btn-sm">
-                      <span class="glyphicon glyphicon-plus-sign"></span> Add report
-                    </button>
-                  </div>
-                </form>
-              </td>
-              {% end %} {# if am_staff #}
             </tbody>
           </table>
+          {% end %} {# if reports #}
+          {% if am_staff %}
+          <form action="{{ reverse_url('report_create') }}"
+                method="GET" role="form">
+            <input type="hidden" name="order" value="{{ order['_id'] }}">
+            <div class="form-group" style="margin-bottom: 0px;">
+              <button type="submit" class="btn btn-primary btn-sm">
+                <span class="glyphicon glyphicon-plus-sign"></span> Add report
+              </button>
+            </div>
+          </form>
+          {% end %} {# if am_staff #}
         </td>
       </tr>
       <tr>
@@ -226,8 +220,6 @@
           </a>
           (updated 
           <span class="localtime">{{ order['report']['timestamp'] }}</span>)
-          {% else %}
-          -
           {% end %}
           {% if am_admin %}
           <a href="{{ reverse_url('order_report_edit', order['_id']) }}"

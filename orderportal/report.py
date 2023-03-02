@@ -1,27 +1,20 @@
 "An order may have reports attached, which should got through a workflow for approval."
 
-# XXX On-going work
-
-### Real example: https://ngisweden.scilifelab.se/orders/order/5152fb14a8f0466bb1fdf95c6603a542/report
-
 import tornado.web
 
-from orderportal import constants, settings
+from orderportal import constants
+from orderportal import settings
 from orderportal import saver
 from orderportal import utils
+from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler, ApiV1Mixin
 
 
 class ReportSaver(saver.Saver):
     doctype = constants.REPORT
 
-    def set_status(self, new):
-        "Set the new status of the report."
-        if self.get("status") == new:
-            return
-        if new not in constants.REPORT_STATUSES:
-            raise ValueError(f"invalid status '{new}'")
-        self["status"] = new
+    def initialize(self):
+        self.doc["reviewers"] = {}
 
     def set_inline(self, content_type):
         "Set the 'inline' flag according to explicit argument, or content type."
@@ -29,6 +22,41 @@ class ReportSaver(saver.Saver):
             self["inline"] = utils.to_bool(self.rqh.get_argument("inline"))
         except (tornado.web.MissingArgumentError, ValueError):
             self["inline"] = content_type in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE)
+
+    def set_reviewers(self, reviewers):
+        """Set the reviewers of this report. List of email addresses given.
+        Only enabled staff accounts are accepted.
+        """
+        for reviewer in reviewers:
+            try:
+                account = self.rqh.get_account(reviewer)
+                if account["status"] != constants.ENABLED: continue
+                if account["role"] in (constants.ADMIN, constants.STAFF):
+                    self["reviewers"][account["email"]] = {"status": None}
+            except ValueError:
+                pass
+
+    def set_status(self, status=None):
+        """Set the new status of the report.
+        If none specified, set according to the presence of reviewers or not.
+        If "published" specified, then set so only if all reviewers have approved.
+        """
+        if status is None:
+            if self["reviewers"]:
+                self["status"] = constants.REVIEW
+            else:
+                self["status"] = constants.PREPARATION
+        else:
+            if status not in constants.REPORT_STATUSES:
+                raise ValueError(f"invalid status '{new}'")
+            if status == constants.PUBLISHED:
+                for reviewer in self["reviewers"].values():
+                    if reviewer["status"] != constants.APPROVED:
+                        continue
+                else:
+                    self["status"] = status
+            else:
+                self["status"] = status
 
 
 class ReportMixin:
@@ -62,8 +90,25 @@ class ReportMixin:
             return
         raise ValueError("You may not edit the report.")
 
+    def send_review_messages(self, report):
+        "Send message to reviewers."
+        if not report["reviewers"]:
+            return
+        text_template = dict(subject=f"{settings['SITE_NAME']} report review to be done.",
+                             text="Dear {site} staff,\n\nThe report '{name}' for order '{title}' requires your review.\n\nSee {url}"
+                             )
+        with MessageSaver(rqh=self) as saver:
+            order = self.get_order(report["order"])
+            saver.create(
+                text_template,
+                name=report["name"],
+                title=order["title"],
+                url=utils.get_order_url(order)
+            )
+            saver.send(report["reviewers"])
 
-class ReportCreate(RequestHandler):
+
+class ReportCreate(ReportMixin, RequestHandler):
     "Create a new report for an report."
 
     @tornado.web.authenticated
@@ -81,25 +126,27 @@ class ReportCreate(RequestHandler):
         try:
             order = self.get_order(self.get_argument("order"))
         except ValueError as error:
-            self.see_other("home", error=f"Sorry, no such {{ terminology('order') }}.")
+            self.see_other("home", error=f"Sorry, no such { utils.terminology('order') }.")
             return
         try:
             file = self.request.files["report"][0]
         except (KeyError, IndexError):
-            self.see_other("order", order["_id"], error="No file to upload given.")
+            self.see_other("order", order["_id"], error="No file uploaded.")
             return
         try:
             with ReportSaver(rqh=self) as saver:
                 saver["order"] = order["_id"]
                 saver["name"] = file.filename
                 saver.set_inline(file.content_type)
-                saver.set_status(constants.PREPARATION)
+                saver.set_reviewers(self.get_argument("reviewers", "").split())
+                saver.set_status()
             self.db.put_attachment(
                 saver.doc,
                 file.body,
                 filename=file.filename,
                 content_type=file.content_type
             )
+            self.send_review_messages(saver.doc)
         except ValueError as error:
             self.see_other("order", order["_id"], error=error)
         else:

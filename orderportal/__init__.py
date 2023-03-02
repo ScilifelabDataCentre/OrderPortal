@@ -162,6 +162,8 @@ class Constants:
     REVIEW = "review"
     PUBLISHED = "published"
     REPORT_STATUSES = [PREPARATION, REVIEW, PUBLISHED]
+    APPROVED = "approved"
+    REJECTED = "rejected"
 
     # Content types (MIME types).
     HTML_MIMETYPE = "text/html"
