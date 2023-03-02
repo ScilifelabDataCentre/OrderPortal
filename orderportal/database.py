@@ -151,6 +151,13 @@ ACCOUNT_DESIGN_DOC = {
     emit(doc.university, doc.email);
 }"""
         },
+        "login": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    if (!doc.login) return;
+    emit(doc.login, doc.email);
+}"""
+        },
     }
 }
 
@@ -395,6 +402,7 @@ var lint = {lint};
 REPORT_DESIGN_DOC = {
     "views": {
         "order": {
+            "reduce": "_count",
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'report') return;
     emit(doc.order, doc.modified);

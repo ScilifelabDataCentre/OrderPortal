@@ -67,7 +67,7 @@ class AccountSaver(saver.Saver):
 
 
 class Accounts(RequestHandler):
-    "Accounts list page."
+    "List of all accounts."
 
     @tornado.web.authenticated
     def get(self):
@@ -80,7 +80,7 @@ class Accounts(RequestHandler):
     def set_filter(self):
         "Set the filter parameters dictionary."
         self.filter = dict()
-        for key in ["university", "status", "role"]:
+        for key in ["university", "role", "status", "login"]:
             try:
                 value = self.get_argument(key)
                 if not value:
@@ -90,13 +90,14 @@ class Accounts(RequestHandler):
                 pass
 
     def get_accounts(self):
-        "Get the accounts."
-        accounts = self.filter_by_university(self.filter.get("university"))
+        "Get the accounts depending on the filter parameters."
+        accounts = self.filter_by_login(self.filter.get("login"))
+        accounts = self.filter_by_university(self.filter.get("university"), accounts=accounts)
         accounts = self.filter_by_role(self.filter.get("role"), accounts=accounts)
         accounts = self.filter_by_status(self.filter.get("status"), accounts=accounts)
-        # No filter; all accounts
+        # Get all accounts if no filter produces anything.
         if accounts is None:
-            view = self.db.view("account", "email", include_docs=True)
+            view = self.db.view("account", "all", reduce=False, include_docs=True)
             accounts = [r.doc for r in view]
         # This is optimized for retrieval speed. The single-valued
         # function 'get_account_order_count' is not good enough here.
@@ -111,8 +112,25 @@ class Accounts(RequestHandler):
             )
         return accounts
 
+    def filter_by_login(self, login):
+        """Return accounts by last login.
+        If no parameter value, assume 'last year'.
+        If 'whenever', then return None; this is handled correctly by later filters.
+        """
+        if not login or login == 'last year':
+            view = self.db.view(
+                "account",
+                "login",
+                startkey=utils.timestamp(days=-366), # Allow leap year.
+                endkey=utils.timestamp(),
+                include_docs=True
+            )
+            return [r.doc for r in view]
+        else:
+            return None
+
     def filter_by_university(self, university, accounts=None):
-        "Return accounts list if any university filter, or None if none."
+        "Return accounts list if any university filter, or the input accounts if none."
         if university == "[other]":
             if accounts is None:
                 view = self.db.view("account", "email", include_docs=True)
@@ -131,7 +149,7 @@ class Accounts(RequestHandler):
         return accounts
 
     def filter_by_role(self, role, accounts=None):
-        "Return accounts list if any role filter, or None if none."
+        "Return accounts list if any role filter, or the input accounts if none."
         if role:
             if accounts is None:
                 view = self.db.view("account", "role", key=role, include_docs=True)
@@ -141,7 +159,7 @@ class Accounts(RequestHandler):
         return accounts
 
     def filter_by_status(self, status, accounts=None):
-        "Return accounts list if any status filter, or None if none."
+        "Return accounts list if any status filter, or the input if none."
         if status:
             if accounts is None:
                 view = self.db.view("account", "status", key=status, include_docs=True)
@@ -310,7 +328,7 @@ class AccountsXlsx(AccountsCsv):
 
 
 class AccountMixin:
-    "Mixin for various useful methods."
+    "Mixin for access check methods."
 
     def allow_read(self, account):
         "Is the account readable by the current user?"
@@ -344,7 +362,7 @@ class AccountMixin:
 
 
 class Account(AccountMixin, RequestHandler):
-    "Account page."
+    "Display account."
 
     @tornado.web.authenticated
     def get(self, email):
@@ -507,7 +525,7 @@ class AccountApiV1(AccountMixin, RequestHandler):
 
 
 class AccountOrdersMixin:
-    "Mixin containing access tests."
+    "Mixin for access check methods."
 
     def allow_read(self, account):
         "Is the account readable by the current user?"
@@ -542,7 +560,7 @@ class AccountOrdersMixin:
 
 
 class AccountOrders(AccountOrdersMixin, RequestHandler):
-    "Page for a list of all orders for an account."
+    "List all orders for an account."
 
     @tornado.web.authenticated
     def get(self, email):
@@ -624,7 +642,7 @@ class AccountOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandler):
 
 
 class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
-    "Page for a list of all orders for the groups of an account."
+    "List all orders for the groups of an account."
 
     @tornado.web.authenticated
     def get(self, email):
@@ -689,7 +707,7 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandl
 
 
 class AccountLogs(AccountMixin, RequestHandler):
-    "Account log entries page."
+    "Display log entries for an account."
 
     @tornado.web.authenticated
     def get(self, email):
@@ -707,7 +725,7 @@ class AccountLogs(AccountMixin, RequestHandler):
 
 
 class AccountMessages(AccountMixin, RequestHandler):
-    "Account messages list page."
+    "List messages for an account."
 
     @tornado.web.authenticated
     def get(self, email):
@@ -738,7 +756,7 @@ class AccountMessages(AccountMixin, RequestHandler):
 
 
 class AccountEdit(AccountMixin, RequestHandler):
-    "Page for editing account information."
+    "Edit account information."
 
     @tornado.web.authenticated
     def get(self, email):
@@ -813,6 +831,8 @@ class AccountEdit(AccountMixin, RequestHandler):
 
 
 class LoginMixin:
+    "Mixin for login/logout methods."
+
     def do_login(self, account):
         self.set_secure_cookie(
             constants.USER_COOKIE,
@@ -1006,7 +1026,7 @@ class Password(LoginMixin, RequestHandler):
 
 
 class Register(RequestHandler):
-    "Register a new account account."
+    "Register a new account."
 
     KEYS = [
         "email",

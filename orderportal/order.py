@@ -1560,7 +1560,7 @@ class OrderReportEdit(OrderMixin, RequestHandler):
 
 
 class Orders(RequestHandler):
-    "Orders list page."
+    "List of orders."
 
     @tornado.web.authenticated
     def get(self):

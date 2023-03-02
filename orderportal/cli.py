@@ -55,13 +55,22 @@ def initialize():
 
 
 @cli.command()
-def counts():
+@click.option("-v", "--verbose", count=True)
+def counts(verbose):
     "Output counts of database entities."
     db = orderportal.database.get_db()
     orderportal.database.update_design_documents(db)
     click.echo(f"{orderportal.database.get_count(db, 'order', 'owner'):>5} orders")
     click.echo(f"{orderportal.database.get_count(db, 'form', 'all'):>5} forms")
     click.echo(f"{orderportal.database.get_count(db, 'account', 'all'):>5} accounts")
+    click.echo(f"{orderportal.database.get_count(db, 'report', 'order'):>5} reports")
+
+    count = 0
+    for row in db.view("order", "obsolete_report", reduce=False, include_docs=True):
+        if verbose:
+            click.echo(f"{row.doc['identifier']} has an obsolete report.")
+        count += 1
+    click.echo(f"{count:>5} obsolete reports")
 
 
 @cli.command()
@@ -243,23 +252,6 @@ def output(identifier):
     if doc is None:
         raise click.ClickException("No such item in the database.")
     click.echo(json.dumps(doc, ensure_ascii=False, indent=2))
-
-
-@cli.command()
-@click.option("-v", "--verbose", count=True)
-def reports(verbose):
-    "Display information about orders with reports."
-    db = orderportal.database.get_db()
-    view = db.view("order", "identifier", reduce=False, include_docs=True)
-    order_count = 0
-    report_count = 0
-    for row in view:
-        order_count += 1
-        if row.doc.get("report"):
-            if verbose:
-                click.echo(f"{row.doc['identifier']} old-style report")
-            report_count += 1
-    click.echo(f"{order_count} orders, of which {report_count} have old-style reports.")
 
 
 if __name__ == "__main__":

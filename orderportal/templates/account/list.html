@@ -63,6 +63,17 @@
           {% end %}
         </select>
       </div>
+      <div class="form-group">
+        <select name="login" id="login" class="form-control refresh">
+          {% if not filter.get('login') or filter['login'] == 'last year' %}
+          <option selected value="last year">Login last year</option>
+          <option value="whenever">Login whenever</option>
+          {% elif filter.get('login') == 'whenever' %}
+          <option value="last year">Login last year</option>
+          <option selected value="whenever">Login whenever</option>
+          {% end %}
+        </select>
+      </div>
     </div>
   </div>
 </form>
