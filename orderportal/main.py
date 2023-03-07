@@ -331,11 +331,7 @@ def main():
             orderportal.admin.OrderMessages,
             name="admin_order_messages",
         ),
-        url(
-            r"/admin/account",
-            orderportal.admin.Account,
-            name="admin_account",
-        ),
+        url(r"/admin/account", orderportal.admin.Account, name="admin_account"),
         url(
             r"/admin/account_messages",
             orderportal.admin.AccountMessages,

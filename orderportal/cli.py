@@ -130,8 +130,8 @@ def undump(dumpfile, progressbar):
         db.delete(doc)
         doc.pop("_rev")
     ndocs, nfiles = db.undump(dumpfile, progressbar=progressbar)
-    # NOTE: Meta documents must not have these id's; these are henceforth banned.
-    for id in constants.BANNED_META_IDS:
+    # NOTE: Meta documents must not have these id's; these are henceforth forbidden.
+    for id in constants.FORBIDDEN_META_IDS:
         try:
             doc = db[id]
             db.delete(doc)

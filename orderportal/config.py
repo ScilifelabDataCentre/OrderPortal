@@ -90,7 +90,7 @@ def load_settings_from_file():
     filepath = settings.get("ORDER_MESSAGES_FILE")
     if filepath:
         filepath = os.path.join(settings["SITE_DIR"], filepath)
-        logger.info(f"order messages file: {filepath}")
+        logger.info(f"Order messages file: {filepath}")
         with open(filepath) as infile:
             settings["ORDER_MESSAGES"] = yaml.safe_load(infile) or {}
     else:
@@ -100,7 +100,7 @@ def load_settings_from_file():
     filepath = settings.get("UNIVERSITIES_FILE")
     if filepath:
         filepath = os.path.join(settings["SITE_DIR"], filepath)
-        logger.info(f"universities lookup file: {filepath}")
+        logger.info(f"Universities lookup file: {filepath}")
         with open(filepath) as infile:
             unis = yaml.safe_load(infile) or {}
         unis = list(unis.items())
@@ -113,7 +113,7 @@ def load_settings_from_file():
     filepath = settings.get("SUBJECT_TERMS_FILE")
     if filepath:
         filepath = os.path.join(settings["SITE_DIR"], filepath)
-        logger.info(f"subject terms file: {filepath}")
+        logger.info(f"Subject terms file: {filepath}")
         with open(filepath) as infile:
             settings["SUBJECT_TERMS"] = yaml.safe_load(infile) or []
     else:
@@ -140,7 +140,7 @@ def load_settings_from_db(db):
     doc = db["order_statuses"]
     settings["ORDER_STATUSES"] = doc["statuses"]
     settings["ORDER_TRANSITIONS"] = doc["transitions"]
-    logger.info("loaded order statuses from database into 'settings'")
+    logger.info("Loaded order statuses from database into 'settings'.")
 
     doc = db["orders_list"]
     settings["ORDERS_LIST_OWNER_UNIVERSITY"] = doc.get("owner_university", False)
@@ -153,7 +153,20 @@ def load_settings_from_db(db):
     settings["DISPLAY_ORDERS_MOST_RECENT"] = doc["max_most_recent"]
     settings["DEFAULT_ORDER_COLUMN"] = doc["default_order_column"]
     settings["DEFAULT_ORDER_SORT"] = doc["default_order_sort"]
-    logger.info("loaded orders list settings from database into 'settings'")
+    logger.info("Loaded orders list settings from database into 'settings'.")
+
+    doc = db["account"]
+    settings["ACCOUNT_REGISTRATION_OPEN"] = doc["registration_open"]
+    settings["ACCOUNT_PI_INFO"] = doc["pi_info"]
+    settings["ACCOUNT_ORCID_INFO"] = doc["orcid_info"]
+    settings["ACCOUNT_POSTAL_INFO"] = doc["postal_info"]
+    settings["ACCOUNT_INVOICE_INFO"] = doc["invoice_info"]
+    settings["ACCOUNT_INVOICE_REF_REQUIRED"] = doc["invoice_ref_required"]
+    settings["ACCOUNT_FUNDER_INFO_GENDER"] = doc["funder_info_gender"]
+    settings["ACCOUNT_FUNDER_INFO_GROUP_SIZE"] = doc["funder_info_group_size"]
+    settings["ACCOUNT_FUNDER_INFO_SUBJECT"] = doc["funder_info_subject"]
+    settings["ACCOUNT_DEFAULT_COUNTRY_CODE"] = doc["default_country_code"]
+    logger.info("Loaded account settings from database into 'settings'.")
 
     # Lookup for the enabled statuses.
     settings["ORDER_STATUSES_LOOKUP"] = dict(

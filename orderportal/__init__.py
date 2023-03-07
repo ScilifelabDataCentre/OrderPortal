@@ -116,9 +116,9 @@ class Constants:
     # Step for use with input type 'float'.
     FLOAT_STEP = "0.0000001"
 
-    # Banned meta document id's; have changed format or been removed.
+    # Forbidden meta document id's; have changed format or been removed.
     # Re-using these id's would likely create backwards incompatibility issues.
-    BANNED_META_IDS = frozenset(["account_messages", "order_messages", "global_modes"])
+    FORBIDDEN_META_IDS = frozenset(["account_messages","order_messages","global_modes"])
 
     # Text types.
     DISPLAY = "display"
@@ -436,9 +436,6 @@ DEFAULT_SETTINGS = dict(
     SITE_HOST_URL=None,
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
-    DISPLAY_MENU_LIGHT=False,
-    DISPLAY_MENU_ITEM_URL=None,
-    DISPLAY_MENU_ITEM_TEXT=None,
     ORDER_MESSAGES_FILE="order_messages.yaml",
     UNIVERSITIES_FILE="swedish_universities.yaml",
     SUBJECT_TERMS_FILE="subject_terms.yaml",
@@ -455,16 +452,16 @@ DEFAULT_SETTINGS = dict(
     ORDER_REPORTS=True,
     ORDERS_SEARCH_DELIMS_LINT=[":", ",", ";", "'"],
     ORDERS_SEARCH_LINT=["an", "to", "in", "on", "of", "and", "the", "is", "was", "not"],
-    ACCOUNT_REGISTRATION_OPEN=True,
-    ACCOUNT_PI_INFO=True,
-    ACCOUNT_ORCID_INFO=True,
-    ACCOUNT_POSTAL_INFO=True,
-    ACCOUNT_INVOICE_INFO=True,
-    ACCOUNT_INVOICE_REF_REQUIRED=False,
-    ACCOUNT_FUNDER_INFO_GENDER=True,
-    ACCOUNT_FUNDER_INFO_GROUP_SIZE=True,
-    ACCOUNT_FUNDER_INFO_SUBJECT=True,
-    ACCOUNT_DEFAULT_COUNTRY_CODE="SE",
+    # ACCOUNT_REGISTRATION_OPEN=True,
+    # ACCOUNT_PI_INFO=True,
+    # ACCOUNT_ORCID_INFO=True,
+    # ACCOUNT_POSTAL_INFO=True,
+    # ACCOUNT_INVOICE_INFO=True,
+    # ACCOUNT_INVOICE_REF_REQUIRED=False,
+    # ACCOUNT_FUNDER_INFO_GENDER=True,
+    # ACCOUNT_FUNDER_INFO_GROUP_SIZE=True,
+    # ACCOUNT_FUNDER_INFO_SUBJECT=True,
+    # ACCOUNT_DEFAULT_COUNTRY_CODE="SE",
     MAIL_SERVER=None,  # If not set, then no emails can be sent.
     MAIL_DEFAULT_SENDER=None,  # If not set, MAIL_USERNAME will be used.
     MAIL_PORT=25,
@@ -474,6 +471,9 @@ DEFAULT_SETTINGS = dict(
     MAIL_USERNAME=None,
     MAIL_PASSWORD=None,
     MAIL_REPLY_TO=None,
+    DISPLAY_MENU_LIGHT=False,
+    DISPLAY_MENU_ITEM_URL=None,
+    DISPLAY_MENU_ITEM_TEXT=None,
     DISPLAY_DEFAULT_PAGE_SIZE=25,  # Number of paged items in a table.
     DISPLAY_MAX_RECENT_ORDERS=10,  # Max number in home page for admin and staff.
     DISPLAY_MAX_PENDING_ACCOUNTS=10,  # Max number in home page for admin and staff.

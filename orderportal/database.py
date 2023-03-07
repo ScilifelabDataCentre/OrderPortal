@@ -78,6 +78,7 @@ def get_counts(db):
         n_orders=get_count(db, "order", "status"),
         n_forms=get_count(db, "form", "all"),
         n_accounts=get_count(db, "account", "all"),
+        n_reports=get_count(db, "report", "order"),
         n_documents=len(db),
     )
 

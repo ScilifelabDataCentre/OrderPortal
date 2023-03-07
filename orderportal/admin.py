@@ -27,7 +27,7 @@ class MetaSaver(saver.Saver):
     doctype = constants.META
 
     def set_id(self, id):
-        if id in constants.BANNED_META_IDS:
+        if id in constants.FORBIDDEN_META_IDS:
             raise ValueError(f"trying to use a banned meta document name '{id}'")
         self.doc["_id"] = id
 
@@ -139,7 +139,7 @@ def update_meta_documents(db):
             saver.set_id("order_statuses")
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
-        logger.info("saved order statuses to database")
+        logger.info("Saved order statuses to database.")
 
     ### As of version 7.0, the layout of the transitions data ha been changed
     ### to a dict having (key: source status, value: dict of target statues
@@ -161,10 +161,10 @@ def update_meta_documents(db):
         with MetaSaver(doc=doc, db=db) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
-        logger.info("saved updated order transitions to database")
+        logger.info("Saved updated order transitions to database.")
 
-    # As of version 7.0.3, items to show in the order list is stored
-    # in the database, not in the settings file.
+    # As of version 7.0.3, items to show in the order list
+    # are stored in the database, not in the settings file.
     if "orders_list" not in db:
         with MetaSaver(db=db) as saver:
             saver.set_id("orders_list")
@@ -177,13 +177,30 @@ def update_meta_documents(db):
             saver["max_most_recent"] = settings.get("DISPLAY_ORDERS_MOST_RECENT", 500)
             saver["default_order_column"] = "modified"
             saver["default_order_sort"] = "desc"
-        logger.info("saved orders list settings to database")
+        logger.info("Saved orders list settings to database.")
 
     # Re-introduce order list filters, this time separately from orders list fields.
     doc = db["orders_list"]
     if "filters" not in doc:
         with MetaSaver(doc=doc, db=db) as saver:
             saver["filters"] = []
+
+    # As of version 9.1.0, all settings pertaining to the account entities
+    # are stored in the database, not the settings file.
+    if "account" not in db:
+        with MetaSaver(db=db) as saver:
+            saver.set_id("account")
+            saver["registration_open"] = settings.get("ACCOUNT_REGISTRATION_OPEN", True)
+            saver["pi_info"] = settings.get("ACCOUNT_PI_INFO", True)
+            saver["orcid_info"] = settings.get("ACCOUNT_ORCID_INFO", True)
+            saver["postal_info"] = settings.get("ACCOUNT_POSTAL_INFO", True)
+            saver["invoice_info"] = settings.get("ACCOUNT_INVOICE_INFO", True)
+            saver["invoice_ref_required"] = settings.get("ACCOUNT_INVOICE_REF_REQUIRED", False)
+            saver["funder_info_gender"] = settings.get("ACCOUNT_FUNDER_INFO_GENDER", True)
+            saver["funder_info_group_size"] = settings.get("ACCOUNT_FUNDER_INFO_GROUP_SIZE", True)
+            saver["funder_info_subject"] = settings.get("ACCOUNT_FUNDER_INFO_SUBJECT", True)
+            saver["default_country_code"] = settings.get("DEFAULT_COUNTRY_CODE", "SE")
+        logger.info("Saved account settings to database.")
 
 
 class TextSaver(saver.Saver):
@@ -501,7 +518,7 @@ class OrderTransitionsEdit(RequestHandler):
 
 
 class OrdersList(RequestHandler):
-    "Orders list configuration."
+    "Display and edit orders list configuration."
 
     @tornado.web.authenticated
     def get(self):
@@ -578,7 +595,7 @@ class OrdersList(RequestHandler):
             else:
                 saver["default_order_sort"] = "desc"
         orderportal.config.load_settings_from_db(self.db)
-        self.set_message_flash("Saved configuration.")
+        self.set_message_flash("Saved orders list configuration.")
         self.see_other("admin_orders_list")
 
 
@@ -597,12 +614,43 @@ class Account(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin/account_config.html")
+        self.render("admin/account.html")
 
     @tornado.web.authenticated
     def post(self):
         self.check_admin()
-        self.set_message_flash("Saved configuration.")
+        doc = self.db["account"]
+        with MetaSaver(doc=doc, rqh=self) as saver:
+            saver["registration_open"] = utils.to_bool(
+                self.get_argument("registration_open", False)
+            )
+            saver["pi_info"] = utils.to_bool(
+                self.get_argument("pi_info", False)
+            )
+            saver["orcid_info"] = utils.to_bool(
+                self.get_argument("orcid_info", False)
+            )
+            saver["postal_info"] = utils.to_bool(
+                self.get_argument("postal_info", False)
+            )
+            saver["invoice_info"] = utils.to_bool(
+                self.get_argument("invoice_info", False)
+            )
+            saver["invoice_ref_required"] = utils.to_bool(
+                self.get_argument("invoice_ref_required", False)
+            )
+            saver["funder_info_gender"] = utils.to_bool(
+                self.get_argument("funder_info_gender", False)
+            )
+            saver["funder_info_group_size"] = utils.to_bool(
+                self.get_argument("funder_info_group_size", False)
+            )
+            saver["funder_info_subject"] = utils.to_bool(
+                self.get_argument("funder_info_subject", False)
+            )
+            saver["default_country_code"] = self.get_argument("default_country_code", "SE")
+        orderportal.config.load_settings_from_db(self.db)
+        self.set_message_flash("Saved account configuration.")
         self.see_other("admin_account")
 
 
