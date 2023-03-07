@@ -336,7 +336,7 @@ ORDER_DESIGN_DOC = {
 }"""
         },
         "keyword": {  # order/keyword
-            # NOTE: The 'map' function body is modified in utils.load_design_documents.
+            # NOTE: The 'map' function body is modified in 'update_design_documents'.
             "map": """function(doc) {{
     if (doc.orderportal_doctype !== 'order') return;
     var cleaned = doc.title.replace(/[{delims_lint}]/g, " ").toLowerCase();

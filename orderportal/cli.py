@@ -110,7 +110,7 @@ def undump(dumpfile, progressbar):
         db = orderportal.database.get_db()
     except KeyError as error:
         raise click.ClickException(str(error))
-    utils.load_design_documents(db)  # Just in case; probably not really needed.
+    orderportal.database.update_design_documents(db)
     if (
         orderportal.database.get_count(db, "account", "all") != 0
         or orderportal.database.get_count(db, "form", "all") != 0
