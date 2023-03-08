@@ -55,56 +55,52 @@ class OrderSaver(saver.Saver):
             self["identifier"] = settings["ORDER_IDENTIFIER_FORMAT"].format(counter)
 
     def autopopulate(self):
-        "Autopopulate fields if defined."
-        # First try to set the value of a field from the corresponding
-        # value defined for the account's university.
-        autopop = settings.get("ORDER_AUTOPOPULATE")
-        if not autopop:
-            return
-        try:
-            uni_fields = settings["UNIVERSITIES"][self.rqh.current_user["university"]][
-                "fields"
-            ]
-        except KeyError:
-            uni_fields = {}
-        for target in autopop:
-            if target not in self.fields:
-                continue
-            value = uni_fields.get(target)
-            # Terrible kludge! If it looks like a country field,
-            # then attempt to translate from country code to name.
-            if "country" in target:
-                try:
-                    value = settings["COUNTRIES_LOOKUP"][value]
-                except KeyError:
-                    pass
-            self["fields"][target] = value
-        # Next try to set the value of a field from the corresponding
-        # value defined for the account. For use with e.g. invoice address.
-        # Do this only if not done already from university data.
-        for target, source in list(autopop.items()):
-            if target not in self.fields:
-                continue
-            value = self["fields"].get(target)
-            if isinstance(value, str):
-                if value:
-                    continue
-            elif value is not None:  # Value 0 (zero) must be possible to set
-                continue
-            try:
-                key1, key2 = source.split(".")
-            except ValueError:
-                value = self.rqh.current_user.get(source)
-            else:
-                value = self.rqh.current_user.get(key1, {}).get(key2)
-            # Terrible kludge! If it looks like a country field,
-            # then attempt to translate from country code to name.
-            if "country" in target:
-                try:
-                    value = settings["COUNTRIES_LOOKUP"][value]
-                except KeyError:
-                    pass
-            self["fields"][target] = value
+        """Autopopulate fields if defined.
+        Go through the list of sources one by one. There are too many special cases.
+        NOTE: Must be kept in sync with constants.ORDER_AUTOPOPULATE_SOURCES!
+        """
+        account = self.rqh.current_user
+        autopopulate = settings["ORDER_AUTOPOPULATE"]
+
+        target = autopopulate.get("university")
+        if target and target in self["fields"]:
+            # Translate university abbreviation to full name.
+            self["fields"][target] = settings["UNIVERSITIES"].get(account["university"], {}).get("name")
+        target = autopopulate.get("department")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["department"]
+        target = autopopulate.get("phone")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["phone"]
+        target = autopopulate.get("invoice_ref")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["invoice_ref"]
+        target = autopopulate.get("address.address")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["address"]["address"]
+        target = autopopulate.get("address.zip")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["address"]["zip"]
+        target = autopopulate.get("address.city")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["address"]["city"]
+        target = autopopulate.get("address.country")
+        if target and target in self["fields"]:
+            # Translate country abbreviation to full name.
+            self["fields"][target] = constants.COUNTRIES.get(account["address"]["country"])
+        target = autopopulate.get("invoice_address.address")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["invoice_address"]["address"]
+        target = autopopulate.get("invoice_address.zip")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["invoice_address"]["zip"]
+        target = autopopulate.get("invoice_address.city")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["invoice_address"]["city"]
+        target = autopopulate.get("invoice_address.country")
+        if target and target in self["fields"]:
+            # Translate country abbreviation to full name.
+            self["fields"][target] = constants.COUNTRIES.get(account["invoice_address"]["country"])
 
     def add_file(self, infile):
         "Add the given file to the files. Return the unique filename."

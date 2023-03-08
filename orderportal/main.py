@@ -326,6 +326,7 @@ def main():
             orderportal.admin.OrderTransitionsEdit,
             name="admin_order_transitions_edit",
         ),
+        url(r"/admin/order", orderportal.admin.Order, name="admin_order"),
         url(
             r"/admin/order_messages",
             orderportal.admin.OrderMessages,

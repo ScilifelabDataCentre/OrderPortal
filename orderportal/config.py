@@ -142,6 +142,17 @@ def load_settings_from_db(db):
     settings["ORDER_TRANSITIONS"] = doc["transitions"]
     logger.info("Loaded order statuses from database into 'settings'.")
 
+    doc = db["order"]
+    settings["ORDER_CREATE_USER"] = doc.get("create_user", True)
+    settings["ORDER_AUTOPOPULATE"] = doc.get("autopopulate", {}) or {}
+    settings["ORDER_TAGS"] = doc.get("tags", True)
+    settings["ORDER_USER_TAGS"] = doc.get("user_tags", True)
+    settings["ORDER_LINKS"] = doc.get("links", True)
+    settings["ORDER_REPORTS"] = doc.get("reports", True)
+    settings["DISPLAY_MAX_RECENT_ORDERS"] = doc.get("display_max_recent", 10)
+    settings["TERMINOLOGY"] = doc.get("terminology", {})
+    logger.info("Loaded order settings from database into 'settings'.")
+
     doc = db["orders_list"]
     settings["ORDERS_LIST_OWNER_UNIVERSITY"] = doc.get("owner_university", False)
     settings["ORDERS_LIST_OWNER_DEPARTMENT"] = doc.get("owner_department", False)

@@ -55,7 +55,7 @@ class Search(RequestHandler):
                 orders[id] = self.get_order(id)
         term = (
             "".join(
-                [c in settings["ORDERS_SEARCH_DELIMS_LINT"] and " " or c for c in orig]
+                [c in constants.ORDERS_SEARCH_DELIMS_LINT and " " or c for c in orig]
             )
             .strip()
             .lower()
@@ -63,7 +63,7 @@ class Search(RequestHandler):
         parts = [
             part
             for part in term.split()
-            if part and len(part) >= 2 and part not in settings["ORDERS_SEARCH_LINT"]
+            if part and len(part) >= 2 and part not in constants.ORDERS_SEARCH_LINT
         ]
         # Search order titles for the parts extracted from search term.
         id_sets = []

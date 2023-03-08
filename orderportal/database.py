@@ -47,8 +47,8 @@ def update_design_documents(db):
         logger.info("Updated 'news' design document.")
     # Replace variables in the function body according to 'settings'.
     mapfunc = ORDER_DESIGN_DOC["views"]["keyword"]["map"]
-    delims_lint = "".join(settings["ORDERS_SEARCH_DELIMS_LINT"])
-    lint = "{%s}" % ", ".join(["'%s': 1" % w for w in settings["ORDERS_SEARCH_LINT"]])
+    delims_lint = "".join(constants.ORDERS_SEARCH_DELIMS_LINT)
+    lint = "{%s}" % ", ".join(["'%s': 1" % w for w in constants.ORDERS_SEARCH_LINT])
     ORDER_DESIGN_DOC["views"]["keyword"]["map"] = mapfunc.format(
         delims_lint=delims_lint, lint=lint
     )

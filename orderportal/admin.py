@@ -40,6 +40,9 @@ def update_meta_documents(db):
     """Update or delete meta documents for the current version.
     This has to be checked each time the server starts because
     the database may have been loaded with data from an old dump.
+
+    Yes, this is messy. But it has to be backwards compatible,
+    since old dump files may have to be read in and handled correctly.
     """
     logger = logging.getLogger("orderportal")
     ### As of version 6.0 (or thereabouts), there are no longer any global modes.
@@ -185,7 +188,7 @@ def update_meta_documents(db):
         with MetaSaver(doc=doc, db=db) as saver:
             saver["filters"] = []
 
-    # As of version 9.1.0, all settings pertaining to the account entities
+    # As of version 9.1.0, settings pertaining to the account entities
     # are stored in the database, not the settings file.
     if "account" not in db:
         with MetaSaver(db=db) as saver:
@@ -201,6 +204,25 @@ def update_meta_documents(db):
             saver["funder_info_subject"] = settings.get("ACCOUNT_FUNDER_INFO_SUBJECT", True)
             saver["default_country_code"] = settings.get("DEFAULT_COUNTRY_CODE", "SE")
         logger.info("Saved account settings to database.")
+
+    # As of version 9.1.0, many settings pertaining to order entities
+    # are stored on the database, not the settings file.
+    # Transfer the settings to the existing "order" document.
+    doc = db["order"]
+    if "create_user" not in doc:
+        with MetaSaver(doc=doc, db=db) as saver:
+            saver["create_user"] = settings.get("ORDER_CREATE_USER", True)
+            # Flip key/value in autopopulate!
+            autopopulate = settings.get("ORDER_AUTOPOPULATE", {}) or {}
+            saver["autopopulate"] = dict([(v, k) for k, v in autopopulate.items()])
+            saver["tags"] = settings.get("ORDER_TAGS", True)
+            saver["user_tags"] = settings.get("ORDER_USER_TAGS", True)
+            saver["links"] = settings.get("ORDER_LINKS", True)
+            saver["reports"] = settings.get("ORDER_REPORTS", True)
+            saver["display_max_recent"] = settings.get("DISPLAY_MAX_RECENT_ORDERS", 10)
+            # XXX remains to be done!
+            saver["terminology"] = settings.get("TERMINOLOGY", {})
+        logger.info("Saved more order settings to database.")
 
 
 class TextSaver(saver.Saver):
@@ -344,6 +366,39 @@ class TextEdit(RequestHandler):
         settings[doc["type"]][doc["name"]]["text"] = text
         url = self.get_argument("origin", self.absolute_reverse_url("texts"))
         self.redirect(url, status=303)
+
+
+class Order(RequestHandler):
+    "Display and edit the order configuration."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        doc = self.db["order"]
+        self.render("admin/order.html")
+
+    @tornado.web.authenticated
+    def post(self):
+        self.check_admin()
+        doc = self.db["order"]
+        with MetaSaver(doc=doc, rqh=self) as saver:
+            saver["create_user"] = utils.to_bool(
+                self.get_argument("create_user", False)
+            )
+            for source in constants.ORDER_AUTOPOPULATE_SOURCES:
+                saver["autopopulate"][source] = self.get_argument(source) or None
+            saver["tags"] = utils.to_bool(self.get_argument("tags", False))
+            saver["user_tags"] = utils.to_bool(self.get_argument("user_tags", False))
+            saver["links"] = utils.to_bool(self.get_argument("links", False))
+            saver["reports"] = utils.to_bool(self.get_argument("reports", False))
+            try:
+                saver["display_max_recent"] = max(0, int(self.get_argument("display_max_recent", 10)))
+            except (TypeError, ValueError):
+                pass
+            # XXX terminology remains to be done!
+        orderportal.config.load_settings_from_db(self.db)
+        self.set_message_flash("Saved order configuration.")
+        self.see_other("admin_order")
 
 
 class OrderStatuses(RequestHandler):
@@ -600,7 +655,7 @@ class OrdersList(RequestHandler):
 
 
 class OrderMessages(RequestHandler):
-    "Page for displaying order messages configuration."
+    "Display order messages configuration."
 
     @tornado.web.authenticated
     def get(self):
@@ -609,7 +664,7 @@ class OrderMessages(RequestHandler):
 
 
 class Account(RequestHandler):
-    "Page for display and edit of account configuration."
+    "Display and edit of account configuration."
 
     @tornado.web.authenticated
     def get(self):
