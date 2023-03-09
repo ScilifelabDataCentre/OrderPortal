@@ -7,9 +7,7 @@
 {% end %}
 
 {% block body_title %}
-{% module Icon('order', title='Orders', label=True) %}
-{% module Icon('group', title='Groups', label=True) %}
-{% module Entity(account) %}
+{{ terminology('Orders') }} in groups of {% module AccountLink(account=account) %}
 {% end %}
 
 {% block body_header_alt_format %}
@@ -62,7 +60,7 @@
       <tbody>
         {% for order in orders %}
         <tr>
-          <td>{% module Entity(order, icon=False) %}</td>
+          <td>{% module OrderLink(order) %}</td>
           <td>{{ order.get('title') or '[no title]' }}</td>
           {% if am_staff %}
           <td>
@@ -71,6 +69,7 @@
             </a>
           </td>
           {% end %} {# if am_staff #}
+          <td>{% module AccountLink(email=order['owner'], name=True) %}</td>
           {% if settings['ORDERS_LIST_TAGS'] %}
           <td>{% module Tags(order.get('tags', [])) %}</td>
           {% end %}

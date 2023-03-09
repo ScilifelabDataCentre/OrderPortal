@@ -5,8 +5,7 @@
 {% block head_title %}{{ terminology('Orders') }} {{ account['email'] }}{% end %}
 
 {% block body_title %}
-{% module Icon('order', title='Orders', label=True) %}
-{% module Entity(account) %}
+{{ terminology('Orders') }} {% module AccountLink(account=account) %}
 {% end %}
 
 {% block body_header_alt_format %}
@@ -59,7 +58,7 @@
       <tbody>
         {% for order in orders %}
         <tr>
-          <td>{% module Entity(order, icon=False) %}</td>
+          <td>{% module OrderLink(order) %}</td>
           <td>{{ order.get('title') or '[no title]' }}</td>
           {% if am_staff %}
           <td>

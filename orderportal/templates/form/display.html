@@ -156,9 +156,7 @@
         <th>Modified</th>
         <td>
           <span class="localtime">{{ form['modified'] }}</span>
-          <a href="{{ reverse_url('form_logs', form['_id']) }}">
-            {% module Icon('logs', label=True) %}
-          </a>
+          {% module LogsLink(form) %}
         </td>
       </tr>
       <tr>

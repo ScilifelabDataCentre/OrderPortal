@@ -196,9 +196,7 @@
           <div>
             <ul class="nav navbar-nav navbar-right">
               {% if current_user %}
-              <li id="logged-in">
-                {% module Entity(current_user, icon=False) %}
-              </li>
+              <li id="logged-in">{% module AccountLink(account=current_user) %}</li>
               {% end %} {# if current_user #}
               {% block search_field %}
               {% if current_user %}

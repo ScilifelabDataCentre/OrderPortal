@@ -93,9 +93,7 @@
           </td>
 
           <td>
-            <a href="{{ reverse_url('file_logs', file['_id']) }}">
-              {% module Icon('logs', label=True) %}
-            </a>
+            {% module LogsLink(file) %}
           </td>
           {% end %} {# if am_admin #}
 

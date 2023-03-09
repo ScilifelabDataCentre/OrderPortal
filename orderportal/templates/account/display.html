@@ -51,12 +51,7 @@
       <table>
         {% for group in groups %}
         <tr>
-          <td>
-            {% module Entity(group) %}
-            {% if group['owner'] == account['email'] %}
-            (owner)
-            {% end %}
-          </td>
+          <td>{% module GroupLink(group, show_am_owner=True) %}</td>
           {% if current_user['email'] == account['email'] and account['email'] != group['owner'] %}
           <td>
             <form action="{{ reverse_url('group_decline', group['_id']) }}"
@@ -65,9 +60,9 @@
               <div class="form-group">
                 &nbsp;
                 <button type="submit" class="btn btn-danger btn-xs"
-                        onclick="return confirm('Cannot be undone! Really decline?');">
+                        onclick="return confirm('Cannot be undone! Really leave?');">
                   <span class="glyphicon glyphicon-remove"></span>
-                  Decline
+                  Leave
                 </button>
               </div>
             </form>
@@ -296,9 +291,7 @@
     <th>Modified</th>
     <td>
       <span class="localtime">{{ account['modified'] }}</span>
-      <a href="{{ reverse_url('account_logs', account['email']) }}">
-        {% module Icon('logs', label=True) %}
-      </a>
+      {% module LogsLink(account) %}
     </td>
   </tr>
   <tr>

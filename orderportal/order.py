@@ -1619,6 +1619,17 @@ class Orders(RequestHandler):
             ]
         )
 
+    def get_all_accounts(self):
+        "Get all accounts docs; from cache if it exists, otherwise create it."
+        try:
+            return self.cache_all_accounts
+        except AttributeError:
+            self.logger.debug("Getting all accounts into request cache.")
+            self.cache_all_accounts = {}
+            for row in self.db.view("account", "email", include_docs=True):
+                self.cache_all_accounts[row.key] = row.doc
+            return self.cache_all_accounts
+
     def set_filter(self):
         "Set the filter settings dictionary."
         self.filter = dict()

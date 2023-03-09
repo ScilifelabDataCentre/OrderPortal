@@ -11,7 +11,7 @@ Report {{ report['name'] }} for {{ terminology('order') }} '{{ order['title'] }}
 {% end %}
 
 {% block main_content %}
-<h2>{{ terminology('Order') }} identifier: {% module Entity(order, icon=False) %}</h2>
+<h2>{{ terminology('Order') }} identifier: {% module OrderLink(order) %}</h2>
 
 {% if content_type == constants.TEXT_MIMETYPE %}
 <pre>{{ content }}</pre>

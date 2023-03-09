@@ -37,9 +37,7 @@
     {% for form in forms %}
     <tr>
       <td>
-        <a href="{{ reverse_url('form', form['_id']) }}">
-          {{ form['title'] }}
-        </a>
+        <a href="{{ reverse_url('form', form['_id']) }}">{{ form['title'] }}</a>
       </td>
       <td>{{ form.get('version') or '-' }}</td>
       <td>{% module Markdown(form.get('description')) %}</td>

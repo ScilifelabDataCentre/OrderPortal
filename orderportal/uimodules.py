@@ -24,10 +24,22 @@ class Icon(tornado.web.UIModule):
         url = self.handler.static_url(name + ".png")
         name = name.capitalize()
         title = utils.terminology(title or name)
-        value = ICON_TEMPLATE.format(url=url, alt=name, title=title)
+        icon = ICON_TEMPLATE.format(url=url, alt=name, title=title)
         if label:
-            value = f"""<span class="nobr">{value} {title}</span>"""
-        return value
+            return f"""<span class="nobr">{icon} {title}</span>"""
+        else:
+            return icon
+
+
+class Status(tornado.web.UIModule):
+    "HTML for a status; order, account."
+
+    def render(self, status):
+        # Order status icons are now in the generic 'static' directory.
+        url = self.handler.static_url(status + ".png")
+        status = status.capitalize()
+        icon = ICON_TEMPLATE.format(url=url, alt=status, title=status)
+        return f"""<span class="nobr">{icon} {status}</span>"""
 
 
 class ContentType(tornado.web.UIModule):
@@ -42,43 +54,59 @@ class ContentType(tornado.web.UIModule):
         return ICON_TEMPLATE.format(url=url, alt=content_type, title=content_type)
 
 
-class Entity(tornado.web.UIModule):
-    "HTML for a link to an entity, optionally with an icon."
+class OrderLink(tornado.web.UIModule):
+    "HTML for a link to an order."
+    
+    def render(self, order):
+        url = self.handler.order_reverse_url(order)
+        return f"""<a href="{url}">{order['identifier']}</a>"""
 
-    def render(self, entity, icon=True):
-        doctype = entity[constants.DOCTYPE]
-        assert doctype in constants.ENTITIES
-        if doctype == constants.ORDER:
-            icon_url = self.handler.static_url("order.png")
-            title = entity.get("identifier") or (entity["_id"][:6] + "...")
-            alt = "order"
-            url = self.handler.order_reverse_url(entity)
-        elif doctype == constants.ACCOUNT:
-            icon_url = self.handler.static_url("account.png")
-            title = entity["email"]
-            alt = entity["role"]
-            url = self.handler.reverse_url(doctype, entity["email"])
-        elif doctype == constants.INFO:
-            icon_url = self.handler.static_url("info.png")
-            title = entity.get("title") or entity["name"]
-            alt = doctype
-            url = self.handler.reverse_url("info", entity["name"])
+
+class AccountLink(tornado.web.UIModule):
+    """HTML for a link to an account (email or entity), optionally with an icon,
+    and optionally show name and/or email.
+    """
+    
+    def render(self, email=None, account=None, name=False):
+        if account:
+            email = account["email"]
+        elif not email:
+            raise ValueError("neither email nor account specified")
+        if name:
+            title = self.handler.get_account_name(email)
         else:
-            icon_url = self.handler.static_url(doctype + ".png")
-            iuid = entity["_id"]
-            title = (
-                entity.get("path") or entity.get("title") or entity.get("name") or iuid
-            )
-            alt = doctype.capitalize()
-            try:
-                url = self.handler.reverse_url(doctype, iuid)
-            except KeyError as error:
-                raise KeyError(f"{error}: {doctype}")
-        if icon and icon_url:
-            icon = ICON_TEMPLATE.format(url=icon_url, alt=alt, title=alt)
-            return f"""<a href="{url}">{icon} {title}</a>"""
+            title = email
+        url = self.handler.reverse_url("account", email)
+        return f"""<a href="{url}">{title}</a>"""
+
+
+class GroupLink(tornado.web.UIModule):
+    "HTML for link to a group."
+
+    def render(self, group, show_am_owner=False):
+        url = self.handler.reverse_url("group", group["_id"])
+        if show_am_owner:
+            return f"""<a href="{url}">{group['name']}</a> (am owner)"""
         else:
-            return f"""<a href="{url}">{title}</a>"""
+            return f"""<a href="{url}">{group['name']}</a>"""
+
+
+class FormLink(tornado.web.UIModule):
+    "HTML for a link to a form."
+
+    def render(self, form):
+        url = self.handler.reverse_url("form", form["_id"])
+        return f"""<a href="{url}">{form.get('title') or form['_id']}</a>"""
+
+
+class LogsLink(tornado.web.UIModule):
+    "HTML for a link to the logs of an entity."
+
+    def render(self, entity):
+        url = self.handler.static_url("logs.png")
+        icon = ICON_TEMPLATE.format(url=url, alt="Logs", title="Logs")
+        url = self.handler.reverse_url(f"{entity['orderportal_doctype']}_logs", entity["_id"])
+        return f"""<a href="{url}">{icon} Logs</a>"""
 
 
 class Markdown(tornado.web.UIModule):

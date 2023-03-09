@@ -23,21 +23,11 @@
       <tbody>
         {% for group in groups %}
         <tr>
-          <td>
-            <a href="{{ reverse_url('group', group['_id']) }}">
-              {% module Entity(group) %}
-            </a>
-          </td>
-          <td>
-            <a href="{{ reverse_url('account', group['owner']) }}">
-              {{ group['owner'] }}
-            </a>
-          </td>
+          <td>{% module GroupLink(group) %}</td>
+          <td>{% module AccountLink(email=group['owner']) %}</td>
           <td>
             {% for member in group['members'] %}
-            <a href="{{ reverse_url('account', member) }}">
-              {{ member }}
-            </a>
+            {% module AccountLink(email=member) %}
             <br>
             {% end %}
           </td>

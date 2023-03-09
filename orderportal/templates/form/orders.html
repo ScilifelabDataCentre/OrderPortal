@@ -7,7 +7,7 @@
 {% end %}
 
 {% block body_title %}
-{{ terminology('Orders') }} for form {% module Entity(form, icon=False) %}
+{{ terminology('Orders') }} for form {% module FormLink(form) %}
 {% end %}
 
 {% block container %}
@@ -30,9 +30,9 @@
     <table id="orders" class="table table-striped table-condensed">
       <thead>
         <tr>
-          <th>{% module Icon('order', label=True, title=terminology('Order')) %}</th>
+          <th>{{ terminology('Order') }}</th>
           <th width="45%">Title</th>
-          <th>{% module Icon('account', label=True, title='Owner') %}</th>
+          <th>Account</th>
           <th>Status</th>
           <th>Modified</th>
         </tr>
@@ -40,14 +40,10 @@
       <tbody>
         {% for order in orders %}
         <tr>
-          <td>{% module Entity(order, icon=False) %}</td>
+          <td>{% module OrderLink(order) %}</td>
           <td>{{ order.get('title') or '[no title]' }}</td>
-          <td>
-            <a href="{{ reverse_url('account', order['owner']) }}">
-              {{ account_names.get(order['owner'], order['owner']) }}
-            </a>
-          </td>
-          <td>{% module Icon(order['status'], label=True) %}</td>
+          <td>{% module AccountLink(email=order['owner'], name=True) %}</td>
+          <td>{% module Status(order['status']) %}</td>
           <td class="localtime nobr">{{ order['modified'] }}</td>
         </tr>
         {% end %}

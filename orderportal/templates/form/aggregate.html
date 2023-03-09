@@ -3,13 +3,11 @@
 {% extends "../base.html" %}
 
 {% block head_title %}
-Aggregate {{ terminology('orders') }}
-for form {{ form['title'] or form['_id'] }}
+Aggregate {{ terminology('orders') }} for form {{ form['title'] or form['_id'] }}
 {% end %}
 
 {% block body_title %}
-Aggregate {{ terminology('orders') }} 
-for form  {% module Entity(form, icon=False) %}
+Aggregate {{ terminology('orders') }} for form  {% module FormLink(form) %}
 {% end %}
 
 {% block main_content %}

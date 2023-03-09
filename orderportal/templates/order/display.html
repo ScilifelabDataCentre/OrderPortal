@@ -251,9 +251,7 @@
         <th>Modified</th>
         <td>
           <span class="localtime">{{ order['modified'] }}</span>
-          <a href="{{ reverse_url('order_logs', order['_id']) }}">
-            {% module Icon('logs', label=True) %}
-          </a>
+          {% module LogsLink(order) %}
         </td>
       </tr>
       <tr>

@@ -113,7 +113,7 @@
       <tbody>
         {% for order in orders %}
         <tr>
-          <td>{% module Entity(order, icon=False) %}</td>
+          <td>{% module OrderLink(order) %}</td>
           <td>{{ order.get('title') or '[no title]' }}</td>
           <td>
             {% set form = forms_lookup[order['form']] %}

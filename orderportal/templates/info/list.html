@@ -42,9 +42,7 @@
           <td>{{ info['name'] }}</td>
           <td>{{ info.get('title') or '-' }}</td>
           <td>{{ info.get('menu') or '-' }}</td>
-          <td>
-            <span  class="localtime">{{ info['modified'] }}</span>
-          </td>
+          <td><span  class="localtime">{{ info['modified'] }}</span></td>
           <td>
             <a href="{{ reverse_url('info_edit', info['name']) }}"
                class="btn btn-primary btn-xs" role="button">
@@ -61,11 +59,7 @@
                 <span class="glyphicon glyphicon-trash"></span> Delete</button>
             </form>
           </td>
-          <td>
-            <a href="{{ reverse_url('info_logs', info['name']) }}">
-              {% module Icon('logs', label=True) %}
-            </a>
-          </td>
+          <td>{% module LogsLink(info) %}</td>
         </tr>
         {% end %}
       </tbody>

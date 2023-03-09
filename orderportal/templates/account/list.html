@@ -99,7 +99,7 @@
       <tbody>
         {% for account in accounts %}
         <tr>
-          <td>{% module Entity(account, icon=False) %}</td>
+          <td>{% module AccountLink(account=account) %}</td>
           <td>{{ account['name'] }}</td>
           {% if settings['ACCOUNT_ORCID_INFO'] %}
           <td>{{ account.get('orcid') or '-' }}</td>

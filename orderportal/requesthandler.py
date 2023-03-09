@@ -428,8 +428,18 @@ class RequestHandler(tornado.web.RequestHandler):
             return False
         return self.current_user["email"] in self.get_account_colleagues(email)
 
+    def get_account_name(self, email):
+        """Get the name "last, first" of the person for the account."""
+        try:
+            return self.lookup_accounts_names.get(email) or email
+        except AttributeError:
+            self.lookup_accounts_names = {}
+            for row in self.db.view("account", "email"):
+                self.lookup_accounts_names[row.key] = ", ".join(reversed(row.value))
+            return self.lookup_accounts_names.get(email) or email
+
     def get_accounts_name(self, emails=[]):
-        """Get dictionary with email as key and name (last, first) as value.
+        """Get dictionary with email as key and name "last, first" as value.
         If emails is None, then for all accounts."""
         result = {}
         if emails:
@@ -447,17 +457,6 @@ class RequestHandler(tornado.web.RequestHandler):
             for row in self.db.view("account", "email"):
                 result[row.key] = ", ".join(reversed(row.value))
         return result
-
-    def get_all_accounts(self):
-        "Get all accounts docs, from cache if it exists, otherwise create it."
-        try:
-            return self.cache_all_accounts
-        except AttributeError:
-            self.logger.debug("Getting all accounts into request cache.")
-            self.cache_all_accounts = {}
-            for row in self.db.view("account", "email", include_docs=True):
-                self.cache_all_accounts[row.key] = row.doc
-            return self.cache_all_accounts
 
     def get_group(self, iuid):
         "Return the group for the IUID."

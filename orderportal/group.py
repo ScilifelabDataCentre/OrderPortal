@@ -41,7 +41,7 @@ class GroupMixin:
 
 
 class Group(GroupMixin, RequestHandler):
-    "Group page."
+    "Display group."
 
     @tornado.web.authenticated
     def get(self, iuid):
@@ -72,7 +72,7 @@ class Group(GroupMixin, RequestHandler):
 
 
 class GroupCreate(RequestHandler):
-    "Create group page."
+    "Create group."
 
     @tornado.web.authenticated
     def get(self):
@@ -179,7 +179,7 @@ class GroupAccept(GroupMixin, RequestHandler):
 
 
 class GroupDecline(GroupMixin, RequestHandler):
-    "Decline group invitation or membership. Only the user himself can do this."
+    "Decline group invitation or leave. Only the user himself can do this."
 
     @tornado.web.authenticated
     def post(self, iuid):
@@ -196,7 +196,7 @@ class GroupDecline(GroupMixin, RequestHandler):
 
 
 class Groups(RequestHandler):
-    "Page for a list of all groups."
+    "List all groups."
 
     @tornado.web.authenticated
     def get(self):

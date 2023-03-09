@@ -85,7 +85,7 @@
         <label>
           <input type="checkbox" name="statuses" value="{{ status }}"
                  {{ status in settings['ORDERS_LIST_STATUSES'] and 'checked' or '' }}>
-          {% module Icon(status, label=True) %}
+          {% module Status(status) %}
         </label>
       </div>
       {% end %}

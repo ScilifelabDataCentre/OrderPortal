@@ -114,11 +114,11 @@ class InfoLogs(RequestHandler):
     "Display information log entries."
 
     @tornado.web.authenticated
-    def get(self, name):
+    def get(self, iuid):
         self.check_admin()
-        info = self.get_entity_view("info", "name", name)
+        info = self.get_entity(iuid, doctype=constants.INFO)
         self.render(
             "logs.html",
-            title=f"Logs info '{name}'",
+            title=f"""Logs info '{info["name"]}'""",
             logs=self.get_logs(info["_id"]),
         )
