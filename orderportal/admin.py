@@ -220,7 +220,6 @@ def update_meta_documents(db):
             saver["links"] = settings.get("ORDER_LINKS", True)
             saver["reports"] = settings.get("ORDER_REPORTS", True)
             saver["display_max_recent"] = settings.get("DISPLAY_MAX_RECENT_ORDERS", 10)
-            # XXX remains to be done!
             saver["terminology"] = settings.get("TERMINOLOGY", {})
         logger.info("Saved more order settings to database.")
 
@@ -392,10 +391,15 @@ class Order(RequestHandler):
             saver["links"] = utils.to_bool(self.get_argument("links", False))
             saver["reports"] = utils.to_bool(self.get_argument("reports", False))
             try:
-                saver["display_max_recent"] = max(0, int(self.get_argument("display_max_recent", 10)))
+                saver["display_max_recent"] = max(1, int(self.get_argument("display_max_recent", 10)))
             except (TypeError, ValueError):
-                pass
-            # XXX terminology remains to be done!
+                self.set_error_flash("Bad 'display_max_recent' value; ignored.")
+            for builtin_term in constants.TERMINOLOGY_TERMS:
+                term = self.get_argument(f"terminology_{builtin_term}", "").lower()
+                if not term or term == builtin_term:
+                    saver["terminology"].pop(builtin_term, None)
+                else:
+                    saver["terminology"][builtin_term] = term
         orderportal.config.load_settings_from_db(self.db)
         self.set_message_flash("Saved order configuration.")
         self.see_other("admin_order")
@@ -630,7 +634,7 @@ class OrdersList(RequestHandler):
                     # Overwrite if identifier is already in the list.
                     filters[filter["identifier"]] = filter
             except (KeyError, ValueError, yaml.YAMLError):
-                self.set_error_flash("Invalid YAML for 'Orders filter field'; ignored.")
+                self.set_error_flash("Invalid YAML given in 'Add orders filter field'; ignored.")
             saver["filters"] = list(filters.values())
             try:
                 value = int(self.get_argument("orders_most_recent"))

@@ -10,13 +10,14 @@
 {% end %} {# block action_content #}
 
 {% block main_content %}
-<form action="{{ reverse_url('admin_account') }}" method="POST" role="form">
+<form action="{{ reverse_url('admin_account') }}" method="POST" role="form"
+      class="form-horizontal">
   {% module xsrf_form_html() %}
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="registration_open">
-        Account registration open</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="registration_open">
+      Account registration open</label>
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
           <input type="checkbox" id="registration_open" name="registration_open"
@@ -30,13 +31,12 @@
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="pi_info">PI info</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="pi_info">PI info</label>
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
-          <input type="checkbox" id="pi_info" name="pi_info"
-                 value="yes"
+          <input type="checkbox" id="pi_info" name="pi_info" value="yes"
                  {{ settings['ACCOUNT_PI_INFO'] and 'checked' or '' }}>
           Yes, the input fields relevant for a Principal Investigator
           (PI) will be shown when registering an account.
@@ -45,13 +45,12 @@
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="orcid_info">ORCID info</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="orcid_info">ORCID info</label>
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
-          <input type="checkbox" id="orcid_info" name="orcid_info"
-                 value="yes"
+          <input type="checkbox" id="orcid_info" name="orcid_info" value="yes"
                  {{ settings['ACCOUNT_ORCID_INFO'] and 'checked' or '' }}>
           Yes, the input field to provide the ORCID for the new account will be shown.
         </label>
@@ -59,13 +58,12 @@
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="postal_info">Postal address info</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="postal_info">Postal address info</label>
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
-          <input type="checkbox" id="postal_info" name="postal_info"
-                 value="yes"
+          <input type="checkbox" id="postal_info" name="postal_info" value="yes"
                  {{ settings['ACCOUNT_POSTAL_INFO'] and 'checked' or '' }}>
           Yes, the input fields to provide the postal address will be shown.
         </label>
@@ -73,13 +71,12 @@
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="invoice_info">Invoice info</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="invoice_info">Invoice info</label>
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
-          <input type="checkbox" id="invoice_info" name="invoice_info"
-                 value="yes"
+          <input type="checkbox" id="invoice_info" name="invoice_info" value="yes"
                  {{ settings['ACCOUNT_INVOICE_INFO'] and 'checked' or '' }}>
           Yes, the input fields for invoicing will be shown.
         </label>
@@ -87,10 +84,10 @@
     </div>
   </div>
 
-  <div class="row form-group">
+  <div class="form-group">
+    <label class="control-label col-md-2" for="invoice_ref_required">
+      Invoice reference required</label>
     <div class="col-md-12">
-      <label class="control-label" for="invoice_ref_required">
-        Invoice reference required</label>
       <div class="checkbox">
         <label>
           <input type="checkbox" id="invoice_ref_required" name="invoice_ref_required"
@@ -104,9 +101,9 @@
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="funder_info_gender">Gender info</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="funder_info_gender">Gender info</label>
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
           <input type="checkbox" id="funder_info_gender" name="funder_info_gender"
@@ -119,13 +116,14 @@
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="funder_info_group_size">Group size info</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="funder_info_group_size">
+      Group size info</label>
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
-          <input type="checkbox" id="funder_info_group_size" name="funder_info_group_size"
-                 value="yes"
+          <input type="checkbox" value="yes"
+                 id="funder_info_group_size" name="funder_info_group_size"
                  {{ settings['ACCOUNT_FUNDER_INFO_GROUP_SIZE'] and 'checked' or '' }}>
           Yes, the input field for group size is shown. This may be
           required by certain funders.
@@ -134,9 +132,9 @@
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="funder_info_subject">Subject info</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="funder_info_subject">Subject info</label>
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
           <input type="checkbox" id="funder_info_subject" name="funder_info_subject"
@@ -149,9 +147,10 @@
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-8">
-      <label class="control-label" for="default_country_code">Default country</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="default_country_code">
+      Default country</label>
+    <div class="col-md-6">
       <select class="form-control" name="default_country_code" id="default_country_code">
         {% set country = settings['ACCOUNT_DEFAULT_COUNTRY_CODE'] %}
         {% for code, name in constants.COUNTRIES.items() %}
@@ -162,7 +161,7 @@
   </div>
 
   <div class="row form-group">
-    <div class="col-md-3">
+    <div class="col-md-offset-2 col-md-3">
       <button type="submit" class="btn btn-success btn-block">
         <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
     </div>

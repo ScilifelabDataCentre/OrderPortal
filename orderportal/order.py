@@ -1653,7 +1653,7 @@ class Orders(RequestHandler):
                 view = self.db.view(
                     "order",
                     "status",
-                    descending=True,
+                    descending=True, # In order to get the most recently modified.
                     startkey=[status, constants.CEILING],
                     endkey=[status],
                     include_docs=True,
@@ -1672,7 +1672,7 @@ class Orders(RequestHandler):
                 view = self.db.view(
                     "order",
                     "form",
-                    descending=True,
+                    descending=True, # In order to get the most recently modified.
                     startkey=[form_id, constants.CEILING],
                     endkey=[form_id],
                     include_docs=True,
@@ -1689,7 +1689,7 @@ class Orders(RequestHandler):
                 view = self.db.view(
                     "order",
                     "owner",
-                    descending=True,
+                    descending=True, # In order to get the most recently modified.
                     startkey=[owner, constants.CEILING],
                     endkey=[owner],
                     include_docs=True,
@@ -1704,7 +1704,7 @@ class Orders(RequestHandler):
         if value:
             if orders is None:
                 view = self.db.view(
-                    "order", "modified", include_docs=True, descending=True
+                    "order", "modified", descending=True, include_docs=True
                 )
                 orders = [r.doc for r in view]
             if value == "__none__":
@@ -1729,9 +1729,9 @@ class Orders(RequestHandler):
                 view = self.db.view(
                     "order",
                     "modified",
-                    include_docs=True,
-                    descending=True,
+                    descending=True, # In order to get the most recently modified.
                     limit=settings["DISPLAY_ORDERS_MOST_RECENT"],
+                    include_docs=True,
                 )
                 orders = [r.doc for r in view]
             else:
@@ -1740,16 +1740,16 @@ class Orders(RequestHandler):
         elif year == "all":
             if orders is None:
                 view = self.db.view(
-                    "order", "modified", include_docs=True, descending=True
+                    "order", "modified", descending=True, include_docs=True
                 )
                 orders = [r.doc for r in view]
             else:
                 pass  # "all" means no filter by year.
 
-        else:  # Specific year
+        else:  # Specific year; all of them.
             if orders is None:
                 view = self.db.view(
-                    "order", "year_submitted", include_docs=True, key=year
+                    "order", "year_submitted", key=year, include_docs=True
                 )
                 orders = [r.doc for r in view]
             else:

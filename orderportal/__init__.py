@@ -91,7 +91,7 @@ class Constants:
     TABLE = "table"
     ### GROUP   = 'group' Already defined above.
     ### FILE    = 'file' Already defined above.
-    TYPES = [
+    TYPES = (
         STRING,
         EMAIL,
         INT,
@@ -105,7 +105,7 @@ class Constants:
         TABLE,
         FILE,
         GROUP,
-    ]
+    )
     TYPE_HTML = {
         STRING: "text",
         INT: "number",
@@ -137,18 +137,18 @@ class Constants:
     PENDING = "pending"
     ENABLED = "enabled"
     DISABLED = "disabled"
-    ACCOUNT_STATUSES = [PENDING, ENABLED, DISABLED]
+    ACCOUNT_STATUSES = (PENDING, ENABLED, DISABLED)
     RESET = "reset"
 
     # Account roles.
     USER = "user"
     STAFF = "staff"
     ADMIN = "admin"
-    ACCOUNT_ROLES = [USER, STAFF, ADMIN]
+    ACCOUNT_ROLES = (USER, STAFF, ADMIN)
 
     # Form statuses; hard-wired!
     TESTING = "testing"
-    FORM_STATUSES = [PENDING, TESTING, ENABLED, DISABLED]
+    FORM_STATUSES = (PENDING, TESTING, ENABLED, DISABLED)
 
     # These order statuses are hard-wired; must always be present!
     # Other order statuses are defined initially in admin.DEFAULT_ORDER_STATUSES,
@@ -158,13 +158,13 @@ class Constants:
     SUBMITTED = "submitted"
 
     # Delimiters to remove when searching for orders.
-    ORDERS_SEARCH_DELIMS_LINT = [":", ",", ";", "'"]
+    ORDERS_SEARCH_DELIMS_LINT = (":", ",", ";", "'")
     # Words to remove when searching for orders.
-    ORDERS_SEARCH_LINT = ["an", "to", "in", "on", "of", "and", "the", "is", "was", "not"]
+    ORDERS_SEARCH_LINT = ("an", "to", "in", "on", "of", "and", "the", "is", "was", "not")
 
     # Sources in account for autopopulating an order field.
     # This must be kept in sync with code in 'order.py' 'OrderSaver.autopopulate'.
-    ORDER_AUTOPOPULATE_SOURCES = [
+    ORDER_AUTOPOPULATE_SOURCES = (
         "university",
         "department",
         "phone",
@@ -177,13 +177,16 @@ class Constants:
         "invoice_address.zip",
         "invoice_address.city",
         "invoice_address.country",
-    ]
+    )
+
+    # Terminology: terms that can be translated to other terms.
+    TERMINOLOGY_TERMS = ("order", "orders")
 
     # Report statuses; hard-wired!
     # PREPARATION = "preparation" Already defined above.
     REVIEW = "review"
     PUBLISHED = "published"
-    REPORT_STATUSES = [PREPARATION, REVIEW, PUBLISHED]
+    REPORT_STATUSES = (PREPARATION, REVIEW, PUBLISHED)
     APPROVED = "approved"
     REJECTED = "rejected"
 
