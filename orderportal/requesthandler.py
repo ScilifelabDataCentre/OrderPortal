@@ -429,7 +429,9 @@ class RequestHandler(tornado.web.RequestHandler):
         return self.current_user["email"] in self.get_account_colleagues(email)
 
     def get_account_name(self, email):
-        """Get the name "last, first" of the person for the account."""
+        """Get the name "last, first" of the person for the account.
+        Sets up a lookup table when called the first time.
+        """
         try:
             return self.lookup_accounts_names.get(email) or email
         except AttributeError:
@@ -437,26 +439,6 @@ class RequestHandler(tornado.web.RequestHandler):
             for row in self.db.view("account", "email"):
                 self.lookup_accounts_names[row.key] = ", ".join(reversed(row.value))
             return self.lookup_accounts_names.get(email) or email
-
-    def get_accounts_name(self, emails=[]):
-        """Get dictionary with email as key and name "last, first" as value.
-        If emails is None, then for all accounts."""
-        result = {}
-        if emails:
-            for email in emails:
-                email = email.strip().lower()
-                try:
-                    rows = self.db.view("account", "email", key=email)
-                    value = list(rows)[0].value
-                except IndexError:
-                    name = "[unknown]"
-                else:
-                    name = ", ".join(reversed(value))
-                result[email] = name
-        else:
-            for row in self.db.view("account", "email"):
-                result[row.key] = ", ".join(reversed(row.value))
-        return result
 
     def get_group(self, iuid):
         "Return the group for the IUID."

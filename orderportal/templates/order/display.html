@@ -126,10 +126,8 @@
       <tr>
         <th>Owner</th>
         <td colspan="2">
-          <a href="{{ reverse_url('account', order['owner']) }}">
-            {{ account_names.get(order['owner'], order['owner']) }}
-          </a>
-          ({{ order['owner'] }})
+          {% module AccountLink(email=order['owner'], name=True) %}
+          {{ order['owner'] }}
         </td>
       </tr>
       {% if settings['ORDER_TAGS'] and (am_staff or settings['ORDER_USER_TAGS']) %}

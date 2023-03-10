@@ -597,7 +597,6 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
             orders=orders,
             account=account,
             order_column=order_column,
-            account_names=self.get_accounts_name(),
             any_groups=bool(self.get_account_groups(account["email"])),
         )
 
@@ -617,8 +616,6 @@ class AccountOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandler):
             self.check_readable(account)
         except ValueError as error:
             raise tornado.web.HTTPError(403, reason=error)
-        account_names = self.get_accounts_name()
-        forms_lookup = self.get_forms_lookup()
         data = utils.get_json(URL("account_orders", account["email"]), "account orders")
         data["links"] = dict(
             api=dict(href=URL("account_orders_api", account["email"])),
@@ -632,10 +629,9 @@ class AccountOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandler):
             startkey=[account["email"]],
             endkey=[account["email"], constants.CEILING],
         )
+        forms_lookup = self.get_forms_lookup()
         data["orders"] = [
-            self.get_order_json(
-                r.doc, account_names=account_names, forms_lookup=forms_lookup
-            )
+            self.get_order_json(r.doc, forms_lookup=forms_lookup)
             for r in view
         ]
         self.write(data)
@@ -688,8 +684,6 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandl
             self.check_readable(account)
         except ValueError as error:
             raise tornado.web.HTTPError(403, reason=error)
-        account_names = self.get_accounts_name()
-        forms_lookup = self.get_forms_lookup()
         data = utils.get_json(
             URL("account_groups_orders_api", account["email"]), "account groups orders"
         )
@@ -697,10 +691,9 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandl
             api=dict(href=URL("account_groups_orders_api", account["email"])),
             display=dict(href=URL("account_groups_orders", account["email"])),
         )
+        forms_lookup = self.get_forms_lookup()
         data["orders"] = [
-            self.get_order_json(
-                o, account_names=account_names, forms_lookup=forms_lookup
-            )
+            self.get_order_json(o, forms_lookup=forms_lookup)
             for o in self.get_group_orders(account)
         ]
         self.write(data)

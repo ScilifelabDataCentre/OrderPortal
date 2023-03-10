@@ -659,9 +659,9 @@ class OrderMixin:
 class OrderApiV1Mixin(ApiV1Mixin):
     "Mixin for order JSON data structure."
 
-    def get_order_json(self, order, account_names=None, forms_lookup=None, full=False):
+    def get_order_json(self, order, forms_lookup=None, full=False):
         """Return a dictionary for JSON output for the order.
-        Account names or forms lookup are computed if not given.
+        The forms lookup is computed if not given.
         If 'full' then add all fields, else only for orders list.
         NOTE: Only the values of the fields are included, not
         the full definition of the fields. To obtain that,
@@ -702,11 +702,9 @@ class OrderApiV1Mixin(ApiV1Mixin):
                     ("links", dict(api=dict(href=URL("form", order["form"])))),
                 ]
             )
-        if account_names is None:
-            account_names = self.get_accounts_name([order["owner"]])
         data["owner"] = dict(
             email=order["owner"],
-            name=account_names.get(order["owner"]),
+            name=self.get_account_name(order["owner"]),
             links=dict(
                 api=dict(href=URL("account_api", order["owner"])),
                 display=dict(href=URL("account", order["owner"])),
@@ -722,6 +720,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
             data["report"]["link"] = dict(href=URL("order_report_api", order["_id"]))
         data["history"] = dict()
         for s in settings["ORDER_STATUSES"]:
+            if not s.get("enabled"): continue
             key = s["identifier"]
             data["history"][key] = order["history"].get(key)
         data["tags"] = order.get("tags", [])
@@ -857,7 +856,6 @@ class Order(OrderMixin, RequestHandler):
             "order/display.html",
             title="{0} '{1}'".format(utils.terminology("Order"), order["title"]),
             order=order,
-            account_names=self.get_accounts_name([order["owner"]]),
             status=settings["ORDER_STATUSES_LOOKUP"][order["status"]],
             form=form,
             fields=form["fields"],
@@ -1585,7 +1583,6 @@ class Orders(RequestHandler):
             filter=self.filter,
             orders=self.get_orders(),
             order_column=order_column,
-            account_names=self.get_accounts_name(),
             accounts_university=accounts_university,
             accounts_department=accounts_department,
             accounts_gender=accounts_gender,
@@ -1785,14 +1782,10 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
         result["links"] = dict(
             api=dict(href=URL("orders_api")), display=dict(href=URL("orders"))
         )
-        # Get account names and forms lookups once only.
-        account_names = self.get_accounts_name()
         forms_lookup = self.get_forms_lookup()
         result["items"] = []
         for order in self.get_orders():
-            data = self.get_order_json(
-                order, account_names=account_names, forms_lookup=forms_lookup
-            )
+            data = self.get_order_json(order, forms_lookup=forms_lookup)
             data["fields"] = dict()
             for key in settings["ORDERS_LIST_FIELDS"]:
                 data["fields"][key] = order["fields"].get(key)
@@ -1841,7 +1834,6 @@ class OrdersCsv(Orders):
         row.extend([s.capitalize() for s in settings["ORDERS_LIST_STATUSES"]])
         row.append("Modified")
         writer.writerow(row)
-        account_names = self.get_accounts_name()
         forms_lookup = self.get_forms_lookup()
         for order in self.get_orders():
             form = forms_lookup[order["form"]]
@@ -1854,7 +1846,7 @@ class OrdersCsv(Orders):
                 order["form"],
                 self.absolute_reverse_url("form", order["form"]),
                 order["owner"],
-                account_names[order["owner"]],
+                self.get_account_name(order["owner"]),
                 self.absolute_reverse_url("account", order["owner"]),
             ]
             if settings["ORDERS_LIST_OWNER_UNIVERSITY"]:

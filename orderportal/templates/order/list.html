@@ -121,11 +121,7 @@
               {{ form['title'] }} {% module Version(form) %}
             </a>
           </td>
-          <td>
-            <a href="{{ reverse_url('account', order['owner']) }}">
-              {{ account_names[order['owner']] }}
-            </a>
-          </td>
+          <td>{% module AccountLink(email=order['owner'], name=True) %}</td>
           {% if settings['ORDERS_LIST_OWNER_UNIVERSITY'] %}
           <td>{% module NoneStr(accounts_university[order['owner']], undef='-') %}</td>
           {% end %}

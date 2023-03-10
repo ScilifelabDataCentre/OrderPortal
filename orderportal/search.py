@@ -22,7 +22,7 @@ class Search(RequestHandler):
 
     @tornado.web.authenticated
     def get(self):
-        orig = term = self.get_argument("term", "")
+        orig_term = term = self.get_argument("term", "")
         orders = {}
         parts = term.split()
         parts = [p for p in parts if p]
@@ -45,7 +45,7 @@ class Search(RequestHandler):
             for id in reduce(lambda i, j: i.union(j), id_sets):
                 orders[id] = self.get_order(id)
         # Seach order tags; exact match
-        term = "".join([c in ",;'" and " " or c for c in orig]).strip().lower()
+        term = "".join([c in ",;'" and " " or c for c in orig_term]).strip().lower()
         parts = term.split()
         id_sets = []
         for part in parts:
@@ -55,7 +55,7 @@ class Search(RequestHandler):
                 orders[id] = self.get_order(id)
         term = (
             "".join(
-                [c in constants.ORDERS_SEARCH_DELIMS_LINT and " " or c for c in orig]
+                [c in constants.ORDERS_SEARCH_DELIMS_LINT and " " or c for c in orig_term]
             )
             .strip()
             .lower()
@@ -96,9 +96,4 @@ class Search(RequestHandler):
                 for i in list(orders.values())
                 if self.am_owner(i) or self.am_colleague(i["owner"])
             ]
-        self.render(
-            "search.html",
-            term=orig,
-            orders=orders,
-            account_names=self.get_accounts_name(),
-        )
+        self.render("search.html", term=orig_term, orders=orders)

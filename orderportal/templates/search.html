@@ -62,11 +62,9 @@
           </td>
           <td>{{ order.get('title') or '-' }}</td>
           <td class="nobr">
-            <a href="{{ reverse_url('account', order['owner']) }}">
-              {{ account_names.get(order['owner'], order['owner']) }}
-            </a>
+            {% module AccountLink(email=order['owner'], name=True) %}
           </td>
-          <td>{% module Icon(order['status'], label=True) %}</td>
+          <td>{% module Status(order['status']) %}</td>
           <td class="localtime nobr">{{ order['modified'] }}</td>
         </tr>
         {% end %} {# for order in orders #}

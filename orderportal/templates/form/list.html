@@ -49,12 +49,7 @@
           {{ order_counts[form['_id']] }}
         </a>
       </td>
-      <td>
-        <a href="{{ reverse_url('account', form['owner']) }}">
-          {% module Icon('account') %}
-          {{ account_names.get(form['owner'], form['owner']) }}
-        </a>
-      </td>
+      <td class="nobr">{% module AccountLink(email=form['owner'], name=True) %}</td>
       <td class="localtime">{{ form['modified'] }}</td>
     </tr>
     {% end %}
