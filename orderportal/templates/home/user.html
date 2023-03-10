@@ -11,10 +11,8 @@
     <table class="table-condensed">
       {% for order in orders %}
       <tr>
-        <th>
-          <a href="{{ order_reverse_url(order) }}">{{ order['title'] }}</a>
-        </th>
-        <td>{% module Icon(order['status'], label=True) %}</td>
+        <th>{% module OrderLink(order, title=True) %}</th>
+        <td>{% module Status(order['status']) %}</td>
         <td class="localtime">{{ order['modified'] }}</td>
       </tr>
       {% end %}

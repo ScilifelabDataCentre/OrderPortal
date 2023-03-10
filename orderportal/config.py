@@ -183,8 +183,3 @@ def load_settings_from_db(db):
     settings["ORDER_STATUSES_LOOKUP"] = dict(
         [(s["identifier"], s) for s in settings["ORDER_STATUSES"] if s.get("enabled")]
     )
-
-    # Find the initial status.
-    for status in settings["ORDER_STATUSES"]:
-        if status.get("initial"):
-            settings["ORDER_STATUS_INITIAL"] = status

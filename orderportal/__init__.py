@@ -150,12 +150,56 @@ class Constants:
     TESTING = "testing"
     FORM_STATUSES = (PENDING, TESTING, ENABLED, DISABLED)
 
-    # These order statuses are hard-wired; must always be present!
-    # Other order statuses are defined initially in admin.DEFAULT_ORDER_STATUSES,
-    # and stored in a meta document 'order_statuses' in the database,
-    # which is where it is stored whether they are enabled or not.
+    # The possible order statuses are now hard-wired.
+    # The two first order statuses must always be present!
+    # All statuses are stored in a meta document 'order_statuses' in the database,
+    # with the changes made from the admin.DEFAULT_ORDER_STATUSES
     PREPARATION = "preparation"
     SUBMITTED = "submitted"
+    REVIEW = "review"
+    QUEUED = "queued"
+    WAITING = "waiting"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    PROCESSING = "processing"
+    ACTIVE = "active"
+    ANALYSIS = "analysis"
+    ONHOLD = "onhold"
+    HALTED = "halted"
+    ABORTED = "aborted"
+    TERMINATED = "terminated"
+    CANCELLED = "cancelled"
+    FINISHED = "finished"
+    COMPLETED = "completed"
+    CLOSED = "closed"
+    DELIVERED = "delivered"
+    INVOICED = "invoiced"
+    ARCHIVED = "archived"
+    UNDEFINED = "undefined"
+    ORDER_STATUSES = (
+        PREPARATION,
+        SUBMITTED,
+        REVIEW,
+    QUEUED,
+    WAITING,
+    ACCEPTED,
+    REJECTED,
+    PROCESSING,
+    ACTIVE,
+    ANALYSIS,
+    ONHOLD,
+    HALTED,
+    ABORTED,
+    TERMINATED,
+    CANCELLED,
+    FINISHED,
+    COMPLETED,
+    CLOSED,
+    DELIVERED,
+    INVOICED,
+    ARCHIVED,
+    UNDEFINED,
+    )
 
     # Delimiters to remove when searching for orders.
     ORDERS_SEARCH_DELIMS_LINT = (":", ",", ";", "'")
@@ -184,11 +228,11 @@ class Constants:
 
     # Report statuses; hard-wired!
     # PREPARATION = "preparation" Already defined above.
-    REVIEW = "review"
+    # REVIEW = "review" Already defined above.
     PUBLISHED = "published"
     REPORT_STATUSES = (PREPARATION, REVIEW, PUBLISHED)
     APPROVED = "approved"
-    REJECTED = "rejected"
+    # REJECTED = "rejected" Already defined above.
 
     # Content types (MIME types).
     HTML_MIMETYPE = "text/html"
@@ -436,7 +480,6 @@ class Constants:
 constants = Constants()
 
 
-# Default settings.
 DEFAULT_SETTINGS = dict(
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,

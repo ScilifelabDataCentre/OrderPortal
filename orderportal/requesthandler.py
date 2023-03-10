@@ -234,42 +234,6 @@ class RequestHandler(tornado.web.RequestHandler):
         admins = [r.doc for r in view]
         return [a for a in admins if a["status"] == constants.ENABLED]
 
-    def get_staff(self):
-        "Get the list of enabled staff accounts."
-        view = self.db.view("account", "role", key=constants.STAFF, include_docs=True)
-        staff = [r.doc for r in view]
-        return [a for a in staff if a["status"] == constants.ENABLED]
-
-    def get_recipients(self, text, account):
-        """Return the list of emails for the recipients according to
-        the specification in the text, given the user account.
-        May include admin and staff.
-        """
-        result = []
-        if constants.USER in text["recipients"]:
-            result.append(account["email"])
-        if constants.ADMIN in text["recipients"]:
-            result.extend([a["email"] for a in self.get_admins()])
-        if constants.STAFF in text["recipients"]:
-            result.extend([a["email"] for a in self.get_staff()])
-        return result
-
-    def get_colleagues(self, email):
-        "Get list of accounts in same groups as the account given by email."
-        colleagues = dict()
-        for row in self.db.view(
-            "group", "member", include_docs=True, key=email.strip().lower()
-        ):
-            for member in row.doc["members"]:
-                try:
-                    account = self.get_account(member)
-                except ValueError:
-                    pass
-                else:
-                    if account["status"] == constants.ENABLED:
-                        colleagues[account["email"]] = account
-        return list(colleagues.values())
-
     def get_next_counter(self, doctype):
         "Get the next counter number for the doctype."
         from orderportal.admin import MetaSaver  # To avoid circular import.
@@ -332,10 +296,16 @@ class RequestHandler(tornado.web.RequestHandler):
         "Get the form given by its IUID."
         return self.get_entity(iuid, doctype=constants.FORM)
 
-    def get_forms_lookup(self):
-        "Get all forms as a lookup with form iuid as key, form doc as value."
-        view = self.db.view("form", "modified", descending=True, include_docs=True)
-        return dict([(r.id, r.doc) for r in view])
+    def lookup_form(self, iuid):
+        """Lookup the form by its IUID.
+        Sets up a cached dictionary 'lookup_forms' when called the first time.
+        """
+        try:
+            return self.lookup_forms.get(iuid)
+        except AttributeError:
+            view = self.db.view("form", "modified", descending=True, include_docs=True)
+            self.lookup_forms =  dict([(r.id, r.doc) for r in view])
+            return self.lookup_forms.get(iuid)
 
     def get_report(self, iuid):
         "Get the report for the IUID."
@@ -428,9 +398,9 @@ class RequestHandler(tornado.web.RequestHandler):
             return False
         return self.current_user["email"] in self.get_account_colleagues(email)
 
-    def get_account_name(self, email):
-        """Get the name "last, first" of the person for the account.
-        Sets up a lookup table when called the first time.
+    def lookup_account_name(self, email):
+        """Lookup the name "last, first" of the person for the account.
+        Sets up a cached dictionary 'lookup_accounts_names' when called the first time.
         """
         try:
             return self.lookup_accounts_names.get(email) or email

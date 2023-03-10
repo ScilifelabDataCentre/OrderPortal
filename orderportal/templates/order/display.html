@@ -115,11 +115,7 @@
       {% if am_admin %}
       <tr>
         <th>{{ terminology('Order') }} form</th>
-        <td>
-          <a href="{{ reverse_url('form', form['_id']) }}">
-            {{ form['title'] }} {% module Version(form) %}
-          </a>
-        </td>
+        <td>{% module FormLink(form, version=True) %}</td>
       </tr>
       {% end %} {# if am_admin #}
 
@@ -149,10 +145,7 @@
       {% end %} {#if settings.get('ORDER_LINKS') #}
       <tr>
         <th>Status</th>
-        <td>
-          {% module Icon(order['status'], label=True) %}
-          ({{ status['description'] }})
-        </td>
+        <td>{% module Status(order['status']) %} ({{ status['description'] }})</td>
       </tr>
       {% if settings['ORDER_REPORTS'] %}
       <tr>
@@ -180,7 +173,7 @@
                 </td>
                 <td class="localtime">{{ report['modified'] }}</td>
                 {% if am_staff %}
-                <td>{% module Icon(report['status'], label=True) %}</td>
+                <td>{% module Status(report['status']) %}</td>
                 <td>
                   <a href="{{ reverse_url('report_edit', report['_id']) }}"
                      role="button" class="btn btn-primary btn-xs">
@@ -237,7 +230,7 @@
             {% for s in reversed(settings['ORDER_STATUSES']) %}
             {% if order['history'].get(s['identifier']) %}
             <tr>
-              <td>{% module Icon(s['identifier'], label=True) %}</td>
+              <td>{% module Status(s['identifier']) %}</td>
               <td>&nbsp;{{ order['history'][s['identifier']] }}</td>
             </tr>
             {% end %}

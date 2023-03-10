@@ -47,7 +47,8 @@ class OrderSaver(saver.Saver):
         self["form"] = form["_id"]
         self["title"] = title
         self["fields"] = dict([(f["identifier"], None) for f in self.fields])
-        self.set_status(settings["ORDER_STATUS_INITIAL"]["identifier"])
+        # Since version 9.1.0, the status PREPARATION is hard-wired as the initial one.
+        self.set_status(constants.PREPARATION)
         # Set the order identifier if its format defined.
         # Allow also for disabled, since admin may clone such orders.
         if form["status"] in (constants.ENABLED, constants.DISABLED):
@@ -475,7 +476,7 @@ class OrderSaver(saver.Saver):
                 )
 
     def send_message(self):
-        "Send a message after status change."
+        "Send a message after an order status change."
         try:
             text_template = settings["ORDER_MESSAGES"][self.doc["status"]]
         except (couchdb2.NotFoundError, KeyError):
@@ -490,9 +491,19 @@ class OrderSaver(saver.Saver):
             if "owner" in text_template["recipients"]:
                 recipients.add(owner["email"])
             if constants.GROUP in text_template["recipients"]:
-                for colleague in self.rqh.get_colleagues(owner["email"]):
-                    if colleague["status"] == constants.ENABLED:
-                        recipients.add(colleague["email"])
+                colleagues = dict()
+                for row in self.db.view(
+                    "group", "member", include_docs=True, key=owner["email"].strip().lower()
+                ):
+                    for member in row.doc["members"]:
+                        try:
+                            account = self.rqh.get_account(member)
+                            if account["status"] == constants.ENABLED:
+                                colleagues[account["email"]] = account
+                        except ValueError:
+                            pass
+                for colleague in colleagues.values():
+                    recipients.add(colleague["email"])
         if constants.ADMIN in text_template["recipients"]:
             for admin in self.rqh.get_admins():
                 if admin["status"] == constants.ENABLED:
@@ -659,9 +670,8 @@ class OrderMixin:
 class OrderApiV1Mixin(ApiV1Mixin):
     "Mixin for order JSON data structure."
 
-    def get_order_json(self, order, forms_lookup=None, full=False):
+    def get_order_json(self, order, full=False):
         """Return a dictionary for JSON output for the order.
-        The forms lookup is computed if not given.
         If 'full' then add all fields, else only for orders list.
         NOTE: Only the values of the fields are included, not
         the full definition of the fields. To obtain that,
@@ -675,7 +685,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
         data["title"] = order.get("title") or "[no title]"
         data["iuid"] = order["_id"]
         if full:
-            form = self.get_form(order["form"])
+            form = self.lookup_form(order["form"])
             data["form"] = dict(
                 [
                     ("title", form["title"]),
@@ -691,9 +701,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
                 ]
             )
         else:
-            if forms_lookup is None:
-                forms_lookup = self.get_forms_lookup()
-            form = forms_lookup[order["form"]]
+            form = self.lookup_form(order["form"])
             data["form"] = dict(
                 [
                     ("iuid", order["form"]),
@@ -704,7 +712,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
             )
         data["owner"] = dict(
             email=order["owner"],
-            name=self.get_account_name(order["owner"]),
+            name=self.lookup_account_name(order["owner"]),
             links=dict(
                 api=dict(href=URL("account_api", order["owner"])),
                 display=dict(href=URL("account", order["owner"])),
@@ -1576,9 +1584,11 @@ class Orders(RequestHandler):
         else:
             order_column = 0
         self.set_filter()
+        forms = [row.doc for row in
+                 self.db.view("form", "modified", descending=True, include_docs=True)]
         self.render(
             "order/list.html",
-            forms_lookup=self.get_forms_lookup(),
+            forms=forms,
             years=years,
             filter=self.filter,
             orders=self.get_orders(),
@@ -1782,10 +1792,9 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
         result["links"] = dict(
             api=dict(href=URL("orders_api")), display=dict(href=URL("orders"))
         )
-        forms_lookup = self.get_forms_lookup()
         result["items"] = []
         for order in self.get_orders():
-            data = self.get_order_json(order, forms_lookup=forms_lookup)
+            data = self.get_order_json(order)
             data["fields"] = dict()
             for key in settings["ORDERS_LIST_FIELDS"]:
                 data["fields"][key] = order["fields"].get(key)
@@ -1834,9 +1843,8 @@ class OrdersCsv(Orders):
         row.extend([s.capitalize() for s in settings["ORDERS_LIST_STATUSES"]])
         row.append("Modified")
         writer.writerow(row)
-        forms_lookup = self.get_forms_lookup()
         for order in self.get_orders():
-            form = forms_lookup[order["form"]]
+            form = self.lookup_form(order["form"])
             row = [
                 order.get("identifier") or "",
                 order["title"] or "[no title]",
@@ -1846,7 +1854,7 @@ class OrdersCsv(Orders):
                 order["form"],
                 self.absolute_reverse_url("form", order["form"]),
                 order["owner"],
-                self.get_account_name(order["owner"]),
+                self.lookup_account_name(order["owner"]),
                 self.absolute_reverse_url("account", order["owner"]),
             ]
             if settings["ORDERS_LIST_OWNER_UNIVERSITY"]:

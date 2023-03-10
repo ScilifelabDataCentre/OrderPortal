@@ -66,6 +66,59 @@ class AccountSaver(saver.Saver):
                 raise ValueError("Invoice reference is required.")
 
 
+class AccessMixin:
+    "Mixin for access check methods."
+
+    def allow_read(self, account):
+        "Is the account readable by the current user?"
+        if self.am_owner(account):
+            return True
+        if self.am_staff():
+            return True
+        if self.am_colleague(account["email"]):
+            return True
+        return False
+
+    def check_readable(self, account):
+        "Check that the account is readable by the current user."
+        if self.allow_read(account):
+            return
+        raise ValueError("You may not read the account.")
+
+    def allow_edit(self, account):
+        "Is the account editable by the current user?"
+        if self.am_owner(account):
+            return True
+        if self.am_staff():
+            return True
+        return False
+
+    def check_editable(self, account):
+        "Check that the account is editable by the current user."
+        if self.allow_read(account):
+            return
+        raise ValueError("You may not edit the account.")
+
+
+class RecipientsMixin:
+    "Mixin for 'get_recipents' method."
+
+    def get_recipients(self, text, account):
+        """Return the list of emails for the recipients according to
+        the specification in the text, given the user account.
+        May include admin and staff.
+        """
+        result = []
+        if constants.USER in text["recipients"]:
+            result.append(account["email"])
+        if constants.ADMIN in text["recipients"]:
+            result.extend([a["email"] for a in self.get_admins()])
+        if constants.STAFF in text["recipients"]:
+            staff = [row.doc for row in self.db.view("account", "role", key=constants.STAFF, include_docs=True)]
+            result.extend([a["email"] for a in staff if a["status"] == constants.ENABLED])
+        return result
+
+
 class Accounts(RequestHandler):
     "List of all accounts."
 
@@ -327,41 +380,7 @@ class AccountsXlsx(AccountsCsv):
         self.set_header("Content-Disposition", 'attachment; filename="accounts.xlsx"')
 
 
-class AccountMixin:
-    "Mixin for access check methods."
-
-    def allow_read(self, account):
-        "Is the account readable by the current user?"
-        if self.am_owner(account):
-            return True
-        if self.am_staff():
-            return True
-        if self.am_colleague(account["email"]):
-            return True
-        return False
-
-    def check_readable(self, account):
-        "Check that the account is readable by the current user."
-        if self.allow_read(account):
-            return
-        raise ValueError("You may not read the account.")
-
-    def allow_edit(self, account):
-        "Is the account editable by the current user?"
-        if self.am_owner(account):
-            return True
-        if self.am_staff():
-            return True
-        return False
-
-    def check_editable(self, account):
-        "Check that the account is editable by the current user."
-        if self.allow_read(account):
-            return
-        raise ValueError("You may not edit the account.")
-
-
-class Account(AccountMixin, RequestHandler):
+class Account(AccessMixin, RequestHandler):
     "Display account."
 
     @tornado.web.authenticated
@@ -462,7 +481,7 @@ class Account(AccountMixin, RequestHandler):
         return False
 
 
-class AccountApiV1(AccountMixin, RequestHandler):
+class AccountApiV1(AccessMixin, RequestHandler):
     "Account API; JSON output."
 
     @tornado.web.authenticated
@@ -593,7 +612,6 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
         orders = [r.doc for r in view]
         self.render(
             "account/orders.html",
-            forms_lookup=self.get_forms_lookup(),
             orders=orders,
             account=account,
             order_column=order_column,
@@ -629,11 +647,7 @@ class AccountOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandler):
             startkey=[account["email"]],
             endkey=[account["email"], constants.CEILING],
         )
-        forms_lookup = self.get_forms_lookup()
-        data["orders"] = [
-            self.get_order_json(r.doc, forms_lookup=forms_lookup)
-            for r in view
-        ]
+        data["orders"] = [self.get_order_json(r.doc) for r in view]
         self.write(data)
 
 
@@ -663,7 +677,6 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
         self.render(
             "account/groups_orders.html",
             account=account,
-            forms_lookup=self.get_forms_lookup(),
             orders=self.get_group_orders(account),
             order_column=order_column,
         )
@@ -691,15 +704,13 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandl
             api=dict(href=URL("account_groups_orders_api", account["email"])),
             display=dict(href=URL("account_groups_orders", account["email"])),
         )
-        forms_lookup = self.get_forms_lookup()
         data["orders"] = [
-            self.get_order_json(o, forms_lookup=forms_lookup)
-            for o in self.get_group_orders(account)
+            self.get_order_json(order) for oorder in self.get_group_orders(account)
         ]
         self.write(data)
 
 
-class AccountLogs(AccountMixin, RequestHandler):
+class AccountLogs(AccessMixin, RequestHandler):
     "Display log entries for an account."
 
     @tornado.web.authenticated
@@ -717,7 +728,7 @@ class AccountLogs(AccountMixin, RequestHandler):
         )
 
 
-class AccountMessages(AccountMixin, RequestHandler):
+class AccountMessages(AccessMixin, RequestHandler):
     "List messages for an account."
 
     @tornado.web.authenticated
@@ -748,7 +759,7 @@ class AccountMessages(AccountMixin, RequestHandler):
         self.render("account/messages.html", account=account, messages=messages)
 
 
-class AccountEdit(AccountMixin, RequestHandler):
+class AccountEdit(AccessMixin, RequestHandler):
     "Edit account information."
 
     @tornado.web.authenticated
@@ -839,7 +850,7 @@ class LoginMixin:
         self.set_secure_cookie(constants.USER_COOKIE, "")
 
 
-class Login(LoginMixin, RequestHandler):
+class Login(RecipientsMixin, LoginMixin, RequestHandler):
     "Login to a account account. Set a secure cookie."
 
     def get(self):
@@ -914,7 +925,7 @@ class Logout(LoginMixin, RequestHandler):
         self.see_other("home")
 
 
-class Reset(LoginMixin, RequestHandler):
+class Reset(RecipientsMixin, LoginMixin, RequestHandler):
     "Reset the password of an account."
 
     def get(self):
@@ -1018,7 +1029,7 @@ class Password(LoginMixin, RequestHandler):
         self.see_other("home", message="Password set.")
 
 
-class Register(RequestHandler):
+class Register(RecipientsMixin, RequestHandler):
     "Register a new account."
 
     KEYS = [

@@ -48,8 +48,7 @@
             {% if current_user %}
             {% if am_staff %}
             <li>
-              <a href="{{ reverse_url('orders') }}">
-                {{ terminology('Orders') }}</a>
+              <a href="{{ reverse_url('orders') }}">{{ terminology('Orders') }}</a>
             </li>
             {% else %}
             <li>
@@ -85,8 +84,7 @@
                 </li>
                 {% if am_staff %}
                 <li>
-                  <a href="{{ reverse_url('register') }}">
-                    Register new account</a>
+                  <a href="{{ reverse_url('register') }}">Register new account</a>
                 </li>
                 <li>
                   <a href="{{ reverse_url('reset') }}">Reset password</a>
@@ -111,8 +109,7 @@
                 {% end %} {# if am_admin #}
                 {% for name, info_title in infos %}
                 <li>
-                  <a href="{{ reverse_url('info', name) }}">
-                    {{ info_title or name }}</a>
+                  <a href="{{ reverse_url('info', name) }}">{{ info_title or name }}</a>
                 </li>
                 {% end %}
               </ul>

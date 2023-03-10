@@ -18,11 +18,7 @@
     <table class="table table-condensed table-noborder">
       {% for account in pending %}
       <tr>
-        <td>
-          <a href="{{ reverse_url('account', account['email']) }}">
-            {{ account['email'] }}
-          </a>
-        </td>
+        <td>{% module AccountLink(email=account['email']) %}</td>
         <td class="localtime nobr">{{ account['created'] }}</td>
       </tr>
       {% end %}
@@ -46,18 +42,8 @@
     <table class="table table-condensed table-noborder">
       {% for order in orders %}
       <tr>
-        <th>
-          {% if order.get('identifier') %}
-          <a href="{{ reverse_url('order', order['identifier']) }}">
-            {{ order['title'] }}
-          </a>
-          {% else %}
-          <a href="{{ reverse_url('order', order['_id']) }}">
-            {{ order['title'] }}
-          </a>
-          {% end %}
-        </th>
-        <td>{% module Icon(order['status'], label=True) %}</td>
+        <th>{% module OrderLink(order, title=True) %}</th>
+        <td>{% module Status(order['status']) %}</td>
         <td class="localtime nobr">{{ order['modified'] }}</td>
       </tr>
       {% end %}

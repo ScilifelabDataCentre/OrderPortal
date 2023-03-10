@@ -112,7 +112,7 @@
           </td>
           <th>{{ account['university'] }}</td>
           <td>{{ account['role'] }}</td>
-          <td>{% module Icon(account['status'], label=True) %}</td>
+          <td>{% module Status(account['status']) %}</td>
           {% if account.get('login') %}
           <td class="localtime nobr">{{ account['login'] }}</td>
           {% else %}

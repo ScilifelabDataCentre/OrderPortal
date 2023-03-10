@@ -127,16 +127,6 @@ def update_meta_documents(db):
                         target
                     ] = value
 
-        initial = None
-        for status in settings["ORDER_STATUSES"]:
-            if status.get("initial"):
-                if initial:  # There must one and only one initial status.
-                    status.pop("initial")
-                else:
-                    initial = status
-        if initial is None:  # Set the status PREPARATION to initial, if none defined.
-            lookup[constants.PREPARATION]["status"] = True
-
         # Save current setup into database.
         with MetaSaver(db=db) as saver:
             saver.set_id("order_statuses")
@@ -222,6 +212,16 @@ def update_meta_documents(db):
             saver["display_max_recent"] = settings.get("DISPLAY_MAX_RECENT_ORDERS", 10)
             saver["terminology"] = settings.get("TERMINOLOGY", {})
         logger.info("Saved more order settings to database.")
+
+    # As of version 9.1.0, PREPARATION is hard-wired as the initial status.
+    # Remove the obsolete item "initial" from the order statuses.
+    doc = db["order_statuses"]
+    statuses = doc["statuses"]
+    if "initial" in statuses[0]:
+        with MetaSaver(doc=doc, db=db) as saver:
+            for status in statuses:
+                status.pop("initial", None)
+        logger.info("Updated order statuses to remove 'initial'.")
 
 
 class TextSaver(saver.Saver):
@@ -477,12 +477,6 @@ class OrderStatusEdit(RequestHandler):
             status["description"] = value
         else:
             self.set_error_flash("There must be a description; not changed.")
-        initial = utils.to_bool(self.get_argument("initial", False))
-        # Only one status may be initial; set all others to False.
-        if initial and not status.get("initial"):
-            for s in settings["ORDER_STATUSES_LOOKUP"].values():
-                s["initial"] = False
-            status["initial"] = True
         status["edit"] = ["admin"]  # Is always allowed.
         if utils.to_bool(self.get_argument("edit_staff", False)):
             status["edit"].append("staff")
@@ -505,14 +499,19 @@ class OrderTransitionsEdit(RequestHandler):
 
     @tornado.web.authenticated
     def get(self, status_id):
+        "Display edit page."
         self.check_admin()
+        if status_id == constants.PREPARATION:
+            self.see_other("admin_order_statuses",
+                           error="Not allowed to edit transitions from status Preparation.")
+            return
         try:
             status = settings["ORDER_STATUSES_LOOKUP"][status_id]
         except KeyError:
             self.see_other("admin_order_statuses", error="No such order status.")
         else:
             targets = settings["ORDER_TRANSITIONS"].get(status_id, dict())
-            # Defensive: only allow enabled statuses as targets.
+            # Ensure only allow enabled statuses as targets.
             for target in targets.keys():
                 if target not in settings["ORDER_STATUSES_LOOKUP"]:
                     targets.pop(target)
@@ -838,140 +837,140 @@ DEFAULT_ORDER_STATUSES = [
         action="Submit",
     ),
     dict(
-        identifier="review",
+        identifier=constants.REVIEW,
         description="The order is under review.",
         edit=["staff", "admin"],
         attach=["staff", "admin"],
         action="Review",
     ),
     dict(
-        identifier="queued",
+        identifier=constants.QUEUED,
         description="The order has been queued.",
         edit=["admin"],
         attach=["admin"],
         action="Queue",
     ),
     dict(
-        identifier="waiting",
+        identifier=constants.WAITING,
         description="The order is waiting.",
         edit=["admin"],
         attach=["admin"],
         action="Wait",
     ),
     dict(
-        identifier="accepted",
+        identifier=constants.ACCEPTED,
         description="The order has been checked and accepted.",
         edit=["admin"],
         attach=["admin"],
         action="Accept",
     ),
     dict(
-        identifier="rejected",
+        identifier=constants.REJECTED,
         description="The order has been rejected.",
         edit=["admin"],
         attach=["admin"],
         action="Reject",
     ),
     dict(
-        identifier="processing",
+        identifier=constants.PROCESSING,
         description="The order is being processed in the lab.",
         edit=["admin"],
         attach=["admin"],
         action="Process",
     ),
     dict(
-        identifier="active",
+        identifier=constants.ACTIVE,
         description="The order is active.",
         edit=["admin"],
         attach=["admin"],
         action="Active",
     ),
     dict(
-        identifier="analysis",
+        identifier=constants.ANALYSIS,
         description="The order results are being analysed.",
         edit=["admin"],
         attach=["admin"],
         action="Analyse",
     ),
     dict(
-        identifier="onhold",
+        identifier=constants.ONHOLD,
         description="The order is on hold.",
         edit=["admin"],
         attach=["admin"],
         action="On hold",
     ),
     dict(
-        identifier="halted",
+        identifier=constants.HALTED,
         description="The work on the order has been halted.",
         edit=["admin"],
         attach=["admin"],
         action="Halt",
     ),
     dict(
-        identifier="aborted",
+        identifier=constants.ABORTED,
         description="The work on the order has been permanently stopped.",
         edit=["admin"],
         attach=["admin"],
         action="Abort",
     ),
     dict(
-        identifier="terminated",
+        identifier=constants.TERMINATED,
         description="The order has been terminated.",
         edit=["admin"],
         attach=["admin"],
         action="Terminate",
     ),
     dict(
-        identifier="cancelled",
+        identifier=constants.CANCELLED,
         description="The order has been cancelled.",
         edit=["admin"],
         attach=["admin"],
         action="Cancel",
     ),
     dict(
-        identifier="finished",
+        identifier=constants.FINISHED,
         description="The work on the order has finished.",
         edit=["admin"],
         attach=["admin"],
         action="Finish",
     ),
     dict(
-        identifier="completed",
+        identifier=constants.COMPLETED,
         description="The order has been completed.",
         edit=["admin"],
         attach=["admin"],
         action="Complete",
     ),
     dict(
-        identifier="closed",
+        identifier=constants.CLOSED,
         description="All work and other actions for the order have been performed.",
         edit=["admin"],
         attach=["admin"],
         action="Closed",
     ),
     dict(
-        identifier="delivered",
+        identifier=constants.DELIVERED,
         description="The order results have been delivered.",
         edit=["admin"],
         attach=["admin"],
         action="Deliver",
     ),
     dict(
-        identifier="invoiced",
+        identifier=constants.INVOICED,
         description="The order has been invoiced.",
         edit=["admin"],
         attach=["admin"],
         action="Invoice",
     ),
     dict(
-        identifier="archived",
+        identifier=constants.ARCHIVED,
         description="The order has been archived.",
         edit=["admin"],
         attach=["admin"],
         action="Archive",
     ),
     dict(
-        identifier="undefined",
+        identifier=constants.UNDEFINED,
         description="The order has an undefined or unknown status.",
         edit=["admin"],
         attach=["admin"],

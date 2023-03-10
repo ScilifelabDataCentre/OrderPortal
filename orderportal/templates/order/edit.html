@@ -35,14 +35,12 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
     <div class="col-md-4">
       <button type="submit" class="btn btn-lg btn-success btn-block"
               name="__save__" value="continue">
-        <span class="glyphicon glyphicon-floppy-disk"></span>
-        Save and continue edit
+        <span class="glyphicon glyphicon-floppy-disk"></span> Save and continue edit
       </button>
     </div>
     <div class="col-md-3">
       <button type="submit" class="btn btn-lg btn-success btn-block">
-        <span class="glyphicon glyphicon-floppy-save"></span>
-        Save and view
+        <span class="glyphicon glyphicon-floppy-save"></span> Save and view
       </button>
     </div>
     <div class="col-md-6">
@@ -78,10 +76,9 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
     <div class="row">
       <div class="col-md-9">
         <label class="control-label" for="__form__">
-          {{ terminology('Order') }} form
-        </label>
+          {{ terminology('Order') }} form</label>
         <p id="__form__" class="form-control-static">
-          {{ form['title'] }} {% module Version(form) %}
+          {{ form['title'] }} ({{ form.get('version') or '-' }})
         </p>
       </div>
     </div>
@@ -154,14 +151,12 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
     <div class="col-md-4">
       <button type="submit" class="btn btn-lg btn-success btn-block"
               name="__save__" value="continue">
-        <span class="glyphicon glyphicon-floppy-disk"></span>
-        Save and continue edit
+        <span class="glyphicon glyphicon-floppy-disk"></span> Save and continue edit
       </button>
     </div>
     <div class="col-md-3">
       <button type="submit" class="btn btn-lg btn-success btn-block">
-        <span class="glyphicon glyphicon-floppy-save"></span>
-        Save and view
+        <span class="glyphicon glyphicon-floppy-save"></span> Save and view
       </button>
     </div>
     <div class="col-md-6">

@@ -15,26 +15,21 @@ ICON_TEMPLATE = """<img src="{url}" class="icon" alt="{alt}" title="{title}">"""
 class Icon(tornado.web.UIModule):
     "HTML for an icon, optionally labelled with a title."
 
-    def render(self, name, title=None, label=False):
+    def render(self, name):
         if not name:
             name = "undefined"
-        elif not isinstance(name, str):
-            name = name[constants.DOCTYPE]
         # Order status icons have been moved to the generic 'static' directory.
         url = self.handler.static_url(name + ".png")
-        name = name.capitalize()
-        title = utils.terminology(title or name)
-        icon = ICON_TEMPLATE.format(url=url, alt=name, title=title)
-        if label:
-            return f"""<span class="nobr">{icon} {title}</span>"""
-        else:
-            return icon
+        name = utils.terminology(name.capitalize())
+        return ICON_TEMPLATE.format(url=url, alt=name, title=name)
 
 
 class Status(tornado.web.UIModule):
     "HTML for a status; order, account."
 
     def render(self, status):
+        if status not in constants.ORDER_STATUSES:
+            status = "undefined"
         # Order status icons are now in the generic 'static' directory.
         url = self.handler.static_url(status + ".png")
         status = status.capitalize()
@@ -57,9 +52,13 @@ class ContentType(tornado.web.UIModule):
 class OrderLink(tornado.web.UIModule):
     "HTML for a link to an order."
     
-    def render(self, order):
+    def render(self, order, title=False):
         url = self.handler.order_reverse_url(order)
-        return f"""<a href="{url}">{order['identifier']}</a>"""
+        if title:
+            label = f"{order['identifier']} {order['title'] or '[no title]'}"
+        else:
+            label = order['identifier']
+        return f"""<a href="{url}">{label}</a>"""
 
 
 class AccountLink(tornado.web.UIModule):
@@ -73,7 +72,7 @@ class AccountLink(tornado.web.UIModule):
         elif not email:
             raise ValueError("neither email nor account specified")
         if name:
-            title = self.handler.get_account_name(email)
+            title = self.handler.lookup_account_name(email)
         else:
             title = email
         url = self.handler.reverse_url("account", email)
@@ -94,9 +93,15 @@ class GroupLink(tornado.web.UIModule):
 class FormLink(tornado.web.UIModule):
     "HTML for a link to a form."
 
-    def render(self, form):
+    def render(self, form=None, iuid=None, version=False):
+        if form is None:
+            form = self.handler.lookup_form(iuid)
         url = self.handler.reverse_url("form", form["_id"])
-        return f"""<a href="{url}">{form.get('title') or form['_id']}</a>"""
+        if version:
+            label = f"{form.get('title') or '[no title]'} ({form.get('version') or '-'})"
+        else:
+            label = form.get('title') or '[no title]'
+        return f"""<a href="{url}">{label}</a>"""
 
 
 class LogsLink(tornado.web.UIModule):
@@ -162,7 +167,7 @@ class Tags(tornado.web.UIModule):
 
 
 class NoneStr(tornado.web.UIModule):
-    "Output undef string if value is None, else str(value)."
+    "Output undef string if value is None, else str(value); handle lists."
 
     def render(self, value, undef="", list_delimiter=None):
         if value is None:
@@ -171,17 +176,6 @@ class NoneStr(tornado.web.UIModule):
             if list_delimiter:
                 return list_delimiter.join(value)
         return str(value)
-
-
-class Version(tornado.web.UIModule):
-    "Output version string if defined."
-
-    def render(self, doc):
-        version = doc.get("version")
-        if version is None:
-            return ""
-        else:
-            return f"({version})"
 
 
 class ShortenedPre(tornado.web.UIModule):
