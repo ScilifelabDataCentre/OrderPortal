@@ -80,8 +80,7 @@
       {% for group in invitations %}
         <tr>
           <td>
-            {{ group['name'] }}
-            (owner {% module Icon('account') %} {{ group['owner'] }})
+            {{ group['name'] }} (owner {{ group['owner'] }})
           </td>
           {% if current_user['email'] == account['email'] %}
           <td>

@@ -1158,7 +1158,7 @@ class Registered(RequestHandler):
         self.render("account/registered.html")
 
 
-class AccountEnable(RequestHandler):
+class AccountEnable(RecipientsMixin, RequestHandler):
     "Enable the account; from status pending or disabled."
 
     @tornado.web.authenticated

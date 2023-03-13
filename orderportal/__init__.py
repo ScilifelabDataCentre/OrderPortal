@@ -180,25 +180,25 @@ class Constants:
         PREPARATION,
         SUBMITTED,
         REVIEW,
-    QUEUED,
-    WAITING,
-    ACCEPTED,
-    REJECTED,
-    PROCESSING,
-    ACTIVE,
-    ANALYSIS,
-    ONHOLD,
-    HALTED,
-    ABORTED,
-    TERMINATED,
-    CANCELLED,
-    FINISHED,
-    COMPLETED,
-    CLOSED,
-    DELIVERED,
-    INVOICED,
-    ARCHIVED,
-    UNDEFINED,
+        QUEUED,
+        WAITING,
+        ACCEPTED,
+        REJECTED,
+        PROCESSING,
+        ACTIVE,
+        ANALYSIS,
+        ONHOLD,
+        HALTED,
+        ABORTED,
+        TERMINATED,
+        CANCELLED,
+        FINISHED,
+        COMPLETED,
+        CLOSED,
+        DELIVERED,
+        INVOICED,
+        ARCHIVED,
+        UNDEFINED,
     )
 
     # Delimiters to remove when searching for orders.
@@ -233,6 +233,8 @@ class Constants:
     REPORT_STATUSES = (PREPARATION, REVIEW, PUBLISHED)
     APPROVED = "approved"
     # REJECTED = "rejected" Already defined above.
+
+    ALL_STATUSES = frozenset(ACCOUNT_STATUSES + FORM_STATUSES + ORDER_STATUSES + REPORT_STATUSES)
 
     # Content types (MIME types).
     HTML_MIMETYPE = "text/html"

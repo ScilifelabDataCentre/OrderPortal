@@ -28,7 +28,7 @@ class Status(tornado.web.UIModule):
     "HTML for a status; order, account."
 
     def render(self, status):
-        if status not in constants.ORDER_STATUSES:
+        if status not in constants.ALL_STATUSES:
             status = "undefined"
         # Order status icons are now in the generic 'static' directory.
         url = self.handler.static_url(status + ".png")
@@ -114,6 +114,19 @@ class LogsLink(tornado.web.UIModule):
         return f"""<a href="{url}">{icon} Logs</a>"""
 
 
+class CancelButton(tornado.web.UIModule):
+    "Display a standard cancel button."
+
+    def render(self, url):
+        a = hg.A(
+            hg.SPAN(_class="glyphicon glyphicon-remove"),
+            " Cancel",
+            href=url,
+            _class="btn btn-default btn-block",
+        )
+        return hg.render(a, {})
+
+
 class Markdown(tornado.web.UIModule):
     "Process the text as Markdown."
 
@@ -190,56 +203,71 @@ class ShortenedPre(tornado.web.UIModule):
         return "<pre>%s</pre>" % "\n".join(lines)
 
 
-class TableRows(tornado.web.UIModule):
-    "Display the table rows."
+class TableField(tornado.web.UIModule):
+    """Display the field table.
+    This is used in only one place, so should really be included in-line.
+    However, that turned out to be rather complicated, so let's keep this.
+    """
 
     def render(self, field, value):
         assert field["type"] == constants.TABLE
-        result = ["<thead>", "<tr>", "<th></th>"]
+        header = hg.TR(hg.TH())
         for coldef in field["table"]:
             column = utils.parse_field_table_column(coldef)
-            header = column["identifier"]
+            title = column["identifier"]
             if column["type"] in (constants.INT, constants.FLOAT):
-                header += " (%s)" % column["type"]
-            result.append("<th>%s</th>" % header)
-        result.append("</tr>")
-        result.append("</thead>")
-        result.append("<tbody>")
+                title += f" ({column['type']})"
+            header.append(hg.TH(title))
+        rows = []
         if value:
-            for i, row in enumerate(value):
-                result.append("<tr>")
-                result.append('<td class="number">%s</td>' % (i + 1))
-                for cell in row:
+            for i, valuerow in enumerate(value):
+                rows.append(hg.TR(hg.TD(str(i+1), _class="number")))
+                for cell in valuerow:
                     if cell is None:
-                        cell = ""
-                    result.append("<td>%s</td>" % cell)
-                result.append("</tr>")
-        result.append("</tbody>")
-        return "\n".join(result)
+                        rows[-1].append(hg.TD())
+                    else:
+                        rows[-1].append(hg.TD(str(cell)))
+        return hg.render(hg.TABLE(hg.THEAD(header), hg.TBODY(*rows),
+                                  _class="table table-bordered table-condensed"),
+                         {})
 
 
-class TableRowsEdit(tornado.web.UIModule):
-    "Display the table rows for editing."
+class TableFieldEdit(tornado.web.UIModule):
+    """Display the field table for editing.
+    This is used in only one place, so should really be included in-line.
+    However, that turned out to be rather complicated, so let's keep this.
+    """
 
-    def render(self, field, value):
+    def render(self, field, value, tableinputs):
         assert field["type"] == constants.TABLE
-        result = ["<thead>", "<tr>", "<th></th>"]
+        tableid = f"_table_{field['identifier']}"
+        ncols = len(field["table"])
+        if ncols > 5:
+            style = f'style="width: {180*ncols}px; max-width: {180*ncols}px;"'
+        else:
+            style = ""
+        result = [
+            f'<table class="table table-bordered table-condensed" id="{tableid}" {style}>',
+            "<thead>",
+            "<tr>",
+            "<th></th>"
+        ]
         columns = []
         for coldef in field["table"]:
             column = utils.parse_field_table_column(coldef)
             columns.append(column)
             header = column["identifier"]
             if column["type"] in (constants.INT, constants.FLOAT):
-                header += " (%s)" % column["type"]
-            result.append("<th>%s</th>" % header)
+                header += f" ({column['type']})"
+            result.append(f"<th>{header}</th>")
         result.append("</tr>")
         result.append("</thead>")
+        result.append("<tbody>")
         if value:
-            result.append("<tbody>")
             for i, row in enumerate(value):
-                rowid = "_table_%s_%s" % (field["identifier"], i)
-                result.append('<tr id="%s">' % rowid)
-                result.append('<td class="table-input-row-0">%s</td>' % (i + 1))
+                rowid = f"{tableid}_{i}"
+                result.append(f'<tr id="{rowid}">')
+                result.append(f'<td class="table-input-row-0">{i+1}</td>')
                 for j, cell in enumerate(columns):
                     try:
                         cell = row[j]
@@ -248,59 +276,120 @@ class TableRowsEdit(tornado.web.UIModule):
                     except IndexError:
                         cell = ""
                     result.append("<td>")
-                    name = "_table_%s_%s_%s" % (field["identifier"], i, j)
+                    name = f"{tableid}_{i}_{j}"
                     coltype = columns[j]["type"]
                     if coltype == constants.SELECT:
-                        result.append('<select class="form-control" name="%s">' % name)
+                        result.append(f'<select class="form-control" name="{name}">')
                         for option in columns[j]["options"]:
                             if option == cell:
-                                result.append("<option selected>%s</option>" % option)
+                                result.append(f"<option selected>{option}</option>")
                             else:
-                                result.append("<option>%s</option>" % option)
+                                result.append(f"<option>{option}</option>")
                         result.append("</select>")
                     elif coltype == constants.INT:
                         result.append(
-                            '<input type="number" step="1"'
-                            ' class="form-control"'
-                            ' name="%s" value="%s">' % (name, cell)
-                        )
+                            '<input type="number" step="1" class="form-control"'
+                            f' name="{name}" value="{cell}">')
                     elif coltype == constants.FLOAT:
                         result.append(
-                            '<input type="number"'
-                            ' class="form-control"'
-                            ' name="%s" value="%s">' % (name, cell)
-                        )
+                            '<input type="number" class="form-control"'
+                            f' step="{constants.FLOAT_STEP}"'
+                            f' name="{name}" value="{cell}">')
                     elif coltype == constants.DATE:
                         result.append(
-                            '<input type="text"'
-                            ' class="form-control datepicker"'
-                            ' name="%s" value="%s">' % (name, cell)
-                        )
+                            '<input type="text" class="form-control datepicker"'
+                            f' name="{name}" value="{cell}>')
                     else:  # Input type for all other types: text
                         result.append(
                             '<input type="text" class="form-control"'
-                            ' name="%s" value="%s">' % (name, cell)
-                        )
+                            f' name="{name}" value="{cell}">')
                 result.append(
                     "<td>"
                     '<button type="button" class="btn btn-danger"'
-                    """ onclick="$('#%s').remove()">Delete"""
+                    f""" onclick="$('#{rowid}').remove()">Delete"""
                     "</button>"
-                    "</td>" % rowid
+                    "</td>"
                 )
                 result.append("</tr>")
-            result.append("</tbody>")
+        else:
+            result.append(tableinputs[field["identifier"]].replace("></td>", ">1</td>", 1).replace("rowid", tableid + "_0"))
+        result.append("</tbody>")
+        result.append("</table>")
         return "\n".join(result)
 
 
-class CancelButton(tornado.web.UIModule):
-    "Display a standard cancel button."
+class NewTableFieldEdit(tornado.web.UIModule):
+    """Display the field table for editing. XXX New version, as yet unused.
+    This is used in only one place, so should really be included in-line.
+    However, that turned out to be rather complicated, so let's keep this.
+    """
 
-    def render(self, url):
-        a = hg.A(
-            hg.SPAN(_class="glyphicon glyphicon-remove"),
-            " Cancel",
-            href=url,
-            _class="btn btn-default btn-block",
-        )
-        return hg.render(a, {})
+    def render(self, field, value):
+        assert field["type"] == constants.TABLE
+        tableid = f"_new_table_{field['identifier']}"
+        header = hg.TR(hg.TH())
+        columns = []
+        for coldef in field["table"]:
+            column = utils.parse_field_table_column(coldef)
+            columns.append(column)
+            title = column["identifier"]
+            if column["type"] in (constants.INT, constants.FLOAT):
+                title += f" ({column['type']})"
+            header.append(hg.TH(title))
+        rows = []
+        if value:
+            for i, row in enumerate(value):
+                rowid = f"{tableid}_{i}"
+                rows.append(hg.TR(id=rowid))
+                rows[-1].append(hg.TD(str(i+1), _class="table-input-row-0"))
+                for j, cell in enumerate(columns):
+                    try:
+                        cell = row[j]
+                        if cell is None:
+                            cell = ""
+                    except IndexError:
+                        cell = ""
+                    name = "{tableid}_{i}_{j}"
+                    coltype = columns[j]["type"]
+                    if coltype == constants.SELECT:
+                        input_field = hg.SELECT(name=name, _class="form-control")
+                        for option in columns[j]["options"]:
+                            if option == cell:
+                                input_field.append(hg.OPTION(option, selected=True))
+                            else:
+                                input_field.append(hg.OPTION(option))
+                    elif coltype == constants.INT:
+                        input_field = hg.INPUT(type="number",
+                                               step=1,
+                                               _class="form-control",
+                                               name=name,
+                                               value=cell)
+                    elif coltype == constants.FLOAT:
+                        input_field = hg.INPUT(type="number",
+                                               _class="form-control",
+                                               name=name,
+                                               value=cell)
+                    elif coltype == constants.DATE:
+                        input_field = hg.INPUT(type="text",
+                                               _class="form-control datepicker",
+                                               name=name,
+                                               value=cell)
+                    else:  # Input type for all other types: text
+                        input_field = hg.INPUT(type="text",
+                                               _class="form-control",
+                                               name=name,
+                                               value=cell)
+                    rows[-1].append(hg.TD(input_field))
+                rows[-1].append(hg.TD(hg.BUTTON("Delete",
+                                                type="button",
+                                                _class="btn btn-danger",
+                                                onclick="$('#{rowid}').remove()")
+                                      ))
+        # If no rows to edit, then add an empty input row directly for clarity.
+        if not rows:
+            pass ### replace tableinputs !
+        kwargs = dict(id=tableid, _class="table table-bordered table-condensed")
+        if len(field["table"]) > 5:
+            width = 180 * len(field["table"])
+            kwargs["style"] = f"max-width:{width}px; width:{width}px"
+        return hg.render(hg.TABLE(hg.THEAD(header), hg.TBODY(*rows), **kwargs), {})

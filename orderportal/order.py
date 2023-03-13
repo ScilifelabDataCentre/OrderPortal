@@ -1109,8 +1109,11 @@ class OrderLogs(OrderMixin, RequestHandler):
         except ValueError as error:
             self.see_other("home", error=error)
             return
-        title = f"Logs {utils.terminology('order')} '{order['title'] or '[no title]'}'"
-        self.render("logs.html", title=title, logs=self.get_logs(order["_id"]))
+        self.render(
+            "logs.html",
+            title=f"Logs for {utils.terminology('order')} '{order['title'] or '[no title]'}'",
+            logs=self.get_logs(order["_id"])
+        )
 
 
 class OrderEdit(OrderMixin, RequestHandler):
@@ -1142,38 +1145,41 @@ class OrderEdit(OrderMixin, RequestHandler):
         hidden_fields = set(
             [f["identifier"] for f in fields.flatten() if f["type"] != "multiselect"]
         )
-        # For each table input field, create code for use in bespoke JavaScript.
+        # For each table input field, create HTML code for use in 'field_table_edit.js'.
+        # The tableinput values are modified by 'TableFieldEdit' in 'uimodules.py'.
+        # This is an ugly workaround. Should be cleaned up at some point...
+        # NOTE: The use of single- and double-qoutes here must not be changed!
         tableinputs = {}
         for field in fields.flatten():
             if field["type"] != "table":
                 continue
-            tableinput = ["<tr>" "<td id='rowid__' class='table-input-row-0'></td>"]
+            tableinput = ["<tr>", "<td id='rowid__' class='table-input-row-0'></td>"]
             for i, coldef in enumerate(field["table"]):
                 column = utils.parse_field_table_column(coldef)
                 rowid = f"rowid_{i}"
                 if column["type"] == constants.SELECT:
                     inp = [f"<select class='form-control' name='{rowid}' id='{rowid}'>"]
-                    inp.extend(["<option>%s</option>" % o for o in column["options"]])
+                    inp.extend([f"<option>{o}</option>" for o in column["options"]])
+                    inp.append("</select>")
                     inp = "".join(inp)
                 elif column["type"] == constants.INT:
                     inp = f"<input type='number' step='1' class='form-control' name='{rowid}' id='{rowid}'>"
                 elif column["type"] == constants.FLOAT:
                     inp = (
                         f"<input type='number' step='{constants.FLOAT_STEP}'"
+
                         f" class='form-control' name='{rowid}' id='{rowid}'>"
                     )
                 elif column["type"] == constants.DATE:
                     inp = f"<input type='text' class='form-control datepicker' name='{rowid}' id='{rowid}'>"
                 else:  # Default type: 'string'
                     inp = f"<input type='text' class='form-control' name='{rowid}' id='{rowid}'>"
-                tableinput.append("<td>%s</td>" % inp)
+                tableinput.append(f"<td>{inp}</td>")
             tableinput.append("</tr>")
             tableinputs[field["identifier"]] = "".join(tableinput)
         self.render(
             "order/edit.html",
-            title="Edit {0} '{1}'".format(
-                utils.terminology("order"), order["title"] or "[no title]"
-            ),
+            title="""Edit {utils.terminology('order')} '{order["title"] or "[no title]"}'""",
             order=order,
             tags=tags,
             links=links,

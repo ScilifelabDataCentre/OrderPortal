@@ -1,13 +1,13 @@
-/* table_edit.js
-   Edit an input field table.
+/* field_table_edit.js
+   Help function for editing the values of an order input field of type 'table'.
 */
-function table_add_row(event)
+function field_table_add_row(event)
 {
   var tableid = "_table_" + event.data.tableid;
   var countid = tableid + "_count";
-  // Get current number of rows from hidden input value.
+  // Get current number of rows from hidden input field value.
   var count = parseInt($("#" + countid).attr('value'));
-  // Prepare the HTML code for the row: set the row number.
+  // Edit the HTML code for the row: set the row identifier (number).
   var rowid = tableid + "_" + count;
   $("#" + tableid).append(event.data.tableinput.replace(/rowid/g, rowid));
   count = count + 1;
@@ -17,6 +17,6 @@ function table_add_row(event)
   $("#" + rowid + "__").html(count);
   // Attach datepicker, if any.
   $(".datepicker").datepicker();
-  // For ease of input, set focus to the first cell if the added row.
+  // For ease of input, set focus to the first cell of the added row.
   $("#" + rowid + "_0").focus();
 }

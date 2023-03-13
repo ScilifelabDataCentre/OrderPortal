@@ -1,7 +1,7 @@
 /* field_visible_if.js
    Change visibility of fields according to value of another field.
 
-   NOTE: It is not clear whether other source fields than of type
+   NOTE: It is not clear whether source fields other than of type
    'select' currently work. Therefore the web interface has now been
    restricted to only allow 'select' field to be set as source for
    visible-if.

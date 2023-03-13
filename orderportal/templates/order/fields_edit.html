@@ -100,7 +100,7 @@
     <div class="checkbox">
       <label>
         <input type="checkbox" class="visible-if-source"
-               id="{{ field['identifier'] }}" name="{{ field['identifier'] }}"
+               name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
                {{ value == True and 'checked' or '' }} value="true">
         Check box if "{{ field.get('selection') == 'yes_no' and 'yes' or 'true' }}".
       </label>
@@ -127,9 +127,8 @@
       {% for v in field['select'] %}
       <label class="radio-inline">
         <input type="radio" class="visible-if-source"
-               name="{{ field['identifier'] }}"
                {# XXX This is not proper HTML. But it works... #}
-               id="{{ field['identifier'] }}"
+               name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
                value="{{ v }}" {{ v == value and 'checked' or '' }}>{{ v }}
       </label>
       {% end %}
@@ -140,9 +139,8 @@
     <div class="radio">
       <label>
         <input type="radio" class="visible-if-source"
-               name="{{ field['identifier'] }}"
                {# XXX This is not proper HTML. But it works... #}
-               id="{{ field['identifier'] }}"
+               name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
                value="{{ v }}" {{ v == value and 'checked' or '' }}>{{ v }}
       </label>
     </div>
@@ -150,8 +148,7 @@
         
     {% else %} {# default 'menu' #}
     <select class="form-control visible-if-source"
-            name="{{ field['identifier'] }}"
-            id="{{ field['identifier'] }}">
+            name="{{ field['identifier'] }}" id="{{ field['identifier'] }}">
       {% if value is None %}
       <option selected value="">[none]</option>
       {% else %}
@@ -178,9 +175,8 @@
 
     {% elif field['type'] == constants.MULTISELECT %}
     <select class="form-control visible-if-source"
-            multiple size="{{ min(8, len(field['multiselect']) + 1) }}"
-            name="{{ field['identifier'] }}"
-            id="{{ field['identifier'] }}">
+            name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
+            multiple size="{{ min(8, len(field['multiselect']) + 1) }}">
       {% set in_optgroup = False %}
       {% set value = value or [] %}
       {% for v in field['multiselect'] %}
@@ -202,21 +198,19 @@
 
     {% elif field['type'] == constants.TEXT %}
     <textarea class="form-control"
-              name="{{ field['identifier'] }}"
-              id="{{ field['identifier'] }}"
+              name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
               {% if field.get('maxlength') %}
               maxlength="{{ field['maxlength'] }}"
               {% end %}
               >{{ value or '' }}</textarea>
 
     {% elif field['type'] == constants.DATE %}
-    {# This requires jQuery datepicker! Loaded in calling HTML template. #}
+    {# This requires jQuery datepicker! Loaded in the HTML template calling this. #}
     <div class="row">
       <div class="col-md-3">
         <input type="text"
+               name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
                class="form-control datepicker visible-if-source"
-               name="{{ field['identifier'] }}"
-               id="{{ field['identifier'] }}"
                value="{{ value or '' }}">
       </div>
       <div class="col-md-4 help-block">
@@ -225,36 +219,20 @@
     </div>
 
     {% elif field['type'] == constants.TABLE %}
+    {% module TableFieldEdit(field, value, tableinputs) %}
     {% set tableid = '_table_' + field['identifier'] %}
-    <table id="{{ tableid }}"
-           {% set ncols = len(field['table']) %}
-           {% if ncols > 5 %}
-           style="max-width:{{ 180*ncols }}px; width:{{ 180*ncols }}px"
-           {% end %}
-           class="table table-bordered table-condensed">
-      {% module TableRowsEdit(field, value) %}
-      {% set nrows = value and len(value) or 0 %}
-      {% if nrows == 0 %}
-      {% raw tableinputs[field['identifier']].replace("></td>", ">1</td>", 1).replace('rowid', tableid + '_' + str(nrows)) %}
-      {% set nrows = 1 %}
-      {% end %}
-    </table>
-    <input type="hidden"
-           name="_table_{{ field['identifier'] }}_count"
-           id="_table_{{ field['identifier'] }}_count"
-           value="{{ nrows }}">
+    <input type="hidden" name="{{ tableid }}_count" id="{{ tableid }}_count"
+           value="{{ value and len(value) or 1 }}">
     <div class="form-group">
-      <button type="button" id="_table_{{ field['identifier'] }}_add_button" 
-              class="btn btn-info">
+      <button type="button" id="{{ tableid }}_add_button" class="btn btn-info">
         Add row
       </button>
     </div>
-
+    
     {% elif field['type'] == constants.FILE %}
     <input type="file"
-           class="form-control"
-           name="{{ field['identifier'] }}"
-           id="{{ field['identifier'] }}">
+           name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
+           class="form-control">
     {% if value %}
     <div class="checkbox">
       <label>
@@ -271,9 +249,8 @@
     <div class="row">
       <div class="col-md-4">
         <input type="number" step="{{ constants.FLOAT_STEP }}"
+               name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
                class="form-control visible-if-source"
-               name="{{ field['identifier'] }}"
-               id="{{ field['identifier'] }}"
                value="{{ '' if value is None else value }}"> {# Value 0.0 must be shown! #}
       </div>
     </div>
@@ -282,18 +259,16 @@
     <div class="row">
       <div class="col-md-3">
         <input type="{{ constants.TYPE_HTML.get(field['type'], 'text') }}"
+               name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
                class="form-control visible-if-source"
-               name="{{ field['identifier'] }}"
-               id="{{ field['identifier'] }}"
                value="{{ '' if value is None else value }}"> {# Value 0 must be shown! #}
       </div>
     </div>
 
     {% else %} {# All other field types: STRING, EMAIL, URL #}
     <input type="{{ constants.TYPE_HTML.get(field['type'], 'text') }}"
+           name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
            class="form-control visible-if-source"
-           name="{{ field['identifier'] }}"
-           id="{{ field['identifier'] }}"
            value="{{ value or '' }}">
     {% end %} {# elif field['type'] == #}
     
@@ -315,9 +290,7 @@
       <div class="col-md-12 help-block">
         {% module Markdown(field.get('description')) %}
         {% if field['type'] == constants.TEXT %}
-        {% if field.get('maxlength') %}
-        Max {{ field['maxlength'] }} characters.
-        {% end %}
+        {% if field.get('maxlength') %}Max {{ field['maxlength'] }} characters.{% end %}
         {% if settings['DISPLAY_TEXT_MARKDOWN_NOTATION_INFO'] %}
         <a href="{{ constants.MARKDOWN_URL }}" target="_blank">Markdown</a>
         notation may optionally be used to format the text.

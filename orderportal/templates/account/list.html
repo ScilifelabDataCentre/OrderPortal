@@ -27,11 +27,10 @@
 {% end %}
 
 {% block content %}
-<form action="{{ reverse_url('accounts', **filter) }}" id="refresh"
-      method="GET" class="form-inline" role="form">
-
-  <div class="row">
-    <div class="col-md-10 col-md-offset-2">
+<div class="row" style="padding: 0.5em;">
+  <div class="col-md-10 col-md-offset-2">
+    <form action="{{ reverse_url('accounts', **filter) }}" name="refresh" id="refresh"
+          method="GET" class="form-inline" role="form">
       <span class="glyphicon glyphicon-filter"></span>
       <div class="form-group">
         <label for="university">Filter by</label>
@@ -74,9 +73,9 @@
           {% end %}
         </select>
       </div>
-    </div>
+    </form>
   </div>
-</form>
+</div>
 
 <div class="row">
   <div class="col-md-12">
