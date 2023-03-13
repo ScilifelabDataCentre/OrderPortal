@@ -199,7 +199,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   $("#__order_edit__").find("a").attr("target", "_blank");
 </script>
 {#
-  'tableinputs' is a lookup of table row HTML code for each input field
+  'tableinputs' is a lookup of table row HTML template code for each input field
    of type 'table' in the entire form.
 #}
 {% for tableid in tableinputs %}
