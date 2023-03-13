@@ -244,14 +244,15 @@ class OrderSaver(saver.Saver):
 
             elif field["type"] == constants.TABLE:
                 coldefs = [utils.parse_field_table_column(c) for c in field["table"]]
-                if data:  # JSON data: contains complete table.
+                if data:  # JSON data: contains the complete table.
                     try:
                         table = data[identifier]
                     except KeyError:
                         continue
                 else:  # HTML form data; collect table from fields.
+                    tableid = f"_table_{identifier}"
                     try:
-                        name = f"_table_{identifier}_count"
+                        name = f"{tableid}_count"
                         n_rows = int(self.rqh.get_argument(name, 0))
                     except (ValueError, TypeError):
                         n_rows = 0
@@ -259,14 +260,14 @@ class OrderSaver(saver.Saver):
                     for i in range(n_rows):
                         row = []
                         for j, coldef in enumerate(coldefs):
-                            name = f"_table_{identifier}_{i}_{j}"
+                            name = f"{tableid}_{i}_{j}"
                             row.append(self.rqh.get_argument(name, None))
                         table.append(row)
                 # Check validity of table content.
                 value = []
                 try:
                     for row in table:
-                        # Check correct number of items in the row.
+                        # Skip if incorrect number of items in the row.
                         if len(row) != len(coldefs):
                             continue
                         for j, coldef in enumerate(coldefs):
@@ -281,7 +282,12 @@ class OrderSaver(saver.Saver):
                                     row[j] = int(row[j])
                                 except (ValueError, TypeError):
                                     row[j] = None
-                            elif not row[j]:
+                            elif coltype == constants.FLOAT:
+                                try:
+                                    row[j] = float(row[j])
+                                except (ValueError, TypeError):
+                                    row[j] = None
+                            elif not row[j] or (row[j] == "[no value]"):
                                 row[j] = None
                         # Use row only if first value is not None.
                         if row[0] is not None:
@@ -1145,38 +1151,6 @@ class OrderEdit(OrderMixin, RequestHandler):
         hidden_fields = set(
             [f["identifier"] for f in fields.flatten() if f["type"] != "multiselect"]
         )
-        # For each table input field, create HTML code for use in 'field_table_edit.js'.
-        # The tableinput values are modified by 'TableFieldEdit' in 'uimodules.py'.
-        # This is an ugly workaround. Should be cleaned up at some point...
-        # NOTE: The use of single- and double-qoutes here must not be changed!
-        tableinputs = {}
-        for field in fields.flatten():
-            if field["type"] != "table":
-                continue
-            tableinput = ["<tr>", "<td id='rowid__' class='table-input-row-0'></td>"]
-            for i, coldef in enumerate(field["table"]):
-                column = utils.parse_field_table_column(coldef)
-                rowid = f"rowid_{i}"
-                if column["type"] == constants.SELECT:
-                    inp = [f"<select class='form-control' name='{rowid}' id='{rowid}'>"]
-                    inp.extend([f"<option>{o}</option>" for o in column["options"]])
-                    inp.append("</select>")
-                    inp = "".join(inp)
-                elif column["type"] == constants.INT:
-                    inp = f"<input type='number' step='1' class='form-control' name='{rowid}' id='{rowid}'>"
-                elif column["type"] == constants.FLOAT:
-                    inp = (
-                        f"<input type='number' step='{constants.FLOAT_STEP}'"
-
-                        f" class='form-control' name='{rowid}' id='{rowid}'>"
-                    )
-                elif column["type"] == constants.DATE:
-                    inp = f"<input type='text' class='form-control datepicker' name='{rowid}' id='{rowid}'>"
-                else:  # Default type: 'string'
-                    inp = f"<input type='text' class='form-control' name='{rowid}' id='{rowid}'>"
-                tableinput.append(f"<td>{inp}</td>")
-            tableinput.append("</tr>")
-            tableinputs[field["identifier"]] = "".join(tableinput)
         self.render(
             "order/edit.html",
             title="""Edit {utils.terminology('order')} '{order["title"] or "[no title]"}'""",
@@ -1187,7 +1161,6 @@ class OrderEdit(OrderMixin, RequestHandler):
             form=form,
             fields=form["fields"],
             hidden_fields=hidden_fields,
-            tableinputs=tableinputs,
         )
 
     @tornado.web.authenticated

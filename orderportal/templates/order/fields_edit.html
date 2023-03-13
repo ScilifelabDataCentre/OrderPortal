@@ -58,7 +58,7 @@
     </div>
     <div class="panel-body">
       {# Recursion: 'include' cannot be used! #}
-      {% module Template('order/fields_edit.html', order=order, fields=field['fields'], am_staff=am_staff, hidden_fields=hidden_fields, tableinputs=tableinputs) %}
+      {% module Template('order/fields_edit.html', order=order, fields=field['fields'], am_staff=am_staff, hidden_fields=hidden_fields) %}
     </div>
   </div>
 </div>
@@ -197,12 +197,23 @@
     </select>
 
     {% elif field['type'] == constants.TEXT %}
-    <textarea class="form-control"
-              name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
-              {% if field.get('maxlength') %}
-              maxlength="{{ field['maxlength'] }}"
-              {% end %}
-              >{{ value or '' }}</textarea>
+    <div class="row">
+      <div class="col-md-12">
+        <textarea class="form-control"
+                  name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
+                  {% if field.get('maxlength') %}
+                  maxlength="{{ field['maxlength'] }}"
+                  {% end %}
+                  >{{ value or '' }}</textarea>
+        {% if field['type'] == constants.TEXT %}
+        {% if field.get('maxlength') %}Max {{ field['maxlength'] }} characters.{% end %}
+        {% if settings['DISPLAY_TEXT_MARKDOWN_NOTATION_INFO'] %}
+        <a href="{{ constants.MARKDOWN_URL }}" target="_blank">Markdown</a>
+        notation may optionally be used to format the text.
+        {% end %}
+        {% end %}
+      </div>
+    </div>
 
     {% elif field['type'] == constants.DATE %}
     {# This requires jQuery datepicker! Loaded in the HTML template calling this. #}
@@ -219,16 +230,15 @@
     </div>
 
     {% elif field['type'] == constants.TABLE %}
-    {% module TableFieldEdit(field, value, tableinputs) %}
-    {% set tableid = '_table_' + field['identifier'] %}
-    <input type="hidden" name="{{ tableid }}_count" id="{{ tableid }}_count"
-           value="{{ value and len(value) or 1 }}">
-    <div class="form-group">
-      <button type="button" id="{{ tableid }}_add_button" class="btn btn-info">
-        Add row
-      </button>
+    <div class="row">
+      <div class="col-md-12">
+        {% module TableFieldEdit(field, value) %}
+        To delete a row, remove the contents of its first field, or set it to the value "[no value]".
+        <br>
+        To add more rows, click "Save and continue edit" below, and resume editing.
+      </div>
     </div>
-    
+
     {% elif field['type'] == constants.FILE %}
     <input type="file"
            name="{{ field['identifier'] }}" id="{{ field['identifier'] }}"
@@ -289,16 +299,6 @@
     <div class="row">
       <div class="col-md-12 help-block">
         {% module Markdown(field.get('description')) %}
-        {% if field['type'] == constants.TEXT %}
-        {% if field.get('maxlength') %}Max {{ field['maxlength'] }} characters.{% end %}
-        {% if settings['DISPLAY_TEXT_MARKDOWN_NOTATION_INFO'] %}
-        <a href="{{ constants.MARKDOWN_URL }}" target="_blank">Markdown</a>
-        notation may optionally be used to format the text.
-        {% end %}
-        {% elif field['type'] == constants.TABLE %}
-        <strong>Note:</strong> Table rows with an empty (or "[no value]")
-        first field will be deleted.
-        {% end %}
       </div>
     </div>
 

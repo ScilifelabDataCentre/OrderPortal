@@ -115,6 +115,8 @@ class Constants:
     }
     # Step for use with input type 'float'.
     FLOAT_STEP = "0.0000001"
+    # Number of new rows to show in field table edit view.
+    FIELD_TABLE_ADD_N_ROWS = 4
 
     # Forbidden meta document id's; have changed format or been removed.
     # Re-using these id's would likely create backwards incompatibility issues.

@@ -136,7 +136,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   {% end %} {#if settings.get('ORDER_LINKS') #}
 
   {# Recursion: 'include' cannot be used! #}
-  {% module Template('order/fields_edit.html', fields=fields, order=order, am_staff=am_staff, hidden_fields=hidden_fields, tableinputs=tableinputs) %}
+  {% module Template('order/fields_edit.html', fields=fields, order=order, am_staff=am_staff, hidden_fields=hidden_fields) %}
 
   <div>
     {# Fields must be allowed to influence others, even when hidden. #}
@@ -194,17 +194,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
 {% block javascript_code %}
 <script src="{{ static_url('field_visible_if.js') }}"></script>
 <script src="{{ static_url('quit_through_submit.js') }}"></script>
-<script src="{{ static_url('field_table_edit.js') }}"></script>
 <script>
   $("#__order_edit__").find("a").attr("target", "_blank");
 </script>
-{#
-  'tableinputs' is a lookup of table row HTML template code for each input field
-   of type 'table' in the entire form.
-#}
-{% for tableid in tableinputs %}
-<script>
-  $("#_table_{{ tableid }}_add_button").click({tableid: "{{ tableid }}", tableinput: "{% raw tableinputs[tableid] %}"}, field_table_add_row);
-</script>
-{% end %}
 {% end %}
