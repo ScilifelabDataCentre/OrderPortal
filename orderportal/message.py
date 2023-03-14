@@ -19,6 +19,7 @@ class MessageSaver(saver.Saver):
     def initialize(self):
         """Connect to the email server.
         Raises KeyError if email server is badly configured.
+        Raises ValueError if some other problem.
         """
         super().initialize()
         try:
@@ -93,6 +94,8 @@ class MessageSaver(saver.Saver):
             self["sent"] = utils.timestamp()
         except smtplib.SMTPException as error:
             self.handle_error(error)
+        else:
+            self.handler.set_message_flash("Email message(s) sent.")
 
     def handle_error(self, error):
         "Convert into a nicer error message to display."

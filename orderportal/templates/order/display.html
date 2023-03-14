@@ -136,10 +136,15 @@
       <tr>
         <th>Links</th>
         <td>
-          {% for link in order.get('links', {}).get('external', []) %}
-          <a href="{{ link['href'] }}" target="_blank">
-            {{ link['title'] }}</a><br>
+          {% set links = order.get('links', {}).get('external', []) %}
+          {% if links %}
+          {% for link in links %}
+          <a href="{{ link['href'] }}" target="_blank">{{ link['title'] }}</a>
+          <br>
           {% end %}
+          {% else %}
+          -
+          {% end %} {# if links #}
         </td>
       </tr>
       {% end %} {#if settings.get('ORDER_LINKS') #}
@@ -203,6 +208,8 @@
               {% end %} {# for report in reports #}
             </tbody>
           </table>
+          {% else %}
+          -
           {% end %} {# if reports #}
           {% if am_staff %}
           <form action="{{ reverse_url('report_add') }}" method="GET" role="form">
@@ -250,6 +257,7 @@
       <tr>
         <th>Files</th>
         <td colspan="2">
+          {% if attached_files %}
           <table class="table table-condensed table-striped">
             {% for file in attached_files %}
             <tr>
@@ -282,11 +290,13 @@
             </tr>
             {% end %} {# for file in attached_files #}
           </table>
+          {% else %}
+          <div>-</div>
+          {% end %} {# if attached_files #}
           {% if allow_attach %}
           <button type="button" class="btn btn-primary"
                   data-toggle="modal" data-target="#attach">
-            <span class="glyphicon glyphicon-paperclip"></span>
-            Attach
+            <span class="glyphicon glyphicon-paperclip"></span> Attach file
           </button>
           {% end %} {# if allow_attach #}
         </td>

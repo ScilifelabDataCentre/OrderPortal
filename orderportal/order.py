@@ -738,15 +738,17 @@ class OrderApiV1Mixin(ApiV1Mixin):
         )
         data["status"] = order["status"]
         data["reports"] = []
-        if self.am_staff():
-            for report in self.get_reports(order):
-                data["reports"].append(dict(iuid=report["_id"], 
-                                            status=report["status"],
-                                            modified=report["modified"]))
-        else:
-            for report in self.get_reports(order):
-                data["reports"].append(dict(iuid=report["_id"], 
-                                            modified=report["modified"]))
+        for report in self.get_reports(order):
+            reportdata = dict(iuid=report["_id"], 
+                              name=report["name"],
+                              modified=report["modified"],
+                              links=dict(
+                                  api=dict(), # XXX when API call implemented.
+                                  display=dict(
+                                      href=self.absolute_reverse_url("report", report["_id"]))))
+            if self.am_staff():
+                reportdata["status"] = report["status"]
+            data["reports"].append(reportdata)
         data["history"] = dict()
         for s in settings["ORDER_STATUSES"]:
             if not s.get("enabled"): continue
@@ -775,8 +777,8 @@ class OrderApiV1Mixin(ApiV1Mixin):
             data["invalid"] = order.get("invalid", {})
             data["files"] = dict()
             for filename in sorted(order.get("_attachments", [])):
-                if filename.startswith(constants.SYSTEM):
-                    continue
+                # if filename.startswith(constants.SYSTEM):
+                #     continue
                 stub = order["_attachments"][filename]
                 data["files"][filename] = dict(
                     size=stub["length"],
@@ -870,8 +872,8 @@ class Order(OrderMixin, RequestHandler):
         reports.sort(key=lambda r: r['modified'], reverse=True)
         files = []
         for filename in order.get("_attachments", []):
-            if filename.startswith(constants.SYSTEM):
-                continue
+            # if filename.startswith(constants.SYSTEM):
+            #     continue
             stub = order["_attachments"][filename]
             files.append(
                 dict(
@@ -1055,8 +1057,8 @@ class OrderCsv(OrderMixin, RequestHandler):
         writer.new_worksheet("Files")
         writer.writerow(("File", "Size", "Content type", "URL"))
         for filename in sorted(order.get("_attachments", [])):
-            if filename.startswith(constants.SYSTEM):
-                continue
+            # if filename.startswith(constants.SYSTEM):
+            #     continue
             stub = order["_attachments"][filename]
             writer.writerow(
                 (
@@ -1188,8 +1190,6 @@ class OrderEdit(OrderMixin, RequestHandler):
             return
         flag = self.get_argument("__save__", None)
         try:
-            message = "{0} saved.".format(utils.terminology("Order"))
-            error = None
             with OrderSaver(doc=order, handler=self) as saver:
                 saver["title"] = self.get_argument("__title__", None)
                 saver.set_tags(
@@ -1197,8 +1197,7 @@ class OrderEdit(OrderMixin, RequestHandler):
                 )
                 saver.set_external(self.get_argument("__links__", "").split("\n"))
                 saver.update_fields()
-            self.set_error_flash(error)
-            self.set_message_flash(message)
+            self.set_message_flash(f"{utils.terminology('Order')} saved.")
             if flag == "continue":
                 self.see_other("order_edit", order["_id"])
             else:
@@ -1248,9 +1247,7 @@ class OrderOwner(OrderMixin, RequestHandler):
             pass
         except ValueError as error:  # No such account.
             self.set_error_flash(error)
-        self.set_message_flash(
-            "Changed owner of {0}.".format(utils.terminology("Order"))
-        )
+        self.set_message_flash(f"Changed owner of {utils.terminology('order')}.")
         if self.allow_read(order):
             self.redirect(self.order_reverse_url(order))
         else:
@@ -1292,8 +1289,8 @@ class OrderClone(OrderMixin, RequestHandler):
         # Make copies of attached files.
         #  Must be done after initial save to avoid version mismatches.
         for filename in order.get("_attachments", []):
-            if filename.startswith(constants.SYSTEM):
-                continue
+            # if filename.startswith(constants.SYSTEM):
+            #     continue
             if filename in erased_files:
                 continue
             stub = order["_attachments"][filename]
@@ -1376,8 +1373,8 @@ class OrderFile(OrderMixin, RequestHandler):
         except (KeyError, IndexError):
             pass
         else:
-            if infile.filename.startswith(constants.SYSTEM):
-                raise tornado.web.HTTPError(400, reason="Reserved filename.")
+            # if infile.filename.startswith(constants.SYSTEM):
+            #     raise tornado.web.HTTPError(400, reason="Reserved filename.")
             with OrderSaver(doc=order, handler=self) as saver:
                 saver.add_file(infile)
         self.redirect(self.order_reverse_url(order))
@@ -1386,8 +1383,8 @@ class OrderFile(OrderMixin, RequestHandler):
     def delete(self, iuid, filename):
         if filename is None:
             raise tornado.web.HTTPError(400)
-        if filename.startswith(constants.SYSTEM):
-            raise tornado.web.HTTPError(400, reason="Reserved filename.")
+        # if filename.startswith(constants.SYSTEM):
+        #     raise tornado.web.HTTPError(400, reason="Reserved filename.")
         order = self.get_order(iuid)
         self.check_attachable(order)
         fields = Fields(self.get_form(order["form"]))
@@ -1406,40 +1403,6 @@ class OrderFile(OrderMixin, RequestHandler):
             saver.delete_filename = filename
             saver.changed["file_deleted"] = filename
         self.redirect(self.order_reverse_url(order))
-
-
-# class OrderReport(OrderMixin, RequestHandler):
-#     "View the report for an order."
-
-#     @tornado.web.authenticated
-#     def get(self, iuid):
-#         order = self.get_order(iuid)
-#         self.check_readable(order)
-#         try:
-#             report = order["report"]
-#             outfile = self.db.get_attachment(order, constants.SYSTEM_REPORT)
-#             if outfile is None:
-#                 raise KeyError
-#         except KeyError:
-#             self.see_other("order", iuid, error="No report available.")
-#             return
-#         content_type = order["_attachments"][constants.SYSTEM_REPORT]["content_type"]
-#         if report.get("inline"):
-#             self.render(
-#                 "order/report.html",
-#                 order=order,
-#                 content=outfile.read(),
-#                 content_type=content_type,
-#             )
-#         else:
-#             self.write(outfile.read())
-#             outfile.close()
-#             self.set_header("Content-Type", content_type)
-#             name = order.get("identifier") or order["_id"]
-#             ext = utils.get_filename_extension(content_type)
-#             self.set_header(
-#                 "Content-Disposition", f'attachment; filename="{name}_report{ext}"'
-#             )
 
 
 # class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
@@ -1488,42 +1451,6 @@ class OrderFile(OrderMixin, RequestHandler):
 #                 )
 #             )
 #         self.write("")
-
-
-# class OrderReportEdit(OrderMixin, RequestHandler):
-#     "Edit the report for an order."
-
-#     @tornado.web.authenticated
-#     def get(self, iuid):
-#         self.check_admin()
-#         order = self.get_order(iuid)
-#         self.render("order/report_edit.html", order=order)
-
-#     @tornado.web.authenticated
-#     def post(self, iuid):
-#         self.check_admin()
-#         order = self.get_order(iuid)
-#         with OrderSaver(doc=order, handler=self) as saver:
-#             try:
-#                 infile = self.request.files["report"][0]
-#             except (KeyError, IndexError):
-#                 if order.get("report"):
-#                     saver.delete_filename = constants.SYSTEM_REPORT
-#                     saver["report"] = dict()
-#             else:
-#                 saver["report"] = dict(
-#                     timestamp=utils.timestamp(),
-#                     inline=infile.content_type
-#                     in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE),
-#                 )
-#                 saver.files.append(
-#                     dict(
-#                         filename=constants.SYSTEM_REPORT,
-#                         body=infile.body,
-#                         content_type=infile.content_type,
-#                     )
-#                 )
-#         self.redirect(self.order_reverse_url(order))
 
 
 class Orders(RequestHandler):

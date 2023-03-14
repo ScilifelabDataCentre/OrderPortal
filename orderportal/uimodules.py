@@ -176,7 +176,7 @@ class Tags(tornado.web.UIModule):
         for tag in tags:
             url = self.handler.reverse_url("search", term=tag)
             result.append(f'<a href="{url}">{tag}</a>')
-        return ", ".join(result)
+        return ", ".join(result) or "-"
 
 
 class NoneStr(tornado.web.UIModule):

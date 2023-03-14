@@ -44,7 +44,7 @@ Review report for {{ terminology('order') }} '{{ order['title'] }}'
     </div>
   </div>
 
-  <div class="form-group has-feedback">
+  <div class="form-group">
     <label class="control-label col-md-2" for="review">My review</label>
     <div class="col-md-10">
       <textarea name="review" id="review" class="form-control"
@@ -58,9 +58,9 @@ Review report for {{ terminology('order') }} '{{ order['title'] }}'
     </div>
   </div>
 
-  <div class="form-group has-feedback">
-    <label class="control-label col-md-2" for="conclusion">My conclusion</label>
-    {% set my_status = report['reviewers'][current_user['email']].get('status') %}
+  <div class="form-group">
+    <label class="control-label col-md-2" for="status">My conclusion</label>
+    {% set my_status = report['reviewers'][current_user['email']]['status'] %}
     <div class="col-md-10">
       {% for status in constants.REPORT_REVIEW_STATUSES %}
       <div class="radio">

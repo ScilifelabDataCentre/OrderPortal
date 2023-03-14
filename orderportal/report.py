@@ -16,6 +16,17 @@ class ReportSaver(saver.Saver):
     def initialize(self):
         self.doc["reviewers"] = {}
 
+    def set_responsible(self, responsible):
+        """Set the responsible person. Only enabled staff accounts are accepted.
+        Raise ValueError if bad value.
+        """
+        account = self.handler.get_account(responsible)
+        if account["status"] != constants.ENABLED:
+            raise ValueError("Account is not enabled.")
+        if account["role"] not in (constants.ADMIN, constants.STAFF):
+            raise ValueError("Account is not admin or staff.")
+        self["responsible"] = account["email"]
+
     def set_inline(self, content_type):
         "Set the 'inline' flag according to explicit argument, or content type."
         try:
@@ -32,7 +43,9 @@ class ReportSaver(saver.Saver):
                 account = self.handler.get_account(reviewer)
                 if account["status"] != constants.ENABLED: continue
                 if account["role"] in (constants.ADMIN, constants.STAFF):
-                    self["reviewers"][account["email"]] = {"status": constants.REVIEW}
+                    self["reviewers"][account["email"]] = {"status": constants.REVIEW,
+                                                           "review": None,
+                                                           "modified": utils.timestamp()}
             except ValueError:
                 pass
 
@@ -90,26 +103,9 @@ class ReportMixin:
             return
         raise ValueError("You may not edit the report.")
 
-    def send_review_messages(self, report):
-        "Send message to reviewers."
-        if not report["reviewers"]:
-            return
-        text_template = dict(subject=f"{settings['SITE_NAME']} report review to be done.",
-                             text="Dear {site} staff,\n\nThe report '{name}' for order '{title}' requires your review.\n\nSee {url}"
-                             )
-        with MessageSaver(handler=self) as saver:
-            order = self.get_order(report["order"])
-            saver.create(
-                text_template,
-                name=report["name"],
-                title=order["title"],
-                url=utils.get_order_url(order)
-            )
-            saver.send(report["reviewers"])
-
 
 class ReportAdd(ReportMixin, RequestHandler):
-    "Add a new report for an report."
+    "Add a new report for an order."
 
     @tornado.web.authenticated
     def get(self):
@@ -131,26 +127,46 @@ class ReportAdd(ReportMixin, RequestHandler):
         try:
             file = self.request.files["report"][0]
         except (KeyError, IndexError):
-            self.see_other("order", order["_id"], error="No file uploaded.")
+            self.see_other("order", order["_id"], error="No report file uploaded.")
             return
         try:
             with ReportSaver(handler=self) as saver:
                 saver["order"] = order["_id"]
                 saver["name"] = file.filename
+                saver.set_responsible(self.get_argument("responsible", ""))
                 saver.set_inline(file.content_type)
                 saver.set_reviewers(self.get_argument("reviewers", "").split())
                 saver.set_status()
+            report = saver.doc
             self.db.put_attachment(
-                saver.doc,
+                report,
                 file.body,
                 filename=file.filename,
                 content_type=file.content_type
             )
-            self.send_review_messages(saver.doc)
         except ValueError as error:
             self.see_other("order", order["_id"], error=error)
-        else:
-            self.see_other("order", order["_id"])
+            return
+
+        # Send messages to reviewers, if any.
+        if report["reviewers"]:
+            try:
+                # XXX This into database, to allow modification.
+                text_template = dict(subject=f"{settings['SITE_NAME']} report requires review.",
+                                     text="Dear {site} staff,\n\nThe report '{name}' for the order '{title}' requires your review.\n\nSee {url}"
+                                     )
+                with MessageSaver(handler=self) as saver:
+                    saver.create(
+                        text_template,
+                        name=report["name"],
+                        title=order["title"],
+                        url=utils.get_order_url(order)
+                    )
+                    saver.send(report["reviewers"])
+            except (KeyError, ValueError) as error:
+                self.see_other("order", order["_id"], error=error)
+                return
+        self.see_other("order", order["_id"])
 
 
 class Report(ReportMixin, RequestHandler):
@@ -242,22 +258,27 @@ class ReportEdit(ReportMixin, RequestHandler):
         try:
             file = self.request.files["report"][0]
         except (KeyError, IndexError):
-            self.see_other("order", order["_id"], error="No file to upload given.")
-            return
-        try:
-            with ReportSaver(doc=report, handler=self) as saver:
-                saver["name"] = file.filename
-                saver.set_inline(file.content_type)
-            self.db.put_attachment(
-                saver.doc,
-                file.body,
-                filename=file.filename,
-                content_type=file.content_type
-            )
-        except ValueError as error:
-            self.see_other("order", order["_id"], error=error)
+            pass
         else:
-            self.see_other("order", order["_id"])
+            # Remove the old report file before adding the new.
+            try:
+                with ReportSaver(doc=report, handler=self) as saver:
+                    saver["name"] = file.filename
+                    saver.set_inline(file.content_type)
+                report = saver.doc
+                self.db.delete_attachment(report, report["name"])
+                self.db.put_attachment(
+                    report,
+                    file.body,
+                    filename=file.filename,
+                    content_type=file.content_type
+                )
+            except ValueError as error:
+                self.see_other("order", order["_id"], error=error)
+                return
+        with ReportSaver(doc=report, handler=self) as saver:
+            saver.set_status(self.get_argument("status"))
+        self.see_other("order", order["_id"])
 
 
 class ReportReview(ReportMixin, RequestHandler):

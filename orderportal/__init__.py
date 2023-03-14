@@ -77,9 +77,9 @@ class Constants:
     META = "meta"
     ENTITIES = frozenset([ACCOUNT, GROUP, FORM, ORDER, INFO, FILE, MESSAGE, REPORT])
 
-    # System attachments to order.
-    SYSTEM = "system"
-    SYSTEM_REPORT = "system_report"
+    # # System attachments to order.
+    # SYSTEM = "system"
+    # SYSTEM_REPORT = "system_report"
 
     # Field types.
     STRING = "string"
@@ -143,8 +143,8 @@ class Constants:
     PENDING = "pending"
     ENABLED = "enabled"
     DISABLED = "disabled"
-    ACCOUNT_STATUSES = (PENDING, ENABLED, DISABLED)
     RESET = "reset"
+    ACCOUNT_STATUSES = (PENDING, ENABLED, DISABLED, RESET)
 
     # Account roles.
     USER = "user"
