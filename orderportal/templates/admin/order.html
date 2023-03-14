@@ -31,42 +31,6 @@
   </div>
 
   <div class="form-group">
-    <label class="control-label col-md-2" for="autopopulate">
-      Autopopulate {{ terminology('order') }}
-    </label>
-    <div class="col-md-10">
-      <table class="table table-condensed">
-        <thead>
-          <tr>
-            <th>{{ terminology('Order') }} field name</th>
-            <th>Account field name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% set autopopulate = settings['ORDER_AUTOPOPULATE'] %}
-          {% for source in constants.ORDER_AUTOPOPULATE_SOURCES %}
-          <tr>
-            <td>
-              <input type="text" name="{{ source }}" id="{{ source }}"
-                     class="form-control"
-                     value="{{ autopopulate.get(source) or  '' }}">
-            </td>
-            <td>
-              <p class="form-control-static">{{ source }}</p>
-            </td>
-          </tr>
-          {% end %}
-        </tbody>
-      </table>
-      <span class="help-block">
-        The named order fields will be filled in by the values of the
-        specified account fields. There is no effect if the order does
-        not contain the specified field name.
-      </span>
-    </div>
-  </div>
-
-  <div class="form-group">
     <label class="control-label col-md-2" for="tags">
       {{ terminology('Order') }} tags</label>
     <div class="col-md-10">
@@ -143,6 +107,42 @@
           For users, the maximum number of the user's recent orders
           that are displayed on the home page of the system.
         </p>
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="autopopulate">
+      Autopopulate {{ terminology('order') }}
+    </label>
+    <div class="col-md-10">
+      <table class="table table-condensed">
+        <thead>
+          <tr>
+            <th>{{ terminology('Order') }} field name</th>
+            <th>Account field name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set autopopulate = settings['ORDER_AUTOPOPULATE'] %}
+          {% for source in constants.ORDER_AUTOPOPULATE_SOURCES %}
+          <tr>
+            <td>
+              <input type="text" name="{{ source }}" id="{{ source }}"
+                     class="form-control"
+                     value="{{ autopopulate.get(source) or  '' }}">
+            </td>
+            <td>
+              <p class="form-control-static">{{ source }}</p>
+            </td>
+          </tr>
+          {% end %}
+        </tbody>
+      </table>
+      <span class="help-block">
+        The named order fields will be filled in by the values of the
+        specified account fields. There is no effect if the order does
+        not contain the specified field name.
       </span>
     </div>
   </div>

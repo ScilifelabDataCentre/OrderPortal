@@ -91,8 +91,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
       <div class="col-md-9">
         <label class="control-label" for="__tags__">Keywords (tags)</label>
         {# Terminology in display: keyword; in code: tag #}
-        <textarea class="form-control"
-                  name="__tags__" id="__tags__" rows="2"
+        <textarea name="__tags__" id="__tags__" rows="2" class="form-control"
                   >{{ ', '.join(tags) }}</textarea>
       </div>
     </div>
@@ -118,8 +117,7 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
     <div class="row">
       <div class="col-md-9">
         <label class="control-label" for="__links__">Links</label>
-        <textarea class="form-control"
-                  name="__links__" id="__links__" rows="2"
+        <textarea name="__links__" id="__links__" rows="2" class="form-control"
                   >{{ '\n'.join(links) }}</textarea>
       </div>
     </div>

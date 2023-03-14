@@ -32,7 +32,7 @@ class ReportSaver(saver.Saver):
                 account = self.handler.get_account(reviewer)
                 if account["status"] != constants.ENABLED: continue
                 if account["role"] in (constants.ADMIN, constants.STAFF):
-                    self["reviewers"][account["email"]] = {"status": None}
+                    self["reviewers"][account["email"]] = {"status": constants.REVIEW}
             except ValueError:
                 pass
 
@@ -108,8 +108,8 @@ class ReportMixin:
             saver.send(report["reviewers"])
 
 
-class ReportCreate(ReportMixin, RequestHandler):
-    "Create a new report for an report."
+class ReportAdd(ReportMixin, RequestHandler):
+    "Add a new report for an report."
 
     @tornado.web.authenticated
     def get(self):
@@ -118,7 +118,7 @@ class ReportCreate(ReportMixin, RequestHandler):
             order = self.get_order(self.get_argument("order"))
         except ValueError as error:
             self.see_other("home", error=f"Sorry, no such {{ terminology('order') }}.")
-        self.render("report/create.html", order=order)
+        self.render("report/add.html", order=order)
 
     @tornado.web.authenticated
     def post(self):
@@ -194,11 +194,15 @@ class Report(ReportMixin, RequestHandler):
 
     @tornado.web.authenticated
     def delete(self, iuid):
-        self.check_staff()
         try:
             report = self.get_report(iuid)
         except ValueError as error:
             self.see_other("home", error="Sorry, no such report.")
+            return
+        try:
+            self.check_editable(report)
+        except ValueError as error:
+            self.see_other("home", error=error)
             return
         order = self.get_order(report["order"])
         self.delete_logs(report["_id"])
@@ -216,7 +220,7 @@ class ReportEdit(ReportMixin, RequestHandler):
         except ValueError as error:
             self.see_other("home", error="Sorry, no such report.")
         try:
-            self.check_readable(report)
+            self.check_editable(report)
         except ValueError as error:
             self.see_other("home", error=error)
             return
@@ -251,6 +255,62 @@ class ReportEdit(ReportMixin, RequestHandler):
                 content_type=file.content_type
             )
         except ValueError as error:
+            self.see_other("order", order["_id"], error=error)
+        else:
+            self.see_other("order", order["_id"])
+
+
+class ReportReview(ReportMixin, RequestHandler):
+    "Review a report for an order."
+
+    @tornado.web.authenticated
+    def get(self, iuid):
+        try:
+            report = self.get_report(iuid)
+        except ValueError as error:
+            self.see_other("home", error="Sorry, no such report.")
+        try:
+            self.check_editable(report)
+        except ValueError as error:
+            self.see_other("home", error=error)
+            return
+        self.render(
+            "report/review.html",
+            report=report,
+            order=self.get_order(report["order"])
+        )
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        report = self.get_report(iuid)
+        try:
+            self.check_editable(report)
+        except ValueError as error:
+            self.see_other("home", error=error)
+            return
+        order = self.get_order(report["order"])
+        try:
+            with ReportSaver(doc=report, handler=self) as saver:
+                reviewer = saver["reviewers"][self.current_user["email"]]
+                reviewer["review"] = saver.handler.get_argument("review", None)
+                status = saver.handler.get_argument("status")
+                if status in constants.REPORT_REVIEW_STATUSES:
+                    reviewer["status"] = status
+                else:
+                    reviewer["status"] = constants.REVIEW
+                # Has the report been rejected? A single rejection is sufficient.
+                for review in saver["reviewers"].values():
+                    if review.get("status") == constants.REJECTED:
+                        saver["status"] = constants.REJECTED
+                        break
+                else:
+                    # If all reviewers have accepted, then publish.
+                    for review in saver["reviewers"].values():
+                        if review.get("status") != constants.APPROVED:
+                            break
+                    else:
+                        saver["status"] = constants.PUBLISHED
+        except (KeyError, ValueError) as error:
             self.see_other("order", order["_id"], error=error)
         else:
             self.see_other("order", order["_id"])

@@ -3,11 +3,11 @@
 {% extends "../base.html" %}
 
 {% block head_title %}
-Update the report for {{ terminology('order') }} {{ order['title'] }}
+Edit report for {{ terminology('order') }} '{{ order['title'] }}'
 {% end %}
 
 {% block body_title %}
-Update the report for {{ terminology('order') }}: {{ order['title'] }}
+Edit report for {{ terminology('order') }} '{{ order['title'] }}'
 {% end %}
 
 {% block action_content %}
@@ -25,55 +25,78 @@ Update the report for {{ terminology('order') }}: {{ order['title'] }}
 
 {% block main_content %}
 <form action="{{ reverse_url('report_edit', report['_id']) }}"
-      method="POST" role="form" enctype="multipart/form-data">
+      class="form-horizontal" method="POST" role="form" enctype="multipart/form-data">
   {% module xsrf_form_html() %}
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-9">
-        <label class="control-label">Current report file</label>
-        <p class="form-control-static">{{ report['name'] }}</p>
-      </div>
+    <label class="control-label col-md-2">Current report file</label>
+    <div class="col-md-10">
+      <p class="form-control-static">
+        {% if report.get('inline') %}
+        <a href="{{ reverse_url('report', report['_id']) }}">
+          <strong>{{ report['name'] }}</strong>
+        </a>
+        {% else %}
+        <a href="{{ reverse_url('report', report['_id']) }}"
+           role="button" class="btn btn-primary" title="Download">
+          <span class="glyphicon glyphicon-download-alt"></span>
+          {{ report['name'] }}
+        </a>
+        {% end %}
+      </p>
     </div>
   </div>
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-9">
-        <label class="control-label">Modified</label>
-        <p class="form-control-static localtime">{{ report['modified'] }}</p>
-      </div>
+    <label class="control-label col-md-2">Modified</label>
+    <div class="col-md-8">
+      <p class="form-control-static localtime">{{ report['modified'] }}</p>
     </div>
   </div>
 
   <div class="form-group has-feedback">
-    <div class="row">
-      <div class="col-md-9">
-        <label for="report" class="control-label">Update report file</label>
-        <input type="file" name="report" id="report" class="form-control">
-        <span style="color:red; margin-right: 1em;"
-              class="glyphicon glyphicon-star form-control-feedback"
-              aria-hidden="true"></span>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <p class="help-block">
-          Upload a new file to update the report file. An HTML or text
-          file will be displayed in-line when clicking the link to it;
-          other content types will be downloaded as a file.
-        </p>
-      </div>
+    <label class="control-label col-md-2" for="report">Update report file</label>
+    <div class="col-md-10">
+      <input type="file" name="report" id="report" class="form-control">
+      <span style="color:red; margin-right: 1em;"
+            class="glyphicon glyphicon-star form-control-feedback"
+            aria-hidden="true"></span>
+      <p class="help-block">
+        Upload a new file as the report file. An HTML or text file
+        will be displayed in-line when clicking the link to it; other
+        content types will be downloaded as a file.
+      </p>
     </div>
   </div>
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <label class="control-label"></label>
-        <button type="submit" class="btn btn-success btn-block">
-          <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
-      </div>
+    <label class="control-label col-md-2">Reviews</label>
+    <div class="col-md-8">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Reviewer</th>
+            <th>Review</th>
+            <th>Conclusion</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for reviewer, review in report['reviewers'].items() %}
+          <tr>
+            <td>{% module AccountLink(email=reviewer) %}</td>
+            <td>{% module Markdown(review.get('review')) %}</td>
+            <td>{% module Status(review.get('status')) %}</td>
+          </tr>
+          {% end %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-3">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
     </div>
   </div>
 

@@ -160,6 +160,7 @@
                 {% if am_staff %}
                 <th style="text-align: left;">Status</th>
                 <th></th>
+                <th></th>
                 {% end %} {# if am_staff #}
               </tr>
             </thead>
@@ -167,13 +168,30 @@
               {% for report in reports %}
               <tr>
                 <td>
+                  {% if report.get('inline') %}
                   <a href="{{ reverse_url('report', report['_id']) }}">
+                    <strong>{{ report['name'] }}</strong>
+                  </a>
+                  {% else %}
+                  <a href="{{ reverse_url('report', report['_id']) }}"
+                     role="button" class="btn btn-xs btn-primary" title="Download">
+                    <span class="glyphicon glyphicon-download-alt"></span>
                     {{ report['name'] }}
                   </a>
+                  {% end %}
                 </td>
                 <td class="localtime">{{ report['modified'] }}</td>
                 {% if am_staff %}
                 <td>{% module Status(report['status']) %}</td>
+                <td>
+                  {% if report['status'] == constants.REVIEW and current_user and report['reviewers'].get(current_user['email'], {}).get('status') == constants.REVIEW %}
+                  
+                  <a href="{{ reverse_url('report_review', report['_id']) }}"
+                     role="button" class="btn btn-warning btn-xs" style="color: black;">
+                    <span class="glyphicon glyphicon-edit"></span> Review
+                  </a>
+                  {% end %}
+                </td>
                 <td>
                   <a href="{{ reverse_url('report_edit', report['_id']) }}"
                      role="button" class="btn btn-primary btn-xs">
@@ -187,8 +205,7 @@
           </table>
           {% end %} {# if reports #}
           {% if am_staff %}
-          <form action="{{ reverse_url('report_create') }}"
-                method="GET" role="form">
+          <form action="{{ reverse_url('report_add') }}" method="GET" role="form">
             <input type="hidden" name="order" value="{{ order['_id'] }}">
             <div class="form-group" style="margin-bottom: 0px;">
               <button type="submit" class="btn btn-primary btn-sm">
@@ -197,29 +214,6 @@
             </div>
           </form>
           {% end %} {# if am_staff #}
-        </td>
-      </tr>
-      <tr>
-        <th>Report</th>
-        <td>
-          {% if order.get('report') %}
-          <a href="{{ reverse_url('order_report', order['_id']) }}"
-             role="button"
-             class="btn btn-success btn-sm">
-            <span class="glyphicon glyphicon-briefcase"></span>
-            Report
-          </a>
-          (updated 
-          <span class="localtime">{{ order['report']['timestamp'] }}</span>)
-          {% end %}
-          {% if am_admin %}
-          <a href="{{ reverse_url('order_report_edit', order['_id']) }}"
-             class="btn btn-primary btn-xs"
-             role="button">
-            <span class="glyphicon glyphicon-edit"></span>
-            Edit
-          </a>
-          {% end %} {# if am_admin #}
         </td>
       </tr>
       {% end %} {# if settings['ORDER_REPORTS'] #}

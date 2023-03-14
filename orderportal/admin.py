@@ -211,14 +211,14 @@ def migrate_meta_documents(db):
     if "create_user" not in doc:
         with MetaSaver(doc=doc, db=db) as saver:
             saver["create_user"] = settings.get("ORDER_CREATE_USER", True)
-            # Flip key/value in autopopulate!
-            autopopulate = settings.get("ORDER_AUTOPOPULATE", {}) or {}
-            saver["autopopulate"] = dict([(v, k) for k, v in autopopulate.items()])
             saver["tags"] = settings.get("ORDER_TAGS", True)
             saver["user_tags"] = settings.get("ORDER_USER_TAGS", True)
             saver["links"] = settings.get("ORDER_LINKS", True)
             saver["reports"] = settings.get("ORDER_REPORTS", True)
             saver["display_max_recent"] = settings.get("DISPLAY_MAX_RECENT_ORDERS", 10)
+            # Flip key/value in autopopulate!
+            autopopulate = settings.get("ORDER_AUTOPOPULATE", {}) or {}
+            saver["autopopulate"] = dict([(v, k) for k, v in autopopulate.items()])
             saver["terminology"] = settings.get("TERMINOLOGY", {})
         logger.info("Saved more order settings to database.")
 
@@ -389,8 +389,6 @@ class Order(RequestHandler):
             saver["create_user"] = utils.to_bool(
                 self.get_argument("create_user", False)
             )
-            for source in constants.ORDER_AUTOPOPULATE_SOURCES:
-                saver["autopopulate"][source] = self.get_argument(source) or None
             saver["tags"] = utils.to_bool(self.get_argument("tags", False))
             saver["user_tags"] = utils.to_bool(self.get_argument("user_tags", False))
             saver["links"] = utils.to_bool(self.get_argument("links", False))
@@ -399,6 +397,8 @@ class Order(RequestHandler):
                 saver["display_max_recent"] = max(1, int(self.get_argument("display_max_recent", 10)))
             except (TypeError, ValueError):
                 self.set_error_flash("Bad 'display_max_recent' value; ignored.")
+            for source in constants.ORDER_AUTOPOPULATE_SOURCES:
+                saver["autopopulate"][source] = self.get_argument(source) or None
             for builtin_term in constants.TERMINOLOGY_TERMS:
                 term = self.get_argument(f"terminology_{builtin_term}", "").lower()
                 if not term or term == builtin_term:

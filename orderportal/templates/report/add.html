@@ -1,13 +1,13 @@
-{# Create a report for an order. #}
+{# Add a report for an order. #}
 
 {% extends "../base.html" %}
 
 {% block head_title %}
-Create a report for {{ terminology('order') }} {{ order['title'] }}
+Add a report for {{ terminology('order') }} {{ order['title'] }}
 {% end %}
 
 {% block body_title %}
-Create a report for {{ terminology('order') }}: {{ order['title'] }}
+Add a report for {{ terminology('order') }}: {{ order['title'] }}
 {% end %}
 
 {% block action_content %}
@@ -15,7 +15,7 @@ Create a report for {{ terminology('order') }}: {{ order['title'] }}
 {% end %} {# block action_content #}
 
 {% block main_content %}
-<form action="{{ reverse_url('report_create') }}"
+<form action="{{ reverse_url('report_add') }}"
       method="POST" role="form" enctype="multipart/form-data">
   {% module xsrf_form_html() %}
   <input type="hidden" name="order" value="{{ order['_id'] }}">
@@ -89,7 +89,7 @@ Create a report for {{ terminology('order') }}: {{ order['title'] }}
       <div class="col-md-3">
         <label for="status">Status</label>
         <select name="status" id="status" class="form-control">
-          {% for status in constants.REPORT_STATUSES %}
+          {% for status in (constants.PREPARATION, constants.REVIEW, constants.APPROVED) %}
           <option value="{{ status }}">{{ status.capitalize() }}</option>
           {% end %}
         </select>

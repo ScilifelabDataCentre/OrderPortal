@@ -236,11 +236,12 @@ class Constants:
     # PREPARATION = "preparation" Already defined above.
     # REVIEW = "review" Already defined above.
     PUBLISHED = "published"
-    REPORT_STATUSES = (PREPARATION, REVIEW, PUBLISHED)
     APPROVED = "approved"
     # REJECTED = "rejected" Already defined above.
+    REPORT_STATUSES = (PREPARATION, REVIEW, PUBLISHED, REJECTED)
+    REPORT_REVIEW_STATUSES = (REVIEW, APPROVED, REJECTED)
 
-    ALL_STATUSES = frozenset(ACCOUNT_STATUSES + FORM_STATUSES + ORDER_STATUSES + REPORT_STATUSES)
+    ALL_STATUSES = frozenset(ACCOUNT_STATUSES + FORM_STATUSES + ORDER_STATUSES + REPORT_STATUSES + REPORT_REVIEW_STATUSES)
 
     # Content types (MIME types).
     HTML_MIMETYPE = "text/html"

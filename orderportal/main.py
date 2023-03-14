@@ -95,31 +95,21 @@ def main():
             orderportal.order.OrderFile,
             name="order_file",
         ),
-        url(
-            r"/order/([0-9a-f]{32})/report",
-            orderportal.order.OrderReport,
-            name="order_report",
-        ),
-        url(
-            r"/api/v1/order/([0-9a-f]{32})/report",
-            orderportal.order.OrderReportApiV1,
-            name="order_report_api",
-        ),
-        url(
-            r"/order/([0-9a-f]{32})/report/edit",
-            orderportal.order.OrderReportEdit,
-            name="order_report_edit",
-        ),
         url(r"/orders", orderportal.order.Orders, name="orders"),
         url(r"/api/v1/orders", orderportal.order.OrdersApiV1, name="orders_api"),
         url(r"/orders.csv", orderportal.order.OrdersCsv, name="orders_csv"),
         url(r"/orders.xlsx", orderportal.order.OrdersXlsx, name="orders_xlsx"),
-        url(r"/report", orderportal.report.ReportCreate, name="report_create"),
+        url(r"/report", orderportal.report.ReportAdd, name="report_add"),
         url(r"/report/([0-9a-f]{32})", orderportal.report.Report, name="report"),
         url(
             r"/report/([0-9a-f]{32})/edit",
             orderportal.report.ReportEdit,
             name="report_edit"
+        ),
+        url(
+            r"/report/([0-9a-f]{32})/review",
+            orderportal.report.ReportReview,
+            name="report_review"
         ),
         url(
             r"/report/([0-9a-f]{32})/logs",
