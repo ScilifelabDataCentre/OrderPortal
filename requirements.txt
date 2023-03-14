@@ -5,6 +5,7 @@ CouchDB2==1.13.0
 htmlgenerator==1.2.27
 idna==3.3
 Markdown==3.3.4
+pycountry==22.3.5
 PyYAML==6.0
 requests==2.26.0
 tornado==6.1

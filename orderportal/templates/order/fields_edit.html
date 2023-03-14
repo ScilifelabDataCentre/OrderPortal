@@ -206,11 +206,15 @@
                   {% end %}
                   >{{ value or '' }}</textarea>
         {% if field['type'] == constants.TEXT %}
-        {% if field.get('maxlength') %}Max {{ field['maxlength'] }} characters.{% end %}
-        {% if settings['DISPLAY_TEXT_MARKDOWN_NOTATION_INFO'] %}
-        <a href="{{ constants.MARKDOWN_URL }}" target="_blank">Markdown</a>
-        notation may optionally be used to format the text.
-        {% end %}
+        <small>
+          {% if field.get('maxlength') %}
+          Max {{ field['maxlength'] }} characters.
+          {% end %}
+          {% if settings['DISPLAY_TEXT_MARKDOWN_NOTATION_INFO'] %}
+          <a href="{{ constants.MARKDOWN_NOTATION_INFO_URL }}" target="_blank">
+            Markdown</a> notation may optionally be used to format the text.
+          {% end %}
+          </small>
         {% end %}
       </div>
     </div>
@@ -233,9 +237,12 @@
     <div class="row">
       <div class="col-md-12">
         {% module TableFieldEdit(field, value) %}
-        To delete a row, remove the contents of its first field, or set it to the value "[no value]".
-        <br>
-        To add more rows, click "Save and continue edit" below, and resume editing.
+        <small>
+          To delete a row, remove the contents of its first field, or
+          set it to the value "[no value]".
+          <br>
+          To add more rows, click "Save and continue edit" below, and resume editing.
+          </small>
       </div>
     </div>
 

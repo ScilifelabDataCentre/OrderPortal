@@ -242,7 +242,7 @@ class RequestHandler(tornado.web.RequestHandler):
             try:
                 doc = self.db[doctype]  # Doc must be reloaded each iteration
             except couchdb2.NotFoundError:
-                with MetaSaver(rqh=self) as saver:
+                with MetaSaver(handler=self) as saver:
                     saver.set_id(doctype)
                 doc = saver.doc
             try:

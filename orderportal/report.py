@@ -1,4 +1,4 @@
-"An order may have reports attached, which should got through a workflow for approval."
+"An order may have reports attached, which may go through a workflow for approval."
 
 import tornado.web
 
@@ -19,7 +19,7 @@ class ReportSaver(saver.Saver):
     def set_inline(self, content_type):
         "Set the 'inline' flag according to explicit argument, or content type."
         try:
-            self["inline"] = utils.to_bool(self.rqh.get_argument("inline"))
+            self["inline"] = utils.to_bool(self.handler.get_argument("inline"))
         except (tornado.web.MissingArgumentError, ValueError):
             self["inline"] = content_type in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE)
 
@@ -29,7 +29,7 @@ class ReportSaver(saver.Saver):
         """
         for reviewer in reviewers:
             try:
-                account = self.rqh.get_account(reviewer)
+                account = self.handler.get_account(reviewer)
                 if account["status"] != constants.ENABLED: continue
                 if account["role"] in (constants.ADMIN, constants.STAFF):
                     self["reviewers"][account["email"]] = {"status": None}
@@ -97,7 +97,7 @@ class ReportMixin:
         text_template = dict(subject=f"{settings['SITE_NAME']} report review to be done.",
                              text="Dear {site} staff,\n\nThe report '{name}' for order '{title}' requires your review.\n\nSee {url}"
                              )
-        with MessageSaver(rqh=self) as saver:
+        with MessageSaver(handler=self) as saver:
             order = self.get_order(report["order"])
             saver.create(
                 text_template,
@@ -134,7 +134,7 @@ class ReportCreate(ReportMixin, RequestHandler):
             self.see_other("order", order["_id"], error="No file uploaded.")
             return
         try:
-            with ReportSaver(rqh=self) as saver:
+            with ReportSaver(handler=self) as saver:
                 saver["order"] = order["_id"]
                 saver["name"] = file.filename
                 saver.set_inline(file.content_type)
@@ -241,7 +241,7 @@ class ReportEdit(ReportMixin, RequestHandler):
             self.see_other("order", order["_id"], error="No file to upload given.")
             return
         try:
-            with ReportSaver(doc=report, rqh=self) as saver:
+            with ReportSaver(doc=report, handler=self) as saver:
                 saver["name"] = file.filename
                 saver.set_inline(file.content_type)
             self.db.put_attachment(

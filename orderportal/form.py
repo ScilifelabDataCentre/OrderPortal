@@ -23,19 +23,19 @@ class FormSaver(saver.Saver):
         self.fields = Fields(self.doc)
 
     def add_field(self):
-        identifier = self.rqh.get_argument("identifier")
+        identifier = self.handler.get_argument("identifier")
         if not constants.ID_RX.match(identifier):
             raise ValueError("Invalid identifier.")
-        if self.rqh.get_argument("type") not in constants.TYPES:
+        if self.handler.get_argument("type") not in constants.TYPES:
             raise ValueError("Invalid type.")
         if identifier in self.fields:
             raise ValueError("Identifier already exists.")
-        self.changed["fields"] = self.fields.add(identifier, self.rqh)
+        self.changed["fields"] = self.fields.add(identifier, self.handler)
 
     def update_field(self, identifier):
         if identifier not in self.fields:
             raise ValueError("No such field.")
-        self.changed["fields"] = self.fields.update(identifier, self.rqh)
+        self.changed["fields"] = self.fields.update(identifier, self.handler)
 
     def clone_fields(self, form):
         "Clone all fields from the given form."
@@ -206,7 +206,7 @@ class FormCreate(RequestHandler):
     @tornado.web.authenticated
     def post(self):
         self.check_admin()
-        with FormSaver(rqh=self) as saver:
+        with FormSaver(handler=self) as saver:
             saver["title"] = self.get_argument("title") or "[no title]"
             saver["version"] = self.get_argument("version", None)
             saver["description"] = self.get_argument("description", None)
@@ -256,7 +256,7 @@ class FormEdit(FormMixin, RequestHandler):
     def post(self, iuid):
         self.check_admin()
         form = self.get_form(iuid)
-        with FormSaver(doc=form, rqh=self) as saver:
+        with FormSaver(doc=form, handler=self) as saver:
             saver["title"] = self.get_argument("title") or "[no title]"
             saver["version"] = self.get_argument("version", None)
             saver["description"] = self.get_argument("description", None)
@@ -314,7 +314,7 @@ class FormFieldCreate(FormMixin, RequestHandler):
             self.see_other("form", form["_id"], error=error)
             return
         try:
-            with FormSaver(doc=form, rqh=self) as saver:
+            with FormSaver(doc=form, handler=self) as saver:
                 saver.add_field()
         except ValueError as error:
             self.see_other("form", form["_id"], error=error)
@@ -362,7 +362,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
             self.see_other("form", form["_id"], error=error)
             return
         try:
-            with FormSaver(doc=form, rqh=self) as saver:
+            with FormSaver(doc=form, handler=self) as saver:
                 saver.update_field(identifier)
         except ValueError as error:
             self.see_other("form", form["_id"], error=error)
@@ -379,7 +379,7 @@ class FormFieldEdit(FormMixin, RequestHandler):
             self.see_other("form", form["_id"], error=error)
             return
         try:
-            with FormSaver(doc=form, rqh=self) as saver:
+            with FormSaver(doc=form, handler=self) as saver:
                 saver.delete_field(identifier)
         except ValueError as error:
             self.see_other("form", form["_id"], error=error)
@@ -396,7 +396,7 @@ class FormFieldEditDescr(FormMixin, RequestHandler):
     def post(self, iuid, identifier):
         self.check_admin()
         form = self.get_form(iuid)
-        with FormSaver(doc=form, rqh=self) as saver:
+        with FormSaver(doc=form, handler=self) as saver:
             name = "{0}/label".format(identifier)
             saver.fields[identifier]["label"] = self.get_argument(name, "")
             name = "{0}/initial_display".format(identifier)
@@ -423,7 +423,7 @@ class FormClone(FormMixin, RequestHandler):
     def post(self, iuid):
         self.check_admin()
         form = self.get_form(iuid)
-        with FormSaver(rqh=self) as saver:
+        with FormSaver(handler=self) as saver:
             saver["title"] = "Clone of {0}".format(form["title"])
             saver["version"] = form.get("version")
             saver["description"] = form.get("description")
@@ -445,7 +445,7 @@ class FormPending(FormMixin, RequestHandler):
         form = self.get_form(iuid)
         if form["status"] != constants.TESTING:
             raise ValueError("Form does not have status testing.")
-        with FormSaver(doc=form, rqh=self) as saver:
+        with FormSaver(doc=form, handler=self) as saver:
             saver["status"] = constants.PENDING
         view = self.db.view(
             "order",
@@ -470,7 +470,7 @@ class FormTesting(FormMixin, RequestHandler):
         form = self.get_form(iuid)
         if form["status"] != constants.PENDING:
             raise ValueError("Form does not have status pending.")
-        with FormSaver(doc=form, rqh=self) as saver:
+        with FormSaver(doc=form, handler=self) as saver:
             saver["status"] = constants.TESTING
         self.see_other("form", iuid)
 
@@ -484,7 +484,7 @@ class FormEnable(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_form(iuid)
         if form["status"] == constants.PENDING:
-            with FormSaver(doc=form, rqh=self) as saver:
+            with FormSaver(doc=form, handler=self) as saver:
                 if not form.get("version"):
                     saver["version"] = utils.today()
                 saver["status"] = constants.ENABLED
@@ -500,7 +500,7 @@ class FormDisable(FormMixin, RequestHandler):
         self.check_admin()
         form = self.get_form(iuid)
         if form["status"] == constants.ENABLED:
-            with FormSaver(doc=form, rqh=self) as saver:
+            with FormSaver(doc=form, handler=self) as saver:
                 saver["status"] = constants.DISABLED
         self.see_other("form", iuid)
 

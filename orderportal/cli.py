@@ -65,13 +65,6 @@ def counts(verbose):
     click.echo(f"{orderportal.database.get_count(db, 'account', 'all'):>5} accounts")
     click.echo(f"{orderportal.database.get_count(db, 'report', 'order'):>5} reports")
 
-    count = 0
-    for row in db.view("order", "obsolete_report", reduce=False, include_docs=True):
-        if verbose:
-            click.echo(f"{row.doc['identifier']} has an obsolete report.")
-        count += 1
-    click.echo(f"{count:>5} obsolete reports")
-
 
 @cli.command()
 @click.option(
@@ -145,7 +138,7 @@ def undump(dumpfile, progressbar):
         if len(db.view("text", "name", key=doc["name"])) == 0:
             db.put(doc)
     # And finally update the formats of some meta documents.
-    orderportal.admin.update_meta_documents(db)
+    orderportal.admin.migrate_meta_documents(db)
     click.echo(f"Loaded {ndocs} documents and {nfiles} files.")
 
 

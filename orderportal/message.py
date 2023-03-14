@@ -97,10 +97,10 @@ class MessageSaver(saver.Saver):
     def handle_error(self, error):
         "Convert into a nicer error message to display."
         try:
-            if not self.rqh.am_admin():
-                self.rqh.logger.error(f"Email failure: {error}")
+            if not self.handler.am_admin():
+                self.handler.logger.error(f"Email failure: {error}")
                 error = "Contact the admin."
-        except AttributeError:  # If rqh is None.
+        except AttributeError:  # If handler is None.
             pass
         raise ValueError(
             f"The operation succeeded, but no email could be sent; problem with the email server. {error}"

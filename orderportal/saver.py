@@ -12,16 +12,16 @@ class Saver:
 
     doctype = None
 
-    def __init__(self, doc=None, rqh=None, db=None):
+    def __init__(self, doc=None, handler=None, db=None):
         assert self.doctype
-        if rqh is not None:
-            self.rqh = rqh
-            self.db = rqh.db
+        if handler is not None:
+            self.handler = handler
+            self.db = handler.db
         elif db is not None:
-            self.rqh = None
+            self.handler = None
             self.db = db
         else:
-            raise AttributeError("neither db nor rqh given")
+            raise AttributeError("neither db nor handler given")
         self.doc = doc or dict()
         self.changed = dict()
         if "_id" in self.doc:
@@ -88,7 +88,7 @@ class Saver:
     def initialize(self):
         "Set the initial values for the new document."
         try:
-            self.doc["owner"] = self.rqh.current_user["email"]
+            self.doc["owner"] = self.handler.current_user["email"]
         except (TypeError, AttributeError, KeyError):
             self.doc["owner"] = None
         self.doc["created"] = utils.timestamp()
@@ -107,4 +107,4 @@ class Saver:
 
     def log(self):
         "Create a log entry for the change."
-        utils.log(self.db, self.rqh, self.doc, changed=self.changed)
+        utils.log(self.db, self.handler, self.doc, changed=self.changed)

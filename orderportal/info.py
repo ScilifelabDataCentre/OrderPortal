@@ -48,7 +48,7 @@ class InfoCreate(RequestHandler):
         else:
             self.see_other("info_create", error="named info already exists")
             return
-        with InfoSaver(rqh=self) as saver:
+        with InfoSaver(handler=self) as saver:
             saver["name"] = name
             saver["title"] = self.get_argument("title", None)
             try:
@@ -100,7 +100,7 @@ class InfoEdit(RequestHandler):
     def post(self, name):
         self.check_admin()
         info = self.get_entity_view("info", "name", name)
-        with InfoSaver(doc=info, rqh=self) as saver:
+        with InfoSaver(doc=info, handler=self) as saver:
             saver["title"] = self.get_argument("title", None)
             try:
                 saver["menu"] = int(self.get_argument("menu", None))

@@ -109,18 +109,18 @@ def get_json(id, type):
 
 
 def get_order_url(order):
-    "Synthesize absolute order URL when 'rqh' is not available."
+    "Synthesize absolute order URL when 'handler' is not available."
     try:
         identifier = order["identifier"]
     except KeyError:
         identifier = order["_id"]
-    path = f"/order/{identifier}"
+    path = f"/order/{identifier}" # Hard-wired! Yes, ugly, but hard to avoid here.
     if settings["BASE_URL_PATH_PREFIX"]:
         path = settings["BASE_URL_PATH_PREFIX"] + path
     return settings["BASE_URL"].rstrip("/") + path
 
 
-def log(db, rqh, entity, changed=dict()):
+def log(db, handler, entity, changed=dict()):
     "Add a log entry for the change of the given entity."
     entry = dict(
         _id=get_iuid(),
@@ -130,16 +130,16 @@ def log(db, rqh, entity, changed=dict()):
         modified=timestamp(),
     )
     entry[constants.DOCTYPE] = constants.LOG
-    if rqh:
+    if handler:
         # xheaders argument to HTTPServer takes care of X-Real-Ip
         # and X-Forwarded-For
-        entry["remote_ip"] = rqh.request.remote_ip
+        entry["remote_ip"] = handler.request.remote_ip
         try:
-            entry["user_agent"] = rqh.request.headers["User-Agent"]
+            entry["user_agent"] = handler.request.headers["User-Agent"]
         except KeyError:
             pass
     try:
-        entry["account"] = rqh.current_user["email"]
+        entry["account"] = handler.current_user["email"]
     except (AttributeError, TypeError, KeyError):
         pass
     db.put(entry)

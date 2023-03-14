@@ -80,7 +80,7 @@ class GroupCreate(RequestHandler):
 
     @tornado.web.authenticated
     def post(self):
-        with GroupSaver(rqh=self) as saver:
+        with GroupSaver(handler=self) as saver:
             saver["name"] = self.get_argument("name", "") or "[no name]"
             saver["owner"] = self.current_user["email"]
             invited = set()
@@ -111,7 +111,7 @@ class GroupEdit(GroupMixin, RequestHandler):
         group = self.get_group(iuid)
         self.check_editable(group)
         try:
-            with GroupSaver(doc=group, rqh=self) as saver:
+            with GroupSaver(doc=group, handler=self) as saver:
                 old_members = set(group["members"])
                 old_invited = set(group["invited"])
                 saver["name"] = self.get_argument("name", "") or "[no name]"
@@ -163,7 +163,7 @@ class GroupAccept(GroupMixin, RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid):
         group = self.get_group(iuid)
-        with GroupSaver(doc=group, rqh=self) as saver:
+        with GroupSaver(doc=group, handler=self) as saver:
             invited = set(group["invited"])
             try:
                 invited.remove(self.current_user["email"])
@@ -184,7 +184,7 @@ class GroupDecline(GroupMixin, RequestHandler):
     @tornado.web.authenticated
     def post(self, iuid):
         group = self.get_group(iuid)
-        with GroupSaver(doc=group, rqh=self) as saver:
+        with GroupSaver(doc=group, handler=self) as saver:
             invited = set(group["invited"])
             invited.discard(self.current_user["email"])
             saver["invited"] = sorted(invited)

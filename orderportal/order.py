@@ -37,7 +37,7 @@ class OrderSaver(saver.Saver):
         self.files = []
         self.filenames = set(self.doc.get("_attachments", []))
         try:
-            self.fields = Fields(self.rqh.get_form(self.doc["form"]))
+            self.fields = Fields(self.handler.get_form(self.doc["form"]))
         except KeyError:
             pass
 
@@ -52,7 +52,7 @@ class OrderSaver(saver.Saver):
         # Set the order identifier if its format defined.
         # Allow also for disabled, since admin may clone such orders.
         if form["status"] in (constants.ENABLED, constants.DISABLED):
-            counter = self.rqh.get_next_counter(constants.ORDER)
+            counter = self.handler.get_next_counter(constants.ORDER)
             self["identifier"] = settings["ORDER_IDENTIFIER_FORMAT"].format(counter)
 
     def autopopulate(self):
@@ -60,7 +60,7 @@ class OrderSaver(saver.Saver):
         Go through the list of sources one by one. There are too many special cases.
         NOTE: Must be kept in sync with constants.ORDER_AUTOPOPULATE_SOURCES!
         """
-        account = self.rqh.current_user
+        account = self.handler.current_user
         autopopulate = settings["ORDER_AUTOPOPULATE"]
 
         target = autopopulate.get("university")
@@ -127,7 +127,7 @@ class OrderSaver(saver.Saver):
         if new not in settings["ORDER_STATUSES_LOOKUP"]:
             raise ValueError(f"invalid status '{new}'")
         if "status" in self.doc:
-            targets = self.rqh.get_targets(self.doc)
+            targets = self.handler.get_targets(self.doc)
             if new not in [t["identifier"] for t in targets]:
                 raise ValueError(
                     "You may not change status of {0} to {1}.".format(
@@ -148,7 +148,7 @@ class OrderSaver(saver.Saver):
             if not isinstance(s, str):
                 raise ValueError("tags list item is not a string")
         # Allow staff to add prefixed tags.
-        if self.rqh.am_staff():
+        if self.handler.am_staff():
             for pos, tag in enumerate(tags):
                 parts = tag.split(":", 1)
                 for part in parts:
@@ -194,7 +194,7 @@ class OrderSaver(saver.Saver):
 
     def update_fields(self, data=None):
         "Update all fields from JSON data if given, else HTML form input."
-        assert self.rqh is not None
+        assert self.handler is not None
         self.removed_files = []  # Names of old files to remove.
         # Loop over fields defined in the form document and get values.
         # Do not change values for a field if that argument is missing,
@@ -202,7 +202,7 @@ class OrderSaver(saver.Saver):
         # and except for multiselect: there a missing value means empty list.
         for field in self.fields:
             # Field not displayed or not writeable must not be changed.
-            if not self.rqh.am_staff() and (
+            if not self.handler.am_staff() and (
                 field["restrict_read"] or field["restrict_write"]
             ):
                 continue
@@ -215,12 +215,12 @@ class OrderSaver(saver.Saver):
                 # Files are uploaded by the normal form multi-part
                 # encoding approach, not by JSON data.
                 try:
-                    infile = self.rqh.request.files[identifier][0]
+                    infile = self.handler.request.files[identifier][0]
                 except (KeyError, IndexError):
                     # No new file given; check if old should be removed.
                     if (
                         utils.to_bool(
-                            self.rqh.get_argument(f"{identifier}__remove__", False)
+                            self.handler.get_argument(f"{identifier}__remove__", False)
                         )
                         and value
                     ):
@@ -240,7 +240,7 @@ class OrderSaver(saver.Saver):
                 else:
                     # Missing argument implies empty list.
                     # This is a special case for HTML form input.
-                    value = self.rqh.get_arguments(identifier)
+                    value = self.handler.get_arguments(identifier)
 
             elif field["type"] == constants.TABLE:
                 coldefs = [utils.parse_field_table_column(c) for c in field["table"]]
@@ -253,7 +253,7 @@ class OrderSaver(saver.Saver):
                     tableid = f"_table_{identifier}"
                     try:
                         name = f"{tableid}_count"
-                        n_rows = int(self.rqh.get_argument(name, 0))
+                        n_rows = int(self.handler.get_argument(name, 0))
                     except (ValueError, TypeError):
                         n_rows = 0
                     table = []
@@ -261,7 +261,7 @@ class OrderSaver(saver.Saver):
                         row = []
                         for j, coldef in enumerate(coldefs):
                             name = f"{tableid}_{i}_{j}"
-                            row.append(self.rqh.get_argument(name, None))
+                            row.append(self.handler.get_argument(name, None))
                         table.append(row)
                 # Check validity of table content.
                 value = []
@@ -305,7 +305,7 @@ class OrderSaver(saver.Saver):
                         continue
                 else:  # HTML form input.
                     try:
-                        value = self.rqh.get_argument(identifier)
+                        value = self.handler.get_argument(identifier)
                         if value == "":
                             value = None
                     except tornado.web.MissingArgumentError:
@@ -489,7 +489,7 @@ class OrderSaver(saver.Saver):
             return
         recipients = set()
         try:
-            owner = self.rqh.get_account(self.doc["owner"])
+            owner = self.handler.get_account(self.doc["owner"])
         except ValueError:  # Owner account may have been deleted.
             pass
         else:
@@ -503,7 +503,7 @@ class OrderSaver(saver.Saver):
                 ):
                     for member in row.doc["members"]:
                         try:
-                            account = self.rqh.get_account(member)
+                            account = self.handler.get_account(member)
                             if account["status"] == constants.ENABLED:
                                 colleagues[account["email"]] = account
                         except ValueError:
@@ -511,11 +511,11 @@ class OrderSaver(saver.Saver):
                 for colleague in colleagues.values():
                     recipients.add(colleague["email"])
         if constants.ADMIN in text_template["recipients"]:
-            for admin in self.rqh.get_admins():
+            for admin in self.handler.get_admins():
                 if admin["status"] == constants.ENABLED:
                     recipients.add(admin["email"])
         try:
-            with MessageSaver(rqh=self.rqh) as saver:
+            with MessageSaver(handler=self.handler) as saver:
                 saver.create(
                     text_template,
                     owner=self.doc["owner"],
@@ -526,7 +526,7 @@ class OrderSaver(saver.Saver):
                 )
                 saver.send(list(recipients))
         except ValueError as error:
-            self.rqh.set_error_flash(error)
+            self.handler.set_error_flash(error)
 
 
 class OrderMixin:
@@ -794,7 +794,7 @@ class OrderCreate(OrderMixin, RequestHandler):
             form = self.get_form(self.get_argument("form"))
             if form["status"] not in (constants.ENABLED, constants.TESTING):
                 raise ValueError("form is not available for creation")
-            with OrderSaver(rqh=self) as saver:
+            with OrderSaver(handler=self) as saver:
                 saver.create(form)
                 saver.autopopulate()
                 saver.check_fields_validity()
@@ -822,7 +822,7 @@ class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             form = self.get_form(iuid)
             if form["status"] not in (constants.ENABLED, constants.TESTING):
                 raise ValueError("form is not available for creation")
-            with OrderSaver(rqh=self) as saver:
+            with OrderSaver(handler=self) as saver:
                 saver.create(form, title=data.get("title"))
                 saver.autopopulate()
                 saver.check_fields_validity()
@@ -920,7 +920,7 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             raise tornado.web.HTTPError(403, reason=str(error))
         data = self.get_json_body()
         try:
-            with OrderSaver(doc=order, rqh=self) as saver:
+            with OrderSaver(doc=order, handler=self) as saver:
                 try:
                     saver["title"] = data["title"]
                 except KeyError:
@@ -1175,7 +1175,7 @@ class OrderEdit(OrderMixin, RequestHandler):
         try:
             message = "{0} saved.".format(utils.terminology("Order"))
             error = None
-            with OrderSaver(doc=order, rqh=self) as saver:
+            with OrderSaver(doc=order, handler=self) as saver:
                 saver["title"] = self.get_argument("__title__", None)
                 saver.set_tags(
                     self.get_argument("__tags__", "").replace(",", " ").split()
@@ -1227,7 +1227,7 @@ class OrderOwner(OrderMixin, RequestHandler):
             account = self.get_account(owner)
             if account.get("status") != constants.ENABLED:
                 raise ValueError("Owner account is not enabled.")
-            with OrderSaver(doc=order, rqh=self) as saver:
+            with OrderSaver(doc=order, handler=self) as saver:
                 saver["owner"] = account["email"]
         except tornado.web.MissingArgumentError:
             pass
@@ -1261,7 +1261,7 @@ class OrderClone(OrderMixin, RequestHandler):
             )
         form = self.get_form(order["form"])
         erased_files = set()
-        with OrderSaver(rqh=self) as saver:
+        with OrderSaver(handler=self) as saver:
             saver.create(
                 form, title="Clone of {0}".format(order["title"] or "[no title]")
             )
@@ -1301,7 +1301,7 @@ class OrderTransition(OrderMixin, RequestHandler):
                     break
             else:
                 raise ValueError("disallowed status transition")
-            with OrderSaver(doc=order, rqh=self) as saver:
+            with OrderSaver(doc=order, handler=self) as saver:
                 saver.set_status(targetid)
         except ValueError as error:
             self.set_error_flash(error)
@@ -1315,7 +1315,7 @@ class OrderTransitionApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         order = self.get_order(iuid)
         try:
             self.check_editable(order)
-            with OrderSaver(doc=order, rqh=self) as saver:
+            with OrderSaver(doc=order, handler=self) as saver:
                 saver.set_status(targetid)
         except ValueError as error:
             raise tornado.web.HTTPError(403, reason=str(error))
@@ -1363,7 +1363,7 @@ class OrderFile(OrderMixin, RequestHandler):
         else:
             if infile.filename.startswith(constants.SYSTEM):
                 raise tornado.web.HTTPError(400, reason="Reserved filename.")
-            with OrderSaver(doc=order, rqh=self) as saver:
+            with OrderSaver(doc=order, handler=self) as saver:
                 saver.add_file(infile)
         self.redirect(self.order_reverse_url(order))
 
@@ -1376,7 +1376,7 @@ class OrderFile(OrderMixin, RequestHandler):
         order = self.get_order(iuid)
         self.check_attachable(order)
         fields = Fields(self.get_form(order["form"]))
-        with OrderSaver(doc=order, rqh=self) as saver:
+        with OrderSaver(doc=order, handler=self) as saver:
             for key in order["fields"]:
                 # Remove the field value if it is the filename.
                 # NOTE: Slightly dangerous: may delete a value that happens to
@@ -1456,7 +1456,7 @@ class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
     def put(self, iuid):
         self.check_admin()
         order = self.get_order(iuid)
-        with OrderSaver(doc=order, rqh=self) as saver:
+        with OrderSaver(doc=order, handler=self) as saver:
             content_type = (
                 self.request.headers.get("content-type") or constants.BIN_MIMETYPE
             )
@@ -1488,7 +1488,7 @@ class OrderReportEdit(OrderMixin, RequestHandler):
     def post(self, iuid):
         self.check_admin()
         order = self.get_order(iuid)
-        with OrderSaver(doc=order, rqh=self) as saver:
+        with OrderSaver(doc=order, handler=self) as saver:
             try:
                 infile = self.request.files["report"][0]
             except (KeyError, IndexError):

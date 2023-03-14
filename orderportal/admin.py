@@ -36,13 +36,22 @@ class MetaSaver(saver.Saver):
         pass
 
 
-def update_meta_documents(db):
+class TextSaver(saver.Saver):
+    doctype = constants.TEXT
+
+    def log(self):
+        "Don't bother recording log for text documents."
+        pass
+
+
+def migrate_meta_documents(db):
     """Update or delete meta documents for the current version.
+
     This has to be checked each time the server starts because
     the database may have been loaded with data from an old dump.
 
-    Yes, this is messy. But it has to be backwards compatible,
-    since old dump files may have to be read in and handled correctly.
+    Yes, this is messy. But all old versions must be dealt with,
+    since old dump files may have to be read in.
     """
     logger = logging.getLogger("orderportal")
     ### As of version 6.0 (or thereabouts), there are no longer any global modes.
@@ -224,20 +233,16 @@ def update_meta_documents(db):
         logger.info("Updated order statuses to remove 'initial'.")
 
 
-class TextSaver(saver.Saver):
-    doctype = constants.TEXT
-
-    def log(self):
-        "Don't bother recording log for text documents."
-        pass
-
-
-def update_text_documents(db):
+def migrate_text_documents(db):
     """Update text documents for the current version of the system.
-    Remove old multiple texts; clean up after previous bug.
+    Remove old multiple texts; clean up after a previous bug.
     Load the default texts if not already in the database.
+
     This has to be checked each time the server starts because
     the database may have been loaded with data from an old dump.
+
+    Yes, this is messy. But all old versions must be dealt with,
+    since old dump files may have to be read in.
     """
     loaded = False
     for text in DEFAULT_TEXTS_DISPLAY:
@@ -360,7 +365,7 @@ class TextEdit(RequestHandler):
         except KeyError:
             raise tornado.web.HTTPError(404, reason="No such text.")
         text = self.get_argument("text", "")
-        with TextSaver(doc=doc, rqh=self) as saver:
+        with TextSaver(doc=doc, handler=self) as saver:
             saver["text"] = text
         settings[doc["type"]][doc["name"]]["text"] = text
         url = self.get_argument("origin", self.absolute_reverse_url("texts"))
@@ -380,7 +385,7 @@ class Order(RequestHandler):
     def post(self):
         self.check_admin()
         doc = self.db["order"]
-        with MetaSaver(doc=doc, rqh=self) as saver:
+        with MetaSaver(doc=doc, handler=self) as saver:
             saver["create_user"] = utils.to_bool(
                 self.get_argument("create_user", False)
             )
@@ -444,7 +449,7 @@ class OrderStatusEnable(RequestHandler):
             self.see_other("admin_order_statuses", error="No such order status.")
             return
         status["enabled"] = True
-        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+        with MetaSaver(doc=self.db["order_statuses"], handler=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
         orderportal.config.load_settings_from_db(self.db)
@@ -487,7 +492,7 @@ class OrderStatusEdit(RequestHandler):
             status["attach"].append("staff")
         if utils.to_bool(self.get_argument("attach_user", False)):
             status["attach"].append("user")
-        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+        with MetaSaver(doc=self.db["order_statuses"], handler=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
         orderportal.config.load_settings_from_db(self.db)
@@ -549,7 +554,7 @@ class OrderTransitionsEdit(RequestHandler):
         settings["ORDER_TRANSITIONS"][source["identifier"]][
             target["identifier"]
         ] = value
-        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+        with MetaSaver(doc=self.db["order_statuses"], handler=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
         orderportal.config.load_settings_from_db(self.db)
@@ -568,7 +573,7 @@ class OrderTransitionsEdit(RequestHandler):
                 "admin_order_statuses", error="Invalid or missing order status."
             )
             return
-        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+        with MetaSaver(doc=self.db["order_statuses"], handler=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
         orderportal.config.load_settings_from_db(self.db)
@@ -587,7 +592,7 @@ class OrdersList(RequestHandler):
     def post(self):
         self.check_admin()
         doc = self.db["orders_list"]
-        with MetaSaver(doc=doc, rqh=self) as saver:
+        with MetaSaver(doc=doc, handler=self) as saver:
             saver["owner_university"] = utils.to_bool(
                 self.get_argument("owner_university", False)
             )
@@ -678,7 +683,7 @@ class Account(RequestHandler):
     def post(self):
         self.check_admin()
         doc = self.db["account"]
-        with MetaSaver(doc=doc, rqh=self) as saver:
+        with MetaSaver(doc=doc, handler=self) as saver:
             saver["registration_open"] = utils.to_bool(
                 self.get_argument("registration_open", False)
             )
@@ -743,7 +748,7 @@ class AccountMessageEdit(RequestHandler):
     def post(self, name):
         self.check_admin()
         doc = self.get_text(constants.ACCOUNT, name)
-        with TextSaver(doc, rqh=self) as saver:
+        with TextSaver(doc, handler=self) as saver:
             saver["subject"] = self.get_argument("subject", None) or "[no subject]"
             saver["recipients"] = self.get_arguments("recipients")
             saver["text"] = self.get_argument("text", None) or "[no text]"

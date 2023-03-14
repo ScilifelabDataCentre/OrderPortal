@@ -76,46 +76,46 @@ class Fields:
     def __getitem__(self, identifier):
         return self._lookup[identifier]
 
-    def add(self, identifier, rqh):
+    def add(self, identifier, handler):
         "Add a form field from data in the RequestHandler instance."
         assert identifier not in self, "field identifier must be unique in form"
-        type = rqh.get_argument("type")
+        type = handler.get_argument("type")
         assert type in constants.TYPES, "invalid field type"
         new = dict(
             identifier=identifier,
-            label=rqh.get_argument("label", None),
-            type=rqh.get_argument("type"),
-            required=utils.to_bool(rqh.get_argument("required", False)),
-            restrict_read=utils.to_bool(rqh.get_argument("restrict_read", False)),
-            restrict_write=utils.to_bool(rqh.get_argument("restrict_write", False)),
-            erase_on_clone=utils.to_bool(rqh.get_argument("erase_on_clone", False)),
-            initial_display=utils.to_bool(rqh.get_argument("initial_display", False)),
-            description=rqh.get_argument("description", None),
+            label=handler.get_argument("label", None),
+            type=handler.get_argument("type"),
+            required=utils.to_bool(handler.get_argument("required", False)),
+            restrict_read=utils.to_bool(handler.get_argument("restrict_read", False)),
+            restrict_write=utils.to_bool(handler.get_argument("restrict_write", False)),
+            erase_on_clone=utils.to_bool(handler.get_argument("erase_on_clone", False)),
+            initial_display=utils.to_bool(handler.get_argument("initial_display", False)),
+            description=handler.get_argument("description", None),
         )
         if type == constants.GROUP:
             new["fields"] = []
         # Set the possible values for menu or radiobuttons field.
         elif type == constants.SELECT:
-            values = rqh.get_argument("select", "").split("\n")
+            values = handler.get_argument("select", "").split("\n")
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new["select"] = values
-            new["display"] = rqh.get_argument("display", None) or "menu"
+            new["display"] = handler.get_argument("display", None) or "menu"
         # Set the possible values for a multiselect field.
         elif type == constants.MULTISELECT:
-            values = rqh.get_argument("multiselect", "").split("\n")
+            values = handler.get_argument("multiselect", "").split("\n")
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new["multiselect"] = values
         # Set the column identifiers for a table field.
         elif type == constants.TABLE:
-            values = rqh.get_argument("table", "").split("\n")
+            values = handler.get_argument("table", "").split("\n")
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             # NOTE: Should really do sanity check of each line: "header|type|values"
             new["table"] = values
         # Set the group which the field is a member of.
-        group = rqh.get_argument("group", None)
+        group = handler.get_argument("group", None)
         if group == "":
             group = None
         for field in self:
@@ -135,64 +135,64 @@ class Fields:
         self.setup()
         return new
 
-    def update(self, identifier, rqh):
+    def update(self, identifier, handler):
         """Update the form field from data in the RequestHandler instance.
         This includes moving the field into a different group,
         or within a group."""
         assert identifier in self, "field identifier must be defined in form"
         new = dict(
-            label=rqh.get_argument("label", None),
-            required=utils.to_bool(rqh.get_argument("required", False)),
-            restrict_read=utils.to_bool(rqh.get_argument("restrict_read", False)),
-            restrict_write=utils.to_bool(rqh.get_argument("restrict_write", False)),
-            erase_on_clone=utils.to_bool(rqh.get_argument("erase_on_clone", False)),
-            auto_tag=utils.to_bool(rqh.get_argument("auto_tag", False)),
-            initial_display=utils.to_bool(rqh.get_argument("initial_display", False)),
-            description=rqh.get_argument("description", None),
+            label=handler.get_argument("label", None),
+            required=utils.to_bool(handler.get_argument("required", False)),
+            restrict_read=utils.to_bool(handler.get_argument("restrict_read", False)),
+            restrict_write=utils.to_bool(handler.get_argument("restrict_write", False)),
+            erase_on_clone=utils.to_bool(handler.get_argument("erase_on_clone", False)),
+            auto_tag=utils.to_bool(handler.get_argument("auto_tag", False)),
+            initial_display=utils.to_bool(handler.get_argument("initial_display", False)),
+            description=handler.get_argument("description", None),
         )
         field = self._lookup[identifier]
 
         # Conditional field setup
-        identifier = rqh.get_argument("visible_if_field", None)
+        identifier = handler.get_argument("visible_if_field", None)
         if identifier == "":
             identifier = None
         new["visible_if_field"] = identifier
-        value = rqh.get_argument("visible_if_value", None)
+        value = handler.get_argument("visible_if_value", None)
         if value:
             value = "|".join([s.strip() for s in value.split("|") if s.strip()])
         new["visible_if_value"] = value
 
         # Set the possible values for menu or radiobuttons field.
         if field["type"] == constants.SELECT:
-            values = rqh.get_argument("select", "").split("\n")
+            values = handler.get_argument("select", "").split("\n")
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new["select"] = values
-            new["display"] = rqh.get_argument("display", None) or "menu"
+            new["display"] = handler.get_argument("display", None) or "menu"
 
         # Set the possible values for a multiselect field.
         elif field["type"] == constants.MULTISELECT:
-            values = rqh.get_argument("multiselect", "").split("\n")
+            values = handler.get_argument("multiselect", "").split("\n")
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new["multiselect"] = values
 
         # Set the column identifiers for a table field.
         elif field["type"] == constants.TABLE:
-            values = rqh.get_argument("table", "").split("\n")
+            values = handler.get_argument("table", "").split("\n")
             values = [v.strip() for v in values]
             values = [v for v in values if v]
             new["table"] = values
 
         # Represent the boolean by a checkbox or a selection.
         elif field["type"] == constants.BOOLEAN:
-            new["checkbox"] = utils.to_bool(rqh.get_argument("checkbox", None))
-            new["selection"] = rqh.get_argument("selection", None)
+            new["checkbox"] = utils.to_bool(handler.get_argument("checkbox", None))
+            new["selection"] = handler.get_argument("selection", None)
 
         # Get the maxlength for a textarea, if given.
         elif field["type"] == constants.TEXT:
             try:
-                maxlength = rqh.get_argument("maxlength")
+                maxlength = handler.get_argument("maxlength")
                 maxlength = int(maxlength)
                 if maxlength <= 0:
                     raise ValueError
@@ -212,7 +212,7 @@ class Fields:
                 diff[key] = value
 
         # Set a new parent; change the field's group.
-        new_parent = rqh.get_argument("parent", "")
+        new_parent = handler.get_argument("parent", "")
         if new_parent:
             if new_parent == "[top level]":
                 new_parent = -1  # Special value that is 'true'
@@ -243,7 +243,7 @@ class Fields:
         # Repositioning a field is relevant only if parent stays the same.
         else:
             try:
-                position = rqh.get_argument("position")
+                position = handler.get_argument("position")
                 if not position:
                     raise ValueError
             except (tornado.web.MissingArgumentError, ValueError):

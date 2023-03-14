@@ -19,7 +19,7 @@ class FileSaver(saver.Saver):
         if not constants.NAME_RX.match(value):
             raise tornado.web.HTTPError(400, reason="invalid file name")
         try:
-            doc = self.rqh.get_entity_view("file", "name", value)
+            doc = self.handler.get_entity_view("file", "name", value)
         except tornado.web.HTTPError:
             pass
         else:
@@ -99,7 +99,7 @@ class FileCreate(RequestHandler):
     def post(self):
         self.check_admin()
         try:
-            with FileSaver(rqh=self) as saver:
+            with FileSaver(handler=self) as saver:
                 try:
                     infile = self.request.files["file"][0]
                 except (KeyError, IndexError):
@@ -135,7 +135,7 @@ class FileEdit(RequestHandler):
             return
         self.check_admin()
         file = self.get_entity_view("file", "name", name)
-        with FileSaver(doc=file, rqh=self) as saver:
+        with FileSaver(doc=file, handler=self) as saver:
             try:
                 infile = self.request.files["file"][0]
             except (KeyError, IndexError):

@@ -22,7 +22,7 @@ def get_db():
 
 
 def update_design_documents(db):
-    "Ensure that all CouchDB design documents are up to date."
+    "Ensure that all CouchDB design documents are current."
     logger = logging.getLogger("orderportal")
 
     if db.put_design("account", ACCOUNT_DESIGN_DOC):
@@ -45,7 +45,7 @@ def update_design_documents(db):
         logger.info("Updated 'meta' design document.")
     if db.put_design("news", NEWS_DESIGN_DOC):
         logger.info("Updated 'news' design document.")
-    # Replace variables in the function body according to 'settings'.
+    # Replace variables in the function body according to constants.
     mapfunc = ORDER_DESIGN_DOC["views"]["keyword"]["map"]
     delims_lint = "".join(constants.ORDERS_SEARCH_DELIMS_LINT)
     lint = "{%s}" % ", ".join(["'%s': 1" % w for w in constants.ORDERS_SEARCH_LINT])
@@ -388,13 +388,6 @@ var lint = {lint};
     if (doc.orderportal_doctype !== 'order') return;
     if (!doc.history.submitted) return;
     emit(doc.history.submitted.split('-')[0], 1);
-}""",
-        },
-        "obsolete_report": {    # To allow updating of obsolete report implementation.
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'order') return;
-    if (!doc.report) return;
-    emit(doc.identifier, null);
 }""",
         },
     }

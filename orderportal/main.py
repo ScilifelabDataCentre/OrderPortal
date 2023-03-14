@@ -30,8 +30,8 @@ def main():
     orderportal.config.load_settings_from_file()
     db = orderportal.database.get_db()
     orderportal.database.update_design_documents(db)
-    orderportal.admin.update_meta_documents(db)
-    orderportal.admin.update_text_documents(db)
+    orderportal.admin.migrate_meta_documents(db)
+    orderportal.admin.migrate_text_documents(db)
     orderportal.admin.load_texts(db)
     orderportal.config.load_settings_from_db(db)
 

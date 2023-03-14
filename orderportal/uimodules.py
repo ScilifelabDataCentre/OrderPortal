@@ -210,7 +210,6 @@ class TableField(tornado.web.UIModule):
     """
 
     def render(self, field, value):
-        assert field["type"] == constants.TABLE
         header = hg.TR(hg.TH())
         for coldef in field["table"]:
             column = utils.parse_field_table_column(coldef)
@@ -239,7 +238,6 @@ class TableFieldEdit(tornado.web.UIModule):
     """
 
     def render(self, field, value):
-        assert field["type"] == constants.TABLE
         tableid = f"_table_{field['identifier']}"
         th = hg.TH()
         header = hg.TR(th)
@@ -267,7 +265,7 @@ class TableFieldEdit(tornado.web.UIModule):
         return hg.render(hg.TABLE(hg.THEAD(header), hg.TBODY(*rows), **kwargs), {})
 
     def create_row(self, tableid, columns, i, row):
-        "Return a table row."
+        "Return a new row for the table."
         rowid = f"{tableid}_{i}"
         result = hg.TR(id=rowid)
         result.append(hg.TD(str(i+1), _class="table-input-row-0"))
