@@ -27,7 +27,7 @@ class MetaSaver(saver.Saver):
     doctype = constants.META
 
     def set_id(self, id):
-        if id in constants.BANNED_META_IDS:
+        if id in constants.FORBIDDEN_META_IDS:
             raise ValueError(f"trying to use a banned meta document name '{id}'")
         self.doc["_id"] = id
 
@@ -36,10 +36,22 @@ class MetaSaver(saver.Saver):
         pass
 
 
-def update_meta_documents(db):
+class TextSaver(saver.Saver):
+    doctype = constants.TEXT
+
+    def log(self):
+        "Don't bother recording log for text documents."
+        pass
+
+
+def migrate_meta_documents(db):
     """Update or delete meta documents for the current version.
+
     This has to be checked each time the server starts because
     the database may have been loaded with data from an old dump.
+
+    Yes, this is messy. But all old versions must be dealt with,
+    since old dump files may have to be read in.
     """
     logger = logging.getLogger("orderportal")
     ### As of version 6.0 (or thereabouts), there are no longer any global modes.
@@ -124,22 +136,12 @@ def update_meta_documents(db):
                         target
                     ] = value
 
-        initial = None
-        for status in settings["ORDER_STATUSES"]:
-            if status.get("initial"):
-                if initial:  # There must one and only one initial status.
-                    status.pop("initial")
-                else:
-                    initial = status
-        if initial is None:  # Set the status PREPARATION to initial, if none defined.
-            lookup[constants.PREPARATION]["status"] = True
-
         # Save current setup into database.
         with MetaSaver(db=db) as saver:
             saver.set_id("order_statuses")
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
-        logger.info("saved order statuses to database")
+        logger.info("Saved order statuses to database.")
 
     ### As of version 7.0, the layout of the transitions data ha been changed
     ### to a dict having (key: source status, value: dict of target statues
@@ -161,10 +163,10 @@ def update_meta_documents(db):
         with MetaSaver(doc=doc, db=db) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
-        logger.info("saved updated order transitions to database")
+        logger.info("Saved updated order transitions to database.")
 
-    # As of version 7.0.3, items to show in the order list is stored
-    # in the database, not in the settings file.
+    # As of version 7.0.3, items to show in the order list
+    # are stored in the database, not in the settings file.
     if "orders_list" not in db:
         with MetaSaver(db=db) as saver:
             saver.set_id("orders_list")
@@ -177,7 +179,7 @@ def update_meta_documents(db):
             saver["max_most_recent"] = settings.get("DISPLAY_ORDERS_MOST_RECENT", 500)
             saver["default_order_column"] = "modified"
             saver["default_order_sort"] = "desc"
-        logger.info("saved orders list settings to database")
+        logger.info("Saved orders list settings to database.")
 
     # Re-introduce order list filters, this time separately from orders list fields.
     doc = db["orders_list"]
@@ -185,21 +187,62 @@ def update_meta_documents(db):
         with MetaSaver(doc=doc, db=db) as saver:
             saver["filters"] = []
 
+    # As of version 9.1.0, settings pertaining to the account entities
+    # are stored in the database, not the settings file.
+    if "account" not in db:
+        with MetaSaver(db=db) as saver:
+            saver.set_id("account")
+            saver["registration_open"] = settings.get("ACCOUNT_REGISTRATION_OPEN", True)
+            saver["pi_info"] = settings.get("ACCOUNT_PI_INFO", True)
+            saver["orcid_info"] = settings.get("ACCOUNT_ORCID_INFO", True)
+            saver["postal_info"] = settings.get("ACCOUNT_POSTAL_INFO", True)
+            saver["invoice_info"] = settings.get("ACCOUNT_INVOICE_INFO", True)
+            saver["invoice_ref_required"] = settings.get("ACCOUNT_INVOICE_REF_REQUIRED", False)
+            saver["funder_info_gender"] = settings.get("ACCOUNT_FUNDER_INFO_GENDER", True)
+            saver["funder_info_group_size"] = settings.get("ACCOUNT_FUNDER_INFO_GROUP_SIZE", True)
+            saver["funder_info_subject"] = settings.get("ACCOUNT_FUNDER_INFO_SUBJECT", True)
+            saver["default_country_code"] = settings.get("DEFAULT_COUNTRY_CODE", "SE")
+        logger.info("Saved account settings to database.")
 
-class TextSaver(saver.Saver):
-    doctype = constants.TEXT
+    # As of version 9.1.0, many settings pertaining to order entities
+    # are stored on the database, not the settings file.
+    # Transfer the settings to the existing "order" document.
+    doc = db["order"]
+    if "create_user" not in doc:
+        with MetaSaver(doc=doc, db=db) as saver:
+            saver["create_user"] = settings.get("ORDER_CREATE_USER", True)
+            saver["tags"] = settings.get("ORDER_TAGS", True)
+            saver["user_tags"] = settings.get("ORDER_USER_TAGS", True)
+            saver["links"] = settings.get("ORDER_LINKS", True)
+            saver["reports"] = settings.get("ORDER_REPORTS", True)
+            saver["display_max_recent"] = settings.get("DISPLAY_MAX_RECENT_ORDERS", 10)
+            # Flip key/value in autopopulate!
+            autopopulate = settings.get("ORDER_AUTOPOPULATE", {}) or {}
+            saver["autopopulate"] = dict([(v, k) for k, v in autopopulate.items()])
+            saver["terminology"] = settings.get("TERMINOLOGY", {})
+        logger.info("Saved more order settings to database.")
 
-    def log(self):
-        "Don't bother recording log for text documents."
-        pass
+    # As of version 9.1.0, PREPARATION is hard-wired as the initial status.
+    # Remove the obsolete item "initial" from the order statuses.
+    doc = db["order_statuses"]
+    statuses = doc["statuses"]
+    if "initial" in statuses[0]:
+        with MetaSaver(doc=doc, db=db) as saver:
+            for status in statuses:
+                status.pop("initial", None)
+        logger.info("Updated order statuses to remove 'initial'.")
 
 
-def update_text_documents(db):
+def migrate_text_documents(db):
     """Update text documents for the current version of the system.
-    Remove old multiple texts; clean up after previous bug.
+    Remove old multiple texts; clean up after a previous bug.
     Load the default texts if not already in the database.
+
     This has to be checked each time the server starts because
     the database may have been loaded with data from an old dump.
+
+    Yes, this is messy. But all old versions must be dealt with,
+    since old dump files may have to be read in.
     """
     loaded = False
     for text in DEFAULT_TEXTS_DISPLAY:
@@ -289,7 +332,14 @@ class Texts(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin/texts.html", texts=self.get_texts(constants.DISPLAY))
+        texts = [
+            row.doc
+            for row in self.db.view(
+                "text", "type", key=constants.DISPLAY, reduce=False, include_docs=True
+            )
+        ]
+        texts.sort(key=lambda d: d["name"])
+        self.render("admin/texts.html", texts=texts)
 
 
 class TextEdit(RequestHandler):
@@ -315,11 +365,49 @@ class TextEdit(RequestHandler):
         except KeyError:
             raise tornado.web.HTTPError(404, reason="No such text.")
         text = self.get_argument("text", "")
-        with TextSaver(doc=doc, rqh=self) as saver:
+        with TextSaver(doc=doc, handler=self) as saver:
             saver["text"] = text
         settings[doc["type"]][doc["name"]]["text"] = text
         url = self.get_argument("origin", self.absolute_reverse_url("texts"))
         self.redirect(url, status=303)
+
+
+class Order(RequestHandler):
+    "Display and edit the order configuration."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        doc = self.db["order"]
+        self.render("admin/order.html")
+
+    @tornado.web.authenticated
+    def post(self):
+        self.check_admin()
+        doc = self.db["order"]
+        with MetaSaver(doc=doc, handler=self) as saver:
+            saver["create_user"] = utils.to_bool(
+                self.get_argument("create_user", False)
+            )
+            saver["tags"] = utils.to_bool(self.get_argument("tags", False))
+            saver["user_tags"] = utils.to_bool(self.get_argument("user_tags", False))
+            saver["links"] = utils.to_bool(self.get_argument("links", False))
+            saver["reports"] = utils.to_bool(self.get_argument("reports", False))
+            try:
+                saver["display_max_recent"] = max(1, int(self.get_argument("display_max_recent", 10)))
+            except (TypeError, ValueError):
+                self.set_error_flash("Bad 'display_max_recent' value; ignored.")
+            for source in constants.ORDER_AUTOPOPULATE_SOURCES:
+                saver["autopopulate"][source] = self.get_argument(source) or None
+            for builtin_term in constants.TERMINOLOGY_TERMS:
+                term = self.get_argument(f"terminology_{builtin_term}", "").lower()
+                if not term or term == builtin_term:
+                    saver["terminology"].pop(builtin_term, None)
+                else:
+                    saver["terminology"][builtin_term] = term
+        orderportal.config.load_settings_from_db(self.db)
+        self.set_message_flash("Saved order configuration.")
+        self.see_other("admin_order")
 
 
 class OrderStatuses(RequestHandler):
@@ -361,7 +449,7 @@ class OrderStatusEnable(RequestHandler):
             self.see_other("admin_order_statuses", error="No such order status.")
             return
         status["enabled"] = True
-        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+        with MetaSaver(doc=self.db["order_statuses"], handler=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
         orderportal.config.load_settings_from_db(self.db)
@@ -394,12 +482,6 @@ class OrderStatusEdit(RequestHandler):
             status["description"] = value
         else:
             self.set_error_flash("There must be a description; not changed.")
-        initial = utils.to_bool(self.get_argument("initial", False))
-        # Only one status may be initial; set all others to False.
-        if initial and not status.get("initial"):
-            for s in settings["ORDER_STATUSES_LOOKUP"].values():
-                s["initial"] = False
-            status["initial"] = True
         status["edit"] = ["admin"]  # Is always allowed.
         if utils.to_bool(self.get_argument("edit_staff", False)):
             status["edit"].append("staff")
@@ -410,7 +492,7 @@ class OrderStatusEdit(RequestHandler):
             status["attach"].append("staff")
         if utils.to_bool(self.get_argument("attach_user", False)):
             status["attach"].append("user")
-        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+        with MetaSaver(doc=self.db["order_statuses"], handler=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
         orderportal.config.load_settings_from_db(self.db)
@@ -422,14 +504,19 @@ class OrderTransitionsEdit(RequestHandler):
 
     @tornado.web.authenticated
     def get(self, status_id):
+        "Display edit page."
         self.check_admin()
+        if status_id == constants.PREPARATION:
+            self.see_other("admin_order_statuses",
+                           error="Not allowed to edit transitions from status Preparation.")
+            return
         try:
             status = settings["ORDER_STATUSES_LOOKUP"][status_id]
         except KeyError:
             self.see_other("admin_order_statuses", error="No such order status.")
         else:
             targets = settings["ORDER_TRANSITIONS"].get(status_id, dict())
-            # Defensive: only allow enabled statuses as targets.
+            # Ensure only allow enabled statuses as targets.
             for target in targets.keys():
                 if target not in settings["ORDER_STATUSES_LOOKUP"]:
                     targets.pop(target)
@@ -467,7 +554,7 @@ class OrderTransitionsEdit(RequestHandler):
         settings["ORDER_TRANSITIONS"][source["identifier"]][
             target["identifier"]
         ] = value
-        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+        with MetaSaver(doc=self.db["order_statuses"], handler=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
         orderportal.config.load_settings_from_db(self.db)
@@ -486,7 +573,7 @@ class OrderTransitionsEdit(RequestHandler):
                 "admin_order_statuses", error="Invalid or missing order status."
             )
             return
-        with MetaSaver(doc=self.db["order_statuses"], rqh=self) as saver:
+        with MetaSaver(doc=self.db["order_statuses"], handler=self) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
         orderportal.config.load_settings_from_db(self.db)
@@ -494,7 +581,7 @@ class OrderTransitionsEdit(RequestHandler):
 
 
 class OrdersList(RequestHandler):
-    "Orders list configuration."
+    "Display and edit orders list configuration."
 
     @tornado.web.authenticated
     def get(self):
@@ -505,7 +592,7 @@ class OrdersList(RequestHandler):
     def post(self):
         self.check_admin()
         doc = self.db["orders_list"]
-        with MetaSaver(doc=doc, rqh=self) as saver:
+        with MetaSaver(doc=doc, handler=self) as saver:
             saver["owner_university"] = utils.to_bool(
                 self.get_argument("owner_university", False)
             )
@@ -551,7 +638,7 @@ class OrdersList(RequestHandler):
                     # Overwrite if identifier is already in the list.
                     filters[filter["identifier"]] = filter
             except (KeyError, ValueError, yaml.YAMLError):
-                self.set_error_flash("Invalid YAML for 'Orders filter field'; ignored.")
+                self.set_error_flash("Invalid YAML given in 'Add orders filter field'; ignored.")
             saver["filters"] = list(filters.values())
             try:
                 value = int(self.get_argument("orders_most_recent"))
@@ -571,12 +658,12 @@ class OrdersList(RequestHandler):
             else:
                 saver["default_order_sort"] = "desc"
         orderportal.config.load_settings_from_db(self.db)
-        self.set_message_flash("Saved configuration.")
+        self.set_message_flash("Saved orders list configuration.")
         self.see_other("admin_orders_list")
 
 
 class OrderMessages(RequestHandler):
-    "Page for displaying order messages configuration."
+    "Display order messages configuration."
 
     @tornado.web.authenticated
     def get(self):
@@ -585,17 +672,48 @@ class OrderMessages(RequestHandler):
 
 
 class Account(RequestHandler):
-    "Page for display and edit of account configuration."
+    "Display and edit of account configuration."
 
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin/account_config.html")
+        self.render("admin/account.html")
 
     @tornado.web.authenticated
     def post(self):
         self.check_admin()
-        self.set_message_flash("Saved configuration.")
+        doc = self.db["account"]
+        with MetaSaver(doc=doc, handler=self) as saver:
+            saver["registration_open"] = utils.to_bool(
+                self.get_argument("registration_open", False)
+            )
+            saver["pi_info"] = utils.to_bool(
+                self.get_argument("pi_info", False)
+            )
+            saver["orcid_info"] = utils.to_bool(
+                self.get_argument("orcid_info", False)
+            )
+            saver["postal_info"] = utils.to_bool(
+                self.get_argument("postal_info", False)
+            )
+            saver["invoice_info"] = utils.to_bool(
+                self.get_argument("invoice_info", False)
+            )
+            saver["invoice_ref_required"] = utils.to_bool(
+                self.get_argument("invoice_ref_required", False)
+            )
+            saver["funder_info_gender"] = utils.to_bool(
+                self.get_argument("funder_info_gender", False)
+            )
+            saver["funder_info_group_size"] = utils.to_bool(
+                self.get_argument("funder_info_group_size", False)
+            )
+            saver["funder_info_subject"] = utils.to_bool(
+                self.get_argument("funder_info_subject", False)
+            )
+            saver["default_country_code"] = self.get_argument("default_country_code", "SE")
+        orderportal.config.load_settings_from_db(self.db)
+        self.set_message_flash("Saved account configuration.")
         self.see_other("admin_account")
 
 
@@ -630,7 +748,7 @@ class AccountMessageEdit(RequestHandler):
     def post(self, name):
         self.check_admin()
         doc = self.get_text(constants.ACCOUNT, name)
-        with TextSaver(doc, rqh=self) as saver:
+        with TextSaver(doc, handler=self) as saver:
             saver["subject"] = self.get_argument("subject", None) or "[no subject]"
             saver["recipients"] = self.get_arguments("recipients")
             saver["text"] = self.get_argument("text", None) or "[no text]"
@@ -724,140 +842,140 @@ DEFAULT_ORDER_STATUSES = [
         action="Submit",
     ),
     dict(
-        identifier="review",
+        identifier=constants.REVIEW,
         description="The order is under review.",
         edit=["staff", "admin"],
         attach=["staff", "admin"],
         action="Review",
     ),
     dict(
-        identifier="queued",
+        identifier=constants.QUEUED,
         description="The order has been queued.",
         edit=["admin"],
         attach=["admin"],
         action="Queue",
     ),
     dict(
-        identifier="waiting",
+        identifier=constants.WAITING,
         description="The order is waiting.",
         edit=["admin"],
         attach=["admin"],
         action="Wait",
     ),
     dict(
-        identifier="accepted",
+        identifier=constants.ACCEPTED,
         description="The order has been checked and accepted.",
         edit=["admin"],
         attach=["admin"],
         action="Accept",
     ),
     dict(
-        identifier="rejected",
+        identifier=constants.REJECTED,
         description="The order has been rejected.",
         edit=["admin"],
         attach=["admin"],
         action="Reject",
     ),
     dict(
-        identifier="processing",
+        identifier=constants.PROCESSING,
         description="The order is being processed in the lab.",
         edit=["admin"],
         attach=["admin"],
         action="Process",
     ),
     dict(
-        identifier="active",
+        identifier=constants.ACTIVE,
         description="The order is active.",
         edit=["admin"],
         attach=["admin"],
         action="Active",
     ),
     dict(
-        identifier="analysis",
+        identifier=constants.ANALYSIS,
         description="The order results are being analysed.",
         edit=["admin"],
         attach=["admin"],
         action="Analyse",
     ),
     dict(
-        identifier="onhold",
+        identifier=constants.ONHOLD,
         description="The order is on hold.",
         edit=["admin"],
         attach=["admin"],
         action="On hold",
     ),
     dict(
-        identifier="halted",
+        identifier=constants.HALTED,
         description="The work on the order has been halted.",
         edit=["admin"],
         attach=["admin"],
         action="Halt",
     ),
     dict(
-        identifier="aborted",
+        identifier=constants.ABORTED,
         description="The work on the order has been permanently stopped.",
         edit=["admin"],
         attach=["admin"],
         action="Abort",
     ),
     dict(
-        identifier="terminated",
+        identifier=constants.TERMINATED,
         description="The order has been terminated.",
         edit=["admin"],
         attach=["admin"],
         action="Terminate",
     ),
     dict(
-        identifier="cancelled",
+        identifier=constants.CANCELLED,
         description="The order has been cancelled.",
         edit=["admin"],
         attach=["admin"],
         action="Cancel",
     ),
     dict(
-        identifier="finished",
+        identifier=constants.FINISHED,
         description="The work on the order has finished.",
         edit=["admin"],
         attach=["admin"],
         action="Finish",
     ),
     dict(
-        identifier="completed",
+        identifier=constants.COMPLETED,
         description="The order has been completed.",
         edit=["admin"],
         attach=["admin"],
         action="Complete",
     ),
     dict(
-        identifier="closed",
+        identifier=constants.CLOSED,
         description="All work and other actions for the order have been performed.",
         edit=["admin"],
         attach=["admin"],
         action="Closed",
     ),
     dict(
-        identifier="delivered",
+        identifier=constants.DELIVERED,
         description="The order results have been delivered.",
         edit=["admin"],
         attach=["admin"],
         action="Deliver",
     ),
     dict(
-        identifier="invoiced",
+        identifier=constants.INVOICED,
         description="The order has been invoiced.",
         edit=["admin"],
         attach=["admin"],
         action="Invoice",
     ),
     dict(
-        identifier="archived",
+        identifier=constants.ARCHIVED,
         description="The order has been archived.",
         edit=["admin"],
         attach=["admin"],
         action="Archive",
     ),
     dict(
-        identifier="undefined",
+        identifier=constants.UNDEFINED,
         description="The order has an undefined or unknown status.",
         edit=["admin"],
         attach=["admin"],

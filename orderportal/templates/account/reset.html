@@ -15,8 +15,7 @@
   {% module Text('reset', origin=reverse_url('reset')) %}
 </div>
 
-<form action="{{ reverse_url('reset') }}"
-      method="POST" role="form">
+<form action="{{ reverse_url('reset') }}" method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <div class="form-group has-feedback">

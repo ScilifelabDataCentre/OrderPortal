@@ -48,8 +48,7 @@
             {% if current_user %}
             {% if am_staff %}
             <li>
-              <a href="{{ reverse_url('orders') }}">
-                {{ terminology('Orders') }}</a>
+              <a href="{{ reverse_url('orders') }}">{{ terminology('Orders') }}</a>
             </li>
             {% else %}
             <li>
@@ -85,8 +84,7 @@
                 </li>
                 {% if am_staff %}
                 <li>
-                  <a href="{{ reverse_url('register') }}">
-                    Register new account</a>
+                  <a href="{{ reverse_url('register') }}">Register new account</a>
                 </li>
                 <li>
                   <a href="{{ reverse_url('reset') }}">Reset password</a>
@@ -109,10 +107,9 @@
                   <a href="{{ reverse_url('infos') }}">All info pages</a>
                 </li>
                 {% end %} {# if am_admin #}
-                {% for n, t in infos %}
+                {% for name, info_title in infos %}
                 <li>
-                  <a href="{{ reverse_url('info', n) }}">
-                    {{ t or n }}</a>
+                  <a href="{{ reverse_url('info', name) }}">{{ info_title or name }}</a>
                 </li>
                 {% end %}
               </ul>
@@ -137,6 +134,10 @@
                   <a href="{{ reverse_url('texts') }}">Texts</a>
                 </li>
                 <li>
+                  <a href="{{ reverse_url('admin_order') }}">
+                    {{ terminology('Order') }} configuration</a>
+                </li>
+                <li>
                   <a href="{{ reverse_url('admin_order_statuses') }}">
                     {{ terminology('Order') }} status configuration</a>
                 </li>
@@ -147,6 +148,10 @@
                 <li>
                   <a href="{{ reverse_url('admin_order_messages') }}">
                     {{ terminology('Order') }} messages configuration</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('admin_account') }}">
+                    Account configuration</a>
                 </li>
                 <li>
                   <a href="{{ reverse_url('admin_account_messages') }}">
@@ -188,19 +193,7 @@
           <div>
             <ul class="nav navbar-nav navbar-right">
               {% if current_user %}
-              <li id="logged-in">
-                {% module Entity(current_user, icon=False) %}
-              </li>
-              <li>
-                <form action="{{ reverse_url('logout') }}"
-                      method="POST" role="form" class="navbar-form">
-                  {% module xsrf_form_html() %}
-                  <button type="submit" title="Logout"
-                          class="btn btn-default btn-sm">
-                    <span class="glyphicon glyphicon-log-out"></span>
-                  </button>
-                </form>
-              </li>
+              <li id="logged-in">{% module AccountLink(account=current_user) %}</li>
               {% end %} {# if current_user #}
               {% block search_field %}
               {% if current_user %}

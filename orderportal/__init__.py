@@ -7,7 +7,10 @@ import os.path
 import re
 import sys
 
-__version__ = "9.1.0"
+import pycountry
+
+
+__version__ = "10.0.0"
 
 
 class Constants:
@@ -27,6 +30,7 @@ class Constants:
     REQUESTS_URL = "https://docs.python-requests.org/"
     XLSXWRITER_URL = "https://pypi.org/project/XlsxWriter/"
     MARKDOWN_URL = "https://pypi.org/project/Markdown/"
+    MARKDOWN_NOTATION_INFO_URL = "https://www.markdownguide.org/cheat-sheet/"
     PYYAML_URL = "https://pypi.org/project/PyYAML/"
 
     BOOTSTRAP_VERSION = "3.4.1"
@@ -73,9 +77,9 @@ class Constants:
     META = "meta"
     ENTITIES = frozenset([ACCOUNT, GROUP, FORM, ORDER, INFO, FILE, MESSAGE, REPORT])
 
-    # System attachments to order.
-    SYSTEM = "system"
-    SYSTEM_REPORT = "system_report"
+    # # System attachments to order.
+    # SYSTEM = "system"
+    # SYSTEM_REPORT = "system_report"
 
     # Field types.
     STRING = "string"
@@ -91,7 +95,7 @@ class Constants:
     TABLE = "table"
     ### GROUP   = 'group' Already defined above.
     ### FILE    = 'file' Already defined above.
-    TYPES = [
+    TYPES = (
         STRING,
         EMAIL,
         INT,
@@ -105,7 +109,7 @@ class Constants:
         TABLE,
         FILE,
         GROUP,
-    ]
+    )
     TYPE_HTML = {
         STRING: "text",
         INT: "number",
@@ -115,10 +119,12 @@ class Constants:
     }
     # Step for use with input type 'float'.
     FLOAT_STEP = "0.0000001"
+    # Number of new rows to show in field table edit view.
+    FIELD_TABLE_ADD_N_ROWS = 4
 
-    # Banned meta document id's; have changed format or been removed.
+    # Forbidden meta document id's; have changed format or been removed.
     # Re-using these id's would likely create backwards incompatibility issues.
-    BANNED_META_IDS = frozenset(["account_messages", "order_messages", "global_modes"])
+    FORBIDDEN_META_IDS = frozenset(["account_messages","order_messages","global_modes"])
 
     # Text types.
     DISPLAY = "display"
@@ -137,24 +143,105 @@ class Constants:
     PENDING = "pending"
     ENABLED = "enabled"
     DISABLED = "disabled"
-    ACCOUNT_STATUSES = [PENDING, ENABLED, DISABLED]
     RESET = "reset"
+    ACCOUNT_STATUSES = (PENDING, ENABLED, DISABLED, RESET)
 
     # Account roles.
     USER = "user"
     STAFF = "staff"
     ADMIN = "admin"
-    ACCOUNT_ROLES = [USER, STAFF, ADMIN]
+    ACCOUNT_ROLES = (USER, STAFF, ADMIN)
 
-    # Form status; hard-wired!
+    # Form statuses; hard-wired!
     TESTING = "testing"
-    FORM_STATUSES = [PENDING, TESTING, ENABLED, DISABLED]
+    FORM_STATUSES = (PENDING, TESTING, ENABLED, DISABLED)
 
-    # Hard-wired order statuses; must always be present.
-    # Other statuses are defined initially in admin.DEFAULT_ORDER_STATUSES,
-    # and stored in a meta document 'order_statuses' in the database.
+    # The possible order statuses are now hard-wired.
+    # The two first order statuses must always be present!
+    # All statuses are stored in a meta document 'order_statuses' in the database,
+    # with the changes made from the admin.DEFAULT_ORDER_STATUSES
     PREPARATION = "preparation"
     SUBMITTED = "submitted"
+    REVIEW = "review"
+    QUEUED = "queued"
+    WAITING = "waiting"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    PROCESSING = "processing"
+    ACTIVE = "active"
+    ANALYSIS = "analysis"
+    ONHOLD = "onhold"
+    HALTED = "halted"
+    ABORTED = "aborted"
+    TERMINATED = "terminated"
+    CANCELLED = "cancelled"
+    FINISHED = "finished"
+    COMPLETED = "completed"
+    CLOSED = "closed"
+    DELIVERED = "delivered"
+    INVOICED = "invoiced"
+    ARCHIVED = "archived"
+    UNDEFINED = "undefined"
+    ORDER_STATUSES = (
+        PREPARATION,
+        SUBMITTED,
+        REVIEW,
+        QUEUED,
+        WAITING,
+        ACCEPTED,
+        REJECTED,
+        PROCESSING,
+        ACTIVE,
+        ANALYSIS,
+        ONHOLD,
+        HALTED,
+        ABORTED,
+        TERMINATED,
+        CANCELLED,
+        FINISHED,
+        COMPLETED,
+        CLOSED,
+        DELIVERED,
+        INVOICED,
+        ARCHIVED,
+        UNDEFINED,
+    )
+
+    # Delimiters to remove when searching for orders.
+    ORDERS_SEARCH_DELIMS_LINT = (":", ",", ";", "'")
+    # Words to remove when searching for orders.
+    ORDERS_SEARCH_LINT = ("an", "to", "in", "on", "of", "and", "the", "is", "was", "not")
+
+    # Sources in account for autopopulating an order field.
+    # This must be kept in sync with code in 'order.py' 'OrderSaver.autopopulate'.
+    ORDER_AUTOPOPULATE_SOURCES = (
+        "university",
+        "department",
+        "phone",
+        "invoice_ref",
+        "address.address",
+        "address.zip",
+        "address.city",
+        "address.country",
+        "invoice_address.address",
+        "invoice_address.zip",
+        "invoice_address.city",
+        "invoice_address.country",
+    )
+
+    # Terminology: terms that can be translated to other terms.
+    TERMINOLOGY_TERMS = ("order", "orders")
+
+    # Report statuses; hard-wired!
+    # PREPARATION = "preparation" Already defined above.
+    # REVIEW = "review" Already defined above.
+    PUBLISHED = "published"
+    APPROVED = "approved"
+    # REJECTED = "rejected" Already defined above.
+    REPORT_STATUSES = (PREPARATION, REVIEW, PUBLISHED, REJECTED)
+    REPORT_REVIEW_STATUSES = (REVIEW, APPROVED, REJECTED)
+
+    ALL_STATUSES = frozenset(ACCOUNT_STATUSES + FORM_STATUSES + ORDER_STATUSES + REPORT_STATUSES + REPORT_REVIEW_STATUSES)
 
     # Content types (MIME types).
     HTML_MIMETYPE = "text/html"
@@ -198,211 +285,12 @@ class Constants:
     }
     DEFAULT_CONTENT_TYPE_ICON = "binary.png"
 
-    COUNTRIES = dict(
-        [
-            ("AF", "Afghanistan"),
-            ("AL", "Albania"),
-            ("DZ", "Algeria"),
-            ("AD", "Andorra"),
-            ("AO", "Angola"),
-            ("AG", "Antigua and Barbuda"),
-            ("AR", "Argentina"),
-            ("AM", "Armenia"),
-            ("AU", "Australia"),
-            ("AT", "Austria"),
-            ("AZ", "Azerbaijan"),
-            ("BS", "Bahamas"),
-            ("BH", "Bahrain"),
-            ("BD", "Bangladesh"),
-            ("BB", "Barbados"),
-            ("BY", "Belarus"),
-            ("BE", "Belgium"),
-            ("BZ", "Belize"),
-            ("BJ", "Benin"),
-            ("BT", "Bhutan"),
-            ("BO", "Bolivia, Plurinational State of"),
-            ("BA", "Bosnia and Herzegovina"),
-            ("BW", "Botswana"),
-            ("BR", "Brazil"),
-            ("BN", "Brunei Darussalam"),
-            ("BG", "Bulgaria"),
-            ("BF", "Burkina Faso"),
-            ("BI", "Burundi"),
-            ("KH", "Cambodia"),
-            ("CM", "Cameroon"),
-            ("CA", "Canada"),
-            ("CV", "Cape Verde"),
-            ("CF", "Central African Republic"),
-            ("TD", "Chad"),
-            ("CL", "Chile"),
-            ("CN", "China"),
-            ("CO", "Colombia"),
-            ("KM", "Comoros"),
-            ("CG", "Congo"),
-            ("CD", "Congo, the Democratic Republic of the"),
-            ("CR", "Costa Rica"),
-            ("HR", "Croatia"),
-            ("CU", "Cuba"),
-            ("CY", "Cyprus"),
-            ("CZ", "Czech Republic"),
-            ("CI", "Côte d'Ivoire"),
-            ("DK", "Denmark"),
-            ("DJ", "Djibouti"),
-            ("DM", "Dominica"),
-            ("DO", "Dominican Republic"),
-            ("EC", "Ecuador"),
-            ("EG", "Egypt"),
-            ("SV", "El Salvador"),
-            ("GQ", "Equatorial Guinea"),
-            ("ER", "Eritrea"),
-            ("EE", "Estonia"),
-            ("ET", "Ethiopia"),
-            ("FJ", "Fiji"),
-            ("FI", "Finland"),
-            ("FR", "France"),
-            ("GA", "Gabon"),
-            ("GM", "Gambia"),
-            ("GE", "Georgia"),
-            ("DE", "Germany"),
-            ("GH", "Ghana"),
-            ("GR", "Greece"),
-            ("GD", "Grenada"),
-            ("GT", "Guatemala"),
-            ("GN", "Guinea"),
-            ("GW", "Guinea-Bissau"),
-            ("GY", "Guyana"),
-            ("HT", "Haiti"),
-            ("VA", "Holy See (Vatican City State),"),
-            ("HN", "Honduras"),
-            ("HU", "Hungary"),
-            ("IS", "Iceland"),
-            ("IN", "India"),
-            ("ID", "Indonesia"),
-            ("IR", "Iran, Islamic Republic of"),
-            ("IQ", "Iraq"),
-            ("IE", "Ireland"),
-            ("IL", "Israel"),
-            ("IT", "Italy"),
-            ("JM", "Jamaica"),
-            ("JP", "Japan"),
-            ("JO", "Jordan"),
-            ("KZ", "Kazakhstan"),
-            ("KE", "Kenya"),
-            ("KI", "Kiribati"),
-            ("KP", "Korea, Democratic People's Republic of"),
-            ("KR", "Korea, Republic of"),
-            ("KW", "Kuwait"),
-            ("KG", "Kyrgyzstan"),
-            ("LA", "Lao People's Democratic Republic"),
-            ("LV", "Latvia"),
-            ("LB", "Lebanon"),
-            ("LS", "Lesotho"),
-            ("LR", "Liberia"),
-            ("LY", "Libya"),
-            ("LI", "Liechtenstein"),
-            ("LT", "Lithuania"),
-            ("LU", "Luxembourg"),
-            ("MK", "Macedonia, the Former Yugoslav Republic of"),
-            ("MG", "Madagascar"),
-            ("MW", "Malawi"),
-            ("MY", "Malaysia"),
-            ("MV", "Maldives"),
-            ("ML", "Mali"),
-            ("MT", "Malta"),
-            ("MH", "Marshall Islands"),
-            ("MR", "Mauritania"),
-            ("MU", "Mauritius"),
-            ("MX", "Mexico"),
-            ("FM", "Micronesia, Federated States of"),
-            ("MD", "Moldova, Republic of"),
-            ("MC", "Monaco"),
-            ("MN", "Mongolia"),
-            ("ME", "Montenegro"),
-            ("MA", "Morocco"),
-            ("MZ", "Mozambique"),
-            ("MM", "Myanmar"),
-            ("NA", "Namibia"),
-            ("NR", "Nauru"),
-            ("NP", "Nepal"),
-            ("NL", "Netherlands"),
-            ("NZ", "New Zealand"),
-            ("NI", "Nicaragua"),
-            ("NE", "Niger"),
-            ("NG", "Nigeria"),
-            ("NO", "Norway"),
-            ("OM", "Oman"),
-            ("PK", "Pakistan"),
-            ("PW", "Palau"),
-            ("PA", "Panama"),
-            ("PG", "Papua New Guinea"),
-            ("PY", "Paraguay"),
-            ("PE", "Peru"),
-            ("PH", "Philippines"),
-            ("PL", "Poland"),
-            ("PT", "Portugal"),
-            ("QA", "Qatar"),
-            ("RO", "Romania"),
-            ("RU", "Russian Federation"),
-            ("RW", "Rwanda"),
-            ("KN", "Saint Kitts and Nevis"),
-            ("LC", "Saint Lucia"),
-            ("VC", "Saint Vincent and the Grenadines"),
-            ("WS", "Samoa"),
-            ("SM", "San Marino"),
-            ("ST", "Sao Tome and Principe"),
-            ("SA", "Saudi Arabia"),
-            ("SN", "Senegal"),
-            ("RS", "Serbia"),
-            ("SC", "Seychelles"),
-            ("SL", "Sierra Leone"),
-            ("SG", "Singapore"),
-            ("SK", "Slovakia"),
-            ("SI", "Slovenia"),
-            ("SB", "Solomon Islands"),
-            ("SO", "Somalia"),
-            ("ZA", "South Africa"),
-            ("SS", "South Sudan"),
-            ("ES", "Spain"),
-            ("LK", "Sri Lanka"),
-            ("SD", "Sudan"),
-            ("SR", "Suriname"),
-            ("SZ", "Swaziland"),
-            ("SE", "Sweden"),
-            ("CH", "Switzerland"),
-            ("SY", "Syrian Arab Republic"),
-            ("TW", "Taiwan, Province of China"),
-            ("TJ", "Tajikistan"),
-            ("TZ", "Tanzania, United Republic of"),
-            ("TH", "Thailand"),
-            ("TL", "Timor-Leste"),
-            ("TG", "Togo"),
-            ("TO", "Tonga"),
-            ("TT", "Trinidad and Tobago"),
-            ("TN", "Tunisia"),
-            ("TR", "Turkey"),
-            ("TM", "Turkmenistan"),
-            ("TV", "Tuvalu"),
-            ("UG", "Uganda"),
-            ("UA", "Ukraine"),
-            ("AE", "United Arab Emirates"),
-            ("GB", "United Kingdom"),
-            ("US", "United States"),
-            ("UY", "Uruguay"),
-            ("UZ", "Uzbekistan"),
-            ("VU", "Vanuatu"),
-            ("VE", "Venezuela, Bolivarian Republic of"),
-            ("VN", "Viet Nam"),
-            ("YE", "Yemen"),
-            ("ZM", "Zambia"),
-            ("ZW", "Zimbabwe"),
-        ]
-    )
+    COUNTRIES = dict([(c.alpha_2, c.name) for c in pycountry.countries])
 
 
 constants = Constants()
 
 
-# Default settings.
 DEFAULT_SETTINGS = dict(
     TORNADO_DEBUG=False,
     LOGGING_DEBUG=False,
@@ -427,35 +315,13 @@ DEFAULT_SETTINGS = dict(
     SITE_HOST_URL=None,
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
-    DISPLAY_MENU_LIGHT=False,
-    DISPLAY_MENU_ITEM_URL=None,
-    DISPLAY_MENU_ITEM_TEXT=None,
     ORDER_MESSAGES_FILE="order_messages.yaml",
     UNIVERSITIES_FILE="swedish_universities.yaml",
     SUBJECT_TERMS_FILE="subject_terms.yaml",
-    TERMINOLOGY=dict(),  # Terms translation lookup.
     LOGIN_MAX_AGE_DAYS=14,  # Max age of login session in a browser.
     LOGIN_MAX_FAILURES=6,  # After this number of fails, the account is disabled.
-    ORDER_AUTOPOPULATE=None,  # Dictionary key=order field, value=account field.
-    ORDER_CREATE_USER=True,
     ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",
     ORDER_IDENTIFIER_FIRST=1,
-    ORDER_TAGS=True,
-    ORDER_USER_TAGS=True,
-    ORDER_LINKS=True,
-    ORDER_REPORT=True,
-    ORDERS_SEARCH_DELIMS_LINT=[":", ",", ";", "'"],
-    ORDERS_SEARCH_LINT=["an", "to", "in", "on", "of", "and", "the", "is", "was", "not"],
-    ACCOUNT_REGISTRATION_OPEN=True,
-    ACCOUNT_PI_INFO=True,
-    ACCOUNT_ORCID_INFO=True,
-    ACCOUNT_POSTAL_INFO=True,
-    ACCOUNT_INVOICE_INFO=True,
-    ACCOUNT_INVOICE_REF_REQUIRED=False,
-    ACCOUNT_FUNDER_INFO_GENDER=True,
-    ACCOUNT_FUNDER_INFO_GROUP_SIZE=True,
-    ACCOUNT_FUNDER_INFO_SUBJECT=True,
-    ACCOUNT_DEFAULT_COUNTRY_CODE="SE",
     MAIL_SERVER=None,  # If not set, then no emails can be sent.
     MAIL_DEFAULT_SENDER=None,  # If not set, MAIL_USERNAME will be used.
     MAIL_PORT=25,
@@ -465,8 +331,10 @@ DEFAULT_SETTINGS = dict(
     MAIL_USERNAME=None,
     MAIL_PASSWORD=None,
     MAIL_REPLY_TO=None,
+    DISPLAY_MENU_LIGHT=False,
+    DISPLAY_MENU_ITEM_URL=None,
+    DISPLAY_MENU_ITEM_TEXT=None,
     DISPLAY_DEFAULT_PAGE_SIZE=25,  # Number of paged items in a table.
-    DISPLAY_MAX_RECENT_ORDERS=10,  # Max number in home page for admin and staff.
     DISPLAY_MAX_PENDING_ACCOUNTS=10,  # Max number in home page for admin and staff.
     DISPLAY_DEFAULT_MAX_LOG=20,  # Max number of log items displayed.
     DISPLAY_NEWS=True,

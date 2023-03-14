@@ -104,8 +104,10 @@
   </th>
   <td>
     {% set value = order['fields'].get(field['identifier']) %}
+
     {% if field['type'] == constants.TEXT %}
       {% module Markdown(value or '-') %}
+
     {% elif field['type'] == constants.BOOLEAN %}
       {% if value == True %}
         {{ field.get('selection') == 'yes_no' and 'Yes' or 'True' }}
@@ -114,16 +116,17 @@
       {% else %}
         -
       {% end %}
+
     {% elif field['type'] == constants.MULTISELECT %}
       {% if value %}
       <p class="pre">{{ '\n'.join(value) }}</p>
       {% else %}
       -
       {% end %}
+
     {% elif field['type'] == constants.TABLE %}
-      <table class="table table-bordered table-condensed">
-        {% module TableRows(field, value) %}
-      </table>
+      {% module TableField(field, value) %}
+
     {% elif field['type'] == constants.FILE %}
       {% if value is None %}
       -

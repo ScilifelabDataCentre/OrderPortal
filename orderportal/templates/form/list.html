@@ -36,14 +36,10 @@
   <tbody>
     {% for form in forms %}
     <tr>
-      <td>
-        <a href="{{ reverse_url('form', form['_id']) }}">
-          {{ form['title'] }}
-        </a>
-      </td>
+      <td>{% module FormLink(form) %}</td>
       <td>{{ form.get('version') or '-' }}</td>
       <td>{% module Markdown(form.get('description')) %}</td>
-      <td>{% module Icon(form['status'], label=True) %}</td>
+      <td>{% module Status(form['status']) %}</td>
       <td>{{ form.get('ordinal') or 0 }}</td>
       <td>
         <a class="badge"
@@ -51,12 +47,7 @@
           {{ order_counts[form['_id']] }}
         </a>
       </td>
-      <td>
-        <a href="{{ reverse_url('account', form['owner']) }}">
-          {% module Icon('account') %}
-          {{ account_names.get(form['owner'], form['owner']) }}
-        </a>
-      </td>
+      <td class="nobr">{% module AccountLink(email=form['owner'], name=True) %}</td>
       <td class="localtime">{{ form['modified'] }}</td>
     </tr>
     {% end %}

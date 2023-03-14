@@ -1,4 +1,4 @@
-{# Admin orders list edit page. #}
+{# Display and edit orders list configuration. #}
 
 {% extends "../base.html" %}
 
@@ -10,13 +10,14 @@
 {% end %} {# block action_content #}
 
 {% block main_content %}
-<form action="{{ reverse_url('admin_orders_list') }}" method="POST" role="form">
+<form action="{{ reverse_url('admin_orders_list') }}" method="POST" role="form"
+      class="form-horizontal">
   {% module xsrf_form_html() %}
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="owner_university">
-        {{ terminology('Order') }} owner university</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="owner_university">
+      {{ terminology('Order') }} owner university</label>
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
           <input type="checkbox" id="owner_university" name="owner_university"
@@ -29,10 +30,10 @@
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="owner_department">
-        {{ terminology('Order') }} owner department</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="owner_department">
+      {{ terminology('Order') }} owner department</label>
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
           <input type="checkbox" id="owner_department" name="owner_department"
@@ -45,10 +46,10 @@
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="owner_gender">
+  <div class="form-group">
+    <label class="control-label col-md-2" for="owner_gender">
         {{ terminology('Order') }} owner gender</label>
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
           <input type="checkbox" id="owner_gender" name="owner_gender" value="yes"
@@ -60,10 +61,10 @@
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="tags">
-        {{ terminology('Orders') }} list tags</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="tags">
+      {{ terminology('Orders') }} list tags</label>
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
           <input type="checkbox" id="tags" name="tags" value="yes"
@@ -75,45 +76,46 @@
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="statuses">
-        {{ terminology('Orders') }} list statuses</label>
-      {% for target in settings['ORDER_STATUSES_LOOKUP'] %}
+  <div class="form-group">
+    <label class="control-label col-md-2" for="statuses">
+      {{ terminology('Orders') }} list statuses</label>
+    <div class="col-md-10">
+      {% for status in settings['ORDER_STATUSES_LOOKUP'] %}
       <div class="checkbox">
         <label>
-          <input type="checkbox" name="statuses" value="{{ target }}"
-                 {{ target in settings['ORDERS_LIST_STATUSES'] and 'checked' or '' }}>
-          {{ target }}
+          <input type="checkbox" name="statuses" value="{{ status }}"
+                 {{ status in settings['ORDERS_LIST_STATUSES'] and 'checked' or '' }}>
+          {% module Status(status) %}
         </label>
       </div>
       {% end %}
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
+  <div class="form-group">
+    <label class="control-label col-md-2" for="fields">
+      {{ terminology('Orders') }} list fields</label>
+    <div class="col-md-10">
       <div class="row">
-        <div class="col-md-4">
-          <label class="control-label" for="fields">
-            {{ terminology('Orders') }} list fields</label>
+        <div class="col-md-5">
           <textarea id="fields" name="fields" class="form-control" rows="4"
                     >{{ '\n'.join(settings['ORDERS_LIST_FIELDS']) }}</textarea>
         </div>
       </div>
       <span class="help-block">
-        Display a column for each {{ terminology('order') }} field given by
-        its identifier.
-        One field identifier per line.
-        The field does not have to exist in every {{ terminology('order') }}.
+        Display a column for each {{ terminology('order') }} field
+        given by its identifier. The field does not have to exist in
+        every {{ terminology('order') }}.
+        <br>
+        Give one field identifier per line.
       </span>
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="orders_filter_field_delete">
-        Delete {{ terminology('orders') }} filter field(s)</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="orders_filter_field_delete">
+      Delete {{ terminology('orders') }} filter field(s)</label>
+    <div class="col-md-10">
       {% for f in settings['ORDERS_FILTER_FIELDS'] %}
       <div class="checkbox">
         <label>
@@ -123,59 +125,69 @@
         </label>
       </div>
       {% end %}
+      <span class="help-block">
+        Check the current orders filters to delete.
+      </span>
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
+  <div class="form-group">
+    <label class="control-label col-md-2" for="orders_filter_field">
+      Add {{ terminology('orders') }} filter field</label>
+    <div class="col-md-10">
       <div class="row">
         <div class="col-md-8">
-          <label class="control-label" for="orders_filter_field">
-            Add {{ terminology('orders') }} filter field</label>
           <textarea id="orders_filter_field" name="orders_filter_field"
                     class="form-control" rows="6"></textarea>
         </div>
       </div>
       <span class="help-block">
-        Specification for an order field to use as filter in the orders
-        list. YAML format must be used to specify a dictionary,
-        where <i>identifier</i> (a string) and <i>values</i> (a list of
-        strings" are required. <i>label</i> is optional. An example:
-        <pre>
+        <p>
+          Add a new order filter for the orders list by giving a
+          specification for an order field to use. YAML format must be
+          used to specify a dictionary, where 'identifier' (a string)
+          and 'values' (a list of strings" are required. 'label' is
+          optional.
+        </p>
+        <p>
+          An example:
+          <pre>
 identifier: assigned_node
 label: Assigned node
 values:
   - Stockholm
-  - "Uppsala SNP&SEQ"
+  - "Uppsala SNP&amp;SEQ"
   - Uppsala UGC
   - Not assigned
 </pre>
+        </p>
       </span>
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
+  <div class="form-group">
+    <label class="control-label col-md-2"for="orders_most_recent">
+      Max most recent</label>
+    <div class="col-md-10">
       <div class="row">
         <div class="col-md-4">
-          <label for="orders_most_recent">Max most recent</label>
           <input type="number" id="orders_most_recent" name="orders_most_recent"
                  class="form-control" min="10"
                  value="{{ settings['DISPLAY_ORDERS_MOST_RECENT'] }}">
         </div>
       </div>
+      <span class="help-block">
+        The maximum number of most recently modified
+        {{ terminology('orders') }} fetched by default for the
+        {{ terminology('orders') }} list.
+      </span>
     </div>
-    <span class="help-block">
-      The maximum number of most recent {{ terminology('orders') }} fetched by
-      default for the {{ terminology('orders') }} list.
-    </span>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="display">
-        Default column to sort {{ terminology('orders') }} list by
-      </label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="display">
+      Default column to sort {{ terminology('orders') }} list by</label>
+    <div class="col-md-10">
       <div class="radio">
         <label>
           <input type="radio" name="default_order_column" value="identifier"
@@ -193,10 +205,10 @@ values:
     </div>
   </div>
 
-  <div class="row form-group">
-    <div class="col-md-12">
-      <label class="control-label" for="display">
-        Default {{ terminology('orders') }} list sort direction</label>
+  <div class="form-group">
+    <label class="control-label col-md-2" for="display">
+      Default {{ terminology('orders') }} list sort direction</label>
+    <div class="col-md-10">
       <div class="radio">
         <label>
           <input type="radio" name="default_order_sort" value="desc"
@@ -215,8 +227,7 @@ values:
   </div>
 
   <div class="row form-group">
-    <div class="col-md-3">
-      <label class="control-label"></label>
+    <div class="col-md-offset-2 col-md-3">
       <button type="submit" class="btn btn-success btn-block">
         <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
     </div>

@@ -21,6 +21,7 @@ import orderportal.home
 import orderportal.info
 import orderportal.news
 import orderportal.order
+import orderportal.report
 import orderportal.search
 import orderportal.uimodules
 
@@ -29,8 +30,8 @@ def main():
     orderportal.config.load_settings_from_file()
     db = orderportal.database.get_db()
     orderportal.database.update_design_documents(db)
-    orderportal.admin.update_meta_documents(db)
-    orderportal.admin.update_text_documents(db)
+    orderportal.admin.migrate_meta_documents(db)
+    orderportal.admin.migrate_text_documents(db)
     orderportal.admin.load_texts(db)
     orderportal.config.load_settings_from_db(db)
 
@@ -94,25 +95,27 @@ def main():
             orderportal.order.OrderFile,
             name="order_file",
         ),
-        url(
-            r"/order/([0-9a-f]{32})/report",
-            orderportal.order.OrderReport,
-            name="order_report",
-        ),
-        url(
-            r"/api/v1/order/([0-9a-f]{32})/report",
-            orderportal.order.OrderReportApiV1,
-            name="order_report_api",
-        ),
-        url(
-            r"/order/([0-9a-f]{32})/report/edit",
-            orderportal.order.OrderReportEdit,
-            name="order_report_edit",
-        ),
         url(r"/orders", orderportal.order.Orders, name="orders"),
         url(r"/api/v1/orders", orderportal.order.OrdersApiV1, name="orders_api"),
         url(r"/orders.csv", orderportal.order.OrdersCsv, name="orders_csv"),
         url(r"/orders.xlsx", orderportal.order.OrdersXlsx, name="orders_xlsx"),
+        url(r"/report", orderportal.report.ReportAdd, name="report_add"),
+        url(r"/report/([0-9a-f]{32})", orderportal.report.Report, name="report"),
+        url(
+            r"/report/([0-9a-f]{32})/edit",
+            orderportal.report.ReportEdit,
+            name="report_edit"
+        ),
+        url(
+            r"/report/([0-9a-f]{32})/review",
+            orderportal.report.ReportReview,
+            name="report_review"
+        ),
+        url(
+            r"/report/([0-9a-f]{32})/logs",
+            orderportal.report.ReportLogs,
+            name="report_logs"
+        ),
         url(r"/accounts", orderportal.account.Accounts, name="accounts"),
         url(
             r"/api/v1/accounts", orderportal.account.AccountsApiV1, name="accounts_api"
@@ -313,16 +316,13 @@ def main():
             orderportal.admin.OrderTransitionsEdit,
             name="admin_order_transitions_edit",
         ),
+        url(r"/admin/order", orderportal.admin.Order, name="admin_order"),
         url(
             r"/admin/order_messages",
             orderportal.admin.OrderMessages,
             name="admin_order_messages",
         ),
-        url(
-            r"/admin/account",
-            orderportal.admin.Account,
-            name="admin_account",
-        ),
+        url(r"/admin/account", orderportal.admin.Account, name="admin_account"),
         url(
             r"/admin/account_messages",
             orderportal.admin.AccountMessages,

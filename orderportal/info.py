@@ -48,7 +48,7 @@ class InfoCreate(RequestHandler):
         else:
             self.see_other("info_create", error="named info already exists")
             return
-        with InfoSaver(rqh=self) as saver:
+        with InfoSaver(handler=self) as saver:
             saver["name"] = name
             saver["title"] = self.get_argument("title", None)
             try:
@@ -60,7 +60,7 @@ class InfoCreate(RequestHandler):
 
 
 class Info(RequestHandler):
-    "Information page."
+    "Display an information page."
 
     def get(self, name):
         try:
@@ -88,7 +88,7 @@ class Info(RequestHandler):
 
 
 class InfoEdit(RequestHandler):
-    "Edit the information page."
+    "Edit an information page."
 
     @tornado.web.authenticated
     def get(self, name):
@@ -100,7 +100,7 @@ class InfoEdit(RequestHandler):
     def post(self, name):
         self.check_admin()
         info = self.get_entity_view("info", "name", name)
-        with InfoSaver(doc=info, rqh=self) as saver:
+        with InfoSaver(doc=info, handler=self) as saver:
             saver["title"] = self.get_argument("title", None)
             try:
                 saver["menu"] = int(self.get_argument("menu", None))
@@ -111,14 +111,14 @@ class InfoEdit(RequestHandler):
 
 
 class InfoLogs(RequestHandler):
-    "Info log entries page."
+    "Display information log entries."
 
     @tornado.web.authenticated
-    def get(self, name):
+    def get(self, iuid):
         self.check_admin()
-        info = self.get_entity_view("info", "name", name)
+        info = self.get_entity(iuid, doctype=constants.INFO)
         self.render(
             "logs.html",
-            title=f"Logs info '{name}'",
+            title=f"""Logs info '{info["name"]}'""",
             logs=self.get_logs(info["_id"]),
         )

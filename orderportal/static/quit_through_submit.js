@@ -7,7 +7,7 @@ $(window).on("beforeunload", function() {
         
 $(function() {
     $(".allow_leaving_without_question").on("submit", function(e) {
-        //remove the ev
+        // Remove the event.
         $(window).off("beforeunload");
         return true;
     });

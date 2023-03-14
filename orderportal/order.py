@@ -11,7 +11,8 @@ import zipfile
 import couchdb2
 import tornado.web
 
-from orderportal import constants, settings
+from orderportal import constants
+from orderportal import settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.fields import Fields
@@ -36,7 +37,7 @@ class OrderSaver(saver.Saver):
         self.files = []
         self.filenames = set(self.doc.get("_attachments", []))
         try:
-            self.fields = Fields(self.rqh.get_form(self.doc["form"]))
+            self.fields = Fields(self.handler.get_form(self.doc["form"]))
         except KeyError:
             pass
 
@@ -46,64 +47,61 @@ class OrderSaver(saver.Saver):
         self["form"] = form["_id"]
         self["title"] = title
         self["fields"] = dict([(f["identifier"], None) for f in self.fields])
-        self.set_status(settings["ORDER_STATUS_INITIAL"]["identifier"])
+        # Since version 9.1.0, the status PREPARATION is hard-wired as the initial one.
+        self.set_status(constants.PREPARATION)
         # Set the order identifier if its format defined.
         # Allow also for disabled, since admin may clone such orders.
         if form["status"] in (constants.ENABLED, constants.DISABLED):
-            counter = self.rqh.get_next_counter(constants.ORDER)
+            counter = self.handler.get_next_counter(constants.ORDER)
             self["identifier"] = settings["ORDER_IDENTIFIER_FORMAT"].format(counter)
 
     def autopopulate(self):
-        "Autopopulate fields if defined."
-        # First try to set the value of a field from the corresponding
-        # value defined for the account's university.
-        autopop = settings.get("ORDER_AUTOPOPULATE")
-        if not autopop:
-            return
-        try:
-            uni_fields = settings["UNIVERSITIES"][self.rqh.current_user["university"]][
-                "fields"
-            ]
-        except KeyError:
-            uni_fields = {}
-        for target in autopop:
-            if target not in self.fields:
-                continue
-            value = uni_fields.get(target)
-            # Terrible kludge! If it looks like a country field,
-            # then attempt to translate from country code to name.
-            if "country" in target:
-                try:
-                    value = settings["COUNTRIES_LOOKUP"][value]
-                except KeyError:
-                    pass
-            self["fields"][target] = value
-        # Next try to set the value of a field from the corresponding
-        # value defined for the account. For use with e.g. invoice address.
-        # Do this only if not done already from university data.
-        for target, source in list(autopop.items()):
-            if target not in self.fields:
-                continue
-            value = self["fields"].get(target)
-            if isinstance(value, str):
-                if value:
-                    continue
-            elif value is not None:  # Value 0 (zero) must be possible to set
-                continue
-            try:
-                key1, key2 = source.split(".")
-            except ValueError:
-                value = self.rqh.current_user.get(source)
-            else:
-                value = self.rqh.current_user.get(key1, {}).get(key2)
-            # Terrible kludge! If it looks like a country field,
-            # then attempt to translate from country code to name.
-            if "country" in target:
-                try:
-                    value = settings["COUNTRIES_LOOKUP"][value]
-                except KeyError:
-                    pass
-            self["fields"][target] = value
+        """Autopopulate fields if defined.
+        Go through the list of sources one by one. There are too many special cases.
+        NOTE: Must be kept in sync with constants.ORDER_AUTOPOPULATE_SOURCES!
+        """
+        account = self.handler.current_user
+        autopopulate = settings["ORDER_AUTOPOPULATE"]
+
+        target = autopopulate.get("university")
+        if target and target in self["fields"]:
+            # Translate university abbreviation to full name.
+            self["fields"][target] = settings["UNIVERSITIES"].get(account["university"], {}).get("name")
+        target = autopopulate.get("department")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["department"]
+        target = autopopulate.get("phone")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["phone"]
+        target = autopopulate.get("invoice_ref")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["invoice_ref"]
+        target = autopopulate.get("address.address")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["address"]["address"]
+        target = autopopulate.get("address.zip")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["address"]["zip"]
+        target = autopopulate.get("address.city")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["address"]["city"]
+        target = autopopulate.get("address.country")
+        if target and target in self["fields"]:
+            # Translate country abbreviation to full name.
+            self["fields"][target] = constants.COUNTRIES.get(account["address"]["country"])
+        target = autopopulate.get("invoice_address.address")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["invoice_address"]["address"]
+        target = autopopulate.get("invoice_address.zip")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["invoice_address"]["zip"]
+        target = autopopulate.get("invoice_address.city")
+        if target and target in self["fields"]:
+            self["fields"][target] = account["invoice_address"]["city"]
+        target = autopopulate.get("invoice_address.country")
+        if target and target in self["fields"]:
+            # Translate country abbreviation to full name.
+            self["fields"][target] = constants.COUNTRIES.get(account["invoice_address"]["country"])
 
     def add_file(self, infile):
         "Add the given file to the files. Return the unique filename."
@@ -129,7 +127,7 @@ class OrderSaver(saver.Saver):
         if new not in settings["ORDER_STATUSES_LOOKUP"]:
             raise ValueError(f"invalid status '{new}'")
         if "status" in self.doc:
-            targets = self.rqh.get_targets(self.doc)
+            targets = self.handler.get_targets(self.doc)
             if new not in [t["identifier"] for t in targets]:
                 raise ValueError(
                     "You may not change status of {0} to {1}.".format(
@@ -150,7 +148,7 @@ class OrderSaver(saver.Saver):
             if not isinstance(s, str):
                 raise ValueError("tags list item is not a string")
         # Allow staff to add prefixed tags.
-        if self.rqh.am_staff():
+        if self.handler.am_staff():
             for pos, tag in enumerate(tags):
                 parts = tag.split(":", 1)
                 for part in parts:
@@ -196,7 +194,7 @@ class OrderSaver(saver.Saver):
 
     def update_fields(self, data=None):
         "Update all fields from JSON data if given, else HTML form input."
-        assert self.rqh is not None
+        assert self.handler is not None
         self.removed_files = []  # Names of old files to remove.
         # Loop over fields defined in the form document and get values.
         # Do not change values for a field if that argument is missing,
@@ -204,7 +202,7 @@ class OrderSaver(saver.Saver):
         # and except for multiselect: there a missing value means empty list.
         for field in self.fields:
             # Field not displayed or not writeable must not be changed.
-            if not self.rqh.am_staff() and (
+            if not self.handler.am_staff() and (
                 field["restrict_read"] or field["restrict_write"]
             ):
                 continue
@@ -217,12 +215,12 @@ class OrderSaver(saver.Saver):
                 # Files are uploaded by the normal form multi-part
                 # encoding approach, not by JSON data.
                 try:
-                    infile = self.rqh.request.files[identifier][0]
+                    infile = self.handler.request.files[identifier][0]
                 except (KeyError, IndexError):
                     # No new file given; check if old should be removed.
                     if (
                         utils.to_bool(
-                            self.rqh.get_argument(f"{identifier}__remove__", False)
+                            self.handler.get_argument(f"{identifier}__remove__", False)
                         )
                         and value
                     ):
@@ -242,33 +240,34 @@ class OrderSaver(saver.Saver):
                 else:
                     # Missing argument implies empty list.
                     # This is a special case for HTML form input.
-                    value = self.rqh.get_arguments(identifier)
+                    value = self.handler.get_arguments(identifier)
 
             elif field["type"] == constants.TABLE:
                 coldefs = [utils.parse_field_table_column(c) for c in field["table"]]
-                if data:  # JSON data: contains complete table.
+                if data:  # JSON data: contains the complete table.
                     try:
                         table = data[identifier]
                     except KeyError:
                         continue
                 else:  # HTML form data; collect table from fields.
+                    tableid = f"_table_{identifier}"
                     try:
-                        name = f"_table_{identifier}_count"
-                        n_rows = int(self.rqh.get_argument(name, 0))
+                        name = f"{tableid}_count"
+                        n_rows = int(self.handler.get_argument(name, 0))
                     except (ValueError, TypeError):
                         n_rows = 0
                     table = []
                     for i in range(n_rows):
                         row = []
                         for j, coldef in enumerate(coldefs):
-                            name = f"_table_{identifier}_{i}_{j}"
-                            row.append(self.rqh.get_argument(name, None))
+                            name = f"{tableid}_{i}_{j}"
+                            row.append(self.handler.get_argument(name, None))
                         table.append(row)
                 # Check validity of table content.
                 value = []
                 try:
                     for row in table:
-                        # Check correct number of items in the row.
+                        # Skip if incorrect number of items in the row.
                         if len(row) != len(coldefs):
                             continue
                         for j, coldef in enumerate(coldefs):
@@ -283,7 +282,12 @@ class OrderSaver(saver.Saver):
                                     row[j] = int(row[j])
                                 except (ValueError, TypeError):
                                     row[j] = None
-                            elif not row[j]:
+                            elif coltype == constants.FLOAT:
+                                try:
+                                    row[j] = float(row[j])
+                                except (ValueError, TypeError):
+                                    row[j] = None
+                            elif not row[j] or (row[j] == "[no value]"):
                                 row[j] = None
                         # Use row only if first value is not None.
                         if row[0] is not None:
@@ -301,7 +305,7 @@ class OrderSaver(saver.Saver):
                         continue
                 else:  # HTML form input.
                     try:
-                        value = self.rqh.get_argument(identifier)
+                        value = self.handler.get_argument(identifier)
                         if value == "":
                             value = None
                     except tornado.web.MissingArgumentError:
@@ -452,6 +456,7 @@ class OrderSaver(saver.Saver):
             self["history"][status] = date
 
     def post_process(self):
+        "Wrap up attachments delete/store, and send message if so set up."
         self.modify_attachments()
         if self.changed_status:
             self.send_message()
@@ -476,94 +481,64 @@ class OrderSaver(saver.Saver):
                     content_type=file["content_type"],
                 )
 
-    def get_order_url(self, order):
-        """Member rqh is not available when used from a stand-alone script,
-        so self.rqh.order_reverse_url cannot be used.
-        The URL has to be synthesized explicitly here."""
-        try:
-            identifier = order["identifier"]
-        except KeyError:
-            identifier = order["_id"]
-        path = "/order/{0}".format(identifier)
-        if settings["BASE_URL_PATH_PREFIX"]:
-            path = settings["BASE_URL_PATH_PREFIX"] + path
-        return settings["BASE_URL"].rstrip("/") + path
-
-    def get_account(self, email):
-        "Get the account document for the given email."
-        result = self.db.view("account", "email", key=email, include_docs=True)
-        rows = list(result)
-        if len(rows) == 1:
-            return rows[0].doc
-        else:
-            return None
-
     def send_message(self):
-        "Send a message after status change."
+        "Send a message after an order status change."
         try:
-            template = settings["ORDER_MESSAGES"][self.doc["status"]]
+            text_template = settings["ORDER_MESSAGES"][self.doc["status"]]
         except (couchdb2.NotFoundError, KeyError):
             return
         recipients = set()
-        owner = self.get_account(self.doc["owner"])
-        # Owner account may have been deleted.
-        if owner:
-            email = owner["email"].strip().lower()
-            if "owner" in template["recipients"]:
-                recipients = set([owner["email"]])
-            if "group" in template["recipients"]:
+        try:
+            owner = self.handler.get_account(self.doc["owner"])
+        except ValueError:  # Owner account may have been deleted.
+            pass
+        else:
+            email = owner["email"]
+            if "owner" in text_template["recipients"]:
+                recipients.add(owner["email"])
+            if constants.GROUP in text_template["recipients"]:
+                colleagues = dict()
                 for row in self.db.view(
-                    "group", "member", include_docs=True, key=email
+                    "group", "member", include_docs=True, key=owner["email"].strip().lower()
                 ):
                     for member in row.doc["members"]:
-                        account = self.get_account(member)
-                        if account and account["status"] == constants.ENABLED:
-                            recipients.add(account["email"])
-        if constants.ADMIN in template["recipients"]:
-            # Can't use 'get_admins', not available here.
-            result = self.db.view(
-                "account", "role", key=constants.ADMIN, include_docs=True
-            )
-            admins = [r.doc for r in result]
-            for admin in admins:
+                        try:
+                            account = self.handler.get_account(member)
+                            if account["status"] == constants.ENABLED:
+                                colleagues[account["email"]] = account
+                        except ValueError:
+                            pass
+                for colleague in colleagues.values():
+                    recipients.add(colleague["email"])
+        if constants.ADMIN in text_template["recipients"]:
+            for admin in self.handler.get_admins():
                 if admin["status"] == constants.ENABLED:
                     recipients.add(admin["email"])
         try:
-            with MessageSaver(rqh=self.rqh) as saver:
+            with MessageSaver(handler=self.handler) as saver:
                 saver.create(
-                    template,
+                    text_template,
                     owner=self.doc["owner"],
                     title=self.doc["title"],
                     identifier=self.doc.get("identifier") or self.doc["_id"],
-                    url=self.get_order_url(self.doc),
+                    url=utils.get_order_url(self.doc),
                     tags=", ".join(self.doc.get("tags", [])),
                 )
                 saver.send(list(recipients))
-        except KeyError as error:
-            self.rqh.set_message_flash(error)
         except ValueError as error:
-            self.rqh.set_error_flash(error)
+            self.handler.set_error_flash(error)
 
 
 class OrderMixin:
-    "Mixin for various useful methods."
-
-    def get_order(self, iuid):
-        "Get the order for the identifier or IUID."
-        try:  # First try order identifier.
-            order = self.get_entity_view("order", "identifier", iuid)
-        except tornado.web.HTTPError:
-            # Next try order doc IUID.
-            order = self.get_entity(iuid, doctype=constants.ORDER)
-        return order
+    "Mixin for access check methods and some other methods."
 
     def allow_read(self, order):
         "Is the order readable by the current user?"
-        if self.is_owner(order):
+        if self.am_owner(order):
             return True
         if self.am_staff():
             return True
-        if self.is_colleague(order["owner"]):
+        if self.am_colleague(order["owner"]):
             return True
         return False
 
@@ -581,7 +556,7 @@ class OrderMixin:
         edit = status.get("edit", [])
         if self.am_staff() and constants.STAFF in edit:
             return True
-        if self.is_owner(order) and constants.USER in edit:
+        if self.am_owner(order) and constants.USER in edit:
             return True
         return False
 
@@ -599,7 +574,7 @@ class OrderMixin:
         attach = status.get("attach", [])
         if self.am_staff() and constants.STAFF in attach:
             return True
-        if self.is_owner(order) and constants.USER in attach:
+        if self.am_owner(order) and constants.USER in attach:
             return True
         return False
 
@@ -624,14 +599,6 @@ class OrderMixin:
             raise ValueError(
                 f"{term} creation is not allowed for account with role 'user'."
             )
-
-    def get_form(self, iuid, check=False):
-        "Get the form given by its IUID. Optionally check that it is enabled."
-        form = self.get_entity(iuid, doctype=constants.FORM)
-        if check:
-            if form["status"] not in (constants.ENABLED, constants.TESTING):
-                raise ValueError("form is not available for creation")
-        return form
 
     def get_fields(self, order, depth=0, fields=None):
         """Return a list of dictionaries, each of which
@@ -679,7 +646,7 @@ class OrderMixin:
             if (
                 (self.am_admin() and constants.ADMIN in permission)
                 or (self.am_staff() and constants.STAFF in permission)
-                or (self.is_owner(order) and constants.USER in permission)
+                or (self.am_owner(order) and constants.USER in permission)
             ):
                 try:  # Defensive: only allow enabled statuses as targets.
                     result.append(settings["ORDER_STATUSES_LOOKUP"][key])
@@ -705,13 +672,24 @@ class OrderMixin:
             )
         return form["status"] in (constants.ENABLED, constants.TESTING)
 
+    def get_reports(self, order):
+        "Get the report entities. All for staff, only published for ordinary user."
+        if self.am_staff():
+            result = [r.doc for r in
+                      self.db.view("report", "order", key=order["_id"], include_docs=True)]
+        else:
+            result = [r.doc for r in
+                      self.db.view("report", "order", key=order["_id"], include_docs=True)
+                      if r.doc["status"] == constants.PUBLISHED]
+        result.sort(key=lambda r: r["modified"], reverse=True)
+        return result
+
 
 class OrderApiV1Mixin(ApiV1Mixin):
     "Mixin for order JSON data structure."
 
-    def get_order_json(self, order, account_names=None, forms_lookup=None, full=False):
+    def get_order_json(self, order, full=False):
         """Return a dictionary for JSON output for the order.
-        Account names or forms lookup are computed if not given.
         If 'full' then add all fields, else only for orders list.
         NOTE: Only the values of the fields are included, not
         the full definition of the fields. To obtain that,
@@ -725,7 +703,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
         data["title"] = order.get("title") or "[no title]"
         data["iuid"] = order["_id"]
         if full:
-            form = self.get_form(order["form"])
+            form = self.lookup_form(order["form"])
             data["form"] = dict(
                 [
                     ("title", form["title"]),
@@ -741,9 +719,7 @@ class OrderApiV1Mixin(ApiV1Mixin):
                 ]
             )
         else:
-            if forms_lookup is None:
-                forms_lookup = self.get_forms_lookup()
-            form = forms_lookup[order["form"]]
+            form = self.lookup_form(order["form"])
             data["form"] = dict(
                 [
                     ("iuid", order["form"]),
@@ -752,26 +728,30 @@ class OrderApiV1Mixin(ApiV1Mixin):
                     ("links", dict(api=dict(href=URL("form", order["form"])))),
                 ]
             )
-        if account_names is None:
-            account_names = self.get_accounts_name([order["owner"]])
         data["owner"] = dict(
             email=order["owner"],
-            name=account_names.get(order["owner"]),
+            name=self.lookup_account_name(order["owner"]),
             links=dict(
                 api=dict(href=URL("account_api", order["owner"])),
                 display=dict(href=URL("account", order["owner"])),
             ),
         )
         data["status"] = order["status"]
-        data["report"] = dict()
-        if order.get("report"):
-            data["report"]["content_type"] = order["_attachments"][
-                constants.SYSTEM_REPORT
-            ]["content_type"]
-            data["report"]["timestamp"] = order["report"]["timestamp"]
-            data["report"]["link"] = dict(href=URL("order_report_api", order["_id"]))
+        data["reports"] = []
+        for report in self.get_reports(order):
+            reportdata = dict(iuid=report["_id"], 
+                              name=report["name"],
+                              modified=report["modified"],
+                              links=dict(
+                                  api=dict(), # XXX when API call implemented.
+                                  display=dict(
+                                      href=self.absolute_reverse_url("report", report["_id"]))))
+            if self.am_staff():
+                reportdata["status"] = report["status"]
+            data["reports"].append(reportdata)
         data["history"] = dict()
         for s in settings["ORDER_STATUSES"]:
+            if not s.get("enabled"): continue
             key = s["identifier"]
             data["history"][key] = order["history"].get(key)
         data["tags"] = order.get("tags", [])
@@ -797,8 +777,8 @@ class OrderApiV1Mixin(ApiV1Mixin):
             data["invalid"] = order.get("invalid", {})
             data["files"] = dict()
             for filename in sorted(order.get("_attachments", [])):
-                if filename.startswith(constants.SYSTEM):
-                    continue
+                # if filename.startswith(constants.SYSTEM):
+                #     continue
                 stub = order["_attachments"][filename]
                 data["files"][filename] = dict(
                     size=stub["length"],
@@ -828,8 +808,10 @@ class OrderCreate(OrderMixin, RequestHandler):
     def post(self):
         try:
             self.check_creation_enabled()
-            form = self.get_form(self.get_argument("form"), check=True)
-            with OrderSaver(rqh=self) as saver:
+            form = self.get_form(self.get_argument("form"))
+            if form["status"] not in (constants.ENABLED, constants.TESTING):
+                raise ValueError("form is not available for creation")
+            with OrderSaver(handler=self) as saver:
                 saver.create(form)
                 saver.autopopulate()
                 saver.check_fields_validity()
@@ -854,8 +836,10 @@ class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             iuid = data.get("form")
             if not iuid:
                 raise ValueError("no form IUID given")
-            form = self.get_form(iuid, check=True)
-            with OrderSaver(rqh=self) as saver:
+            form = self.get_form(iuid)
+            if form["status"] not in (constants.ENABLED, constants.TESTING):
+                raise ValueError("form is not available for creation")
+            with OrderSaver(handler=self) as saver:
                 saver.create(form, title=data.get("title"))
                 saver.autopopulate()
                 saver.check_fields_validity()
@@ -883,10 +867,13 @@ class Order(OrderMixin, RequestHandler):
             self.see_other("home", error=error)
             return
         form = self.get_form(order["form"])
+        
+        reports = [r.doc for r in self.db.view("report", "order", include_docs=True)]
+        reports.sort(key=lambda r: r['modified'], reverse=True)
         files = []
         for filename in order.get("_attachments", []):
-            if filename.startswith(constants.SYSTEM):
-                continue
+            # if filename.startswith(constants.SYSTEM):
+            #     continue
             stub = order["_attachments"][filename]
             files.append(
                 dict(
@@ -900,10 +887,10 @@ class Order(OrderMixin, RequestHandler):
             "order/display.html",
             title="{0} '{1}'".format(utils.terminology("Order"), order["title"]),
             order=order,
-            account_names=self.get_accounts_name([order["owner"]]),
             status=settings["ORDER_STATUSES_LOOKUP"][order["status"]],
             form=form,
             fields=form["fields"],
+            reports=reports,
             attached_files=files,
             allow_edit=self.am_admin() or self.allow_edit(order),
             allow_clone=self.allow_clone(order),
@@ -916,9 +903,7 @@ class Order(OrderMixin, RequestHandler):
         if self.get_argument("_http_method", None) == "delete":
             self.delete(iuid)
             return
-        raise tornado.web.HTTPError(
-            405, reason="Internal problem; POST only allowed for DELETE."
-        )
+        raise tornado.web.HTTPError(405, reason="POST only allowed for DELETE.")
 
     @tornado.web.authenticated
     def delete(self, iuid):
@@ -952,7 +937,7 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             raise tornado.web.HTTPError(403, reason=str(error))
         data = self.get_json_body()
         try:
-            with OrderSaver(doc=order, rqh=self) as saver:
+            with OrderSaver(doc=order, handler=self) as saver:
                 try:
                     saver["title"] = data["title"]
                 except KeyError:
@@ -1072,8 +1057,8 @@ class OrderCsv(OrderMixin, RequestHandler):
         writer.new_worksheet("Files")
         writer.writerow(("File", "Size", "Content type", "URL"))
         for filename in sorted(order.get("_attachments", [])):
-            if filename.startswith(constants.SYSTEM):
-                continue
+            # if filename.startswith(constants.SYSTEM):
+            #     continue
             stub = order["_attachments"][filename]
             writer.writerow(
                 (
@@ -1147,8 +1132,11 @@ class OrderLogs(OrderMixin, RequestHandler):
         except ValueError as error:
             self.see_other("home", error=error)
             return
-        title = f"Logs {utils.terminology('order')} '{order['title'] or '[no title]'}'"
-        self.render("logs.html", title=title, logs=self.get_logs(order["_id"]))
+        self.render(
+            "logs.html",
+            title=f"Logs for {utils.terminology('order')} '{order['title'] or '[no title]'}'",
+            logs=self.get_logs(order["_id"])
+        )
 
 
 class OrderEdit(OrderMixin, RequestHandler):
@@ -1180,38 +1168,9 @@ class OrderEdit(OrderMixin, RequestHandler):
         hidden_fields = set(
             [f["identifier"] for f in fields.flatten() if f["type"] != "multiselect"]
         )
-        # For each table input field, create code for use in bespoke JavaScript.
-        tableinputs = {}
-        for field in fields.flatten():
-            if field["type"] != "table":
-                continue
-            tableinput = ["<tr>" "<td id='rowid__' class='table-input-row-0'></td>"]
-            for i, coldef in enumerate(field["table"]):
-                column = utils.parse_field_table_column(coldef)
-                rowid = f"rowid_{i}"
-                if column["type"] == constants.SELECT:
-                    inp = [f"<select class='form-control' name='{rowid}' id='{rowid}'>"]
-                    inp.extend(["<option>%s</option>" % o for o in column["options"]])
-                    inp = "".join(inp)
-                elif column["type"] == constants.INT:
-                    inp = f"<input type='number' step='1' class='form-control' name='{rowid}' id='{rowid}'>"
-                elif column["type"] == constants.FLOAT:
-                    inp = (
-                        f"<input type='number' step='{constants.FLOAT_STEP}'"
-                        f" class='form-control' name='{rowid}' id='{rowid}'>"
-                    )
-                elif column["type"] == constants.DATE:
-                    inp = f"<input type='text' class='form-control datepicker' name='{rowid}' id='{rowid}'>"
-                else:  # Default type: 'string'
-                    inp = f"<input type='text' class='form-control' name='{rowid}' id='{rowid}'>"
-                tableinput.append("<td>%s</td>" % inp)
-            tableinput.append("</tr>")
-            tableinputs[field["identifier"]] = "".join(tableinput)
         self.render(
             "order/edit.html",
-            title="Edit {0} '{1}'".format(
-                utils.terminology("order"), order["title"] or "[no title]"
-            ),
+            title="""Edit {utils.terminology('order')} '{order["title"] or "[no title]"}'""",
             order=order,
             tags=tags,
             links=links,
@@ -1219,7 +1178,6 @@ class OrderEdit(OrderMixin, RequestHandler):
             form=form,
             fields=form["fields"],
             hidden_fields=hidden_fields,
-            tableinputs=tableinputs,
         )
 
     @tornado.web.authenticated
@@ -1232,17 +1190,14 @@ class OrderEdit(OrderMixin, RequestHandler):
             return
         flag = self.get_argument("__save__", None)
         try:
-            message = "{0} saved.".format(utils.terminology("Order"))
-            error = None
-            with OrderSaver(doc=order, rqh=self) as saver:
+            with OrderSaver(doc=order, handler=self) as saver:
                 saver["title"] = self.get_argument("__title__", None)
                 saver.set_tags(
                     self.get_argument("__tags__", "").replace(",", " ").split()
                 )
                 saver.set_external(self.get_argument("__links__", "").split("\n"))
                 saver.update_fields()
-            self.set_error_flash(error)
-            self.set_message_flash(message)
+            self.set_message_flash(f"{utils.terminology('Order')} saved.")
             if flag == "continue":
                 self.see_other("order_edit", order["_id"])
             else:
@@ -1286,15 +1241,13 @@ class OrderOwner(OrderMixin, RequestHandler):
             account = self.get_account(owner)
             if account.get("status") != constants.ENABLED:
                 raise ValueError("Owner account is not enabled.")
-            with OrderSaver(doc=order, rqh=self) as saver:
+            with OrderSaver(doc=order, handler=self) as saver:
                 saver["owner"] = account["email"]
         except tornado.web.MissingArgumentError:
             pass
         except ValueError as error:  # No such account.
             self.set_error_flash(error)
-        self.set_message_flash(
-            "Changed owner of {0}.".format(utils.terminology("Order"))
-        )
+        self.set_message_flash(f"Changed owner of {utils.terminology('order')}.")
         if self.allow_read(order):
             self.redirect(self.order_reverse_url(order))
         else:
@@ -1320,7 +1273,7 @@ class OrderClone(OrderMixin, RequestHandler):
             )
         form = self.get_form(order["form"])
         erased_files = set()
-        with OrderSaver(rqh=self) as saver:
+        with OrderSaver(handler=self) as saver:
             saver.create(
                 form, title="Clone of {0}".format(order["title"] or "[no title]")
             )
@@ -1336,8 +1289,8 @@ class OrderClone(OrderMixin, RequestHandler):
         # Make copies of attached files.
         #  Must be done after initial save to avoid version mismatches.
         for filename in order.get("_attachments", []):
-            if filename.startswith(constants.SYSTEM):
-                continue
+            # if filename.startswith(constants.SYSTEM):
+            #     continue
             if filename in erased_files:
                 continue
             stub = order["_attachments"][filename]
@@ -1360,7 +1313,7 @@ class OrderTransition(OrderMixin, RequestHandler):
                     break
             else:
                 raise ValueError("disallowed status transition")
-            with OrderSaver(doc=order, rqh=self) as saver:
+            with OrderSaver(doc=order, handler=self) as saver:
                 saver.set_status(targetid)
         except ValueError as error:
             self.set_error_flash(error)
@@ -1374,7 +1327,7 @@ class OrderTransitionApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
         order = self.get_order(iuid)
         try:
             self.check_editable(order)
-            with OrderSaver(doc=order, rqh=self) as saver:
+            with OrderSaver(doc=order, handler=self) as saver:
                 saver.set_status(targetid)
         except ValueError as error:
             raise tornado.web.HTTPError(403, reason=str(error))
@@ -1420,9 +1373,9 @@ class OrderFile(OrderMixin, RequestHandler):
         except (KeyError, IndexError):
             pass
         else:
-            if infile.filename.startswith(constants.SYSTEM):
-                raise tornado.web.HTTPError(400, reason="Reserved filename.")
-            with OrderSaver(doc=order, rqh=self) as saver:
+            # if infile.filename.startswith(constants.SYSTEM):
+            #     raise tornado.web.HTTPError(400, reason="Reserved filename.")
+            with OrderSaver(doc=order, handler=self) as saver:
                 saver.add_file(infile)
         self.redirect(self.order_reverse_url(order))
 
@@ -1430,12 +1383,12 @@ class OrderFile(OrderMixin, RequestHandler):
     def delete(self, iuid, filename):
         if filename is None:
             raise tornado.web.HTTPError(400)
-        if filename.startswith(constants.SYSTEM):
-            raise tornado.web.HTTPError(400, reason="Reserved filename.")
+        # if filename.startswith(constants.SYSTEM):
+        #     raise tornado.web.HTTPError(400, reason="Reserved filename.")
         order = self.get_order(iuid)
         self.check_attachable(order)
         fields = Fields(self.get_form(order["form"]))
-        with OrderSaver(doc=order, rqh=self) as saver:
+        with OrderSaver(doc=order, handler=self) as saver:
             for key in order["fields"]:
                 # Remove the field value if it is the filename.
                 # NOTE: Slightly dangerous: may delete a value that happens to
@@ -1452,126 +1405,56 @@ class OrderFile(OrderMixin, RequestHandler):
         self.redirect(self.order_reverse_url(order))
 
 
-class OrderReport(OrderMixin, RequestHandler):
-    "View the report for an order."
+# class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
+#     "Order report API: get or set."
 
-    @tornado.web.authenticated
-    def get(self, iuid):
-        order = self.get_order(iuid)
-        self.check_readable(order)
-        try:
-            report = order["report"]
-            outfile = self.db.get_attachment(order, constants.SYSTEM_REPORT)
-            if outfile is None:
-                raise KeyError
-        except KeyError:
-            self.see_other("order", iuid, error="No report available.")
-            return
-        content_type = order["_attachments"][constants.SYSTEM_REPORT]["content_type"]
-        if report.get("inline"):
-            self.render(
-                "order/report.html",
-                order=order,
-                content=outfile.read(),
-                content_type=content_type,
-            )
-        else:
-            self.write(outfile.read())
-            outfile.close()
-            self.set_header("Content-Type", content_type)
-            name = order.get("identifier") or order["_id"]
-            ext = utils.get_filename_extension(content_type)
-            self.set_header(
-                "Content-Disposition", f'attachment; filename="{name}_report{ext}"'
-            )
+#     def get(self, iuid):
+#         order = self.get_order(iuid)
+#         try:
+#             self.check_readable(order)
+#         except ValueError as error:
+#             raise tornado.web.HTTPError(403, reason=str(error))
+#         try:
+#             report = order["report"]
+#             outfile = self.db.get_attachment(order, constants.SYSTEM_REPORT)
+#             if outfile is None:
+#                 raise KeyError
+#         except KeyError:
+#             raise tornado.web.HTTPError(404)
+#         self.write(outfile.read())
+#         outfile.close()
+#         content_type = order["_attachments"][constants.SYSTEM_REPORT]["content_type"]
+#         self.set_header("Content-Type", content_type)
+#         name = order.get("identifier") or order["_id"]
+#         ext = utils.get_filename_extension(content_type)
+#         self.set_header(
+#             "Content-Disposition", f'attachment; filename="{name}_report{ext}"'
+#         )
 
-
-class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
-    "Order report API: get or set."
-
-    def get(self, iuid):
-        order = self.get_order(iuid)
-        try:
-            self.check_readable(order)
-        except ValueError as error:
-            raise tornado.web.HTTPError(403, reason=str(error))
-        try:
-            report = order["report"]
-            outfile = self.db.get_attachment(order, constants.SYSTEM_REPORT)
-            if outfile is None:
-                raise KeyError
-        except KeyError:
-            raise tornado.web.HTTPError(404)
-        self.write(outfile.read())
-        outfile.close()
-        content_type = order["_attachments"][constants.SYSTEM_REPORT]["content_type"]
-        self.set_header("Content-Type", content_type)
-        name = order.get("identifier") or order["_id"]
-        ext = utils.get_filename_extension(content_type)
-        self.set_header(
-            "Content-Disposition", f'attachment; filename="{name}_report{ext}"'
-        )
-
-    def put(self, iuid):
-        self.check_admin()
-        order = self.get_order(iuid)
-        with OrderSaver(doc=order, rqh=self) as saver:
-            content_type = (
-                self.request.headers.get("content-type") or constants.BIN_MIMETYPE
-            )
-            saver["report"] = dict(
-                timestamp=utils.timestamp(),
-                inline=content_type
-                in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE),
-            )
-            saver.files.append(
-                dict(
-                    filename=constants.SYSTEM_REPORT,
-                    body=self.request.body,
-                    content_type=content_type,
-                )
-            )
-        self.write("")
-
-
-class OrderReportEdit(OrderMixin, RequestHandler):
-    "Edit the report for an order."
-
-    @tornado.web.authenticated
-    def get(self, iuid):
-        self.check_admin()
-        order = self.get_order(iuid)
-        self.render("order/report_edit.html", order=order)
-
-    @tornado.web.authenticated
-    def post(self, iuid):
-        self.check_admin()
-        order = self.get_order(iuid)
-        with OrderSaver(doc=order, rqh=self) as saver:
-            try:
-                infile = self.request.files["report"][0]
-            except (KeyError, IndexError):
-                if order.get("report"):
-                    saver.delete_filename = constants.SYSTEM_REPORT
-                    saver["report"] = dict()
-            else:
-                saver["report"] = dict(
-                    timestamp=utils.timestamp(),
-                    inline=infile.content_type
-                    in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE),
-                )
-                saver.files.append(
-                    dict(
-                        filename=constants.SYSTEM_REPORT,
-                        body=infile.body,
-                        content_type=infile.content_type,
-                    )
-                )
-        self.redirect(self.order_reverse_url(order))
+#     def put(self, iuid):
+#         self.check_admin()
+#         order = self.get_order(iuid)
+#         with OrderSaver(doc=order, handler=self) as saver:
+#             content_type = (
+#                 self.request.headers.get("content-type") or constants.BIN_MIMETYPE
+#             )
+#             saver["report"] = dict(
+#                 timestamp=utils.timestamp(),
+#                 inline=content_type
+#                 in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE),
+#             )
+#             saver.files.append(
+#                 dict(
+#                     filename=constants.SYSTEM_REPORT,
+#                     body=self.request.body,
+#                     content_type=content_type,
+#                 )
+#             )
+#         self.write("")
 
 
 class Orders(RequestHandler):
-    "Orders list page."
+    "List of orders."
 
     @tornado.web.authenticated
     def get(self):
@@ -1622,14 +1505,15 @@ class Orders(RequestHandler):
         else:
             order_column = 0
         self.set_filter()
+        forms = [row.doc for row in
+                 self.db.view("form", "modified", descending=True, include_docs=True)]
         self.render(
             "order/list.html",
-            forms_lookup=self.get_forms_lookup(),
+            forms=forms,
             years=years,
             filter=self.filter,
             orders=self.get_orders(),
             order_column=order_column,
-            account_names=self.get_accounts_name(),
             accounts_university=accounts_university,
             accounts_department=accounts_department,
             accounts_gender=accounts_gender,
@@ -1662,6 +1546,17 @@ class Orders(RequestHandler):
                 for email, account in self.get_all_accounts().items()
             ]
         )
+
+    def get_all_accounts(self):
+        "Get all accounts docs; from cache if it exists, otherwise create it."
+        try:
+            return self.cache_all_accounts
+        except AttributeError:
+            self.logger.debug("Getting all accounts into request cache.")
+            self.cache_all_accounts = {}
+            for row in self.db.view("account", "email", include_docs=True):
+                self.cache_all_accounts[row.key] = row.doc
+            return self.cache_all_accounts
 
     def set_filter(self):
         "Set the filter settings dictionary."
@@ -1697,7 +1592,7 @@ class Orders(RequestHandler):
                 view = self.db.view(
                     "order",
                     "status",
-                    descending=True,
+                    descending=True, # In order to get the most recently modified.
                     startkey=[status, constants.CEILING],
                     endkey=[status],
                     include_docs=True,
@@ -1716,7 +1611,7 @@ class Orders(RequestHandler):
                 view = self.db.view(
                     "order",
                     "form",
-                    descending=True,
+                    descending=True, # In order to get the most recently modified.
                     startkey=[form_id, constants.CEILING],
                     endkey=[form_id],
                     include_docs=True,
@@ -1733,7 +1628,7 @@ class Orders(RequestHandler):
                 view = self.db.view(
                     "order",
                     "owner",
-                    descending=True,
+                    descending=True, # In order to get the most recently modified.
                     startkey=[owner, constants.CEILING],
                     endkey=[owner],
                     include_docs=True,
@@ -1748,7 +1643,7 @@ class Orders(RequestHandler):
         if value:
             if orders is None:
                 view = self.db.view(
-                    "order", "modified", include_docs=True, descending=True
+                    "order", "modified", descending=True, include_docs=True
                 )
                 orders = [r.doc for r in view]
             if value == "__none__":
@@ -1773,9 +1668,9 @@ class Orders(RequestHandler):
                 view = self.db.view(
                     "order",
                     "modified",
-                    include_docs=True,
-                    descending=True,
+                    descending=True, # In order to get the most recently modified.
                     limit=settings["DISPLAY_ORDERS_MOST_RECENT"],
+                    include_docs=True,
                 )
                 orders = [r.doc for r in view]
             else:
@@ -1784,16 +1679,16 @@ class Orders(RequestHandler):
         elif year == "all":
             if orders is None:
                 view = self.db.view(
-                    "order", "modified", include_docs=True, descending=True
+                    "order", "modified", descending=True, include_docs=True
                 )
                 orders = [r.doc for r in view]
             else:
                 pass  # "all" means no filter by year.
 
-        else:  # Specific year
+        else:  # Specific year; all of them.
             if orders is None:
                 view = self.db.view(
-                    "order", "year_submitted", include_docs=True, key=year
+                    "order", "year_submitted", key=year, include_docs=True
                 )
                 orders = [r.doc for r in view]
             else:
@@ -1818,14 +1713,9 @@ class OrdersApiV1(OrderApiV1Mixin, OrderMixin, Orders):
         result["links"] = dict(
             api=dict(href=URL("orders_api")), display=dict(href=URL("orders"))
         )
-        # Get account names and forms lookups once only.
-        account_names = self.get_accounts_name()
-        forms_lookup = self.get_forms_lookup()
         result["items"] = []
         for order in self.get_orders():
-            data = self.get_order_json(
-                order, account_names=account_names, forms_lookup=forms_lookup
-            )
+            data = self.get_order_json(order)
             data["fields"] = dict()
             for key in settings["ORDERS_LIST_FIELDS"]:
                 data["fields"][key] = order["fields"].get(key)
@@ -1874,10 +1764,8 @@ class OrdersCsv(Orders):
         row.extend([s.capitalize() for s in settings["ORDERS_LIST_STATUSES"]])
         row.append("Modified")
         writer.writerow(row)
-        account_names = self.get_accounts_name()
-        forms_lookup = self.get_forms_lookup()
         for order in self.get_orders():
-            form = forms_lookup[order["form"]]
+            form = self.lookup_form(order["form"])
             row = [
                 order.get("identifier") or "",
                 order["title"] or "[no title]",
@@ -1887,7 +1775,7 @@ class OrdersCsv(Orders):
                 order["form"],
                 self.absolute_reverse_url("form", order["form"]),
                 order["owner"],
-                account_names[order["owner"]],
+                self.lookup_account_name(order["owner"]),
                 self.absolute_reverse_url("account", order["owner"]),
             ]
             if settings["ORDERS_LIST_OWNER_UNIVERSITY"]:

@@ -85,9 +85,7 @@
   {% for status in settings['ORDER_STATUSES_LOOKUP'].values() %}
   {% set msg = settings['ORDER_MESSAGES'].get(status['identifier'], dict()) %}
   <tr>
-    <td>
-      {% module Icon(status['identifier'], status.get('label'), True) %}
-    </td>
+    <td>{% module Status(status['identifier']) %}</td>
     <td>{{ ', '.join(msg.get('recipients', [])) or '-' }}</td>
     <td>{{ msg.get('subject') or '-' }}</td>
     <td class="pre">{{ msg.get('text') or '-' }}</td>

@@ -25,7 +25,7 @@ class NewsCreate(RequestHandler):
     @tornado.web.authenticated
     def post(self):
         self.check_admin()
-        with NewsSaver(rqh=self) as saver:
+        with NewsSaver(handler=self) as saver:
             saver["date"] = utils.today()
             saver["title"] = self.get_argument("title")
             saver["text"] = self.get_argument("text", "")
@@ -45,7 +45,7 @@ class NewsEdit(RequestHandler):
         if news is None:
             self.see_other("home", error="No such news item.")
             return
-        with NewsSaver(doc=news, rqh=self) as saver:
+        with NewsSaver(doc=news, handler=self) as saver:
             saver["date"] = self.get_argument("date", "") or utils.today()
             saver["title"] = self.get_argument("title")
             saver["text"] = self.get_argument("text", "")

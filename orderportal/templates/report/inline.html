@@ -1,13 +1,13 @@
-{# Order report page. #}
+{# Inline presentation of order report. #}
 
 {% extends "../base.html" %}
 
 {% block head_title %}
-Report for {{ terminology('order') }} '{{ order['title'] }}'
+Report {{ report['name'] }} for {{ terminology('order') }} '{{ order['title'] }}'
 {% end %}
 
 {% block body_title %}
-Report for {{ terminology('order') }} '{{ order['title'] }}'
+Report {{ report['name'] }} for {{ terminology('order') }} '{{ order['title'] }}'
 {% end %}
 
 {% block main_content %}
@@ -21,7 +21,7 @@ Report for {{ terminology('order') }} '{{ order['title'] }}'
 
 <p>
   <i>Uploaded
-    <span class="localtime">{{ order['report']['timestamp'] }}</span>
+    <span class="localtime">{{ report['modified'] }}</span>
   </i>
 </p>
 

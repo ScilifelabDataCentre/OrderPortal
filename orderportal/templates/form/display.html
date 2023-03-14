@@ -23,7 +23,7 @@
         method="POST" role="form">
     {% module xsrf_form_html() %}
     <button type="submit" class="btn btn-default btn-lg btn-block">
-      Set to {% module Icon('testing', label=True) %}
+      Set to {% module Status(constants.TESTING) %}
     </button>
   </form>
 </p>
@@ -33,7 +33,7 @@
     {% module xsrf_form_html() %}
     <button type="submit" class="btn btn-default btn-lg btn-block"
             onclick="return confirm('Cannot be undone! Really enable?');">
-      Set to {% module Icon('enabled', label=True) %}
+      Set to {% module Status(constants.ENABLED) %}
     </button>
   </form>
 </p>
@@ -53,7 +53,7 @@
         method="POST" role="form">
     {% module xsrf_form_html() %}
     <button type="submit" class="btn btn-default btn-block">
-      Set to {% module Icon('pending', label=True) %}
+      Set to {% module Status(constants.PENDING) %}
     </button>
   </form>
 </p>
@@ -74,7 +74,7 @@
     {% module xsrf_form_html() %}
     <button type="submit" class="btn btn-default btn-block"
             onclick="return confirm('Cannot be undone! Really disable?');">
-      {% module Icon('disabled') %} Disable
+      Set to {% module Status(constants.DISABLED) %}
     </button>
   </form>
 </p>
@@ -146,7 +146,7 @@
       </tr>
       <tr>
         <th>Status</th>
-        <td>{% module Icon(form['status'], label=True) %}</td>
+        <td>{% module Status(form['status']) %}</td>
       </tr>
       <tr>
         <th>Ordinal</th>
@@ -156,9 +156,7 @@
         <th>Modified</th>
         <td>
           <span class="localtime">{{ form['modified'] }}</span>
-          <a href="{{ reverse_url('form_logs', form['_id']) }}">
-            {% module Icon('logs', label=True) %}
-          </a>
+          {% module LogsLink(form) %}
         </td>
       </tr>
       <tr>

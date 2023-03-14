@@ -19,6 +19,7 @@ class MessageSaver(saver.Saver):
     def initialize(self):
         """Connect to the email server.
         Raises KeyError if email server is badly configured.
+        Raises ValueError if some other problem.
         """
         super().initialize()
         try:
@@ -58,7 +59,7 @@ class MessageSaver(saver.Saver):
         except (ValueError, TypeError, KeyError, smtplib.SMTPException) as error:
             self.handle_error(error)
 
-    def create(self, text, **kwargs):
+    def create(self, text_template, **kwargs):
         "Create the message from the text template and parameters for it."
         site_url = settings["BASE_URL"]
         if settings["BASE_URL_PATH_PREFIX"]:
@@ -71,8 +72,8 @@ class MessageSaver(saver.Saver):
             host_url=settings.get("SITE_HOST_URL") or "[not defined]",
         )
         params.update(kwargs)
-        self["subject"] = str(text["subject"]).format_map(params)
-        self["text"] = str(text["text"]).format_map(params)
+        self["subject"] = str(text_template["subject"]).format_map(params)
+        self["text"] = str(text_template["text"]).format_map(params)
 
     def send(self, recipients):
         """Send the message to the given recipient email addresses.
@@ -93,14 +94,16 @@ class MessageSaver(saver.Saver):
             self["sent"] = utils.timestamp()
         except smtplib.SMTPException as error:
             self.handle_error(error)
+        else:
+            self.handler.set_message_flash("Email message(s) sent.")
 
     def handle_error(self, error):
         "Convert into a nicer error message to display."
         try:
-            if not self.rqh.am_admin():
-                self.rqh.logger.error(f"Email failure: {error}")
+            if not self.handler.am_admin():
+                self.handler.logger.error(f"Email failure: {error}")
                 error = "Contact the admin."
-        except AttributeError:  # If rqh is None.
+        except AttributeError:  # If handler is None.
             pass
         raise ValueError(
             f"The operation succeeded, but no email could be sent; problem with the email server. {error}"

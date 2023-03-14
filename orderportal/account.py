@@ -66,8 +66,61 @@ class AccountSaver(saver.Saver):
                 raise ValueError("Invoice reference is required.")
 
 
+class AccessMixin:
+    "Mixin for access check methods."
+
+    def allow_read(self, account):
+        "Is the account readable by the current user?"
+        if self.am_owner(account):
+            return True
+        if self.am_staff():
+            return True
+        if self.am_colleague(account["email"]):
+            return True
+        return False
+
+    def check_readable(self, account):
+        "Check that the account is readable by the current user."
+        if self.allow_read(account):
+            return
+        raise ValueError("You may not read the account.")
+
+    def allow_edit(self, account):
+        "Is the account editable by the current user?"
+        if self.am_owner(account):
+            return True
+        if self.am_staff():
+            return True
+        return False
+
+    def check_editable(self, account):
+        "Check that the account is editable by the current user."
+        if self.allow_read(account):
+            return
+        raise ValueError("You may not edit the account.")
+
+
+class RecipientsMixin:
+    "Mixin for 'get_recipents' method."
+
+    def get_recipients(self, text, account):
+        """Return the list of emails for the recipients according to
+        the specification in the text, given the user account.
+        May include admin and staff.
+        """
+        result = []
+        if constants.USER in text["recipients"]:
+            result.append(account["email"])
+        if constants.ADMIN in text["recipients"]:
+            result.extend([a["email"] for a in self.get_admins()])
+        if constants.STAFF in text["recipients"]:
+            staff = [row.doc for row in self.db.view("account", "role", key=constants.STAFF, include_docs=True)]
+            result.extend([a["email"] for a in staff if a["status"] == constants.ENABLED])
+        return result
+
+
 class Accounts(RequestHandler):
-    "Accounts list page."
+    "List of all accounts."
 
     @tornado.web.authenticated
     def get(self):
@@ -80,7 +133,7 @@ class Accounts(RequestHandler):
     def set_filter(self):
         "Set the filter parameters dictionary."
         self.filter = dict()
-        for key in ["university", "status", "role"]:
+        for key in ["university", "role", "status", "login"]:
             try:
                 value = self.get_argument(key)
                 if not value:
@@ -90,13 +143,14 @@ class Accounts(RequestHandler):
                 pass
 
     def get_accounts(self):
-        "Get the accounts."
-        accounts = self.filter_by_university(self.filter.get("university"))
+        "Get the accounts depending on the filter parameters."
+        accounts = self.filter_by_login(self.filter.get("login"))
+        accounts = self.filter_by_university(self.filter.get("university"), accounts=accounts)
         accounts = self.filter_by_role(self.filter.get("role"), accounts=accounts)
         accounts = self.filter_by_status(self.filter.get("status"), accounts=accounts)
-        # No filter; all accounts
+        # Get all accounts if no filter produces anything.
         if accounts is None:
-            view = self.db.view("account", "email", include_docs=True)
+            view = self.db.view("account", "all", reduce=False, include_docs=True)
             accounts = [r.doc for r in view]
         # This is optimized for retrieval speed. The single-valued
         # function 'get_account_order_count' is not good enough here.
@@ -111,8 +165,25 @@ class Accounts(RequestHandler):
             )
         return accounts
 
+    def filter_by_login(self, login):
+        """Return accounts by last login.
+        If no parameter value, assume 'last year'.
+        If 'whenever', then return None; this is handled correctly by later filters.
+        """
+        if not login or login == 'last year':
+            view = self.db.view(
+                "account",
+                "login",
+                startkey=utils.timestamp(days=-366), # Allow leap year.
+                endkey=utils.timestamp(),
+                include_docs=True
+            )
+            return [r.doc for r in view]
+        else:
+            return None
+
     def filter_by_university(self, university, accounts=None):
-        "Return accounts list if any university filter, or None if none."
+        "Return accounts list if any university filter, or the input accounts if none."
         if university == "[other]":
             if accounts is None:
                 view = self.db.view("account", "email", include_docs=True)
@@ -131,7 +202,7 @@ class Accounts(RequestHandler):
         return accounts
 
     def filter_by_role(self, role, accounts=None):
-        "Return accounts list if any role filter, or None if none."
+        "Return accounts list if any role filter, or the input accounts if none."
         if role:
             if accounts is None:
                 view = self.db.view("account", "role", key=role, include_docs=True)
@@ -141,7 +212,7 @@ class Accounts(RequestHandler):
         return accounts
 
     def filter_by_status(self, status, accounts=None):
-        "Return accounts list if any status filter, or None if none."
+        "Return accounts list if any status filter, or the input if none."
         if status:
             if accounts is None:
                 view = self.db.view("account", "status", key=status, include_docs=True)
@@ -309,42 +380,8 @@ class AccountsXlsx(AccountsCsv):
         self.set_header("Content-Disposition", 'attachment; filename="accounts.xlsx"')
 
 
-class AccountMixin:
-    "Mixin for various useful methods."
-
-    def allow_read(self, account):
-        "Is the account readable by the current user?"
-        if self.is_owner(account):
-            return True
-        if self.am_staff():
-            return True
-        if self.is_colleague(account["email"]):
-            return True
-        return False
-
-    def check_readable(self, account):
-        "Check that the account is readable by the current user."
-        if self.allow_read(account):
-            return
-        raise ValueError("You may not read the account.")
-
-    def allow_edit(self, account):
-        "Is the account editable by the current user?"
-        if self.is_owner(account):
-            return True
-        if self.am_staff():
-            return True
-        return False
-
-    def check_editable(self, account):
-        "Check that the account is editable by the current user."
-        if self.allow_read(account):
-            return
-        raise ValueError("You may not edit the account.")
-
-
-class Account(AccountMixin, RequestHandler):
-    "Account page."
+class Account(AccessMixin, RequestHandler):
+    "Display account."
 
     @tornado.web.authenticated
     def get(self, email):
@@ -388,9 +425,7 @@ class Account(AccountMixin, RequestHandler):
         if self.get_argument("_http_method", None) == "delete":
             self.delete(email)
             return
-        raise tornado.web.HTTPError(
-            405, reason="Internal problem; POST only allowed for DELETE."
-        )
+        raise tornado.web.HTTPError(405, reason="POST only allowed for DELETE.")
 
     @tornado.web.authenticated
     def delete(self, email):
@@ -412,7 +447,7 @@ class Account(AccountMixin, RequestHandler):
         view = self.db.view("group", "owner", include_docs=True, key=account["email"])
         for row in view:
             group = row.doc
-            with GroupSaver(doc=row, rqh=self) as saver:
+            with GroupSaver(doc=row, handler=self) as saver:
                 members = set(group["members"])
                 members.discard(account["email"])
                 saver["members"] = sorted(members)
@@ -446,7 +481,7 @@ class Account(AccountMixin, RequestHandler):
         return False
 
 
-class AccountApiV1(AccountMixin, RequestHandler):
+class AccountApiV1(AccessMixin, RequestHandler):
     "Account API; JSON output."
 
     @tornado.web.authenticated
@@ -509,7 +544,7 @@ class AccountApiV1(AccountMixin, RequestHandler):
 
 
 class AccountOrdersMixin:
-    "Mixin containing access tests."
+    "Mixin for access check methods."
 
     def allow_read(self, account):
         "Is the account readable by the current user?"
@@ -517,7 +552,7 @@ class AccountOrdersMixin:
             return True
         if self.am_staff():
             return True
-        if self.is_colleague(account["email"]):
+        if self.am_colleague(account["email"]):
             return True
         return False
 
@@ -544,7 +579,7 @@ class AccountOrdersMixin:
 
 
 class AccountOrders(AccountOrdersMixin, RequestHandler):
-    "Page for a list of all orders for an account."
+    "List all orders for an account."
 
     @tornado.web.authenticated
     def get(self, email):
@@ -577,11 +612,9 @@ class AccountOrders(AccountOrdersMixin, RequestHandler):
         orders = [r.doc for r in view]
         self.render(
             "account/orders.html",
-            forms_lookup=self.get_forms_lookup(),
             orders=orders,
             account=account,
             order_column=order_column,
-            account_names=self.get_accounts_name(),
             any_groups=bool(self.get_account_groups(account["email"])),
         )
 
@@ -601,8 +634,6 @@ class AccountOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandler):
             self.check_readable(account)
         except ValueError as error:
             raise tornado.web.HTTPError(403, reason=error)
-        account_names = self.get_accounts_name()
-        forms_lookup = self.get_forms_lookup()
         data = utils.get_json(URL("account_orders", account["email"]), "account orders")
         data["links"] = dict(
             api=dict(href=URL("account_orders_api", account["email"])),
@@ -616,17 +647,12 @@ class AccountOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandler):
             startkey=[account["email"]],
             endkey=[account["email"], constants.CEILING],
         )
-        data["orders"] = [
-            self.get_order_json(
-                r.doc, account_names=account_names, forms_lookup=forms_lookup
-            )
-            for r in view
-        ]
+        data["orders"] = [self.get_order_json(r.doc) for r in view]
         self.write(data)
 
 
 class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
-    "Page for a list of all orders for the groups of an account."
+    "List all orders for the groups of an account."
 
     @tornado.web.authenticated
     def get(self, email):
@@ -651,7 +677,6 @@ class AccountGroupsOrders(AccountOrdersMixin, RequestHandler):
         self.render(
             "account/groups_orders.html",
             account=account,
-            forms_lookup=self.get_forms_lookup(),
             orders=self.get_group_orders(account),
             order_column=order_column,
         )
@@ -672,8 +697,6 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandl
             self.check_readable(account)
         except ValueError as error:
             raise tornado.web.HTTPError(403, reason=error)
-        account_names = self.get_accounts_name()
-        forms_lookup = self.get_forms_lookup()
         data = utils.get_json(
             URL("account_groups_orders_api", account["email"]), "account groups orders"
         )
@@ -682,16 +705,13 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandl
             display=dict(href=URL("account_groups_orders", account["email"])),
         )
         data["orders"] = [
-            self.get_order_json(
-                o, account_names=account_names, forms_lookup=forms_lookup
-            )
-            for o in self.get_group_orders(account)
+            self.get_order_json(order) for oorder in self.get_group_orders(account)
         ]
         self.write(data)
 
 
-class AccountLogs(AccountMixin, RequestHandler):
-    "Account log entries page."
+class AccountLogs(AccessMixin, RequestHandler):
+    "Display log entries for an account."
 
     @tornado.web.authenticated
     def get(self, email):
@@ -708,8 +728,8 @@ class AccountLogs(AccountMixin, RequestHandler):
         )
 
 
-class AccountMessages(AccountMixin, RequestHandler):
-    "Account messages list page."
+class AccountMessages(AccessMixin, RequestHandler):
+    "List messages for an account."
 
     @tornado.web.authenticated
     def get(self, email):
@@ -739,8 +759,8 @@ class AccountMessages(AccountMixin, RequestHandler):
         self.render("account/messages.html", account=account, messages=messages)
 
 
-class AccountEdit(AccountMixin, RequestHandler):
-    "Page for editing account information."
+class AccountEdit(AccessMixin, RequestHandler):
+    "Edit account information."
 
     @tornado.web.authenticated
     def get(self, email):
@@ -761,7 +781,7 @@ class AccountEdit(AccountMixin, RequestHandler):
             self.see_other("account_edit", account["email"], error=error)
             return
         try:
-            with AccountSaver(doc=account, rqh=self) as saver:
+            with AccountSaver(doc=account, handler=self) as saver:
                 # Only admin (not staff!) may change role of an account.
                 if self.am_admin():
                     role = self.get_argument("role")
@@ -815,20 +835,22 @@ class AccountEdit(AccountMixin, RequestHandler):
 
 
 class LoginMixin:
+    "Mixin for login/logout methods."
+
     def do_login(self, account):
         self.set_secure_cookie(
             constants.USER_COOKIE,
             account["email"],
             expires_days=settings["LOGIN_MAX_AGE_DAYS"],
         )
-        with AccountSaver(doc=account, rqh=self) as saver:
+        with AccountSaver(doc=account, handler=self) as saver:
             saver["login"] = utils.timestamp()  # Set login timestamp.
 
     def do_logout(self):
         self.set_secure_cookie(constants.USER_COOKIE, "")
 
 
-class Login(LoginMixin, RequestHandler):
+class Login(RecipientsMixin, LoginMixin, RequestHandler):
     "Login to a account account. Set a secure cookie."
 
     def get(self):
@@ -869,12 +891,12 @@ class Login(LoginMixin, RequestHandler):
                 self.logger.warning(
                     f"account {account['email']} has been disabled due to too many login failures"
                 )
-                with AccountSaver(doc=account, rqh=self) as saver:
+                with AccountSaver(doc=account, handler=self) as saver:
                     saver["status"] = constants.DISABLED
                     saver.reset_password()
                 # Prepare email message about being disabled.
                 text = settings[constants.ACCOUNT][constants.DISABLED]
-                with MessageSaver(rqh=self) as saver:
+                with MessageSaver(handler=self) as saver:
                     saver.create(text)
                     saver.send(self.get_recipients(text, account))
                 self.set_error_flash(
@@ -903,7 +925,7 @@ class Logout(LoginMixin, RequestHandler):
         self.see_other("home")
 
 
-class Reset(LoginMixin, RequestHandler):
+class Reset(RecipientsMixin, LoginMixin, RequestHandler):
     "Reset the password of an account."
 
     def get(self):
@@ -927,11 +949,11 @@ class Reset(LoginMixin, RequestHandler):
                     error="Cannot reset password. Account is disabled; contact the admin.",
                 )
                 return
-            with AccountSaver(doc=account, rqh=self) as saver:
+            with AccountSaver(doc=account, handler=self) as saver:
                 saver.reset_password()
             text = settings[constants.ACCOUNT][constants.RESET]
             try:
-                with MessageSaver(rqh=self) as saver:
+                with MessageSaver(handler=self) as saver:
                     saver.create(
                         text,
                         account=account["email"],
@@ -991,7 +1013,7 @@ class Password(LoginMixin, RequestHandler):
             return
 
         try:
-            with AccountSaver(doc=account, rqh=self) as saver:
+            with AccountSaver(doc=account, handler=self) as saver:
                 saver.set_password(password)
         except ValueError as error:
             self.see_other(
@@ -1007,8 +1029,8 @@ class Password(LoginMixin, RequestHandler):
         self.see_other("home", message="Password set.")
 
 
-class Register(RequestHandler):
-    "Register a new account account."
+class Register(RecipientsMixin, RequestHandler):
+    "Register a new account."
 
     KEYS = [
         "email",
@@ -1038,7 +1060,7 @@ class Register(RequestHandler):
 
     def post(self):
         try:
-            with AccountSaver(rqh=self) as saver:
+            with AccountSaver(handler=self) as saver:
                 email = self.get_argument("email", None)
                 saver["first_name"] = self.get_argument("first_name", None)
                 saver["last_name"] = self.get_argument("last_name", None)
@@ -1109,7 +1131,7 @@ class Register(RequestHandler):
 
         # Normal case: send email message to address of new account with info.
         try:
-            with MessageSaver(rqh=self) as saver:
+            with MessageSaver(handler=self) as saver:
                 saver.create(
                     text,
                     account=account["email"],
@@ -1136,7 +1158,7 @@ class Registered(RequestHandler):
         self.render("account/registered.html")
 
 
-class AccountEnable(RequestHandler):
+class AccountEnable(RecipientsMixin, RequestHandler):
     "Enable the account; from status pending or disabled."
 
     @tornado.web.authenticated
@@ -1147,11 +1169,11 @@ class AccountEnable(RequestHandler):
         except ValueError as error:
             self.see_other("home", error=error)
             return
-        with AccountSaver(account, rqh=self) as saver:
+        with AccountSaver(account, handler=self) as saver:
             saver["status"] = constants.ENABLED
             saver.reset_password()
         text = settings[constants.ACCOUNT][constants.ENABLED]
-        with MessageSaver(rqh=self) as saver:
+        with MessageSaver(handler=self) as saver:
             saver.create(
                 text,
                 account=account["email"],
@@ -1176,7 +1198,7 @@ class AccountDisable(RequestHandler):
         except ValueError as error:
             self.see_other("home", error=error)
             return
-        with AccountSaver(account, rqh=self) as saver:
+        with AccountSaver(account, handler=self) as saver:
             saver["status"] = constants.DISABLED
             saver.reset_password()
         # No message sent here.Only done when user has too many login failures; above.
@@ -1195,6 +1217,6 @@ class AccountUpdateInfo(RequestHandler):
             self.see_other("home", error=error)
             return
         if not account.get("update_info"):
-            with AccountSaver(account, rqh=self) as saver:
+            with AccountSaver(account, handler=self) as saver:
                 saver["update_info"] = True
         self.see_other("account", account["email"])

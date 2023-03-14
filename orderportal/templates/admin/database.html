@@ -50,7 +50,7 @@
 {% module Json(server_data) %}
 
 <h3>All databases in CouchDB server</h3>
-{{ ", ".join([str(d) for d in databases]) }}
+{% module Json([str(d) for d in databases]) %}
 
 <h3>CouchDB system stats</h3>
 {% module Json(system_stats) %}

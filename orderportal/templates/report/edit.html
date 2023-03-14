@@ -1,0 +1,129 @@
+{# Create a report for an order. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}
+Edit report for {{ terminology('order') }} '{{ order['title'] }}'
+{% end %}
+
+{% block body_title %}
+Edit report for {{ terminology('order') }} '{{ order['title'] }}'
+{% end %}
+
+{% block action_content %}
+{% module CancelButton(reverse_url('order', order['_id'])) %}
+<form action="{{ reverse_url('report', report['_id']) }}"
+      method="POST" role="form" style="margin-top: 20px;">
+  {% module xsrf_form_html() %}
+  <input type="hidden" name="_http_method" value="delete">
+  <button type="submit" class="btn btn-danger btn-block"
+          onclick="return confirm('Cannot be undone! Really delete?');">
+    <span class="glyphicon glyphicon-trash"></span> Delete
+  </button>
+</form>
+{% end %} {# block action_content #}
+
+{% block main_content %}
+<form action="{{ reverse_url('report_edit', report['_id']) }}"
+      class="form-horizontal" method="POST" role="form" enctype="multipart/form-data">
+  {% module xsrf_form_html() %}
+
+  <div class="row">
+    <label class="control-label col-md-2">Current report file</label>
+    <div class="col-md-10">
+      <p class="form-control-static">
+        {% if report.get('inline') %}
+        <a href="{{ reverse_url('report', report['_id']) }}">
+          <strong>{{ report['name'] }}</strong>
+        </a>
+        {% else %}
+        <a href="{{ reverse_url('report', report['_id']) }}"
+           role="button" class="btn btn-primary" title="Download">
+          <span class="glyphicon glyphicon-download-alt"></span>
+          {{ report['name'] }}
+        </a>
+        {% end %}
+      </p>
+    </div>
+  </div>
+
+  <div class="row">
+    <label class="control-label col-md-2">Responsible</label>
+    <div class="col-md-10">
+      <p class="form-control-static">{% module AccountLink(report['responsible']) %}</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <label class="control-label col-md-2">Modified</label>
+    <div class="col-md-10">
+      <p class="form-control-static localtime">{{ report['modified'] }}</p>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="report">Update report file</label>
+    <div class="col-md-10">
+      <input type="file" name="report" id="report" class="form-control">
+      <p class="help-block">
+        Upload a new file as the report file. An HTML or text file
+        will be displayed in-line when clicking the link to it; other
+        content types will be downloaded as a file.
+      </p>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2">Reviews</label>
+    <div class="col-md-10">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Reviewer</th>
+            <th>Review</th>
+            <th>Conclusion</th>
+            <th>Modified</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if report['reviewers'] %}
+          {% for reviewer, review in report['reviewers'].items() %}
+          <tr>
+            <td>{% module AccountLink(email=reviewer) %}</td>
+            <td>{% module Markdown(review['review']) %}</td>
+            <td>{% module Status(review['status']) %}</td>
+            <td class="localtime">{{ review['modified'] }}</td>
+          </tr>
+          {% end %}
+          {% else %}
+          <tr><td colspan="4"><i>[no reviewers]</i></td></tr>
+          {% end %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="status">Status</label>
+    <div class="col-md-10">
+      {% for status in constants.REPORT_STATUSES %}
+      <div class="radio">
+        <label>
+          <input type="radio" name="status" value="{{ status }}"
+                 {{ report['status'] == status and 'checked' or '' }}>
+          {% module Status(status) %}
+        </label>
+      </div>
+      {% end %}
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-3">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+    </div>
+  </div>
+
+</form>
+{% end %} {# block main_content #}

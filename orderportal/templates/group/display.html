@@ -39,21 +39,13 @@
     <table class="table table-condensed table-fields table-noborder">
       <tr>
         <th>Owner</th>
-        <td>
-          <a href="{{ reverse_url('account', group['owner']) }}">
-            {% module Icon('account') %}
-            {{ group['owner'] }}
-          </a>
-        </td>
+        <td>{% module AccountLink(email=group['owner']) %}</td>
       </tr>
       <tr>
         <th>Members</th>
         <td>
           {% for email in group['members'] %}
-          <a href="{{ reverse_url('account', email) }}">
-            {% module Icon('account') %}
-            {{ email }}
-          </a>
+          {% module AccountLink(email=email) %}
           <br>
           {% end %}
         </td>
@@ -63,10 +55,7 @@
         <td>
           {% for email in group['invited'] %}
             {% if am_staff %}
-            <a href="{{ reverse_url('account', email) }}">
-              {% module Icon('account') %}
-              {{ email }}
-            </a>
+            {% module AccountLink(email=email) %}
             {% else %} {# if am_staff #}
             {{ email }}
             {% end %} {# if am_staff #}
@@ -78,9 +67,7 @@
         <th>Modified</th>
         <td>
           <span class="localtime">{{ group['modified'] }}</span>
-          <a href="{{ reverse_url('group_logs', group['_id']) }}">
-            {% module Icon('logs', label=True) %}
-          </a>
+          {% module LogsLink(group) %}
         </td>
       </tr>
       <tr>

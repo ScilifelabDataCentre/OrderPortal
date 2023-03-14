@@ -55,13 +55,15 @@ def initialize():
 
 
 @cli.command()
-def counts():
+@click.option("-v", "--verbose", count=True)
+def counts(verbose):
     "Output counts of database entities."
     db = orderportal.database.get_db()
     orderportal.database.update_design_documents(db)
     click.echo(f"{orderportal.database.get_count(db, 'order', 'owner'):>5} orders")
     click.echo(f"{orderportal.database.get_count(db, 'form', 'all'):>5} forms")
     click.echo(f"{orderportal.database.get_count(db, 'account', 'all'):>5} accounts")
+    click.echo(f"{orderportal.database.get_count(db, 'report', 'order'):>5} reports")
 
 
 @cli.command()
@@ -101,7 +103,7 @@ def undump(dumpfile, progressbar):
         db = orderportal.database.get_db()
     except KeyError as error:
         raise click.ClickException(str(error))
-    utils.load_design_documents(db)  # Just in case; probably not really needed.
+    orderportal.database.update_design_documents(db)
     if (
         orderportal.database.get_count(db, "account", "all") != 0
         or orderportal.database.get_count(db, "form", "all") != 0
@@ -121,8 +123,8 @@ def undump(dumpfile, progressbar):
         db.delete(doc)
         doc.pop("_rev")
     ndocs, nfiles = db.undump(dumpfile, progressbar=progressbar)
-    # NOTE: Meta documents must not have these id's; these are henceforth banned.
-    for id in constants.BANNED_META_IDS:
+    # NOTE: Meta documents must not have these id's; these are henceforth forbidden.
+    for id in constants.FORBIDDEN_META_IDS:
         try:
             doc = db[id]
             db.delete(doc)
@@ -136,7 +138,7 @@ def undump(dumpfile, progressbar):
         if len(db.view("text", "name", key=doc["name"])) == 0:
             db.put(doc)
     # And finally update the formats of some meta documents.
-    orderportal.admin.update_meta_documents(db)
+    orderportal.admin.migrate_meta_documents(db)
     click.echo(f"Loaded {ndocs} documents and {nfiles} files.")
 
 
@@ -243,23 +245,6 @@ def output(identifier):
     if doc is None:
         raise click.ClickException("No such item in the database.")
     click.echo(json.dumps(doc, ensure_ascii=False, indent=2))
-
-
-@cli.command()
-@click.option("-v", "--verbose", count=True)
-def count_reports(verbose):
-    "Count the number of orders that have an old-style report attached."
-    db = orderportal.database.get_db()
-    view = db.view("order", "identifier", reduce=False, include_docs=True)
-    order_count = 0
-    report_count = 0
-    for row in view:
-        order_count += 1
-        if row.doc.get("report"):
-            if verbose:
-                click.echo(row.doc["identifier"])
-            report_count += 1
-    click.echo(f"{order_count} orders, of which {report_count} have old-style reports.")
 
 
 if __name__ == "__main__":

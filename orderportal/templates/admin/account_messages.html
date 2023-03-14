@@ -26,7 +26,7 @@
   </tr>
   {% for text in  texts %}
   <tr>
-    <td>{% module Icon(text['status'], label=True) %}</td>
+    <td>{% module Status(text['status']) %}</td>
     <td>{{ text['subject'] }}</td>
     <td>{{ ', '.join(text['recipients']) or '-' }}</td>
     <td class="pre">{{ text['text'] }}</td>

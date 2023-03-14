@@ -38,11 +38,11 @@ Reports for {% module terminology('order') %} {{ order['title'] or '[no title]' 
         {% for report in reports %}
         <tr>
           <td>
-            <a href="{{ reverse_url('form', report['_id']) }}">{{ report['title'] }}</a>
+            <a href="{{ reverse_url('report', report['_id']) }}">{{ report['title'] }}</a>
           </td>
           <td></td>
           <td>{% module Markdown(report.get('description')) %}</td>
-          <td>{% module Icon(report['status'], label=True) %}</td>
+          <td>{% module Status(report['status']) %}</td>
           <td class="localtime">{{ report['modified'] }}</td>
         </tr>
         {% end %}

@@ -24,19 +24,19 @@
 {% end %}
 
 {% block content %}
-<div class="row">
-  <div class="col-md-7 col-md-offset-3">
-    <form action="{{ reverse_url('orders', **filter) }}" id="refresh"
+<div class="row" style="padding: 0.5em;">
+  <div class="col-md-10 col-md-offset-1">
+    <form action="{{ reverse_url('orders', **filter) }}" name="refresh" id="refresh"
           method="GET" class="form-inline" role="form">
       <span class="glyphicon glyphicon-filter"></span>
       <div class="form-group">
         <label for="form_id">Filter by</label>
         <select name="form_id" id="form_id" class="form-control refresh">
           <option value="">[any form]</option>
-          {% for form_id, form in forms_lookup.items() %}
-          {% set sel = form_id == filter.get('form_id') and 'selected' or '' %}
-          <option {{ sel }} value="{{ form_id }}">
-            {{ form['title'] }} {% module Version(form) %}
+          {% for form in forms %}
+          {% set sel = form['_id'] == filter.get('form_id') and 'selected' or '' %}
+          <option {{ sel }} value="{{ form['_id'] }}">
+            {{ form['title'] or '[no title]' }} ({{ form.get('version') or '-' }})
           </option>
           {% end %}
         </select>
@@ -113,19 +113,10 @@
       <tbody>
         {% for order in orders %}
         <tr>
-          <td>{% module Entity(order, icon=False) %}</td>
+          <td>{% module OrderLink(order) %}</td>
           <td>{{ order.get('title') or '[no title]' }}</td>
-          <td>
-            {% set form = forms_lookup[order['form']] %}
-            <a href="{{ reverse_url('form', order['form']) }}">
-              {{ form['title'] }} {% module Version(form) %}
-            </a>
-          </td>
-          <td>
-            <a href="{{ reverse_url('account', order['owner']) }}">
-              {{ account_names[order['owner']] }}
-            </a>
-          </td>
+          <td>{% module FormLink(iuid=order['form'], version=True) %}</td>
+          <td>{% module AccountLink(email=order['owner'], name=True) %}</td>
           {% if settings['ORDERS_LIST_OWNER_UNIVERSITY'] %}
           <td>{% module NoneStr(accounts_university[order['owner']], undef='-') %}</td>
           {% end %}
@@ -143,7 +134,7 @@
             {% module NoneStr(order['fields'].get(f), undef='-', list_delimiter=', ') %}
           </td>
           {% end %}
-          <td>{% module Icon(order['status'], label=True) %}</td>
+          <td>{% module Status(order['status']) %}</td>
           {% for s in settings['ORDERS_LIST_STATUSES'] %}
           <td class="nobr">{% module NoneStr(order['history'].get(s)) %}</td>
           {% end %}

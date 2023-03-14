@@ -29,13 +29,13 @@
   </tr>
   <tr>
     <th>Status</th>
-    <td>{% module Icon(account['status'], label=True) %}</td>
+    <td>{% module Status(account['status']) %}</td>
   </tr>
   {% if am_admin %}
   <tr>
     <th>Code for setting password</th>
     <td>
-      {% if account.get('code') %}
+      {% if account.get('code') and account['status'] == constants.ENABLED %}
       {{ account['code'] }}
       <br>
       URL: {{ absolute_reverse_url('password', email=account['email'], code=account['code']) }}
@@ -51,12 +51,7 @@
       <table>
         {% for group in groups %}
         <tr>
-          <td>
-            {% module Entity(group) %}
-            {% if group['owner'] == account['email'] %}
-            (owner)
-            {% end %}
-          </td>
+          <td>{% module GroupLink(group, show_am_owner=True) %}</td>
           {% if current_user['email'] == account['email'] and account['email'] != group['owner'] %}
           <td>
             <form action="{{ reverse_url('group_decline', group['_id']) }}"
@@ -65,9 +60,9 @@
               <div class="form-group">
                 &nbsp;
                 <button type="submit" class="btn btn-danger btn-xs"
-                        onclick="return confirm('Cannot be undone! Really decline?');">
+                        onclick="return confirm('Cannot be undone! Really leave?');">
                   <span class="glyphicon glyphicon-remove"></span>
-                  Decline
+                  Leave
                 </button>
               </div>
             </form>
@@ -85,8 +80,7 @@
       {% for group in invitations %}
         <tr>
           <td>
-            {{ group['name'] }}
-            (owner {% module Icon('account') %} {{ group['owner'] }})
+            {{ group['name'] }} (owner {{ group['owner'] }})
           </td>
           {% if current_user['email'] == account['email'] %}
           <td>
@@ -288,7 +282,7 @@
     <th>Messages</th>
     <td>
       <a href="{{ reverse_url('account_messages', account['email']) }}">
-        {% module Icon('message', label=True, title='Messages') %}
+        {% module Icon('message') %} Messages
       </a>
     </td>
   </tr>
@@ -296,9 +290,7 @@
     <th>Modified</th>
     <td>
       <span class="localtime">{{ account['modified'] }}</span>
-      <a href="{{ reverse_url('account_logs', account['email']) }}">
-        {% module Icon('logs', label=True) %}
-      </a>
+      {% module LogsLink(account) %}
     </td>
   </tr>
   <tr>

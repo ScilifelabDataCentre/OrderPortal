@@ -5,16 +5,19 @@
 {% block content_left %}
 <div class="panel panel-default">
   <div class="panel-heading">
-    Recently accepted {{ terminology('orders') }}
+    Recently submitted {{ terminology('orders') }}
+    <a href="{{ reverse_url('orders', status='submitted') }}"
+       class="btn btn-default btn-xs pull-right" role="button">
+      <span class="glyphicon glyphicon-list-alt"></span>
+      All submitted
+    </a>
   </div>
   <div class="panel-body">
     <table class="table-condensed">
       {% for order in orders %}
       <tr>
-        <th>
-          <a href="{{ order_reverse_url(order) }}">{{ order['title'] }}</a>
-        </th>
-        <td>{% module Icon(order['status'], label=True) %}</td>
+        <th>{% module OrderLink(order, title=True) %}</th>
+        <td>{% module Status(order['status']) %}</td>
         <td class="localtime">{{ order['modified'] }}</td>
       </tr>
       {% end %}

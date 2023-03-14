@@ -1,0 +1,85 @@
+{# Review a report for an order. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}
+Review report for {{ terminology('order') }} '{{ order['title'] }}'
+{% end %}
+
+{% block body_title %}
+Review report for {{ terminology('order') }} '{{ order['title'] }}'
+{% end %}
+
+{% block action_content %}
+{% module CancelButton(reverse_url('order', order['_id'])) %}
+{% end %} {# block action_content #}
+
+{% block main_content %}
+<form action="{{ reverse_url('report_review', report['_id']) }}"
+      class="form-horizontal" method="POST" role="form" enctype="multipart/form-data">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group">
+    <label class="control-label col-md-2">Current report file</label>
+    <div class="col-md-10">
+      <p class="form-control-static">
+        {% if report.get('inline') %}
+        <a href="{{ reverse_url('report', report['_id']) }}">
+          <strong>{{ report['name'] }}</strong>
+        </a>
+        {% else %}
+        <a href="{{ reverse_url('report', report['_id']) }}"
+           role="button" class="btn btn-primary" title="Download">
+          <span class="glyphicon glyphicon-download-alt"></span> {{ report['name'] }}
+        </a>
+        {% end %}
+      </p>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2">Modified</label>
+    <div class="col-md-8">
+      <p class="form-control-static localtime">{{ report['modified'] }}</p>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="review">My review</label>
+    <div class="col-md-10">
+      <textarea name="review" id="review" class="form-control"
+                >{% module NoneStr(report['reviewers'][current_user['email']]['review']) %}</textarea>
+      <small>
+        {% if settings['DISPLAY_TEXT_MARKDOWN_NOTATION_INFO'] %}
+        <a href="{{ constants.MARKDOWN_NOTATION_INFO_URL }}" target="_blank">
+          Markdown</a> notation may optionally be used to format the text.
+        {% end %}
+      </small>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="status">My conclusion</label>
+    {% set my_status = report['reviewers'][current_user['email']]['status'] %}
+    <div class="col-md-10">
+      {% for status in constants.REPORT_REVIEW_STATUSES %}
+      <div class="radio">
+        <label>
+          <input type="radio" name="status" value="{{ status }}"
+                 {{ my_status == status and 'checked' or '' }}>
+          {% module Status(status) %}
+        </label>
+      </div>
+      {% end %}
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-3">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+    </div>
+  </div>
+
+</form>
+{% end %} {# block main_content #}

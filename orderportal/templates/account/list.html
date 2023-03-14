@@ -27,11 +27,10 @@
 {% end %}
 
 {% block content %}
-<form action="{{ reverse_url('accounts', **filter) }}" id="refresh"
-      method="GET" class="form-inline" role="form">
-
-  <div class="row">
-    <div class="col-md-10 col-md-offset-2">
+<div class="row" style="padding: 0.5em;">
+  <div class="col-md-10 col-md-offset-2">
+    <form action="{{ reverse_url('accounts', **filter) }}" name="refresh" id="refresh"
+          method="GET" class="form-inline" role="form">
       <span class="glyphicon glyphicon-filter"></span>
       <div class="form-group">
         <label for="university">Filter by</label>
@@ -63,9 +62,20 @@
           {% end %}
         </select>
       </div>
-    </div>
+      <div class="form-group">
+        <select name="login" id="login" class="form-control refresh">
+          {% if not filter.get('login') or filter['login'] == 'last year' %}
+          <option selected value="last year">Login last year</option>
+          <option value="whenever">Login whenever</option>
+          {% elif filter.get('login') == 'whenever' %}
+          <option value="last year">Login last year</option>
+          <option selected value="whenever">Login whenever</option>
+          {% end %}
+        </select>
+      </div>
+    </form>
   </div>
-</form>
+</div>
 
 <div class="row">
   <div class="col-md-12">
@@ -88,7 +98,7 @@
       <tbody>
         {% for account in accounts %}
         <tr>
-          <td>{% module Entity(account, icon=False) %}</td>
+          <td>{% module AccountLink(account=account) %}</td>
           <td>{{ account['name'] }}</td>
           {% if settings['ACCOUNT_ORCID_INFO'] %}
           <td>{{ account.get('orcid') or '-' }}</td>
@@ -101,7 +111,7 @@
           </td>
           <th>{{ account['university'] }}</td>
           <td>{{ account['role'] }}</td>
-          <td>{% module Icon(account['status'], label=True) %}</td>
+          <td>{% module Status(account['status']) %}</td>
           {% if account.get('login') %}
           <td class="localtime nobr">{{ account['login'] }}</td>
           {% else %}

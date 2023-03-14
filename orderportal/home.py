@@ -38,10 +38,7 @@ class Home(RequestHandler):
             url = self.reverse_url("account", self.current_user["email"])
             kwargs[
                 "message"
-            ] = """You have group invitations.
-See your <a href="{0}">account</a>.""".format(
-                url
-            )
+            ] = f'You have group invitations.\nSee your <a href="{url}">account</a>.'
         if not self.current_user:
             self.render("home/anonymous.html", **kwargs)
         elif self.current_user["role"] == constants.ADMIN:
@@ -59,13 +56,12 @@ See your <a href="{0}">account</a>.""".format(
         pending = [r.doc for r in view]
         pending.sort(key=lambda i: i["modified"], reverse=True)
         pending = pending[: settings["DISPLAY_MAX_PENDING_ACCOUNTS"]]
-        # NOTE: Hard-wired status 'submitted'!
         view = self.db.view(
             "order",
             "status",
             descending=True,
-            startkey=["submitted", constants.CEILING],
-            endkey=["submitted"],
+            startkey=[constants.SUBMITTED, constants.CEILING],
+            endkey=[constants.SUBMITTED],
             limit=settings["DISPLAY_MAX_RECENT_ORDERS"],
             reduce=False,
             include_docs=True,
@@ -75,13 +71,12 @@ See your <a href="{0}">account</a>.""".format(
 
     def home_staff(self, **kwargs):
         "Home page for a current user having role 'staff'."
-        # NOTE: Hard-wired status 'submitted'!
         view = self.db.view(
             "order",
             "status",
             descending=True,
-            startkey=["accepted", constants.CEILING],
-            endkey=["accepted"],
+            startkey=[constants.SUBMITTED, constants.CEILING],
+            endkey=[constants.SUBMITTED],
             limit=settings["DISPLAY_MAX_RECENT_ORDERS"],
             reduce=False,
             include_docs=True,

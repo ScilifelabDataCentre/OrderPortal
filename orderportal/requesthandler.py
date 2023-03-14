@@ -51,7 +51,8 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def see_other(self, name, *args, **kwargs):
         """Redirect to the absolute URL given by name
-        using HTTP status 303 See Other."""
+        using HTTP status 303 See Other.
+        """
         query = kwargs.copy()
         try:
             self.set_error_flash(str(query.pop("error")))
@@ -193,7 +194,7 @@ class RequestHandler(tornado.web.RequestHandler):
         self.logger.debug("Basic auth login: account %s", account["email"])
         return account
 
-    def is_owner(self, entity):
+    def am_owner(self, entity):
         "Does the current user own the given entity?"
         return self.current_user and entity["owner"] == self.current_user["email"]
 
@@ -233,42 +234,6 @@ class RequestHandler(tornado.web.RequestHandler):
         admins = [r.doc for r in view]
         return [a for a in admins if a["status"] == constants.ENABLED]
 
-    def get_staff(self):
-        "Get the list of enabled staff accounts."
-        view = self.db.view("account", "role", key=constants.STAFF, include_docs=True)
-        staff = [r.doc for r in view]
-        return [a for a in staff if a["status"] == constants.ENABLED]
-
-    def get_recipients(self, text, account):
-        """Return the list of emails for the recipients according to
-        the specification in the text, given the user account.
-        May include admin and staff.
-        """
-        result = []
-        if constants.USER in text["recipients"]:
-            result.append(account["email"])
-        if constants.ADMIN in text["recipients"]:
-            result.extend([a["email"] for a in self.get_admins()])
-        if constants.STAFF in text["recipients"]:
-            result.extend([a["email"] for a in self.get_staff()])
-        return result
-
-    def get_colleagues(self, email):
-        "Get list of accounts in same groups as the account given by email."
-        colleagues = dict()
-        for row in self.db.view(
-            "group", "member", include_docs=True, key=email.strip().lower()
-        ):
-            for member in row.doc["members"]:
-                try:
-                    account = self.get_account(member)
-                except ValueError:
-                    pass
-                else:
-                    if account["status"] == constants.ENABLED:
-                        colleagues[account["email"]] = account
-        return list(colleagues.values())
-
     def get_next_counter(self, doctype):
         "Get the next counter number for the doctype."
         from orderportal.admin import MetaSaver  # To avoid circular import.
@@ -277,7 +242,7 @@ class RequestHandler(tornado.web.RequestHandler):
             try:
                 doc = self.db[doctype]  # Doc must be reloaded each iteration
             except couchdb2.NotFoundError:
-                with MetaSaver(rqh=self) as saver:
+                with MetaSaver(handler=self) as saver:
                     saver.set_id(doctype)
                 doc = saver.doc
             try:
@@ -318,16 +283,33 @@ class RequestHandler(tornado.web.RequestHandler):
         else:
             raise tornado.web.HTTPError(404, reason=reason)
 
-    def get_texts(self, type):
-        "Return all texts of the given type."
-        result = [
-            row.doc
-            for row in self.db.view(
-                "text", "type", key=type, reduce=False, include_docs=True
-            )
-        ]
-        result.sort(key=lambda d: d["name"])
-        return result
+    def get_order(self, iuid):
+        "Get the order for the identifier or IUID."
+        try:  # First try order identifier.
+            order = self.get_entity_view("order", "identifier", iuid)
+        except tornado.web.HTTPError:
+            # Next try order doc IUID.
+            order = self.get_entity(iuid, doctype=constants.ORDER)
+        return order
+
+    def get_form(self, iuid):
+        "Get the form given by its IUID."
+        return self.get_entity(iuid, doctype=constants.FORM)
+
+    def lookup_form(self, iuid):
+        """Lookup the form by its IUID.
+        Sets up a cached dictionary 'lookup_forms' when called the first time.
+        """
+        try:
+            return self.lookup_forms.get(iuid)
+        except AttributeError:
+            view = self.db.view("form", "modified", descending=True, include_docs=True)
+            self.lookup_forms =  dict([(r.id, r.doc) for r in view])
+            return self.lookup_forms.get(iuid)
+
+    def get_report(self, iuid):
+        "Get the report for the IUID."
+        return self.get_entity(iuid, doctype=constants.REPORT)
 
     def get_text(self, type, name):
         """Get the requested text by type and name.
@@ -410,48 +392,27 @@ class RequestHandler(tornado.web.RequestHandler):
         view = self.db.view("group", "invited", key=email, include_docs=True)
         return [r.doc for r in view]
 
-    def is_colleague(self, email):
-        """Is the user with the given email address
-        in the same group as the current user?"""
+    def am_colleague(self, email):
+        "Is the user with the email address in the same group as the current user?"
         if not self.current_user:
             return False
         return self.current_user["email"] in self.get_account_colleagues(email)
 
-    def get_accounts_name(self, emails=[]):
-        """Get dictionary with email as key and name (last, first) as value.
-        If emails is None, then for all accounts."""
-        result = {}
-        if emails:
-            for email in emails:
-                email = email.strip().lower()
-                try:
-                    rows = self.db.view("account", "email", key=email)
-                    value = list(rows)[0].value
-                except IndexError:
-                    name = "[unknown]"
-                else:
-                    name = ", ".join(reversed(value))
-                result[email] = name
-        else:
-            for row in self.db.view("account", "email"):
-                result[row.key] = ", ".join(reversed(row.value))
-        return result
-
-    def get_all_accounts(self):
-        "Get all accounts docs, from cache if it exists, otherwise create it."
+    def lookup_account_name(self, email):
+        """Lookup the name "last, first" of the person for the account.
+        Sets up a cached dictionary 'lookup_accounts_names' when called the first time.
+        """
         try:
-            return self.cache_all_accounts
+            return self.lookup_accounts_names.get(email) or email
         except AttributeError:
-            self.logger.debug("Getting all accounts into request cache.")
-            self.cache_all_accounts = {}
-            for row in self.db.view("account", "email", include_docs=True):
-                self.cache_all_accounts[row.key] = row.doc
-            return self.cache_all_accounts
+            self.lookup_accounts_names = {}
+            for row in self.db.view("account", "email"):
+                self.lookup_accounts_names[row.key] = ", ".join(reversed(row.value))
+            return self.lookup_accounts_names.get(email) or email
 
-    def get_forms_lookup(self):
-        "Get all forms as a lookup with form iuid as key, form doc as value."
-        view = self.db.view("form", "modified", descending=True, include_docs=True)
-        return dict([(r.id, r.doc) for r in view])
+    def get_group(self, iuid):
+        "Return the group for the IUID."
+        return self.get_entity(iuid, doctype=constants.GROUP)
 
     def get_logs(self, iuid, limit=settings["DISPLAY_DEFAULT_MAX_LOG"] + 1):
         "Return the event log documents for the given entity iuid."

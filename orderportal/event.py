@@ -25,7 +25,7 @@ class EventCreate(RequestHandler):
     @tornado.web.authenticated
     def post(self):
         self.check_admin()
-        with EventSaver(rqh=self) as saver:
+        with EventSaver(handler=self) as saver:
             saver["date"] = self.get_argument("date")
             saver["title"] = self.get_argument("title")
             saver["text"] = self.get_argument("text", None) or ""
@@ -46,7 +46,7 @@ class EventEdit(RequestHandler):
         except tornado.web.HTTPError:
             self.see_other("home", error="No such event.")
             return
-        with EventSaver(doc=event, rqh=self) as saver:
+        with EventSaver(doc=event, handler=self) as saver:
             saver["date"] = self.get_argument("date")
             saver["title"] = self.get_argument("title")
             saver["text"] = self.get_argument("text", None) or ""

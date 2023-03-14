@@ -22,7 +22,7 @@ def get_db():
 
 
 def update_design_documents(db):
-    "Ensure that all CouchDB design documents are up to date."
+    "Ensure that all CouchDB design documents are current."
     logger = logging.getLogger("orderportal")
 
     if db.put_design("account", ACCOUNT_DESIGN_DOC):
@@ -45,10 +45,10 @@ def update_design_documents(db):
         logger.info("Updated 'meta' design document.")
     if db.put_design("news", NEWS_DESIGN_DOC):
         logger.info("Updated 'news' design document.")
-    # Replace variables in the function body according to 'settings'.
+    # Replace variables in the function body according to constants.
     mapfunc = ORDER_DESIGN_DOC["views"]["keyword"]["map"]
-    delims_lint = "".join(settings["ORDERS_SEARCH_DELIMS_LINT"])
-    lint = "{%s}" % ", ".join(["'%s': 1" % w for w in settings["ORDERS_SEARCH_LINT"]])
+    delims_lint = "".join(constants.ORDERS_SEARCH_DELIMS_LINT)
+    lint = "{%s}" % ", ".join(["'%s': 1" % w for w in constants.ORDERS_SEARCH_LINT])
     ORDER_DESIGN_DOC["views"]["keyword"]["map"] = mapfunc.format(
         delims_lint=delims_lint, lint=lint
     )
@@ -78,6 +78,7 @@ def get_counts(db):
         n_orders=get_count(db, "order", "status"),
         n_forms=get_count(db, "form", "all"),
         n_accounts=get_count(db, "account", "all"),
+        n_reports=get_count(db, "report", "order"),
         n_documents=len(db),
     )
 
@@ -149,6 +150,13 @@ ACCOUNT_DESIGN_DOC = {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'account') return;
     emit(doc.university, doc.email);
+}"""
+        },
+        "login": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'account') return;
+    if (!doc.login) return;
+    emit(doc.login, doc.email);
 }"""
         },
     }
@@ -329,7 +337,8 @@ ORDER_DESIGN_DOC = {
 }"""
         },
         "keyword": {  # order/keyword
-            # NOTE: The 'map' function body is modified in utils.load_design_documents.
+            # NOTE: The 'map' function body is modified in 'update_design_documents'.
+            # This is why there have to be double curly-braces here.
             "map": """function(doc) {{
     if (doc.orderportal_doctype !== 'order') return;
     var cleaned = doc.title.replace(/[{delims_lint}]/g, " ").toLowerCase();
@@ -388,9 +397,21 @@ var lint = {lint};
 REPORT_DESIGN_DOC = {
     "views": {
         "order": {
+            "reduce": "_count",
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'report') return;
     emit(doc.order, doc.modified);
+}"""
+        },
+        "review": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'report') return;
+    if (doc.status !== 'review') return;
+    for (const key in doc.reviewers) {
+      if (doc.reviewers.hasOwnProperty(key)) {
+        if (doc.reviewers[key].status == 'review') emit(key, doc.order);
+      };
+    };
 }"""
         },
     }

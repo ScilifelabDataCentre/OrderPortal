@@ -115,21 +115,15 @@
       {% if am_admin %}
       <tr>
         <th>{{ terminology('Order') }} form</th>
-        <td>
-          <a href="{{ reverse_url('form', form['_id']) }}">
-            {{ form['title'] }} {% module Version(form) %}
-          </a>
-        </td>
+        <td>{% module FormLink(form, version=True) %}</td>
       </tr>
       {% end %} {# if am_admin #}
 
       <tr>
         <th>Owner</th>
         <td colspan="2">
-          <a href="{{ reverse_url('account', order['owner']) }}">
-            {{ account_names.get(order['owner'], order['owner']) }}
-          </a>
-          ({{ order['owner'] }})
+          {% module AccountLink(email=order['owner'], name=True) %}
+          {{ order['owner'] }}
         </td>
       </tr>
       {% if settings['ORDER_TAGS'] and (am_staff or settings['ORDER_USER_TAGS']) %}
@@ -142,47 +136,94 @@
       <tr>
         <th>Links</th>
         <td>
-          {% for link in order.get('links', {}).get('external', []) %}
-          <a href="{{ link['href'] }}" target="_blank">
-            {{ link['title'] }}</a><br>
+          {% set links = order.get('links', {}).get('external', []) %}
+          {% if links %}
+          {% for link in links %}
+          <a href="{{ link['href'] }}" target="_blank">{{ link['title'] }}</a>
+          <br>
           {% end %}
+          {% else %}
+          -
+          {% end %} {# if links #}
         </td>
       </tr>
       {% end %} {#if settings.get('ORDER_LINKS') #}
       <tr>
         <th>Status</th>
-        <td>
-          {% module Icon(order['status'], label=True) %}
-          ({{ status['description'] }})
-        </td>
+        <td>{% module Status(order['status']) %} ({{ status['description'] }})</td>
       </tr>
-      {% if settings['ORDER_REPORT'] %}
+      {% if settings['ORDER_REPORTS'] %}
       <tr>
-        <th>Report</th>
+        <th>Reports</th>
         <td>
-          {% if order.get('report') %}
-          <a href="{{ reverse_url('order_report', order['_id']) }}"
-             role="button"
-             class="btn btn-success btn-sm">
-            <span class="glyphicon glyphicon-briefcase"></span>
-            Report
-          </a>
-          (updated 
-          <span class="localtime">{{ order['report']['timestamp'] }}</span>)
+          {% if reports %}
+          <table class="table table-condensed" style="margin-bottom: 0px;">
+            <thead>
+              <tr>
+                <th style="text-align: left;">File</th>
+                <th style="text-align: left;">Modified</th>
+                {% if am_staff %}
+                <th style="text-align: left;">Status</th>
+                <th></th>
+                <th></th>
+                {% end %} {# if am_staff #}
+              </tr>
+            </thead>
+            <tbody>
+              {% for report in reports %}
+              <tr>
+                <td>
+                  {% if report.get('inline') %}
+                  <a href="{{ reverse_url('report', report['_id']) }}">
+                    <strong>{{ report['name'] }}</strong>
+                  </a>
+                  {% else %}
+                  <a href="{{ reverse_url('report', report['_id']) }}"
+                     role="button" class="btn btn-xs btn-primary" title="Download">
+                    <span class="glyphicon glyphicon-download-alt"></span>
+                    {{ report['name'] }}
+                  </a>
+                  {% end %}
+                </td>
+                <td class="localtime">{{ report['modified'] }}</td>
+                {% if am_staff %}
+                <td>{% module Status(report['status']) %}</td>
+                <td>
+                  {% if report['status'] == constants.REVIEW and current_user and report['reviewers'].get(current_user['email'], {}).get('status') == constants.REVIEW %}
+                  
+                  <a href="{{ reverse_url('report_review', report['_id']) }}"
+                     role="button" class="btn btn-warning btn-xs" style="color: black;">
+                    <span class="glyphicon glyphicon-edit"></span> Review
+                  </a>
+                  {% end %}
+                </td>
+                <td>
+                  <a href="{{ reverse_url('report_edit', report['_id']) }}"
+                     role="button" class="btn btn-primary btn-xs">
+                    <span class="glyphicon glyphicon-edit"></span> Edit
+                  </a>
+                </td>
+                {% end %} {# if am_staff #}
+              </tr>
+              {% end %} {# for report in reports #}
+            </tbody>
+          </table>
           {% else %}
           -
-          {% end %}
-          {% if am_admin %}
-          <a href="{{ reverse_url('order_report_edit', order['_id']) }}"
-             class="btn btn-primary btn-xs"
-             role="button">
-            <span class="glyphicon glyphicon-edit"></span>
-            Edit
-          </a>
-          {% end %} {# if am_admin #}
+          {% end %} {# if reports #}
+          {% if am_staff %}
+          <form action="{{ reverse_url('report_add') }}" method="GET" role="form">
+            <input type="hidden" name="order" value="{{ order['_id'] }}">
+            <div class="form-group" style="margin-bottom: 0px;">
+              <button type="submit" class="btn btn-primary btn-sm">
+                <span class="glyphicon glyphicon-plus-sign"></span> Add report
+              </button>
+            </div>
+          </form>
+          {% end %} {# if am_staff #}
         </td>
       </tr>
-      {% end %} {# if settings['ORDER_REPORT'] #}
+      {% end %} {# if settings['ORDER_REPORTS'] #}
       <tr>
         <th>History</th>
         <td>
@@ -190,7 +231,7 @@
             {% for s in reversed(settings['ORDER_STATUSES']) %}
             {% if order['history'].get(s['identifier']) %}
             <tr>
-              <td>{% module Icon(s['identifier'], label=True) %}</td>
+              <td>{% module Status(s['identifier']) %}</td>
               <td>&nbsp;{{ order['history'][s['identifier']] }}</td>
             </tr>
             {% end %}
@@ -202,9 +243,7 @@
         <th>Modified</th>
         <td>
           <span class="localtime">{{ order['modified'] }}</span>
-          <a href="{{ reverse_url('order_logs', order['_id']) }}">
-            {% module Icon('logs', label=True) %}
-          </a>
+          {% module LogsLink(order) %}
         </td>
       </tr>
       <tr>
@@ -218,6 +257,7 @@
       <tr>
         <th>Files</th>
         <td colspan="2">
+          {% if attached_files %}
           <table class="table table-condensed table-striped">
             {% for file in attached_files %}
             <tr>
@@ -250,11 +290,13 @@
             </tr>
             {% end %} {# for file in attached_files #}
           </table>
+          {% else %}
+          <div>-</div>
+          {% end %} {# if attached_files #}
           {% if allow_attach %}
           <button type="button" class="btn btn-primary"
                   data-toggle="modal" data-target="#attach">
-            <span class="glyphicon glyphicon-paperclip"></span>
-            Attach
+            <span class="glyphicon glyphicon-paperclip"></span> Attach file
           </button>
           {% end %} {# if allow_attach #}
         </td>
