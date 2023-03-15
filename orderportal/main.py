@@ -32,8 +32,8 @@ def main():
     orderportal.database.update_design_documents(db)
     orderportal.admin.migrate_meta_documents(db)
     orderportal.admin.migrate_text_documents(db)
-    orderportal.admin.load_texts(db)
     orderportal.config.load_settings_from_db(db)
+    orderportal.config.load_texts_from_db(db)
 
     url = tornado.web.url
     handlers = [

@@ -12,15 +12,6 @@ Edit report for {{ terminology('order') }} '{{ order['title'] }}'
 
 {% block action_content %}
 {% module CancelButton(reverse_url('order', order['_id'])) %}
-<form action="{{ reverse_url('report', report['_id']) }}"
-      method="POST" role="form" style="margin-top: 20px;">
-  {% module xsrf_form_html() %}
-  <input type="hidden" name="_http_method" value="delete">
-  <button type="submit" class="btn btn-danger btn-block"
-          onclick="return confirm('Cannot be undone! Really delete?');">
-    <span class="glyphicon glyphicon-trash"></span> Delete
-  </button>
-</form>
 {% end %} {# block action_content #}
 
 {% block main_content %}
@@ -29,7 +20,7 @@ Edit report for {{ terminology('order') }} '{{ order['title'] }}'
   {% module xsrf_form_html() %}
 
   <div class="row">
-    <label class="control-label col-md-2">Current report file</label>
+    <label class="control-label col-md-2">Report document</label>
     <div class="col-md-10">
       <p class="form-control-static">
         {% if report.get('inline') %}
@@ -48,9 +39,11 @@ Edit report for {{ terminology('order') }} '{{ order['title'] }}'
   </div>
 
   <div class="row">
-    <label class="control-label col-md-2">Responsible</label>
+    <label class="control-label col-md-2">Owner</label>
     <div class="col-md-10">
-      <p class="form-control-static">{% module AccountLink(report['responsible']) %}</p>
+      {% if report.get('owner') %}
+      <p class="form-control-static">{% module AccountLink(report['owner']) %}</p>
+      {% end %}
     </div>
   </div>
 
@@ -66,10 +59,24 @@ Edit report for {{ terminology('order') }} '{{ order['title'] }}'
     <div class="col-md-10">
       <input type="file" name="report" id="report" class="form-control">
       <p class="help-block">
+        Current file: <strong>{{ filename }}</strong>
+        <br>
         Upload a new file as the report file. An HTML or text file
         will be displayed in-line when clicking the link to it; other
         content types will be downloaded as a file.
       </p>
+    </div>
+  </div>
+
+  <div class="form-group has-feedback">
+    <label class="control-label col-md-2" for="name">Name</label>
+    <div class="col-md-10">
+      <input type="text" name="name" id="name" class="form-control"
+             value="{{ report['name'] }}">
+      <div class="help-block">
+        The displayed name of the report. If none given, the filename
+        of the uploaded file will be used.
+      </div>
     </div>
   </div>
 

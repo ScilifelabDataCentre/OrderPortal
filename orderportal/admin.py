@@ -45,13 +45,13 @@ class TextSaver(saver.Saver):
 
 
 def migrate_meta_documents(db):
-    """Update or delete meta documents for the current version.
+    """Create, update or delete meta documents for the current version.
 
     This has to be checked each time the server starts because
     the database may have been loaded with data from an old dump.
 
-    Yes, this is messy. But all old versions must be dealt with,
-    since old dump files may have to be read in.
+    Yes, this is messy. But all old versions must be handled,
+    since old dump files may have to be dealt with.
     """
     logger = logging.getLogger("orderportal")
     ### As of version 6.0 (or thereabouts), there are no longer any global modes.
@@ -82,11 +82,11 @@ def migrate_meta_documents(db):
             )
             with open(filepath) as infile:
                 legacy_statuses = yaml.safe_load(infile)
-            logger.info(f"loaded legacy order statuses from file '{filepath}'")
+            logger.info(f"Loaded legacy order statuses from file '{filepath}'.")
         except KeyError:
-            logger.warning(f"defaults used for order statuses")
+            logger.warning(f"Defaults used for order statuses.")
         except FileNotFoundError as error:
-            logger.warning(f"defaults used for order statuses; {error}")
+            logger.warning(f"Defaults used for order statuses; {error}")
         except yaml.YAMLError as error:
             logger.warning(f"Error trying to read ORDER_STATUSES_FILE: {error}")
         else:
@@ -98,7 +98,7 @@ def migrate_meta_documents(db):
                     lookup[status["identifier"]]["enabled"] = True
                 except KeyError:
                     logger.error(
-                        f"""unknown legacy order status: '{status["identifier"]}'; skipped"""
+                        f"""Unknown legacy order status: '{status["identifier"]}'; skipped."""
                     )
 
         # Initialize with the default order transitions.
@@ -111,11 +111,11 @@ def migrate_meta_documents(db):
             )
             with open(filepath) as infile:
                 legacy_transitions = yaml.safe_load(infile)
-            logger.info(f"loaded legacy order transitions from file '{filepath}'")
+            logger.info(f"Loaded legacy order transitions from file '{filepath}'.")
         except KeyError:
-            logger.warning(f"defaults used for order transitions")
+            logger.warning(f"Defaults used for order transitions.")
         except FileNotFoundError as error:
-            logger.warning(f"defaults used for order transitions; {error}")
+            logger.warning(f"Defaults used for order transitions; {error}")
         except yaml.YAMLError as error:
             logger.warning(f"Error trying to read ORDER_TRANSITIONS_FILE: {error}")
         else:
@@ -234,17 +234,17 @@ def migrate_meta_documents(db):
 
 
 def migrate_text_documents(db):
-    """Update text documents for the current version of the system.
+    """Create or update text documents for the current version of the system.
     Remove old multiple texts; clean up after a previous bug.
     Load the default texts if not already in the database.
 
     This has to be checked each time the server starts because
     the database may have been loaded with data from an old dump.
 
-    Yes, this is messy. But all old versions must be dealt with,
-    since old dump files may have to be read in.
+    Yes, this is messy. But all old versions must be handled,
+    since old dump files may have to be dealt with.
     """
-    loaded = False
+    stored = False
     for text in DEFAULT_TEXTS_DISPLAY:
         # Due to the problem lower down, have to use a bespoke docs fetch here.
         docs = [
@@ -259,7 +259,7 @@ def migrate_text_documents(db):
                 saver["name"] = text["name"]
                 saver["description"] = text["description"]
                 saver["text"] = text["text"]
-            loaded = True
+            stored = True
         elif len(docs) == 1:
             if not docs[0].get("type"):  # Fix previous mistake.
                 with TextSaver(doc=docs[0], db=db) as saver:
@@ -275,8 +275,8 @@ def migrate_text_documents(db):
             if not newest.get("type"):
                 with TextSaver(doc=newest, db=db) as saver:
                     saver["type"] = constants.DISPLAY
-    if loaded:
-        logging.getLogger("orderportal").info("loaded default display text(s)")
+    if stored:
+        logging.getLogger("orderportal").info("Stored default display text(s).")
 
     ### As of version 7.0.4, the one-line description of a text is in the document.
     ### Defensive; This may have been done above, but not for certain.
@@ -303,7 +303,7 @@ def migrate_text_documents(db):
         row.doc for row in db.view("text", "type", constants.ACCOUNT, include_docs=True)
     ]
     lookup = dict([(d["status"], d) for d in docs])
-    loaded = False
+    stored = False
     for text in DEFAULT_TEXTS_ACCOUNT:
         if text["status"] not in lookup:
             with TextSaver(db=db) as saver:
@@ -314,16 +314,27 @@ def migrate_text_documents(db):
                 saver["recipients"] = text["recipients"]
                 saver["subject"] = text["subject"]
                 saver["text"] = text["text"]
-            loaded = True
+            stored = True
+    if stored:
+        logging.getLogger("orderportal").info("Stored default account text(s).")
 
-
-def load_texts(db):
-    "Load the texts into settings."
-    for type in [constants.DISPLAY, constants.ACCOUNT, constants.ORDER]:
-        docs = [row.doc for row in db.view("text", "type", type, include_docs=True)]
-        settings[type] = dict()
-        for doc in docs:
-            settings[type][doc["name"]] = doc
+    ### As of version 10.0.0, the message templates for emails about reports
+    ### are stored in the database as texts.
+    docs = [
+        row.doc for row in db.view("text", "type", constants.REPORT, include_docs=True)
+    ]
+    lookup = dict([(d["name"], d) for d in docs])
+    stored = False
+    for text in DEFAULT_TEXTS_REPORT:
+        if text["name"] not in lookup:
+            with TextSaver(db=db) as saver:
+                saver["type"] = constants.REPORT
+                saver["name"] = text["name"]
+                saver["subject"] = text["subject"]
+                saver["text"] = text["text"]
+            stored = True
+    if stored:
+        logging.getLogger("orderportal").info("Stored default report text(s).")
 
 
 class Texts(RequestHandler):
@@ -993,7 +1004,7 @@ DEFAULT_ORDER_TRANSITIONS[constants.PREPARATION][constants.SUBMITTED] = dict(
 )
 
 
-# Texts shown in some web pages.
+# Defaults for texts to be shown in some web pages.
 DEFAULT_TEXTS_DISPLAY = [
     dict(
         name="header",
@@ -1165,4 +1176,25 @@ Yours sincerely,
 The {site} administrators.
 """,
     ),
+]
+
+DEFAULT_TEXTS_REPORT = [
+    dict(
+        name="reviewers",
+        subject="{site} report requires review.",
+        text="""Dear staff member of {site},
+
+The report '{name}' for the order '{title}' requires your review.
+
+See {url}""",
+        ),
+    dict(
+        name="owner",
+        subject="{site} report status change.",
+        text="""Dear report owner in {site},
+
+The report '{name}' for the order '{title}' has been set to '{status}'.
+
+See {url}""",
+         ),
 ]

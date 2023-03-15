@@ -81,6 +81,8 @@ class MessageSaver(saver.Saver):
         """
         if not recipients:
             raise ValueError("No recipients specified.")
+        if isinstance(recipients, str):
+            recipients = [recipients]
         try:
             self["recipients"] = recipients
             message = email.message.EmailMessage()

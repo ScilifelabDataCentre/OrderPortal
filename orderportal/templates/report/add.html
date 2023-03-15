@@ -15,94 +15,113 @@ Add a report for {{ terminology('order') }}: {{ order['title'] }}
 {% end %} {# block action_content #}
 
 {% block main_content %}
-<form action="{{ reverse_url('report_add') }}"
-      method="POST" role="form" enctype="multipart/form-data">
+<form action="{{ reverse_url('report_add') }}" method="POST" role="form"
+      enctype="multipart/form-data" class="form-horizontal">
   {% module xsrf_form_html() %}
   <input type="hidden" name="order" value="{{ order['_id'] }}">
 
-  <div class="form-group has-feedback">
-    <div class="row">
-      <div class="col-md-9">
-        <label for="report">Report file</label>
-        <input type="file" name="report" id="report" class="form-control">
-        <span style="color:red; margin-right: 1em;"
-              class="glyphicon glyphicon-star form-control-feedback"
-              aria-hidden="true"></span>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12 help-block">
-        The report file to upload. An HTML file will be displayed
-        in-line when clicking the link to it; other content types will
-        be downloaded as a file.
+  <div class="form-group">
+    <label class="control-label col-md-2" for="report">Report document</label>
+    <div class="col-md-10">
+      <input type="file" name="report" id="report" class="form-control">
+      <span style="color:red; margin-right: 1em;"
+            class="glyphicon glyphicon-star form-control-feedback"
+            aria-hidden="true"></span>
+      <div class="help-block">
+        The report document file to upload.
+        <br>
+        The link to it will display HTML or TXT content inline in the browser.
+        All other content types will be downloaded as a file.
       </div>
     </div>
   </div>
 
   <div class="form-group has-feedback">
-    <div class="row">
-      <div class="col-md-9">
-        <label for="report">Responsible</label>
-        <input type="text" name="responsible" id="responsible"
-               class="form-control" value="{{ current_user['email'] }}">
-        <span style="color:red; margin-right: 1em;"
-              class="glyphicon glyphicon-star form-control-feedback"
-              aria-hidden="true"></span>
+    <label class="control-label col-md-2" for="name">Name</label>
+    <div class="col-md-10">
+      <input type="text" name="name" id="name" class="form-control">
+      <div class="help-block">
+        The displayed name of the report. If none given, the filename
+        of the uploaded file will be used.
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-12 help-block">
-        The person responsible for the report. By default the person
-        creating the report.
+  </div>
+
+  <div class="form-group has-feedback">
+    <label class="control-label col-md-2" for="owner">Owner</label>
+    <div class="col-md-10">
+      <input type="text" name="owner" id="owner"
+             class="form-control" value="{{ current_user['email'] }}">
+      <span style="color:red; margin-right: 1em;"
+            class="glyphicon glyphicon-star form-control-feedback"
+            aria-hidden="true"></span>
+      <div class="help-block">
+        The owner of the report. By default the person creating the report.
+        Only enabled staff or admin accounts are accepted.
       </div>
     </div>
   </div>
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-9">
-        <label for="reviewers">Request review by</label>
-        <textarea name="reviewers" id="reviewers" class="form-control"></textarea>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12 help-block">
+    <label class="control-label col-md-2" for="reviewers">Request review by</label>
+    <div class="col-md-10">
+      <textarea name="reviewers" id="reviewers" class="form-control"></textarea>
+      <div class="help-block">
         <p>
-          Request review by the persons given by their email
-          addresses, one per line. The report cannot be set as
-          published until all reviewers have approved it.
+          Persons that must review the report. The report is set as
+          published when and only when all reviewers have approved it.
         </p>
         <p>
-          Email addresses that do not correspond to currently enabled
-          staff accounts in the system will be ignored.
+          Give the email addresses of each person, one per line. Email
+          addresses that do not correspond to currently enabled staff
+          or admin accounts in the system will be ignored.
         </p>
         <p>
-          If any reviewers are given, the status of the report will be
-          set to <strong>Review</strong>.
+          The reviewers cannot be changed once set. In order to set
+          new reviewers, delete this report and add a new one.
         </p>
       </div>
     </div>
   </div>
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <label for="status">Status</label>
-        <select name="status" id="status" class="form-control">
-          {% for status in (constants.PREPARATION, constants.REVIEW, constants.APPROVED) %}
-          <option value="{{ status }}">{{ status.capitalize() }}</option>
-          {% end %}
-        </select>
+    <label class="control-label col-md-2" for="status">Status</label>
+    <div class="col-md-10">
+      <div class="radio">
+        <label>
+          <input type="radio" name="status" value="{{ constants.REVIEW }}" checked>
+          {% module Status(constants.REVIEW) %} (If any reviewers are given above,
+          this status will be forced.)
+        </label>
+      </div>
+      <div class="radio">
+        <label>
+          <input type="radio" name="status" value="{{ constants.PUBLISHED }}">
+          {% module Status(constants.PUBLISHED) %}
+        </label>
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-12 help-block">
+  </div>
+
+{#
+  <div class="form-group">
+    <label class="control-label col-md-2" for="status">Status</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-3">
+          <select name="status" id="status" class="form-control">
+            {% for status in (constants.PREPARATION, constants.REVIEW, constants.APPROVED) %}
+            <option value="{{ status }}">{{ status.capitalize() }}</option>
+            {% end %}
+          </select>
+        </div>
+      </div>
+      <div class="help-block">
         The status of the report.
         <ul>
           <li>
-            <strong>Preparation:</strong> The report is being
-            prepared. Use this e.g.  if the report is unfinished, or
-            if the reviewers have not been decided.
+            <strong>Preparation:</strong> The report is not yet
+            published. Use this e.g. if the report is unfinished.
           </li>
           <li>
             <strong>Review:</strong>The report is being reviewed by
@@ -119,14 +138,12 @@ Add a report for {{ terminology('order') }}: {{ order['title'] }}
       </div>
     </div>
   </div>
-
+#}
+  
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <label class="control-label"></label>
-        <button type="submit" class="btn btn-success btn-block">
-          <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
-      </div>
+    <div class="col-md-offset-2 col-md-3">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
     </div>
   </div>
 

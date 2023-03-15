@@ -183,3 +183,12 @@ def load_settings_from_db(db):
     settings["ORDER_STATUSES_LOOKUP"] = dict(
         [(s["identifier"], s) for s in settings["ORDER_STATUSES"] if s.get("enabled")]
     )
+
+
+def load_texts_from_db(db):
+    "Load the texts from the database into settings."
+    for type in (constants.DISPLAY, constants.ACCOUNT, constants.ORDER, constants.REPORT):
+        docs = [row.doc for row in db.view("text", "type", type, include_docs=True)]
+        settings[type] = dict()
+        for doc in docs:
+            settings[type][doc["name"]] = doc

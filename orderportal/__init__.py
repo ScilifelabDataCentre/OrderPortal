@@ -233,12 +233,11 @@ class Constants:
     TERMINOLOGY_TERMS = ("order", "orders")
 
     # Report statuses; hard-wired!
-    # PREPARATION = "preparation" Already defined above.
     # REVIEW = "review" Already defined above.
     PUBLISHED = "published"
     APPROVED = "approved"
     # REJECTED = "rejected" Already defined above.
-    REPORT_STATUSES = (PREPARATION, REVIEW, PUBLISHED, REJECTED)
+    REPORT_STATUSES = (REVIEW, PUBLISHED, REJECTED)
     REPORT_REVIEW_STATUSES = (REVIEW, APPROVED, REJECTED)
 
     ALL_STATUSES = frozenset(ACCOUNT_STATUSES + FORM_STATUSES + ORDER_STATUSES + REPORT_STATUSES + REPORT_REVIEW_STATUSES)
