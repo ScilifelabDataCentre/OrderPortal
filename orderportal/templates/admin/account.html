@@ -59,6 +59,20 @@
   </div>
 
   <div class="form-group">
+    <label class="control-label col-md-2" for="orcid_required">ORCID required</label>
+    <div class="col-md-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="orcid_required" name="orcid_required" value="yes"
+                 {{ settings.get('ACCOUNT_ORCID_REQUIRED') and 'checked' or '' }}>
+          Yes, the ORCID input field is required. This will be effective only if
+          the checkbox above is marked.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
     <label class="control-label col-md-2" for="postal_info">Postal address info</label>
     <div class="col-md-10">
       <div class="checkbox">
@@ -87,7 +101,7 @@
   <div class="form-group">
     <label class="control-label col-md-2" for="invoice_ref_required">
       Invoice reference required</label>
-    <div class="col-md-12">
+    <div class="col-md-10">
       <div class="checkbox">
         <label>
           <input type="checkbox" id="invoice_ref_required" name="invoice_ref_required"

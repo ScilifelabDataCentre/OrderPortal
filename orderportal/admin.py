@@ -195,6 +195,7 @@ def migrate_meta_documents(db):
             saver["registration_open"] = settings.get("ACCOUNT_REGISTRATION_OPEN", True)
             saver["pi_info"] = settings.get("ACCOUNT_PI_INFO", True)
             saver["orcid_info"] = settings.get("ACCOUNT_ORCID_INFO", True)
+            saver["orcid_required"] = False
             saver["postal_info"] = settings.get("ACCOUNT_POSTAL_INFO", True)
             saver["invoice_info"] = settings.get("ACCOUNT_INVOICE_INFO", True)
             saver["invoice_ref_required"] = settings.get("ACCOUNT_INVOICE_REF_REQUIRED", False)
@@ -703,6 +704,9 @@ class Account(RequestHandler):
             )
             saver["orcid_info"] = utils.to_bool(
                 self.get_argument("orcid_info", False)
+            )
+            saver["orcid_required"] = utils.to_bool(
+                self.get_argument("orcid_required", False)
             )
             saver["postal_info"] = utils.to_bool(
                 self.get_argument("postal_info", False)

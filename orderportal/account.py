@@ -61,6 +61,9 @@ class AccountSaver(saver.Saver):
             raise ValueError("Last name is required.")
         if not self["university"]:
             raise ValueError("University is required.")
+        if settings["ACCOUNT_ORCID_INFO"] and settings["ACCOUNT_ORCID_REQUIRED"]:
+            if not self["orcid"]:
+                raise ValueError("ORCID is required.")
         if settings["ACCOUNT_INVOICE_REF_REQUIRED"]:
             if not self["invoice_ref"]:
                 raise ValueError("Invoice reference is required.")
@@ -392,21 +395,6 @@ class Account(AccessMixin, RequestHandler):
             self.see_other("home", error=error)
             return
         account["order_count"] = self.get_account_order_count(account["email"])
-        view = self.db.view(
-            "log",
-            "account",
-            startkey=[account["email"], constants.CEILING],
-            endkey=[account["email"]],
-            descending=True,
-            limit=1,
-        )
-        try:
-            key = list(view)[0].key
-            if key[0] != account["email"]:
-                raise IndexError
-            latest_activity = key[1]
-        except IndexError:
-            latest_activity = None
         if self.am_staff() or self.current_user["email"] == account["email"]:
             invitations = self.get_invitations(account["email"])
         else:
@@ -418,7 +406,6 @@ class Account(AccessMixin, RequestHandler):
             "account/display.html",
             account=account,
             groups=self.get_account_groups(account["email"]),
-            latest_activity=latest_activity,
             invitations=invitations,
             reports=reports,
             allow_delete=self.allow_delete(account),
@@ -527,18 +514,6 @@ class AccountApiV1(AccessMixin, RequestHandler):
         data["invoice_address"] = account.get("invoice_address") or {}
         data["login"] = account.get("login", "-")
         data["modified"] = account["modified"]
-        view = self.db.view(
-            "log",
-            "account",
-            startkey=[account["email"], constants.CEILING],
-            endkey=[account["email"]],
-            descending=True,
-            limit=1,
-        )
-        try:
-            data["latest_activity"] = list(view)[0].key[1]
-        except IndexError:
-            data["latest_activity"] = None
         data["orders"] = dict(
             count=self.get_account_order_count(account["email"]),
             display=dict(href=URL("account_orders", account["email"])),
@@ -916,8 +891,8 @@ class Login(RecipientsMixin, LoginMixin, RequestHandler):
                 account["email"],
                 message="Please review and update your account information.",
             )
-            return
-        self.see_other("home")
+        else:
+            self.see_other("home")
 
 
 class Logout(LoginMixin, RequestHandler):
@@ -1065,7 +1040,7 @@ class Register(RecipientsMixin, RequestHandler):
     def post(self):
         try:
             with AccountSaver(handler=self) as saver:
-                email = self.get_argument("email", None)
+                saver.set_email(self.get_argument("email", None))
                 saver["first_name"] = self.get_argument("first_name", None)
                 saver["last_name"] = self.get_argument("last_name", None)
                 university = self.get_argument("university", None)
@@ -1099,9 +1074,6 @@ class Register(RecipientsMixin, RequestHandler):
                     country=self.get_argument("invoice_country", None),
                 )
                 saver["phone"] = self.get_argument("phone", None)
-                if not email:
-                    raise ValueError("Email is required.")
-                saver.set_email(email)
                 saver.check_required()
                 saver.reset_password()
                 saver["owner"] = saver["email"]

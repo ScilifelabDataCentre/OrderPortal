@@ -47,6 +47,11 @@ class RequestHandler(tornado.web.RequestHandler):
             result["alert"] = utils.markdown2html(doc["text"])
         result["action_required"] = []
         if self.current_user:
+            if self.current_user.get("update_info"):
+                result["action_required"].append("You have have been requested to review and update your account information..")
+            if settings["ACCOUNT_ORCID_INFO"] and settings["ACCOUNT_ORCID_REQUIRED"]:
+                if not self.current_user.get("orcid"):
+                    result["action_required"].append("You must provide your ORCID in your account information.")
             if result["am_staff"]:
                 if list(self.db.view("report", "review", key=self.current_user["email"])):
                     result["action_required"].append("You have order report reviews to finish.")

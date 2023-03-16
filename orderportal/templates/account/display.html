@@ -78,8 +78,7 @@
                 &nbsp;
                 <button type="submit" class="btn btn-danger btn-xs"
                         onclick="return confirm('Cannot be undone! Really leave?');">
-                  <span class="glyphicon glyphicon-remove"></span>
-                  Leave
+                  <span class="glyphicon glyphicon-remove"></span> Leave
                 </button>
               </div>
             </form>
@@ -94,6 +93,7 @@
     </td>
   </tr>
 
+  {% if invitations %}
   <tr>
     <th>Group invitations</th>
     <td>
@@ -112,8 +112,7 @@
                 &nbsp;
                 <button type="submit" class="btn btn-success btn-xs"
                         onclick="return confirm('All members of this group will be able to see all your data. Really accept?');">
-                  <span class="glyphicon glyphicon-ok"></span>
-                  Accept
+                  <span class="glyphicon glyphicon-ok"></span> Accept
                 </button>
               </div>
             </form>
@@ -125,8 +124,7 @@
               <div class="form-group">
                 &nbsp;
                 <button type="submit" class="btn btn-danger btn-xs">
-                  <span class="glyphicon glyphicon-remove"></span>
-                  Decline
+                  <span class="glyphicon glyphicon-remove"></span> Decline
                 </button>
               </div>
             </form>
@@ -137,6 +135,7 @@
       </table>
     </td>
   </tr>
+  {% end %}
 
   <tr>
     <th>{{ terminology('Orders') }}</th>
@@ -301,16 +300,6 @@
     <td class="pre">{{ account.get('other_data') or '-' }}</td>
   </tr>
   <tr>
-    <th>Latest activity</th>
-    <td>
-      {% if latest_activity %}
-      <span class="localtime">{{ latest_activity }}</span>
-      {% else %}
-      -
-      {% end %}
-    </td>
-  </tr>
-  <tr>
     <th>Latest login</th>
     <td>
       {% if account.get('login') %}
@@ -357,8 +346,7 @@
     <button type="submit"
             title="Logout"
             class="btn btn-default btn-block">
-      <span class="glyphicon glyphicon-log-out"></span>
-      Logout
+      <span class="glyphicon glyphicon-log-out"></span> Logout
     </button>
   </form>
 </p>
@@ -370,8 +358,7 @@
     <a href="{{ reverse_url('account_edit', account['email']) }}"
        role="button"
        class="btn btn-primary btn-block">
-      <span class="glyphicon glyphicon-edit"></span>
-      Edit
+      <span class="glyphicon glyphicon-edit"></span> Edit
     </a>
   </div>
 </p>
@@ -383,8 +370,7 @@
     <a href="{{ reverse_url('group_create') }}"
        role="button"
        class="btn btn-success btn-block">
-      <span class="glyphicon glyphicon-plus"></span>
-      Create group
+      <span class="glyphicon glyphicon-plus"></span> Create group
     </a>
   </div>
 </p>
@@ -396,8 +382,7 @@
     <a href="{{ reverse_url('reset', email=account['email']) }}"
        role="button"
        class="btn btn-warning btn-block">
-      <span class="glyphicon glyphicon-step-backward"></span>
-      Reset password
+      <span class="glyphicon glyphicon-step-backward"></span> Reset password
     </a>
   </div>
 </p>
@@ -409,8 +394,7 @@
     <a href="{{ reverse_url('password', email=account['email']) }}"
        role="button"
        class="btn btn-warning btn-block">
-      <span class="glyphicon glyphicon-eye-open"></span>
-      Set password
+      <span class="glyphicon glyphicon-eye-open"></span> Set password
     </a>
   </div>
 </p>
@@ -423,11 +407,9 @@
         method="POST" role="form">
     {% module xsrf_form_html() %}
     <div class="form-group">
-      <button type="submit"
-              class="btn btn-warning btn-block"
-              {{ account.get('update_info') and 'disabled' or ''}}>
-        <span class="glyphicon glyphicon-exclamation-sign"></span>
-        Request update
+      <button type="submit" {{ account.get('update_info') and 'disabled' or ''}}
+              class="btn btn-warning btn-block">
+        <span class="glyphicon glyphicon-exclamation-sign"></span> Request update
       </button>
     </div>
   </form>
@@ -440,8 +422,7 @@
     {% module xsrf_form_html() %}
     <div class="form-group">
       <button type="submit" class="btn btn-success btn-block">
-        <span class="glyphicon glyphicon-ok"></span>
-        Enable
+        <span class="glyphicon glyphicon-ok"></span> Enable
       </button>
     </div>
   </form>
@@ -456,8 +437,7 @@
     <div class="form-group">
       <button type="submit" class="btn btn-danger btn-block"
               onclick="return confirm('Really disable?');">
-        <span class="glyphicon glyphicon-ban-circle"></span>
-        Disable
+        <span class="glyphicon glyphicon-ban-circle"></span> Disable
       </button>
     </div>
   </form>
@@ -473,8 +453,7 @@
       <input type="hidden" name="_http_method" value="delete">
       <button type="submit" class="btn btn-danger btn-block"
               onclick="return confirm('Cannot be undone! Really delete?');">
-        <span class="glyphicon glyphicon-trash"></span>
-        Delete
+        <span class="glyphicon glyphicon-trash"></span> Delete
       </button>
     </div>
   </form>

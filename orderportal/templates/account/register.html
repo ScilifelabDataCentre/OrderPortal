@@ -154,12 +154,17 @@
   {% end %} {# if settings['ACCOUNT_PI_INFO'] #}
 
   {% if settings['ACCOUNT_ORCID_INFO'] %}
-  <div class="form-group">
+  <div class="form-group has-feedback">
     <div class="row">
       <div class="col-md-6">
         <label class="control-label" for="orcid">ORCID</label>
         <input type="text" name="orcid" id="orcid" class="form-control"
                value="{{ values.get('orcid') or '' }}">
+        {% if settings['ACCOUNT_ORCID_REQUIRED'] %}
+        <span style="color:red; margin-right: 1em;"
+              class="glyphicon glyphicon-star form-control-feedback"
+              aria-hidden="true"></span>
+        {% end %}
       </div>
     </div>
     <div class="row">

@@ -170,6 +170,7 @@ def load_settings_from_db(db):
     settings["ACCOUNT_REGISTRATION_OPEN"] = doc["registration_open"]
     settings["ACCOUNT_PI_INFO"] = doc["pi_info"]
     settings["ACCOUNT_ORCID_INFO"] = doc["orcid_info"]
+    settings["ACCOUNT_ORCID_REQUIRED"] = doc.get("orcid_required", False)
     settings["ACCOUNT_POSTAL_INFO"] = doc["postal_info"]
     settings["ACCOUNT_INVOICE_INFO"] = doc["invoice_info"]
     settings["ACCOUNT_INVOICE_REF_REQUIRED"] = doc["invoice_ref_required"]
