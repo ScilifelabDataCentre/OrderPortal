@@ -349,6 +349,26 @@ administrator of the site can then change the ownership of your
             </div>
           </div>
 
+          <div class="form-group has-feedback">
+            <label class="control-label col-md-2" for="invoice_ref">Invoice VAT number</label>
+            <div class="col-md-10">
+              <input type="text" name="invoice_vat" id="invoice_vat"
+                     class="form-control"
+                     value="{{ account.get('invoice_vat') or '' }}">
+              {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
+              <span style="color:red; margin-right: 1em;"
+                    class="glyphicon glyphicon-star form-control-feedback"
+                    aria-hidden="true"></span>
+              {% end %}
+              <span class="help-block">
+                {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
+                <strong>NOTE: Required!</strong>
+                {% end %}
+                Invoice VAT number for your university/company/organization.
+              </span>
+            </div>
+          </div>
+
           <div class="form-group">
             <label class="control-label col-md-2" for="invoice_university">University</label>
             <div class="col-md-10">

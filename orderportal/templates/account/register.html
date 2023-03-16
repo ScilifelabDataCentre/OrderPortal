@@ -326,13 +326,32 @@
               <span style="color:red; margin-right: 1em;"
                     class="glyphicon glyphicon-star form-control-feedback"
                     aria-hidden="true"></span>
-              {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
+              {% end %}
               <span class="help-block">
                 {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
                 <strong>NOTE: Required!</strong>
-                {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
+                {% end %}
                 Invoice reference code required on your invoices for your accounting.
                 Some services may be free of charge.
+              </span>
+            </div>
+          </div>
+  
+          <div class="form-group has-feedback">
+            <label class="control-label col-md-2" for="invoice_vat">Invoice VAT number</label>
+            <div class="col-md-10">
+              <input name="invoice_vat" id="invoice_vat" type="text"
+                     class="form-control">
+              {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
+              <span style="color:red; margin-right: 1em;"
+                    class="glyphicon glyphicon-star form-control-feedback"
+                    aria-hidden="true"></span>
+              {% end %}
+              <span class="help-block">
+                {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
+                <strong>NOTE: Required!</strong>
+                {% end %}
+                Invoice VAT number for your university/company/organization.
               </span>
             </div>
           </div>

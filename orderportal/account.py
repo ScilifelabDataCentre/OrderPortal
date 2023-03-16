@@ -265,6 +265,7 @@ class AccountsApiV1(Accounts):
             item["status"] = account["status"]
             item["address"] = account.get("address") or {}
             item["invoice_ref"] = account.get("invoice_ref")
+            item["invoice_vat"] = account.get("invoice_vat")
             item["invoice_address"] = account.get("invoice_address") or {}
             item["login"] = account.get("login", "-")
             item["modified"] = account["modified"]
@@ -312,6 +313,7 @@ class AccountsCsv(Accounts):
                 "City",
                 "Country",
                 "Invoice ref",
+                "Invoice VAT number",
                 "Invoice university",
                 "Invoice department",
                 "Invoice address",
@@ -356,6 +358,7 @@ class AccountsCsv(Accounts):
                 addr.get("city") or "",
                 addr.get("country") or "",
                 account.get("invoice_ref") or "",
+                account.get("invoice_vat") or "",
                 iaddr.get("university") or "",
                 aiddr.get("department") or "",
                 iaddr.get("address") or "",
@@ -519,6 +522,7 @@ class AccountApiV1(AccessMixin, RequestHandler):
         data["status"] = account["status"]
         data["address"] = account.get("address") or {}
         data["invoice_ref"] = account.get("invoice_ref")
+        data["invoice_vat"] = account.get("invoice_vat")
         data["invoice_address"] = account.get("invoice_address") or {}
         data["login"] = account.get("login", "-")
         data["modified"] = account["modified"]
@@ -805,6 +809,7 @@ class AccountEdit(AccessMixin, RequestHandler):
                     country=self.get_argument("country", None),
                 )
                 saver["invoice_ref"] = self.get_argument("invoice_ref", None)
+                saver["invoice_vat"] = self.get_argument("invoice_vat", None)
                 saver["invoice_address"] = dict(
                     university=self.get_argument("invoice_university", None),
                     department=self.get_argument("invoice_department", None),
@@ -1035,6 +1040,7 @@ class Register(RecipientsMixin, RequestHandler):
         "group_size",
         "subject",
         "invoice_ref",
+        "invoice_vat",
         "phone",
     ]
     ADDRESS_KEYS = ["university", "department", "address", "zip", "city", "country"]
@@ -1081,6 +1087,7 @@ class Register(RecipientsMixin, RequestHandler):
                     country=self.get_argument("postal_country", None),
                 )
                 saver["invoice_ref"] = self.get_argument("invoice_ref", None)
+                saver["invoice_vat"] = self.get_argument("invoice_vat", None)
                 saver["invoice_address"] = dict(
                     university=self.get_argument("invoice_university", None) or saver["university"],
                     department=self.get_argument("invoice_department", None) or saver["department"],
