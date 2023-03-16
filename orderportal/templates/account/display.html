@@ -12,25 +12,40 @@
 {% end %}
 
 {% block main_content %}
-{% module Text('privacy_policy', origin=reverse_url('account', account['email'])) %}
+{% if action_required %}
+<div class="panel panel-warning">
+  <div class="panel-heading">Action required!</div>
+  <div class="panel-body">
+    <ul>
+      {% for action in action_required %}
+      <li>{{ action }}</li>
+      {% end %}
+    </ul>
+  </div>
+</div>
+{% end %}
 
 <table class="table-condensed table-fields">
   <tr>
     <th>First name</th>
     <td>{{ account['first_name'] or '-' }}</td>
   </tr>
+
   <tr>
     <th>Last name</th>
     <td>{{ account['last_name'] or '-' }}</td>
   </tr>
+
   <tr>
     <th>Role</th>
     <td>{{ account['role'] }}</td>
   </tr>
+
   <tr>
     <th>Status</th>
     <td>{% module Status(account['status']) %}</td>
   </tr>
+
   {% if am_admin %}
   <tr>
     <th>Code for setting password</th>
@@ -45,9 +60,11 @@
     </td>
   </tr>
   {% end %} {# if am_admin #}
+
   <tr>
     <th>Groups</th>
     <td>
+      {% if groups %}
       <table>
         {% for group in groups %}
         <tr>
@@ -71,8 +88,12 @@
         </tr>
         {% end %}
       </table>
+      {% else %}
+      -
+      {% end %}
     </td>
   </tr>
+
   <tr>
     <th>Group invitations</th>
     <td>
@@ -116,6 +137,7 @@
       </table>
     </td>
   </tr>
+
   <tr>
     <th>{{ terminology('Orders') }}</th>
     <td>
@@ -134,6 +156,26 @@
       </a>
     </td>
   </tr>
+
+  {% if settings['ORDER_REPORTS'] and am_staff %}
+  <tr>
+    <th>Unfinished {{ terminology('order') }} report reviews</th>
+    <td>
+      {% if reports %}
+      {% for report in reports %}
+      <a href="{{ reverse_url('report_review', report['_id']) }}"
+         role="button" class="btn btn-warning btn-xs" style="color: black;">
+        <span class="glyphicon glyphicon-edit"></span> Review
+      </a>
+      {% module OrderLink(report['order'], title=True) %}
+      <br>
+      {% end %}
+      {% else %}
+      -
+      {% end %}
+    </td>
+  </tr>
+  {% end %} {# if settings['ORDER_REPORTS'] and am_staff #}
 
   <tr>
     <th>University</th>
@@ -302,6 +344,8 @@
     <td>{{ account['_id'] }}</td>
   </tr>
 </table>
+
+{% module Text('privacy_policy', origin=reverse_url('account', account['email'])) %}
 {% end %} {# block main_content #}
 
 {% block action_content %}

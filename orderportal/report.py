@@ -299,14 +299,14 @@ class ReportEdit(ReportMixin, RequestHandler):
             except ValueError as error:
                 self.see_other("order", order["_id"], error=error)
                 return
-        # If set to "Review", then clear previous reviews and send email again.
         with ReportSaver(doc=report, handler=self) as saver:
             saver["name"] = self.get_argument("name", None) or report["name"]
             status = self.get_argument("status")
-            resend = status == constants.REVIEW and status != report["status"]
+            # If changed to "Review", then clear previous reviews and send email again.
+            send = status == constants.REVIEW and status != report["status"]
             saver.set_reviewers(report["reviewers"].keys())
             saver.set_status(status)
-        if resend:
+        if send:
             self.send_reviewers_message(report, order)
         self.see_other("order", order["_id"])
 

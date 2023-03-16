@@ -34,11 +34,6 @@ class Home(RequestHandler):
             news_items=self.get_news(limit=settings["DISPLAY_MAX_NEWS"]),
             events=self.get_events(upcoming=True),
         )
-        if self.current_user and self.get_invitations(self.current_user["email"]):
-            url = self.reverse_url("account", self.current_user["email"])
-            kwargs[
-                "message"
-            ] = f'You have group invitations.\nSee your <a href="{url}">account</a>.'
         if not self.current_user:
             self.render("home/anonymous.html", **kwargs)
         elif self.current_user["role"] == constants.ADMIN:

@@ -62,11 +62,9 @@ class OrderLink(tornado.web.UIModule):
 
 
 class AccountLink(tornado.web.UIModule):
-    """HTML for a link to an account (email or entity), optionally with an icon,
-    and optionally show name and/or email.
-    """
+    "HTML for a link to an account (email or entity), optionally show name or email."
     
-    def render(self, email=None, account=None, name=False):
+    def render(self, email=None, account=None, name=False, action_required=False):
         if account:
             email = account["email"]
         elif not email:
@@ -75,8 +73,12 @@ class AccountLink(tornado.web.UIModule):
             title = self.handler.lookup_account_name(email)
         else:
             title = email
+        if action_required:
+            exclaim = '<span class="glyphicon glyphicon-alert text-danger"></span> '
+        else:
+            exclaim = ""
         url = self.handler.reverse_url("account", email)
-        return f"""<a href="{url}">{title}</a>"""
+        return f"""<a href="{url}">{exclaim}{title}</a>"""
 
 
 class GroupLink(tornado.web.UIModule):

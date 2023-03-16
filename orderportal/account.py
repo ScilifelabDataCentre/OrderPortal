@@ -411,12 +411,16 @@ class Account(AccessMixin, RequestHandler):
             invitations = self.get_invitations(account["email"])
         else:
             invitations = []
+        reports = [r.doc for r in self.db.view("report", "review", key=account["email"], include_docs=True)]
+        for report in reports:
+            report["order"] = self.get_order(report["order"])
         self.render(
             "account/display.html",
             account=account,
             groups=self.get_account_groups(account["email"]),
             latest_activity=latest_activity,
             invitations=invitations,
+            reports=reports,
             allow_delete=self.allow_delete(account),
         )
 

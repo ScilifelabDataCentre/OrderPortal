@@ -1,7 +1,6 @@
 "RequestHandler subclass for all pages."
 
 import base64
-import functools
 import json
 import logging
 import traceback
@@ -46,7 +45,13 @@ class RequestHandler(tornado.web.RequestHandler):
             result["alert"] = None
         else:
             result["alert"] = utils.markdown2html(doc["text"])
-        result["reduce"] = functools.reduce
+        result["action_required"] = []
+        if self.current_user:
+            if result["am_staff"]:
+                if list(self.db.view("report", "review", key=self.current_user["email"])):
+                    result["action_required"].append("You have order report reviews to finish.")
+            if self.get_invitations(self.current_user["email"]):
+                result["action_required"].append("You have invitations to group(s).")
         return result
 
     def see_other(self, name, *args, **kwargs):

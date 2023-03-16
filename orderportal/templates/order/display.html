@@ -191,7 +191,6 @@
                 <td>{% module Status(report['status']) %}</td>
                 <td>
                   {% if report['status'] == constants.REVIEW and current_user and report['reviewers'].get(current_user['email'], {}).get('status') == constants.REVIEW %}
-                  
                   <a href="{{ reverse_url('report_review', report['_id']) }}"
                      role="button" class="btn btn-warning btn-xs" style="color: black;">
                     <span class="glyphicon glyphicon-edit"></span> Review
