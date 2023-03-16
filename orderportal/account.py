@@ -305,11 +305,15 @@ class AccountsCsv(Accounts):
                 "Gender",
                 "Group size",
                 "Subject",
+                "University",
+                "Department",
                 "Address",
                 "Zip",
                 "City",
                 "Country",
                 "Invoice ref",
+                "Invoice university",
+                "Invoice department",
                 "Invoice address",
                 "Invoice zip",
                 "Invoice city",
@@ -345,11 +349,15 @@ class AccountsCsv(Accounts):
                 account.get("gender") or "",
                 account.get("group_size") or "",
                 subject,
+                addr.get("university") or "",
+                addr.get("department") or "",
                 addr.get("address") or "",
                 addr.get("zip") or "",
                 addr.get("city") or "",
                 addr.get("country") or "",
                 account.get("invoice_ref") or "",
+                iaddr.get("university") or "",
+                aiddr.get("department") or "",
                 iaddr.get("address") or "",
                 iaddr.get("zip") or "",
                 iaddr.get("city") or "",
@@ -789,6 +797,8 @@ class AccountEdit(AccessMixin, RequestHandler):
                 except (tornado.web.MissingArgumentError, ValueError, TypeError):
                     saver["subject"] = None
                 saver["address"] = dict(
+                    university=self.get_argument("postal_university", None),
+                    department=self.get_argument("postal_department", None),
                     address=self.get_argument("address", None),
                     zip=self.get_argument("zip", None),
                     city=self.get_argument("city", None),
@@ -796,6 +806,8 @@ class AccountEdit(AccessMixin, RequestHandler):
                 )
                 saver["invoice_ref"] = self.get_argument("invoice_ref", None)
                 saver["invoice_address"] = dict(
+                    university=self.get_argument("invoice_university", None),
+                    department=self.get_argument("invoice_department", None),
                     address=self.get_argument("invoice_address", None),
                     zip=self.get_argument("invoice_zip", None),
                     city=self.get_argument("invoice_city", None),
@@ -1025,7 +1037,7 @@ class Register(RecipientsMixin, RequestHandler):
         "invoice_ref",
         "phone",
     ]
-    ADDRESS_KEYS = ["address", "zip", "city", "country"]
+    ADDRESS_KEYS = ["university", "department", "address", "zip", "city", "country"]
 
     def get(self):
         values = dict()
@@ -1061,13 +1073,17 @@ class Register(RecipientsMixin, RequestHandler):
                 except (tornado.web.MissingArgumentError, ValueError, TypeError):
                     saver["subject"] = None
                 saver["address"] = dict(
-                    address=self.get_argument("address", None),
-                    zip=self.get_argument("zip", None),
-                    city=self.get_argument("city", None),
-                    country=self.get_argument("country", None),
+                    university=self.get_argument("postal_university", None) or saver["university"],
+                    department=self.get_argument("postal_department", None) or saver["department"],
+                    address=self.get_argument("postal_address", None),
+                    zip=self.get_argument("postal_zip", None),
+                    city=self.get_argument("postal_city", None),
+                    country=self.get_argument("postal_country", None),
                 )
                 saver["invoice_ref"] = self.get_argument("invoice_ref", None)
                 saver["invoice_address"] = dict(
+                    university=self.get_argument("invoice_university", None) or saver["university"],
+                    department=self.get_argument("invoice_department", None) or saver["department"],
                     address=self.get_argument("invoice_address", None),
                     zip=self.get_argument("invoice_zip", None),
                     city=self.get_argument("invoice_city", None),

@@ -20,137 +20,122 @@ administrator of the site can then change the ownership of your
 </p>
 
 <form action="{{ reverse_url('account_edit', account['email']) }}"
-      method="POST" role="form">
+      class="form-horizontal" method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <div class="form-group has-feedback">
-    <div class="row">
-      <div class="col-md-6">
-        <label class="control-label" for="first_name">First name</label>
-        <input type="text" class="form-control"
-               name="first_name" id="first_name"
-               value="{{ account.get('first_name') or '' }}">
-        <span style="color:red; margin-right: 1em;"
-              class="glyphicon glyphicon-star form-control-feedback"
-              aria-hidden="true"></span>
-      </div>
+    <label class="control-label col-md-2" for="first_name">First name</label>
+    <div class="col-md-10">
+      <input type="text" name="first_name" id="first_name"
+             class="form-control"
+             value="{{ account.get('first_name') or '' }}">
+      <span style="color:red; margin-right: 1em;"
+            class="glyphicon glyphicon-star form-control-feedback"
+            aria-hidden="true"></span>
     </div>
   </div>
 
   <div class="form-group has-feedback">
-    <div class="row">
-      <div class="col-md-6">
-        <label class="control-label" for="last_name">Last name</label>
-        <input type="text" class="form-control"
-               name="last_name" id="last_name"
-               value="{{ account.get('last_name') or '' }}">
-        <span style="color:red; margin-right: 1em;"
-              class="glyphicon glyphicon-star form-control-feedback"
-              aria-hidden="true"></span>
-      </div>
+    <label class="control-label col-md-2" for="last_name">Last name</label>
+    <div class="col-md-10">
+      <input type="text" name="last_name" id="last_name"
+             class="form-control"
+             value="{{ account.get('last_name') or '' }}">
+      <span style="color:red; margin-right: 1em;"
+            class="glyphicon glyphicon-star form-control-feedback"
+            aria-hidden="true"></span>
     </div>
   </div>
 
   {% if am_admin %}
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <label class="control-label" for="role">Role</label>
-        <select class="form-control" name="role" id="role">
-          {% for role in constants.ACCOUNT_ROLES %}
-          {% set selected = role == account['role'] and 'selected' or '' %}
-          <option {{ selected }}>{{ role }}</option>
-          {% end %}
-        </select>
-      </div>
+    <label class="control-label col-md-2" for="role">Role</label>
+    <div class="col-md-10">
+      <select class="form-control" name="role" id="role">
+        {% for role in constants.ACCOUNT_ROLES %}
+        {% set selected = role == account['role'] and 'selected' or '' %}
+        <option {{ selected }}>{{ role }}</option>
+        {% end %}
+      </select>
     </div>
   </div>
   {% end %}
 
   <div class="form-group has-feedback">
-    <label class="control-label" for="university">University</label>
-    <div class="row">
-      {% if settings['UNIVERSITIES'] %}
-      {% set other = True %}
-      <div class="col-md-6">
-        <select class="form-control" name="university" id="university">
-          {% for abbrev, data in settings['UNIVERSITIES'].items() %}
-          {% if account.get('university') == abbrev %}
-          {% set other = False %}
-          {% set selected = 'selected' %}
-          {% else %}
-          {% set selected = '' %}
-          {% end %}
-          <option {{selected}} value="{{ abbrev }}">{{ abbrev }}
-            {% if data.get('name') %}
-            ({{ data.get('name') }})
+    <label class="control-label col-md-2" for="university">University</label>
+    <div class="col-md-10">
+      <div class="row">
+        {% if settings['UNIVERSITIES'] %}
+        <div class="col-md-6">
+          <select class="form-control" name="university" id="university">
+            {% set other = True %}
+            {% for abbrev, data in settings['UNIVERSITIES'].items() %}
+            {% if account.get('university') == abbrev %}
+            {% set other = False %}
+            {% set selected = 'selected' %}
+            {% else %}
+            {% set selected = '' %}
             {% end %}
-          </option>
-          {% end %}
-          {% if other %}
-          <option selected value="">[not available in list]</option>
-          {% else %}
-          <option value="">[not available in list]</option>
-          {% end %}
-        </select>
-        <span style="color:red; margin-right: 2em;"
-              class="glyphicon glyphicon-star form-control-feedback"
-              aria-hidden="true"></span>
+            <option {{selected}} value="{{ abbrev }}">
+              {{ abbrev }}
+              {% if data.get('name') %} ({{ data.get('name') }}) {% end %}
+            </option>
+            {% end %}
+            {% if other %}
+            <option selected value="">[not available in list]</option>
+            {% else %}
+            <option value="">[not available in list]</option>
+            {% end %}
+          </select>
+          <span style="color:red; margin-right: 2em;"
+                class="glyphicon glyphicon-star form-control-feedback"
+                aria-hidden="true"></span>
+        </div>
+        <div class="col-md-6">
+          <input type="text" name="university_other" id="university_other"
+                 class="form-control"
+                 placeholder="Provide full name if not available in the list."
+                 value="{{ other and account.get('university') or '' }}">
+        </div>
+        {% else %}
+        <div class="col-md-12">
+          <input type="text" name="university" id="university"
+                 class="form-control" value="{{ account.get('university') or '' }}">
+          <span style="color:red; margin-right: 1em;"
+                class="glyphicon glyphicon-star form-control-feedback"
+                aria-hidden="true"></span>
+        </div>
+        {% end %} {# if settings['UNIVERSITIES'] #}
       </div>
-      <div class="col-md-6">
-        <input type="text" class="form-control"
-               name="university_other" id="university_other"
-               placeholder="Provide full name if not available in the list."
-               value="{{ other and account.get('university') or '' }}">
-      </div>
-      {% else %}
-      <div class="col-md-6">
-        <input type="text" class="form-control"
-               name="university" id="university"
-               value="{{ account.get('university') or '' }}">
-        <span style="color:red; margin-right: 1em;"
-              class="glyphicon glyphicon-star form-control-feedback"
-              aria-hidden="true"></span>
-      </div>
-      {% end %}
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <span class="help-block">
-          Main affiliation: University, college, company, organization, or
-          similar.
-        </span>
+      <div class="row">
+        <div class="col-md-12">
+          <span class="help-block">
+            Main affiliation: University, college, company, organization, or similar.
+          </span>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-6">
-        <label class="control-label" for="department">Department</label>
-        <input type="text" class="form-control"
-               name="department" id="department"
-               value="{{ account.get('department') or '' }}">
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <span class="help-block">
-          University department, company section, group, or similar.
-        </span>
-      </div>
+    <label class="control-label col-md-2" for="department">Department</label>
+    <div class="col-md-10">
+      <input type="text" name="department" id="department"
+             class="form-control"
+             value="{{ account.get('department') or '' }}">
+      <span class="help-block">
+        University department, company section, group, or similar.
+      </span>
     </div>
   </div>
 
   {% if settings['ACCOUNT_PI_INFO'] %}
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-6">
-        <label class="control-label" for="pi">Principal Investigator</label>
-        <div  class="form-control">
-          <input type="checkbox" name="pi" id="pi" value="true"
-                 {{ account.get('pi') and 'checked' or '' }}> Yes
-        </div>
+    <label class="control-label col-md-2" for="pi">Principal Investigator</label>
+    <div class="col-md-10">
+      <div  class="form-control">
+        <input type="checkbox" name="pi" id="pi" value="true"
+               {{ account.get('pi') and 'checked' or '' }}> Yes
       </div>
     </div>
   </div>
@@ -158,167 +143,175 @@ administrator of the site can then change the ownership of your
 
   {% if settings['ACCOUNT_ORCID_INFO'] %}
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-6">
-        <label class="control-label" for="orcid">ORCID</label>
-        <input type="text" class="form-control"
-               name="orcid" id="orcid"
-               value="{{ account.get('orcid') or '' }}">
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <span class="help-block">
-          Persistent digital identifier for researchers.
-          See the <a href="https://orcid.org/" target="_blank">ORCID website</a>.
-        </span>
-      </div>
+    <label class="control-label col-md-2" for="orcid">ORCID</label>
+    <div class="col-md-10">
+      <input type="text" name="orcid" id="orcid" class="form-control"
+             value="{{ account.get('orcid') or '' }}">
+      {% if settings['ACCOUNT_ORCID_REQUIRED'] %}
+      <span style="color:red; margin-right: 1em;"
+            class="glyphicon glyphicon-star form-control-feedback"
+            aria-hidden="true"></span>
+      {% end %}
+      <span class="help-block">
+        Persistent digital identifier for researchers.
+        See the <a href="https://orcid.org/" target="_blank">ORCID website</a>.
+      </span>
     </div>
   </div>
   {% end %} {# if settings['ACCOUNT_ORCID_INFO'] #}
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      Information required by our funders for reporting purposes.
-    </div>
-    <div class="panel-body">
+  {% if settings['ACCOUNT_FUNDER_INFO_GENDER'] or settings['ACCOUNT_FUNDER_INFO_GROUP_SIZE'] or settings['ACCOUNT_FUNDER_INFO_SUBJECT'] %}
+  <div class="row">
+    <div class="col-md-12">
 
-      {% if settings.get('ACCOUNT_FUNDER_INFO_GENDER') %}
-      <div class="form-group has-feedback">
-        <div class="row">
-          <div class="col-md-3">
-            <label class="control-label" for="gender">Gender</label>
-            <select class="form-control" size="3" name="gender" id="gender">
-              {% set gender = account.get('gender') %}
-              <option {{ gender == 'male' and 'selected' or '' }}>Male</option>
-              <option {{ gender == 'female' and 'selected' or '' }}>Female</option>
-              <option {{ gender == 'other' and 'selected' or '' }}>Other</option>
-            </select>
-            <span style="color:red; margin-right: 2em;"
-                  class="glyphicon glyphicon-star form-control-feedback"
-                  aria-hidden="true"></span>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          Information required by our funders for reporting purposes.
+        </div>
+        <div class="panel-body">
+
+          {% if settings.get('ACCOUNT_FUNDER_INFO_GENDER') %}
+          <div class="form-group has-feedback">
+            <label class="control-label col-md-2" for="gender">Gender</label>
+            <div class="col-md-10">
+              <div>
+                {% for gender in ['male', 'female', 'other'] %}
+                <label class="radio-inline">
+                  <input type="radio" name="gender"
+                         {{ gender == account.get('gender') and 'checked' or '' }}
+                         value="{{ gender }}"> {{ gender.capitalize() }}
+                </label>
+                {% end %}
+              </div>
+              <span style="color:red; margin-right: 2em;"
+                    class="glyphicon glyphicon-star form-control-feedback"
+                    aria-hidden="true"></span>
+            </div>
           </div>
+          {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GENDER') #}
+
+          {% if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') %}
+          <div class="form-group has-feedback">
+            <label class="control-label col-md-2" for="gender">Group size</label>
+            <div class="col-md-10">
+              <input type="number"  name="group_size", id="group_size"
+                     class="form-control"
+                     value="{{ account.get('group_size') or '' }}">
+              <span class="help-block">
+                If you are a Principal Investigator (PI), specify the
+                approximate number of members in your group.
+              </span>
+            </div>
+          </div>
+          {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') #}
+
+          {% if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] %}
+          <div class="form-group has-feedback">
+            <label class="control-label col-md-2" for="subject">Subject</label>
+            <div class="col-md-10">
+              <select class="form-control" name="subject" id="subject">
+                {% for subject in settings['SUBJECT_TERMS'] %}
+                <option value="{{ subject['code'] }}"
+                        {{ subject['code'] == account.get('subject') and 'selected' or '' }}>
+                  {{ '- ' * subject['level'] + subject['term'] }}
+                </option>
+                {% end %}
+              </select>
+              <span style="color:red; margin-right: 2em;"
+                    class="glyphicon glyphicon-star form-control-feedback"
+                    aria-hidden="true"></span>
+              <span class="help-block">
+                Select the subject term that best characterizes your field.
+              </span>
+            </div>
+          </div>
+          {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] #}
+
         </div>
       </div>
-      {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GENDER') #}
-
-      {% if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') %}
-      <div class="form-group has-feedback">
-        <div class="row">
-          <div class="col-md-3">
-            <label class="control-label" for="gender">Group size</label>
-            <input type="number" class="form-control"
-                   name="group_size", id="group_size"
-                   value="{{ account.get('group_size') or '' }}">
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <span class="help-block">
-              If you are a Principal Investigator (PI), specify the
-              approximate number of members in your group.
-            </span>
-          </div>
-        </div>
-      </div>
-      {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GROUP_SIZE') #}
-
-      {% if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] %}
-      <div class="form-group has-feedback">
-        <div class="row">
-          <div class="col-md-6">
-            <label class="control-label" for="subject">Subject</label>
-            <select class="form-control" name="subject" id="subject">
-              {% for subject in settings['SUBJECT_TERMS'] %}
-              <option value="{{ subject['code'] }}"
-                      {{ subject['code'] == account.get('subject') and 'selected' or '' }}>
-                {{ '- ' * subject['level'] + subject['term'] }}
-              </option>
-              {% end %}
-            </select>
-            <span style="color:red; margin-right: 2em;"
-                  class="glyphicon glyphicon-star form-control-feedback"
-                  aria-hidden="true"></span>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <span class="help-block">
-              Select the subject term that best characterizes your field.
-            </span>
-          </div>
-        </div>
-      </div>
-      {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_SUBJECT') and settings['SUBJECT_TERMS'] #}
-
     </div>
   </div>
+  {% end %} {# if settings['ACCOUNT_FUNDER'...] #}
 
   {% if settings['ACCOUNT_POSTAL_INFO'] %}
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      Postal address; for delivery of paper documents, returned
-      samples, etc.
-    </div>
+  <div class="row">
+    <div class="col-md-12">
 
-    <div class="panel-body">
-      <div class="form-group">
-        <div class="row">
-          <div class="col-md-8">
-            <label class="control-label" for="address">Address</label>
-            <textarea class="form-control" rows="2"
-                      id="address" name="address"
-                      >{{ account['address'].get('address') or '' }}</textarea>
-          </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          Postal address; for delivery of paper documents, returned samples, etc.
         </div>
-        <div class="row">
-          <div class="col-md-12">
-            <span class="help-block">
-              Institution, building, street, number, post box, etc.
-            </span>
-          </div>
-        </div>
-      </div>
+        <div class="panel-body">
 
-      <div class="form-group">
-        <div class="row">
-          <div class="col-md-8">
-            <label class="control-label" for="zip">Zip code</label>
-            <input type="text" class="form-control" id="zip" name="zip"
-                   value="{{ account['address'].get('zip') or '' }}">
+          <div class="form-group">
+            <label class="control-label col-md-2" for="postal_university">University</label>
+            <div class="col-md-10">
+              <input type="text" id="postal_university" name="postal_university"
+                     class="form-control"
+                     value="{{ account['address'].get('university') or ''}}">
+              <span class="help-block">
+                University, college, company, organization, or similar.
+                If empty, the value from the university field above will be used.
+              </span>
+            </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <span class="help-block">
-              Postal code.
-            </span>
-          </div>
-        </div>
-      </div>
 
-      <div class="form-group">
-        <div class="row">
-          <div class="col-md-8">
-            <label class="control-label" for="city">City</label>
-            <input type="text" class="form-control"
-                   id="city" name="city"
-                   value="{{ account['address'].get('city') or '' }}">
+          <div class="form-group">
+            <label class="control-label col-md-2" for="postal_department">Department</label>
+            <div class="col-md-10">
+              <input type="text" id="postal_department" name="postal_department"
+                     class="form-control"
+                     value="{{ account['address'].get('department') or ''}}">
+              <span class="help-block">
+                University department, company section, group, or similar.
+                If empty, the value from the department field above will be used.
+              </span>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div class="form-group">
-        <div class="row">
-          <div class="col-md-8">
-            <label class="control-label" for="country">Country</label>
-            <select class="form-control" name="country" id="country">
-              <option value="">[none]</option>
-              {% set country = account['address'].get('country') %}
-              {% for code, name in constants.COUNTRIES.items() %}
-              <option value="{{ code }}" {{ country == code and 'selected' or '' }}>{{ name }}</option>
-              {% end %}
-            </select>
+          <div class="form-group">
+            <label class="control-label col-md-2" for="postal_address">Address</label>
+            <div class="col-md-10">
+              <textarea id="postal_address" name="postal_address"
+                        class="form-control" rows="2"
+                        >{{ account['address'].get('address') or '' }}</textarea>
+              <span class="help-block">
+                Institution, building, street, number, post box, etc.
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label col-md-2" for="postal_zip">Zip code</label>
+            <div class="col-md-10">
+              <input type="text" id="postal_zip" name="postal_zip" class="form-control"
+                     value="{{ account['address'].get('zip') or '' }}">
+              <span class="help-block">
+                Postal code.
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label col-md-2" for="postal_city">City</label>
+            <div class="col-md-10">
+              <input type="text" id="postal_city" name="postal_city"
+                     class="form-control"
+                     value="{{ account['address'].get('city') or '' }}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label col-md-2" for="postal_country">Country</label>
+            <div class="col-md-10">
+              <select class="form-control" name="postal_country" id="postal_country">
+                <option value="">[none]</option>
+                {% set country = account['address'].get('country') %}
+                {% for code, name in constants.COUNTRIES.items() %}
+                <option value="{{ code }}" {{ country == code and 'selected' or '' }}>{{ name }}</option>
+                {% end %}
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -327,97 +320,105 @@ administrator of the site can then change the ownership of your
   {% end %} {# if settings['ACCOUNT_POSTAL_INFO'] #}
 
   {% if settings['ACCOUNT_INVOICE_INFO'] %}
-  <div class="form-group has-feedback">
-    <div class="row">
-      <div class="col-md-6">
-        <label class="control-label" for="invoice_ref">Invoice reference</label>
-        <input type="text" class="form-control"
-               name="invoice_ref" id="invoice_ref"
-               value="{{ account.get('invoice_ref') or '' }}">
-        {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
-        <span style="color:red; margin-right: 1em;"
-              class="glyphicon glyphicon-star form-control-feedback"
-              aria-hidden="true"></span>
-        {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <span class="help-block">
-          {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
-          <strong>NOTE: Required!</strong>
-          {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
-          Invoice reference code that may be required on your invoices for
-          your accounting.
-        </span>
-      </div>
-    </div>
-  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          Invoice reference and address.
+        </div>
+        <div class="panel-body">
 
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      Invoice address.
-    </div>
-    <div class="panel-body">
-      <div class="form-group">
-        <div class="row">
-          <div class="col-md-8">
-            <label class="control-label" for="invoice_address">Address</label>
-            <textarea class="form-control" rows="2"
-                      id="invoice_address" name="invoice_address"
-                      >{{ account['invoice_address'].get('address') or '' }}</textarea>
+          <div class="form-group has-feedback">
+            <label class="control-label col-md-2" for="invoice_ref">Invoice reference</label>
+            <div class="col-md-10">
+              <input type="text" name="invoice_ref" id="invoice_ref"
+                     class="form-control"
+                     value="{{ account.get('invoice_ref') or '' }}">
+              {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
+              <span style="color:red; margin-right: 1em;"
+                    class="glyphicon glyphicon-star form-control-feedback"
+                    aria-hidden="true"></span>
+              {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
+              <span class="help-block">
+                {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
+                <strong>NOTE: Required!</strong>
+                {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
+                Invoice reference code required on your invoices for your accounting.
+                Some services may be free of charge.
+              </span>
+            </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <span class="help-block">
-              Institution, building, street, number, post box, etc.
-            </span>
-          </div>
-        </div>
-      </div>
 
-      <div class="form-group">
-        <div class="row">
-          <div class="col-md-8">
-            <label class="control-label" for="invoice_zip">Zip code</label>
-            <input type="text" class="form-control"
-                   id="invoice_zip" name="invoice_zip"
-                   value="{{ account['invoice_address'].get('zip') or '' }}">
+          <div class="form-group">
+            <label class="control-label col-md-2" for="invoice_university">University</label>
+            <div class="col-md-10">
+              <input type="text" id="invoice_university" name="invoice_university"
+                     class="form-control"
+                     value="{{ account['invoice_address'].get('university') or ''}}">
+              <span class="help-block">
+                University, college, company, organization, or similar.
+                If empty, the value from the university field above will be used.
+              </span>
+            </div>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <span class="help-block">
-              Postal code.
-            </span>
-          </div>
-        </div>
-      </div>
 
-      <div class="form-group">
-        <div class="row">
-          <div class="col-md-8">
-            <label class="control-label" for="invoice_city">City</label>
-            <input type="text" class="form-control"
-                   id="invoice_city" name="invoice_city"
-                   value="{{ account['invoice_address'].get('city') or '' }}">
+          <div class="form-group">
+            <label class="control-label col-md-2" for="invoice_department">Department</label>
+            <div class="col-md-10">
+              <input type="text" id="invoice_department" name="invoice_department"
+                     class="form-control"
+                     value="{{ account['invoice_address'].get('department') or ''}}">
+              <span class="help-block">
+                University department, company section, group, or similar.
+                If empty, the value from the department field above will be used.
+              </span>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div class="form-group">
-        <div class="row">
-          <div class="col-md-8">
-            <label class="control-label" for="invoice_country">Country</label>
-            <select class="form-control"
-                    name="invoice_country" id="invoice_country">
-              <option value="">[none]</option>
-              {% set country = account['invoice_address'].get('country') %}
-              {% for code, name in constants.COUNTRIES.items() %}
-              <option value="{{ code }}"  {{ country == code and 'selected' or '' }}>{{ name }}</option>
-              {% end %}
-            </select>
+          <div class="form-group">
+            <label class="control-label col-md-2" for="invoice_address">Address</label>
+            <div class="col-md-10">
+              <textarea id="invoice_address" name="invoice_address"
+                        class="form-control" rows="2"
+                        >{{ account['invoice_address'].get('address') or '' }}</textarea>
+              <span class="help-block">
+                Street, number, post box, building, etc.
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label col-md-2" for="invoice_zip">Zip code</label>
+            <div class="col-md-10">
+              <input type="text" class="form-control"
+                     id="invoice_zip" name="invoice_zip"
+                     value="{{ account['invoice_address'].get('zip') or '' }}">
+              <span class="help-block">
+                Postal code.
+              </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label col-md-2" for="invoice_city">City</label>
+            <div class="col-md-10">
+              <input type="text" class="form-control"
+                     id="invoice_city" name="invoice_city"
+                     value="{{ account['invoice_address'].get('city') or '' }}">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label col-md-2" for="invoice_country">Country</label>
+            <div class="col-md-10">
+              <select name="invoice_country" id="invoice_country" class="form-control">
+                <option value="">[none]</option>
+                {% set country = account['invoice_address'].get('country') %}
+                {% for code, name in constants.COUNTRIES.items() %}
+                <option value="{{ code }}"  {{ country == code and 'selected' or '' }}>{{ name }}</option>
+                {% end %}
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -426,61 +427,42 @@ administrator of the site can then change the ownership of your
   {% end %} {# if settings['ACCOUNT_INVOICE_INFO'] #}
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-6">
-        <label class="control-label" for="phone">Phone</label>
-        <textarea rows="3" class="form-control"
-                  name="phone" id="phone"
-                  >{{ account.get('phone') or '' }}</textarea>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <span class="help-block">
-          One or more telephone numbers, one per line.
-        </span>
-      </div>
+    <label class="control-label col-md-2" for="phone">Phone</label>
+    <div class="col-md-10">
+      <textarea name="phone" id="phone" rows="3" class="form-control"
+                >{{ account.get('phone') or '' }}</textarea>
+      <span class="help-block">
+        One or more telephone numbers, one per line.
+      </span>
     </div>
   </div>
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-8">
-        <label class="control-label" for="other_data">Other data</label>
-        <textarea rows="3" class="form-control"
-                  id="other_data" name="other_data"
+    <label class="control-label col-md-2" for="other_data">Other data</label>
+    <div class="col-md-10">
+      <textarea id="other_data" name="other_data" rows="3" class="form-control"
                   >{{ account.get('other_data') or '' }}</textarea>
-      </div>
+      <span class="help-block">
+        Miscellaneous user data from other sources.
+      </span>
     </div>
-    <div class="row">
-      <div class="col-md-12">
-        <span class="help-block">
-          Miscellaneous user data from other sources.
-        </span>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="api_key">API key</label>
+    <div class="col-md-10">
+      <div  class="form-control">
+        <input type="checkbox" name="api_key" id="api_key" value="true">
+        Set new API key
       </div>
     </div>
   </div>
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-6">
-        <label class="control-label" for="api_key">API key</label>
-        <div  class="form-control">
-          <input type="checkbox" name="api_key" id="api_key" value="true">
-          Set new API key
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <label class="control-label"></label>
-        <button type="submit" class="btn btn-success btn-block">
-          <span class="glyphicon glyphicon-floppy-disk"></span> Save
-        </button>
-      </div>
+    <div class="col-md-offset-2 col-md-3">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-floppy-disk"></span> Save
+      </button>
     </div>
   </div>
 
