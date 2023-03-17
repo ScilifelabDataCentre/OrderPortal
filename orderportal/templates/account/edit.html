@@ -27,11 +27,14 @@ administrator of the site can then change the ownership of your
     <label class="control-label col-md-2" for="first_name">First name</label>
     <div class="col-md-10">
       <input type="text" name="first_name" id="first_name"
-             class="form-control"
+             class="form-control" aria-describedby="first_nameHelp"
              value="{{ account.get('first_name') or '' }}">
       <span style="color:red; margin-right: 1em;"
             class="glyphicon glyphicon-star form-control-feedback"
             aria-hidden="true"></span>
+      <span id="first_nameHelp" class="help-block">
+        <strong>NOTE: Required!</strong><br>
+      </span>
     </div>
   </div>
 
@@ -39,11 +42,14 @@ administrator of the site can then change the ownership of your
     <label class="control-label col-md-2" for="last_name">Last name</label>
     <div class="col-md-10">
       <input type="text" name="last_name" id="last_name"
-             class="form-control"
+             class="form-control" aria-describedby="last_nameHelp"
              value="{{ account.get('last_name') or '' }}">
       <span style="color:red; margin-right: 1em;"
             class="glyphicon glyphicon-star form-control-feedback"
             aria-hidden="true"></span>
+      <span id="last_nameHelp" class="help-block">
+        <strong>NOTE: Required!</strong><br>
+      </span>
     </div>
   </div>
 
@@ -67,7 +73,8 @@ administrator of the site can then change the ownership of your
       <div class="row">
         {% if settings['UNIVERSITIES'] %}
         <div class="col-md-6">
-          <select class="form-control" name="university" id="university">
+          <select name="university" id="university"
+                  class="form-control" aria-describedby="universityHelp">
             {% set other = True %}
             {% for abbrev, data in settings['UNIVERSITIES'].items() %}
             {% if account.get('university') == abbrev %}
@@ -93,14 +100,15 @@ administrator of the site can then change the ownership of your
         </div>
         <div class="col-md-6">
           <input type="text" name="university_other" id="university_other"
-                 class="form-control"
+                 class="form-control" aria-describedby="universityHelp"
                  placeholder="Provide full name if not available in the list."
                  value="{{ other and account.get('university') or '' }}">
         </div>
         {% else %}
         <div class="col-md-12">
           <input type="text" name="university" id="university"
-                 class="form-control" value="{{ account.get('university') or '' }}">
+                 class="form-control" aria-describedby="universityHelp"
+                 value="{{ account.get('university') or '' }}">
           <span style="color:red; margin-right: 1em;"
                 class="glyphicon glyphicon-star form-control-feedback"
                 aria-hidden="true"></span>
@@ -109,7 +117,8 @@ administrator of the site can then change the ownership of your
       </div>
       <div class="row">
         <div class="col-md-12">
-          <span class="help-block">
+          <span id="universityHelp" class="help-block">
+            <strong>NOTE: Required!</strong><br>
             Main affiliation: University, college, company, organization, or similar.
           </span>
         </div>
@@ -121,9 +130,9 @@ administrator of the site can then change the ownership of your
     <label class="control-label col-md-2" for="department">Department</label>
     <div class="col-md-10">
       <input type="text" name="department" id="department"
-             class="form-control"
+             class="form-control" aria-describedby="departmentHelp"
              value="{{ account.get('department') or '' }}">
-      <span class="help-block">
+      <span id="departmentHelp" class="help-block">
         University department, company section, group, or similar.
       </span>
     </div>
@@ -145,14 +154,18 @@ administrator of the site can then change the ownership of your
   <div class="form-group">
     <label class="control-label col-md-2" for="orcid">ORCID</label>
     <div class="col-md-10">
-      <input type="text" name="orcid" id="orcid" class="form-control"
+      <input type="text" name="orcid" id="orcid"
+             class="form-control" aria-describedby="orcidHelp"
              value="{{ account.get('orcid') or '' }}">
       {% if settings['ACCOUNT_ORCID_REQUIRED'] %}
       <span style="color:red; margin-right: 1em;"
             class="glyphicon glyphicon-star form-control-feedback"
             aria-hidden="true"></span>
       {% end %}
-      <span class="help-block">
+      <span id="orcidHelp" class="help-block">
+        {% if settings['ACCOUNT_ORCID_REQUIRED'] %}
+        <strong>NOTE: Required!</strong><br>
+        {% end %}
         Persistent digital identifier for researchers.
         See the <a href="https://orcid.org/" target="_blank">ORCID website</a>.
       </span>
@@ -183,9 +196,6 @@ administrator of the site can then change the ownership of your
                 </label>
                 {% end %}
               </div>
-              <span style="color:red; margin-right: 2em;"
-                    class="glyphicon glyphicon-star form-control-feedback"
-                    aria-hidden="true"></span>
             </div>
           </div>
           {% end %} {# if settings.get('ACCOUNT_FUNDER_INFO_GENDER') #}
@@ -194,10 +204,10 @@ administrator of the site can then change the ownership of your
           <div class="form-group has-feedback">
             <label class="control-label col-md-2" for="gender">Group size</label>
             <div class="col-md-10">
-              <input type="number"  name="group_size", id="group_size"
-                     class="form-control"
+              <input type="number" name="group_size" id="group_size"
+                     class="form-control" aria-describedby="group_sizeHelp"
                      value="{{ account.get('group_size') or '' }}">
-              <span class="help-block">
+              <span id="group_sizeHelp" class="help-block">
                 If you are a Principal Investigator (PI), specify the
                 approximate number of members in your group.
               </span>
@@ -209,7 +219,8 @@ administrator of the site can then change the ownership of your
           <div class="form-group has-feedback">
             <label class="control-label col-md-2" for="subject">Subject</label>
             <div class="col-md-10">
-              <select class="form-control" name="subject" id="subject">
+              <select name="subject" id="subject"
+                      class="form-control" aria-describedby="subjectHelp">
                 {% for subject in settings['SUBJECT_TERMS'] %}
                 <option value="{{ subject['code'] }}"
                         {{ subject['code'] == account.get('subject') and 'selected' or '' }}>
@@ -217,10 +228,7 @@ administrator of the site can then change the ownership of your
                 </option>
                 {% end %}
               </select>
-              <span style="color:red; margin-right: 2em;"
-                    class="glyphicon glyphicon-star form-control-feedback"
-                    aria-hidden="true"></span>
-              <span class="help-block">
+              <span id="subjectHelp"> class="help-block">
                 Select the subject term that best characterizes your field.
               </span>
             </div>
@@ -246,10 +254,10 @@ administrator of the site can then change the ownership of your
           <div class="form-group">
             <label class="control-label col-md-2" for="postal_university">University</label>
             <div class="col-md-10">
-              <input type="text" id="postal_university" name="postal_university"
-                     class="form-control"
+              <input type="text" name="postal_university" id="postal_university"
+                     class="form-control" aria-describedby="postal_universityHelp"
                      value="{{ account['address'].get('university') or ''}}">
-              <span class="help-block">
+              <span id="postal_universityHelp" class="help-block">
                 University, college, company, organization, or similar.
                 If empty, the value from the university field above will be used.
               </span>
@@ -259,10 +267,10 @@ administrator of the site can then change the ownership of your
           <div class="form-group">
             <label class="control-label col-md-2" for="postal_department">Department</label>
             <div class="col-md-10">
-              <input type="text" id="postal_department" name="postal_department"
-                     class="form-control"
+              <input type="text" name="postal_department" id="postal_department"
+                     class="form-control" aria-describedby="postal_departmentHelp"
                      value="{{ account['address'].get('department') or ''}}">
-              <span class="help-block">
+              <span id="postal_departmentHelp" class="help-block">
                 University department, company section, group, or similar.
                 If empty, the value from the department field above will be used.
               </span>
@@ -272,10 +280,10 @@ administrator of the site can then change the ownership of your
           <div class="form-group">
             <label class="control-label col-md-2" for="postal_address">Address</label>
             <div class="col-md-10">
-              <textarea id="postal_address" name="postal_address"
-                        class="form-control" rows="2"
+              <textarea name="postal_address" id="postal_address" rows="2"
+                        class="form-control" aria-describedby="postal_addressHelp"
                         >{{ account['address'].get('address') or '' }}</textarea>
-              <span class="help-block">
+              <span id="postal_addressHelp" class="help-block">
                 Institution, building, street, number, post box, etc.
               </span>
             </div>
@@ -284,9 +292,10 @@ administrator of the site can then change the ownership of your
           <div class="form-group">
             <label class="control-label col-md-2" for="postal_zip">Zip code</label>
             <div class="col-md-10">
-              <input type="text" id="postal_zip" name="postal_zip" class="form-control"
+              <input type="text" name="postal_zip" id="postal_zip"
+                     class="form-control" aria-describedby="postal_zipHelp"
                      value="{{ account['address'].get('zip') or '' }}">
-              <span class="help-block">
+              <span id="postal_zipHelp" class="help-block">
                 Postal code.
               </span>
             </div>
@@ -295,7 +304,7 @@ administrator of the site can then change the ownership of your
           <div class="form-group">
             <label class="control-label col-md-2" for="postal_city">City</label>
             <div class="col-md-10">
-              <input type="text" id="postal_city" name="postal_city"
+              <input type="text" name="postal_city" id="postal_city"
                      class="form-control"
                      value="{{ account['address'].get('city') or '' }}">
             </div>
@@ -332,14 +341,14 @@ administrator of the site can then change the ownership of your
             <label class="control-label col-md-2" for="invoice_ref">Invoice reference</label>
             <div class="col-md-10">
               <input type="text" name="invoice_ref" id="invoice_ref"
-                     class="form-control"
+                     class="form-control" aria-describedby="invoice_refHelp"
                      value="{{ account.get('invoice_ref') or '' }}">
               {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
               <span style="color:red; margin-right: 1em;"
                     class="glyphicon glyphicon-star form-control-feedback"
                     aria-hidden="true"></span>
               {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
-              <span class="help-block">
+              <span id="invoice_refHelp" class="help-block">
                 {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
                 <strong>NOTE: Required!</strong>
                 {% end %} {# if settings['ACCOUNT_INVOICE_REF_REQUIRED'] #}
@@ -353,17 +362,9 @@ administrator of the site can then change the ownership of your
             <label class="control-label col-md-2" for="invoice_ref">Invoice VAT number</label>
             <div class="col-md-10">
               <input type="text" name="invoice_vat" id="invoice_vat"
-                     class="form-control"
+                     class="form-control" aria-describedby="invoice_vatHelp"
                      value="{{ account.get('invoice_vat') or '' }}">
-              {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
-              <span style="color:red; margin-right: 1em;"
-                    class="glyphicon glyphicon-star form-control-feedback"
-                    aria-hidden="true"></span>
-              {% end %}
-              <span class="help-block">
-                {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
-                <strong>NOTE: Required!</strong>
-                {% end %}
+              <span id="invoice_vatHelp" class="help-block">
                 Invoice VAT number for your university/company/organization.
               </span>
             </div>
@@ -372,10 +373,10 @@ administrator of the site can then change the ownership of your
           <div class="form-group">
             <label class="control-label col-md-2" for="invoice_university">University</label>
             <div class="col-md-10">
-              <input type="text" id="invoice_university" name="invoice_university"
-                     class="form-control"
+              <input type="text" name="invoice_university" id="invoice_university"
+                     class="form-control" aria-describedby="invoice_universityHelp"
                      value="{{ account['invoice_address'].get('university') or ''}}">
-              <span class="help-block">
+              <span id="invoice_universityHelp" class="help-block">
                 University, college, company, organization, or similar.
                 If empty, the value from the university field above will be used.
               </span>
@@ -385,10 +386,10 @@ administrator of the site can then change the ownership of your
           <div class="form-group">
             <label class="control-label col-md-2" for="invoice_department">Department</label>
             <div class="col-md-10">
-              <input type="text" id="invoice_department" name="invoice_department"
-                     class="form-control"
+              <input type="text" name="invoice_department" id="invoice_department"
+                     class="form-control" aria-describedby="invoice_departmentHelp"
                      value="{{ account['invoice_address'].get('department') or ''}}">
-              <span class="help-block">
+              <span id="invoice_departmentHelp" class="help-block">
                 University department, company section, group, or similar.
                 If empty, the value from the department field above will be used.
               </span>
@@ -398,10 +399,10 @@ administrator of the site can then change the ownership of your
           <div class="form-group">
             <label class="control-label col-md-2" for="invoice_address">Address</label>
             <div class="col-md-10">
-              <textarea id="invoice_address" name="invoice_address"
-                        class="form-control" rows="2"
+              <textarea name="invoice_address" id="invoice_address" rows="2"
+                        class="form-control" aria-describedby="invoice_addressHelp"
                         >{{ account['invoice_address'].get('address') or '' }}</textarea>
-              <span class="help-block">
+              <span id="invoice_addressHelp" class="help-block">
                 Street, number, post box, building, etc.
               </span>
             </div>
@@ -410,10 +411,10 @@ administrator of the site can then change the ownership of your
           <div class="form-group">
             <label class="control-label col-md-2" for="invoice_zip">Zip code</label>
             <div class="col-md-10">
-              <input type="text" class="form-control"
-                     id="invoice_zip" name="invoice_zip"
+              <input type="text" name="invoice_zip" id="invoice_zip"
+                     class="form-control" aria-describedby="invoice_zipHelp"
                      value="{{ account['invoice_address'].get('zip') or '' }}">
-              <span class="help-block">
+              <span id="invoice_zipHelp" class="help-block">
                 Postal code.
               </span>
             </div>
@@ -422,8 +423,8 @@ administrator of the site can then change the ownership of your
           <div class="form-group">
             <label class="control-label col-md-2" for="invoice_city">City</label>
             <div class="col-md-10">
-              <input type="text" class="form-control"
-                     id="invoice_city" name="invoice_city"
+              <input type="text" name="invoice_city" id="invoice_city"
+                     class="form-control"
                      value="{{ account['invoice_address'].get('city') or '' }}">
             </div>
           </div>
@@ -449,9 +450,10 @@ administrator of the site can then change the ownership of your
   <div class="form-group">
     <label class="control-label col-md-2" for="phone">Phone</label>
     <div class="col-md-10">
-      <textarea name="phone" id="phone" rows="3" class="form-control"
+      <textarea name="phone" id="phone" rows="2"
+                class="form-control" aria-describedby="phoneHelp"
                 >{{ account.get('phone') or '' }}</textarea>
-      <span class="help-block">
+      <span id="phoneHelp" class="help-block">
         One or more telephone numbers, one per line.
       </span>
     </div>
@@ -460,9 +462,10 @@ administrator of the site can then change the ownership of your
   <div class="form-group">
     <label class="control-label col-md-2" for="other_data">Other data</label>
     <div class="col-md-10">
-      <textarea id="other_data" name="other_data" rows="3" class="form-control"
+      <textarea name="other_data" id="other_data" rows="3"
+                class="form-control" aria-describedby="other_dataHelp"
                   >{{ account.get('other_data') or '' }}</textarea>
-      <span class="help-block">
+      <span id="other_dataHelp" class="help-block">
         Miscellaneous user data from other sources.
       </span>
     </div>
