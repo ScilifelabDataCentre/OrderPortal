@@ -228,7 +228,7 @@ administrator of the site can then change the ownership of your
                 </option>
                 {% end %}
               </select>
-              <span id="subjectHelp"> class="help-block">
+              <span id="subjectHelp" class="help-block">
                 Select the subject term that best characterizes your field.
               </span>
             </div>
@@ -378,6 +378,7 @@ administrator of the site can then change the ownership of your
                      value="{{ account['invoice_address'].get('university') or ''}}">
               <span id="invoice_universityHelp" class="help-block">
                 University, college, company, organization, or similar.
+                <br>
                 If empty, the value from the university field above will be used.
               </span>
             </div>

@@ -284,7 +284,8 @@ class Constants:
     }
     DEFAULT_CONTENT_TYPE_ICON = "binary.png"
 
-    COUNTRIES = dict([(c.alpha_2, c.name) for c in pycountry.countries])
+    COUNTRIES = dict(sorted([(c.alpha_2, c.name) for c in pycountry.countries],
+                            key=lambda c: c[1]))
 
 
 constants = Constants()

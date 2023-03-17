@@ -336,7 +336,7 @@
                     class="glyphicon glyphicon-star form-control-feedback"
                     aria-hidden="true"></span>
               {% end %}
-              <span id="invoice_refHelp"> class="help-block">
+              <span id="invoice_refHelp" class="help-block">
                 {% if settings['ACCOUNT_INVOICE_REF_REQUIRED'] %}
                 <strong>NOTE: Required!</strong><br>
                 {% end %}
@@ -379,6 +379,7 @@
                      value="{{ values.get('invoice_department') or ''}}">
               <span id="invoice_departmentHelp" class="help-block">
                 University department, company section, group, or similar.
+                <br>
                 If empty, the value from the department field above will be used.
               </span>
             </div>
@@ -387,8 +388,8 @@
           <div class="form-group">
             <label class="control-label col-md-2" for="invoice_address">Address</label>
             <div class="col-md-10">
-              <textarea name="invoice_address" id="invoice_address" rows="2
-                        class="form-control"" aria-describedby="invoice_addressHelp"
+              <textarea name="invoice_address" id="invoice_address" rows="2"
+                        class="form-control" aria-describedby="invoice_addressHelp"
                         >{{ values.get('invoice_address') or '' }}</textarea>
               <span id="invoice_addressHelp" class="help-block">
                 Street, number, post box, building, etc.

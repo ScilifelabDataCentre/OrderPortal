@@ -84,10 +84,10 @@ class AccountLink(tornado.web.UIModule):
 class GroupLink(tornado.web.UIModule):
     "HTML for link to a group."
 
-    def render(self, group, show_am_owner=False):
+    def render(self, group, is_owner=False):
         url = self.handler.reverse_url("group", group["_id"])
-        if show_am_owner:
-            return f"""<a href="{url}">{group['name']}</a> (am owner)"""
+        if is_owner:
+            return f"""<a href="{url}">{group['name']}</a> (owner)"""
         else:
             return f"""<a href="{url}">{group['name']}</a>"""
 

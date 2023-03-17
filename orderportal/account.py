@@ -804,9 +804,9 @@ class AccountEdit(AccessMixin, RequestHandler):
                     university=self.get_argument("postal_university", None),
                     department=self.get_argument("postal_department", None),
                     address=self.get_argument("address", None),
-                    zip=self.get_argument("zip", None),
-                    city=self.get_argument("city", None),
-                    country=self.get_argument("country", None),
+                    zip=self.get_argument("postal_zip", None),
+                    city=self.get_argument("postal_city", None),
+                    country=self.get_argument("postal_country", None),
                 )
                 saver["invoice_ref"] = self.get_argument("invoice_ref", None)
                 saver["invoice_vat"] = self.get_argument("invoice_vat", None)

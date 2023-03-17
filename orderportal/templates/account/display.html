@@ -68,7 +68,7 @@
       <table>
         {% for group in groups %}
         <tr>
-          <td>{% module GroupLink(group, show_am_owner=True) %}</td>
+          <td>{% module GroupLink(group, is_owner=account['email'] == group['owner']) %}</td>
           {% if current_user['email'] == account['email'] and account['email'] != group['owner'] %}
           <td>
             <form action="{{ reverse_url('group_decline', group['_id']) }}"
@@ -350,7 +350,9 @@
   </tr>
 </table>
 
-{% module Text('privacy_policy', origin=reverse_url('account', account['email'])) %}
+<div class="well">
+  {% module Text('privacy_policy', origin=reverse_url('account', account['email'])) %}
+</div>
 {% end %} {# block main_content #}
 
 {% block action_content %}
