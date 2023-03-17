@@ -818,7 +818,7 @@ class OrderCreate(OrderMixin, RequestHandler):
             self.check_creation_enabled()
             form = self.get_form(self.get_argument("form"))
             if form["status"] not in (constants.ENABLED, constants.TESTING):
-                raise ValueError("form is not available for creation")
+                raise ValueError("Form is not available for creation.")
             with OrderSaver(handler=self) as saver:
                 saver.create(form)
                 saver.autopopulate()
@@ -843,7 +843,7 @@ class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
             data = self.get_json_body()
             iuid = data.get("form")
             if not iuid:
-                raise ValueError("no form IUID given")
+                raise ValueError("No form IUID given.")
             form = self.get_form(iuid)
             if form["status"] not in (constants.ENABLED, constants.TESTING):
                 raise ValueError("form is not available for creation")

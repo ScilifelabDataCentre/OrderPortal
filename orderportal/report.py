@@ -387,3 +387,25 @@ class ReportLogs(ReportMixin, RequestHandler):
             return
         title = f"Logs for report '{report['name'] or '[no name]'}'"
         self.render("logs.html", title=title, logs=self.get_logs(report["_id"]))
+
+
+class ReportCreateApiV1(ApiV1Mixin, RequestHandler):
+    "Create a report for an order."
+
+    @tornado.web.authenticated
+    def post(self):
+        try:
+            self.check_login()
+        except ValueError as error:
+            raise tornado.web.HTTPError(403, reason=str(error))
+        try:
+            data = self.get_json_body()
+            order = data.get("order")
+            if not order:
+                raise ValueError("No order IUID given.")
+            order = self.get_order(order)
+            # XXX
+        except ValueError as error:
+            raise tornado.web.HTTPError(400, reason=str(error))
+        else:
+            self.write(self.get_order_json(saver.doc, full=True))

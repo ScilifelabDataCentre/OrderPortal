@@ -469,7 +469,7 @@ class ApiV1Mixin:
     "Mixin containing some API methods; JSON generation."
 
     def cleanup(self, doc):
-        "Change _id to iuid and remove _id."
+        "Change '_id' to 'iuid' and remove '_rev'."
         doc["iuid"] = doc.pop("_id")
         doc.pop("_rev", None)
 
