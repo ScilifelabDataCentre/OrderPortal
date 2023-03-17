@@ -198,10 +198,18 @@ def migrate_meta_documents(db):
             saver["orcid_required"] = False
             saver["postal_info"] = settings.get("ACCOUNT_POSTAL_INFO", True)
             saver["invoice_info"] = settings.get("ACCOUNT_INVOICE_INFO", True)
-            saver["invoice_ref_required"] = settings.get("ACCOUNT_INVOICE_REF_REQUIRED", False)
-            saver["funder_info_gender"] = settings.get("ACCOUNT_FUNDER_INFO_GENDER", True)
-            saver["funder_info_group_size"] = settings.get("ACCOUNT_FUNDER_INFO_GROUP_SIZE", True)
-            saver["funder_info_subject"] = settings.get("ACCOUNT_FUNDER_INFO_SUBJECT", True)
+            saver["invoice_ref_required"] = settings.get(
+                "ACCOUNT_INVOICE_REF_REQUIRED", False
+            )
+            saver["funder_info_gender"] = settings.get(
+                "ACCOUNT_FUNDER_INFO_GENDER", True
+            )
+            saver["funder_info_group_size"] = settings.get(
+                "ACCOUNT_FUNDER_INFO_GROUP_SIZE", True
+            )
+            saver["funder_info_subject"] = settings.get(
+                "ACCOUNT_FUNDER_INFO_SUBJECT", True
+            )
             saver["default_country_code"] = settings.get("DEFAULT_COUNTRY_CODE", "SE")
         logger.info("Saved account settings to database.")
 
@@ -406,7 +414,9 @@ class Order(RequestHandler):
             saver["links"] = utils.to_bool(self.get_argument("links", False))
             saver["reports"] = utils.to_bool(self.get_argument("reports", False))
             try:
-                saver["display_max_recent"] = max(1, int(self.get_argument("display_max_recent", 10)))
+                saver["display_max_recent"] = max(
+                    1, int(self.get_argument("display_max_recent", 10))
+                )
             except (TypeError, ValueError):
                 self.set_error_flash("Bad 'display_max_recent' value; ignored.")
             for source in constants.ORDER_AUTOPOPULATE_SOURCES:
@@ -519,8 +529,10 @@ class OrderTransitionsEdit(RequestHandler):
         "Display edit page."
         self.check_admin()
         if status_id == constants.PREPARATION:
-            self.see_other("admin_order_statuses",
-                           error="Not allowed to edit transitions from status Preparation.")
+            self.see_other(
+                "admin_order_statuses",
+                error="Not allowed to edit transitions from status Preparation.",
+            )
             return
         try:
             status = settings["ORDER_STATUSES_LOOKUP"][status_id]
@@ -650,7 +662,9 @@ class OrdersList(RequestHandler):
                     # Overwrite if identifier is already in the list.
                     filters[filter["identifier"]] = filter
             except (KeyError, ValueError, yaml.YAMLError):
-                self.set_error_flash("Invalid YAML given in 'Add orders filter field'; ignored.")
+                self.set_error_flash(
+                    "Invalid YAML given in 'Add orders filter field'; ignored."
+                )
             saver["filters"] = list(filters.values())
             try:
                 value = int(self.get_argument("orders_most_recent"))
@@ -699,12 +713,8 @@ class Account(RequestHandler):
             saver["registration_open"] = utils.to_bool(
                 self.get_argument("registration_open", False)
             )
-            saver["pi_info"] = utils.to_bool(
-                self.get_argument("pi_info", False)
-            )
-            saver["orcid_info"] = utils.to_bool(
-                self.get_argument("orcid_info", False)
-            )
+            saver["pi_info"] = utils.to_bool(self.get_argument("pi_info", False))
+            saver["orcid_info"] = utils.to_bool(self.get_argument("orcid_info", False))
             saver["orcid_required"] = utils.to_bool(
                 self.get_argument("orcid_required", False)
             )
@@ -726,7 +736,9 @@ class Account(RequestHandler):
             saver["funder_info_subject"] = utils.to_bool(
                 self.get_argument("funder_info_subject", False)
             )
-            saver["default_country_code"] = self.get_argument("default_country_code", "SE")
+            saver["default_country_code"] = self.get_argument(
+                "default_country_code", "SE"
+            )
         orderportal.config.load_settings_from_db(self.db)
         self.set_message_flash("Saved account configuration.")
         self.see_other("admin_account")
@@ -1191,7 +1203,7 @@ DEFAULT_TEXTS_REPORT = [
 The report '{name}' for the order '{title}' requires your review.
 
 See {url}""",
-        ),
+    ),
     dict(
         name="owner",
         subject="{site} report status change.",
@@ -1200,5 +1212,5 @@ See {url}""",
 The report '{name}' for the order '{title}' has been set to '{status}'.
 
 See {url}""",
-         ),
+    ),
 ]

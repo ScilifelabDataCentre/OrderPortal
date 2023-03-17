@@ -20,7 +20,7 @@ administrator of the site can then change the ownership of your
 </p>
 
 <form action="{{ reverse_url('account_edit', account['email']) }}"
-      class="form-horizontal" method="POST" role="form">
+      method="POST" role="form" class="form-horizontal">
   {% module xsrf_form_html() %}
 
   <div class="form-group has-feedback">

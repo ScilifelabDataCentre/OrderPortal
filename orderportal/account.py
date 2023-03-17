@@ -117,8 +117,15 @@ class RecipientsMixin:
         if constants.ADMIN in text["recipients"]:
             result.extend([a["email"] for a in self.get_admins()])
         if constants.STAFF in text["recipients"]:
-            staff = [row.doc for row in self.db.view("account", "role", key=constants.STAFF, include_docs=True)]
-            result.extend([a["email"] for a in staff if a["status"] == constants.ENABLED])
+            staff = [
+                row.doc
+                for row in self.db.view(
+                    "account", "role", key=constants.STAFF, include_docs=True
+                )
+            ]
+            result.extend(
+                [a["email"] for a in staff if a["status"] == constants.ENABLED]
+            )
         return result
 
 
@@ -148,13 +155,19 @@ class Accounts(RequestHandler):
     def get_accounts(self):
         "Get the accounts depending on the filter parameters."
         accounts = self.filter_by_login(self.filter.get("login"))
-        accounts = self.filter_by_university(self.filter.get("university"), accounts=accounts)
+        accounts = self.filter_by_university(
+            self.filter.get("university"), accounts=accounts
+        )
         accounts = self.filter_by_role(self.filter.get("role"), accounts=accounts)
         accounts = self.filter_by_status(self.filter.get("status"), accounts=accounts)
         # Get all accounts if no filter produces anything.
         if accounts is None:
-            view = self.db.view("account", "all", reduce=False, include_docs=True)
-            accounts = [r.doc for r in view]
+            accounts = [
+                row.doc
+                for row in self.db.view(
+                    "account", "all", reduce=False, include_docs=True
+                )
+            ]
         # This is optimized for retrieval speed. The single-valued
         # function 'get_account_order_count' is not good enough here.
         view = self.db.view(
@@ -173,15 +186,15 @@ class Accounts(RequestHandler):
         If no parameter value, assume 'last year'.
         If 'whenever', then return None; this is handled correctly by later filters.
         """
-        if not login or login == 'last year':
+        if not login or login == "last year":
             view = self.db.view(
                 "account",
                 "login",
-                startkey=utils.timestamp(days=-366), # Allow leap year.
+                startkey=utils.timestamp(days=-366),  # Allow leap year.
                 endkey=utils.timestamp(),
-                include_docs=True
+                include_docs=True,
             )
-            return [r.doc for r in view]
+            return [row.doc for row in view]
         else:
             return None
 
@@ -189,17 +202,21 @@ class Accounts(RequestHandler):
         "Return accounts list if any university filter, or the input accounts if none."
         if university == "[other]":
             if accounts is None:
-                view = self.db.view("account", "email", include_docs=True)
-                accounts = [r.doc for r in view]
+                accounts = [
+                    row.doc
+                    for row in self.db.view("account", "email", include_docs=True)
+                ]
             accounts = [
                 a for a in accounts if a["university"] not in settings["UNIVERSITIES"]
             ]
         elif university:
             if accounts is None:
-                view = self.db.view(
-                    "account", "university", key=university, include_docs=True
-                )
-                accounts = [r.doc for r in view]
+                accounts = [
+                    row.doc
+                    for row in self.db.view(
+                        "account", "university", key=university, include_docs=True
+                    )
+                ]
             else:
                 account = [a for a in accounts if a["university"] == university]
         return accounts
@@ -410,7 +427,12 @@ class Account(AccessMixin, RequestHandler):
             invitations = self.get_invitations(account["email"])
         else:
             invitations = []
-        reports = [r.doc for r in self.db.view("report", "review", key=account["email"], include_docs=True)]
+        reports = [
+            r.doc
+            for r in self.db.view(
+                "report", "review", key=account["email"], include_docs=True
+            )
+        ]
         for report in reports:
             report["order"] = self.get_order(report["order"])
         self.render(
@@ -1079,8 +1101,10 @@ class Register(RecipientsMixin, RequestHandler):
                 except (tornado.web.MissingArgumentError, ValueError, TypeError):
                     saver["subject"] = None
                 saver["address"] = dict(
-                    university=self.get_argument("postal_university", None) or saver["university"],
-                    department=self.get_argument("postal_department", None) or saver["department"],
+                    university=self.get_argument("postal_university", None)
+                    or saver["university"],
+                    department=self.get_argument("postal_department", None)
+                    or saver["department"],
                     address=self.get_argument("postal_address", None),
                     zip=self.get_argument("postal_zip", None),
                     city=self.get_argument("postal_city", None),
@@ -1089,8 +1113,10 @@ class Register(RecipientsMixin, RequestHandler):
                 saver["invoice_ref"] = self.get_argument("invoice_ref", None)
                 saver["invoice_vat"] = self.get_argument("invoice_vat", None)
                 saver["invoice_address"] = dict(
-                    university=self.get_argument("invoice_university", None) or saver["university"],
-                    department=self.get_argument("invoice_department", None) or saver["department"],
+                    university=self.get_argument("invoice_university", None)
+                    or saver["university"],
+                    department=self.get_argument("invoice_department", None)
+                    or saver["department"],
                     address=self.get_argument("invoice_address", None),
                     zip=self.get_argument("invoice_zip", None),
                     city=self.get_argument("invoice_city", None),

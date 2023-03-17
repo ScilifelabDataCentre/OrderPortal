@@ -401,7 +401,7 @@ REPORT_DESIGN_DOC = {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'report') return;
     emit(doc.order, doc.modified);
-}"""
+}""",
         },
         "review": {
             "map": """function(doc) {

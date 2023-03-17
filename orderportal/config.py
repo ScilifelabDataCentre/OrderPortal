@@ -188,7 +188,12 @@ def load_settings_from_db(db):
 
 def load_texts_from_db(db):
     "Load the texts from the database into settings."
-    for type in (constants.DISPLAY, constants.ACCOUNT, constants.ORDER, constants.REPORT):
+    for type in (
+        constants.DISPLAY,
+        constants.ACCOUNT,
+        constants.ORDER,
+        constants.REPORT,
+    ):
         docs = [row.doc for row in db.view("text", "type", type, include_docs=True)]
         settings[type] = dict()
         for doc in docs:

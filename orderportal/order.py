@@ -62,46 +62,38 @@ class OrderSaver(saver.Saver):
         """
         account = self.handler.current_user
         autopopulate = settings["ORDER_AUTOPOPULATE"]
-
+        # Translate university abbreviation to full name.
         target = autopopulate.get("university")
         if target and target in self["fields"]:
-            # Translate university abbreviation to full name.
-            self["fields"][target] = settings["UNIVERSITIES"].get(account["university"], {}).get("name")
-        target = autopopulate.get("department")
-        if target and target in self["fields"]:
-            self["fields"][target] = account["department"]
-        target = autopopulate.get("phone")
-        if target and target in self["fields"]:
-            self["fields"][target] = account["phone"]
-        target = autopopulate.get("invoice_ref")
-        if target and target in self["fields"]:
-            self["fields"][target] = account["invoice_ref"]
-        target = autopopulate.get("address.address")
-        if target and target in self["fields"]:
-            self["fields"][target] = account["address"]["address"]
-        target = autopopulate.get("address.zip")
-        if target and target in self["fields"]:
-            self["fields"][target] = account["address"]["zip"]
-        target = autopopulate.get("address.city")
-        if target and target in self["fields"]:
-            self["fields"][target] = account["address"]["city"]
+            self["fields"][target] = (
+                settings["UNIVERSITIES"].get(account["university"], {}).get("name")
+            )
+        for source in ["department", "phone", "invoice_ref", "invoice_vat"]:
+            target = autopopulate.get(source)
+            if target and target in self["fields"]:
+                self["fields"][target] = account[source]
+        # Postal address fields.
+        for source in ["university", "department", "address", "zip", "city"]:
+            target = autopopulate.get(f"address.{source}")
+            if target and target in self["fields"]:
+                self["fields"][target] = account["address"].get(source)
         target = autopopulate.get("address.country")
         if target and target in self["fields"]:
             # Translate country abbreviation to full name.
-            self["fields"][target] = constants.COUNTRIES.get(account["address"]["country"])
-        target = autopopulate.get("invoice_address.address")
-        if target and target in self["fields"]:
-            self["fields"][target] = account["invoice_address"]["address"]
-        target = autopopulate.get("invoice_address.zip")
-        if target and target in self["fields"]:
-            self["fields"][target] = account["invoice_address"]["zip"]
-        target = autopopulate.get("invoice_address.city")
-        if target and target in self["fields"]:
-            self["fields"][target] = account["invoice_address"]["city"]
+            self["fields"][target] = constants.COUNTRIES.get(
+                account["address"]["country"]
+            )
+        # Invoice address fields.
+        for source in ["university", "department", "address", "zip", "city"]:
+            target = autopopulate.get(f"invoice_address.{source}")
+            if target and target in self["fields"]:
+                self["fields"][target] = account["invoice_address"].get(source)
         target = autopopulate.get("invoice_address.country")
         if target and target in self["fields"]:
             # Translate country abbreviation to full name.
-            self["fields"][target] = constants.COUNTRIES.get(account["invoice_address"]["country"])
+            self["fields"][target] = constants.COUNTRIES.get(
+                account["invoice_address"]["country"]
+            )
 
     def add_file(self, infile):
         "Add the given file to the files. Return the unique filename."
@@ -499,7 +491,10 @@ class OrderSaver(saver.Saver):
             if constants.GROUP in text_template["recipients"]:
                 colleagues = dict()
                 for row in self.db.view(
-                    "group", "member", include_docs=True, key=owner["email"].strip().lower()
+                    "group",
+                    "member",
+                    include_docs=True,
+                    key=owner["email"].strip().lower(),
                 ):
                     for member in row.doc["members"]:
                         try:
@@ -675,12 +670,20 @@ class OrderMixin:
     def get_reports(self, order):
         "Get the report entities. All for staff, only published for ordinary user."
         if self.am_staff():
-            result = [r.doc for r in
-                      self.db.view("report", "order", key=order["_id"], include_docs=True)]
+            result = [
+                r.doc
+                for r in self.db.view(
+                    "report", "order", key=order["_id"], include_docs=True
+                )
+            ]
         else:
-            result = [r.doc for r in
-                      self.db.view("report", "order", key=order["_id"], include_docs=True)
-                      if r.doc["status"] == constants.PUBLISHED]
+            result = [
+                r.doc
+                for r in self.db.view(
+                    "report", "order", key=order["_id"], include_docs=True
+                )
+                if r.doc["status"] == constants.PUBLISHED
+            ]
         result.sort(key=lambda r: r["modified"], reverse=True)
         return result
 
@@ -739,19 +742,24 @@ class OrderApiV1Mixin(ApiV1Mixin):
         data["status"] = order["status"]
         data["reports"] = []
         for report in self.get_reports(order):
-            reportdata = dict(iuid=report["_id"], 
-                              name=report["name"],
-                              modified=report["modified"],
-                              links=dict(
-                                  api=dict(), # XXX when API call implemented.
-                                  display=dict(
-                                      href=self.absolute_reverse_url("report", report["_id"]))))
+            reportdata = dict(
+                iuid=report["_id"],
+                name=report["name"],
+                modified=report["modified"],
+                links=dict(
+                    api=dict(),  # XXX when API call implemented.
+                    display=dict(
+                        href=self.absolute_reverse_url("report", report["_id"])
+                    ),
+                ),
+            )
             if self.am_staff():
                 reportdata["status"] = report["status"]
             data["reports"].append(reportdata)
         data["history"] = dict()
         for s in settings["ORDER_STATUSES"]:
-            if not s.get("enabled"): continue
+            if not s.get("enabled"):
+                continue
             key = s["identifier"]
             data["history"][key] = order["history"].get(key)
         data["tags"] = order.get("tags", [])
@@ -867,9 +875,9 @@ class Order(OrderMixin, RequestHandler):
             self.see_other("home", error=error)
             return
         form = self.get_form(order["form"])
-        
+
         reports = [r.doc for r in self.db.view("report", "order", include_docs=True)]
-        reports.sort(key=lambda r: r['modified'], reverse=True)
+        reports.sort(key=lambda r: r["modified"], reverse=True)
         files = []
         for filename in order.get("_attachments", []):
             # if filename.startswith(constants.SYSTEM):
@@ -1135,7 +1143,7 @@ class OrderLogs(OrderMixin, RequestHandler):
         self.render(
             "logs.html",
             title=f"Logs for {utils.terminology('order')} '{order['title'] or '[no title]'}'",
-            logs=self.get_logs(order["_id"])
+            logs=self.get_logs(order["_id"]),
         )
 
 
@@ -1505,8 +1513,12 @@ class Orders(RequestHandler):
         else:
             order_column = 0
         self.set_filter()
-        forms = [row.doc for row in
-                 self.db.view("form", "modified", descending=True, include_docs=True)]
+        forms = [
+            row.doc
+            for row in self.db.view(
+                "form", "modified", descending=True, include_docs=True
+            )
+        ]
         self.render(
             "order/list.html",
             forms=forms,
@@ -1592,7 +1604,7 @@ class Orders(RequestHandler):
                 view = self.db.view(
                     "order",
                     "status",
-                    descending=True, # In order to get the most recently modified.
+                    descending=True,  # In order to get the most recently modified.
                     startkey=[status, constants.CEILING],
                     endkey=[status],
                     include_docs=True,
@@ -1611,7 +1623,7 @@ class Orders(RequestHandler):
                 view = self.db.view(
                     "order",
                     "form",
-                    descending=True, # In order to get the most recently modified.
+                    descending=True,  # In order to get the most recently modified.
                     startkey=[form_id, constants.CEILING],
                     endkey=[form_id],
                     include_docs=True,
@@ -1628,7 +1640,7 @@ class Orders(RequestHandler):
                 view = self.db.view(
                     "order",
                     "owner",
-                    descending=True, # In order to get the most recently modified.
+                    descending=True,  # In order to get the most recently modified.
                     startkey=[owner, constants.CEILING],
                     endkey=[owner],
                     include_docs=True,
@@ -1668,7 +1680,7 @@ class Orders(RequestHandler):
                 view = self.db.view(
                     "order",
                     "modified",
-                    descending=True, # In order to get the most recently modified.
+                    descending=True,  # In order to get the most recently modified.
                     limit=settings["DISPLAY_ORDERS_MOST_RECENT"],
                     include_docs=True,
                 )

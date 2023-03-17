@@ -55,7 +55,10 @@ class Search(RequestHandler):
                 orders[id] = self.get_order(id)
         term = (
             "".join(
-                [c in constants.ORDERS_SEARCH_DELIMS_LINT and " " or c for c in orig_term]
+                [
+                    c in constants.ORDERS_SEARCH_DELIMS_LINT and " " or c
+                    for c in orig_term
+                ]
             )
             .strip()
             .lower()

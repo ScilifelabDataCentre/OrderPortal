@@ -48,13 +48,21 @@ class RequestHandler(tornado.web.RequestHandler):
         result["action_required"] = []
         if self.current_user:
             if self.current_user.get("update_info"):
-                result["action_required"].append("You have have been requested to review and update your account information..")
+                result["action_required"].append(
+                    "You have have been requested to review and update your account information.."
+                )
             if settings["ACCOUNT_ORCID_INFO"] and settings["ACCOUNT_ORCID_REQUIRED"]:
                 if not self.current_user.get("orcid"):
-                    result["action_required"].append("You must provide your ORCID in your account information.")
+                    result["action_required"].append(
+                        "You must provide your ORCID in your account information."
+                    )
             if result["am_staff"]:
-                if list(self.db.view("report", "review", key=self.current_user["email"])):
-                    result["action_required"].append("You have order report reviews to finish.")
+                if list(
+                    self.db.view("report", "review", key=self.current_user["email"])
+                ):
+                    result["action_required"].append(
+                        "You have order report reviews to finish."
+                    )
             if self.get_invitations(self.current_user["email"]):
                 result["action_required"].append("You have invitations to group(s).")
         return result
@@ -241,7 +249,7 @@ class RequestHandler(tornado.web.RequestHandler):
     def get_admins(self):
         "Get the list of enabled admin accounts."
         view = self.db.view("account", "role", key=constants.ADMIN, include_docs=True)
-        admins = [r.doc for r in view]
+        admins = [row.doc for row in view]
         return [a for a in admins if a["status"] == constants.ENABLED]
 
     def get_next_counter(self, doctype):
@@ -314,7 +322,7 @@ class RequestHandler(tornado.web.RequestHandler):
             return self.lookup_forms.get(iuid)
         except AttributeError:
             view = self.db.view("form", "modified", descending=True, include_docs=True)
-            self.lookup_forms =  dict([(r.id, r.doc) for r in view])
+            self.lookup_forms = dict([(row.id, row.doc) for row in view])
             return self.lookup_forms.get(iuid)
 
     def get_report(self, iuid):
@@ -341,8 +349,7 @@ class RequestHandler(tornado.web.RequestHandler):
         kwargs = dict(include_docs=True, descending=True)
         if limit is not None:
             kwargs["limit"] = limit
-        view = self.db.view("news", "modified", **kwargs)
-        return [r.doc for r in view]
+        return [row.doc for row in self.db.view("news", "modified", **kwargs)]
 
     def get_events(self, upcoming=False):
         "Get all (descending) or upcoming (ascending) events."
@@ -352,8 +359,7 @@ class RequestHandler(tornado.web.RequestHandler):
             kwargs["endkey"] = constants.CEILING
         else:
             kwargs["descending"] = True
-        view = self.db.view("event", "date", **kwargs)
-        return [r.doc for r in view]
+        return [row.doc for row in self.db.view("event", "date", **kwargs)]
 
     def get_account(self, email, password=None):
         """Get the account identified by the email address.
@@ -386,7 +392,7 @@ class RequestHandler(tornado.web.RequestHandler):
         "Get sorted list of all groups which the account is a member of."
         email = email.strip().lower()
         view = self.db.view("group", "member", key=email, include_docs=True)
-        return sorted([r.doc for r in view], key=lambda i: i["name"])
+        return sorted([row.doc for row in view], key=lambda i: i["name"])
 
     def get_account_colleagues(self, email):
         """Return the set of all emails for colleagues of the account;
@@ -399,8 +405,10 @@ class RequestHandler(tornado.web.RequestHandler):
     def get_invitations(self, email):
         "Get the groups the account with the given email has been invited to."
         email = email.strip().lower()
-        view = self.db.view("group", "invited", key=email, include_docs=True)
-        return [r.doc for r in view]
+        return [
+            row.doc
+            for row in self.db.view("group", "invited", key=email, include_docs=True)
+        ]
 
     def am_colleague(self, email):
         "Is the user with the email address in the same group as the current user?"
@@ -435,7 +443,7 @@ class RequestHandler(tornado.web.RequestHandler):
         if limit > 0:
             kwargs["limit"] = limit
         view = self.db.view("log", "entity", **kwargs)
-        logs = [r.doc for r in view]
+        logs = [row.doc for row in view]
         # Ref to entity in DB is not needed in each log entry.
         for log in logs:
             log["iuid"] = log.pop("_id")

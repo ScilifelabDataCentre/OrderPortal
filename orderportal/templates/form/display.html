@@ -125,15 +125,15 @@
       </tr>
       <tr>
         <th>Description</th>
-        <td>{% module Markdown(form.get('description')) %}</td>
+        <td>{% module Markdown(form.get('description'), safe=True) %}</td>
       </tr>
       <tr>
         <th>Instruction</th>
-        <td>{% module Markdown(form.get('instruction')) %}</td>
+        <td>{% module Markdown(form.get('instruction'), safe=True) %}</td>
       </tr>
       <tr>
         <th>Disclaimer</th>
-        <td>{% module Markdown(form.get('disclaimer')) %}</td>
+        <td>{% module Markdown(form.get('disclaimer'), safe=True) %}</td>
       </tr>
       <tr>
         <th>{{ terminology('Orders') }}</th>

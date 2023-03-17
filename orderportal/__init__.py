@@ -124,7 +124,9 @@ class Constants:
 
     # Forbidden meta document id's; have changed format or been removed.
     # Re-using these id's would likely create backwards incompatibility issues.
-    FORBIDDEN_META_IDS = frozenset(["account_messages","order_messages","global_modes"])
+    FORBIDDEN_META_IDS = frozenset(
+        ["account_messages", "order_messages", "global_modes"]
+    )
 
     # Text types.
     DISPLAY = "display"
@@ -210,19 +212,35 @@ class Constants:
     # Delimiters to remove when searching for orders.
     ORDERS_SEARCH_DELIMS_LINT = (":", ",", ";", "'")
     # Words to remove when searching for orders.
-    ORDERS_SEARCH_LINT = ("an", "to", "in", "on", "of", "and", "the", "is", "was", "not")
+    ORDERS_SEARCH_LINT = (
+        "an",
+        "to",
+        "in",
+        "on",
+        "of",
+        "and",
+        "the",
+        "is",
+        "was",
+        "not",
+    )
 
     # Sources in account for autopopulating an order field.
-    # This must be kept in sync with code in 'order.py' 'OrderSaver.autopopulate'.
+    # NOTE: This must be kept in sync with code in 'order.py' 'OrderSaver.autopopulate'.
     ORDER_AUTOPOPULATE_SOURCES = (
         "university",
         "department",
         "phone",
         "invoice_ref",
+        "invoice_vat",
+        "address.university",
+        "address.department",
         "address.address",
         "address.zip",
         "address.city",
         "address.country",
+        "invoice_address.university",
+        "invoice_address.department",
         "invoice_address.address",
         "invoice_address.zip",
         "invoice_address.city",
@@ -240,7 +258,13 @@ class Constants:
     REPORT_STATUSES = (REVIEW, PUBLISHED, REJECTED)
     REPORT_REVIEW_STATUSES = (REVIEW, APPROVED, REJECTED)
 
-    ALL_STATUSES = frozenset(ACCOUNT_STATUSES + FORM_STATUSES + ORDER_STATUSES + REPORT_STATUSES + REPORT_REVIEW_STATUSES)
+    ALL_STATUSES = frozenset(
+        ACCOUNT_STATUSES
+        + FORM_STATUSES
+        + ORDER_STATUSES
+        + REPORT_STATUSES
+        + REPORT_REVIEW_STATUSES
+    )
 
     # Content types (MIME types).
     HTML_MIMETYPE = "text/html"
@@ -284,8 +308,9 @@ class Constants:
     }
     DEFAULT_CONTENT_TYPE_ICON = "binary.png"
 
-    COUNTRIES = dict(sorted([(c.alpha_2, c.name) for c in pycountry.countries],
-                            key=lambda c: c[1]))
+    COUNTRIES = dict(
+        sorted([(c.alpha_2, c.name) for c in pycountry.countries], key=lambda c: c[1])
+    )
 
 
 constants = Constants()

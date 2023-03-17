@@ -40,9 +40,11 @@ class ReportSaver(saver.Saver):
                     continue
                 if account["role"] not in (constants.ADMIN, constants.STAFF):
                     continue
-                self["reviewers"][account["email"]] = {"status": constants.REVIEW,
-                                                       "review": None,
-                                                       "modified": utils.timestamp()}
+                self["reviewers"][account["email"]] = {
+                    "status": constants.REVIEW,
+                    "review": None,
+                    "modified": utils.timestamp(),
+                }
             except ValueError:
                 pass
 
@@ -115,7 +117,7 @@ class ReportMixin:
                     text,
                     name=report["name"],
                     title=order["title"],
-                    url=utils.get_order_url(order)
+                    url=utils.get_order_url(order),
                 )
                 saver.send(report["reviewers"])
         except (KeyError, ValueError):
@@ -131,7 +133,7 @@ class ReportMixin:
                     name=report["name"],
                     title=order["title"],
                     url=utils.get_order_url(order),
-                    status=report["status"]
+                    status=report["status"],
                 )
                 saver.send(report["owner"])
         except (KeyError, ValueError):
@@ -156,7 +158,9 @@ class ReportAdd(ReportMixin, RequestHandler):
         try:
             order = self.get_order(self.get_argument("order"))
         except ValueError as error:
-            self.see_other("home", error=f"Sorry, no such { utils.terminology('order') }.")
+            self.see_other(
+                "home", error=f"Sorry, no such { utils.terminology('order') }."
+            )
             return
         try:
             file = self.request.files["report"][0]
@@ -168,7 +172,10 @@ class ReportAdd(ReportMixin, RequestHandler):
                 saver["order"] = order["_id"]
                 saver["name"] = self.get_argument("name", None) or file.filename
                 saver.set_owner(self.get_argument("owner", ""))
-                saver["inline"] = file.content_type in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE)
+                saver["inline"] = file.content_type in (
+                    constants.HTML_MIMETYPE,
+                    constants.TEXT_MIMETYPE,
+                )
                 saver.set_reviewers(self.get_argument("reviewers", "").split())
                 saver.set_status(self.get_argument("status", None))
             report = saver.doc
@@ -177,7 +184,7 @@ class ReportAdd(ReportMixin, RequestHandler):
                     report,
                     file.body,
                     filename=file.filename,
-                    content_type=file.content_type
+                    content_type=file.content_type,
                 )
         except ValueError as error:
             self.see_other("order", order["_id"], error=error)
@@ -266,7 +273,7 @@ class ReportEdit(ReportMixin, RequestHandler):
             "report/edit.html",
             report=report,
             filename=list(report["_attachments"].keys())[0],
-            order=self.get_order(report["order"])
+            order=self.get_order(report["order"]),
         )
 
     @tornado.web.authenticated
@@ -288,13 +295,16 @@ class ReportEdit(ReportMixin, RequestHandler):
                 self.db.delete_attachment(report, report["name"])
                 with ReportSaver(doc=report, handler=self) as saver:
                     saver["name"] = file.filename
-                    saver["inline"] = file.content_type in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE)
+                    saver["inline"] = file.content_type in (
+                        constants.HTML_MIMETYPE,
+                        constants.TEXT_MIMETYPE,
+                    )
                 report = saver.doc
                 self.db.put_attachment(
                     report,
                     file.body,
                     filename=file.filename,
-                    content_type=file.content_type
+                    content_type=file.content_type,
                 )
             except ValueError as error:
                 self.see_other("order", order["_id"], error=error)
@@ -326,9 +336,7 @@ class ReportReview(ReportMixin, RequestHandler):
             self.see_other("home", error=error)
             return
         self.render(
-            "report/review.html",
-            report=report,
-            order=self.get_order(report["order"])
+            "report/review.html", report=report, order=self.get_order(report["order"])
         )
 
     @tornado.web.authenticated
@@ -349,12 +357,16 @@ class ReportReview(ReportMixin, RequestHandler):
                 if status not in constants.REPORT_REVIEW_STATUSES:
                     raise ValueError(f"Invalid status '{status}' for report review.")
                 reviewer["status"] = status
-                saver.set_status() # Set the status according to all reviews.
+                saver.set_status()  # Set the status according to all reviews.
             report = saver.doc
         except (KeyError, ValueError) as error:
             self.see_other("order", order["_id"], error=error)
             return
-        if report["status"] != constants.REVIEW and report["status"] != original_status and self.current_user["email"] != report["owner"]:
+        if (
+            report["status"] != constants.REVIEW
+            and report["status"] != original_status
+            and self.current_user["email"] != report["owner"]
+        ):
             self.send_owner_message(report, order)
         self.see_other("order", order["_id"])
 

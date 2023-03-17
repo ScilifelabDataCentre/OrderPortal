@@ -104,17 +104,17 @@ def main():
         url(
             r"/report/([0-9a-f]{32})/edit",
             orderportal.report.ReportEdit,
-            name="report_edit"
+            name="report_edit",
         ),
         url(
             r"/report/([0-9a-f]{32})/review",
             orderportal.report.ReportReview,
-            name="report_review"
+            name="report_review",
         ),
         url(
             r"/report/([0-9a-f]{32})/logs",
             orderportal.report.ReportLogs,
-            name="report_logs"
+            name="report_logs",
         ),
         url(r"/accounts", orderportal.account.Accounts, name="accounts"),
         url(
