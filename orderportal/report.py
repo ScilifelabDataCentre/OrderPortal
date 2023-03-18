@@ -294,7 +294,7 @@ class ReportEdit(ReportMixin, RequestHandler):
                 # Remove the old report file before adding the new.
                 self.db.delete_attachment(report, report["name"])
                 with ReportSaver(doc=report, handler=self) as saver:
-                    saver["name"] = file.filename
+                    saver["name"] = file.filename  # May be modified below.
                     saver["inline"] = file.content_type in (
                         constants.HTML_MIMETYPE,
                         constants.TEXT_MIMETYPE,
