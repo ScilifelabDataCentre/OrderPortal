@@ -737,24 +737,23 @@ class OrderApiV1Mixin(ApiV1Mixin):
             ),
         )
         data["status"] = order["status"]
-        data["reports"] = []
-        for report in self.get_reports(order):
-            reportdata = dict(
-                iuid=report["_id"],
-                name=report["name"],
-                filename=list(report["_attachments"].keys())[0],
-                status=report["status"],
-                modified=report["modified"],
-                links=dict(
-                    api=dict(
-                        href=self.absolute_reverse_url("report_api", report["_id"])
-                    ),
-                    file=dict(
-                        href=self.absolute_reverse_url("report", report["_id"])
-                    ),
-                ),
-            )
-            data["reports"].append(reportdata)
+        data["reports"] = [
+            dict(iuid=report["_id"],
+                 name=report["name"],
+                 filename=list(report["_attachments"].keys())[0],
+                 status=report["status"],
+                 modified=report["modified"],
+                 links=dict(
+                     api=dict(
+                         href=self.absolute_reverse_url("report_api", report["_id"])
+                     ),
+                     file=dict(
+                         href=self.absolute_reverse_url("report", report["_id"])
+                     )
+                 )
+                 )
+            for report in self.get_reports(order)
+        ]
         data["history"] = dict()
         for s in settings["ORDER_STATUSES"]:
             if not s.get("enabled"):
@@ -1400,54 +1399,6 @@ class OrderFile(OrderMixin, RequestHandler):
             saver.delete_filename = filename
             saver.changed["file_deleted"] = filename
         self.redirect(self.order_reverse_url(order))
-
-
-# class OrderReportApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
-#     "Order report API: get or set."
-
-#     def get(self, iuid):
-#         order = self.get_order(iuid)
-#         try:
-#             self.check_readable(order)
-#         except ValueError as error:
-#             raise tornado.web.HTTPError(403, reason=str(error))
-#         try:
-#             report = order["report"]
-#             outfile = self.db.get_attachment(order, constants.SYSTEM_REPORT)
-#             if outfile is None:
-#                 raise KeyError
-#         except KeyError:
-#             raise tornado.web.HTTPError(404)
-#         self.write(outfile.read())
-#         outfile.close()
-#         content_type = order["_attachments"][constants.SYSTEM_REPORT]["content_type"]
-#         self.set_header("Content-Type", content_type)
-#         name = order.get("identifier") or order["_id"]
-#         ext = utils.get_filename_extension(content_type)
-#         self.set_header(
-#             "Content-Disposition", f'attachment; filename="{name}_report{ext}"'
-#         )
-
-#     def put(self, iuid):
-#         self.check_admin()
-#         order = self.get_order(iuid)
-#         with OrderSaver(doc=order, handler=self) as saver:
-#             content_type = (
-#                 self.request.headers.get("content-type") or constants.BIN_MIMETYPE
-#             )
-#             saver["report"] = dict(
-#                 timestamp=utils.timestamp(),
-#                 inline=content_type
-#                 in (constants.HTML_MIMETYPE, constants.TEXT_MIMETYPE),
-#             )
-#             saver.files.append(
-#                 dict(
-#                     filename=constants.SYSTEM_REPORT,
-#                     body=self.request.body,
-#                     content_type=content_type,
-#                 )
-#             )
-#         self.write("")
 
 
 class Orders(RequestHandler):

@@ -15,7 +15,7 @@ import requests
 BASE_URL = "http://localhost:8881/"
 
 # The identifier for the order. The IUID can also be used.
-ORDER_ID = "OP0031"
+ORDER_ID = "OP0032"
 
 API_KEY = os.environ["ORDERPORTAL_API_KEY"]
 
