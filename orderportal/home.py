@@ -23,22 +23,17 @@ class Home(RequestHandler):
     "Home page; dashboard. Contents according to role of logged-in account."
 
     def get(self):
-
-        forms = [r.doc for r in self.db.view("form", "enabled", include_docs=True)]
-        for f in forms:
-            if f.get("ordinal") is None:
-                f["ordinal"] = 0
+        "Home page; contents depends on the role of the logged-in account, if any."
+        forms = [row.doc for row in self.db.view("form", "enabled", include_docs=True)]
+        for form in forms:
+            if form.get("ordinal") is None:
+                form["ordinal"] = 0
         forms.sort(key=lambda i: i["ordinal"])
         kwargs = dict(
             forms=forms,
             news_items=self.get_news(limit=settings["DISPLAY_MAX_NEWS"]),
             events=self.get_events(upcoming=True),
         )
-        if self.current_user and self.get_invitations(self.current_user["email"]):
-            url = self.reverse_url("account", self.current_user["email"])
-            kwargs[
-                "message"
-            ] = f'You have group invitations.\nSee your <a href="{url}">account</a>.'
         if not self.current_user:
             self.render("home/anonymous.html", **kwargs)
         elif self.current_user["role"] == constants.ADMIN:
@@ -53,7 +48,7 @@ class Home(RequestHandler):
         view = self.db.view(
             "account", "status", key=constants.PENDING, include_docs=True
         )
-        pending = [r.doc for r in view]
+        pending = [row.doc for row in view]
         pending.sort(key=lambda i: i["modified"], reverse=True)
         pending = pending[: settings["DISPLAY_MAX_PENDING_ACCOUNTS"]]
         view = self.db.view(
@@ -66,7 +61,7 @@ class Home(RequestHandler):
             reduce=False,
             include_docs=True,
         )
-        orders = [r.doc for r in view]
+        orders = [row.doc for row in view]
         self.render("home/admin.html", pending=pending, orders=orders, **kwargs)
 
     def home_staff(self, **kwargs):
@@ -81,7 +76,7 @@ class Home(RequestHandler):
             reduce=False,
             include_docs=True,
         )
-        orders = [r.doc for r in view]
+        orders = [row.doc for row in view]
         self.render("home/staff.html", orders=orders, **kwargs)
 
     def home_user(self, **kwargs):
@@ -98,7 +93,7 @@ class Home(RequestHandler):
             endkey=[self.current_user["email"]],
             limit=settings["DISPLAY_MAX_RECENT_ORDERS"],
         )
-        orders = [r.doc for r in view]
+        orders = [row.doc for row in view]
         self.render("home/user.html", orders=orders, **kwargs)
 
 

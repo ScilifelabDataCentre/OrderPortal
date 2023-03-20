@@ -160,10 +160,11 @@
           <table class="table table-condensed" style="margin-bottom: 0px;">
             <thead>
               <tr>
-                <th style="text-align: left;">File</th>
+                <th style="text-align: left;">Document</th>
                 <th style="text-align: left;">Modified</th>
                 {% if am_staff %}
                 <th style="text-align: left;">Status</th>
+                <th></th>
                 <th></th>
                 <th></th>
                 {% end %} {# if am_staff #}
@@ -190,7 +191,6 @@
                 <td>{% module Status(report['status']) %}</td>
                 <td>
                   {% if report['status'] == constants.REVIEW and current_user and report['reviewers'].get(current_user['email'], {}).get('status') == constants.REVIEW %}
-                  
                   <a href="{{ reverse_url('report_review', report['_id']) }}"
                      role="button" class="btn btn-warning btn-xs" style="color: black;">
                     <span class="glyphicon glyphicon-edit"></span> Review
@@ -202,6 +202,17 @@
                      role="button" class="btn btn-primary btn-xs">
                     <span class="glyphicon glyphicon-edit"></span> Edit
                   </a>
+                </td>
+                <td>
+                  <form action="{{ reverse_url('report', report['_id']) }}"
+                        method="POST" role="form">
+                    {% module xsrf_form_html() %}
+                    <input type="hidden" name="_http_method" value="delete">
+                    <button type="submit" class="btn btn-danger btn-xs"
+                            onclick="return confirm('Cannot be undone! Really delete?');">
+                      <span class="glyphicon glyphicon-trash"></span> Delete
+                    </button>
+                  </form>
                 </td>
                 {% end %} {# if am_staff #}
               </tr>
@@ -258,7 +269,7 @@
         <th>Files</th>
         <td colspan="2">
           {% if attached_files %}
-          <table class="table table-condensed table-striped">
+          <table class="table table-condensed" style="margin-bottom: 0px;">
             {% for file in attached_files %}
             <tr>
               <td>

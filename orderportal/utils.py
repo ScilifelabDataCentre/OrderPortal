@@ -114,7 +114,7 @@ def get_order_url(order):
         identifier = order["identifier"]
     except KeyError:
         identifier = order["_id"]
-    path = f"/order/{identifier}" # Hard-wired! Yes, ugly, but hard to avoid here.
+    path = f"/order/{identifier}"  # Hard-wired! Yes, ugly, but hard to avoid here.
     if settings["BASE_URL_PATH_PREFIX"]:
         path = settings["BASE_URL_PATH_PREFIX"] + path
     return settings["BASE_URL"].rstrip("/") + path

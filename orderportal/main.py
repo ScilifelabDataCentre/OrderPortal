@@ -32,8 +32,8 @@ def main():
     orderportal.database.update_design_documents(db)
     orderportal.admin.migrate_meta_documents(db)
     orderportal.admin.migrate_text_documents(db)
-    orderportal.admin.load_texts(db)
     orderportal.config.load_settings_from_db(db)
+    orderportal.config.load_texts_from_db(db)
 
     url = tornado.web.url
     handlers = [
@@ -100,21 +100,23 @@ def main():
         url(r"/orders.csv", orderportal.order.OrdersCsv, name="orders_csv"),
         url(r"/orders.xlsx", orderportal.order.OrdersXlsx, name="orders_xlsx"),
         url(r"/report", orderportal.report.ReportAdd, name="report_add"),
+        url(r"/api/v1/report", orderportal.report.ReportAddApiV1, name="report_add_api"),
         url(r"/report/([0-9a-f]{32})", orderportal.report.Report, name="report"),
+        url(r"/api/v1/report/([0-9a-f]{32})", orderportal.report.ReportApiV1, name="report_api"),
         url(
             r"/report/([0-9a-f]{32})/edit",
             orderportal.report.ReportEdit,
-            name="report_edit"
+            name="report_edit",
         ),
         url(
             r"/report/([0-9a-f]{32})/review",
             orderportal.report.ReportReview,
-            name="report_review"
+            name="report_review",
         ),
         url(
             r"/report/([0-9a-f]{32})/logs",
             orderportal.report.ReportLogs,
-            name="report_logs"
+            name="report_logs",
         ),
         url(r"/accounts", orderportal.account.Accounts, name="accounts"),
         url(

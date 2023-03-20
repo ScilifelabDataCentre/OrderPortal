@@ -51,22 +51,20 @@ class ContentType(tornado.web.UIModule):
 
 class OrderLink(tornado.web.UIModule):
     "HTML for a link to an order."
-    
+
     def render(self, order, title=False):
         url = self.handler.order_reverse_url(order)
         if title:
             label = f"{order['identifier']} {order['title'] or '[no title]'}"
         else:
-            label = order.get('identifier') or "[no identifier]"
+            label = order.get("identifier") or "[no identifier]"
         return f"""<a href="{url}">{label}</a>"""
 
 
 class AccountLink(tornado.web.UIModule):
-    """HTML for a link to an account (email or entity), optionally with an icon,
-    and optionally show name and/or email.
-    """
-    
-    def render(self, email=None, account=None, name=False):
+    "HTML for a link to an account (email or entity), optionally show name or email."
+
+    def render(self, email=None, account=None, name=False, action_required=False):
         if account:
             email = account["email"]
         elif not email:
@@ -75,17 +73,21 @@ class AccountLink(tornado.web.UIModule):
             title = self.handler.lookup_account_name(email)
         else:
             title = email
+        if action_required:
+            exclaim = '<span class="glyphicon glyphicon-alert text-danger"></span> '
+        else:
+            exclaim = ""
         url = self.handler.reverse_url("account", email)
-        return f"""<a href="{url}">{title}</a>"""
+        return f"""<a href="{url}">{exclaim}{title}</a>"""
 
 
 class GroupLink(tornado.web.UIModule):
     "HTML for link to a group."
 
-    def render(self, group, show_am_owner=False):
+    def render(self, group, is_owner=False):
         url = self.handler.reverse_url("group", group["_id"])
-        if show_am_owner:
-            return f"""<a href="{url}">{group['name']}</a> (am owner)"""
+        if is_owner:
+            return f"""<a href="{url}">{group['name']}</a> (owner)"""
         else:
             return f"""<a href="{url}">{group['name']}</a>"""
 
@@ -98,9 +100,11 @@ class FormLink(tornado.web.UIModule):
             form = self.handler.lookup_form(iuid)
         url = self.handler.reverse_url("form", form["_id"])
         if version:
-            label = f"{form.get('title') or '[no title]'} ({form.get('version') or '-'})"
+            label = (
+                f"{form.get('title') or '[no title]'} ({form.get('version') or '-'})"
+            )
         else:
-            label = form.get('title') or '[no title]'
+            label = form.get("title") or "[no title]"
         return f"""<a href="{url}">{label}</a>"""
 
 
@@ -110,7 +114,9 @@ class LogsLink(tornado.web.UIModule):
     def render(self, entity):
         url = self.handler.static_url("logs.png")
         icon = ICON_TEMPLATE.format(url=url, alt="Logs", title="Logs")
-        url = self.handler.reverse_url(f"{entity['orderportal_doctype']}_logs", entity["_id"])
+        url = self.handler.reverse_url(
+            f"{entity['orderportal_doctype']}_logs", entity["_id"]
+        )
         return f"""<a href="{url}">{icon} Logs</a>"""
 
 
@@ -220,15 +226,20 @@ class TableField(tornado.web.UIModule):
         rows = []
         if value:
             for i, valuerow in enumerate(value):
-                rows.append(hg.TR(hg.TD(str(i+1), _class="number")))
+                rows.append(hg.TR(hg.TD(str(i + 1), _class="number")))
                 for cell in valuerow:
                     if cell is None:
                         rows[-1].append(hg.TD())
                     else:
                         rows[-1].append(hg.TD(str(cell)))
-        return hg.render(hg.TABLE(hg.THEAD(header), hg.TBODY(*rows),
-                                  _class="table table-bordered table-condensed"),
-                         {})
+        return hg.render(
+            hg.TABLE(
+                hg.THEAD(header),
+                hg.TBODY(*rows),
+                _class="table table-bordered table-condensed",
+            ),
+            {},
+        )
 
 
 class TableFieldEdit(tornado.web.UIModule):
@@ -253,12 +264,14 @@ class TableFieldEdit(tornado.web.UIModule):
         if value:
             for i, row in enumerate(value):
                 rows.append(self.create_row(tableid, columns, i, row))
-        for i in range(len(rows), len(rows)+constants.FIELD_TABLE_ADD_N_ROWS):
+        for i in range(len(rows), len(rows) + constants.FIELD_TABLE_ADD_N_ROWS):
             rows.append(self.create_row(tableid, columns, i, []))
         kwargs = dict(id=tableid, _class="table table-bordered table-condensed")
         if len(field["table"]) > 5:
             width = 180 * len(field["table"])
-            kwargs["style"] = f"margin-bottom: 0; max-width: {width}px; width: {width}px;"
+            kwargs[
+                "style"
+            ] = f"margin-bottom: 0; max-width: {width}px; width: {width}px;"
         else:
             kwargs["style"] = f"margin-bottom: 0;"
         th.append(hg.INPUT(type="hidden", name=f"{tableid}_count", value=len(rows)))
@@ -268,7 +281,7 @@ class TableFieldEdit(tornado.web.UIModule):
         "Return a new row for the table."
         rowid = f"{tableid}_{i}"
         result = hg.TR(id=rowid)
-        result.append(hg.TD(str(i+1), _class="table-input-row-0"))
+        result.append(hg.TD(str(i + 1), _class="table-input-row-0"))
         for j, cell in enumerate(columns):
             try:
                 cell = row[j]
@@ -286,21 +299,24 @@ class TableFieldEdit(tornado.web.UIModule):
                     else:
                         input_field.append(hg.OPTION(option))
             elif coltype == constants.INT:
-                input_field = hg.INPUT(type="number",
-                                       step=1,
-                                       _class="form-control",
-                                       name=name,
-                                       value=cell)
+                input_field = hg.INPUT(
+                    type="number", step=1, _class="form-control", name=name, value=cell
+                )
             elif coltype == constants.FLOAT:
-                input_field = hg.INPUT(type="number", name=name,
-                                       _class="form-control", step=constants.FLOAT_STEP,
-                                       value=cell)
+                input_field = hg.INPUT(
+                    type="number",
+                    name=name,
+                    _class="form-control",
+                    step=constants.FLOAT_STEP,
+                    value=cell,
+                )
             elif coltype == constants.DATE:
-                input_field = hg.INPUT(type="text", name=name,
-                                       _class="form-control datepicker", value=cell)
+                input_field = hg.INPUT(
+                    type="text", name=name, _class="form-control datepicker", value=cell
+                )
             else:  # Input type for all other types: text
-                input_field = hg.INPUT(type="text", name=name,
-                                       _class="form-control", value=cell)
+                input_field = hg.INPUT(
+                    type="text", name=name, _class="form-control", value=cell
+                )
             result.append(hg.TD(input_field))
         return result
-        

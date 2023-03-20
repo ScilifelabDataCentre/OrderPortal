@@ -10,121 +10,98 @@
 {% end %} {# block action_content #}
 
 {% block main_content %}
-<form action="{{ reverse_url('form_edit', form['_id']) }}" method="POST" role="form">
+<form action="{{ reverse_url('form_edit', form['_id']) }}"
+      method="POST" role="form" class="form-horizontal">
   {% module xsrf_form_html() %}
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-10">
-        <label for="title">Title</label>
-        <input type="text" class="form-control"
-               id="title" name="title"
-               value="{{ form.get('title') or ''}}">
-      </div>
-    </div>
-    <span class="help-block">
-      Brief, descriptive title for the form. It is not required to
-      be unique, but it is a good idea to make it so anyway.
-    </span>
-  </div>
-
-  <div class="form-group">
-    <div class="row">
-      <div class="col-md-4">
-        <label for="version">Version</label>
-        <input type="text" class="form-control" name="version" id="version"
-               value="{{ form.get('version') or '' }}">
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <span class="help-block">
-          The version denotes a minor update of a form. It is optional.
-        </span>
-      </div>
+    <label class="control-label col-md-2" for="title">Title</label>
+    <div class="col-md-10">
+      <input type="text" name="title" id="title"
+             class="form-control" aria-describedby="titleHelp"
+             value="{{ form.get('title') or ''}}">
+      <span id="titleHelp" class="help-block">
+        Brief, descriptive title for the form. It is not required to
+        be unique, but it is a good idea to make it so anyway.
+      </span>
     </div>
   </div>
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-12">
-        <label for="description">Description</label>
-        <textarea rows="6" class="form-control"
-                  id="description" name="description"
-                  >{{ form.get('description') or '' }}</textarea>
-        <span class="help-block">
-          The description is displayed in the order creation panel on the
-          home page.
-          <br>
-          (Optional: 
-          <a href="{{ constants.MARKDOWN_URL }}" target="_blank">Markdown</a>
-          notation may be used to format the text.)
-        </span>
-      </div>
+    <label class="control-label col-md-2" for="version">Version</label>
+    <div class="col-md-10">
+      <input type="text"  name="version" id="version"
+             class="form-control" aria-describedby="versionHelp"
+             value="{{ form.get('version') or '' }}">
+      <span id="versionHelp" class="help-block">
+        Optional. The version denotes a minor update of a form.
+      </span>
     </div>
   </div>
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-12">
-        <label for="instruction">Instruction</label>
-        <textarea rows="6" class="form-control"
-                  id="instruction" name="instruction"
-                  >{{ form.get('instruction') or '' }}</textarea>
-        <span class="help-block">
-          The instruction is displayed at the top of the order edit page.
-          <br>
-          (Optional: 
-          <a href="{{ constants.MARKDOWN_URL }}" target="_blank">Markdown</a>
-          notation may be used to format the text.)
-        </span>
-      </div>
+    <label class="control-label col-md-2" for="description">Description</label>
+    <div class="col-md-10">
+      <textarea name="description" id="description"  rows="6"
+                class="form-control" aria-describedby="descriptionHelp"
+                >{{ form.get('description') or '' }}</textarea>
+      <span id="descriptionHelp" class="help-block">
+        The description is displayed in the order creation panel on
+        the home page.
+        <br>
+        <a href="{{ constants.MARKDOWN_URL }}" target="_blank">Markdown</a>
+        notation may optionally be used to format the text.
+      </span>
     </div>
   </div>
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-12">
-        <label for="disclaimer">Disclaimer</label>
-        <textarea rows="6" class="form-control"
-                  id="disclaimer" name="disclaimer"
-                  >{{ form.get('disclaimer') or '' }}</textarea>
-        <span class="help-block">
-          The disclaimer is displayed at the bottom of the order edit page,
-          and in the header part of the order view page.
-          <br>
-          (Optional: 
-          <a href="{{ constants.MARKDOWN_URL }}" target="_blank">Markdown</a>
-          notation may be used to format the text.)
-        </span>
-      </div>
+    <label class="control-label col-md-2" for="instruction">Instruction</label>
+    <div class="col-md-10">
+      <textarea name="instruction" id="instruction" rows="6"
+                class="form-control" aria-describedby="instructionHelp"
+                >{{ form.get('instruction') or '' }}</textarea>
+      <span id="instructionHelp" class="help-block">
+        The instruction is displayed at the top of the order edit page.
+        <br>
+        <a href="{{ constants.MARKDOWN_URL }}" target="_blank">Markdown</a>
+        notation may optionally be used to format the text.
+      </span>
     </div>
   </div>
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-2">
-        <label for="ordinal">Ordinal</label>
-        <input type="text" class="form-control" name="ordinal" id="ordinal"
-               value="{{ form.get('ordinal') or 0 }}">
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <span class="help-block">
-          Integer value determining order of forms in display for users.
-        </span>
-      </div>
+    <label class="control-label col-md-2" for="disclaimer">Disclaimer</label>
+    <div class="col-md-10">
+      <textarea name="disclaimer" id="disclaimer" rows="6"
+                class="form-control" aria-describedby="disclaimerHelp"
+                >{{ form.get('disclaimer') or '' }}</textarea>
+      <span id="disclaimerHelp" class="help-block">
+        The disclaimer is displayed at the bottom of the order edit page,
+        and in the header part of the order view page.
+        <br>
+        <a href="{{ constants.MARKDOWN_URL }}" target="_blank">Markdown</a>
+        notation may optionally be used to format the text.
+      </span>
     </div>
   </div>
 
   <div class="form-group">
-    <div class="row">
-      <div class="col-md-3">
-        <label class="control-label"></label>
-        <button type="submit" class="btn btn-success btn-block">
-          <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
-      </div>
+    <label class="control-label col-md-2" for="ordinal">Ordinal</label>
+    <div class="col-md-10">
+      <input type="text" name="ordinal" id="ordinal"
+             class="form-control" aria-describedby="ordinalHelp"
+             value="{{ form.get('ordinal') or 0 }}">
+      <span id="ordinalHelp" class="help-block">
+        Integer value determining order of forms in display for users.
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-3">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
     </div>
   </div>
 

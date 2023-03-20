@@ -89,7 +89,9 @@ class Fields:
             restrict_read=utils.to_bool(handler.get_argument("restrict_read", False)),
             restrict_write=utils.to_bool(handler.get_argument("restrict_write", False)),
             erase_on_clone=utils.to_bool(handler.get_argument("erase_on_clone", False)),
-            initial_display=utils.to_bool(handler.get_argument("initial_display", False)),
+            initial_display=utils.to_bool(
+                handler.get_argument("initial_display", False)
+            ),
             description=handler.get_argument("description", None),
         )
         if type == constants.GROUP:
@@ -147,7 +149,9 @@ class Fields:
             restrict_write=utils.to_bool(handler.get_argument("restrict_write", False)),
             erase_on_clone=utils.to_bool(handler.get_argument("erase_on_clone", False)),
             auto_tag=utils.to_bool(handler.get_argument("auto_tag", False)),
-            initial_display=utils.to_bool(handler.get_argument("initial_display", False)),
+            initial_display=utils.to_bool(
+                handler.get_argument("initial_display", False)
+            ),
             description=handler.get_argument("description", None),
         )
         field = self._lookup[identifier]

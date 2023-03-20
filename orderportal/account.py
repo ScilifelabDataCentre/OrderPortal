@@ -61,6 +61,9 @@ class AccountSaver(saver.Saver):
             raise ValueError("Last name is required.")
         if not self["university"]:
             raise ValueError("University is required.")
+        if settings["ACCOUNT_ORCID_INFO"] and settings["ACCOUNT_ORCID_REQUIRED"]:
+            if not self["orcid"]:
+                raise ValueError("ORCID is required.")
         if settings["ACCOUNT_INVOICE_REF_REQUIRED"]:
             if not self["invoice_ref"]:
                 raise ValueError("Invoice reference is required.")
@@ -114,8 +117,15 @@ class RecipientsMixin:
         if constants.ADMIN in text["recipients"]:
             result.extend([a["email"] for a in self.get_admins()])
         if constants.STAFF in text["recipients"]:
-            staff = [row.doc for row in self.db.view("account", "role", key=constants.STAFF, include_docs=True)]
-            result.extend([a["email"] for a in staff if a["status"] == constants.ENABLED])
+            staff = [
+                row.doc
+                for row in self.db.view(
+                    "account", "role", key=constants.STAFF, include_docs=True
+                )
+            ]
+            result.extend(
+                [a["email"] for a in staff if a["status"] == constants.ENABLED]
+            )
         return result
 
 
@@ -145,13 +155,19 @@ class Accounts(RequestHandler):
     def get_accounts(self):
         "Get the accounts depending on the filter parameters."
         accounts = self.filter_by_login(self.filter.get("login"))
-        accounts = self.filter_by_university(self.filter.get("university"), accounts=accounts)
+        accounts = self.filter_by_university(
+            self.filter.get("university"), accounts=accounts
+        )
         accounts = self.filter_by_role(self.filter.get("role"), accounts=accounts)
         accounts = self.filter_by_status(self.filter.get("status"), accounts=accounts)
         # Get all accounts if no filter produces anything.
         if accounts is None:
-            view = self.db.view("account", "all", reduce=False, include_docs=True)
-            accounts = [r.doc for r in view]
+            accounts = [
+                row.doc
+                for row in self.db.view(
+                    "account", "all", reduce=False, include_docs=True
+                )
+            ]
         # This is optimized for retrieval speed. The single-valued
         # function 'get_account_order_count' is not good enough here.
         view = self.db.view(
@@ -170,15 +186,15 @@ class Accounts(RequestHandler):
         If no parameter value, assume 'last year'.
         If 'whenever', then return None; this is handled correctly by later filters.
         """
-        if not login or login == 'last year':
+        if not login or login == "last year":
             view = self.db.view(
                 "account",
                 "login",
-                startkey=utils.timestamp(days=-366), # Allow leap year.
+                startkey=utils.timestamp(days=-366),  # Allow leap year.
                 endkey=utils.timestamp(),
-                include_docs=True
+                include_docs=True,
             )
-            return [r.doc for r in view]
+            return [row.doc for row in view]
         else:
             return None
 
@@ -186,17 +202,21 @@ class Accounts(RequestHandler):
         "Return accounts list if any university filter, or the input accounts if none."
         if university == "[other]":
             if accounts is None:
-                view = self.db.view("account", "email", include_docs=True)
-                accounts = [r.doc for r in view]
+                accounts = [
+                    row.doc
+                    for row in self.db.view("account", "email", include_docs=True)
+                ]
             accounts = [
                 a for a in accounts if a["university"] not in settings["UNIVERSITIES"]
             ]
         elif university:
             if accounts is None:
-                view = self.db.view(
-                    "account", "university", key=university, include_docs=True
-                )
-                accounts = [r.doc for r in view]
+                accounts = [
+                    row.doc
+                    for row in self.db.view(
+                        "account", "university", key=university, include_docs=True
+                    )
+                ]
             else:
                 account = [a for a in accounts if a["university"] == university]
         return accounts
@@ -262,6 +282,7 @@ class AccountsApiV1(Accounts):
             item["status"] = account["status"]
             item["address"] = account.get("address") or {}
             item["invoice_ref"] = account.get("invoice_ref")
+            item["invoice_vat"] = account.get("invoice_vat")
             item["invoice_address"] = account.get("invoice_address") or {}
             item["login"] = account.get("login", "-")
             item["modified"] = account["modified"]
@@ -302,11 +323,16 @@ class AccountsCsv(Accounts):
                 "Gender",
                 "Group size",
                 "Subject",
+                "University",
+                "Department",
                 "Address",
                 "Zip",
                 "City",
                 "Country",
                 "Invoice ref",
+                "Invoice VAT number",
+                "Invoice university",
+                "Invoice department",
                 "Invoice address",
                 "Invoice zip",
                 "Invoice city",
@@ -342,11 +368,16 @@ class AccountsCsv(Accounts):
                 account.get("gender") or "",
                 account.get("group_size") or "",
                 subject,
+                addr.get("university") or "",
+                addr.get("department") or "",
                 addr.get("address") or "",
                 addr.get("zip") or "",
                 addr.get("city") or "",
                 addr.get("country") or "",
                 account.get("invoice_ref") or "",
+                account.get("invoice_vat") or "",
+                iaddr.get("university") or "",
+                aiddr.get("department") or "",
                 iaddr.get("address") or "",
                 iaddr.get("zip") or "",
                 iaddr.get("city") or "",
@@ -392,31 +423,24 @@ class Account(AccessMixin, RequestHandler):
             self.see_other("home", error=error)
             return
         account["order_count"] = self.get_account_order_count(account["email"])
-        view = self.db.view(
-            "log",
-            "account",
-            startkey=[account["email"], constants.CEILING],
-            endkey=[account["email"]],
-            descending=True,
-            limit=1,
-        )
-        try:
-            key = list(view)[0].key
-            if key[0] != account["email"]:
-                raise IndexError
-            latest_activity = key[1]
-        except IndexError:
-            latest_activity = None
         if self.am_staff() or self.current_user["email"] == account["email"]:
             invitations = self.get_invitations(account["email"])
         else:
             invitations = []
+        reports = [
+            r.doc
+            for r in self.db.view(
+                "report", "review", key=account["email"], include_docs=True
+            )
+        ]
+        for report in reports:
+            report["order"] = self.get_order(report["order"])
         self.render(
             "account/display.html",
             account=account,
             groups=self.get_account_groups(account["email"]),
-            latest_activity=latest_activity,
             invitations=invitations,
+            reports=reports,
             allow_delete=self.allow_delete(account),
         )
 
@@ -520,21 +544,10 @@ class AccountApiV1(AccessMixin, RequestHandler):
         data["status"] = account["status"]
         data["address"] = account.get("address") or {}
         data["invoice_ref"] = account.get("invoice_ref")
+        data["invoice_vat"] = account.get("invoice_vat")
         data["invoice_address"] = account.get("invoice_address") or {}
         data["login"] = account.get("login", "-")
         data["modified"] = account["modified"]
-        view = self.db.view(
-            "log",
-            "account",
-            startkey=[account["email"], constants.CEILING],
-            endkey=[account["email"]],
-            descending=True,
-            limit=1,
-        )
-        try:
-            data["latest_activity"] = list(view)[0].key[1]
-        except IndexError:
-            data["latest_activity"] = None
         data["orders"] = dict(
             count=self.get_account_order_count(account["email"]),
             display=dict(href=URL("account_orders", account["email"])),
@@ -810,13 +823,18 @@ class AccountEdit(AccessMixin, RequestHandler):
                 except (tornado.web.MissingArgumentError, ValueError, TypeError):
                     saver["subject"] = None
                 saver["address"] = dict(
+                    university=self.get_argument("postal_university", None),
+                    department=self.get_argument("postal_department", None),
                     address=self.get_argument("address", None),
-                    zip=self.get_argument("zip", None),
-                    city=self.get_argument("city", None),
-                    country=self.get_argument("country", None),
+                    zip=self.get_argument("postal_zip", None),
+                    city=self.get_argument("postal_city", None),
+                    country=self.get_argument("postal_country", None),
                 )
                 saver["invoice_ref"] = self.get_argument("invoice_ref", None)
+                saver["invoice_vat"] = self.get_argument("invoice_vat", None)
                 saver["invoice_address"] = dict(
+                    university=self.get_argument("invoice_university", None),
+                    department=self.get_argument("invoice_department", None),
                     address=self.get_argument("invoice_address", None),
                     zip=self.get_argument("invoice_zip", None),
                     city=self.get_argument("invoice_city", None),
@@ -912,8 +930,8 @@ class Login(RecipientsMixin, LoginMixin, RequestHandler):
                 account["email"],
                 message="Please review and update your account information.",
             )
-            return
-        self.see_other("home")
+        else:
+            self.see_other("home")
 
 
 class Logout(LoginMixin, RequestHandler):
@@ -1044,9 +1062,10 @@ class Register(RecipientsMixin, RequestHandler):
         "group_size",
         "subject",
         "invoice_ref",
+        "invoice_vat",
         "phone",
     ]
-    ADDRESS_KEYS = ["address", "zip", "city", "country"]
+    ADDRESS_KEYS = ["university", "department", "address", "zip", "city", "country"]
 
     def get(self):
         values = dict()
@@ -1061,7 +1080,7 @@ class Register(RecipientsMixin, RequestHandler):
     def post(self):
         try:
             with AccountSaver(handler=self) as saver:
-                email = self.get_argument("email", None)
+                saver.set_email(self.get_argument("email", None))
                 saver["first_name"] = self.get_argument("first_name", None)
                 saver["last_name"] = self.get_argument("last_name", None)
                 university = self.get_argument("university", None)
@@ -1082,22 +1101,28 @@ class Register(RecipientsMixin, RequestHandler):
                 except (tornado.web.MissingArgumentError, ValueError, TypeError):
                     saver["subject"] = None
                 saver["address"] = dict(
-                    address=self.get_argument("address", None),
-                    zip=self.get_argument("zip", None),
-                    city=self.get_argument("city", None),
-                    country=self.get_argument("country", None),
+                    university=self.get_argument("postal_university", None)
+                    or saver["university"],
+                    department=self.get_argument("postal_department", None)
+                    or saver["department"],
+                    address=self.get_argument("postal_address", None),
+                    zip=self.get_argument("postal_zip", None),
+                    city=self.get_argument("postal_city", None),
+                    country=self.get_argument("postal_country", None),
                 )
                 saver["invoice_ref"] = self.get_argument("invoice_ref", None)
+                saver["invoice_vat"] = self.get_argument("invoice_vat", None)
                 saver["invoice_address"] = dict(
+                    university=self.get_argument("invoice_university", None)
+                    or saver["university"],
+                    department=self.get_argument("invoice_department", None)
+                    or saver["department"],
                     address=self.get_argument("invoice_address", None),
                     zip=self.get_argument("invoice_zip", None),
                     city=self.get_argument("invoice_city", None),
                     country=self.get_argument("invoice_country", None),
                 )
                 saver["phone"] = self.get_argument("phone", None)
-                if not email:
-                    raise ValueError("Email is required.")
-                saver.set_email(email)
                 saver.check_required()
                 saver.reset_password()
                 saver["owner"] = saver["email"]
