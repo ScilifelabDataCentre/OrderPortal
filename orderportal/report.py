@@ -341,7 +341,7 @@ class ReportApiV1(ReportApiV1Mixin, RequestHandler):
             report = self.get_report(iuid)
         except ValueError as error:
             raise tornado.web.HTTPError(404, reason=str(error))
-        order = self.get_order(report["_id"])
+        order = self.get_order(report["order"])
         try:
             if self.am_staff():
                 pass
