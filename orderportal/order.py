@@ -309,7 +309,7 @@ class OrderSaver(saver.Saver):
                         else:
                             continue
                 # Remove all carriage-returns from string.
-                if value is not None:
+                if isinstance(value, str):
                     value = value.replace("\r", "")
 
             # Set tag, if auto_tags for field.
@@ -579,9 +579,7 @@ class OrderMixin:
             return
         raise tornado.web.HTTPError(
             403,
-            reason="You may not attach a file to the {0}.".format(
-                utils.terminology("order")
-            ),
+            reason=f"You may not attach a file to the {utils.terminology('order')}."
         )
 
     def check_creation_enabled(self):
@@ -696,7 +694,8 @@ class OrderApiV1Mixin(ApiV1Mixin):
         If 'full' then add all fields, else only for orders list.
         NOTE: Only the values of the fields are included, not
         the full definition of the fields. To obtain that,
-        one must fetch the JSON for the corresponding form."""
+        one must fetch the JSON for the corresponding form.
+        """
         URL = self.absolute_reverse_url
         if full:
             data = utils.get_json(self.order_reverse_url(order, api=True), "order")
@@ -724,12 +723,10 @@ class OrderApiV1Mixin(ApiV1Mixin):
         else:
             form = self.lookup_form(order["form"])
             data["form"] = dict(
-                [
-                    ("iuid", order["form"]),
-                    ("title", form["title"]),
-                    ("version", form.get("version")),
-                    ("links", dict(api=dict(href=URL("form", order["form"])))),
-                ]
+                iuid=order["form"],
+                title=form["title"],
+                version=form.get("version"),
+                links=dict(api=dict(href=URL("form", order["form"])))
             )
         data["owner"] = dict(
             email=order["owner"],
@@ -745,16 +742,18 @@ class OrderApiV1Mixin(ApiV1Mixin):
             reportdata = dict(
                 iuid=report["_id"],
                 name=report["name"],
+                filename=list(report["_attachments"].keys())[0],
+                status=report["status"],
                 modified=report["modified"],
                 links=dict(
-                    api=dict(),  # XXX when API call implemented.
-                    display=dict(
+                    api=dict(
+                        href=self.absolute_reverse_url("report_api", report["_id"])
+                    ),
+                    file=dict(
                         href=self.absolute_reverse_url("report", report["_id"])
                     ),
                 ),
             )
-            if self.am_staff():
-                reportdata["status"] = report["status"]
             data["reports"].append(reportdata)
         data["history"] = dict()
         for s in settings["ORDER_STATUSES"]:
@@ -853,8 +852,7 @@ class OrderCreateApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
                 saver.check_fields_validity()
         except ValueError as error:
             raise tornado.web.HTTPError(400, reason=str(error))
-        else:
-            self.write(self.get_order_json(saver.doc, full=True))
+        self.write(self.get_order_json(saver.doc, full=True))
 
 
 class Order(OrderMixin, RequestHandler):
@@ -876,12 +874,8 @@ class Order(OrderMixin, RequestHandler):
             return
         form = self.get_form(order["form"])
 
-        reports = [r.doc for r in self.db.view("report", "order", include_docs=True)]
-        reports.sort(key=lambda r: r["modified"], reverse=True)
         files = []
         for filename in order.get("_attachments", []):
-            # if filename.startswith(constants.SYSTEM):
-            #     continue
             stub = order["_attachments"][filename]
             files.append(
                 dict(
@@ -898,7 +892,7 @@ class Order(OrderMixin, RequestHandler):
             status=settings["ORDER_STATUSES_LOOKUP"][order["status"]],
             form=form,
             fields=form["fields"],
-            reports=reports,
+            reports=self.get_reports(order),
             attached_files=files,
             allow_edit=self.am_admin() or self.allow_edit(order),
             allow_clone=self.allow_clone(order),
@@ -973,8 +967,7 @@ class OrderApiV1(OrderApiV1Mixin, OrderMixin, RequestHandler):
                         pass
         except ValueError as error:
             raise tornado.web.HTTPError(400, reason=str(error))
-        else:
-            self.write(self.get_order_json(order, full=True))
+        self.write(self.get_order_json(order, full=True))
 
 
 class OrderCsv(OrderMixin, RequestHandler):
@@ -1381,8 +1374,6 @@ class OrderFile(OrderMixin, RequestHandler):
         except (KeyError, IndexError):
             pass
         else:
-            # if infile.filename.startswith(constants.SYSTEM):
-            #     raise tornado.web.HTTPError(400, reason="Reserved filename.")
             with OrderSaver(doc=order, handler=self) as saver:
                 saver.add_file(infile)
         self.redirect(self.order_reverse_url(order))
@@ -1391,8 +1382,6 @@ class OrderFile(OrderMixin, RequestHandler):
     def delete(self, iuid, filename):
         if filename is None:
             raise tornado.web.HTTPError(400)
-        # if filename.startswith(constants.SYSTEM):
-        #     raise tornado.web.HTTPError(400, reason="Reserved filename.")
         order = self.get_order(iuid)
         self.check_attachable(order)
         fields = Fields(self.get_form(order["form"]))

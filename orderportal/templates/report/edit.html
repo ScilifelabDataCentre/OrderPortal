@@ -10,6 +10,12 @@ Edit report for {{ terminology('order') }} '{{ order['title'] }}'
 Edit report for {{ terminology('order') }} '{{ order['title'] }}'
 {% end %}
 
+{% block body_header_alt_format %}
+<a href="{{ reverse_url('report_api', report['_id']) }}">
+  {% module Icon('json') %} JSON
+</a>
+{% end %}
+
 {% block action_content %}
 {% module CancelButton(reverse_url('order', order['_id'])) %}
 {% end %} {# block action_content #}
@@ -44,6 +50,13 @@ Edit report for {{ terminology('order') }} '{{ order['title'] }}'
       {% if report.get('owner') %}
       <p class="form-control-static">{% module AccountLink(report['owner']) %}</p>
       {% end %}
+    </div>
+  </div>
+
+  <div class="row">
+    <label class="control-label col-md-2">IUID</label>
+    <div class="col-md-10">
+      <p class="form-control-static">{{ report['_id'] }}</p>
     </div>
   </div>
 

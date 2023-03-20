@@ -100,7 +100,9 @@ def main():
         url(r"/orders.csv", orderportal.order.OrdersCsv, name="orders_csv"),
         url(r"/orders.xlsx", orderportal.order.OrdersXlsx, name="orders_xlsx"),
         url(r"/report", orderportal.report.ReportAdd, name="report_add"),
+        url(r"/api/v1/report", orderportal.report.ReportAddApiV1, name="report_add_api"),
         url(r"/report/([0-9a-f]{32})", orderportal.report.Report, name="report"),
+        url(r"/api/v1/report/([0-9a-f]{32})", orderportal.report.ReportApiV1, name="report_api"),
         url(
             r"/report/([0-9a-f]{32})/edit",
             orderportal.report.ReportEdit,

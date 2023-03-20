@@ -1,5 +1,7 @@
 "An order may have reports attached, which may go through a workflow for approval."
 
+import base64
+import json
 import os.path
 
 import tornado.web
@@ -140,6 +142,49 @@ class ReportMixin:
             pass
 
 
+class ReportApiV1Mixin(ApiV1Mixin):
+    "Mixin for report JSON data structure."
+
+    def get_report_json(self, report, order=None):
+        """Return a dictionary for JSON output for the report.
+        """
+        if order is None:
+            order = self.get_order(report["order"])
+        URL = self.absolute_reverse_url
+        data = dict(id=URL("report", report["_id"]),
+                    type="report",
+                    name=report["name"],
+                    iuid=report["_id"],
+                    file=dict(href=URL("report", report["_id"])),
+                    filename=list(report["_attachments"].keys())[0],
+                    order=dict(
+                        identifier=order.get("identifier"),
+                        title=order.get("title") or "[no title]",
+                        iuid=order["_id"],
+                        links=dict(
+                            api=dict(href=self.order_reverse_url(order, api=True)),
+                            display=dict(href=self.order_reverse_url(order)),
+                        )
+                    ),
+                    owner=dict(
+                        email=report["owner"],
+                        name=self.lookup_account_name(report["owner"]),
+                        links=dict(
+                            api=dict(href=URL("account_api", report["owner"])),
+                            display=dict(href=URL("account", report["owner"])),
+                        ),
+                    ),
+                    reviewers=report["reviewers"],
+                    status=report["status"],
+                    modified=report["modified"],
+                    links=dict(
+                        api=dict(href=URL("report_api", report["_id"])),
+                        display=dict(href=URL("report", report["_id"]))
+                    )
+                    )
+        return data
+
+
 class ReportAdd(ReportMixin, RequestHandler):
     "Add a new report for an order."
 
@@ -191,6 +236,39 @@ class ReportAdd(ReportMixin, RequestHandler):
             return
         self.send_reviewers_message(report, order)
         self.see_other("order", order["_id"])
+
+
+class ReportAddApiV1(ReportApiV1Mixin, RequestHandler):
+    "Add a report to an order."
+
+    def post(self):
+        try:
+            self.check_staff()
+        except ValueError as error:
+            raise tornado.web.HTTPError(403, reason=str(error))
+        try:
+            data = self.get_json_body()
+            order = data.get("order")
+            if not order:
+                raise ValueError("No order IUID given.")
+            order = self.get_order(order)
+            with ReportSaver(handler=self) as saver:
+                saver["order"] = order["_id"]
+                saver["name"] = data["name"]
+                saver["owner"] = self.current_user["email"]
+                saver.set_reviewers(data.get("reviewers") or [])
+                saver.set_status(data["status"])
+            report = saver.doc
+            self.db.put_attachment(
+                report,
+                base64.b64decode(data["file"]["data"]),
+                filename=data["file"]["filename"],
+                content_type=data["file"]["content_type"]
+            )
+            report = self.get_report(report["_id"])  # Get updated '_attachments'.
+        except ValueError as error:
+            raise tornado.web.HTTPError(400, reason=str(error))
+        self.write(self.get_report_json(report, order))
 
 
 class Report(ReportMixin, RequestHandler):
@@ -253,6 +331,59 @@ class Report(ReportMixin, RequestHandler):
         self.delete_logs(report["_id"])
         self.db.delete(report)
         self.see_other("order", order["_id"])
+
+
+class ReportApiV1(ReportApiV1Mixin, RequestHandler):
+    "Report API; JSON output; JSON input for edit."
+
+    def get(self, iuid):
+        try:
+            report = self.get_report(iuid)
+        except ValueError as error:
+            raise tornado.web.HTTPError(404, reason=str(error))
+        order = self.get_order(report["_id"])
+        try:
+            if self.am_staff():
+                pass
+            elif self.am_owner(order):
+                if not report["status"] == constants.PUBLISHED:
+                    raise tornado.web.HTTPError(
+                        403, reason="Report has not been published."
+                    )
+            else:
+                raise tornado.web.HTTPError(
+                    403, reason="Role 'admin' or 'staff' is required."
+                )
+        except ValueError as error:
+            raise tornado.web.HTTPError(403, reason=str(error))
+        self.write(self.get_report_json(report))
+
+    def post(self, iuid):
+        try:
+            self.check_staff()
+        except ValueError as error:
+            raise tornado.web.HTTPError(403, reason=str(error))
+        try:
+            report = self.get_report(iuid)
+        except ValueError as error:
+            raise tornado.web.HTTPError(404, reason=str(error))
+        try:
+            self.db.delete_attachment(report, list(report["_attachments"].keys())[0])
+            data = self.get_json_body()
+            report = self.get_report(iuid)
+            with ReportSaver(doc=report, handler=self) as saver:
+                saver["name"] = data.get("name") or report["name"]
+                saver.set_status(data.get("status"))
+            self.db.put_attachment(
+                report,
+                base64.b64decode(data["file"]["data"]),
+                filename=data["file"]["filename"],
+                content_type=data["file"]["content_type"]
+            )
+            report = self.get_report(iuid)  # Get updated '_attachments'.
+        except ValueError as error:
+            raise tornado.web.HTTPError(400, reason=str(error))
+        self.write(self.get_report_json(report, self.get_order(report["order"])))
 
 
 class ReportEdit(ReportMixin, RequestHandler):
@@ -387,25 +518,3 @@ class ReportLogs(ReportMixin, RequestHandler):
             return
         title = f"Logs for report '{report['name'] or '[no name]'}'"
         self.render("logs.html", title=title, logs=self.get_logs(report["_id"]))
-
-
-class ReportCreateApiV1(ApiV1Mixin, RequestHandler):
-    "Create a report for an order."
-
-    @tornado.web.authenticated
-    def post(self):
-        try:
-            self.check_login()
-        except ValueError as error:
-            raise tornado.web.HTTPError(403, reason=str(error))
-        try:
-            data = self.get_json_body()
-            order = data.get("order")
-            if not order:
-                raise ValueError("No order IUID given.")
-            order = self.get_order(order)
-            # XXX
-        except ValueError as error:
-            raise tornado.web.HTTPError(400, reason=str(error))
-        else:
-            self.write(self.get_order_json(saver.doc, full=True))
