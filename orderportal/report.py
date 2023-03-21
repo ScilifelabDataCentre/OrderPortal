@@ -20,6 +20,10 @@ class ReportSaver(saver.Saver):
     def initialize(self):
         self.doc["reviewers"] = {}
 
+    def setup(self):
+        self.original_status = self.get("status")
+        self.original_reviewers = set(self.get("reviewers"))  # Keys (email) only.
+
     def set_owner(self, owner):
         """Set the owner of the report. Only enabled staff accounts are accepted.
         Raise ValueError if bad value.
@@ -32,9 +36,11 @@ class ReportSaver(saver.Saver):
         self["owner"] = account["email"]
 
     def set_reviewers(self, reviewers):
-        """Set the reviewers of this report. List of email addresses given.
+        """Set the reviewers of this report. Give list of email addresses.
         Accounts that are not enabled or staff or admin are ignored.
         """
+        if not reviewers:
+            return
         for reviewer in reviewers:
             try:
                 account = self.handler.get_account(reviewer)
@@ -76,9 +82,60 @@ class ReportSaver(saver.Saver):
         else:
             self["status"] = status
 
+    def send_reviewers_message(self):
+        """Send an email to the reviewers of the report, if any.
+        If the status is unchanged "review", then send only to new reviewers.
+        If the status has changed to "review", send to all reviewers.
+        """
+        if self["status"] != constants.REVIEW:
+            return
+        if self["status"] == self.original_status:
+            reviewers = list(set(self["reviewers"]).difference(self.original_reviewers))
+        else:
+            reviewers = list(set(self["reviewers"]))
+        if not reviewers:
+            return
+        try:
+            order = self.handler.get_order(self["order"])
+            with MessageSaver(handler=self.handler) as saver:
+                saver.create(
+                    settings[constants.REPORT]["reviewers"],
+                    name=self["name"],
+                    title=order["title"],
+                    url=utils.get_order_url(order),
+                )
+                saver.send(reviewers)
+        except (KeyError, ValueError):
+            pass
+
+    def send_owner_message(self):
+        """Send an email to the owner of the report if the status
+        has changed from "review".
+        """
+        if self["status"] == constants.REVIEW:
+            return
+        if self["status"] == self.original_status:
+            return
+        # No need to send to the owner if the owner changed the status.
+        if self["owner"] == self.handler.current_user["email"]:
+            return
+        try:
+            order = self.handler.get_order(self["order"])
+            with MessageSaver(handler=self.handler) as saver:
+                saver.create(
+                    settings[constants.REPORT]["owner"],
+                    name=self["name"],
+                    title=order["title"],
+                    url=utils.get_order_url(order),
+                    status=self["status"],
+                )
+                saver.send(self["owner"])
+        except (KeyError, ValueError):
+            pass
+
 
 class ReportMixin:
-    "Mixin access methods and send email to reviewers."
+    "Mixin access methods."
 
     def allow_read(self, report):
         "Is the report readable by the current user?"
@@ -107,39 +164,6 @@ class ReportMixin:
         if self.allow_edit(report):
             return
         raise ValueError("You may not edit the report.")
-
-    def send_reviewers_message(self, report, order):
-        "Send an email to the reviewers of the report, if any."
-        if not report["reviewers"]:
-            return
-        try:
-            text = settings[constants.REPORT]["reviewers"]
-            with MessageSaver(handler=self) as saver:
-                saver.create(
-                    text,
-                    name=report["name"],
-                    title=order["title"],
-                    url=utils.get_order_url(order),
-                )
-                saver.send(report["reviewers"])
-        except (KeyError, ValueError):
-            pass
-
-    def send_owner_message(self, report, order):
-        "Send an email to the owner of the report."
-        try:
-            text = settings[constants.REPORT]["owner"]
-            with MessageSaver(handler=self) as saver:
-                saver.create(
-                    text,
-                    name=report["name"],
-                    title=order["title"],
-                    url=utils.get_order_url(order),
-                    status=report["status"],
-                )
-                saver.send(report["owner"])
-        except (KeyError, ValueError):
-            pass
 
 
 class ReportApiV1Mixin(ApiV1Mixin):
@@ -216,25 +240,24 @@ class ReportAdd(ReportMixin, RequestHandler):
             with ReportSaver(handler=self) as saver:
                 saver["order"] = order["_id"]
                 saver["name"] = self.get_argument("name", None) or file.filename
-                saver.set_owner(self.get_argument("owner", ""))
+                saver.set_owner(self.get_argument("owner"))
                 saver["inline"] = file.content_type in (
                     constants.HTML_MIMETYPE,
                     constants.TEXT_MIMETYPE,
                 )
                 saver.set_reviewers(self.get_argument("reviewers", "").split())
                 saver.set_status(self.get_argument("status", None))
+                saver.send_reviewers_message()
             report = saver.doc
-            if file:
-                self.db.put_attachment(
-                    report,
-                    file.body,
-                    filename=file.filename,
-                    content_type=file.content_type,
-                )
+            self.db.put_attachment(
+                report,
+                file.body,
+                filename=file.filename,
+                content_type=file.content_type,
+            )
         except ValueError as error:
             self.see_other("order", order["_id"], error=error)
             return
-        self.send_reviewers_message(report, order)
         self.see_other("order", order["_id"])
 
 
@@ -258,6 +281,7 @@ class ReportAddApiV1(ReportApiV1Mixin, RequestHandler):
                 saver["owner"] = self.current_user["email"]
                 saver.set_reviewers(data.get("reviewers") or [])
                 saver.set_status(data["status"])
+                saver.send_reviewers_message()
             report = saver.doc
             self.db.put_attachment(
                 report,
@@ -334,7 +358,9 @@ class Report(ReportMixin, RequestHandler):
 
 
 class ReportApiV1(ReportApiV1Mixin, RequestHandler):
-    "Report API; JSON output; JSON input for edit."
+    """Report API; JSON output; JSON input for edit.
+    NOTE: only the status can be edited!
+    """
 
     def get(self, iuid):
         try:
@@ -368,19 +394,10 @@ class ReportApiV1(ReportApiV1Mixin, RequestHandler):
         except ValueError as error:
             raise tornado.web.HTTPError(404, reason=str(error))
         try:
-            self.db.delete_attachment(report, list(report["_attachments"].keys())[0])
             data = self.get_json_body()
             report = self.get_report(iuid)
             with ReportSaver(doc=report, handler=self) as saver:
-                saver["name"] = data.get("name") or report["name"]
                 saver.set_status(data.get("status"))
-            self.db.put_attachment(
-                report,
-                base64.b64decode(data["file"]["data"]),
-                filename=data["file"]["filename"],
-                content_type=data["file"]["content_type"]
-            )
-            report = self.get_report(iuid)  # Get updated '_attachments'.
         except ValueError as error:
             raise tornado.web.HTTPError(400, reason=str(error))
         self.write(self.get_report_json(report, self.get_order(report["order"])))
@@ -442,13 +459,9 @@ class ReportEdit(ReportMixin, RequestHandler):
                 return
         with ReportSaver(doc=report, handler=self) as saver:
             saver["name"] = self.get_argument("name", None) or report["name"]
-            status = self.get_argument("status")
-            # If changed to "Review", then clear previous reviews and send email again.
-            send = status == constants.REVIEW and status != report["status"]
-            saver.set_reviewers(report["reviewers"].keys())
-            saver.set_status(status)
-        if send:
-            self.send_reviewers_message(report, order)
+            saver.set_reviewers(self.get_argument("reviewers", "").split())
+            saver.set_status(self.get_argument("status"))
+            saver.send_reviewers_message()
         self.see_other("order", order["_id"])
 
 
@@ -479,7 +492,6 @@ class ReportReview(ReportMixin, RequestHandler):
             self.see_other("home", error=error)
             return
         order = self.get_order(report["order"])
-        original_status = report["status"]
         try:
             with ReportSaver(doc=report, handler=self) as saver:
                 reviewer = saver["reviewers"][self.current_user["email"]]
@@ -489,16 +501,17 @@ class ReportReview(ReportMixin, RequestHandler):
                     raise ValueError(f"Invalid status '{status}' for report review.")
                 reviewer["status"] = status
                 saver.set_status()  # Set the status according to all reviews.
+                saver.send_owner_message()  # Send message if changed status.
             report = saver.doc
         except (KeyError, ValueError) as error:
             self.see_other("order", order["_id"], error=error)
             return
-        if (
-            report["status"] != constants.REVIEW
-            and report["status"] != original_status
-            and self.current_user["email"] != report["owner"]
-        ):
-            self.send_owner_message(report, order)
+        # if (
+        #     report["status"] != constants.REVIEW
+        #     and report["status"] != original_status
+        #     and self.current_user["email"] != report["owner"]
+        # ):
+        #     self.send_owner_message(report, order)
         self.see_other("order", order["_id"])
 
 

@@ -94,6 +94,30 @@ Edit report for {{ terminology('order') }} '{{ order['title'] }}'
   </div>
 
   <div class="form-group">
+    <label class="control-label col-md-2" for="reviewers">Request review by</label>
+    <div class="col-md-10">
+      <textarea name="reviewers" id="reviewers" class="form-control"
+                >{{ '\n'.join(report["reviewers"]) }}</textarea>
+      <div class="help-block">
+        <p>
+          Persons that must review the report. The report is set as
+          published when and only when all reviewers have approved it.
+        </p>
+        <p>
+          Give the email addresses of each person, one per line. Email
+          addresses that do not correspond to currently enabled staff
+          or admin accounts in the system will be ignored.
+        </p>
+        <p>
+          If the status is unchanged "review", an email will be sent
+          to each new reviewer. If the status has changed to "review",
+          an email will be sent to all reviewers.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
     <label class="control-label col-md-2">Reviews</label>
     <div class="col-md-10">
       <table class="table">
