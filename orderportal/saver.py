@@ -47,19 +47,7 @@ class Saver:
         self.log()
 
     def __setitem__(self, key, value):
-        "Update the key/value pair."
-        try:
-            checker = getattr(self, "check_{0}".format(key))
-        except AttributeError:
-            pass
-        else:
-            checker(value)
-        try:
-            converter = getattr(self, "convert_{0}".format(key))
-        except AttributeError:
-            pass
-        else:
-            value = converter(value)
+        "Update the value for the key."
         try:
             if self.doc[key] == value:
                 return

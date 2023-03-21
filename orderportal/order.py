@@ -33,11 +33,11 @@ class OrderSaver(saver.Saver):
         1) Initialize flag for changed status.
         2) Prepare for attaching files.
         """
-        self.changed_status = None
+        self.original_status = self.get("status")
         self.files = []
-        self.filenames = set(self.doc.get("_attachments", []))
+        self.filenames = set(self.get("_attachments", []))
         try:
-            self.fields = Fields(self.handler.get_form(self.doc["form"]))
+            self.fields = Fields(self.handler.get_form(self["form"]))
         except KeyError:
             pass
 
@@ -128,7 +128,6 @@ class OrderSaver(saver.Saver):
                 )
         self["status"] = new
         self.doc["history"][new] = utils.today()
-        self.changed_status = new
 
     def set_tags(self, tags):
         """Set the tags of the order from JSON data (list of strings).
@@ -203,7 +202,7 @@ class OrderSaver(saver.Saver):
             identifier = field["identifier"]
 
             if field["type"] == constants.FILE:
-                value = self.doc["fields"].get(identifier)
+                value = self["fields"].get(identifier)
                 # Files are uploaded by the normal form multi-part
                 # encoding approach, not by JSON data.
                 try:
@@ -320,7 +319,7 @@ class OrderSaver(saver.Saver):
             ):
                 tags = [
                     t
-                    for t in self.doc.get("tags", [])
+                    for t in self.get("tags", [])
                     if not t.startswith(identifier + ":")
                 ]
                 if value:
@@ -328,15 +327,15 @@ class OrderSaver(saver.Saver):
                 self["tags"] = tags
 
             # Record any change to the value.
-            if value != self.doc["fields"].get(identifier):
+            if value != self["fields"].get(identifier):
                 changed = self.changed.setdefault("fields", dict())
                 changed[identifier] = value
-                self.doc["fields"][identifier] = value
+                self["fields"][identifier] = value
         self.check_fields_validity()
 
     def check_fields_validity(self):
         "Check validity of current field values."
-        self.doc["invalid"] = dict()
+        self["invalid"] = dict()
         for field in self.fields:
             if field["depth"] == 0:
                 self.check_validity(field)
@@ -350,7 +349,7 @@ class OrderSaver(saver.Saver):
         try:
             select_id = field.get("visible_if_field")
             if select_id:
-                select_value = self.doc["fields"].get(select_id)
+                select_value = self["fields"].get(select_id)
                 if select_value is not None:
                     select_value = str(select_value).lower()
                 if_value = field.get("visible_if_value")
@@ -367,7 +366,7 @@ class OrderSaver(saver.Saver):
                 if failure:
                     raise ValueError("subfield(s) invalid")
             else:
-                value = self.doc["fields"][field["identifier"]]
+                value = self["fields"][field["identifier"]]
                 if value is None:
                     if field["required"]:
                         raise ValueError("missing value")
@@ -378,19 +377,19 @@ class OrderSaver(saver.Saver):
                         raise ValueError("not a valid email address")
                 elif field["type"] == constants.INT:
                     try:
-                        self.doc["fields"][field["identifier"]] = int(value)
+                        self["fields"][field["identifier"]] = int(value)
                     except (TypeError, ValueError):
                         raise ValueError("not an integer value")
                 elif field["type"] == constants.FLOAT:
                     try:
-                        self.doc["fields"][field["identifier"]] = float(value)
+                        self["fields"][field["identifier"]] = float(value)
                     except (TypeError, ValueError):
                         raise ValueError("not a float value")
                 elif field["type"] == constants.BOOLEAN:
                     try:
                         if value is None:
                             raise ValueError
-                        self.doc["fields"][field["identifier"]] = utils.to_bool(value)
+                        self["fields"][field["identifier"]] = utils.to_bool(value)
                     except (TypeError, ValueError):
                         raise ValueError("not a boolean value")
                 elif field["type"] == constants.URL:
@@ -425,10 +424,10 @@ class OrderSaver(saver.Saver):
                 elif field["type"] == constants.FILE:
                     pass
         except ValueError as error:
-            self.doc["invalid"][field["identifier"]] = str(error)
+            self["invalid"][field["identifier"]] = str(error)
             return False
         except Exception as error:
-            self.doc["invalid"][field["identifier"]] = f"System error: {error}"
+            self["invalid"][field["identifier"]] = f"System error: {error}"
             return False
         else:
             return True
@@ -448,10 +447,9 @@ class OrderSaver(saver.Saver):
             self["history"][status] = date
 
     def post_process(self):
-        "Wrap up attachments delete/store, and send message if so set up."
+        "Wrap up attachments delete/store. Send message if so configured."
         self.modify_attachments()
-        if self.changed_status:
-            self.send_message()
+        self.send_message()
 
     def modify_attachments(self):
         "Save or delete the file as an attachment to the document."
@@ -474,14 +472,16 @@ class OrderSaver(saver.Saver):
                 )
 
     def send_message(self):
-        "Send a message after an order status change."
+        "Send a message after an order status change, if so configured."
+        if self.original_status == self["status"]:
+            return
         try:
-            text_template = settings["ORDER_MESSAGES"][self.doc["status"]]
+            text_template = settings["ORDER_MESSAGES"][self["status"]]
         except (couchdb2.NotFoundError, KeyError):
             return
         recipients = set()
         try:
-            owner = self.handler.get_account(self.doc["owner"])
+            owner = self.handler.get_account(self["owner"])
         except ValueError:  # Owner account may have been deleted.
             pass
         else:
@@ -513,11 +513,11 @@ class OrderSaver(saver.Saver):
             with MessageSaver(handler=self.handler) as saver:
                 saver.create(
                     text_template,
-                    owner=self.doc["owner"],
-                    title=self.doc["title"],
-                    identifier=self.doc.get("identifier") or self.doc["_id"],
+                    owner=self["owner"],
+                    title=self["title"],
+                    identifier=self.get("identifier") or self["_id"],
                     url=utils.get_order_url(self.doc),
-                    tags=", ".join(self.doc.get("tags", [])),
+                    tags=", ".join(self.get("tags", [])),
                 )
                 saver.send(list(recipients))
         except ValueError as error:
@@ -796,15 +796,6 @@ class OrderApiV1Mixin(ApiV1Mixin):
         # Terrible kludge! Converts binary keys and values to string.
         # A Python3 issue, possible due to bad old CouchDB interface.
         return json.loads(json.dumps(data))
-
-
-def convert_to_strings(doc):
-    items = list(doc.items())
-    for key, value in items:
-        if isinstance(key, bytes):
-            doc[key.decode()] = doc.pop(key)
-        if isinstance(value, dict):
-            convert_to_strings(value)
 
 
 class OrderCreate(OrderMixin, RequestHandler):
