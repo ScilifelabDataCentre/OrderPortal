@@ -23,6 +23,24 @@ class ReportSaver(saver.Saver):
     def setup(self):
         self.original_status = self.get("status")
         self.original_reviewers = set(self.get("reviewers"))  # Keys (email) only.
+        self.updated_file = None
+
+    def post_process(self):
+        "Add or replace the file content."
+        if not self.updated_file:
+            return
+        try:
+            filename = list(self.doc["_attachments"])[0]
+        except (KeyError, IndexError):
+            pass
+        else:
+            self.handler.db.delete_attachment(self.doc, filename)
+        self.handler.db.put_attachment(
+            self.doc,
+            self.updated_file["body"],
+            filename=self.updated_file["filename"],
+            content_type=self.updated_file["content_type"],
+        )
 
     def set_owner(self, owner):
         """Set the owner of the report. Only enabled staff accounts are accepted.
@@ -34,6 +52,26 @@ class ReportSaver(saver.Saver):
         if account["role"] not in (constants.ADMIN, constants.STAFF):
             raise ValueError("Account is not admin or staff.")
         self["owner"] = account["email"]
+
+    def set_file(self, file):
+        """Set the file content; attachment will be handled later.
+        Raise ValueError if any of the items 'data', 'filename' or 
+        'content_type' is missing.
+        """
+        if "filename" not in file:
+            raise ValueError("Given file lacks 'filename' key.")
+        if "content_type" not in file:
+            raise ValueError("Given file lacks 'content_type' key.")
+        try:
+            file["body"] = base64.b64decode(file["data"])
+        except KeyError:
+            if "body" not in file:
+                raise ValueError("Given file lacks 'data' or 'body' key.")
+        self.updated_file = file
+        self["inline"] = file["content_type"] in (
+            constants.HTML_MIMETYPE,
+            constants.TEXT_MIMETYPE,
+        )
 
     def set_reviewers(self, reviewers):
         """Set the reviewers of this report. Give list of email addresses.
@@ -232,7 +270,7 @@ class ReportAdd(ReportMixin, RequestHandler):
             )
             return
         try:
-            file = self.request.files["report"][0]
+            file = self.request.files["file"][0]
         except (KeyError, IndexError):
             self.see_other("order", order["_id"], error="No report file uploaded.")
             return
@@ -241,20 +279,10 @@ class ReportAdd(ReportMixin, RequestHandler):
                 saver["order"] = order["_id"]
                 saver["name"] = self.get_argument("name", None) or file.filename
                 saver.set_owner(self.get_argument("owner"))
-                saver["inline"] = file.content_type in (
-                    constants.HTML_MIMETYPE,
-                    constants.TEXT_MIMETYPE,
-                )
+                saver.set_file(dict(body=file.body, filename=file.filename, content_type=file.content_type))
                 saver.set_reviewers(self.get_argument("reviewers", "").split())
                 saver.set_status(self.get_argument("status", None))
                 saver.send_reviewers_message()
-            report = saver.doc
-            self.db.put_attachment(
-                report,
-                file.body,
-                filename=file.filename,
-                content_type=file.content_type,
-            )
         except ValueError as error:
             self.see_other("order", order["_id"], error=error)
             return
@@ -279,17 +307,14 @@ class ReportAddApiV1(ReportApiV1Mixin, RequestHandler):
                 saver["order"] = order["_id"]
                 saver["name"] = data["name"]
                 saver["owner"] = self.current_user["email"]
+                try:
+                    saver.set_file(data["file"])
+                except KeyError:
+                    raise ValueError("Missing 'file' item.")
                 saver.set_reviewers(data.get("reviewers") or [])
                 saver.set_status(data["status"])
                 saver.send_reviewers_message()
-            report = saver.doc
-            self.db.put_attachment(
-                report,
-                base64.b64decode(data["file"]["data"]),
-                filename=data["file"]["filename"],
-                content_type=data["file"]["content_type"]
-            )
-            report = self.get_report(report["_id"])  # Get updated '_attachments'.
+            report = self.get_report(saver.doc["_id"])  # Get updated '_attachments'.
         except ValueError as error:
             raise tornado.web.HTTPError(400, reason=str(error))
         self.write(self.get_report_json(report, order))
@@ -359,7 +384,7 @@ class Report(ReportMixin, RequestHandler):
 
 class ReportApiV1(ReportApiV1Mixin, RequestHandler):
     """Report API; JSON output; JSON input for edit.
-    NOTE: only the status can be edited!
+    NOTE: the name, status and file can be edited, order and owner cannot.
     """
 
     def get(self, iuid):
@@ -397,7 +422,18 @@ class ReportApiV1(ReportApiV1Mixin, RequestHandler):
             data = self.get_json_body()
             report = self.get_report(iuid)
             with ReportSaver(doc=report, handler=self) as saver:
-                saver.set_status(data.get("status"))
+                try:
+                    saver["name"] = data["name"]
+                except KeyError:
+                    pass
+                try:
+                    saver.set_file(data["file"])
+                except KeyError:
+                    pass
+                try:
+                    saver.set_status(data["status"])
+                except KeyError:
+                    pass
         except ValueError as error:
             raise tornado.web.HTTPError(400, reason=str(error))
         self.write(self.get_report_json(report, self.get_order(report["order"])))
@@ -432,37 +468,18 @@ class ReportEdit(ReportMixin, RequestHandler):
         except ValueError as error:
             self.see_other("home", error=error)
             return
-        order = self.get_order(report["order"])
-        try:
-            file = self.request.files["report"][0]
-        except (KeyError, IndexError):
-            pass
-        else:
-            try:
-                # Remove the old report file before adding the new.
-                self.db.delete_attachment(report, report["name"])
-                with ReportSaver(doc=report, handler=self) as saver:
-                    saver["name"] = file.filename  # May be modified below.
-                    saver["inline"] = file.content_type in (
-                        constants.HTML_MIMETYPE,
-                        constants.TEXT_MIMETYPE,
-                    )
-                report = saver.doc
-                self.db.put_attachment(
-                    report,
-                    file.body,
-                    filename=file.filename,
-                    content_type=file.content_type,
-                )
-            except ValueError as error:
-                self.see_other("order", order["_id"], error=error)
-                return
         with ReportSaver(doc=report, handler=self) as saver:
             saver["name"] = self.get_argument("name", None) or report["name"]
+            try:
+                file = self.request.files["file"][0]
+            except (KeyError, IndexError):
+                pass
+            else:
+                saver.set_file(dict(body=file.body, filename=file.filename, content_type=file.content_type))
             saver.set_reviewers(self.get_argument("reviewers", "").split())
             saver.set_status(self.get_argument("status"))
             saver.send_reviewers_message()
-        self.see_other("order", order["_id"])
+        self.see_other("order", self.get_order(report["order"])["identifier"])
 
 
 class ReportReview(ReportMixin, RequestHandler):
