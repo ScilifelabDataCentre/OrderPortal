@@ -21,14 +21,14 @@ Add a report for {{ terminology('order') }}: {{ order['title'] }}
   <input type="hidden" name="order" value="{{ order['_id'] }}">
 
   <div class="form-group">
-    <label class="control-label col-md-2" for="report">Report document</label>
+    <label class="control-label col-md-2" for="report">Report file</label>
     <div class="col-md-10">
-      <input type="file" name="report" id="report" class="form-control">
+      <input type="file" name="file" id="file" class="form-control">
       <span style="color:red; margin-right: 1em;"
             class="glyphicon glyphicon-star form-control-feedback"
             aria-hidden="true"></span>
       <div class="help-block">
-        The report document file to upload.
+        The report file to upload.
         <br>
         The link to it will display HTML or TXT content inline in the browser.
         All other content types will be downloaded as a file.

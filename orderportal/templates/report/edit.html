@@ -26,7 +26,7 @@ Edit report for {{ terminology('order') }} '{{ order['title'] }}'
   {% module xsrf_form_html() %}
 
   <div class="row">
-    <label class="control-label col-md-2">Report document</label>
+    <label class="control-label col-md-2">Report file</label>
     <div class="col-md-10">
       <p class="form-control-static">
         {% if report.get('inline') %}
@@ -68,9 +68,9 @@ Edit report for {{ terminology('order') }} '{{ order['title'] }}'
   </div>
 
   <div class="form-group">
-    <label class="control-label col-md-2" for="report">Update report file</label>
+    <label class="control-label col-md-2" for="file">Update report file</label>
     <div class="col-md-10">
-      <input type="file" name="report" id="report" class="form-control">
+      <input type="file" name="file" id="file" class="form-control">
       <p class="help-block">
         Current file: <strong>{{ filename }}</strong>
         <br>
