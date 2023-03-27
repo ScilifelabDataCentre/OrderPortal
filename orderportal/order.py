@@ -686,7 +686,7 @@ class OrderMixin:
         return result
 
 
-class OrderApiV1Mixin(ApiV1Mixin):
+class OrderApiV1Mixin(OrderMixin, ApiV1Mixin):
     "Mixin for order JSON data structure."
 
     def get_order_json(self, order, full=False):
