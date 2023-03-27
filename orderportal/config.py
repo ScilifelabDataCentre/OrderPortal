@@ -96,19 +96,6 @@ def load_settings_from_file():
     else:
         settings["ORDER_MESSAGES"] = {}
 
-    # Read universities YAML file.
-    filepath = settings.get("UNIVERSITIES_FILE")
-    if filepath:
-        filepath = os.path.join(settings["SITE_DIR"], filepath)
-        logger.info(f"Universities lookup file: {filepath}")
-        with open(filepath) as infile:
-            unis = yaml.safe_load(infile) or {}
-        unis = list(unis.items())
-        unis.sort(key=lambda i: (i[1].get("rank"), i[0]))
-        settings["UNIVERSITIES"] = dict(unis)
-    else:
-        settings["UNIVERSITIES"] = {}
-
     # Read subject terms YAML file.
     filepath = settings.get("SUBJECT_TERMS_FILE")
     if filepath:
@@ -131,16 +118,12 @@ def load_settings_from_file():
 
 
 def load_settings_from_db(db):
-    """Load the settings that are stored in the database:
-    - order statuses and transitions
-    - orders list settings
-    and setup derived variable values.
-    """
+    "Load the configuration that are stored in the database into 'settings'."
     logger = logging.getLogger("orderportal")
     doc = db["order_statuses"]
     settings["ORDER_STATUSES"] = doc["statuses"]
     settings["ORDER_TRANSITIONS"] = doc["transitions"]
-    logger.info("Loaded order statuses from database into 'settings'.")
+    logger.info("Loaded order statuses configuration from database into 'settings'.")
 
     doc = db["order"]
     settings["ORDER_CREATE_USER"] = doc.get("create_user", True)
@@ -151,7 +134,7 @@ def load_settings_from_db(db):
     settings["ORDER_REPORTS"] = doc.get("reports", True)
     settings["DISPLAY_MAX_RECENT_ORDERS"] = doc.get("display_max_recent", 10)
     settings["TERMINOLOGY"] = doc.get("terminology", {})
-    logger.info("Loaded order settings from database into 'settings'.")
+    logger.info("Loaded order configuration from database into 'settings'.")
 
     doc = db["orders_list"]
     settings["ORDERS_LIST_OWNER_UNIVERSITY"] = doc.get("owner_university", False)
@@ -164,7 +147,7 @@ def load_settings_from_db(db):
     settings["DISPLAY_ORDERS_MOST_RECENT"] = doc["max_most_recent"]
     settings["DEFAULT_ORDER_COLUMN"] = doc["default_order_column"]
     settings["DEFAULT_ORDER_SORT"] = doc["default_order_sort"]
-    logger.info("Loaded orders list settings from database into 'settings'.")
+    logger.info("Loaded orders list configuration from database into 'settings'.")
 
     doc = db["account"]
     settings["ACCOUNT_REGISTRATION_OPEN"] = doc["registration_open"]
@@ -178,7 +161,8 @@ def load_settings_from_db(db):
     settings["ACCOUNT_FUNDER_INFO_GROUP_SIZE"] = doc["funder_info_group_size"]
     settings["ACCOUNT_FUNDER_INFO_SUBJECT"] = doc["funder_info_subject"]
     settings["ACCOUNT_DEFAULT_COUNTRY_CODE"] = doc["default_country_code"]
-    logger.info("Loaded account settings from database into 'settings'.")
+    settings["UNIVERSITIES"] = doc["universities"]
+    logger.info("Loaded account configuration from database into 'settings'.")
 
     # Lookup for the enabled statuses.
     settings["ORDER_STATUSES_LOOKUP"] = dict(

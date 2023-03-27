@@ -174,6 +174,36 @@
     </div>
   </div>
 
+  <div class="form-group">
+    <label class="control-label col-md-2" for="universities">
+      Universities</label>
+    <div class="col-md-8">
+      <textarea name="universities" id="universities" rows="8"
+                class="form-control">{{ universities }}</textarea>
+      <span class="help-block">
+        List of universities to select from. One university per line,
+        three items in CSV format.
+        <ol>
+          <li>
+            The first item on each line is <strong>required</strong>.
+            It will be the actual value stored with each account. The
+            recommended value is the unambiguous abbrevation of the
+            university.
+          </li>
+          <li>
+            The second item is the name of the university that is
+            displayed. If not given, the first item will be used.
+          </li>
+          <li>
+            The third item is the numerical rank of the item in the
+            displayed selection list. If not given, it will be set to
+            0 (zero).
+          </li>
+        </ol>
+        <br>
+    </div>
+  </div>
+
   <div class="row form-group">
     <div class="col-md-offset-2 col-md-3">
       <button type="submit" class="btn btn-success btn-block">

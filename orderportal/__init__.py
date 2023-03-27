@@ -10,7 +10,7 @@ import sys
 import pycountry
 
 
-__version__ = "10.0.2"
+__version__ = "10.1.0"
 
 
 class Constants:
@@ -341,7 +341,6 @@ DEFAULT_SETTINGS = dict(
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
     ORDER_MESSAGES_FILE="order_messages.yaml",
-    UNIVERSITIES_FILE="swedish_universities.yaml",
     SUBJECT_TERMS_FILE="subject_terms.yaml",
     LOGIN_MAX_AGE_DAYS=14,  # Max age of login session in a browser.
     LOGIN_MAX_FAILURES=6,  # After this number of fails, the account is disabled.
