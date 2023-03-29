@@ -195,12 +195,46 @@
             displayed. If not given, the first item will be used.
           </li>
           <li>
-            The third item is the numerical rank of the item in the
-            displayed selection list. If not given, it will be set to
-            0 (zero).
+            The third item is the numerical rank of the item. This is
+            only used to sort the items for display in the selection
+            list. in If not given, it will be set to 0 (zero).
           </li>
         </ol>
         <br>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="login_max_age_days">
+      Max login session</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-3">
+          <input type="number" id="login_max_age_days" name="login_max_age_days"
+                 class="form-control" min="1"
+                 value="{{ settings['LOGIN_MAX_AGE_DAYS'] }}">
+        </div>
+      </div>
+      <span class="help-block">
+        The maximum length of a login session, in days.
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="login_max_failures">
+      Max login failures</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-3">
+          <input type="number" id="login_max_failures" name="login_max_failures"
+                 class="form-control" min="1"
+                 value="{{ settings['LOGIN_MAX_FAILURES'] }}">
+        </div>
+      </div>
+      <span class="help-block">
+        The maximum number of login failures before the account is disabled.
+      </span>
     </div>
   </div>
 

@@ -780,6 +780,18 @@ class Account(RequestHandler):
                         rank = 0
                     universities[item["key"]] = dict(name=name, rank=rank)
             saver["universities"] = universities
+            try:
+                saver["login_max_age_days"] = max(1, int(self.get_argument(
+                    "login_max_age_days", "14")
+                                                         ))
+            except (ValueError, TypeError):
+                pass
+            try:
+                saver["login_max_failures"] = max(1, int(self.get_argument(
+                    "login_max_failures", "6")
+                                                         ))
+            except (ValueError, TypeError):
+                pass
         orderportal.config.load_settings_from_db(self.db)
         self.set_message_flash("Saved account configuration.")
         self.see_other("admin_account")

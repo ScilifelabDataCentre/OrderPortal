@@ -342,8 +342,6 @@ DEFAULT_SETTINGS = dict(
     SITE_HOST_TITLE=None,
     ORDER_MESSAGES_FILE="order_messages.yaml",
     SUBJECT_TERMS_FILE="subject_terms.yaml",
-    LOGIN_MAX_AGE_DAYS=14,  # Max age of login session in a browser.
-    LOGIN_MAX_FAILURES=6,  # After this number of fails, the account is disabled.
     ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",
     ORDER_IDENTIFIER_FIRST=1,
     MAIL_SERVER=None,  # If not set, then no emails can be sent.

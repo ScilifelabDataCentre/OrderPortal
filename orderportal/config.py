@@ -162,6 +162,8 @@ def load_settings_from_db(db):
     settings["ACCOUNT_FUNDER_INFO_SUBJECT"] = doc["funder_info_subject"]
     settings["ACCOUNT_DEFAULT_COUNTRY_CODE"] = doc["default_country_code"]
     settings["UNIVERSITIES"] = doc["universities"]
+    settings["LOGIN_MAX_AGE_DAYS"] = doc.get("login_max_age_days", 14)
+    settings["LOGIN_MAX_FAILURES"] = doc.get("login_max_failures", 6)
     logger.info("Loaded account configuration from database into 'settings'.")
 
     # Lookup for the enabled statuses.
