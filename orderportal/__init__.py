@@ -248,7 +248,7 @@ class Constants:
     )
 
     # Terminology: terms that can be translated to other terms.
-    TERMINOLOGY_TERMS = ("order", "orders")
+    TERMINOLOGY_TERMS = ("order", "orders", "tag", "tags")
 
     # Report statuses; hard-wired!
     # REVIEW = "review" Already defined above.

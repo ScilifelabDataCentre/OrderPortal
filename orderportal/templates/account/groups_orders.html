@@ -42,7 +42,7 @@
           {% end %} {# if am_staff #}
           <th>Owner</th>
           {% if settings['ORDERS_LIST_TAGS'] %}
-          <th width="5%">Keywords (tags)</th>
+          <th width="5%">Tags</th>
           {% end %}
           {% for f in settings['ORDERS_LIST_FIELDS'] %}
           <th>{{ f.replace('_', ' ').capitalize() }}</th>

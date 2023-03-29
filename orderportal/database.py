@@ -353,7 +353,7 @@ var lint = {lint};
         "modified": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
-    emit(doc.modified, doc.title);
+    emit(doc.modified, doc.identifier);
 }"""
         },
         "owner": {
@@ -375,10 +375,10 @@ var lint = {lint};
     if (doc.orderportal_doctype !== 'order') return;
     if (!doc.tags) return;
     doc.tags.forEach(function(tag) {
-	emit(tag.toLowerCase(), doc.title);
+	emit(tag.toLowerCase(), doc.identifier);
 	var parts = tag.split(':');
 	if (parts.length === 2) {
-	    emit(parts[1].toLowerCase(), doc.title);
+	    emit(parts[1].toLowerCase(), doc.identifier);
 	};
     });
 }"""
@@ -400,7 +400,7 @@ REPORT_DESIGN_DOC = {
             "reduce": "_count",
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'report') return;
-    emit(doc.order, doc.modified);
+    emit(doc.order, doc.name);
 }""",
         },
         "review": {
@@ -413,6 +413,12 @@ REPORT_DESIGN_DOC = {
       };
     };
 }"""
+        },
+        "modified": {
+            "map": """function(doc) {
+    if (doc.orderportal_doctype !== 'report') return;
+    emit(doc.modified, doc.name);
+}""",
         },
     }
 }

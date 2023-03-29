@@ -89,23 +89,25 @@ Edit {{ terminology('order') }} '{{ order['title'] or '[no title]'}}'
   <div class="form-group">
     <div class="row">
       <div class="col-md-9">
-        <label class="control-label" for="__tags__">Keywords (tags)</label>
-        {# Terminology in display: keyword; in code: tag #}
+        <label class="control-label" for="__tags__">{{ terminology('Tags') }}</label>
         <textarea name="__tags__" id="__tags__" rows="2" class="form-control"
                   >{{ ', '.join(tags) }}</textarea>
       </div>
     </div>
     <div class="row">
       <div class="col-md-12 help-block">
-        Optional keywords (tags) characterizing the {{ terminology('order') }},
-        which are used in searches.
+        Optional {{ terminology('tags') }} (a.k.a. keywords, labels)
+        characterizing the {{ terminology('order') }}, which are
+        searchable.
         <br>
-        A keyword must look like an identifier: It begins with a letter and
-        continues with letters, digits and/or underscore '_'. Blank or comma
-        ',' separates keywords from one another.
+        A {{ terminology('tag' }} must look like an identifier: It
+        begins with a letter and continues with letters, digits and/or
+        underscore '_'. Blank or comma ',' separates tags from one
+        another.
         {% if am_staff %}
         <br>
-        Staff may use namespace prefixes, e.g. "project_id:P12345".
+        Staff may use namespace prefixes for {{ terminology('tags') }},
+        e.g. <code>project_id:P12345</code>.
         {% end %}
       </div>
     </div>

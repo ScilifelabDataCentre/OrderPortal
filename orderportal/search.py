@@ -39,7 +39,7 @@ class Search(RequestHandler):
         id_sets = []
         for part in parts:
             id_sets.append(
-                set([r.id for r in self.db.view("order", "identifier", key=part)])
+                set([row.id for row in self.db.view("order", "identifier", key=part)])
             )
         if id_sets:
             for id in reduce(lambda i, j: i.union(j), id_sets):
@@ -49,7 +49,7 @@ class Search(RequestHandler):
         parts = term.split()
         id_sets = []
         for part in parts:
-            id_sets.append(set([r.id for r in self.db.view("order", "tag", key=part)]))
+            id_sets.append(set([row.id for row in self.db.view("order", "tag", key=part)]))
         if id_sets:
             for id in reduce(lambda i, j: i.union(j), id_sets):
                 orders[id] = self.get_order(id)
@@ -74,8 +74,8 @@ class Search(RequestHandler):
             id_sets.append(
                 set(
                     [
-                        r.id
-                        for r in self.db.view(
+                        row.id
+                        for row in self.db.view(
                             "order",
                             "keyword",
                             startkey=part,
@@ -85,7 +85,7 @@ class Search(RequestHandler):
                 )
             )
         if id_sets:
-            # All words must exist in title
+            # All words must exist in the title.
             id_set = reduce(lambda i, j: i.intersection(j), id_sets)
             for id in reduce(lambda i, j: i.intersection(j), id_sets):
 

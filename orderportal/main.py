@@ -118,6 +118,7 @@ def main():
             orderportal.report.ReportLogs,
             name="report_logs",
         ),
+        url(r"/reports", orderportal.report.Reports, name="reports"),
         url(r"/accounts", orderportal.account.Accounts, name="accounts"),
         url(
             r"/api/v1/accounts", orderportal.account.AccountsApiV1, name="accounts_api"

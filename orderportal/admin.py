@@ -657,8 +657,8 @@ class OrdersList(RequestHandler):
             saver["fields"] = self.get_argument("fields", "").strip().split()
             # Lookup of filters with identifier as key.
             filters = dict([(f["identifier"], f) for f in doc["filters"]])
-            # Delete specified fields.
-            for value in self.get_arguments("orders_filter_field_delete"):
+            # Remove specified fields.
+            for value in self.get_arguments("orders_filter_field_remove"):
                 filters.pop(value, None)
             # Add a specified field.
             try:
