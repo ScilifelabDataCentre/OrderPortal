@@ -328,7 +328,6 @@ DEFAULT_SETTINGS = dict(
     DATABASE_PASSWORD=None,
     COOKIE_SECRET=None,
     PASSWORD_SALT=None,
-    MIN_PASSWORD_LENGTH=8,
     SETTINGS_FILE=None,
     SITE_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site")),
     SITE_STATIC_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site/static")),
