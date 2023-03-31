@@ -80,7 +80,7 @@ def migrate_meta_documents(db):
         # Load the legacy site ORDER_STATUSES_FILE, if any defined.
         try:
             filepath = os.path.join(
-                settings["SITE_DIR"], settings["ORDER_STATUSES_FILE"]
+                constants.SITE_DIR, settings["ORDER_STATUSES_FILE"]
             )
             with open(filepath) as infile:
                 legacy_statuses = yaml.safe_load(infile)
@@ -109,7 +109,7 @@ def migrate_meta_documents(db):
         # Load the legacy site ORDER_TRANSITIONS_FILE, if any defined.
         try:
             filepath = os.path.join(
-                settings["SITE_DIR"], settings["ORDER_TRANSITIONS_FILE"]
+                constants.SITE_DIR, settings["ORDER_TRANSITIONS_FILE"]
             )
             with open(filepath) as infile:
                 legacy_transitions = yaml.safe_load(infile)
@@ -243,24 +243,40 @@ def migrate_meta_documents(db):
                 status.pop("initial", None)
         logger.info("Updated order statuses to remove 'initial'.")
 
-    ### As of version 10.1.0, the universities lookup is in the database.
+    ### As of version 10.1.0, the universities data is in the database.
     doc = db["account"]
     if "universities" not in doc:
         universities = {}
         # Load the legacy site UNIVERSITES_FILE, if any.
         try:
-            filepath = os.path.join(settings["SITE_DIR"], settings["UNIVERSITIES_FILE"])
+            filepath = os.path.join(constants.SITE_DIR, settings["UNIVERSITIES_FILE"])
             with open(filepath) as infile:
                 universities = yaml.safe_load(infile) or {}
             universities = list(universities.items())
             universities.sort(key=lambda i: (i[1].get("rank"), i[0]))
             universities = dict(universities)
-            logger.info(f"Loaded legacy universities lookup from file '{filepath}'.")
+            logger.info(f"Loaded legacy universities data from file '{filepath}'.")
         except (KeyError, FileNotFoundError):
             logger.warning("No legacy information for universities.")
         with MetaSaver(doc=doc, db=db) as saver:
             saver["universities"] = universities
-        logger.info("Saved universities lookup in database.")
+        logger.info("Saved universities data in database.")
+
+    ### As of version 10.1.0, the subject terms data is in the database.
+    doc = db["account"]
+    if "subject_terms" not in doc:
+        subject_terms = []
+        # Load the legacy site SUBJECT_TERMS_FILE, if any.
+        try:
+            filepath = os.path.join(constants.SITE_DIR, settings["SUBJECT_TERMS_FILE"])
+            with open(filepath) as infile:
+                subject_terms = yaml.safe_load(infile) or []
+            logger.info(f"Loaded legacy subject terms data from file '{filepath}'.")
+        except (KeyError, FileNotFoundError):
+            logger.warning("No legacy information for subject terms.")
+        with MetaSaver(doc=doc, db=db) as saver:
+            saver["subject_terms"] = subject_terms
+        logger.info("Saved subject terms data in database.")
 
 
 def migrate_text_documents(db):
@@ -725,11 +741,18 @@ class Account(RequestHandler):
     def get(self):
         self.check_admin()
         # Convert university data to CSV file for easier editing.
-        output = io.StringIO()
-        writer = csv.writer(output, dialect=csv.unix_dialect, quoting=csv.QUOTE_MINIMAL)
+        universities = io.StringIO()
+        writer = csv.writer(universities, dialect=csv.unix_dialect, quoting=csv.QUOTE_MINIMAL)
         for key, value in settings["UNIVERSITIES"].items():
             writer.writerow((key, value["name"], value["rank"]))
-        self.render("admin/account.html", universities=output.getvalue().strip())
+        # Convert subject terms data to CSV file for easier editing.
+        subject_terms = io.StringIO()
+        writer = csv.writer(subject_terms, dialect=csv.unix_dialect, quoting=csv.QUOTE_MINIMAL)
+        for item in settings["SUBJECT_TERMS"]:
+            writer.writerow((item["code"], item["term"], item["level"]))
+        self.render("admin/account.html",
+                    universities=universities.getvalue().strip(),
+                    subject_terms=subject_terms.getvalue().strip())
 
     @tornado.web.authenticated
     def post(self):
@@ -765,21 +788,6 @@ class Account(RequestHandler):
             saver["default_country_code"] = self.get_argument(
                 "default_country_code", "SE"
             )
-            indata = self.get_argument("universities", "").strip()
-            dialect = csv.Sniffer().sniff(indata)
-            with io.StringIO(indata) as infile:
-                reader = csv.DictReader(infile,
-                                        fieldnames=("key", "name", "rank"),
-                                        dialect=dialect)
-                universities = {}
-                for item in reader:
-                    name = item.get("name", item["key"])
-                    try:
-                        rank = int(item["rank"])
-                    except (KeyError, ValueError, TypeError):
-                        rank = 0
-                    universities[item["key"]] = dict(name=name, rank=rank)
-            saver["universities"] = universities
             try:
                 saver["login_max_age_days"] = max(1, int(self.get_argument(
                     "login_max_age_days", "14")))
@@ -795,6 +803,46 @@ class Account(RequestHandler):
                     "min_password_length", "8")))
             except (ValueError, TypeError):
                 pass
+            # Interpret universities CSV format.
+            indata = self.get_argument("universities", "").strip()
+            dialect = csv.Sniffer().sniff(indata)
+            with io.StringIO(indata) as infile:
+                reader = csv.DictReader(infile,
+                                        fieldnames=("key", "name", "rank"),
+                                        dialect=dialect)
+                universities = {}
+                for item in reader:
+                    name = item.get("name", item["key"])
+                    try:
+                        rank = int(item["rank"])
+                    except (KeyError, ValueError, TypeError):
+                        rank = 0
+                    universities[item["key"]] = dict(name=name, rank=rank)
+            saver["universities"] = universities
+            # Interpret subject terms CSV format.
+            indata = self.get_argument("subject_terms", "").strip()
+            dialect = csv.Sniffer().sniff(indata)
+            with io.StringIO(indata) as infile:
+                reader = csv.DictReader(infile,
+                                        fieldnames=("code", "term", "level"),
+                                        dialect=dialect)
+                subject_terms = []
+                subject_terms_codes = set()
+                for item in reader:
+                    try:
+                        item["code"] = max(0, int(item["code"]))
+                    except (KeyError, ValueError, TypeError):
+                        continue
+                    if not item.get("term"):
+                        continue
+                    try:
+                        item["level"] = min(10, max(0, int(item["level"])))
+                    except (KeyError, ValueError, TypeError):
+                        item["level"] = 0
+                    if item["code"] not in subject_terms_codes:
+                        subject_terms.append(item)
+                        subject_terms_codes.add(item["code"])
+            saver["subject_terms"] = subject_terms
         orderportal.config.load_settings_from_db(self.db)
         self.set_message_flash("Saved account configuration.")
         self.see_other("admin_account")

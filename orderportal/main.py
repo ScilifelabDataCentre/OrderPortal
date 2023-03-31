@@ -343,7 +343,7 @@ def main():
         url(
             r"/site/([^/]+)",
             tornado.web.StaticFileHandler,
-            {"path": settings["SITE_STATIC_DIR"]},
+            {"path": constants.SITE_STATIC_DIR},
             name="site",
         ),
         url(r"/api/v1/(.*)", orderportal.home.NoSuchEntityApiV1),
@@ -357,8 +357,8 @@ def main():
         cookie_secret=settings["COOKIE_SECRET"],
         xsrf_cookies=True,
         ui_modules=orderportal.uimodules,
-        template_path=os.path.join(constants.ROOT, "templates"),
-        static_path=os.path.join(constants.ROOT, "static"),
+        template_path=constants.TEMPLATE_DIR,
+        static_path=constants.STATIC_DIR,
         login_url=(settings["BASE_URL_PATH_PREFIX"] or "") + "/login",
     )
 

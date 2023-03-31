@@ -10,7 +10,7 @@ import sys
 import pycountry
 
 
-__version__ = "10.1.0"
+__version__ = "10.1.1"
 
 
 class Constants:
@@ -19,7 +19,12 @@ class Constants:
 
     VERSION = __version__
     SOURCE_URL = "https://github.com/pekrau/OrderPortal"
-    ROOT = os.path.dirname(os.path.abspath(__file__))
+
+    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+    TEMPLATE_DIR = os.path.normpath(os.path.join(ROOT_DIR, "templates"))
+    STATIC_DIR = os.path.normpath(os.path.join(ROOT_DIR, "static"))
+    SITE_DIR = os.path.normpath(os.path.join(ROOT_DIR, "../site"))
+    SITE_STATIC_DIR = os.path.normpath(os.path.join(ROOT_DIR, "../site/static"))
 
     PYTHON_VERSION = ".".join([str(i) for i in sys.version_info[0:3]])
     PYTHON_URL = "https://www.python.org/"
@@ -328,9 +333,7 @@ DEFAULT_SETTINGS = dict(
     DATABASE_PASSWORD=None,
     COOKIE_SECRET=None,
     PASSWORD_SALT=None,
-    SETTINGS_FILE=None,
-    SITE_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site")),
-    SITE_STATIC_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site/static")),
+    SETTINGS_FILE=None,         # This value is set on startup.
     SITE_NAME="OrderPortal",
     SITE_FAVICON="orderportal32.png",
     SITE_NAVBAR_ICON="orderportal32.png",
@@ -340,7 +343,6 @@ DEFAULT_SETTINGS = dict(
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
     ORDER_MESSAGES_FILE="order_messages.yaml",
-    SUBJECT_TERMS_FILE="subject_terms.yaml",
     ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",
     ORDER_IDENTIFIER_FIRST=1,
     MAIL_SERVER=None,  # If not set, then no emails can be sent.

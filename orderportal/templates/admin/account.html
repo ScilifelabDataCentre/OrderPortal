@@ -175,36 +175,6 @@
   </div>
 
   <div class="form-group">
-    <label class="control-label col-md-2" for="universities">
-      Universities</label>
-    <div class="col-md-8">
-      <textarea name="universities" id="universities" rows="8"
-                class="form-control">{{ universities }}</textarea>
-      <span class="help-block">
-        List of universities to select from. One university per line,
-        three items in CSV format.
-        <ol>
-          <li>
-            The first item on each line is <strong>required</strong>.
-            It will be the actual value stored with each account. The
-            recommended value is the unambiguous abbrevation of the
-            university.
-          </li>
-          <li>
-            The second item is the name of the university that is
-            displayed. If not given, the first item will be used.
-          </li>
-          <li>
-            The third item is the numerical rank of the item. This is
-            only used to sort the items for display in the selection
-            list. in If not given, it will be set to 0 (zero).
-          </li>
-        </ol>
-        <br>
-    </div>
-  </div>
-
-  <div class="form-group">
     <label class="control-label col-md-2" for="login_max_age_days">
       Max login session</label>
     <div class="col-md-10">
@@ -254,6 +224,65 @@
         The minimum length of the password for an account, in number
         of characters. Must be 6 or higher.
       </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="universities">
+      Universities</label>
+    <div class="col-md-8">
+      <textarea name="universities" id="universities" rows="8"
+                class="form-control">{{ universities }}</textarea>
+      <span class="help-block">
+        List of universities to select from. One university per line,
+        three items in CSV format.
+        <ol>
+          <li>
+            The first item on each line is <strong>required</strong>.
+            It will be the actual value stored with each account. The
+            recommended value is the unambiguous abbrevation of the
+            university.
+          </li>
+          <li>
+            The second item is the name of the university that is
+            displayed. If not given, the first item will be used.
+          </li>
+          <li>
+            The third item is the numerical rank of the item. This is
+            only used to sort the items for display in the selection
+            list. If not given, it will be set to 0 (zero).
+          </li>
+        </ol>
+        <br>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="subject_terms">
+      Subject terms</label>
+    <div class="col-md-8">
+      <textarea name="subject_terms" id="subject_terms" rows="8"
+                class="form-control">{{ subject_terms }}</textarea>
+      <span class="help-block">
+        List of subject terms to select from. One subject term per line,
+        three items in CSV format.
+        <ol>
+          <li>
+            The first item on each line is <strong>required</strong>.
+            It is the code that represents the term; a non-negative integer.
+          </li>
+          <li>
+            The second item on each line is <strong>required</strong>.
+            It is the actual literal term.
+          </li>
+          <li>
+            The third item is the level of the term; a non-negative
+            integer. This allows for hierarchical grouping of the
+            terms. This only used for the display of the items in the
+            selection list. If not given, it will be set to 0 (zero).
+          </li>
+        </ol>
+        <br>
     </div>
   </div>
 
