@@ -108,6 +108,29 @@ class FormLink(tornado.web.UIModule):
         return f"""<a href="{url}">{label}</a>"""
 
 
+class ReportLink(tornado.web.UIModule):
+    "HTML for a link or download button for a report."
+
+    def render(self, report):
+        url = self.handler.reverse_url("report", report["_id"])
+        if report.get("inline"):
+            a = hg.A(
+                hg.STRONG(report["name"]),
+                href=url
+            )
+        else:
+            a = hg.A(
+                hg.SPAN(_class="glyphicon glyphicon-download-alt"),
+                " ",
+                report["name"],
+                href=url,
+                role="button",
+                _class="btn btn-xs btn-primary",
+                title="Download"
+            )
+        return hg.render(a, {})
+
+
 class LogsLink(tornado.web.UIModule):
     "HTML for a link to the logs of an entity."
 

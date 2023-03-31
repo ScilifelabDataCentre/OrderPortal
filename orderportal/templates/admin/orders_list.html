@@ -63,14 +63,14 @@
 
   <div class="form-group">
     <label class="control-label col-md-2" for="tags">
-      {{ terminology('Orders') }} list tags</label>
+      {{ terminology('Orders') }} list {{ terminology('tags') }}</label>
     <div class="col-md-10">
       <div class="checkbox">
         <label>
           <input type="checkbox" id="tags" name="tags" value="yes"
                  {{ settings['ORDERS_LIST_TAGS'] and 'checked' or '' }}>
-          Yes, display the tags for an {{ terminology('order') }} in the
-          {{ terminology('orders') }} list.
+          Yes, display the {{ terminology('tags') }} for an
+          {{ terminology('order') }} in the {{ terminology('orders') }} list.
         </label>
       </div>
     </div>
@@ -89,6 +89,11 @@
         </label>
       </div>
       {% end %}
+      <span class="help-block">
+        For each checked status, a column will be displayed in the
+        {{ terminology('orders') }} list showing the date of the
+        transition into the status.
+      </span>
     </div>
   </div>
 
@@ -113,20 +118,20 @@
   </div>
 
   <div class="form-group">
-    <label class="control-label col-md-2" for="orders_filter_field_delete">
-      Delete {{ terminology('orders') }} filter field(s)</label>
+    <label class="control-label col-md-2" for="orders_filter_field_remove">
+      Remove {{ terminology('orders') }} filter field(s)</label>
     <div class="col-md-10">
       {% for f in settings['ORDERS_FILTER_FIELDS'] %}
       <div class="checkbox">
         <label>
-          <input type="checkbox" id="orders_filter_field_delete"
-                 name="orders_filter_field_delete" value="{{ f['identifier'] }}">
+          <input type="checkbox" id="orders_filter_field_remove"
+                 name="orders_filter_field_remove" value="{{ f['identifier'] }}">
           {{ f.get('label') or f['identifier'] }}
         </label>
       </div>
       {% end %}
       <span class="help-block">
-        Check the current orders filters to delete.
+        Check the current orders filters to remove.
       </span>
     </div>
   </div>
@@ -166,7 +171,7 @@ values:
   </div>
 
   <div class="form-group">
-    <label class="control-label col-md-2"for="orders_most_recent">
+    <label class="control-label col-md-2" for="orders_most_recent">
       Max most recent</label>
     <div class="col-md-10">
       <div class="row">

@@ -30,7 +30,8 @@
         </div>
         <p class="help-block">
           {% if settings.get('ORDER_TAGS') %}
-          Searches {{ terminology('order') }} title, identifier and tags.
+          Searches {{ terminology('order') }} title, identifier and 
+          {{ terminology('tags') }}.
           {% else %}
           Searches {{ terminology('order') }} title and identifier.
           {% end %}

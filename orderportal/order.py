@@ -311,7 +311,7 @@ class OrderSaver(saver.Saver):
                 if isinstance(value, str):
                     value = value.replace("\r", "")
 
-            # Set tag, if auto_tags for field.
+            # Set tag if 'auto_tags' is true for the field.
             if (
                 settings["ORDER_TAGS"]
                 and field["type"] in [constants.STRING, constants.SELECT]

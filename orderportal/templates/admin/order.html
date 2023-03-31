@@ -32,13 +32,13 @@
 
   <div class="form-group">
     <label class="control-label col-md-2" for="tags">
-      {{ terminology('Order') }} tags</label>
+      {{ terminology('Order') }} {{ terminology('tags') }}</label>
     <div class="col-md-10">
       <div class="checkbox">
         <label>
           <input type="checkbox" id="tags" name="tags" value="yes"
                  {{ settings['ORDER_TAGS'] and 'checked' or '' }}>
-          Yes, {{ terminology('orders') }} can be assigned tags.
+          Yes, {{ terminology('orders') }} can be assigned {{ terminology('tags') }}.
         </label>
       </div>
     </div>
@@ -46,13 +46,18 @@
 
   <div class="form-group">
     <label class="control-label col-md-2" for="user_tags">
-      User view {{ terminology('order') }} tags</label>
+      User {{ terminology('order') }} {{ terminology('tags') }}</label>
     <div class="col-md-10">
       <div class="checkbox">
         <label>
           <input type="checkbox" id="user_tags" name="user_tags" value="yes"
                  {{ settings['ORDER_USER_TAGS'] and 'checked' or '' }}>
-          Yes, the users can see the tags assigned to the {{ terminology('orders') }}.
+          Yes, the users can see and edit the {{ terminology('tags') }}
+          assigned to the {{ terminology('orders') }}.
+          <br>
+          However, staff may assign {{ terminology('tags') }} having a
+          namespace prefix, e.g. <code>project_id:P12345</code>; these
+          cannot be edited by the user.
         </label>
       </div>
     </div>
@@ -173,8 +178,8 @@
         </tbody>
       </table>
       <span class="help-block">
-        Certain built-in terms can be changed in the web interface. Give the
-        terms to use. Character case does not matter.
+        Certain terms used in the web interface can be changed. Give
+        the terms to use. Character case does not matter.
       </span>
     </div>
   </div>

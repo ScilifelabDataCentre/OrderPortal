@@ -1,7 +1,9 @@
 "Admin pages."
 
 import copy
+import csv
 import email.message
+import io
 import json
 import logging
 import os
@@ -165,8 +167,8 @@ def migrate_meta_documents(db):
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
         logger.info("Saved updated order transitions to database.")
 
-    # As of version 7.0.3, items to show in the order list
-    # are stored in the database, not in the settings file.
+    ### As of version 7.0.3, items to show in the order list
+    ### are stored in the database, not in the settings file.
     if "orders_list" not in db:
         with MetaSaver(db=db) as saver:
             saver.set_id("orders_list")
@@ -181,14 +183,14 @@ def migrate_meta_documents(db):
             saver["default_order_sort"] = "desc"
         logger.info("Saved orders list settings to database.")
 
-    # Re-introduce order list filters, this time separately from orders list fields.
+    ### Re-introduce order list filters, this time separately from orders list fields.
     doc = db["orders_list"]
     if "filters" not in doc:
         with MetaSaver(doc=doc, db=db) as saver:
             saver["filters"] = []
 
-    # As of version 9.1.0, settings pertaining to the account entities
-    # are stored in the database, not the settings file.
+    ### As of version 9.1.0, settings pertaining to the account entities
+    ### are stored in the database, not the settings file.
     if "account" not in db:
         with MetaSaver(db=db) as saver:
             saver.set_id("account")
@@ -213,9 +215,9 @@ def migrate_meta_documents(db):
             saver["default_country_code"] = settings.get("DEFAULT_COUNTRY_CODE", "SE")
         logger.info("Saved account settings to database.")
 
-    # As of version 9.1.0, many settings pertaining to order entities
-    # are stored on the database, not the settings file.
-    # Transfer the settings to the existing "order" document.
+    ### As of version 9.1.0, many settings pertaining to order entities
+    ### are stored on the database, not the settings file.
+    ### Transfer the settings to the existing "order" document.
     doc = db["order"]
     if "create_user" not in doc:
         with MetaSaver(doc=doc, db=db) as saver:
@@ -231,8 +233,8 @@ def migrate_meta_documents(db):
             saver["terminology"] = settings.get("TERMINOLOGY", {})
         logger.info("Saved more order settings to database.")
 
-    # As of version 9.1.0, PREPARATION is hard-wired as the initial status.
-    # Remove the obsolete item "initial" from the order statuses.
+    ### As of version 9.1.0, PREPARATION is hard-wired as the initial status.
+    ### Remove the obsolete item "initial" from the order statuses.
     doc = db["order_statuses"]
     statuses = doc["statuses"]
     if "initial" in statuses[0]:
@@ -240,6 +242,25 @@ def migrate_meta_documents(db):
             for status in statuses:
                 status.pop("initial", None)
         logger.info("Updated order statuses to remove 'initial'.")
+
+    ### As of version 10.1.0, the universities lookup is in the database.
+    doc = db["account"]
+    if "universities" not in doc:
+        universities = {}
+        # Load the legacy site UNIVERSITES_FILE, if any.
+        try:
+            filepath = os.path.join(settings["SITE_DIR"], settings["UNIVERSITIES_FILE"])
+            with open(filepath) as infile:
+                universities = yaml.safe_load(infile) or {}
+            universities = list(universities.items())
+            universities.sort(key=lambda i: (i[1].get("rank"), i[0]))
+            universities = dict(universities)
+            logger.info(f"Loaded legacy universities lookup from file '{filepath}'.")
+        except (KeyError, FileNotFoundError):
+            logger.warning("No legacy information for universities.")
+        with MetaSaver(doc=doc, db=db) as saver:
+            saver["universities"] = universities
+        logger.info("Saved universities lookup in database.")
 
 
 def migrate_text_documents(db):
@@ -636,8 +657,8 @@ class OrdersList(RequestHandler):
             saver["fields"] = self.get_argument("fields", "").strip().split()
             # Lookup of filters with identifier as key.
             filters = dict([(f["identifier"], f) for f in doc["filters"]])
-            # Delete specified fields.
-            for value in self.get_arguments("orders_filter_field_delete"):
+            # Remove specified fields.
+            for value in self.get_arguments("orders_filter_field_remove"):
                 filters.pop(value, None)
             # Add a specified field.
             try:
@@ -703,7 +724,12 @@ class Account(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin/account.html")
+        # Convert university data to CSV file for easier editing.
+        output = io.StringIO()
+        writer = csv.writer(output, dialect=csv.unix_dialect, quoting=csv.QUOTE_MINIMAL)
+        for key, value in settings["UNIVERSITIES"].items():
+            writer.writerow((key, value["name"], value["rank"]))
+        self.render("admin/account.html", universities=output.getvalue().strip())
 
     @tornado.web.authenticated
     def post(self):
@@ -739,6 +765,36 @@ class Account(RequestHandler):
             saver["default_country_code"] = self.get_argument(
                 "default_country_code", "SE"
             )
+            indata = self.get_argument("universities", "").strip()
+            dialect = csv.Sniffer().sniff(indata)
+            with io.StringIO(indata) as infile:
+                reader = csv.DictReader(infile,
+                                        fieldnames=("key", "name", "rank"),
+                                        dialect=dialect)
+                universities = {}
+                for item in reader:
+                    name = item.get("name", item["key"])
+                    try:
+                        rank = int(item["rank"])
+                    except (KeyError, ValueError, TypeError):
+                        rank = 0
+                    universities[item["key"]] = dict(name=name, rank=rank)
+            saver["universities"] = universities
+            try:
+                saver["login_max_age_days"] = max(1, int(self.get_argument(
+                    "login_max_age_days", "14")))
+            except (ValueError, TypeError):
+                pass
+            try:
+                saver["login_max_failures"] = max(1, int(self.get_argument(
+                    "login_max_failures", "6")))
+            except (ValueError, TypeError):
+                pass
+            try:
+                saver["min_password_length"] = max(1, int(self.get_argument(
+                    "min_password_length", "8")))
+            except (ValueError, TypeError):
+                pass
         orderportal.config.load_settings_from_db(self.db)
         self.set_message_flash("Saved account configuration.")
         self.see_other("admin_account")

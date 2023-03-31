@@ -548,3 +548,14 @@ class ReportLogs(ReportMixin, RequestHandler):
             return
         title = f"Logs for report '{report['name'] or '[no name]'}'"
         self.render("logs.html", title=title, logs=self.get_logs(report["_id"]))
+
+
+class Reports(RequestHandler):
+    "List of reports."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_staff()
+        reports = [
+            row.doc for row in self.db.view("report", "modified", descending=True, include_docs=True)]
+        self.render("report/list.html", reports=reports)

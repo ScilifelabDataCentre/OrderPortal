@@ -10,7 +10,7 @@ import sys
 import pycountry
 
 
-__version__ = "10.0.2"
+__version__ = "10.1.0"
 
 
 class Constants:
@@ -248,7 +248,7 @@ class Constants:
     )
 
     # Terminology: terms that can be translated to other terms.
-    TERMINOLOGY_TERMS = ("order", "orders")
+    TERMINOLOGY_TERMS = ("order", "orders", "tag", "tags")
 
     # Report statuses; hard-wired!
     # REVIEW = "review" Already defined above.
@@ -328,7 +328,6 @@ DEFAULT_SETTINGS = dict(
     DATABASE_PASSWORD=None,
     COOKIE_SECRET=None,
     PASSWORD_SALT=None,
-    MIN_PASSWORD_LENGTH=8,
     SETTINGS_FILE=None,
     SITE_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site")),
     SITE_STATIC_DIR=os.path.normpath(os.path.join(constants.ROOT, "../site/static")),
@@ -341,10 +340,7 @@ DEFAULT_SETTINGS = dict(
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
     ORDER_MESSAGES_FILE="order_messages.yaml",
-    UNIVERSITIES_FILE="swedish_universities.yaml",
     SUBJECT_TERMS_FILE="subject_terms.yaml",
-    LOGIN_MAX_AGE_DAYS=14,  # Max age of login session in a browser.
-    LOGIN_MAX_FAILURES=6,  # After this number of fails, the account is disabled.
     ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",
     ORDER_IDENTIFIER_FIRST=1,
     MAIL_SERVER=None,  # If not set, then no emails can be sent.
