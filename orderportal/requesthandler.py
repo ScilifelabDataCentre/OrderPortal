@@ -301,13 +301,13 @@ class RequestHandler(tornado.web.RequestHandler):
         else:
             raise tornado.web.HTTPError(404, reason=reason)
 
-    def get_order(self, iuid):
+    def get_order(self, identifier_iuid):
         "Get the order for the identifier or IUID."
         try:  # First try order identifier.
-            order = self.get_entity_view("order", "identifier", iuid)
+            order = self.get_entity_view("order", "identifier", identifier_iuid)
         except tornado.web.HTTPError:
             # Next try order doc IUID.
-            order = self.get_entity(iuid, doctype=constants.ORDER)
+            order = self.get_entity(identifier_iuid, doctype=constants.ORDER)
         return order
 
     def get_form(self, iuid):
@@ -315,8 +315,8 @@ class RequestHandler(tornado.web.RequestHandler):
         return self.get_entity(iuid, doctype=constants.FORM)
 
     def lookup_form(self, iuid):
-        """Lookup the form by its IUID.
-        Sets up a cached dictionary 'lookup_forms' when called the first time.
+        """Lookup the form by its IUID. When called the first time,
+        set up a cached dictionary 'lookup_forms' containing all forms.
         """
         try:
             return self.lookup_forms.get(iuid)

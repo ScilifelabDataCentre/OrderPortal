@@ -26,6 +26,24 @@
 {% end %}
 
 {% block content %}
+<div class="row" style="padding: 0.5em;">
+  <div class="col-md-9 col-md-offset-2">
+    <form action="{{ reverse_url('reports') }}" name="refresh" id="refresh"
+          method="GET" class="form-inline" role="form">
+      <span class="glyphicon glyphicon-filter"></span>
+      <div class="form-group">
+        <label for="form_id">Filter by</label>
+      <div class="form-group">
+        <select name="recent" class="form-control refresh">
+          <option value="true" {{ filter.get('recent') and 'selected' or '' }}>{{ settings['DISPLAY_ORDERS_MOST_RECENT'] }} most recent
+          </option>
+          <option value="false" {{ not filter.get('recent') and 'selected' or '' }}>All ({{ all_count }})</option>
+        </select>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="row">
   <div class="col-md-12">
     <table id="reports" class="table table-striped table-condensed">
@@ -34,8 +52,8 @@
           <th>Report</th>
           <th>Order</th>
           <th>Owner</th>
-          {% if settings['ORDERS_LIST_TAGS'] %}
-          <th width="5%">Tags</th>
+          {% if settings['ORDER_TAGS'] %}
+          <th width="5%">{{ terminology('Tags') }}</th>
           {% end %}
           <th>Status</th>
           <th>Modified</th>
@@ -45,10 +63,10 @@
         {% for report in reports %}
         <tr>
           <td>{% module ReportLink(report) %}</td>
-          <td></td>
+          <td>{% module OrderLink(report['order']) %}</td>
           <td>{% module AccountLink(email=report['owner'], name=True) %}</td>
-          {% if settings['ORDERS_LIST_TAGS'] %}
-          <td></td>
+          {% if settings['ORDER_TAGS'] %}
+          <td>{% module Tags(report['order'].get('tags')) %}</td>
           {% end %}
           <td>{% module Status(report['status']) %}</td>
           <td class="localtime nobr">{{ report['modified'] }}</td>
@@ -61,6 +79,14 @@
 {% end %} {# block content #}
 
 {% block javascript_code %}
+<script>
+$(function() {
+  $(".refresh").change(function () {
+    $("#refresh").submit();
+  });
+});
+</script>
+
 <script>
 $(function() {
   $("#reports").DataTable( {

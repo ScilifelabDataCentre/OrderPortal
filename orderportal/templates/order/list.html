@@ -26,7 +26,7 @@
 {% block content %}
 <div class="row" style="padding: 0.5em;">
   <div class="col-md-10 col-md-offset-1">
-    <form action="{{ reverse_url('orders', **filter) }}" name="refresh" id="refresh"
+    <form action="{{ reverse_url('orders') }}" name="refresh" id="refresh"
           method="GET" class="form-inline" role="form">
       <span class="glyphicon glyphicon-filter"></span>
       <div class="form-group">
@@ -127,7 +127,7 @@
           <td>{% module NoneStr(accounts_gender[order['owner']], undef='-') %}</td>
           {% end %}
           {% if settings['ORDERS_LIST_TAGS'] %}
-          <td>{% module Tags(order.get('tags', [])) %}</td>
+          <td>{% module Tags(order.get('tags')) %}</td>
           {% end %}
           {% for f in settings['ORDERS_LIST_FIELDS'] %}
           <td>

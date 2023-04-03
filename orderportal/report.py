@@ -523,12 +523,6 @@ class ReportReview(ReportMixin, RequestHandler):
         except (KeyError, ValueError) as error:
             self.see_other("order", order["_id"], error=error)
             return
-        # if (
-        #     report["status"] != constants.REVIEW
-        #     and report["status"] != original_status
-        #     and self.current_user["email"] != report["owner"]
-        # ):
-        #     self.send_owner_message(report, order)
         self.see_other("order", order["_id"])
 
 
@@ -556,6 +550,19 @@ class Reports(RequestHandler):
     @tornado.web.authenticated
     def get(self):
         self.check_staff()
-        reports = [
-            row.doc for row in self.db.view("report", "modified", descending=True, include_docs=True)]
-        self.render("report/list.html", reports=reports)
+        # Count all reports.
+        view = self.db.view("report", "order", reduce=True)
+        try:
+            r = list(view)[0]
+        except IndexError:
+            all_count = 0
+        else:
+            all_count = r.value
+        kwargs = dict(descending=True, include_docs=True)
+        filter = dict(recent=utils.to_bool(self.get_argument("recent", True)))
+        if filter["recent"]:
+            kwargs["limit"] = settings["DISPLAY_ORDERS_MOST_RECENT"]
+        reports = [row.doc for row in self.db.view("report", "modified", **kwargs)]
+        for report in reports:
+            report["order"] = self.get_order(report["order"])
+        self.render("report/list.html", reports=reports, filter=filter, all_count=all_count)
