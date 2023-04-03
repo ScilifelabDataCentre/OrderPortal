@@ -354,20 +354,20 @@ DEFAULT_SETTINGS = dict(
     MAIL_USERNAME=None,
     MAIL_PASSWORD=None,
     MAIL_REPLY_TO=None,
-    DISPLAY_MENU_LIGHT=False,
-    DISPLAY_MENU_ITEM_URL=None,
-    DISPLAY_MENU_ITEM_TEXT=None,
-    DISPLAY_DEFAULT_PAGE_SIZE=25,  # Number of paged items in a table.
-    DISPLAY_MAX_PENDING_ACCOUNTS=10,  # Max number in home page for admin and staff.
-    DISPLAY_DEFAULT_MAX_LOG=20,  # Max number of log items displayed.
+    # DISPLAY_MENU_LIGHT=False,
+    # DISPLAY_MENU_ITEM_URL=None,
+    # DISPLAY_MENU_ITEM_TEXT=None,
+    # DISPLAY_DEFAULT_PAGE_SIZE=25,  # Number of paged items in a table.
+    # DISPLAY_MAX_PENDING_ACCOUNTS=10,  # Max number in home page for admin and staff.
+    # DISPLAY_DEFAULT_MAX_LOG=20,  # Max number of log items displayed.
     DISPLAY_NEWS=True,
     DISPLAY_MAX_NEWS=4,
     DISPLAY_EVENTS=True,
-    DISPLAY_MENU_INFORMATION=True,
-    DISPLAY_MENU_DOCUMENTS=True,
-    DISPLAY_MENU_CONTACT=True,
-    DISPLAY_MENU_ABOUT_US=True,
-    DISPLAY_TEXT_MARKDOWN_NOTATION_INFO=True,
+    # DISPLAY_MENU_INFORMATION=True,
+    # DISPLAY_MENU_DOCUMENTS=True,
+    # DISPLAY_MENU_CONTACT=True,
+    # DISPLAY_MENU_ABOUT_US=True,
+    # DISPLAY_TEXT_MARKDOWN_NOTATION_INFO=True,
 )
 
 # Settings to be modified by 'settings.yaml' file, by computed values, or from database.

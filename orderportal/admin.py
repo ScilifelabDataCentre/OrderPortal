@@ -84,7 +84,7 @@ def migrate_meta_documents(db):
             )
             with open(filepath) as infile:
                 legacy_statuses = yaml.safe_load(infile)
-            logger.info(f"Loaded legacy order statuses from file '{filepath}'.")
+            logger.info(f"Loaded legacy order status configuration from file '{filepath}'.")
         except KeyError:
             logger.warning(f"Defaults used for order statuses.")
         except FileNotFoundError as error:
@@ -113,7 +113,7 @@ def migrate_meta_documents(db):
             )
             with open(filepath) as infile:
                 legacy_transitions = yaml.safe_load(infile)
-            logger.info(f"Loaded legacy order transitions from file '{filepath}'.")
+            logger.info(f"Loaded legacy order transitions configuration from file '{filepath}'.")
         except KeyError:
             logger.warning(f"Defaults used for order transitions.")
         except FileNotFoundError as error:
@@ -143,7 +143,7 @@ def migrate_meta_documents(db):
             saver.set_id("order_statuses")
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
-        logger.info("Saved order statuses to database.")
+        logger.info("Saved order statuses configuration to database.")
 
     ### As of version 7.0, the layout of the transitions data ha been changed
     ### to a dict having (key: source status, value: dict of target statues
@@ -165,7 +165,7 @@ def migrate_meta_documents(db):
         with MetaSaver(doc=doc, db=db) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
-        logger.info("Saved updated order transitions to database.")
+        logger.info("Saved updated order transitions configuration to database.")
 
     ### As of version 7.0.3, items to show in the order list
     ### are stored in the database, not in the settings file.
@@ -181,7 +181,7 @@ def migrate_meta_documents(db):
             saver["max_most_recent"] = settings.get("DISPLAY_ORDERS_MOST_RECENT", 500)
             saver["default_order_column"] = "modified"
             saver["default_order_sort"] = "desc"
-        logger.info("Saved orders list settings to database.")
+        logger.info("Saved orders list configuration to database.")
 
     ### Re-introduce order list filters, this time separately from orders list fields.
     doc = db["orders_list"]
@@ -213,7 +213,7 @@ def migrate_meta_documents(db):
                 "ACCOUNT_FUNDER_INFO_SUBJECT", True
             )
             saver["default_country_code"] = settings.get("DEFAULT_COUNTRY_CODE", "SE")
-        logger.info("Saved account settings to database.")
+        logger.info("Saved account configuration to database.")
 
     ### As of version 9.1.0, many settings pertaining to order entities
     ### are stored on the database, not the settings file.
@@ -231,7 +231,7 @@ def migrate_meta_documents(db):
             autopopulate = settings.get("ORDER_AUTOPOPULATE", {}) or {}
             saver["autopopulate"] = dict([(v, k) for k, v in autopopulate.items()])
             saver["terminology"] = settings.get("TERMINOLOGY", {})
-        logger.info("Saved more order settings to database.")
+        logger.info("Saved order configuration to database.")
 
     ### As of version 9.1.0, PREPARATION is hard-wired as the initial status.
     ### Remove the obsolete item "initial" from the order statuses.
@@ -241,7 +241,7 @@ def migrate_meta_documents(db):
         with MetaSaver(doc=doc, db=db) as saver:
             for status in statuses:
                 status.pop("initial", None)
-        logger.info("Updated order statuses to remove 'initial'.")
+        logger.info("Updated order statuses configuration to remove 'initial'.")
 
     ### As of version 10.1.0, the universities data is in the database.
     doc = db["account"]
@@ -255,12 +255,12 @@ def migrate_meta_documents(db):
             universities = list(universities.items())
             universities.sort(key=lambda i: (i[1].get("rank"), i[0]))
             universities = dict(universities)
-            logger.info(f"Loaded legacy universities data from file '{filepath}'.")
+            logger.info(f"Loaded legacy universities configuration from file '{filepath}'.")
         except (KeyError, FileNotFoundError):
             logger.warning("No legacy information for universities.")
         with MetaSaver(doc=doc, db=db) as saver:
             saver["universities"] = universities
-        logger.info("Saved universities data in database.")
+        logger.info("Saved universities configuration in database.")
 
     ### As of version 10.1.0, the subject terms data is in the database.
     doc = db["account"]
@@ -271,13 +271,29 @@ def migrate_meta_documents(db):
             filepath = os.path.join(constants.SITE_DIR, settings["SUBJECT_TERMS_FILE"])
             with open(filepath) as infile:
                 subject_terms = yaml.safe_load(infile) or []
-            logger.info(f"Loaded legacy subject terms data from file '{filepath}'.")
+            logger.info(f"Loaded legacy subject terms configuration from file '{filepath}'.")
         except (KeyError, FileNotFoundError):
             logger.warning("No legacy information for subject terms.")
         with MetaSaver(doc=doc, db=db) as saver:
             saver["subject_terms"] = subject_terms
-        logger.info("Saved subject terms data in database.")
+        logger.info("Saved subject terms configuration in database.")
 
+    ### As of version 10.1.2, the display configuration data is in the database.
+    if "display" not in db:
+        with MetaSaver(db=db) as saver:
+            saver.set_id("display")
+            saver["menu_light"] = settings.get("DISPLAY_MENU_LIGHT") or False
+            saver["menu_item_text"] = settings.get("DISPLAY_MENU_TEXT")
+            saver["menu_item_url"] = settings.get("DISPLAY_MENU_URL")
+            saver["menu_information"] = settings.get("DISPLAY_MENU_INFORMATION") or True
+            saver["menu_documents"] = settings.get("DISPLAY_MENU_DOCUMENTS") or True
+            saver["menu_contact"] = settings.get("DISPLAY_MENU_CONTACT") or True
+            saver["menu_about_us"] = settings.get("DISPLAY_MENU_ABOUT_US") or True
+            saver["default_page_size"] = settings.get("DISPLAY_DEFAULT_PAGE_SIZE", 25)
+            saver["max_pending_accounts"] = settings.get("DISPLAY_MAX_PENDING_ACCOUNTS", 10)
+            saver["default_max_log"] = settings.get("DISPLAY_DEFAULT_MAX_LOG", 20)
+            saver["text_markdown_notation_info"] = settings.get("DISPLAY_TEXT_MARKDOWN_NOTATION_INFO") or True
+        logger.info("Saved display configuration in database.")
 
 def migrate_text_documents(db):
     """Create or update text documents for the current version of the system.
@@ -886,6 +902,22 @@ class AccountMessageEdit(RequestHandler):
         self.see_other("admin_account_messages")
 
 
+class Display(RequestHandler):
+    "Display and edit of display configuration."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render("admin/display.html")
+
+    @tornado.web.authenticated
+    def post(self):
+        self.check_admin()
+        doc = self.db["display"]
+        with MetaSaver(doc=doc, handler=self) as saver:
+            raise NotImplementedError
+
+
 class Database(RequestHandler):
     "Page displaying info about the database."
 
@@ -952,7 +984,7 @@ class Settings(RequestHandler):
         safe_settings[
             "ORDER_MESSAGES"
         ] = f"&lt;see file {safe_settings['ORDER_MESSAGES_FILE']}&gt;"
-        self.render("admin/settings.html", settings=safe_settings)
+        self.render("admin/settings.html", safe_settings=safe_settings)
 
 
 DEFAULT_ORDER_STATUSES = [
