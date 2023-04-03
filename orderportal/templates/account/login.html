@@ -9,9 +9,11 @@
 
 <div class="row">
   <div class="col-md-5">
-    <form action="{{ reverse_url('login') }}"
-          method="POST" role="form">
+    <form action="{{ reverse_url('login') }}" method="POST" role="form">
       {% module xsrf_form_html() %}
+      {% if next %}
+      <input type="hidden" name="next" id="name" value="{{ next }}">
+      {% end %}
       <div class="form-group">
         <label for="email">Email</label>
         <input type="text" class="form-control" name="email"

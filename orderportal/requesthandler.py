@@ -68,9 +68,7 @@ class RequestHandler(tornado.web.RequestHandler):
         return result
 
     def see_other(self, name, *args, **kwargs):
-        """Redirect to the absolute URL given by name
-        using HTTP status 303 See Other.
-        """
+        "Redirect to the absolute URL given by name using HTTP status 303 See Other."
         query = kwargs.copy()
         try:
             self.set_error_flash(str(query.pop("error")))
@@ -80,8 +78,7 @@ class RequestHandler(tornado.web.RequestHandler):
             self.set_message_flash(str(query.pop("message")))
         except KeyError:
             pass
-        url = self.absolute_reverse_url(name, *args, **query)
-        self.redirect(url, status=303)
+        self.redirect(self.absolute_reverse_url(name, *args, **query), status=303)
 
     def absolute_reverse_url(self, name, *args, **query):
         "Get the absolute URL given the handler name, arguments and query."
