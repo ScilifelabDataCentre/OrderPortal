@@ -80,7 +80,7 @@
 $(function() {
   $("#orders").DataTable( {
     "pagingType": "full_numbers",
-    "pageLength": 25,
+    "pageLength": {{ settings['DISPLAY_DEFAULT_PAGE_SIZE'] }},
     "searching": false,
     "order": [[4, "desc"]],
   });

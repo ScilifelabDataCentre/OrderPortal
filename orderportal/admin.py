@@ -282,17 +282,16 @@ def migrate_meta_documents(db):
     if "display" not in db:
         with MetaSaver(db=db) as saver:
             saver.set_id("display")
-            saver["menu_light"] = settings.get("DISPLAY_MENU_LIGHT") or False
-            saver["menu_item_text"] = settings.get("DISPLAY_MENU_TEXT")
+            saver["default_page_size"] = settings.get("DISPLAY_DEFAULT_PAGE_SIZE", 25)
+            saver["max_pending_accounts"] = settings.get("DISPLAY_MAX_PENDING_ACCOUNTS", 10)
+            saver["text_markdown_notation_info"] = settings.get("DISPLAY_TEXT_MARKDOWN_NOTATION_INFO") or True
+            saver["menu_light_theme"] = settings.get("DISPLAY_MENU_LIGHT_THEME") or False
             saver["menu_item_url"] = settings.get("DISPLAY_MENU_URL")
+            saver["menu_item_text"] = settings.get("DISPLAY_MENU_TEXT")
             saver["menu_information"] = settings.get("DISPLAY_MENU_INFORMATION") or True
             saver["menu_documents"] = settings.get("DISPLAY_MENU_DOCUMENTS") or True
             saver["menu_contact"] = settings.get("DISPLAY_MENU_CONTACT") or True
             saver["menu_about_us"] = settings.get("DISPLAY_MENU_ABOUT_US") or True
-            saver["default_page_size"] = settings.get("DISPLAY_DEFAULT_PAGE_SIZE", 25)
-            saver["max_pending_accounts"] = settings.get("DISPLAY_MAX_PENDING_ACCOUNTS", 10)
-            saver["default_max_log"] = settings.get("DISPLAY_DEFAULT_MAX_LOG", 20)
-            saver["text_markdown_notation_info"] = settings.get("DISPLAY_TEXT_MARKDOWN_NOTATION_INFO") or True
         logger.info("Saved display configuration in database.")
 
 def migrate_text_documents(db):
@@ -915,7 +914,41 @@ class Display(RequestHandler):
         self.check_admin()
         doc = self.db["display"]
         with MetaSaver(doc=doc, handler=self) as saver:
-            raise NotImplementedError
+            try:
+                saver["default_page_size"] = max(
+                    10, int(self.get_argument("default_page_size", 25))
+                )
+            except (TypeError, ValueError):
+                self.set_error_flash("Bad 'default_page_size' value; ignored.")
+            try:
+                saver["max_pending_accounts"] = max(
+                    1, int(self.get_argument("default_page_size", 10))
+                )
+            except (TypeError, ValueError):
+                self.set_error_flash("Bad 'max_pending_accounts' value; ignored.")
+            saver["menu_light_theme"] = utils.to_bool(
+                self.get_argument("menu_light_theme", False)
+            )
+            saver["text_markdown_notation_info"] = utils.to_bool(
+                self.get_argument("text_markdown_notation_info", False)
+            )
+            saver["menu_item_url"] = self.get_argument("menu_item_url", None)
+            saver["menu_item_text"] = self.get_argument("menu_item_text", None)
+            saver["menu_information"] = utils.to_bool(
+                self.get_argument("menu_information", False)
+            )
+            saver["menu_documents"] = utils.to_bool(
+                self.get_argument("menu_documents", False)
+            )
+            saver["menu_contact"] = utils.to_bool(
+                self.get_argument("menu_contact", False)
+            )
+            saver["menu_about_us"] = utils.to_bool(
+                self.get_argument("menu_about_us", False)
+            )
+        orderportal.config.load_settings_from_db(self.db)
+        self.set_message_flash("Saved display configuration.")
+        self.see_other("admin_display")
 
 
 class Database(RequestHandler):

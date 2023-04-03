@@ -54,7 +54,7 @@
   $(function() { 
     $("#messages").DataTable( {
       "pagingType": "full_numbers",
-      "pageLength": 25,
+      "pageLength": {{ settings['DISPLAY_DEFAULT_PAGE_SIZE'] }},
       "order": [[0, "desc"]],
     });
   });

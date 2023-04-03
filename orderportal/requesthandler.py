@@ -429,17 +429,13 @@ class RequestHandler(tornado.web.RequestHandler):
         "Return the group for the IUID."
         return self.get_entity(iuid, doctype=constants.GROUP)
 
-    def get_logs(self, iuid, limit=settings["DISPLAY_DEFAULT_MAX_LOG"] + 1):
+    def get_logs(self, iuid):
         "Return the event log documents for the given entity iuid."
-        kwargs = dict(
-            include_docs=True,
-            startkey=[iuid, constants.CEILING],
-            endkey=[iuid],
-            descending=True,
-        )
-        if limit > 0:
-            kwargs["limit"] = limit
-        view = self.db.view("log", "entity", **kwargs)
+        view = self.db.view("log", "entity",
+                            include_docs=True,
+                            startkey=[iuid, constants.CEILING],
+                            endkey=[iuid],
+                            descending=True)
         logs = [row.doc for row in view]
         # Ref to entity in DB is not needed in each log entry.
         for log in logs:

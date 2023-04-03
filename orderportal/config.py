@@ -155,17 +155,16 @@ def load_settings_from_db(db):
     logger.info("Loaded account configuration from database into 'settings'.")
 
     doc = db["display"]
-    settings["DISPLAY_MENU_LIGHT"] = doc["menu_light"]
-    settings["DISPLAY_MENU_ITEM_TEXT"] = doc["menu_item_text"]
+    settings["DISPLAY_DEFAULT_PAGE_SIZE"] = doc["default_page_size"]
+    settings["DISPLAY_MAX_PENDING_ACCOUNTS"] = doc["max_pending_accounts"]
+    settings["DISPLAY_TEXT_MARKDOWN_NOTATION_INFO"] = doc["text_markdown_notation_info"]
+    settings["DISPLAY_MENU_LIGHT_THEME"] = doc["menu_light_theme"]
     settings["DISPLAY_MENU_ITEM_URL"] = doc["menu_item_url"]
+    settings["DISPLAY_MENU_ITEM_TEXT"] = doc["menu_item_text"]
     settings["DISPLAY_MENU_INFORMATION"] = doc["menu_information"]
     settings["DISPLAY_MENU_DOCUMENTS"] = doc["menu_documents"]
     settings["DISPLAY_MENU_CONTACT"] = doc["menu_contact"]
     settings["DISPLAY_MENU_ABOUT_US"] = doc["menu_about_us"]
-    settings["DISPLAY_DEFAULT_PAGE_SIZE"] = doc["default_page_size"]
-    settings["DISPLAY_MAX_PENDING_ACCOUNTS"] = doc["max_pending_accounts"]
-    settings["DISPLAY_DEFAULT_MAX_LOG"] = doc["default_max_log"]
-    settings["DISPLAY_TEXT_MARKDOWN_NOTATION_INFO"] = doc["text_markdown_notation_info"]
     logger.info("Loaded display configuration from database into 'settings'.")
 
     # Lookup for the enabled statuses: key=identifier, value=item dict.

@@ -135,8 +135,8 @@ $(function() {
   });
   $("#accounts").DataTable( {
     "pagingType": "full_numbers",
-    "pageLength": 25,
-      "order": [[{% if settings['ACCOUNT_ORCID_INFO'] %}8{% else %}7{% end %}, "desc"]],
+    "pageLength": {{ settings['DISPLAY_DEFAULT_PAGE_SIZE'] }},
+    "order": [[{% if settings['ACCOUNT_ORCID_INFO'] %}8{% else %}7{% end %}, "desc"]],
   });
 });
 </script>

@@ -160,7 +160,7 @@ $(function() {
 $(function() {
   $("#orders").DataTable( {
     "pagingType": "full_numbers",
-    "pageLength": 25,
+    "pageLength": {{ settings['DISPLAY_DEFAULT_PAGE_SIZE'] }},
     "order": [[{{ order_column }}, "{{ settings['DEFAULT_ORDER_SORT'] }}"]],
   });
 });

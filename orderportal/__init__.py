@@ -359,7 +359,6 @@ DEFAULT_SETTINGS = dict(
     # DISPLAY_MENU_ITEM_TEXT=None,
     # DISPLAY_DEFAULT_PAGE_SIZE=25,  # Number of paged items in a table.
     # DISPLAY_MAX_PENDING_ACCOUNTS=10,  # Max number in home page for admin and staff.
-    # DISPLAY_DEFAULT_MAX_LOG=20,  # Max number of log items displayed.
     DISPLAY_NEWS=True,
     DISPLAY_MAX_NEWS=4,
     DISPLAY_EVENTS=True,

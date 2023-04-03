@@ -1,0 +1,186 @@
+{# Display and edit display configuration. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Display configuration{% end %}
+{% block body_title %}Display configuration{% end %}
+
+{% block action_content %}
+{% module CancelButton(reverse_url('home')) %}
+{% end %} {# block action_content #}
+
+{% block main_content %}
+<form action="{{ reverse_url('admin_display') }}" method="POST" role="form"
+      class="form-horizontal">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="default_page_size">
+      Default page size</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-3">
+          <input type="number" id="default_page_size" name="default_page_size"
+                 class="form-control" min="10"
+                 value="{{ settings['DISPLAY_DEFAULT_PAGE_SIZE'] }}">
+        </div>
+      </div>
+      <span class="help-block">
+        The default number of items in a list page table.
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="max_pending_accounts">
+      Max pending accounts displayed</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-3">
+          <input type="number" id="max_pending_accounts" name="max_pending_accounts"
+                 class="form-control" min="1"
+                 value="{{ settings['DISPLAY_MAX_PENDING_ACCOUNTS'] }}">
+        </div>
+      </div>
+      <span class="help-block">
+        The maximum number of pending accounts to display on the home page for admin.
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="text_markdown_notation_info">
+      Markdown notation info</label>
+    <div class="col-md-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="text_markdown_notation_info" name="text_markdown_notation_info"
+                 value="yes"
+                 {{ settings['DISPLAY_TEXT_MARKDOWN_NOTATION_INFO'] and 'checked' or '' }}>
+          Yes, display the information about Markdown notation at text input fields.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="menu_light_theme">
+      Menu light theme</label>
+    <div class="col-md-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="menu_light_theme" name="menu_light_theme"
+                 value="yes"
+                 {{ settings['DISPLAY_MENU_LIGHT_THEME'] and 'checked' or '' }}>
+          Yes, use the light theme for the top menu bar.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="menu_item_url">
+      Extra menu item URL</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-5">
+          <input type="text" id="menu_item_url" name="menu_item_url"
+                 class="form-control"
+                 value="{{ settings['DISPLAY_MENU_ITEM_URL'] or '' }}">
+        </div>
+      </div>
+      <span class="help-block">
+        The URL to use for an extra top menu entry.
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="menu_item_text">
+      Extra menu item text</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-5">
+          <input type="text" id="menu_item_text" name="menu_item_text"
+                 class="form-control"
+                 value="{{ settings['DISPLAY_MENU_ITEM_TEXT'] or '' }}">
+        </div>
+      </div>
+      <span class="help-block">
+        The text to use for an extra top menu entry. Requires that
+        the URL for the extra top menu entry is also set (see above).
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="menu_information">
+      'Information' menu item</label>
+    <div class="col-md-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="menu_information" name="menu_information"
+                 value="yes"
+                 {{ settings['DISPLAY_MENU_INFORMATION'] and 'checked' or '' }}>
+          Yes, display the top menu item 'Information'. The
+          information pages functionality is not affected.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="menu_documents">
+      'Documents' menu item</label>
+    <div class="col-md-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="menu_documents" name="menu_documents"
+                 value="yes"
+                 {{ settings['DISPLAY_MENU_DOCUMENTS'] and 'checked' or '' }}>
+          Yes, display the top menu item 'Documents'. The
+          documents functionality is not affected.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="menu_contact">
+      'Contact' menu item</label>
+    <div class="col-md-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="menu_contact" name="menu_contact"
+                 value="yes"
+                 {{ settings['DISPLAY_MENU_CONTACT'] and 'checked' or '' }}>
+          Yes, display the top menu item 'Contact'. The page itself is not affected.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="menu_about_us">
+      'About us' menu item</label>
+    <div class="col-md-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="menu_about_us" name="menu_about_us"
+                 value="yes"
+                 {{ settings['DISPLAY_MENU_ABOUT_US'] and 'checked' or '' }}>
+          Yes, display the top menu item 'About us'. The page itself is not affected.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-offset-2 col-md-3">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+    </div>
+  </div>
+
+</form>
+{% end %} {# block main_content #}
