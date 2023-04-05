@@ -26,10 +26,10 @@
 </div>
 
 <table class="table">
-  {% for key in sorted(settings) %}
+  {% for key in sorted(safe_settings) %}
   <tr>
     <th>{{ key }}</th>
-    <td>{% raw settings.get(key) %}</td>
+    <td>{% raw safe_settings.get(key) %}</td>
   </tr>
   {% end %}
 </table>

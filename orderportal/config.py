@@ -19,17 +19,16 @@ def load_settings_from_file():
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
     """
-    site_dir = settings["SITE_DIR"]
-    if not os.path.exists(site_dir):
-        raise OSError(f"The required site directory '{site_dir}' does not exist.")
-    if not os.path.isdir(site_dir):
-        raise OSError(f"The site directory path '{site_dir}' is not a directory.")
+    if not os.path.exists(constants.SITE_DIR):
+        raise OSError(f"""The required site directory '{constants.SITE_DIR}' does not exist.""")
+    if not os.path.isdir(constants.SITE_DIR):
+        raise OSError(f"""The site directory path '{constants.SITE_DIR}' is not a directory.""")
 
     # Find and read the settings file, updating the defaults.
     try:
         filepath = os.environ["ORDERPORTAL_SETTINGS"]
     except KeyError:
-        filepath = os.path.join(site_dir, "settings.yaml")
+        filepath = os.path.join(constants.SITE_DIR, "settings.yaml")
     with open(filepath) as infile:
         from_settings_file = yaml.safe_load(infile)
     settings.update(from_settings_file)
@@ -43,8 +42,8 @@ def load_settings_from_file():
     else:
         logger.setLevel(logging.INFO)
     logger.info(f"OrderPortal version {constants.VERSION}")
-    logger.info(f"ROOT: {constants.ROOT}")
-    logger.info(f"SITE_DIR: {settings['SITE_DIR']}")
+    logger.info(f"ROOT_DIR: {constants.ROOT_DIR}")
+    logger.info(f"SITE_DIR: {constants.SITE_DIR}")
     logger.info(f"settings: {settings['SETTINGS_FILE']}")
     logger.info(f"logger debug: {settings['LOGGING_DEBUG']}")
     logger.info(f"tornado debug: {settings['TORNADO_DEBUG']}")
@@ -89,27 +88,14 @@ def load_settings_from_file():
     # Read order messages YAML file.
     filepath = settings.get("ORDER_MESSAGES_FILE")
     if filepath:
-        filepath = os.path.join(settings["SITE_DIR"], filepath)
+        filepath = os.path.join(constants.SITE_DIR, filepath)
         logger.info(f"Order messages file: {filepath}")
         with open(filepath) as infile:
             settings["ORDER_MESSAGES"] = yaml.safe_load(infile) or {}
     else:
         settings["ORDER_MESSAGES"] = {}
 
-    # Read subject terms YAML file.
-    filepath = settings.get("SUBJECT_TERMS_FILE")
-    if filepath:
-        filepath = os.path.join(settings["SITE_DIR"], filepath)
-        logger.info(f"Subject terms file: {filepath}")
-        with open(filepath) as infile:
-            settings["SUBJECT_TERMS"] = yaml.safe_load(infile) or []
-    else:
-        settings["SUBJECT_TERMS"] = []
-    settings["SUBJECT_TERMS_LOOKUP"] = dict(
-        [(s["code"], s["term"]) for s in settings["SUBJECT_TERMS"]]
-    )
-
-    # Settings computable from others.
+    # Settings computed from others.
     parts = urllib.parse.urlparse(settings["BASE_URL"])
     if not settings.get("BASE_URL_PATH_PREFIX") and parts.path:
         settings["BASE_URL_PATH_PREFIX"] = parts.path.rstrip("/") or None
@@ -162,16 +148,34 @@ def load_settings_from_db(db):
     settings["ACCOUNT_FUNDER_INFO_SUBJECT"] = doc["funder_info_subject"]
     settings["ACCOUNT_DEFAULT_COUNTRY_CODE"] = doc["default_country_code"]
     settings["UNIVERSITIES"] = doc["universities"]
+    settings["SUBJECT_TERMS"] = doc["subject_terms"]
     settings["LOGIN_MAX_AGE_DAYS"] = doc.get("login_max_age_days", 14)
     settings["LOGIN_MAX_FAILURES"] = doc.get("login_max_failures", 6)
     settings["MIN_PASSWORD_LENGTH"] = doc.get("min_password_length", 8)
     logger.info("Loaded account configuration from database into 'settings'.")
 
-    # Lookup for the enabled statuses.
+    doc = db["display"]
+    settings["DISPLAY_DEFAULT_PAGE_SIZE"] = doc["default_page_size"]
+    settings["DISPLAY_MAX_PENDING_ACCOUNTS"] = doc["max_pending_accounts"]
+    settings["DISPLAY_TEXT_MARKDOWN_NOTATION_INFO"] = doc["text_markdown_notation_info"]
+    settings["DISPLAY_MENU_LIGHT_THEME"] = doc["menu_light_theme"]
+    settings["DISPLAY_MENU_ITEM_URL"] = doc["menu_item_url"]
+    settings["DISPLAY_MENU_ITEM_TEXT"] = doc["menu_item_text"]
+    settings["DISPLAY_MENU_INFORMATION"] = doc["menu_information"]
+    settings["DISPLAY_MENU_DOCUMENTS"] = doc["menu_documents"]
+    settings["DISPLAY_MENU_CONTACT"] = doc["menu_contact"]
+    settings["DISPLAY_MENU_ABOUT_US"] = doc["menu_about_us"]
+    logger.info("Loaded display configuration from database into 'settings'.")
+
+    # Lookup for the enabled statuses: key=identifier, value=item dict.
     settings["ORDER_STATUSES_LOOKUP"] = dict(
         [(s["identifier"], s) for s in settings["ORDER_STATUSES"] if s.get("enabled")]
     )
 
+    # Lookup for subject terms: key=code, value=item dict.
+    settings["SUBJECT_TERMS_LOOKUP"] = dict(
+        [(s["code"], s["term"]) for s in settings["SUBJECT_TERMS"]]
+    )
 
 def load_texts_from_db(db):
     "Load the texts from the database into settings."

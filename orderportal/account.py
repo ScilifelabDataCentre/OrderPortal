@@ -872,23 +872,28 @@ class Login(RecipientsMixin, LoginMixin, RequestHandler):
     "Login to a account account. Set a secure cookie."
 
     def get(self):
-        self.render("account/login.html")
+        self.render("account/login.html", next=self.get_argument("next", None))
 
     def post(self):
         """Login to a account account. Set a secure cookie.
         Forward to account edit page if first login.
         Log failed login attempt. Disable account if too many recent.
+        Forward to 'next' page, if given.
         """
         try:
             email = self.get_argument("email")
+        except tornado.web.MissingArgumentError:
+            self.see_other("login", error="Missing email argument.")
+            return
+        try:
             password = self.get_argument("password")
         except tornado.web.MissingArgumentError:
-            self.see_other("home", error="Missing email or password argument.")
+            self.see_other("login", error="Missing password argument.")
             return
         try:
             account = self.get_account(email)
         except ValueError as error:
-            self.see_other("home", error=error)
+            self.see_other("login", error=error)
             return
         if not account.get("status") == constants.ENABLED:
             self.see_other("home", error="Account is disabled. Contact the admin.")
@@ -924,20 +929,22 @@ class Login(RecipientsMixin, LoginMixin, RequestHandler):
             return
         self.logger.debug(f"Basic auth login: account {account['email']}")
         self.do_login(account)
+        next = self.get_argument("next", None)
         if account.get("update_info"):
             self.see_other(
                 "account_edit",
                 account["email"],
                 message="Please review and update your account information.",
             )
+        elif next:
+            self.redirect(next, status=303)
         else:
             self.see_other("home")
 
 
 class Logout(LoginMixin, RequestHandler):
-    "Logout; unset the secure cookie, and invalidate login session."
+    "Logout; unset the secure cookie, and invalidate the login session."
 
-    @tornado.web.authenticated
     def post(self):
         self.do_logout()
         self.see_other("home")

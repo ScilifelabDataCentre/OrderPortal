@@ -13,13 +13,11 @@ import orderportal.account
 import orderportal.admin
 import orderportal.config
 import orderportal.database
-import orderportal.event
 import orderportal.file
 import orderportal.form
 import orderportal.group
-import orderportal.home
 import orderportal.info
-import orderportal.news
+import orderportal.home
 import orderportal.order
 import orderportal.report
 import orderportal.search
@@ -266,12 +264,6 @@ def main():
             orderportal.form.FormAggregate,
             name="form_aggregate",
         ),
-        url(r"/news", orderportal.news.News, name="news"),
-        url(r"/new", orderportal.news.NewsCreate, name="news_create"),
-        url(r"/new/([0-9a-f]{32})", orderportal.news.NewsEdit, name="news_edit"),
-        url(r"/events", orderportal.event.Events, name="events"),
-        url(r"/event/([0-9a-f]{32})", orderportal.event.EventEdit, name="event_edit"),
-        url(r"/event", orderportal.event.EventCreate, name="event_create"),
         url(r"/infos", orderportal.info.Infos, name="infos"),
         url(r"/info", orderportal.info.InfoCreate, name="info_create"),
         url(r"/info/([^/]+)", orderportal.info.Info, name="info"),
@@ -336,6 +328,7 @@ def main():
             orderportal.admin.AccountMessageEdit,
             name="admin_account_message_edit",
         ),
+        url(r"/admin/display", orderportal.admin.Display, name="admin_display"),
         url(r"/admin/database", orderportal.admin.Database, name="admin_database"),
         url(r"/admin/document/(.+)", orderportal.admin.Document, name="admin_document"),
         url(r"/admin/settings", orderportal.admin.Settings, name="admin_settings"),
@@ -343,7 +336,7 @@ def main():
         url(
             r"/site/([^/]+)",
             tornado.web.StaticFileHandler,
-            {"path": settings["SITE_STATIC_DIR"]},
+            {"path": constants.SITE_STATIC_DIR},
             name="site",
         ),
         url(r"/api/v1/(.*)", orderportal.home.NoSuchEntityApiV1),
@@ -357,8 +350,8 @@ def main():
         cookie_secret=settings["COOKIE_SECRET"],
         xsrf_cookies=True,
         ui_modules=orderportal.uimodules,
-        template_path=os.path.join(constants.ROOT, "templates"),
-        static_path=os.path.join(constants.ROOT, "static"),
+        template_path=constants.TEMPLATE_DIR,
+        static_path=constants.STATIC_DIR,
         login_url=(settings["BASE_URL_PATH_PREFIX"] or "") + "/login",
     )
 

@@ -21,7 +21,7 @@
   </head>
 
   <body>
-    <nav class="navbar navbar-static-top {{ settings['DISPLAY_MENU_LIGHT'] and 'navbar-default' or 'navbar-inverse' }}">
+    <nav class="navbar navbar-static-top {{ settings['DISPLAY_MENU_LIGHT_THEME'] and 'navbar-default' or 'navbar-inverse' }}">
       <div class="container-fluid">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle"
@@ -50,6 +50,11 @@
             <li>
               <a href="{{ reverse_url('orders') }}">{{ terminology('Orders') }}</a>
             </li>
+            {% if settings['ORDER_REPORTS'] %}
+            <li>
+              <a href="{{ reverse_url('reports') }}">Reports</a>
+            </li>
+            {% end %}
             {% else %}
             <li>
               <a href="{{ reverse_url('account_orders', current_user['email']) }}">
@@ -158,6 +163,9 @@
                     Account messages configuration</a>
                 </li>
                 <li>
+                  <a href="{{ reverse_url('admin_display') }}">Display configuration</a>
+                </li>
+                <li>
                   <a href="{{ reverse_url('admin_database') }}">Database</a>
                 </li>
                 <li>
@@ -183,7 +191,7 @@
             {% if settings['DISPLAY_MENU_ITEM_URL'] %}
             <li>
               <a href="{{ settings['DISPLAY_MENU_ITEM_URL'] }}">
-                {{ settings.get('DISPLAY_MENU_ITEM_TEXT') or 'Back to website' }}
+                {{ settings.get('DISPLAY_MENU_ITEM_TEXT') or 'Back' }}
               </a>
             </li>
             {% end %}

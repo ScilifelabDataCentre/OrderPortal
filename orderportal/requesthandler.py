@@ -68,9 +68,7 @@ class RequestHandler(tornado.web.RequestHandler):
         return result
 
     def see_other(self, name, *args, **kwargs):
-        """Redirect to the absolute URL given by name
-        using HTTP status 303 See Other.
-        """
+        "Redirect to the absolute URL given by name using HTTP status 303 See Other."
         query = kwargs.copy()
         try:
             self.set_error_flash(str(query.pop("error")))
@@ -80,8 +78,7 @@ class RequestHandler(tornado.web.RequestHandler):
             self.set_message_flash(str(query.pop("message")))
         except KeyError:
             pass
-        url = self.absolute_reverse_url(name, *args, **query)
-        self.redirect(url, status=303)
+        self.redirect(self.absolute_reverse_url(name, *args, **query), status=303)
 
     def absolute_reverse_url(self, name, *args, **query):
         "Get the absolute URL given the handler name, arguments and query."
@@ -301,13 +298,13 @@ class RequestHandler(tornado.web.RequestHandler):
         else:
             raise tornado.web.HTTPError(404, reason=reason)
 
-    def get_order(self, iuid):
+    def get_order(self, identifier_iuid):
         "Get the order for the identifier or IUID."
         try:  # First try order identifier.
-            order = self.get_entity_view("order", "identifier", iuid)
+            order = self.get_entity_view("order", "identifier", identifier_iuid)
         except tornado.web.HTTPError:
             # Next try order doc IUID.
-            order = self.get_entity(iuid, doctype=constants.ORDER)
+            order = self.get_entity(identifier_iuid, doctype=constants.ORDER)
         return order
 
     def get_form(self, iuid):
@@ -315,8 +312,8 @@ class RequestHandler(tornado.web.RequestHandler):
         return self.get_entity(iuid, doctype=constants.FORM)
 
     def lookup_form(self, iuid):
-        """Lookup the form by its IUID.
-        Sets up a cached dictionary 'lookup_forms' when called the first time.
+        """Lookup the form by its IUID. When called the first time,
+        set up a cached dictionary 'lookup_forms' containing all forms.
         """
         try:
             return self.lookup_forms.get(iuid)
@@ -343,23 +340,6 @@ class RequestHandler(tornado.web.RequestHandler):
             if doc["name"] == name:
                 return doc
         raise KeyError
-
-    def get_news(self, limit=None):
-        "Get all news items in descending 'modified' order."
-        kwargs = dict(include_docs=True, descending=True)
-        if limit is not None:
-            kwargs["limit"] = limit
-        return [row.doc for row in self.db.view("news", "modified", **kwargs)]
-
-    def get_events(self, upcoming=False):
-        "Get all (descending) or upcoming (ascending) events."
-        kwargs = dict(include_docs=True)
-        if upcoming:
-            kwargs["startkey"] = utils.today()
-            kwargs["endkey"] = constants.CEILING
-        else:
-            kwargs["descending"] = True
-        return [row.doc for row in self.db.view("event", "date", **kwargs)]
 
     def get_account(self, email, password=None):
         """Get the account identified by the email address.
@@ -432,17 +412,13 @@ class RequestHandler(tornado.web.RequestHandler):
         "Return the group for the IUID."
         return self.get_entity(iuid, doctype=constants.GROUP)
 
-    def get_logs(self, iuid, limit=settings["DISPLAY_DEFAULT_MAX_LOG"] + 1):
-        "Return the event log documents for the given entity iuid."
-        kwargs = dict(
-            include_docs=True,
-            startkey=[iuid, constants.CEILING],
-            endkey=[iuid],
-            descending=True,
-        )
-        if limit > 0:
-            kwargs["limit"] = limit
-        view = self.db.view("log", "entity", **kwargs)
+    def get_logs(self, iuid):
+        "Return the log documents for the given entity iuid."
+        view = self.db.view("log", "entity",
+                            include_docs=True,
+                            startkey=[iuid, constants.CEILING],
+                            endkey=[iuid],
+                            descending=True)
         logs = [row.doc for row in view]
         # Ref to entity in DB is not needed in each log entry.
         for log in logs:
@@ -453,16 +429,8 @@ class RequestHandler(tornado.web.RequestHandler):
         return logs
 
     def delete_logs(self, iuid):
-        "Delete the event log documents for the given entity iuid."
-        view = self.db.view(
-            "log",
-            "entity",
-            startkey=[iuid],
-            endkey=[iuid, constants.CEILING],
-            include_docs=True,
-        )
-        for row in view:
-            self.db.delete(row.doc)
+        "Delete the log documents for the given entity iuid."
+        orderportal.database.delete_logs(self.db, iuid)
 
 
 class ApiV1Mixin:

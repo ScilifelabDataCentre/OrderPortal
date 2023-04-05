@@ -80,11 +80,11 @@ def migrate_meta_documents(db):
         # Load the legacy site ORDER_STATUSES_FILE, if any defined.
         try:
             filepath = os.path.join(
-                settings["SITE_DIR"], settings["ORDER_STATUSES_FILE"]
+                constants.SITE_DIR, settings["ORDER_STATUSES_FILE"]
             )
             with open(filepath) as infile:
                 legacy_statuses = yaml.safe_load(infile)
-            logger.info(f"Loaded legacy order statuses from file '{filepath}'.")
+            logger.info(f"Loaded legacy order status configuration from file '{filepath}'.")
         except KeyError:
             logger.warning(f"Defaults used for order statuses.")
         except FileNotFoundError as error:
@@ -109,11 +109,11 @@ def migrate_meta_documents(db):
         # Load the legacy site ORDER_TRANSITIONS_FILE, if any defined.
         try:
             filepath = os.path.join(
-                settings["SITE_DIR"], settings["ORDER_TRANSITIONS_FILE"]
+                constants.SITE_DIR, settings["ORDER_TRANSITIONS_FILE"]
             )
             with open(filepath) as infile:
                 legacy_transitions = yaml.safe_load(infile)
-            logger.info(f"Loaded legacy order transitions from file '{filepath}'.")
+            logger.info(f"Loaded legacy order transitions configuration from file '{filepath}'.")
         except KeyError:
             logger.warning(f"Defaults used for order transitions.")
         except FileNotFoundError as error:
@@ -143,7 +143,7 @@ def migrate_meta_documents(db):
             saver.set_id("order_statuses")
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
-        logger.info("Saved order statuses to database.")
+        logger.info("Saved order statuses configuration to database.")
 
     ### As of version 7.0, the layout of the transitions data ha been changed
     ### to a dict having (key: source status, value: dict of target statues
@@ -165,7 +165,7 @@ def migrate_meta_documents(db):
         with MetaSaver(doc=doc, db=db) as saver:
             saver["statuses"] = settings["ORDER_STATUSES"]
             saver["transitions"] = settings["ORDER_TRANSITIONS"]
-        logger.info("Saved updated order transitions to database.")
+        logger.info("Saved updated order transitions configuration to database.")
 
     ### As of version 7.0.3, items to show in the order list
     ### are stored in the database, not in the settings file.
@@ -181,7 +181,7 @@ def migrate_meta_documents(db):
             saver["max_most_recent"] = settings.get("DISPLAY_ORDERS_MOST_RECENT", 500)
             saver["default_order_column"] = "modified"
             saver["default_order_sort"] = "desc"
-        logger.info("Saved orders list settings to database.")
+        logger.info("Saved orders list configuration to database.")
 
     ### Re-introduce order list filters, this time separately from orders list fields.
     doc = db["orders_list"]
@@ -213,7 +213,7 @@ def migrate_meta_documents(db):
                 "ACCOUNT_FUNDER_INFO_SUBJECT", True
             )
             saver["default_country_code"] = settings.get("DEFAULT_COUNTRY_CODE", "SE")
-        logger.info("Saved account settings to database.")
+        logger.info("Saved account configuration to database.")
 
     ### As of version 9.1.0, many settings pertaining to order entities
     ### are stored on the database, not the settings file.
@@ -231,7 +231,7 @@ def migrate_meta_documents(db):
             autopopulate = settings.get("ORDER_AUTOPOPULATE", {}) or {}
             saver["autopopulate"] = dict([(v, k) for k, v in autopopulate.items()])
             saver["terminology"] = settings.get("TERMINOLOGY", {})
-        logger.info("Saved more order settings to database.")
+        logger.info("Saved order configuration to database.")
 
     ### As of version 9.1.0, PREPARATION is hard-wired as the initial status.
     ### Remove the obsolete item "initial" from the order statuses.
@@ -241,27 +241,58 @@ def migrate_meta_documents(db):
         with MetaSaver(doc=doc, db=db) as saver:
             for status in statuses:
                 status.pop("initial", None)
-        logger.info("Updated order statuses to remove 'initial'.")
+        logger.info("Updated order statuses configuration to remove 'initial'.")
 
-    ### As of version 10.1.0, the universities lookup is in the database.
+    ### As of version 10.1.0, the universities data is in the database.
     doc = db["account"]
     if "universities" not in doc:
         universities = {}
         # Load the legacy site UNIVERSITES_FILE, if any.
         try:
-            filepath = os.path.join(settings["SITE_DIR"], settings["UNIVERSITIES_FILE"])
+            filepath = os.path.join(constants.SITE_DIR, settings["UNIVERSITIES_FILE"])
             with open(filepath) as infile:
                 universities = yaml.safe_load(infile) or {}
             universities = list(universities.items())
             universities.sort(key=lambda i: (i[1].get("rank"), i[0]))
             universities = dict(universities)
-            logger.info(f"Loaded legacy universities lookup from file '{filepath}'.")
+            logger.info(f"Loaded legacy universities configuration from file '{filepath}'.")
         except (KeyError, FileNotFoundError):
             logger.warning("No legacy information for universities.")
         with MetaSaver(doc=doc, db=db) as saver:
             saver["universities"] = universities
-        logger.info("Saved universities lookup in database.")
+        logger.info("Saved universities configuration in database.")
 
+    ### As of version 10.1.0, the subject terms data is in the database.
+    doc = db["account"]
+    if "subject_terms" not in doc:
+        subject_terms = []
+        # Load the legacy site SUBJECT_TERMS_FILE, if any.
+        try:
+            filepath = os.path.join(constants.SITE_DIR, settings["SUBJECT_TERMS_FILE"])
+            with open(filepath) as infile:
+                subject_terms = yaml.safe_load(infile) or []
+            logger.info(f"Loaded legacy subject terms configuration from file '{filepath}'.")
+        except (KeyError, FileNotFoundError):
+            logger.warning("No legacy information for subject terms.")
+        with MetaSaver(doc=doc, db=db) as saver:
+            saver["subject_terms"] = subject_terms
+        logger.info("Saved subject terms configuration in database.")
+
+    ### As of version 10.1.2, the display configuration data is in the database.
+    if "display" not in db:
+        with MetaSaver(db=db) as saver:
+            saver.set_id("display")
+            saver["default_page_size"] = settings.get("DISPLAY_DEFAULT_PAGE_SIZE", 25)
+            saver["max_pending_accounts"] = settings.get("DISPLAY_MAX_PENDING_ACCOUNTS", 10)
+            saver["text_markdown_notation_info"] = settings.get("DISPLAY_TEXT_MARKDOWN_NOTATION_INFO") or True
+            saver["menu_light_theme"] = settings.get("DISPLAY_MENU_LIGHT_THEME") or False
+            saver["menu_item_url"] = settings.get("DISPLAY_MENU_URL")
+            saver["menu_item_text"] = settings.get("DISPLAY_MENU_TEXT")
+            saver["menu_information"] = settings.get("DISPLAY_MENU_INFORMATION") or True
+            saver["menu_documents"] = settings.get("DISPLAY_MENU_DOCUMENTS") or True
+            saver["menu_contact"] = settings.get("DISPLAY_MENU_CONTACT") or True
+            saver["menu_about_us"] = settings.get("DISPLAY_MENU_ABOUT_US") or True
+        logger.info("Saved display configuration in database.")
 
 def migrate_text_documents(db):
     """Create or update text documents for the current version of the system.
@@ -725,11 +756,18 @@ class Account(RequestHandler):
     def get(self):
         self.check_admin()
         # Convert university data to CSV file for easier editing.
-        output = io.StringIO()
-        writer = csv.writer(output, dialect=csv.unix_dialect, quoting=csv.QUOTE_MINIMAL)
+        universities = io.StringIO()
+        writer = csv.writer(universities, dialect=csv.unix_dialect, quoting=csv.QUOTE_MINIMAL)
         for key, value in settings["UNIVERSITIES"].items():
             writer.writerow((key, value["name"], value["rank"]))
-        self.render("admin/account.html", universities=output.getvalue().strip())
+        # Convert subject terms data to CSV file for easier editing.
+        subject_terms = io.StringIO()
+        writer = csv.writer(subject_terms, dialect=csv.unix_dialect, quoting=csv.QUOTE_MINIMAL)
+        for item in settings["SUBJECT_TERMS"]:
+            writer.writerow((item["code"], item["term"], item["level"]))
+        self.render("admin/account.html",
+                    universities=universities.getvalue().strip(),
+                    subject_terms=subject_terms.getvalue().strip())
 
     @tornado.web.authenticated
     def post(self):
@@ -765,21 +803,6 @@ class Account(RequestHandler):
             saver["default_country_code"] = self.get_argument(
                 "default_country_code", "SE"
             )
-            indata = self.get_argument("universities", "").strip()
-            dialect = csv.Sniffer().sniff(indata)
-            with io.StringIO(indata) as infile:
-                reader = csv.DictReader(infile,
-                                        fieldnames=("key", "name", "rank"),
-                                        dialect=dialect)
-                universities = {}
-                for item in reader:
-                    name = item.get("name", item["key"])
-                    try:
-                        rank = int(item["rank"])
-                    except (KeyError, ValueError, TypeError):
-                        rank = 0
-                    universities[item["key"]] = dict(name=name, rank=rank)
-            saver["universities"] = universities
             try:
                 saver["login_max_age_days"] = max(1, int(self.get_argument(
                     "login_max_age_days", "14")))
@@ -795,6 +818,46 @@ class Account(RequestHandler):
                     "min_password_length", "8")))
             except (ValueError, TypeError):
                 pass
+            # Interpret universities CSV format.
+            indata = self.get_argument("universities", "").strip()
+            dialect = csv.Sniffer().sniff(indata)
+            with io.StringIO(indata) as infile:
+                reader = csv.DictReader(infile,
+                                        fieldnames=("key", "name", "rank"),
+                                        dialect=dialect)
+                universities = {}
+                for item in reader:
+                    name = item.get("name", item["key"])
+                    try:
+                        rank = int(item["rank"])
+                    except (KeyError, ValueError, TypeError):
+                        rank = 0
+                    universities[item["key"]] = dict(name=name, rank=rank)
+            saver["universities"] = universities
+            # Interpret subject terms CSV format.
+            indata = self.get_argument("subject_terms", "").strip()
+            dialect = csv.Sniffer().sniff(indata)
+            with io.StringIO(indata) as infile:
+                reader = csv.DictReader(infile,
+                                        fieldnames=("code", "term", "level"),
+                                        dialect=dialect)
+                subject_terms = []
+                subject_terms_codes = set()
+                for item in reader:
+                    try:
+                        item["code"] = max(0, int(item["code"]))
+                    except (KeyError, ValueError, TypeError):
+                        continue
+                    if not item.get("term"):
+                        continue
+                    try:
+                        item["level"] = min(10, max(0, int(item["level"])))
+                    except (KeyError, ValueError, TypeError):
+                        item["level"] = 0
+                    if item["code"] not in subject_terms_codes:
+                        subject_terms.append(item)
+                        subject_terms_codes.add(item["code"])
+            saver["subject_terms"] = subject_terms
         orderportal.config.load_settings_from_db(self.db)
         self.set_message_flash("Saved account configuration.")
         self.see_other("admin_account")
@@ -836,6 +899,56 @@ class AccountMessageEdit(RequestHandler):
             saver["recipients"] = self.get_arguments("recipients")
             saver["text"] = self.get_argument("text", None) or "[no text]"
         self.see_other("admin_account_messages")
+
+
+class Display(RequestHandler):
+    "Display and edit of display configuration."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        self.render("admin/display.html")
+
+    @tornado.web.authenticated
+    def post(self):
+        self.check_admin()
+        doc = self.db["display"]
+        with MetaSaver(doc=doc, handler=self) as saver:
+            try:
+                saver["default_page_size"] = max(
+                    10, int(self.get_argument("default_page_size", 25))
+                )
+            except (TypeError, ValueError):
+                self.set_error_flash("Bad 'default_page_size' value; ignored.")
+            try:
+                saver["max_pending_accounts"] = max(
+                    1, int(self.get_argument("default_page_size", 10))
+                )
+            except (TypeError, ValueError):
+                self.set_error_flash("Bad 'max_pending_accounts' value; ignored.")
+            saver["menu_light_theme"] = utils.to_bool(
+                self.get_argument("menu_light_theme", False)
+            )
+            saver["text_markdown_notation_info"] = utils.to_bool(
+                self.get_argument("text_markdown_notation_info", False)
+            )
+            saver["menu_item_url"] = self.get_argument("menu_item_url", None)
+            saver["menu_item_text"] = self.get_argument("menu_item_text", None)
+            saver["menu_information"] = utils.to_bool(
+                self.get_argument("menu_information", False)
+            )
+            saver["menu_documents"] = utils.to_bool(
+                self.get_argument("menu_documents", False)
+            )
+            saver["menu_contact"] = utils.to_bool(
+                self.get_argument("menu_contact", False)
+            )
+            saver["menu_about_us"] = utils.to_bool(
+                self.get_argument("menu_about_us", False)
+            )
+        orderportal.config.load_settings_from_db(self.db)
+        self.set_message_flash("Saved display configuration.")
+        self.see_other("admin_display")
 
 
 class Database(RequestHandler):
@@ -904,7 +1017,7 @@ class Settings(RequestHandler):
         safe_settings[
             "ORDER_MESSAGES"
         ] = f"&lt;see file {safe_settings['ORDER_MESSAGES_FILE']}&gt;"
-        self.render("admin/settings.html", settings=safe_settings)
+        self.render("admin/settings.html", safe_settings=safe_settings)
 
 
 DEFAULT_ORDER_STATUSES = [

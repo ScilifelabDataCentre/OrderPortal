@@ -201,6 +201,7 @@ class Tags(tornado.web.UIModule):
     "Output tags with links to search."
 
     def render(self, tags):
+        tags = tags or []
         result = []
         for tag in tags:
             url = self.handler.reverse_url("search", term=tag)

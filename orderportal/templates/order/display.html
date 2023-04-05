@@ -129,7 +129,7 @@
       {% if settings['ORDER_TAGS'] and (am_staff or settings['ORDER_USER_TAGS']) %}
       <tr>
         <th>{{ terminology('Tags') }}</th>
-        <td>{% module Tags(order.get('tags', [])) %}</td>
+        <td>{% module Tags(order.get('tags')) %}</td>
       </tr>
       {% end %} {# if settings['ORDER_TAGS'] and ... #}
       {% if settings.get('ORDER_LINKS') %}

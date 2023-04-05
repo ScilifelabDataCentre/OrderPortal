@@ -29,19 +29,14 @@ class Home(RequestHandler):
             if form.get("ordinal") is None:
                 form["ordinal"] = 0
         forms.sort(key=lambda i: i["ordinal"])
-        kwargs = dict(
-            forms=forms,
-            news_items=self.get_news(limit=settings["DISPLAY_MAX_NEWS"]),
-            events=self.get_events(upcoming=True),
-        )
         if not self.current_user:
-            self.render("home/anonymous.html", **kwargs)
+            self.render("home/anonymous.html", forms=forms)
         elif self.current_user["role"] == constants.ADMIN:
-            self.home_admin(**kwargs)
+            self.home_admin(forms=forms)
         elif self.current_user["role"] == constants.STAFF:
-            self.home_staff(**kwargs)
+            self.home_staff(forms=forms)
         else:
-            self.home_user(**kwargs)
+            self.home_user(forms=forms)
 
     def home_admin(self, **kwargs):
         "Home page for a current user having role 'admin'."
