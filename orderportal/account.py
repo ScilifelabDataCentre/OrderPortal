@@ -937,6 +937,8 @@ class Login(RecipientsMixin, LoginMixin, RequestHandler):
                 message="Please review and update your account information.",
             )
         elif next:
+            if settings["BASE_URL_PATH_PREFIX"]:
+                next = f"/{settings['BASE_URL_PATH_PREFIX']}{next}"
             self.redirect(next, status=303)
         else:
             self.see_other("home")

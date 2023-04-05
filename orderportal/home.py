@@ -167,30 +167,30 @@ class Entity(RequestHandler):
         elif doc[constants.DOCTYPE] == constants.ACCOUNT:
             self.see_other("account", doc["email"])
         else:
-            self.see_other("home", error="Sorry, no such entity found.")
+            self.see_other("home", error="Sorry, page not found.")
 
 
 class NoSuchEntity(RequestHandler):
     "Error message on home page."
 
     def get(self, path=None):
-        self.logger.debug("No such entity: %s", path)
-        self.see_other("home", error="Sorry, no such entity found.")
+        self.logger.debug(f"Page not found: {path}")
+        self.see_other("home", error="Sorry, page not found.")
 
 
 class NoSuchEntityApiV1(RequestHandler):
     "Return Not Found status code."
 
     def get(self, path=None):
-        self.logger.debug("No such entity: %s", path)
+        self.logger.debug(f"Page not found: {path}")
         raise tornado.web.HTTPError(404)
 
     def post(self, path=None):
-        self.logger.debug("No such entity: %s", path)
+        self.logger.debug(f"Page not found: {path}")
         raise tornado.web.HTTPError(404)
 
     def put(self, path=None):
-        self.logger.debug("No such entity: %s", path)
+        self.logger.debug(f"Page not found: {path}")
         raise tornado.web.HTTPError(404)
 
     def check_xsrf_cookie(self):
