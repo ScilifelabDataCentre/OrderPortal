@@ -95,12 +95,17 @@ def load_settings_from_file():
     else:
         settings["ORDER_MESSAGES"] = {}
 
-    # Settings computed from others.
+    # Normalize the BASE_URL and BASE_URL_PATH_PREFIX values.
+    # BASE_URL must contain only the scheme and netloc parts, with a trailing '/'.
+    # BASE_URL_PATH_PREFIX, if any, must not contain any leading or trailing '/'.
     parts = urllib.parse.urlparse(settings["BASE_URL"])
-    if not settings.get("BASE_URL_PATH_PREFIX") and parts.path:
-        settings["BASE_URL_PATH_PREFIX"] = parts.path.rstrip("/") or None
-    # BASE_URL should not contain any path part.
-    settings["BASE_URL"] = "%s://%s/" % (parts.scheme, parts.netloc)
+    settings["BASE_URL"] = f"{parts.scheme}://{parts.netloc}/"
+    if parts.path:
+        if settings.get("BASE_URL_PATH_PREFIX"):
+            raise ValueError("BASE_URL_PATH_PREFIX may not be set if BASE_URL has a path part.")
+        settings["BASE_URL_PATH_PREFIX"] = parts.path
+    if settings["BASE_URL_PATH_PREFIX"]:
+        settings["BASE_URL_PATH_PREFIX"] = settings["BASE_URL_PATH_PREFIX"].strip("/") or None
 
 
 def load_settings_from_db(db):

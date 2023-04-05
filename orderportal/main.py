@@ -343,6 +343,11 @@ def main():
         url(r"/(.*)", orderportal.home.NoSuchEntity),
     ]
 
+    if settings["BASE_URL_PATH_PREFIX"]:
+        login_url = f"/{settings['BASE_URL_PATH_PREFIX']}/login"
+    else:
+        login_url = "/login"
+
     application = tornado.web.Application(
         handlers=handlers,
         debug=settings.get("TORNADO_DEBUG", False),
@@ -352,14 +357,14 @@ def main():
         ui_modules=orderportal.uimodules,
         template_path=constants.TEMPLATE_DIR,
         static_path=constants.STATIC_DIR,
-        login_url=(settings["BASE_URL_PATH_PREFIX"] or "") + "/login",
+        login_url=login_url,
     )
+    application.listen(settings["PORT"], xheaders=True)
 
     # Add href URLs for the status icons.
     for key, value in settings["ORDER_STATUSES_LOOKUP"].items():
         value["href"] = f"/static/{key}.png"
 
-    application.listen(settings["PORT"], xheaders=True)
     url = settings["BASE_URL"]
     if settings["BASE_URL_PATH_PREFIX"]:
         url += settings["BASE_URL_PATH_PREFIX"]

@@ -63,7 +63,7 @@ class MessageSaver(saver.Saver):
         "Create the message from the text template and parameters for it."
         site_url = settings["BASE_URL"]
         if settings["BASE_URL_PATH_PREFIX"]:
-            site_url = settings["BASE_URL_PATH_PREFIX"] + site_url
+            site_url += settings["BASE_URL_PATH_PREFIX"]
         params = SafeDict(
             site=settings["SITE_NAME"],
             site_url=site_url,
