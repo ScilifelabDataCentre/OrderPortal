@@ -284,14 +284,14 @@ def migrate_meta_documents(db):
             saver.set_id("display")
             saver["default_page_size"] = settings.get("DISPLAY_DEFAULT_PAGE_SIZE", 25)
             saver["max_pending_accounts"] = settings.get("DISPLAY_MAX_PENDING_ACCOUNTS", 10)
-            saver["text_markdown_notation_info"] = settings.get("DISPLAY_TEXT_MARKDOWN_NOTATION_INFO") or True
-            saver["menu_light_theme"] = settings.get("DISPLAY_MENU_LIGHT_THEME") or False
+            saver["text_markdown_notation_info"] = settings.get("DISPLAY_TEXT_MARKDOWN_NOTATION_INFO", True)
+            saver["menu_light_theme"] = settings.get("DISPLAY_MENU_LIGHT", False)
             saver["menu_item_url"] = settings.get("DISPLAY_MENU_URL")
             saver["menu_item_text"] = settings.get("DISPLAY_MENU_TEXT")
-            saver["menu_information"] = settings.get("DISPLAY_MENU_INFORMATION") or True
-            saver["menu_documents"] = settings.get("DISPLAY_MENU_DOCUMENTS") or True
-            saver["menu_contact"] = settings.get("DISPLAY_MENU_CONTACT") or True
-            saver["menu_about_us"] = settings.get("DISPLAY_MENU_ABOUT_US") or True
+            saver["menu_information"] = settings.get("DISPLAY_MENU_INFORMATION", True)
+            saver["menu_documents"] = settings.get("DISPLAY_MENU_DOCUMENTS", True)
+            saver["menu_contact"] = settings.get("DISPLAY_MENU_CONTACT", True)
+            saver["menu_about_us"] = settings.get("DISPLAY_MENU_ABOUT_US", True)
         logger.info("Saved display configuration in database.")
 
 def migrate_text_documents(db):
