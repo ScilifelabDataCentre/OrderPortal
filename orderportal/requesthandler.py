@@ -85,15 +85,15 @@ class RequestHandler(tornado.web.RequestHandler):
         if name is None:
             path = settings["BASE_URL_PATH_PREFIX"] or ""
         else:
-            path = self.reverse_url(name, *args, **query)
-        return settings["BASE_URL"].rstrip("/") + path
+            path = self.reverse_url(name, *args, **query).lstrip("/")
+        return settings["BASE_URL"] + path
 
     def reverse_url(self, name, *args, **query):
         "Allow adding query arguments to the URL."
         url = super().reverse_url(name, *args)
         url = url.rstrip("?")  # tornado bug? left-over '?' sometimes
         if settings["BASE_URL_PATH_PREFIX"]:
-            url = settings["BASE_URL_PATH_PREFIX"] + url
+            url = f"/{settings['BASE_URL_PATH_PREFIX']}{url}"
         if query:
             query = dict([(k, str(v)) for k, v in list(query.items())])
             url += "?" + urllib.parse.urlencode(query)
@@ -104,7 +104,7 @@ class RequestHandler(tornado.web.RequestHandler):
         url = super().static_url(path, include_host=include_host, **kwargs)
         if settings["BASE_URL_PATH_PREFIX"]:
             parts = urllib.parse.urlparse(url)
-            path = settings["BASE_URL_PATH_PREFIX"] + parts.path
+            path = f"/{settings['BASE_URL_PATH_PREFIX']}{parts.path}"
             parts = (parts[0], parts[1], path, parts[3], parts[4], parts[5])
             url = urllib.parse.urlunparse(parts)
         return url
