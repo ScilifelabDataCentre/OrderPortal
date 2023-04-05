@@ -27,8 +27,6 @@ def update_design_documents(db):
 
     if db.put_design("account", ACCOUNT_DESIGN_DOC):
         logger.info("Updated 'account' design document.")
-    if db.put_design("event", EVENT_DESIGN_DOC):
-        logger.info("Updated 'event' design document.")
     if db.put_design("file", FILE_DESIGN_DOC):
         logger.info("Updated 'file' design document.")
     if db.put_design("form", FORM_DESIGN_DOC):
@@ -43,8 +41,6 @@ def update_design_documents(db):
         logger.info("Updated 'message' design document.")
     if db.put_design("meta", META_DESIGN_DOC):
         logger.info("Updated 'meta' design document.")
-    if db.put_design("news", NEWS_DESIGN_DOC):
-        logger.info("Updated 'news' design document.")
     # Replace variables in the function body according to constants.
     mapfunc = ORDER_DESIGN_DOC["views"]["keyword"]["map"]
     delims_lint = "".join(constants.ORDERS_SEARCH_DELIMS_LINT)
@@ -58,6 +54,29 @@ def update_design_documents(db):
         logger.info("Updated 'report' design document.")
     if db.put_design("text", TEXT_DESIGN_DOC):
         logger.info("Updated 'text' design document.")
+
+    # As of version 10.2, the entity types news and event have been scrapped.
+    # If the indexes still exist, remove the documents, logs and indexes.
+    try:
+        news = [row.doc for row in db.view("news", "modified", include_docs=True)]
+        for doc in news:
+            delete_logs(db, doc["_id"])
+            db.delete(doc)
+        doc = db.get_design("news")
+        db.delete(doc)
+        logger.info("Removed obsolete 'news' documents, logs and design document.")
+    except couchdb2.NotFoundError:
+        pass
+    try:
+        events = [row.doc for row in db.view("event", "date", include_docs=True)]
+        for doc in events:
+            delete_logs(db, doc["_id"])
+            db.delete(doc)
+        doc = db.get_design("event")
+        db.delete(doc)
+        logger.info("Removed obsolete 'event' documents, logs and design document.")
+    except couchdb2.NotFoundError:
+        pass
 
 
 def get_count(db, designname, viewname, key=None):
@@ -111,6 +130,18 @@ def lookup_document(db, identifier):
     except couchdb2.NotFoundError:
         return None
 
+def delete_logs(db, iuid):
+    "Delete the log documents for the given entity IUID."
+    view = db.view(
+        "log",
+        "entity",
+        startkey=[iuid],
+        endkey=[iuid, constants.CEILING],
+        include_docs=True,
+    )
+    for row in view:
+        db.delete(row.doc)
+
 
 ACCOUNT_DESIGN_DOC = {
     "views": {
@@ -159,17 +190,6 @@ ACCOUNT_DESIGN_DOC = {
     emit(doc.login, doc.email);
 }"""
         },
-    }
-}
-
-EVENT_DESIGN_DOC = {
-    "views": {
-        "date": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'event') return;
-    emit(doc.date, doc.title);
-}"""
-        }
     }
 }
 
@@ -304,17 +324,6 @@ META_DESIGN_DOC = {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'meta') return;
     emit(doc._id, null);
-}"""
-        }
-    }
-}
-
-NEWS_DESIGN_DOC = {
-    "views": {
-        "modified": {
-            "map": """function(doc) {
-    if (doc.orderportal_doctype !== 'news') return;
-    emit(doc.modified, null);
 }"""
         }
     }

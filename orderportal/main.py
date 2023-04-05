@@ -13,13 +13,11 @@ import orderportal.account
 import orderportal.admin
 import orderportal.config
 import orderportal.database
-import orderportal.event
 import orderportal.file
 import orderportal.form
 import orderportal.group
-import orderportal.home
 import orderportal.info
-import orderportal.news
+import orderportal.home
 import orderportal.order
 import orderportal.report
 import orderportal.search
@@ -266,12 +264,6 @@ def main():
             orderportal.form.FormAggregate,
             name="form_aggregate",
         ),
-        url(r"/news", orderportal.news.News, name="news"),
-        url(r"/new", orderportal.news.NewsCreate, name="news_create"),
-        url(r"/new/([0-9a-f]{32})", orderportal.news.NewsEdit, name="news_edit"),
-        url(r"/events", orderportal.event.Events, name="events"),
-        url(r"/event/([0-9a-f]{32})", orderportal.event.EventEdit, name="event_edit"),
-        url(r"/event", orderportal.event.EventCreate, name="event_create"),
         url(r"/infos", orderportal.info.Infos, name="infos"),
         url(r"/info", orderportal.info.InfoCreate, name="info_create"),
         url(r"/info/([^/]+)", orderportal.info.Info, name="info"),

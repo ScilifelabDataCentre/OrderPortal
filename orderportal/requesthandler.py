@@ -341,23 +341,6 @@ class RequestHandler(tornado.web.RequestHandler):
                 return doc
         raise KeyError
 
-    def get_news(self, limit=None):
-        "Get all news items in descending 'modified' order."
-        kwargs = dict(include_docs=True, descending=True)
-        if limit is not None:
-            kwargs["limit"] = limit
-        return [row.doc for row in self.db.view("news", "modified", **kwargs)]
-
-    def get_events(self, upcoming=False):
-        "Get all (descending) or upcoming (ascending) events."
-        kwargs = dict(include_docs=True)
-        if upcoming:
-            kwargs["startkey"] = utils.today()
-            kwargs["endkey"] = constants.CEILING
-        else:
-            kwargs["descending"] = True
-        return [row.doc for row in self.db.view("event", "date", **kwargs)]
-
     def get_account(self, email, password=None):
         """Get the account identified by the email address.
         Check the password, if given.
@@ -430,7 +413,7 @@ class RequestHandler(tornado.web.RequestHandler):
         return self.get_entity(iuid, doctype=constants.GROUP)
 
     def get_logs(self, iuid):
-        "Return the event log documents for the given entity iuid."
+        "Return the log documents for the given entity iuid."
         view = self.db.view("log", "entity",
                             include_docs=True,
                             startkey=[iuid, constants.CEILING],
@@ -446,16 +429,8 @@ class RequestHandler(tornado.web.RequestHandler):
         return logs
 
     def delete_logs(self, iuid):
-        "Delete the event log documents for the given entity iuid."
-        view = self.db.view(
-            "log",
-            "entity",
-            startkey=[iuid],
-            endkey=[iuid, constants.CEILING],
-            include_docs=True,
-        )
-        for row in view:
-            self.db.delete(row.doc)
+        "Delete the log documents for the given entity iuid."
+        orderportal.database.delete_logs(self.db, iuid)
 
 
 class ApiV1Mixin:
