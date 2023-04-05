@@ -368,7 +368,7 @@ def main():
     url = settings["BASE_URL"]
     if settings["BASE_URL_PATH_PREFIX"]:
         url += settings["BASE_URL_PATH_PREFIX"]
-    logging.getLogger("orderportal").info(f"web server at {url}")
+    logging.getLogger("orderportal").info(f"Web server at {url}")
 
     tornado.ioloop.IOLoop.instance().start()
 
