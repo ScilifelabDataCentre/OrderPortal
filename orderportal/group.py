@@ -152,7 +152,7 @@ class GroupLogs(GroupMixin, RequestHandler):
             return
         self.render(
             "logs.html",
-            title=f"Logs for group {group['name']}",
+            title=f"Logs group '{group['name']}'",
             logs=self.get_logs(group["_id"]),
         )
 

@@ -951,6 +951,31 @@ class Display(RequestHandler):
         self.see_other("admin_display")
 
 
+class Statistics(RequestHandler):
+    "Collect some statistics."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        yearly = {}
+        for row in self.db.view("order", "year_submitted", reduce=True, group_level=1):
+            yearly[row.key] = dict(n_orders=row.value, users=set())
+        order_year = {}
+        for row in self.db.view("order", "year_submitted", reduce=False):
+            order_year[row.id] = row.key
+        for row in self.db.view("order", "owner", reduce=False):
+            try:
+                yearly[order_year[row.id]]["users"].add(row.key[0])
+            except KeyError:    # Orders that have not been submitted.
+                pass
+        totals = dict(n_orders=sum([y["n_orders"] for y in yearly.values()]),
+                      users=set())
+        for data in yearly.values():
+            totals["users"].update(data["users"])
+        yearly["Total"] = totals
+        self.render("admin/statistics.html", yearly=yearly)
+
+
 class Database(RequestHandler):
     "Page displaying info about the database."
 

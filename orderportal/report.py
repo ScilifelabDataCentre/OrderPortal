@@ -540,7 +540,7 @@ class ReportLogs(ReportMixin, RequestHandler):
         except ValueError as error:
             self.see_other("home", error=error)
             return
-        title = f"Logs for report '{report['name'] or '[no name]'}'"
+        title = f"Logs report '{report['name'] or '[no name]'}'"
         self.render("logs.html", title=title, logs=self.get_logs(report["_id"]))
 
 

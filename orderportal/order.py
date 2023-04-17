@@ -1125,7 +1125,7 @@ class OrderLogs(OrderMixin, RequestHandler):
             return
         self.render(
             "logs.html",
-            title=f"Logs for {utils.terminology('order')} '{order['title'] or '[no title]'}'",
+            title=f"Logs {utils.terminology('order')} '{order['title'] or '[no title]'}'",
             logs=self.get_logs(order["_id"]),
         )
 

@@ -163,6 +163,7 @@
                 <th style="text-align: left;">Document</th>
                 <th style="text-align: left;">Modified</th>
                 {% if am_staff %}
+                <th></th>
                 <th style="text-align: left;">Status</th>
                 <th></th>
                 <th></th>
@@ -188,6 +189,7 @@
                 </td>
                 <td class="localtime">{{ report['modified'] }}</td>
                 {% if am_staff %}
+                <td>{% module LogsLink(report) %}</td>
                 <td>{% module Status(report['status']) %}</td>
                 <td>
                   {% if report['status'] == constants.REVIEW and current_user and report['reviewers'].get(current_user['email'], {}).get('status') == constants.REVIEW %}
