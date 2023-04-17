@@ -87,7 +87,7 @@ def migrate_meta_documents(db):
             logger.info(f"Loaded legacy order status configuration from file '{filepath}'.")
         except KeyError:
             logger.warning(f"Defaults used for order statuses.")
-        except FileNotFoundError as error:
+        except (FileNotFoundError, TypeError) as error:
             logger.warning(f"Defaults used for order statuses; {error}")
         except yaml.YAMLError as error:
             logger.warning(f"Error trying to read ORDER_STATUSES_FILE: {error}")
@@ -116,7 +116,7 @@ def migrate_meta_documents(db):
             logger.info(f"Loaded legacy order transitions configuration from file '{filepath}'.")
         except KeyError:
             logger.warning(f"Defaults used for order transitions.")
-        except FileNotFoundError as error:
+        except (FileNotFoundError, TypeError) as error:
             logger.warning(f"Defaults used for order transitions; {error}")
         except yaml.YAMLError as error:
             logger.warning(f"Error trying to read ORDER_TRANSITIONS_FILE: {error}")
@@ -256,7 +256,7 @@ def migrate_meta_documents(db):
             universities.sort(key=lambda i: (i[1].get("rank"), i[0]))
             universities = dict(universities)
             logger.info(f"Loaded legacy universities configuration from file '{filepath}'.")
-        except (KeyError, FileNotFoundError):
+        except (KeyError, FileNotFoundError, TypeError):
             logger.warning("No legacy information for universities.")
         with MetaSaver(doc=doc, db=db) as saver:
             saver["universities"] = universities
@@ -272,7 +272,7 @@ def migrate_meta_documents(db):
             with open(filepath) as infile:
                 subject_terms = yaml.safe_load(infile) or []
             logger.info(f"Loaded legacy subject terms configuration from file '{filepath}'.")
-        except (KeyError, FileNotFoundError):
+        except (KeyError, FileNotFoundError, TypeError):
             logger.warning("No legacy information for subject terms.")
         with MetaSaver(doc=doc, db=db) as saver:
             saver["subject_terms"] = subject_terms
@@ -949,6 +949,31 @@ class Display(RequestHandler):
         orderportal.config.load_settings_from_db(self.db)
         self.set_message_flash("Saved display configuration.")
         self.see_other("admin_display")
+
+
+class Statistics(RequestHandler):
+    "Collect some statistics."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        yearly = {}
+        for row in self.db.view("order", "year_submitted", reduce=True, group_level=1):
+            yearly[row.key] = dict(n_orders=row.value, users=set())
+        order_year = {}
+        for row in self.db.view("order", "year_submitted", reduce=False):
+            order_year[row.id] = row.key
+        for row in self.db.view("order", "owner", reduce=False):
+            try:
+                yearly[order_year[row.id]]["users"].add(row.key[0])
+            except KeyError:    # Orders that have not been submitted.
+                pass
+        totals = dict(n_orders=sum([y["n_orders"] for y in yearly.values()]),
+                      users=set())
+        for data in yearly.values():
+            totals["users"].update(data["users"])
+        yearly["Total"] = totals
+        self.render("admin/statistics.html", yearly=yearly)
 
 
 class Database(RequestHandler):

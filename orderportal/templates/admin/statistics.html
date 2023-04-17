@@ -1,0 +1,31 @@
+{# Statistics display page. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Statistics{% end %}
+{% block body_title %}Statistics{% end %}
+
+{% block content %}
+<table class="table">
+  <caption>
+    Number of {{ terminology('orders') }}, and number of users per
+    year, based on date of submission.
+  </caption>
+  <thead>
+    <tr>
+      <th>Year</th>
+      <th># of {{ terminology('orders') }}</th>
+      <th># of users</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for year, item in yearly.items() %}
+    <tr>
+      <td>{{ year }}</td>
+      <td>{{ item['n_orders'] }}</td>
+      <td>{{ len(item['users']) }}</td>
+    </tr>
+    {% end %}
+  </tbody>
+</table>
+{% end %} {# block content #}

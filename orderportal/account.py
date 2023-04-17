@@ -727,9 +727,9 @@ class AccountLogs(AccessMixin, RequestHandler):
     "Display log entries for an account."
 
     @tornado.web.authenticated
-    def get(self, email):
+    def get(self, iuid):
         try:
-            account = self.get_account(email)
+            account = self.get_entity(iuid, doctype=constants.ACCOUNT)
             self.check_readable(account)
         except ValueError as error:
             self.see_other("home", error=error)
