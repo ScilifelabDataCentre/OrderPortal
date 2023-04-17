@@ -16,7 +16,7 @@ import tornado.web
 import yaml
 
 import orderportal
-from orderportal import constants, DEFAULT_SETTINGS, settings
+from orderportal import constants, settings
 from orderportal import saver
 from orderportal import utils
 from orderportal.requesthandler import RequestHandler
@@ -1019,7 +1019,8 @@ class Settings(RequestHandler):
     def get(self):
         self.check_admin()
         hidden = "&lt;hidden&gt;"
-        safe_settings = dict([(key, settings[key]) for key in DEFAULT_SETTINGS])
+        safe_settings = dict([(key, settings[key])
+                              for key in orderportal.config.DEFAULT_SETTINGS])
 
         # Hide sensitive data.
         for key in safe_settings:

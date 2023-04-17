@@ -10,18 +10,45 @@
 
 <div class="well">
   <p>
-    The settings are defined in the YAML settings file given by
-    <strong>SETTINGS_FILE</strong> (see below), which is read on
-    startup of the OrderPortal server.
+    Settings are read on startup of the server process. If a value for
+    a setting is changed, the server process must be restarted.
   </p>
   <p>
-    To change the settings, the YAML file must be edited and the
-    OrderPortal server restarted. Only the sysadmin for the server
-    machine can do this.
-  </p>
-  <p>
-    The full list of configuration variables is in the dictionary 'settings'
-    in the <code>OrderPortal/orderportal/__init__.py</code> file.
+    The settings values are determined in the following way:
+    <ol>
+      <li>
+        Initial values are defined in the DEFAULT_SETTINGS dictionary in the
+        source code file <code>OrderPortal/orderportal/config.py</code>.
+      </li>
+      <li>
+        The values found in a YAML settings file, if any, updates the settings.
+        <ol>
+          <li>
+            Read the YAML file given by environment variable
+            <code>ORDERPORTAL_SETTINGS_FILEPATH</code>, if defined.
+          </li>
+          <li>
+            Otherwise, read the file <code>OrderPortal/site/settings.yaml</code>,
+            if it exists.
+          </li>
+        </ol>
+      </li>
+      <li>      
+        The value given by an environment variable will be used, if it is defined.
+      </li>
+      <ol>
+        <li>
+          Enviroment variables may be defined for the process in the normal way.
+        </li>
+        <li>
+          Environment variables may also be defined in in the file
+          <code>OrderPortal/orderportal/.env</code>, if it exists. This
+          does <strong>not</strong> overwrite any already existing
+          environment variables. This uses the Python third-party
+          package <a href="https://pypi.org/project/python-dotenv/">python-dotenv</a>.
+        </li>
+      </ol>
+    </ol>
   </p>
 </div>
 

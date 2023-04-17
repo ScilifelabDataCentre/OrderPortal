@@ -2,7 +2,6 @@
 An order can be a project application, a request, a report, etc.
 """
 
-import copy
 import os.path
 import re
 import sys
@@ -10,7 +9,7 @@ import sys
 import pycountry
 
 
-__version__ = "10.2.3"
+__version__ = "10.3.0"
 
 
 class Constants:
@@ -319,40 +318,5 @@ class Constants:
 constants = Constants()
 
 
-DEFAULT_SETTINGS = dict(
-    TORNADO_DEBUG=False,
-    LOGGING_DEBUG=False,
-    BASE_URL="http://localhost:8881/",
-    BASE_URL_PATH_PREFIX=None,
-    PORT=8881,  # The port used by tornado.
-    DATABASE_SERVER="http://localhost:5984/",
-    DATABASE_NAME="orderportal",
-    DATABASE_ACCOUNT="orderportal_account",
-    DATABASE_PASSWORD=None,
-    COOKIE_SECRET=None,
-    PASSWORD_SALT=None,
-    SETTINGS_FILE=None,         # This value is set on startup.
-    SITE_NAME="OrderPortal",
-    SITE_FAVICON="orderportal32.png",
-    SITE_NAVBAR_ICON="orderportal32.png",
-    SITE_HOME_ICON="orderportal144.png",
-    SITE_CSS_FILE=None,
-    SITE_HOST_URL=None,
-    SITE_HOST_ICON=None,
-    SITE_HOST_TITLE=None,
-    ORDER_MESSAGES_FILE="order_messages.yaml",
-    ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",
-    ORDER_IDENTIFIER_FIRST=1,
-    MAIL_SERVER=None,  # If not set, then no emails can be sent.
-    MAIL_DEFAULT_SENDER=None,  # If not set, MAIL_USERNAME will be used.
-    MAIL_PORT=25,
-    MAIL_USE_SSL=False,
-    MAIL_USE_TLS=False,
-    MAIL_EHLO=None,
-    MAIL_USERNAME=None,
-    MAIL_PASSWORD=None,
-    MAIL_REPLY_TO=None,
-)
-
-# Settings to be modified by 'settings.yaml' file, by computed values, or from database.
-settings = copy.deepcopy(DEFAULT_SETTINGS)
+# Set by 'config.load_settings_from_file' and 'config.load_settings_from_db'.
+settings = {}
