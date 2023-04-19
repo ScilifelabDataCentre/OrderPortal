@@ -10,11 +10,20 @@
 {% end %} {# block action_content #}
 
 {% block main_content %}
-<form action="{{ reverse_url('text_edit', text['name']) }}"
-      method="POST" role="form">
+<form action="{{ reverse_url('text_edit', text['name']) }}" method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <h4>{{ text.get('description') or '-' }}</h4>
+
+  <div class="form-group">
+    <div class="row">
+      <div class="col-md-10">
+        <label for="description">Description</label>
+        <input type="text" id="description" name="description"
+               class="form-control" value="{{ text.get('description') or '' }}">
+      </div>
+    </div>
+  </div>
 
   {% if text["type"] == constants.ACCOUNT %}
   <div class="form-group">

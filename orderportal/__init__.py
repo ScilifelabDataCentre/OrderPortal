@@ -160,7 +160,7 @@ class Constants:
     TESTING = "testing"
     FORM_STATUSES = (PENDING, TESTING, ENABLED, DISABLED)
 
-    # The possible order statuses are now hard-wired.
+    # The possible order statuses are hard-wired.
     # The two first order statuses must always be present!
     # All statuses are stored in a meta document 'order_statuses' in the database,
     # with the changes made from the admin.DEFAULT_ORDER_STATUSES
@@ -210,6 +210,10 @@ class Constants:
         ARCHIVED,
         UNDEFINED,
     )
+
+    # Recipients of order messages.
+    OWNER = "owner"
+    ORDER_MESSAGE_RECIPIENTS = (ADMIN, OWNER, GROUP)
 
     # Delimiters to remove when searching for orders.
     ORDERS_SEARCH_DELIMS_LINT = (":", ",", ";", "'")

@@ -8,72 +8,7 @@
 {% block content %}
 <h4>Templates for email messages about order status changes.</h4>
 
-<div class="well">
-  <p>
-    A message is sent by email to a set of recipients when an order is
-    set to a given status. The currently defined messages are listed
-    below.
-  </p>
-  <p>
-    The templates for {{ terminology('order') }} messages are defined
-    in the YAML file
-    <code>{{ settings.get('ORDER_MESSAGES_FILE') }}</code>
-    in <strong>SITE_DIR</strong> '{{ constants.SITE_DIR }}' which is
-    read on startup of the OrderPortal server.
-  </p>
-  <p>
-    To change the messages, the YAML file must be edited and the
-    OrderPortal server restarted. Only the sysadmin for the server
-    machine can do this.
-  </p>
-  <table class="table table-condensed">
-    <tr>
-      <th>Variable</th>
-      <th>Value</th>
-    </tr>
-    <tr>
-      <td><code>{site}</code></td>
-      <td>The name of the OrderPortal site.</td>
-    </tr>
-    <tr>
-      <td><code>{site_url}</code></td>
-      <td>The URL of the OrderPortal site.</td>
-    </tr>
-    <tr>
-      <td><code>{support}</code></td>
-      <td>The contact email for the OrderPortal site.</td>
-    </tr>
-    <tr>
-      <td><code>{owner}</code></td>
-      <td>The account owning the {{ terminology('order') }};
-        usually its creator.</td>
-    </tr>
-    <tr>
-      <td><code>{title}</code></td>
-      <td>The title of the {{ terminology('order') }}.</td>
-    </tr>
-    <tr>
-      <td><code>{identifier}</code></td>
-      <td>The identifier of the {{ terminology('order') }}.</td>
-    </tr>
-    <tr>
-      <td><code>{url}</code></td>
-      <td>The absolute URL for the {{ terminology('order') }}.</td>
-    </tr>
-    <tr>
-      <td><code>{tags}</code></td>
-      <td>The tags set for the {{ terminology('order') }}, if any.</td>
-    </tr>
-    <tr>
-      <td><code>{host_title}</code></td>
-      <td>The name of the hosting site.</td>
-    </tr>
-    <tr>
-      <td><code>{host_url}</code></td>
-      <td>The URL of the hosting site.</td>
-    </tr>
-  </table>
-</div>
+{% include 'order_message_variables.html' %}
 
 <table class="table">
   <tr>
@@ -81,6 +16,7 @@
     <th>Recipients</th>
     <th>Subject</th>
     <th>Text</th>
+    <th></th>
   </tr>
   {% for status in settings['ORDER_STATUSES_LOOKUP'].values() %}
   {% set msg = settings['ORDER_MESSAGES'].get(status['identifier'], dict()) %}
@@ -89,6 +25,10 @@
     <td>{{ ', '.join(msg.get('recipients', [])) or '-' }}</td>
     <td>{{ msg.get('subject') or '-' }}</td>
     <td class="pre">{{ msg.get('text') or '-' }}</td>
+    <td>
+      <a href="{{ reverse_url('admin_order_message_edit', status['identifier']) }}"
+         class="btn btn-sm btn-primary btn-block" role="button">Edit</a>
+    </td>
   </tr>
   {% end %}
 </table>

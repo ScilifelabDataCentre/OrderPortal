@@ -257,7 +257,7 @@ def migrate_meta_documents(db):
             universities = dict(universities)
             logger.info(f"Loaded legacy universities configuration from file '{filepath}'.")
         except (KeyError, FileNotFoundError, TypeError):
-            logger.warning("No legacy information for universities.")
+            logger.warning("No legacy information for universities; none defined.")
         with MetaSaver(doc=doc, db=db) as saver:
             saver["universities"] = universities
         logger.info("Saved universities configuration in database.")
@@ -273,7 +273,7 @@ def migrate_meta_documents(db):
                 subject_terms = yaml.safe_load(infile) or []
             logger.info(f"Loaded legacy subject terms configuration from file '{filepath}'.")
         except (KeyError, FileNotFoundError, TypeError):
-            logger.warning("No legacy information for subject terms.")
+            logger.warning("No legacy information for subject terms; none defined.")
         with MetaSaver(doc=doc, db=db) as saver:
             saver["subject_terms"] = subject_terms
         logger.info("Saved subject terms configuration in database.")
@@ -293,6 +293,37 @@ def migrate_meta_documents(db):
             saver["menu_contact"] = settings.get("DISPLAY_MENU_CONTACT", True)
             saver["menu_about_us"] = settings.get("DISPLAY_MENU_ABOUT_US", True)
         logger.info("Saved display configuration in database.")
+
+    ### As of version 10.3.0, messages following order status changes
+    ### are stored in the database.
+    doc = db["order_statuses"]
+    if "message" not in doc["statuses"][0]:
+
+        # Load the legacy site ORDER_MESSAGES_FILE, if any. Or use defaults.
+        try:
+            filepath = os.path.join(constants.SITE_DIR, settings["ORDER_MESSAGES_FILE"])
+            with open(filepath) as infile:
+                order_messages = yaml.safe_load(infile) or []
+            logger.info(f"Loaded legacy order messages configuration from file '{filepath}'.")
+        except (KeyError, FileNotFoundError, TypeError):
+            order_messages = DEFAULT_ORDER_MESSAGES
+            logger.warning("No legacy information for order messages; using defaults.")
+
+        with MetaSaver(doc=doc, db=db) as saver:
+            for status in doc["statuses"]:
+                status["message"] = dict(recipients=[], subject="", text="")
+            for entry in doc["statuses"]:
+                try:
+                    old = order_messages[entry["identifier"]]
+                    entry["message"] = dict(
+                        recipients=old.get("recipients") or [],
+                        subject=old.get("subject") or "",
+                        text=old.get("text") or "")
+                except KeyError:
+                    pass
+        logger.info("Saved order messages configuration in database.")
+        
+
 
 def migrate_text_documents(db):
     """Create or update text documents for the current version of the system.
@@ -436,9 +467,12 @@ class TextEdit(RequestHandler):
             doc = self.get_text(constants.DISPLAY, name)
         except KeyError:
             raise tornado.web.HTTPError(404, reason="No such text.")
+        description = self.get_argument("description", "")
         text = self.get_argument("text", "")
         with TextSaver(doc=doc, handler=self) as saver:
+            saver["description"] = description
             saver["text"] = text
+        settings[doc["type"]][doc["name"]]["description"] = description
         settings[doc["type"]][doc["name"]]["text"] = text
         url = self.get_argument("origin", self.absolute_reverse_url("texts"))
         self.redirect(url, status=303)
@@ -747,6 +781,39 @@ class OrderMessages(RequestHandler):
     def get(self):
         self.check_admin()
         self.render("admin/order_messages.html")
+
+
+class OrderMessageEdit(RequestHandler):
+    "Edit an order message."
+
+    @tornado.web.authenticated
+    def get(self, status_id):
+        self.check_admin()
+        try:
+            status = settings["ORDER_STATUSES_LOOKUP"][status_id]
+        except KeyError:
+            self.see_other("admin_order_statuses", error="No such order status.")
+        else:
+            self.render("admin/order_message_edit.html", status=status)
+
+    @tornado.web.authenticated
+    def post(self, status_id):
+        self.check_admin()
+        try:
+            settings["ORDER_STATUSES_LOOKUP"][status_id]
+        except KeyError:
+            self.see_other("admin_order_statuses", error="No such order status.")
+            return
+        message = dict(recipients = list(set(self.get_arguments("recipients")).intersection(constants.ORDER_MESSAGE_RECIPIENTS)),
+                       subject = self.get_argument("subject", "").strip(),
+                       text = self.get_argument("text", "").strip())
+        with MetaSaver(doc=self.db["order_statuses"], handler=self) as saver:
+            for status in saver["statuses"]:
+                if status["identifier"] == status_id:
+                    status["message"] = message
+                    break
+        orderportal.config.load_settings_from_db(self.db)
+        self.see_other("admin_order_messages")
 
 
 class Account(RequestHandler):
@@ -1215,6 +1282,26 @@ DEFAULT_ORDER_TRANSITIONS[constants.PREPARATION][constants.SUBMITTED] = dict(
 )
 
 
+# Minimal order messages.
+DEFAULT_ORDER_MESSAGES = dict([(status, dict(recipients=[], subject="", text=""))
+                               for status in constants.ORDER_STATUSES])
+DEFAULT_ORDER_MESSAGES[constants.SUBMITTED] = dict(
+    recipients=["admin", "owner", "group"],
+    subject="The order '{title}' ({identifier}) has been submitted by {owner} to {site}.",
+    text="""This is to confirm that the  order '{title}' ({identifier}) has been
+submitted by {owner} to {site}.
+
+It will be reviewed by the {site} administrators who will contact you
+if further infomation is needed.
+
+Go to {url} to view the order.
+
+If you have any questions, use {support}
+
+Yours sincerely,
+The {site} administrators
+""")
+
 # Defaults for texts to be shown in some web pages.
 DEFAULT_TEXTS_DISPLAY = [
     dict(
@@ -1225,7 +1312,7 @@ be logged in to create, edit, submit and view orders.""",
     ),
     dict(
         name="register",
-        description="Registration page text.",
+        description="Account registration page text.",
         text="""In order to place orders, you must have registered an account in this system.
 Your email address is the account name in this portal.
 
@@ -1251,7 +1338,7 @@ above.""",
     ),
     dict(
         name="registered",
-        description="Text on page after registration.",
+        description="Text on page after account registration.",
         text="""An activation email will be sent to you from the administrator
 when your account has been enabled. This may take some time.""",
     ),

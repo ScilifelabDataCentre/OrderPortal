@@ -17,60 +17,60 @@
 <h4>Setup of order statuses and transitions.</h4>
 
 <table class="table">
-  <tr>
-    <th>Status</th>
-    <th>Description</th>
-    <th>From</th>
-    <th>To</th>
-    <th>May edit {{ terminology('order') }}</th>
-    <th>May attach to {{ terminology('order') }}</th>
-    <th># orders</th>
-    <th></th>
-  </tr>
-  {% for status in enabled %}
-  <tr>
-    <th>{% module Status(status['identifier']) %}</th>
-    <td>{{ status['description'] }}</td>
-    <td>
-      {% if status.get('initial') %}
-      <strong>[initial status]</strong><br>
-      {% end %}
-      {% for source, transition in targets.get(status["identifier"], {}).items() %}
-      <strong>{{ source }}</strong>
-      {% if transition.get('require_valid') %}<i>require valid</i>{% end %}
-      ({{', '.join(transition['permission']) }})
-      <br>
-      {% end %}
-    </td>
-    <td>
-      {% for target, transition in sources.get(status["identifier"], {}).items() %}
-      <strong>{{ target }}</strong>
-      {% if transition.get('require_valid') %}<i>require valid</i>{% end %}
-      ({{', '.join(transition['permission']) }})
-      <br>
-      {% end %}
-      {% if status['identifier'] != constants.PREPARATION %}
-      <a href="{{ reverse_url('admin_order_transitions_edit', status['identifier']) }}",
-         class="btn btn-sm btn-primary btn-block" role="button">
-        <span class="glyphicon glyphicon-edit"></span> Edit transitions
-      </a>
-      {% end %}
-    </td>
-    <td>{{ ', '.join(sorted(set(['admin'] + status.get('edit', [])))) or '-' }}</td>
-    <td>{{ ', '.join(sorted(set(['admin'] + status.get('attach', [])))) or '-' }}</td>
-    <td>
-      <a href="{{ reverse_url('orders', status=status['identifier']) }}" class="badge">
-        {{ counts.get(status['identifier'], 0) }}
-      </a>
-    </td>
-    <td>
-      <a href="{{ reverse_url('admin_order_status_edit', status['identifier']) }}",
-         class="btn btn-sm btn-primary btn-block" role="button">
-        <span class="glyphicon glyphicon-edit"></span> Edit status
-      </a>
-    </td>
-  </tr>
-  {% end %} {# for status in enabled #}
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Description</th>
+      <th>From</th>
+      <th>To</th>
+      <th>May edit {{ terminology('order') }}</th>
+      <th>May attach to {{ terminology('order') }}</th>
+      <th># orders</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for status in enabled %}
+    <tr>
+      <th>{% module Status(status['identifier']) %}</th>
+      <td>{{ status['description'] }}</td>
+      <td>
+        {% if status.get('initial') %}
+        <strong>[initial status]</strong><br>
+        {% end %}
+        {% for source, transition in targets.get(status["identifier"], {}).items() %}
+        <strong>{{ source }}</strong>
+        {% if transition.get('require_valid') %}<i>require valid</i>{% end %}
+        ({{', '.join(transition['permission']) }})
+        <br>
+        {% end %}
+      </td>
+      <td>
+        {% for target, transition in sources.get(status["identifier"], {}).items() %}
+        <strong>{{ target }}</strong>
+        {% if transition.get('require_valid') %}<i>require valid</i>{% end %}
+        ({{', '.join(transition['permission']) }})
+        <br>
+        {% end %}
+        {% if status['identifier'] != constants.PREPARATION %}
+        <a href="{{ reverse_url('admin_order_transitions_edit', status['identifier']) }}",
+           class="btn btn-sm btn-primary btn-block" role="button">Edit transitions</a>
+        {% end %}
+      </td>
+      <td>{{ ', '.join(sorted(set(['admin'] + status.get('edit', [])))) or '-' }}</td>
+      <td>{{ ', '.join(sorted(set(['admin'] + status.get('attach', [])))) or '-' }}</td>
+      <td>
+        <a href="{{ reverse_url('orders', status=status['identifier']) }}" class="badge">
+          {{ counts.get(status['identifier'], 0) }}
+        </a>
+      </td>
+      <td>
+        <a href="{{ reverse_url('admin_order_status_edit', status['identifier']) }}",
+           class="btn btn-sm btn-primary btn-block" role="button">Edit status</a>
+      </td>
+    </tr>
+    {% end %} {# for status in enabled #}
+  </tbody>
 
   {% for status in not_enabled %}
   <tr>

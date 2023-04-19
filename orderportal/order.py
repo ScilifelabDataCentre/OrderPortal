@@ -8,7 +8,6 @@ import traceback
 import urllib.parse
 import zipfile
 
-import couchdb2
 import tornado.web
 
 from orderportal import constants
@@ -472,23 +471,23 @@ class OrderSaver(saver.Saver):
                 )
 
     def send_message(self):
-        "Send a message after an order status change, if so configured."
+        """Send a message after an order status change, if so configured.
+        No message will be sent if there is no change of status, or if
+        no recipients have been defined.
+        """
         if self.original_status == self["status"]:
             return
-        try:
-            text_template = settings["ORDER_MESSAGES"][self["status"]]
-        except (couchdb2.NotFoundError, KeyError):
-            return
+        message_template = settings["ORDER_MESSAGES"][self["status"]]
         recipients = set()
         try:
             owner = self.handler.get_account(self["owner"])
         except ValueError:  # Owner account may have been deleted.
             pass
-        else:
+        else:  # Meaningful only if the owner account actually still exists.
             email = owner["email"]
-            if "owner" in text_template["recipients"]:
+            if "owner" in message_template["recipients"]:
                 recipients.add(owner["email"])
-            if constants.GROUP in text_template["recipients"]:
+            if constants.GROUP in message_template["recipients"]:
                 colleagues = dict()
                 for row in self.db.view(
                     "group",
@@ -505,19 +504,21 @@ class OrderSaver(saver.Saver):
                             pass
                 for colleague in colleagues.values():
                     recipients.add(colleague["email"])
-        if constants.ADMIN in text_template["recipients"]:
+        if constants.ADMIN in message_template["recipients"]:
             for admin in self.handler.get_admins():
                 if admin["status"] == constants.ENABLED:
                     recipients.add(admin["email"])
+        if not recipients:
+            return
         try:
             with MessageSaver(handler=self.handler) as saver:
                 saver.create(
-                    text_template,
-                    owner=self["owner"],
-                    title=self["title"],
+                    message_template,
                     identifier=self.get("identifier") or self["_id"],
-                    url=utils.get_order_url(self.doc),
+                    owner=self["owner"],
                     tags=", ".join(self.get("tags", [])),
+                    title=self["title"],
+                    url=utils.get_order_url(self.doc),
                 )
                 saver.send(list(recipients))
         except ValueError as error:

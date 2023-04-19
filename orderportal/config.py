@@ -33,7 +33,6 @@ DEFAULT_SETTINGS = dict(
     SITE_HOST_URL=None,
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
-    ORDER_MESSAGES_FILE="order_messages.yaml",
     ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",
     ORDER_IDENTIFIER_FIRST=1,
     MAIL_SERVER=None,  # If not set, then no emails can be sent.
@@ -144,6 +143,7 @@ def load_settings_from_file():
             )
 
     # Read order messages YAML file.
+    # XXX
     filepath = settings.get("ORDER_MESSAGES_FILE")
     if filepath:
         filepath = os.path.join(constants.SITE_DIR, filepath)
@@ -177,6 +177,12 @@ def load_settings_from_db(db):
     settings["ORDER_STATUSES"] = doc["statuses"]
     settings["ORDER_TRANSITIONS"] = doc["transitions"]
     logger.info("Loaded order statuses configuration from database into 'settings'.")
+
+    settings["ORDER_MESSAGES"] = dict([(status, dict(recipients=[], subject="", text=""))
+                                       for status in constants.ORDER_STATUSES])
+    for status in doc["statuses"]:
+        settings["ORDER_MESSAGES"][status["identifier"]] = status["message"]
+    logger.info("Loaded order messages configuration from database into 'settings'.")
 
     doc = db["order"]
     settings["ORDER_CREATE_USER"] = doc.get("create_user", True)

@@ -1,0 +1,58 @@
+{# Table of subject and text variables for messages. #}
+<div class="well">
+  <p>
+    The message subject line and text body may contain variables which
+    are substituted according to the table.
+  </p>
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>Variable</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>{host}</code></td>
+        <td>The name of the hosting site.</td>
+      </tr>
+      <tr>
+        <td><code>{host_url}</code></td>
+        <td>The URL of the hosting site.</td>
+      </tr>
+      <tr>
+        <td><code>{identifier}</code></td>
+        <td>The identifier of the {{ terminology('order') }}.</td>
+      </tr>
+      <tr>
+        <td><code>{owner}</code></td>
+        <td>The account owning the {{ terminology('order') }}; usually its creator.</td>
+      </tr>
+      <tr>
+        <td><code>{site}</code></td>
+        <td>The name of the OrderPortal site.</td>
+      </tr>
+      <tr>
+        <td><code>{site_url}</code></td>
+        <td>The URL of the OrderPortal site.</td>
+      </tr>
+      <tr>
+        <td><code>{support}</code></td>
+        <td>The contact email for the OrderPortal site.</td>
+      </tr>
+      <tr>
+        <td><code>{tags}</code></td>
+        <td>The tags set for the {{ terminology('order') }}, if any.</td>
+      </tr>
+      <tr>
+        <td><code>{title}</code></td>
+        <td>The title of the {{ terminology('order') }}.</td>
+      </tr>
+      <tr>
+        <td><code>{url}</code></td>
+        <td>The absolute URL for the {{ terminology('order') }}.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
