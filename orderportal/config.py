@@ -33,7 +33,7 @@ DEFAULT_SETTINGS = dict(
     SITE_HOST_URL=None,
     SITE_HOST_ICON=None,
     SITE_HOST_TITLE=None,
-    ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",
+    ORDER_IDENTIFIER_FORMAT="OP{0:=05d}", # Order identifier format; site-unique prefix.
     ORDER_IDENTIFIER_FIRST=1,
     MAIL_SERVER=None,  # If not set, then no emails can be sent.
     MAIL_DEFAULT_SENDER=None,  # If not set, MAIL_USERNAME will be used.
@@ -125,33 +125,24 @@ def load_settings_from_file():
     if len(settings["COOKIE_SECRET"]) < 10:
         raise ValueError("setting COOKIE_SECRET is too short.")
 
-    # Check valid order identifier format; prefix all upper case characters
+    # Check valid order identifier format; prefix all upper case characters.
     if not settings["ORDER_IDENTIFIER_FORMAT"]:
         raise ValueError("Undefined ORDER_IDENTIFIER_FORMAT")
-    if not isinstance(settings["ORDER_IDENTIFIER_FIRST"], int):
-        raise ValueError("ORDER_IDENTIFIER_FIRST is not an integer")
     if not settings["ORDER_IDENTIFIER_FORMAT"][0].isalpha():
         raise ValueError(
-            "ORDER_IDENTIFIER_FORMAT prefix contain at least one alphabetical character"
+            "ORDER_IDENTIFIER_FORMAT prefix must contain at least one alphabetical character"
         )
     for c in settings["ORDER_IDENTIFIER_FORMAT"]:
-        if not c.isalpha():
+        if c.isdigit():
+            raise ValueError("ORDER_IDENTIFIER_FORMAT prefix may not contain digits")
+        elif not c.isalpha():
             break
-        if not c.isupper():
+        elif c != c.upper():
             raise ValueError(
                 "ORDER_IDENTIFIER_FORMAT prefix must be all upper-case characters"
             )
-
-    # Read order messages YAML file.
-    # XXX
-    filepath = settings.get("ORDER_MESSAGES_FILE")
-    if filepath:
-        filepath = os.path.join(constants.SITE_DIR, filepath)
-        logger.info(f"Order messages file: {filepath}")
-        with open(filepath) as infile:
-            settings["ORDER_MESSAGES"] = yaml.safe_load(infile) or {}
-    else:
-        settings["ORDER_MESSAGES"] = {}
+    if not isinstance(settings["ORDER_IDENTIFIER_FIRST"], int):
+        raise ValueError("ORDER_IDENTIFIER_FIRST is not an integer")
 
     # Normalize the BASE_URL and BASE_URL_PATH_PREFIX values.
     # BASE_URL must contain only the scheme and netloc parts, with a trailing '/'.

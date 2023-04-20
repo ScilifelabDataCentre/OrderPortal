@@ -9,7 +9,7 @@ import sys
 import pycountry
 
 
-__version__ = "10.3.0"
+__version__ = "10.3.1"
 
 
 class Constants:
@@ -215,20 +215,26 @@ class Constants:
     OWNER = "owner"
     ORDER_MESSAGE_RECIPIENTS = (ADMIN, OWNER, GROUP)
 
-    # Delimiters to remove when searching for orders.
-    ORDERS_SEARCH_DELIMS_LINT = (":", ",", ";", "'")
-    # Words to remove when searching for orders.
+    # Delimiters to remove when searching in order titles.
+    ORDERS_SEARCH_DELIMS_LINT = (":", ",", ";", "'", '"', "(", ")")
+
+    # Words to remove when searching in order titles.
     ORDERS_SEARCH_LINT = (
         "an",
-        "to",
-        "in",
-        "on",
-        "of",
         "and",
-        "the",
+        "as",
+        "at",
+        "be",
+        "by",
+        "for",
         "is",
-        "was",
+        "in",
         "not",
+        "of",
+        "on",
+        "the",
+        "to",
+        "was",
     )
 
     # Sources in account for autopopulating an order field.
