@@ -10,19 +10,16 @@
 {% end %} {# block action_content #}
 
 {% block main_content %}
-<form action="{{ reverse_url('file_create') }}"
-      method="POST" role="form" enctype="multipart/form-data">
+<form action="{{ reverse_url('file_create') }}" method="POST" role="form" enctype="multipart/form-data">
   {% module xsrf_form_html() %}
 
   <div class="form-group has-feedback">
     <div class="row">
       <div class="col-md-6">
         <label for="name">Name</label>
-        <input type="text" class="form-control"
-               id="name" name="name">
-        <span style="color:red; margin-right: 1em;"
-              class="glyphicon glyphicon-star form-control-feedback"
-              aria-hidden="true"></span>
+        <input id="name" name="name" type="text" class="form-control">
+        <span style="color:red; margin-right: 1em;" aria-hidden="true"
+              class="glyphicon glyphicon-star form-control-feedback"></span>
       </div>
     </div>
     <div class="row">
@@ -72,10 +69,9 @@
     <div class="row">
       <div class="col-md-8">
         <label for="text">File upload</label>
-        <input type="file" name="file" class="form-control">
-        <span style="color:red; margin-right: 1em;"
-              class="glyphicon glyphicon-star form-control-feedback"
-              aria-hidden="true"></span>
+        <input type="file" name="file" id="file" class="form-control">
+        <span style="color:red; margin-right: 1em;" aria-hidden="true"
+              class="glyphicon glyphicon-star form-control-feedback"></span>
         <span class="help-block">
           The file to upload.
         </span>

@@ -170,6 +170,21 @@ class Entity(RequestHandler):
             self.see_other("home", error="Sorry, page not found.")
 
 
+class SiteFile(RequestHandler):
+    "Return a file configured for the site."
+
+    def get(self, name):
+        try:
+            data = settings[f"SITE_{name.upper()}"]
+            if data is None:
+                raise KeyError
+        except KeyError:
+            raise tornado.web.HTTPError(404)
+        else:
+            self.write(data["content"])
+            self.set_header("Content-Type", data["content_type"])
+
+
 class NoSuchEntity(RequestHandler):
     "Error message on home page."
 

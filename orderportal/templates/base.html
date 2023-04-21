@@ -4,19 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block head_title %}{{ settings['SITE_NAME'] }}{% end %}</title>
-    <link rel="shortcut icon"
-          href="{{ reverse_url('site', settings['SITE_FAVICON']) }}">
-    <link rel="stylesheet"
-          href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" crossorigin="anonymous"
-          href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" 
-          integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu">
-    <link rel="stylesheet"
-          href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css">       {% block css_page %}
+    <link rel="shortcut icon" href="{{ reverse_url('site', 'favicon') }}">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css">
+    {% block css_page %}
     {% end %}
-    <link rel="stylesheet" href="{{ static_url('mods.css') }}">
-    {% if settings['SITE_CSS_FILE'] %}
- <link rel="stylesheet" href="{{ reverse_url('site', settings['SITE_CSS_FILE']) }}">
+    <link rel="stylesheet" href="{{ static_url('modifications.css') }}">
+    {% if settings['SITE_CSS'] %}
+    <link rel="stylesheet" href="{{ reverse_url('site', 'css') }}">
     {% end %}
   </head>
 
@@ -30,13 +26,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          {% if settings['SITE_NAVBAR_ICON'] %}
           <a class="navbar-brand" href="{{ reverse_url('home') }}">
-            <img src="{{ reverse_url('site', settings['SITE_NAVBAR_ICON']) }}"
-                 title="{{ settings['SITE_NAME'] }}"
-                 alt="{{ settings['SITE_NAME'] }}">
+            {% if settings.get("SITE_ICON") %}
+            <img src="{{ reverse_url('site', 'icon') }}"
+                 title="{{ settings['SITE_NAME'] }}" alt="{{ settings['SITE_NAME'] }}">
+            {% end %}
           </a>
-          {% end %}
         </div>
         <div class="collapse navbar-collapse" id="myNavbar">
           <ul class="nav navbar-nav">
@@ -139,7 +134,11 @@
                   <a href="{{ reverse_url('texts') }}">Texts</a>
                 </li>
                 <li>
-                  <a href="{{ reverse_url('admin_order') }}">
+                  <a href="{{ reverse_url('admin_site_configuration') }}">
+                    Site configuration</a>
+                </li>
+                <li>
+                  <a href="{{ reverse_url('admin_order_configuration') }}">
                     {{ terminology('Order') }} configuration</a>
                 </li>
                 <li>
@@ -163,7 +162,7 @@
                     Account messages configuration</a>
                 </li>
                 <li>
-                  <a href="{{ reverse_url('admin_display') }}">Display configuration</a>
+                  <a href="{{ reverse_url('admin_display_configuration') }}">Display configuration</a>
                 </li>
                 <li>
                   <a href="{{ reverse_url('admin_statistics') }}">Statistics</a>
@@ -306,11 +305,11 @@
           {% if settings['SITE_HOST_URL'] %}
           <a href="{{ settings['SITE_HOST_URL'] or '#' }}" target="_blank">
             {% if settings['SITE_HOST_ICON'] %}
-            <img src="{{ reverse_url('site', settings['SITE_HOST_ICON']) }}"
-                 title="Site host {{ settings['SITE_HOST_TITLE'] or '' }}">
+            <img src="{{ reverse_url('site', 'host_icon') }}"
+                 title="Site host {{ settings['SITE_HOST_NAME'] or '' }}">
             &nbsp; 
             {% end %}
-            {{ settings['SITE_HOST_TITLE'] or 'Site host' }}
+            {{ settings['SITE_HOST_NAME'] or 'Site host' }}
           </a>
           {% end %}
         </div>

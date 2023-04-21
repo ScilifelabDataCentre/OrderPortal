@@ -241,6 +241,22 @@ def load_settings_from_db(db):
         [(s["code"], s["term"]) for s in settings["SUBJECT_TERMS"]]
     )
 
+    # Site configuration variables and files.
+    doc = db["site_configuration"]
+    settings["SITE_NAME"] = doc.get("name") or "OrderPortal"
+    settings["SITE_HOST_NAME"] = doc.get("host_name")
+    settings["SITE_HOST_URL"] = doc.get("host_url")
+    for name in ("icon", "favicon", "image", "css", "host_icon"):
+        key = f"SITE_{name.upper()}"
+        if doc.get("_attachments", {}).get(name):
+            settings[key] = dict(
+                content_type=doc["_attachments"][name]["content_type"],
+                content=db.get_attachment(doc, name).read()
+            )
+        else:
+            settings[key] = None
+
+
 def load_texts_from_db(db):
     "Load the texts from the database into settings."
     for type in (

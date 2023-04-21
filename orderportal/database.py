@@ -26,27 +26,27 @@ def update_design_documents(db):
     logger = logging.getLogger("orderportal")
 
     if db.put_design("account", ACCOUNT_DESIGN_DOC):
-        logger.info("Updated 'account' design document.")
+        logger.info("Updated 'account' CouchDB design document.")
     if db.put_design("file", FILE_DESIGN_DOC):
-        logger.info("Updated 'file' design document.")
+        logger.info("Updated 'file' CouchDB design document.")
     if db.put_design("form", FORM_DESIGN_DOC):
-        logger.info("Updated 'form' design document.")
+        logger.info("Updated 'form' CouchDB design document.")
     if db.put_design("group", GROUP_DESIGN_DOC):
-        logger.info("Updated 'group' design document.")
+        logger.info("Updated 'group' CouchDB design document.")
     if db.put_design("info", INFO_DESIGN_DOC):
-        logger.info("Updated 'info' design document.")
+        logger.info("Updated 'info' CouchDB design document.")
     if db.put_design("log", LOG_DESIGN_DOC):
-        logger.info("Updated 'log' design document.")
+        logger.info("Updated 'log' CouchDB design document.")
     if db.put_design("message", MESSAGE_DESIGN_DOC):
-        logger.info("Updated 'message' design document.")
+        logger.info("Updated 'message' CouchDB design document.")
     if db.put_design("meta", META_DESIGN_DOC):
-        logger.info("Updated 'meta' design document.")
+        logger.info("Updated 'meta' CouchDB design document.")
     if db.put_design("order", ORDER_DESIGN_DOC):
-        logger.info("Updated 'order' design document.")
+        logger.info("Updated 'order' CouchDB design document.")
     if db.put_design("report", REPORT_DESIGN_DOC):
-        logger.info("Updated 'report' design document.")
+        logger.info("Updated 'report' CouchDB design document.")
     if db.put_design("text", TEXT_DESIGN_DOC):
-        logger.info("Updated 'text' design document.")
+        logger.info("Updated 'text' CouchDB design document.")
 
     # As of version 10.2, the entity types news and event have been scrapped.
     # If the indexes still exist, remove the documents, logs and indexes.

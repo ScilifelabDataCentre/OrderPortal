@@ -65,7 +65,7 @@ class MessageSaver(saver.Saver):
         if settings["BASE_URL_PATH_PREFIX"]:
             site_url += settings["BASE_URL_PATH_PREFIX"]
         params = SafeDict(
-            host=settings.get("SITE_HOST_TITLE") or "[not defined]",
+            host=settings.get("SITE_HOST_NAME") or "[not defined]",
             host_url=settings.get("SITE_HOST_URL") or "[not defined]",
             site=settings["SITE_NAME"],
             site_url=site_url,

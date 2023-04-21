@@ -311,7 +311,16 @@ def main():
             orderportal.admin.OrderTransitionsEdit,
             name="admin_order_transitions_edit",
         ),
-        url(r"/admin/order", orderportal.admin.Order, name="admin_order"),
+        url(
+            r"/admin/site_configuration",
+            orderportal.admin.SiteConfiguration,
+            name="admin_site_configuration"
+        ),
+        url(
+            r"/admin/order_configuration",
+            orderportal.admin.OrderConfiguration,
+            name="admin_order_configuration"
+        ),
         url(
             r"/admin/order_messages",
             orderportal.admin.OrderMessages,
@@ -333,18 +342,17 @@ def main():
             orderportal.admin.AccountMessageEdit,
             name="admin_account_message_edit",
         ),
-        url(r"/admin/display", orderportal.admin.Display, name="admin_display"),
+        url(
+            r"/admin/display_configuration",
+            orderportal.admin.DisplayConfiguration,
+            name="admin_display_configuration"
+        ),
         url(r"/admin/statistics", orderportal.admin.Statistics, name="admin_statistics"),
         url(r"/admin/database", orderportal.admin.Database, name="admin_database"),
         url(r"/admin/document/(.+)", orderportal.admin.Document, name="admin_document"),
         url(r"/admin/settings", orderportal.admin.Settings, name="admin_settings"),
         url(r"/search", orderportal.search.Search, name="search"),
-        url(
-            r"/site/([^/]+)",
-            tornado.web.StaticFileHandler,
-            {"path": constants.SITE_STATIC_DIR},
-            name="site",
-        ),
+        url(r"/site/([^/]+)", orderportal.home.SiteFile, name="site"),
         url(r"/api/v1/(.*)", orderportal.home.NoSuchEntityApiV1),
         url(r"/(.*)", orderportal.home.NoSuchEntity),
     ]

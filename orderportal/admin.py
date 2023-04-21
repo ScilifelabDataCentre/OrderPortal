@@ -6,6 +6,7 @@ import email.message
 import io
 import json
 import logging
+import mimetypes
 import os
 import os.path
 import re
@@ -322,7 +323,88 @@ def migrate_meta_documents(db):
                 except KeyError:
                     pass
         logger.info("Saved order messages configuration in database.")
-        
+
+    ### As of version 11.0.0, the site configuration is stored in the database.
+    if "site_configuration" not in db:
+        with MetaSaver(db=db) as saver:
+            saver.set_id("site_configuration")
+            saver["name"] = settings.get("SITE_NAME") or "OrderPortal"
+            # Change the name of this item.
+            saver["host_name"] = settings.get("SITE_HOST_TITLE")
+            saver["host_url"] = settings.get("SITE_HOST_URL")
+
+        doc = saver.doc
+
+        # Read default site icon, or use that specified.
+        filepath = os.path.join(constants.ROOT_DIR, "orderportal32.png")
+        with open(filepath, "rb") as infile:
+            data = infile.read()
+            mimetype = mimetypes.guess_type(filepath)[0]
+        if settings.get("SITE_NAVBAR_ICON") and hasattr(constants, "SITE_STATIC_DIR"):
+            filepath = os.path.join(constants.SITE_STATIC_DIR, settings["SITE_NAVBAR_ICON"])
+            try:
+                with open(filepath, "rb") as infile:
+                    data = infile.read()
+                    mimetype = mimetypes.guess_type(filepath)[0]
+            except OSError:
+                pass
+        db.put_attachment(doc, data, filename="icon", content_type=mimetype)
+
+        # Set default site favicon, or read that specified.
+        filepath = os.path.join(constants.ROOT_DIR, "orderportal32.png")
+        with open(filepath, "rb") as infile:
+            data = infile.read()
+            mimetype = mimetypes.guess_type(filepath)[0]
+        if settings.get("SITE_FAVICON") and hasattr(constants, "SITE_STATIC_DIR"):
+            filepath = os.path.join(constants.SITE_STATIC_DIR, settings["SITE_FAVICON"])
+            try:
+                with open(filepath, "rb") as infile:
+                    data = infile.read()
+                    mimetype = mimetypes.guess_type(filepath)[0]
+            except OSError:
+                pass
+        db.put_attachment(doc, data, filename="favicon", content_type=mimetype)
+
+        # Read default site image, or use that specified.
+        filepath = os.path.join(constants.ROOT_DIR, "orderportal144.png")
+        with open(filepath, "rb") as infile:
+            data = infile.read()
+            mimetype = mimetypes.guess_type(filepath)[0]
+        if settings.get("SITE_HOME_ICON") and hasattr(constants, "SITE_STATIC_DIR"):
+            filepath = os.path.join(constants.SITE_STATIC_DIR, settings["SITE_HOME_ICON"])
+            try:
+                with open(filepath, "rb") as infile:
+                    data = infile.read()
+                    mimetype = mimetypes.guess_type(filepath)[0]
+            except OSError:
+                pass
+        db.put_attachment(doc, data, filename="image", content_type=mimetype)
+
+        # Read site CSS file, if any specified.
+        if settings.get("SITE_CSS_FILE") and hasattr(constants, "SITE_STATIC_DIR"):
+            filepath = os.path.join(constants.SITE_STATIC_DIR, settings["SITE_CSS_FILE"])
+            try:
+                with open(filepath, "r") as infile:
+                    data = infile.read()
+                    mimetype = mimetypes.guess_type(filepath)[0]
+            except OSError:
+                pass
+            else:
+                db.put_attachment(doc, data, filename="css", content_type=mimetype)
+
+        # Read host icon, if any specified.
+        if settings.get("SITE_HOST_ICON") and hasattr(constants, "SITE_STATIC_DIR"):
+            filepath = os.path.join(constants.SITE_STATIC_DIR, settings["SITE_HOST_ICON"])
+            try:
+                with open(filepath, "rb") as infile:
+                    data = infile.read()
+                    mimetype = mimetypes.guess_type(filepath)[0]
+            except OSError:
+                pass
+            else:
+                db.put_attachment(doc, data, filename="host_icon", content_type=mimetype)
+
+        logger.info("Saved site configuration in database.")
 
 
 def migrate_text_documents(db):
@@ -478,14 +560,113 @@ class TextEdit(RequestHandler):
         self.redirect(url, status=303)
 
 
-class Order(RequestHandler):
+class SiteConfiguration(RequestHandler):
+    "Display and edit the site configuration."
+
+    @tornado.web.authenticated
+    def get(self):
+        self.check_admin()
+        if settings["SITE_CSS"]:
+            css_code = settings["SITE_CSS"]["content"]
+        else:
+            css_code = ""
+        self.render("admin/site_configuration.html", css_code=css_code)
+
+    @tornado.web.authenticated
+    def post(self):
+        self.check_admin()
+        doc = self.db["site_configuration"]
+        with MetaSaver(doc=doc, handler=self) as saver:
+            saver["name"] = self.get_argument("name", "").strip() or "OrderPortal"
+            saver["host_name"] = self.get_argument("host_name", "").strip()
+            saver["host_url"] = self.get_argument("host_url", "").strip()
+        doc = saver.doc
+
+        # Site icon image.
+        if utils.to_bool(self.get_argument("remove_icon", False)):
+            try:
+                self.db.delete_attachment(doc, "icon")
+            except couchdb2.NotFoundError:
+                pass
+        elif utils.to_bool(self.get_argument("icon_default", False)):
+            filepath = os.path.join(constants.ROOT_DIR, "orderportal32.png")
+            with open(filepath, "rb") as infile:
+                data = infile.read()
+                mimetype = mimetypes.guess_type(filepath)[0]
+            self.db.put_attachment(doc, data, "icon", mimetype)
+        else:
+            try:
+                infile = self.request.files["icon"][0]
+            except (KeyError, IndexError):
+                pass
+            else:
+                self.db.put_attachment(doc, infile.body, "icon", infile.content_type)
+
+        # Site favicon image.
+        if utils.to_bool(self.get_argument("favicon_default", False)):
+            filepath = os.path.join(constants.ROOT_DIR, "orderportal32.png")
+            with open(filepath, "rb") as infile:
+                data = infile.read()
+                mimetype = mimetypes.guess_type(filepath)[0]
+            self.db.put_attachment(doc, data, "favicon", mimetype)
+        else:
+            try:
+                infile = self.request.files["favicon"][0]
+            except (KeyError, IndexError):
+                pass
+            else:
+                self.db.put_attachment(doc, infile.body, "favicon", infile.content_type)
+
+        # Site home page image.
+        if utils.to_bool(self.get_argument("image_default", False)):
+            filepath = os.path.join(constants.ROOT_DIR, "orderportal144.png")
+            with open(filepath, "rb") as infile:
+                data = infile.read()
+                mimetype = mimetypes.guess_type(filepath)[0]
+            self.db.put_attachment(doc, data, "image", mimetype)
+        else:
+            try:
+                infile = self.request.files["image"][0]
+            except (KeyError, IndexError):
+                pass
+            else:
+                self.db.put_attachment(doc, infile.body, "image", infile.content_type)
+
+        css = self.get_argument("css", "").strip()
+        if css:
+            self.db.put_attachment(doc, css, "css", "text/css")
+        else:
+            try:
+                self.db.delete_attachment(doc, "css")
+            except couchdb2.NotFoundError:
+                pass
+
+        # Host icon image.
+        if utils.to_bool(self.get_argument("remove_host_icon", False)):
+            try:
+                self.db.delete_attachment(doc, "host_icon")
+            except couchdb2.NotFoundError:
+                pass
+        else:
+            try:
+                infile = self.request.files["host_icon"][0]
+            except (KeyError, IndexError):
+                pass
+            else:
+                self.db.put_attachment(doc, infile.body, "host_icon", infile.content_type)
+
+        self.set_message_flash("Saved site configuration.")
+        orderportal.config.load_settings_from_db(self.db)
+        self.see_other("admin_site_configuration")
+
+
+class OrderConfiguration(RequestHandler):
     "Display and edit the order configuration."
 
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        doc = self.db["order"]
-        self.render("admin/order.html")
+        self.render("admin/order_configuration.html")
 
     @tornado.web.authenticated
     def post(self):
@@ -513,9 +694,9 @@ class Order(RequestHandler):
                     saver["terminology"].pop(builtin_term, None)
                 else:
                     saver["terminology"][builtin_term] = term
-        orderportal.config.load_settings_from_db(self.db)
         self.set_message_flash("Saved order configuration.")
-        self.see_other("admin_order")
+        orderportal.config.load_settings_from_db(self.db)
+        self.see_other("admin_order_configuration")
 
 
 class OrderStatuses(RequestHandler):
@@ -769,8 +950,8 @@ class OrdersList(RequestHandler):
                 saver["default_order_sort"] = "asc"
             else:
                 saver["default_order_sort"] = "desc"
-        orderportal.config.load_settings_from_db(self.db)
         self.set_message_flash("Saved orders list configuration.")
+        orderportal.config.load_settings_from_db(self.db)
         self.see_other("admin_orders_list")
 
 
@@ -925,8 +1106,8 @@ class Account(RequestHandler):
                         subject_terms.append(item)
                         subject_terms_codes.add(item["code"])
             saver["subject_terms"] = subject_terms
-        orderportal.config.load_settings_from_db(self.db)
         self.set_message_flash("Saved account configuration.")
+        orderportal.config.load_settings_from_db(self.db)
         self.see_other("admin_account")
 
 
@@ -968,13 +1149,13 @@ class AccountMessageEdit(RequestHandler):
         self.see_other("admin_account_messages")
 
 
-class Display(RequestHandler):
+class DisplayConfiguration(RequestHandler):
     "Display and edit of display configuration."
 
     @tornado.web.authenticated
     def get(self):
         self.check_admin()
-        self.render("admin/display.html")
+        self.render("admin/display_configuration.html")
 
     @tornado.web.authenticated
     def post(self):
@@ -1013,9 +1194,9 @@ class Display(RequestHandler):
             saver["menu_about_us"] = utils.to_bool(
                 self.get_argument("menu_about_us", False)
             )
-        orderportal.config.load_settings_from_db(self.db)
         self.set_message_flash("Saved display configuration.")
-        self.see_other("admin_display")
+        orderportal.config.load_settings_from_db(self.db)
+        self.see_other("admin_display_configuration")
 
 
 class Statistics(RequestHandler):
@@ -1107,9 +1288,6 @@ class Settings(RequestHandler):
             url = list(url)
             url[match.start(1) : match.end(1)] = "password"
             safe_settings["DATABASE_SERVER"] = "".join(url)
-        safe_settings[
-            "ORDER_MESSAGES"
-        ] = f"&lt;see file {safe_settings['ORDER_MESSAGES_FILE']}&gt;"
         self.render("admin/settings.html", safe_settings=safe_settings)
 
 
