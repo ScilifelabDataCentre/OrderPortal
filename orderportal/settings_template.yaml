@@ -1,0 +1,56 @@
+# OrderPortal: Settings file, to be edited for your instance.
+# Alternatively, configuration values may be provided as environment variables.
+
+### The OrderPortal instance will look for a settings file in:
+### 1) The location given by the environment variable ORDERPORTAL_SETTINGS_FILEPATH
+### 2) The file path 'OrderPortal/site/settings.yaml'
+
+# This file changes the default values defined in the 'settings' dictionary
+# in the '__init__.py' file.
+
+# tornado debug is useful only during software development.
+TORNADO_DEBUG: false
+# Debug logging level; may be useful for debugging the settings. Or set to 'false'.
+LOGGING_DEBUG: true
+
+# Official URL to the portal; access from the outside world.
+BASE_URL: 'http://my-domain.com/'
+# The following may be useful for testing on a laptop:
+# BASE_URL: 'http://localhost:8880/'
+
+# Port for the tornado server; may be different from BASE_URL if a proxy is used.
+PORT: 8880
+
+# The URL of the CouchDB server.
+DATABASE_SERVER:   'http://localhost:5984/'
+# The name of the database in the CouchDB server to use for OrderPortal
+DATABASE_NAME:     'orderportal'
+# The name of the CouchDB user account to use for creating, accessing and modifying.
+DATABASE_ACCOUNT:  'orderportal_account'
+# The password of the CouchDB user account.
+DATABASE_PASSWORD: 'Change this to CouchDB account password'
+
+# Salts for password and login secrets hashing.
+# These *MUST* be changed for your instance, and must be kept constant once set.
+COOKIE_SECRET: 'Change this to a long string of random characters.'
+PASSWORD_SALT: 'Change this to another long string of random characters.'
+
+# The format for generating the sequentially numbered order identifiers.
+# The prefix must be all upper-case characters.
+ORDER_IDENTIFIER_FORMAT: 'MY{0:=05d}'
+
+# Email setup. Not strictly required, but emails for account registration,
+# password setting and order status updates will not be sent.
+# This would complicate life for the administrators.
+
+# Email settings using Google server and the webservice account; not relay!.
+MAIL_SERVER: 'smtp.gmail.com'
+MAIL_DEFAULT_SENDER: '"OrderPortal webservice" <webservice@whatever.com>'
+MAIL_PORT: 587
+MAIL_USE_TLS: true
+MAIL_USERNAME: 'webservice@whatever.com'
+# App-specific password for best behaviour.
+MAIL_PASSWORD: '16-char code'
+
+# Email server settings when available on the local machine.
+# MAIL_SERVER: localhost

@@ -25,14 +25,6 @@ DEFAULT_SETTINGS = dict(
     PASSWORD_SALT=None,
     SETTINGS_FILE=None,         # This value is set on startup.
     SETTINGS_ENVVAR=False,      # This value is set on startup.
-    # SITE_NAME="OrderPortal",
-    # SITE_FAVICON="orderportal32.png",
-    # SITE_NAVBAR_ICON="orderportal32.png",
-    # SITE_HOME_ICON="orderportal144.png",
-    # SITE_CSS_FILE=None,
-    # SITE_HOST_URL=None,
-    # SITE_HOST_ICON=None,
-    # SITE_HOST_TITLE=None,
     ORDER_IDENTIFIER_FORMAT="OP{0:=05d}", # Order identifier format; site-unique prefix.
     ORDER_IDENTIFIER_FIRST=1,
     MAIL_SERVER=None,  # If not set, then no emails can be sent.

@@ -4,4 +4,4 @@
 *.yaml
 *.json
 site*
-!site_template/*.yaml
+!orderportal/settings_template.yaml
