@@ -25,14 +25,14 @@ DEFAULT_SETTINGS = dict(
     PASSWORD_SALT=None,
     SETTINGS_FILE=None,         # This value is set on startup.
     SETTINGS_ENVVAR=False,      # This value is set on startup.
-    SITE_NAME="OrderPortal",
-    SITE_FAVICON="orderportal32.png",
-    SITE_NAVBAR_ICON="orderportal32.png",
-    SITE_HOME_ICON="orderportal144.png",
-    SITE_CSS_FILE=None,
-    SITE_HOST_URL=None,
-    SITE_HOST_ICON=None,
-    SITE_HOST_TITLE=None,
+    # SITE_NAME="OrderPortal",
+    # SITE_FAVICON="orderportal32.png",
+    # SITE_NAVBAR_ICON="orderportal32.png",
+    # SITE_HOME_ICON="orderportal144.png",
+    # SITE_CSS_FILE=None,
+    # SITE_HOST_URL=None,
+    # SITE_HOST_ICON=None,
+    # SITE_HOST_TITLE=None,
     ORDER_IDENTIFIER_FORMAT="OP{0:=05d}", # Order identifier format; site-unique prefix.
     ORDER_IDENTIFIER_FIRST=1,
     MAIL_SERVER=None,  # If not set, then no emails can be sent.
@@ -175,6 +175,22 @@ def load_settings_from_db(db):
         settings["ORDER_MESSAGES"][status["identifier"]] = status["message"]
     logger.info("Loaded order messages configuration from database into 'settings'.")
 
+    # Site configuration variables and files.
+    doc = db["site_configuration"]
+    settings["SITE_NAME"] = doc.get("name") or "OrderPortal"
+    settings["SITE_HOST_NAME"] = doc.get("host_name")
+    settings["SITE_HOST_URL"] = doc.get("host_url")
+    for name in ("icon", "favicon", "image", "css", "host_icon"):
+        key = f"SITE_{name.upper()}"
+        if doc.get("_attachments", {}).get(name):
+            settings[key] = dict(
+                content_type=doc["_attachments"][name]["content_type"],
+                content=db.get_attachment(doc, name).read()
+            )
+        else:
+            settings[key] = None
+    logger.info("Loaded site configuration from database into 'settings'.")
+
     doc = db["order"]
     settings["ORDER_CREATE_USER"] = doc.get("create_user", True)
     settings["ORDER_AUTOPOPULATE"] = doc.get("autopopulate", {}) or {}
@@ -240,21 +256,6 @@ def load_settings_from_db(db):
     settings["SUBJECT_TERMS_LOOKUP"] = dict(
         [(s["code"], s["term"]) for s in settings["SUBJECT_TERMS"]]
     )
-
-    # Site configuration variables and files.
-    doc = db["site_configuration"]
-    settings["SITE_NAME"] = doc.get("name") or "OrderPortal"
-    settings["SITE_HOST_NAME"] = doc.get("host_name")
-    settings["SITE_HOST_URL"] = doc.get("host_url")
-    for name in ("icon", "favicon", "image", "css", "host_icon"):
-        key = f"SITE_{name.upper()}"
-        if doc.get("_attachments", {}).get(name):
-            settings[key] = dict(
-                content_type=doc["_attachments"][name]["content_type"],
-                content=db.get_attachment(doc, name).read()
-            )
-        else:
-            settings[key] = None
 
 
 def load_texts_from_db(db):
