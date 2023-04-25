@@ -1,8 +1,6 @@
 *~
 *.pyc
 *.bak
-*.yaml
-!orderportal/settings_template.yaml
 *.json
 site*
 !orderportal/templates/admin/site_configuration.html

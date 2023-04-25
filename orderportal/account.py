@@ -753,22 +753,18 @@ class AccountMessages(AccessMixin, RequestHandler):
         except ValueError as error:
             self.see_other("home", error=error)
             return
-        view = self.db.view(
-            "message",
-            "recipient",
-            startkey=[account["email"]],
-            endkey=[account["email"], constants.CEILING],
-        )
-        view = self.db.view(
-            "message",
-            "recipient",
-            descending=True,
-            startkey=[account["email"], constants.CEILING],
-            endkey=[account["email"]],
-            reduce=False,
-            include_docs=True,
-        )
-        messages = [r.doc for r in view]
+        messages = [
+            r.doc
+            for r in self.db.view(
+                "message",
+                "recipient",
+                descending=True,
+                startkey=[account["email"], constants.CEILING],
+                endkey=[account["email"]],
+                reduce=False,
+                include_docs=True,
+            )
+        ]
         self.render("account/messages.html", account=account, messages=messages)
 
 
@@ -918,10 +914,10 @@ class Login(RecipientsMixin, LoginMixin, RequestHandler):
                     saver["status"] = constants.DISABLED
                     saver.reset_password()
                 # Prepare email message about being disabled.
-                text = settings[constants.ACCOUNT][constants.DISABLED]
+                text_container = settings[constants.ACCOUNT][constants.DISABLED]
                 with MessageSaver(handler=self) as saver:
-                    saver.create(text)
-                    saver.send(self.get_recipients(text, account))
+                    saver.create(text_container)
+                    saver.send(self.get_recipients(text_container, account))
                 self.set_error_flash(
                     "Too many failed login attempts: Your account has been disabled. Contact the admin"
                 )
@@ -978,11 +974,11 @@ class Reset(RecipientsMixin, LoginMixin, RequestHandler):
                 return
             with AccountSaver(doc=account, handler=self) as saver:
                 saver.reset_password()
-            text = settings[constants.ACCOUNT][constants.RESET]
+            text_container = settings[constants.ACCOUNT][constants.RESET]
             try:
                 with MessageSaver(handler=self) as saver:
                     saver.create(
-                        text,
+                        text_container,
                         account=account["email"],
                         url=URL("password"),
                         password_url=URL("password"),
@@ -991,7 +987,7 @@ class Reset(RecipientsMixin, LoginMixin, RequestHandler):
                         ),
                         code=account["code"],
                     )
-                    saver.send(self.get_recipients(text, account))
+                    saver.send(self.get_recipients(text_container, account))
                     # Log out the user if same as the account that was reset.
                     if self.current_user == account:
                         self.do_logout()
@@ -1154,9 +1150,10 @@ class Register(RecipientsMixin, RequestHandler):
             self.see_other("register", error=error, **kwargs)
             return
         account = saver.doc
-        text = settings[constants.ACCOUNT][account["status"]]
+        # Status will be either 'pending' or 'enabled'.
+        text_container = settings[constants.ACCOUNT][account["status"]]
 
-        # Allow staff to avoid sending email to the person when registering an account.
+        # Allow staff to *not* send email to the person when registering an account.
         if self.am_staff() and not utils.to_bool(
             self.get_argument("send_email", False)
         ):
@@ -1167,7 +1164,7 @@ class Register(RecipientsMixin, RequestHandler):
         try:
             with MessageSaver(handler=self) as saver:
                 saver.create(
-                    text,
+                    text_container,
                     account=account["email"],
                     url=self.absolute_reverse_url("account", account["email"]),
                     password_url=self.absolute_reverse_url("password"),
@@ -1176,7 +1173,7 @@ class Register(RecipientsMixin, RequestHandler):
                     ),
                     code=account["code"],
                 )
-                saver.send(self.get_recipients(text, account))
+                saver.send(self.get_recipients(text_container, account))
         except (KeyError, ValueError) as error:
             self.set_error_flash(error)
         if self.am_staff():
@@ -1206,10 +1203,10 @@ class AccountEnable(RecipientsMixin, RequestHandler):
         with AccountSaver(account, handler=self) as saver:
             saver["status"] = constants.ENABLED
             saver.reset_password()
-        text = settings[constants.ACCOUNT][constants.ENABLED]
+        text_container = settings[constants.ACCOUNT][constants.ENABLED]
         with MessageSaver(handler=self) as saver:
             saver.create(
-                text,
+                text_container,
                 account=account["email"],
                 password_url=self.absolute_reverse_url("password"),
                 password_code_url=self.absolute_reverse_url(
@@ -1217,7 +1214,7 @@ class AccountEnable(RecipientsMixin, RequestHandler):
                 ),
                 code=account["code"],
             )
-            saver.send(self.get_recipients(text, account))
+            saver.send(self.get_recipients(text_container, account))
         self.see_other("account", account["email"])
 
 

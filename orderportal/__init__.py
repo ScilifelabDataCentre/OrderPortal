@@ -4,6 +4,7 @@ An order can be a project application, a request, a report, etc.
 
 import os.path
 import re
+import string
 import sys
 
 import pycountry
@@ -14,7 +15,7 @@ __version__ = "11.0.0"
 
 class Constants:
     def __setattr__(self, key, value):
-        raise ValueError("setting constant is not allowed")
+        raise ValueError("setting a constant is not allowed")
 
     VERSION = __version__
     SOURCE_URL = "https://github.com/pekrau/OrderPortal"
@@ -23,6 +24,8 @@ class Constants:
     TEMPLATE_DIR = os.path.normpath(os.path.join(ROOT_DIR, "templates"))
     STATIC_DIR = os.path.normpath(os.path.join(ROOT_DIR, "static"))
     SITE_DIR = os.path.normpath(os.path.join(ROOT_DIR, "../site"))
+    # The SITE_STATIC_DIR is no longer used, but may contain files that need
+    # to be loaded into the database when upgrading. So keep the definition.
     SITE_STATIC_DIR = os.path.normpath(os.path.join(ROOT_DIR, "../site/static"))
 
     PYTHON_VERSION = ".".join([str(i) for i in sys.version_info[0:3]])
@@ -33,7 +36,7 @@ class Constants:
     COUCHDB2_URL = "https://pypi.org/project/couchdb2"
     REQUESTS_URL = "https://docs.python-requests.org/"
     XLSXWRITER_URL = "https://pypi.org/project/XlsxWriter/"
-    MARKDOWN_URL = "https://pypi.org/project/Markdown/"
+    MARKO_URL = "https://pypi.org/project/marko/"
     MARKDOWN_NOTATION_INFO_URL = "https://www.markdownguide.org/cheat-sheet/"
     PYYAML_URL = "https://pypi.org/project/PyYAML/"
 
@@ -323,6 +326,8 @@ class Constants:
     COUNTRIES = dict(
         sorted([(c.alpha_2, c.name) for c in pycountry.countries], key=lambda c: c[1])
     )
+
+    ALLOWED_ID_CHARACTERS = frozenset(string.ascii_lowercase + string.digits + "-_")
 
 
 constants = Constants()

@@ -14,6 +14,8 @@
     {% if settings['SITE_CSS'] %}
     <link rel="stylesheet" href="{{ reverse_url('site', 'css') }}">
     {% end %}
+    {% block head_items %}
+    {% end %}
   </head>
 
   <body>
@@ -180,6 +182,9 @@
             </li>
             {% end %} {# if am_admin #}
 
+            <li>
+              <a href="{{ reverse_url('documentation') }}">Documentation</a>
+            </li>
             {% if settings['DISPLAY_MENU_CONTACT'] %}
             <li>
               <a href="{{ reverse_url('contact') }}">Contact</a>

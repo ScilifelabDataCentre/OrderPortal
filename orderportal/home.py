@@ -4,7 +4,7 @@ import os.path
 import sys
 
 import couchdb2
-import markdown
+import marko
 import requests
 import tornado
 import tornado.web
@@ -115,6 +115,13 @@ class About(RequestHandler):
         self.render("home/about.html")
 
 
+class Documentation(RequestHandler):
+    "Documentation page."
+
+    def get(self):
+        self.render("home/documentation.html")
+
+
 class Software(RequestHandler):
     "Display software information for the web site."
 
@@ -126,7 +133,7 @@ class Software(RequestHandler):
             ("CouchDB server", self.db.server.version, constants.COUCHDB_URL),
             ("CouchDB2 interface", couchdb2.__version__, constants.COUCHDB2_URL),
             ("XslxWriter", xlsxwriter.__version__, constants.XLSXWRITER_URL),
-            ("Markdown", markdown.version, constants.MARKDOWN_URL),
+            ("Marko", marko.__version__, constants.MARKO_URL),
             ("requests", requests.__version__, constants.REQUESTS_URL),
             ("PyYAML", yaml.__version__, constants.PYYAML_URL),
             ("Bootstrap", constants.BOOTSTRAP_VERSION, constants.BOOTSTRAP_URL),

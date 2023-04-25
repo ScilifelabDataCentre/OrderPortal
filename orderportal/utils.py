@@ -7,7 +7,7 @@ import mimetypes
 import uuid
 
 import couchdb2
-import markdown
+import marko
 import tornado.web
 import tornado.escape
 import xlsxwriter
@@ -67,14 +67,6 @@ def to_bool(value):
     if lowvalue in constants.FALSE:
         return False
     raise ValueError("invalid boolean: '{0}'".format(value))
-
-
-def markdown2html(text, safe=False):
-    "Process the text from Markdown to HTML."
-    text = text or ""
-    if not safe:
-        text = tornado.escape.xhtml_escape(text)
-    return markdown.markdown(text, output_format="html5")
 
 
 def csv_safe_row(row):
@@ -209,3 +201,50 @@ class XlsxWriter:
         self.workbook.close()
         self.xlsxbuffer.seek(0)
         return self.xlsxbuffer.getvalue()
+
+
+def markdown2html(text, safe=False):
+    "Process the text from Markdown to HTML."
+    text = text or ""
+    if not safe:
+        text = tornado.escape.xhtml_escape(text)
+    return marko.Markdown(renderer=HtmlRenderer).convert(text or "")
+
+
+class HtmlRenderer(marko.html_renderer.HTMLRenderer):
+    "Extension of Marko Markdown-to-HTML renderer."
+
+    def render_link(self, element):
+        """Allow setting <a> attribute '_target' to '_blank', when the title
+        begins with an exclamation point '!'.
+        """
+        if element.title and element.title.startswith("!"):
+            template = '<a target="_blank" href="{url}"{title}>{body}</a>'
+            element.title = element.title[1:]
+        else:
+            template = '<a href="{url}"{title}>{body}</a>'
+        title = (
+            ' title="{}"'.format(self.escape_html(element.title))
+            if element.title
+            else ""
+        )
+        return template.format(
+            url=self.escape_url(element.dest),
+            title=title,
+            body=self.render_children(element),
+        )
+
+    def render_heading(self, element):
+        "Add id to all headings."
+        id = self.get_text_only(element).replace(" ", "-").lower()
+        id = "".join(c for c in id if c in constants.ALLOWED_ID_CHARACTERS)
+        return '<h{level} id="{id}">{children}</h{level}>\n'.format(
+            level=element.level, id=id, children=self.render_children(element)
+        )
+
+    def get_text_only(self, element):
+        "Helper function to extract only the text from element and its children."
+        if isinstance(element.children, str):
+            return element.children
+        else:
+            return "".join([self.get_text_only(el) for el in element.children])

@@ -580,7 +580,7 @@ class OrderMixin:
             return
         raise tornado.web.HTTPError(
             403,
-            reason=f"You may not attach a file to the {utils.terminology('order')}."
+            reason=f"You may not attach a file to the {utils.terminology('order')}.",
         )
 
     def check_creation_enabled(self):
@@ -727,7 +727,7 @@ class OrderApiV1Mixin(OrderMixin, ApiV1Mixin):
                 iuid=order["form"],
                 title=form["title"],
                 version=form.get("version"),
-                links=dict(api=dict(href=URL("form", order["form"])))
+                links=dict(api=dict(href=URL("form", order["form"]))),
             )
         data["owner"] = dict(
             email=order["owner"],
@@ -739,20 +739,19 @@ class OrderApiV1Mixin(OrderMixin, ApiV1Mixin):
         )
         data["status"] = order["status"]
         data["reports"] = [
-            dict(iuid=report["_id"],
-                 name=report["name"],
-                 filename=list(report["_attachments"].keys())[0],
-                 status=report["status"],
-                 modified=report["modified"],
-                 links=dict(
-                     api=dict(
-                         href=self.absolute_reverse_url("report_api", report["_id"])
-                     ),
-                     file=dict(
-                         href=self.absolute_reverse_url("report", report["_id"])
-                     )
-                 )
-                 )
+            dict(
+                iuid=report["_id"],
+                name=report["name"],
+                filename=list(report["_attachments"].keys())[0],
+                status=report["status"],
+                modified=report["modified"],
+                links=dict(
+                    api=dict(
+                        href=self.absolute_reverse_url("report_api", report["_id"])
+                    ),
+                    file=dict(href=self.absolute_reverse_url("report", report["_id"])),
+                ),
+            )
             for report in self.get_reports(order)
         ]
         data["history"] = dict()
