@@ -1,0 +1,210 @@
+{# Display and edit site configuration. #}
+
+{% extends "../base.html" %}
+
+{% block head_title %}Site configuration{% end %}
+{% block body_title %}Site configuration{% end %}
+
+{% block action_content %}
+{% module CancelButton(reverse_url('home')) %}
+{% end %} {# block action_content #}
+
+{% block main_content %}
+<form action="{{ reverse_url('admin_site_configuration') }}" method="POST" role="form"
+      class="form-horizontal" enctype="multipart/form-data">
+  {% module xsrf_form_html() %}
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="name">Site name</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-5">
+          <input type="text" name="name" id="name" class="form-control"
+                 value="{{ settings['SITE_NAME'] }}">
+        </div>
+      </div>
+      <span class="help-block">
+        The name of this OrderPortal site.
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="icon">Site icon file upload</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-8">
+          <input type="file" name="icon" id="icon" class="form-control">
+        </div>
+      </div>
+      <span class="help-block">
+        The site icon file to upload.
+        {% if settings['SITE_ICON'] %}
+        Current site icon:
+        <img src="{{ reverse_url('site', 'icon') }}" style="border: 1px solid black">
+        {% else %}
+        No current site icon.
+        {% end %}
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="remove_site_icon">Remove site icon</label>
+    <div class="col-md-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="remove_icon" name="remove_icon" value="yes">
+          Remove the site icon.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="icon_default">Default site icon</label>
+    <div class="col-md-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="icon_default" name="icon_default" value="yes">
+          Revert to the default site icon.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="favicon">Favicon file upload</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-8">
+          <input type="file" name="favicon" id="favicon" class="form-control">
+        </div>
+      </div>
+      <span class="help-block">
+        The favicon file to upload. Current favicon:
+        <img src="{{ reverse_url('site', 'favicon') }}" style="border: 1px solid black">
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="favicon_default">Default favicon</label>
+    <div class="col-md-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="favicon_default" name="favicon_default" value="yes">
+          Revert to the default favicon.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="image">Home page image file upload</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-8">
+          <input type="file" name="image" id="image" class="form-control">
+        </div>
+      </div>
+      <span class="help-block">
+        The home page image file to upload. Current image:
+        <img src="{{ reverse_url('site', 'image') }}" style="border: 1px solid black">
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="image_default">Default home page image</label>
+    <div class="col-md-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="image_default" name="image_default" value="yes">
+          Revert to the default home page image.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="css">CSS code</label>
+    <div class="col-md-10">
+      <textarea name="css" id="css" class="form-control" rows="8">{{ css_code }}</textarea>
+      <span class="help-block">
+        The site-specific CSS code. Optional.
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="host_name">Host name</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-8">
+          <input type="text" name="host_name" id="host_name" class="form-control"
+                 value="{{ settings['SITE_HOST_NAME'] or '' }}">
+        </div>
+      </div>
+      <span class="help-block">
+        The name of the hosting site. Optional.
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="host_url">Host URL</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-8">
+          <input type="text" name="host_url" id="host_url" class="form-control"
+                 value="{{ settings['SITE_HOST_URL'] or '' }}">
+        </div>
+      </div>
+      <span class="help-block">
+        The URL of the hosting site. Optional.
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="host_icon">Host icon file upload</label>
+    <div class="col-md-10">
+      <div class="row">
+        <div class="col-md-8">
+          <input type="file" name="host_icon" id="host_icon" class="form-control">
+        </div>
+      </div>
+      <span class="help-block">
+        The host icon file to upload.
+        {% if settings['SITE_HOST_ICON'] %}
+        Current host icon:
+        <img src="{{ reverse_url('site', 'host_icon') }}" style="border: 1px solid black">
+        {% else %}
+        No current host icon.
+        {% end %}
+      </span>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="control-label col-md-2" for="remove_host_icon">Remove host icon</label>
+    <div class="col-md-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" id="remove_host_icon" name="remove_host_icon" value="yes">
+          Remove the host icon.
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="row form-group">
+    <div class="col-md-offset-2 col-md-3">
+      <button type="submit" class="btn btn-success btn-block">
+        <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+    </div>
+  </div>
+
+</form>
+{% end %} {# block main_content #}
