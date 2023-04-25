@@ -54,15 +54,6 @@ def load_settings_from_file():
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
     """
-    if not os.path.exists(constants.SITE_DIR):
-        raise OSError(
-            f"""The required site directory '{constants.SITE_DIR}' does not exist."""
-        )
-    if not os.path.isdir(constants.SITE_DIR):
-        raise OSError(
-            f"""The site directory path '{constants.SITE_DIR}' is not a directory."""
-        )
-
     settings.clear()
     settings.update(DEFAULT_SETTINGS)
 

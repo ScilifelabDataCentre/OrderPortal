@@ -15,7 +15,7 @@ __version__ = "11.0.0"
 
 class Constants:
     def __setattr__(self, key, value):
-        raise ValueError("setting constant is not allowed")
+        raise ValueError("setting a constant is not allowed")
 
     VERSION = __version__
     SOURCE_URL = "https://github.com/pekrau/OrderPortal"
@@ -24,7 +24,7 @@ class Constants:
     TEMPLATE_DIR = os.path.normpath(os.path.join(ROOT_DIR, "templates"))
     STATIC_DIR = os.path.normpath(os.path.join(ROOT_DIR, "static"))
     SITE_DIR = os.path.normpath(os.path.join(ROOT_DIR, "../site"))
-    # This directory is no longer used, but may contain files that need
+    # The SITE_STATIC_DIR is no longer used, but may contain files that need
     # to be loaded into the database when upgrading. So keep the definition.
     SITE_STATIC_DIR = os.path.normpath(os.path.join(ROOT_DIR, "../site/static"))
 
