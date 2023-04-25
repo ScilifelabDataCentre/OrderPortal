@@ -55,7 +55,7 @@ class ReportSaver(saver.Saver):
 
     def set_file(self, file):
         """Set the file content; attachment will be handled later.
-        Raise ValueError if any of the items 'data', 'filename' or 
+        Raise ValueError if any of the items 'data', 'filename' or
         'content_type' is missing.
         """
         if "filename" not in file:
@@ -208,42 +208,42 @@ class ReportApiV1Mixin(ApiV1Mixin):
     "Mixin for report JSON data structure."
 
     def get_report_json(self, report, order=None):
-        """Return a dictionary for JSON output for the report.
-        """
+        """Return a dictionary for JSON output for the report."""
         if order is None:
             order = self.get_order(report["order"])
         URL = self.absolute_reverse_url
-        data = dict(id=URL("report", report["_id"]),
-                    type="report",
-                    name=report["name"],
-                    iuid=report["_id"],
-                    file=dict(href=URL("report", report["_id"])),
-                    filename=list(report["_attachments"].keys())[0],
-                    order=dict(
-                        identifier=order.get("identifier"),
-                        title=order.get("title") or "[no title]",
-                        iuid=order["_id"],
-                        links=dict(
-                            api=dict(href=self.order_reverse_url(order, api=True)),
-                            display=dict(href=self.order_reverse_url(order)),
-                        )
-                    ),
-                    owner=dict(
-                        email=report["owner"],
-                        name=self.lookup_account_name(report["owner"]),
-                        links=dict(
-                            api=dict(href=URL("account_api", report["owner"])),
-                            display=dict(href=URL("account", report["owner"])),
-                        ),
-                    ),
-                    reviewers=report["reviewers"],
-                    status=report["status"],
-                    modified=report["modified"],
-                    links=dict(
-                        api=dict(href=URL("report_api", report["_id"])),
-                        display=dict(href=URL("report", report["_id"]))
-                    )
-                    )
+        data = dict(
+            id=URL("report", report["_id"]),
+            type="report",
+            name=report["name"],
+            iuid=report["_id"],
+            file=dict(href=URL("report", report["_id"])),
+            filename=list(report["_attachments"].keys())[0],
+            order=dict(
+                identifier=order.get("identifier"),
+                title=order.get("title") or "[no title]",
+                iuid=order["_id"],
+                links=dict(
+                    api=dict(href=self.order_reverse_url(order, api=True)),
+                    display=dict(href=self.order_reverse_url(order)),
+                ),
+            ),
+            owner=dict(
+                email=report["owner"],
+                name=self.lookup_account_name(report["owner"]),
+                links=dict(
+                    api=dict(href=URL("account_api", report["owner"])),
+                    display=dict(href=URL("account", report["owner"])),
+                ),
+            ),
+            reviewers=report["reviewers"],
+            status=report["status"],
+            modified=report["modified"],
+            links=dict(
+                api=dict(href=URL("report_api", report["_id"])),
+                display=dict(href=URL("report", report["_id"])),
+            ),
+        )
         return data
 
 
@@ -279,7 +279,13 @@ class ReportAdd(ReportMixin, RequestHandler):
                 saver["order"] = order["_id"]
                 saver["name"] = self.get_argument("name", None) or file.filename
                 saver.set_owner(self.get_argument("owner"))
-                saver.set_file(dict(body=file.body, filename=file.filename, content_type=file.content_type))
+                saver.set_file(
+                    dict(
+                        body=file.body,
+                        filename=file.filename,
+                        content_type=file.content_type,
+                    )
+                )
                 saver.set_reviewers(self.get_argument("reviewers", "").split())
                 saver.set_status(self.get_argument("status", None))
                 saver.send_reviewers_message()
@@ -475,7 +481,13 @@ class ReportEdit(ReportMixin, RequestHandler):
             except (KeyError, IndexError):
                 pass
             else:
-                saver.set_file(dict(body=file.body, filename=file.filename, content_type=file.content_type))
+                saver.set_file(
+                    dict(
+                        body=file.body,
+                        filename=file.filename,
+                        content_type=file.content_type,
+                    )
+                )
             saver.set_reviewers(self.get_argument("reviewers", "").split())
             saver.set_status(self.get_argument("status"))
             saver.send_reviewers_message()
@@ -565,4 +577,6 @@ class Reports(RequestHandler):
         reports = [row.doc for row in self.db.view("report", "modified", **kwargs)]
         for report in reports:
             report["order"] = self.get_order(report["order"])
-        self.render("report/list.html", reports=reports, filter=filter, all_count=all_count)
+        self.render(
+            "report/list.html", reports=reports, filter=filter, all_count=all_count
+        )

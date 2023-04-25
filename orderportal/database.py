@@ -123,6 +123,7 @@ def lookup_document(db, identifier):
     except couchdb2.NotFoundError:
         return None
 
+
 def delete_logs(db, iuid):
     "Delete the log documents for the given entity IUID."
     view = db.view(

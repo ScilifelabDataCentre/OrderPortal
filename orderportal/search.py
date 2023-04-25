@@ -40,7 +40,12 @@ class Search(RequestHandler):
         id_sets = []
         for part in parts:
             id_sets.append(
-                set([row.id for row in self.db.view("order", "identifier", key=part.upper())])
+                set(
+                    [
+                        row.id
+                        for row in self.db.view("order", "identifier", key=part.upper())
+                    ]
+                )
             )
         if id_sets:
             for id in functools.reduce(lambda i, j: i.union(j), id_sets):
@@ -51,7 +56,9 @@ class Search(RequestHandler):
         parts = term.split()
         id_sets = []
         for part in parts:
-            id_sets.append(set([row.id for row in self.db.view("order", "tag", key=part)]))
+            id_sets.append(
+                set([row.id for row in self.db.view("order", "tag", key=part)])
+            )
         if id_sets:
             for id in functools.reduce(lambda i, j: i.union(j), id_sets):
                 orders[id] = self.get_order(id)

@@ -4,7 +4,7 @@
 
 {% block head_title %}Messages to {{ account['email'] }}{% end %}
 
-{% block body_title %}Messages to {% module AccountLink(account) %}{% end %}
+{% block body_title %}Messages to {% module AccountLink(account=account) %}{% end %}
 
 {% block content %}
 <table id="messages" class="table table-striped">

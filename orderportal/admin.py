@@ -80,12 +80,12 @@ def migrate_meta_documents(db):
 
         # Load the legacy site ORDER_STATUSES_FILE, if any defined.
         try:
-            filepath = os.path.join(
-                constants.SITE_DIR, settings["ORDER_STATUSES_FILE"]
-            )
+            filepath = os.path.join(constants.SITE_DIR, settings["ORDER_STATUSES_FILE"])
             with open(filepath) as infile:
                 legacy_statuses = yaml.safe_load(infile)
-            logger.info(f"Loaded legacy order status configuration from file '{filepath}'.")
+            logger.info(
+                f"Loaded legacy order status configuration from file '{filepath}'."
+            )
         except KeyError:
             logger.warning(f"Defaults used for order statuses.")
         except (FileNotFoundError, TypeError) as error:
@@ -114,7 +114,9 @@ def migrate_meta_documents(db):
             )
             with open(filepath) as infile:
                 legacy_transitions = yaml.safe_load(infile)
-            logger.info(f"Loaded legacy order transitions configuration from file '{filepath}'.")
+            logger.info(
+                f"Loaded legacy order transitions configuration from file '{filepath}'."
+            )
         except KeyError:
             logger.warning(f"Defaults used for order transitions.")
         except (FileNotFoundError, TypeError) as error:
@@ -256,7 +258,9 @@ def migrate_meta_documents(db):
             universities = list(universities.items())
             universities.sort(key=lambda i: (i[1].get("rank"), i[0]))
             universities = dict(universities)
-            logger.info(f"Loaded legacy universities configuration from file '{filepath}'.")
+            logger.info(
+                f"Loaded legacy universities configuration from file '{filepath}'."
+            )
         except (KeyError, FileNotFoundError, TypeError):
             logger.warning("No legacy information for universities; none defined.")
         with MetaSaver(doc=doc, db=db) as saver:
@@ -272,7 +276,9 @@ def migrate_meta_documents(db):
             filepath = os.path.join(constants.SITE_DIR, settings["SUBJECT_TERMS_FILE"])
             with open(filepath) as infile:
                 subject_terms = yaml.safe_load(infile) or []
-            logger.info(f"Loaded legacy subject terms configuration from file '{filepath}'.")
+            logger.info(
+                f"Loaded legacy subject terms configuration from file '{filepath}'."
+            )
         except (KeyError, FileNotFoundError, TypeError):
             logger.warning("No legacy information for subject terms; none defined.")
         with MetaSaver(doc=doc, db=db) as saver:
@@ -284,8 +290,12 @@ def migrate_meta_documents(db):
         with MetaSaver(db=db) as saver:
             saver.set_id("display")
             saver["default_page_size"] = settings.get("DISPLAY_DEFAULT_PAGE_SIZE", 25)
-            saver["max_pending_accounts"] = settings.get("DISPLAY_MAX_PENDING_ACCOUNTS", 10)
-            saver["text_markdown_notation_info"] = settings.get("DISPLAY_TEXT_MARKDOWN_NOTATION_INFO", True)
+            saver["max_pending_accounts"] = settings.get(
+                "DISPLAY_MAX_PENDING_ACCOUNTS", 10
+            )
+            saver["text_markdown_notation_info"] = settings.get(
+                "DISPLAY_TEXT_MARKDOWN_NOTATION_INFO", True
+            )
             saver["menu_light_theme"] = settings.get("DISPLAY_MENU_LIGHT", False)
             saver["menu_item_url"] = settings.get("DISPLAY_MENU_URL")
             saver["menu_item_text"] = settings.get("DISPLAY_MENU_TEXT")
@@ -305,7 +315,9 @@ def migrate_meta_documents(db):
             filepath = os.path.join(constants.SITE_DIR, settings["ORDER_MESSAGES_FILE"])
             with open(filepath) as infile:
                 order_messages = yaml.safe_load(infile) or []
-            logger.info(f"Loaded legacy order messages configuration from file '{filepath}'.")
+            logger.info(
+                f"Loaded legacy order messages configuration from file '{filepath}'."
+            )
         except (KeyError, FileNotFoundError, TypeError):
             order_messages = DEFAULT_ORDER_MESSAGES
             logger.warning("No legacy information for order messages; using defaults.")
@@ -319,7 +331,8 @@ def migrate_meta_documents(db):
                     entry["message"] = dict(
                         recipients=old.get("recipients") or [],
                         subject=old.get("subject") or "",
-                        text=old.get("text") or "")
+                        text=old.get("text") or "",
+                    )
                 except KeyError:
                     pass
         logger.info("Saved order messages configuration in database.")
@@ -341,7 +354,9 @@ def migrate_meta_documents(db):
             data = infile.read()
             mimetype = mimetypes.guess_type(filepath)[0]
         if settings.get("SITE_NAVBAR_ICON") and hasattr(constants, "SITE_STATIC_DIR"):
-            filepath = os.path.join(constants.SITE_STATIC_DIR, settings["SITE_NAVBAR_ICON"])
+            filepath = os.path.join(
+                constants.SITE_STATIC_DIR, settings["SITE_NAVBAR_ICON"]
+            )
             try:
                 with open(filepath, "rb") as infile:
                     data = infile.read()
@@ -371,7 +386,9 @@ def migrate_meta_documents(db):
             data = infile.read()
             mimetype = mimetypes.guess_type(filepath)[0]
         if settings.get("SITE_HOME_ICON") and hasattr(constants, "SITE_STATIC_DIR"):
-            filepath = os.path.join(constants.SITE_STATIC_DIR, settings["SITE_HOME_ICON"])
+            filepath = os.path.join(
+                constants.SITE_STATIC_DIR, settings["SITE_HOME_ICON"]
+            )
             try:
                 with open(filepath, "rb") as infile:
                     data = infile.read()
@@ -382,7 +399,9 @@ def migrate_meta_documents(db):
 
         # Read site CSS file, if any specified.
         if settings.get("SITE_CSS_FILE") and hasattr(constants, "SITE_STATIC_DIR"):
-            filepath = os.path.join(constants.SITE_STATIC_DIR, settings["SITE_CSS_FILE"])
+            filepath = os.path.join(
+                constants.SITE_STATIC_DIR, settings["SITE_CSS_FILE"]
+            )
             try:
                 with open(filepath, "r") as infile:
                     data = infile.read()
@@ -394,7 +413,9 @@ def migrate_meta_documents(db):
 
         # Read host icon, if any specified.
         if settings.get("SITE_HOST_ICON") and hasattr(constants, "SITE_STATIC_DIR"):
-            filepath = os.path.join(constants.SITE_STATIC_DIR, settings["SITE_HOST_ICON"])
+            filepath = os.path.join(
+                constants.SITE_STATIC_DIR, settings["SITE_HOST_ICON"]
+            )
             try:
                 with open(filepath, "rb") as infile:
                     data = infile.read()
@@ -402,7 +423,9 @@ def migrate_meta_documents(db):
             except OSError:
                 pass
             else:
-                db.put_attachment(doc, data, filename="host_icon", content_type=mimetype)
+                db.put_attachment(
+                    doc, data, filename="host_icon", content_type=mimetype
+                )
 
         logger.info("Saved site configuration in database.")
 
@@ -653,7 +676,9 @@ class SiteConfiguration(RequestHandler):
             except (KeyError, IndexError):
                 pass
             else:
-                self.db.put_attachment(doc, infile.body, "host_icon", infile.content_type)
+                self.db.put_attachment(
+                    doc, infile.body, "host_icon", infile.content_type
+                )
 
         self.set_message_flash("Saved site configuration.")
         orderportal.config.load_settings_from_db(self.db)
@@ -985,9 +1010,15 @@ class OrderMessageEdit(RequestHandler):
         except KeyError:
             self.see_other("admin_order_statuses", error="No such order status.")
             return
-        message = dict(recipients = list(set(self.get_arguments("recipients")).intersection(constants.ORDER_MESSAGE_RECIPIENTS)),
-                       subject = self.get_argument("subject", "").strip(),
-                       text = self.get_argument("text", "").strip())
+        message = dict(
+            recipients=list(
+                set(self.get_arguments("recipients")).intersection(
+                    constants.ORDER_MESSAGE_RECIPIENTS
+                )
+            ),
+            subject=self.get_argument("subject", "").strip(),
+            text=self.get_argument("text", "").strip(),
+        )
         with MetaSaver(doc=self.db["order_statuses"], handler=self) as saver:
             for status in saver["statuses"]:
                 if status["identifier"] == status_id:
@@ -1005,17 +1036,23 @@ class Account(RequestHandler):
         self.check_admin()
         # Convert university data to CSV file for easier editing.
         universities = io.StringIO()
-        writer = csv.writer(universities, dialect=csv.unix_dialect, quoting=csv.QUOTE_MINIMAL)
+        writer = csv.writer(
+            universities, dialect=csv.unix_dialect, quoting=csv.QUOTE_MINIMAL
+        )
         for key, value in settings["UNIVERSITIES"].items():
             writer.writerow((key, value["name"], value["rank"]))
         # Convert subject terms data to CSV file for easier editing.
         subject_terms = io.StringIO()
-        writer = csv.writer(subject_terms, dialect=csv.unix_dialect, quoting=csv.QUOTE_MINIMAL)
+        writer = csv.writer(
+            subject_terms, dialect=csv.unix_dialect, quoting=csv.QUOTE_MINIMAL
+        )
         for item in settings["SUBJECT_TERMS"]:
             writer.writerow((item["code"], item["term"], item["level"]))
-        self.render("admin/account.html",
-                    universities=universities.getvalue().strip(),
-                    subject_terms=subject_terms.getvalue().strip())
+        self.render(
+            "admin/account.html",
+            universities=universities.getvalue().strip(),
+            subject_terms=subject_terms.getvalue().strip(),
+        )
 
     @tornado.web.authenticated
     def post(self):
@@ -1052,27 +1089,30 @@ class Account(RequestHandler):
                 "default_country_code", "SE"
             )
             try:
-                saver["login_max_age_days"] = max(1, int(self.get_argument(
-                    "login_max_age_days", "14")))
+                saver["login_max_age_days"] = max(
+                    1, int(self.get_argument("login_max_age_days", "14"))
+                )
             except (ValueError, TypeError):
                 pass
             try:
-                saver["login_max_failures"] = max(1, int(self.get_argument(
-                    "login_max_failures", "6")))
+                saver["login_max_failures"] = max(
+                    1, int(self.get_argument("login_max_failures", "6"))
+                )
             except (ValueError, TypeError):
                 pass
             try:
-                saver["min_password_length"] = max(1, int(self.get_argument(
-                    "min_password_length", "8")))
+                saver["min_password_length"] = max(
+                    1, int(self.get_argument("min_password_length", "8"))
+                )
             except (ValueError, TypeError):
                 pass
             # Interpret universities CSV format.
             indata = self.get_argument("universities", "").strip()
             dialect = csv.Sniffer().sniff(indata)
             with io.StringIO(indata) as infile:
-                reader = csv.DictReader(infile,
-                                        fieldnames=("key", "name", "rank"),
-                                        dialect=dialect)
+                reader = csv.DictReader(
+                    infile, fieldnames=("key", "name", "rank"), dialect=dialect
+                )
                 universities = {}
                 for item in reader:
                     name = item.get("name", item["key"])
@@ -1086,9 +1126,9 @@ class Account(RequestHandler):
             indata = self.get_argument("subject_terms", "").strip()
             dialect = csv.Sniffer().sniff(indata)
             with io.StringIO(indata) as infile:
-                reader = csv.DictReader(infile,
-                                        fieldnames=("code", "term", "level"),
-                                        dialect=dialect)
+                reader = csv.DictReader(
+                    infile, fieldnames=("code", "term", "level"), dialect=dialect
+                )
                 subject_terms = []
                 subject_terms_codes = set()
                 for item in reader:
@@ -1214,10 +1254,11 @@ class Statistics(RequestHandler):
         for row in self.db.view("order", "owner", reduce=False):
             try:
                 yearly[order_year[row.id]]["users"].add(row.key[0])
-            except KeyError:    # Orders that have not been submitted.
+            except KeyError:  # Orders that have not been submitted.
                 pass
-        totals = dict(n_orders=sum([y["n_orders"] for y in yearly.values()]),
-                      users=set())
+        totals = dict(
+            n_orders=sum([y["n_orders"] for y in yearly.values()]), users=set()
+        )
         for data in yearly.values():
             totals["users"].update(data["users"])
         yearly["Total"] = totals
@@ -1267,8 +1308,9 @@ class Settings(RequestHandler):
     def get(self):
         self.check_admin()
         hidden = "&lt;hidden&gt;"
-        safe_settings = dict([(key, settings[key])
-                              for key in orderportal.config.DEFAULT_SETTINGS])
+        safe_settings = dict(
+            [(key, settings[key]) for key in orderportal.config.DEFAULT_SETTINGS]
+        )
 
         # Hide sensitive data.
         for key in safe_settings:
@@ -1461,8 +1503,12 @@ DEFAULT_ORDER_TRANSITIONS[constants.PREPARATION][constants.SUBMITTED] = dict(
 
 
 # Minimal order messages.
-DEFAULT_ORDER_MESSAGES = dict([(status, dict(recipients=[], subject="", text=""))
-                               for status in constants.ORDER_STATUSES])
+DEFAULT_ORDER_MESSAGES = dict(
+    [
+        (status, dict(recipients=[], subject="", text=""))
+        for status in constants.ORDER_STATUSES
+    ]
+)
 DEFAULT_ORDER_MESSAGES[constants.SUBMITTED] = dict(
     recipients=["admin", "owner", "group"],
     subject="The order '{title}' ({identifier}) has been submitted by {owner} to {site}.",
@@ -1478,7 +1524,8 @@ If you have any questions, use {support}
 
 Yours sincerely,
 The {site} administrators
-""")
+""",
+)
 
 # Defaults for texts to be shown in some web pages.
 DEFAULT_TEXTS_DISPLAY = [

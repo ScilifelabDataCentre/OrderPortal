@@ -59,7 +59,7 @@ class MessageSaver(saver.Saver):
         except (ValueError, TypeError, KeyError, smtplib.SMTPException) as error:
             self.handle_error(error)
 
-    def create(self, message_template, **kwargs):
+    def create(self, text_container, **kwargs):
         "Create the message from the template and parameters for it."
         site_url = settings["BASE_URL"]
         if settings["BASE_URL_PATH_PREFIX"]:
@@ -72,8 +72,8 @@ class MessageSaver(saver.Saver):
             support=settings.get("MAIL_DEFAULT_SENDER") or "[not defined]",
         )
         params.update(kwargs)
-        self["subject"] = str(message_template["subject"]).format_map(params)
-        self["text"] = str(message_template["text"]).format_map(params)
+        self["subject"] = str(text_container["subject"]).format_map(params)
+        self["text"] = str(text_container["text"]).format_map(params)
 
     def send(self, recipients):
         """Send the message to the given recipient email addresses.

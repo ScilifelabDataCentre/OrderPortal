@@ -114,10 +114,7 @@ class ReportLink(tornado.web.UIModule):
     def render(self, report):
         url = self.handler.reverse_url("report", report["_id"])
         if report.get("inline"):
-            a = hg.A(
-                hg.STRONG(report["name"]),
-                href=url
-            )
+            a = hg.A(hg.STRONG(report["name"]), href=url)
         else:
             a = hg.A(
                 hg.SPAN(_class="glyphicon glyphicon-download-alt"),
@@ -126,7 +123,7 @@ class ReportLink(tornado.web.UIModule):
                 href=url,
                 role="button",
                 _class="btn btn-xs btn-primary",
-                title="Download"
+                title="Download",
             )
         return hg.render(a, {})
 

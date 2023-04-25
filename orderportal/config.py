@@ -8,7 +8,9 @@ import urllib.parse
 import dotenv
 import yaml
 
-from orderportal import constants, settings
+from orderportal import constants
+from orderportal import settings
+from orderportal import utils
 
 
 DEFAULT_SETTINGS = dict(
@@ -23,10 +25,10 @@ DEFAULT_SETTINGS = dict(
     DATABASE_PASSWORD=None,
     COOKIE_SECRET=None,
     PASSWORD_SALT=None,
-    SETTINGS_FILE=None,         # This value is set on startup.
-    SETTINGS_ENVVAR=False,      # This value is set on startup.
-    ORDER_IDENTIFIER_FORMAT="OP{0:=05d}", # Order identifier format; site-unique prefix.
-    ORDER_IDENTIFIER_FIRST=1,   # The number to use for the first order.
+    SETTINGS_FILE=None,  # This value is set on startup.
+    SETTINGS_ENVVAR=False,  # This value is set on startup.
+    ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",  # Order identifier format; site-unique prefix.
+    ORDER_IDENTIFIER_FIRST=1,  # The number to use for the first order.
     MAIL_SERVER=None,  # If not set, then no emails can be sent.
     MAIL_DEFAULT_SENDER=None,  # If not set, MAIL_USERNAME will be used.
     MAIL_PORT=25,
@@ -48,13 +50,18 @@ def load_settings_from_file():
     3) Try the filepath in environment variable ORDERPORTAL_SETTINGS_FILEPATH.
     4) If none, try the file '../site/settings.yaml' relative to this directory.
     5) Use any environment variables defined; settings file values are overwritten.
+    6) Read and preprocess the documentation file.
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
     """
     if not os.path.exists(constants.SITE_DIR):
-        raise OSError(f"""The required site directory '{constants.SITE_DIR}' does not exist.""")
+        raise OSError(
+            f"""The required site directory '{constants.SITE_DIR}' does not exist."""
+        )
     if not os.path.isdir(constants.SITE_DIR):
-        raise OSError(f"""The site directory path '{constants.SITE_DIR}' is not a directory.""")
+        raise OSError(
+            f"""The site directory path '{constants.SITE_DIR}' is not a directory."""
+        )
 
     settings.clear()
     settings.update(DEFAULT_SETTINGS)
@@ -143,14 +150,47 @@ def load_settings_from_file():
     settings["BASE_URL"] = f"{parts.scheme}://{parts.netloc}/"
     if parts.path:
         if settings.get("BASE_URL_PATH_PREFIX"):
-            raise ValueError("BASE_URL_PATH_PREFIX may not be set if BASE_URL has a path part.")
+            raise ValueError(
+                "BASE_URL_PATH_PREFIX may not be set if BASE_URL has a path part."
+            )
         settings["BASE_URL_PATH_PREFIX"] = parts.path
     if settings["BASE_URL_PATH_PREFIX"]:
-        settings["BASE_URL_PATH_PREFIX"] = settings["BASE_URL_PATH_PREFIX"].strip("/") or None
+        settings["BASE_URL_PATH_PREFIX"] = (
+            settings["BASE_URL_PATH_PREFIX"].strip("/") or None
+        )
 
     # Check for obsolete settings.
     for key in sorted(obsolete_keys):
         logger.warning(f"Obsolete entry '{key}' in settings file.")
+
+    # Read and preprocess the documentation file.
+    with open("documentation.md") as infile:
+        lines = infile.readlines()
+    toc = []
+    current_level = 0
+    for line in lines:
+        if line.startswith("#"):
+            parts = line.split()
+            level = len(parts[0])
+            title = " ".join(parts[1:])
+            # All headers in the file are "clean", i.e. text only, no markup.
+            id = title.strip().replace(" ", "-").lower()
+            id = "".join(c for c in id if c in constants.ALLOWED_ID_CHARACTERS)
+            # Add to table of contents.
+            if level <= 2:
+                if level > current_level:
+                    for l in range(current_level, level):
+                        toc.append('<ul class="list-unstyled ml-3">')
+                    current_level = level
+                elif level < current_level:
+                    for l in range(level, current_level):
+                        toc.append("</ul>")
+                    current_level = level
+                toc.append(f'<li><a href="#{id}">{title}</a></li>')
+    for level in range(current_level):
+        toc.append("</ul>")
+    settings["DOCUMENTATION_TOC"] = "\n".join(toc)
+    settings["DOCUMENTATION"] = utils.markdown2html("".join(lines), safe=True)
 
 
 def load_settings_from_db(db):
@@ -161,8 +201,12 @@ def load_settings_from_db(db):
     settings["ORDER_TRANSITIONS"] = doc["transitions"]
     logger.info("Loaded order statuses configuration from database into 'settings'.")
 
-    settings["ORDER_MESSAGES"] = dict([(status, dict(recipients=[], subject="", text=""))
-                                       for status in constants.ORDER_STATUSES])
+    settings["ORDER_MESSAGES"] = dict(
+        [
+            (status, dict(recipients=[], subject="", text=""))
+            for status in constants.ORDER_STATUSES
+        ]
+    )
     for status in doc["statuses"]:
         settings["ORDER_MESSAGES"][status["identifier"]] = status["message"]
     logger.info("Loaded order messages configuration from database into 'settings'.")
@@ -177,7 +221,7 @@ def load_settings_from_db(db):
         if doc.get("_attachments", {}).get(name):
             settings[key] = dict(
                 content_type=doc["_attachments"][name]["content_type"],
-                content=db.get_attachment(doc, name).read()
+                content=db.get_attachment(doc, name).read(),
             )
         else:
             settings[key] = None

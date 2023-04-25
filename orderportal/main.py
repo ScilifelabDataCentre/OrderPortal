@@ -39,6 +39,7 @@ def main():
         url(r"/status", orderportal.home.Status, name="status"),
         url(r"/contact", orderportal.home.Contact, name="contact"),
         url(r"/about", orderportal.home.About, name="about"),
+        url(r"/documentation", orderportal.home.Documentation, name="documentation"),
         url(r"/software", orderportal.home.Software, name="software"),
         url(r"/log/([0-9a-f]{32})", orderportal.home.Log, name="log"),
         url(r"/([0-9a-f]{32})", orderportal.home.Entity, name="entity"),
@@ -98,9 +99,15 @@ def main():
         url(r"/orders.csv", orderportal.order.OrdersCsv, name="orders_csv"),
         url(r"/orders.xlsx", orderportal.order.OrdersXlsx, name="orders_xlsx"),
         url(r"/report", orderportal.report.ReportAdd, name="report_add"),
-        url(r"/api/v1/report", orderportal.report.ReportAddApiV1, name="report_add_api"),
+        url(
+            r"/api/v1/report", orderportal.report.ReportAddApiV1, name="report_add_api"
+        ),
         url(r"/report/([0-9a-f]{32})", orderportal.report.Report, name="report"),
-        url(r"/api/v1/report/([0-9a-f]{32})", orderportal.report.ReportApiV1, name="report_api"),
+        url(
+            r"/api/v1/report/([0-9a-f]{32})",
+            orderportal.report.ReportApiV1,
+            name="report_api",
+        ),
         url(
             r"/report/([0-9a-f]{32})/edit",
             orderportal.report.ReportEdit,
@@ -314,12 +321,12 @@ def main():
         url(
             r"/admin/site_configuration",
             orderportal.admin.SiteConfiguration,
-            name="admin_site_configuration"
+            name="admin_site_configuration",
         ),
         url(
             r"/admin/order_configuration",
             orderportal.admin.OrderConfiguration,
-            name="admin_order_configuration"
+            name="admin_order_configuration",
         ),
         url(
             r"/admin/order_messages",
@@ -345,9 +352,11 @@ def main():
         url(
             r"/admin/display_configuration",
             orderportal.admin.DisplayConfiguration,
-            name="admin_display_configuration"
+            name="admin_display_configuration",
         ),
-        url(r"/admin/statistics", orderportal.admin.Statistics, name="admin_statistics"),
+        url(
+            r"/admin/statistics", orderportal.admin.Statistics, name="admin_statistics"
+        ),
         url(r"/admin/database", orderportal.admin.Database, name="admin_database"),
         url(r"/admin/document/(.+)", orderportal.admin.Document, name="admin_document"),
         url(r"/admin/settings", orderportal.admin.Settings, name="admin_settings"),

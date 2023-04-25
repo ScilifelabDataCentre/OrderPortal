@@ -414,11 +414,14 @@ class RequestHandler(tornado.web.RequestHandler):
 
     def get_logs(self, iuid):
         "Return the log documents for the given entity iuid."
-        view = self.db.view("log", "entity",
-                            include_docs=True,
-                            startkey=[iuid, constants.CEILING],
-                            endkey=[iuid],
-                            descending=True)
+        view = self.db.view(
+            "log",
+            "entity",
+            include_docs=True,
+            startkey=[iuid, constants.CEILING],
+            endkey=[iuid],
+            descending=True,
+        )
         logs = [row.doc for row in view]
         # Ref to entity in DB is not needed in each log entry.
         for log in logs:
