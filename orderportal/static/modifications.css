@@ -41,3 +41,10 @@
 /* Indent using padding. */
 .extra-indent { padding-left: 2em; }
 .extra-spacing { padding-bottom: 1em; }
+
+/* Keep documentation side menu at top of page. */
+div.sticky-top {
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    top: 0;
+}

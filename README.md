@@ -8,6 +8,11 @@ proposals, reports, etc, from its researcher users. It has also been
 used as a system to gather reports from researchers and research
 units.
 
+The documentation of the features of the system are available at the
+URL `/documentation` in a running OrderPortal instance, e.g. in
+the demo instance at
+[https://orderportal.scilifelab.se/](https://orderportal.scilifelab.se/)
+
 ## Installation
 
 The current version has been developed using Python 3.10 or higher.
@@ -65,12 +70,12 @@ variables for the basic configuration of the system. All other configurations
 have been moved into the database, and can be modified using the web interface.
 
 However, it is still possible to use a YAML settings file for the basic configuration.
-On startup, the OrderPortal system looks for a `settings.yaml` file first by the
+On startup, the OrderPortal system looks for a YAML settings file first by the
 file path given by the environment variable ORDERPORTAL_SETTINGS_FILEPATH, and
 in second place by the file path `OrderPortal/site/settings.yaml`. The first of
 these files found, if any, will be used.
 
-If both an environment variable and an entry in a `settings.yaml` file defines
+If both an environment variable and an entry in a YAML settings file defines
 a configuration value, then the environment variable takes precedence.
 
 See the comments in the template file
@@ -112,16 +117,6 @@ on your operating system; refer to its documentation.
 It is recommended that you use a reverse proxy for the `tornado`
 server, e.g. `nginx` or `apache`. See the documentation for those
 systems.
-
-### Backup
-
-Backups of the CouchDB database can easily be produced using the CLI:
-
-    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py dump
-
-This creates a `tar.gz` file with today's date in the file name. There are command
-options for setting the name of the file, or the directory in which it is written.
-See the `--help` option of the CLI.
 
 ### Updates
 
