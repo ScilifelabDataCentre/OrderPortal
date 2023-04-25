@@ -5,8 +5,8 @@
 ### 1) The location given by the environment variable ORDERPORTAL_SETTINGS_FILEPATH
 ### 2) The file path 'OrderPortal/site/settings.yaml'
 
-# This file changes the default values defined in the 'settings' dictionary
-# in the '__init__.py' file.
+# All variables that can be set by this file are given in the dictionary
+# DEFAULT_SETTINGS in the source code file 'OrderPortal/orderportal/config.py'.
 
 # tornado debug is useful only during software development.
 TORNADO_DEBUG: false
@@ -39,9 +39,9 @@ PASSWORD_SALT: 'Change this to another long string of random characters.'
 # The prefix must be all upper-case characters.
 ORDER_IDENTIFIER_FORMAT: 'MY{0:=05d}'
 
-# Email setup. Not strictly required, but emails for account registration,
-# password setting and order status updates will not be sent.
-# This would complicate life for the administrators.
+# Email setup. Not strictly required, but if not set, then emails for account
+# registration, password setting and order status updates will *not* be sent.
+# This would complicate life for the admins.
 
 # Email settings using Google server and the webservice account; not relay!.
 MAIL_SERVER: 'smtp.gmail.com'
@@ -49,8 +49,8 @@ MAIL_DEFAULT_SENDER: '"OrderPortal webservice" <webservice@whatever.com>'
 MAIL_PORT: 587
 MAIL_USE_TLS: true
 MAIL_USERNAME: 'webservice@whatever.com'
-# App-specific password for best behaviour.
+# App-specific password for Google best behaviour.
 MAIL_PASSWORD: '16-char code'
 
-# Email server settings when available on the local machine.
+# Email server settings when available on the local server machine.
 # MAIL_SERVER: localhost

@@ -26,7 +26,7 @@ DEFAULT_SETTINGS = dict(
     SETTINGS_FILE=None,         # This value is set on startup.
     SETTINGS_ENVVAR=False,      # This value is set on startup.
     ORDER_IDENTIFIER_FORMAT="OP{0:=05d}", # Order identifier format; site-unique prefix.
-    ORDER_IDENTIFIER_FIRST=1,
+    ORDER_IDENTIFIER_FIRST=1,   # The number to use for the first order.
     MAIL_SERVER=None,  # If not set, then no emails can be sent.
     MAIL_DEFAULT_SENDER=None,  # If not set, MAIL_USERNAME will be used.
     MAIL_PORT=25,
