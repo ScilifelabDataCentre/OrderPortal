@@ -1,5 +1,6 @@
 "Search orders page."
 
+import functools
 import urllib.parse
 
 import couchdb2
@@ -10,14 +11,13 @@ from orderportal import saver
 from orderportal import utils
 from orderportal.fields import Fields
 from orderportal.requesthandler import RequestHandler
-from functools import reduce
 
 
 class Search(RequestHandler):
     """Search orders:
     - identifier (exact)
     - tags (exact)
-    - title (words)
+    - title (terms)
     """
 
     @tornado.web.authenticated
@@ -26,33 +26,38 @@ class Search(RequestHandler):
         orders = {}
         parts = term.split()
         parts = [p for p in parts if p]
-        parts.extend([p.upper() for p in parts])
-        # Try order IUIDs
+
+        # Order IUIDs, lower case.
         for iuid in parts:
             try:
-                order = self.get_order(iuid)
+                order = self.get_order(iuid.lower())
             except tornado.web.HTTPError:
                 pass
             else:
                 orders[order["_id"]] = order
-        # Search order identifier; exact match
+
+        # Search order identifier; exact match using upper case.
         id_sets = []
         for part in parts:
             id_sets.append(
-                set([row.id for row in self.db.view("order", "identifier", key=part)])
+                set([row.id for row in self.db.view("order", "identifier", key=part.upper())])
             )
         if id_sets:
-            for id in reduce(lambda i, j: i.union(j), id_sets):
+            for id in functools.reduce(lambda i, j: i.union(j), id_sets):
                 orders[id] = self.get_order(id)
-        # Seach order tags; exact match
+
+        # Seach order tags; exact match, using lower case.
         term = "".join([c in ",;'" and " " or c for c in orig_term]).strip().lower()
         parts = term.split()
         id_sets = []
         for part in parts:
             id_sets.append(set([row.id for row in self.db.view("order", "tag", key=part)]))
         if id_sets:
-            for id in reduce(lambda i, j: i.union(j), id_sets):
+            for id in functools.reduce(lambda i, j: i.union(j), id_sets):
                 orders[id] = self.get_order(id)
+
+        # Search order titles for the parts extracted from search term.
+        # Replace delimiters by blanks, make lower case.
         term = (
             "".join(
                 [
@@ -68,7 +73,7 @@ class Search(RequestHandler):
             for part in term.split()
             if part and len(part) >= 2 and part not in constants.ORDERS_SEARCH_LINT
         ]
-        # Search order titles for the parts extracted from search term.
+
         id_sets = []
         for part in parts:
             id_sets.append(
@@ -77,20 +82,20 @@ class Search(RequestHandler):
                         row.id
                         for row in self.db.view(
                             "order",
-                            "keyword",
+                            "term",
                             startkey=part,
                             endkey=part + constants.CEILING,
                         )
                     ]
                 )
             )
-        if id_sets:
-            # All words must exist in the title.
-            id_set = reduce(lambda i, j: i.intersection(j), id_sets)
-            for id in reduce(lambda i, j: i.intersection(j), id_sets):
 
+        # All term parts (=words) must exist in the title.
+        if id_sets:
+            for id in functools.reduce(lambda i, j: i.intersection(j), id_sets):
                 orders[id] = self.get_order(id)
-        # Convert to list; keep the orders that are readable by the user.
+
+        # Convert to list; keep the orders that the user is allowed to read.
         if self.am_staff():
             orders = list(orders.values())
         else:

@@ -26,34 +26,27 @@ def update_design_documents(db):
     logger = logging.getLogger("orderportal")
 
     if db.put_design("account", ACCOUNT_DESIGN_DOC):
-        logger.info("Updated 'account' design document.")
+        logger.info("Updated 'account' CouchDB design document.")
     if db.put_design("file", FILE_DESIGN_DOC):
-        logger.info("Updated 'file' design document.")
+        logger.info("Updated 'file' CouchDB design document.")
     if db.put_design("form", FORM_DESIGN_DOC):
-        logger.info("Updated 'form' design document.")
+        logger.info("Updated 'form' CouchDB design document.")
     if db.put_design("group", GROUP_DESIGN_DOC):
-        logger.info("Updated 'group' design document.")
+        logger.info("Updated 'group' CouchDB design document.")
     if db.put_design("info", INFO_DESIGN_DOC):
-        logger.info("Updated 'info' design document.")
+        logger.info("Updated 'info' CouchDB design document.")
     if db.put_design("log", LOG_DESIGN_DOC):
-        logger.info("Updated 'log' design document.")
+        logger.info("Updated 'log' CouchDB design document.")
     if db.put_design("message", MESSAGE_DESIGN_DOC):
-        logger.info("Updated 'message' design document.")
+        logger.info("Updated 'message' CouchDB design document.")
     if db.put_design("meta", META_DESIGN_DOC):
-        logger.info("Updated 'meta' design document.")
-    # Replace variables in the function body according to constants.
-    mapfunc = ORDER_DESIGN_DOC["views"]["keyword"]["map"]
-    delims_lint = "".join(constants.ORDERS_SEARCH_DELIMS_LINT)
-    lint = "{%s}" % ", ".join(["'%s': 1" % w for w in constants.ORDERS_SEARCH_LINT])
-    ORDER_DESIGN_DOC["views"]["keyword"]["map"] = mapfunc.format(
-        delims_lint=delims_lint, lint=lint
-    )
+        logger.info("Updated 'meta' CouchDB design document.")
     if db.put_design("order", ORDER_DESIGN_DOC):
-        logger.info("Updated 'order' design document.")
+        logger.info("Updated 'order' CouchDB design document.")
     if db.put_design("report", REPORT_DESIGN_DOC):
-        logger.info("Updated 'report' design document.")
+        logger.info("Updated 'report' CouchDB design document.")
     if db.put_design("text", TEXT_DESIGN_DOC):
-        logger.info("Updated 'text' design document.")
+        logger.info("Updated 'text' CouchDB design document.")
 
     # As of version 10.2, the entity types news and event have been scrapped.
     # If the indexes still exist, remove the documents, logs and indexes.
@@ -345,20 +338,6 @@ ORDER_DESIGN_DOC = {
     emit(doc.identifier, doc.title);
 }"""
         },
-        "keyword": {  # order/keyword
-            # NOTE: The 'map' function body is modified in 'update_design_documents'.
-            # This is why there have to be double curly-braces here.
-            "map": """function(doc) {{
-    if (doc.orderportal_doctype !== 'order') return;
-    var cleaned = doc.title.replace(/[{delims_lint}]/g, " ").toLowerCase();
-    var words = cleaned.split(/\s+/);
-    words.forEach(function(word) {{
-        if (word.length >= 2 && !lint[word]) emit(word, doc.title);
-    }});
-}};
-var lint = {lint};
-"""
-        },
         "modified": {
             "map": """function(doc) {
     if (doc.orderportal_doctype !== 'order') return;
@@ -400,8 +379,30 @@ var lint = {lint};
     emit(doc.history.submitted.split('-')[0], 1);
 }""",
         },
+        "term": {  # order/term
+            # NOTE: The 'map' function body is modified below.
+            # This is why there have to be double curly-braces here.
+            "map": """function(doc) {{
+    if (doc.orderportal_doctype !== 'order') return;
+    var cleaned = doc.title.replace(/[{delims_lint}]/g, " ").toLowerCase();
+    var terms = cleaned.split(/\s+/);
+    terms.forEach(function(term) {{
+        if (term.length >= 2 && !lint[term]) emit(term, null);
+    }});
+}};
+var lint = {lint};
+"""
+        },
     }
 }
+
+# Replace variables in the function body according to constants.
+mapfunc = ORDER_DESIGN_DOC["views"]["term"]["map"]
+delims_lint = "".join(constants.ORDERS_SEARCH_DELIMS_LINT)
+lint = "{%s}" % ", ".join(["'%s': 1" % w for w in constants.ORDERS_SEARCH_LINT])
+ORDER_DESIGN_DOC["views"]["term"]["map"] = mapfunc.format(
+    delims_lint=delims_lint, lint=lint
+)
 
 REPORT_DESIGN_DOC = {
     "views": {

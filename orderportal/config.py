@@ -5,17 +5,49 @@ import os
 import os.path
 import urllib.parse
 
+import dotenv
 import yaml
 
-from orderportal import constants, settings, DEFAULT_SETTINGS
+from orderportal import constants, settings
+
+
+DEFAULT_SETTINGS = dict(
+    TORNADO_DEBUG=False,
+    LOGGING_DEBUG=False,
+    BASE_URL="http://localhost:8881/",
+    BASE_URL_PATH_PREFIX=None,
+    PORT=8881,  # The port used by tornado.
+    DATABASE_SERVER="http://localhost:5984/",
+    DATABASE_NAME="orderportal",
+    DATABASE_ACCOUNT="orderportal_account",
+    DATABASE_PASSWORD=None,
+    COOKIE_SECRET=None,
+    PASSWORD_SALT=None,
+    SETTINGS_FILE=None,         # This value is set on startup.
+    SETTINGS_ENVVAR=False,      # This value is set on startup.
+    ORDER_IDENTIFIER_FORMAT="OP{0:=05d}", # Order identifier format; site-unique prefix.
+    ORDER_IDENTIFIER_FIRST=1,
+    MAIL_SERVER=None,  # If not set, then no emails can be sent.
+    MAIL_DEFAULT_SENDER=None,  # If not set, MAIL_USERNAME will be used.
+    MAIL_PORT=25,
+    MAIL_USE_SSL=False,
+    MAIL_USE_TLS=False,
+    MAIL_EHLO=None,
+    MAIL_USERNAME=None,
+    MAIL_PASSWORD=None,
+    MAIL_REPLY_TO=None,
+)
 
 
 def load_settings_from_file():
-    """Load the settings that are not in the database from file.
+    """Load the settings that are not stored in the database from file or
+    environment variables.
     1) Initialize with the values in DEFAULT_SETTINGS.
-    2) Try the filepath in environment variable ORDERPORTAL_SETTINGS.
-    3) If none, try the file '../site/settings.yaml' relative to this directory.
-    Raise OSError if settings file could not be read.
+    2) Set environment variables from file '.env', if any, using 'dotenv.load_dotenv'.
+       This does not overwrite any already existing environment variables.
+    3) Try the filepath in environment variable ORDERPORTAL_SETTINGS_FILEPATH.
+    4) If none, try the file '../site/settings.yaml' relative to this directory.
+    5) Use any environment variables defined; settings file values are overwritten.
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
     """
@@ -24,15 +56,44 @@ def load_settings_from_file():
     if not os.path.isdir(constants.SITE_DIR):
         raise OSError(f"""The site directory path '{constants.SITE_DIR}' is not a directory.""")
 
+    settings.clear()
+    settings.update(DEFAULT_SETTINGS)
+
+    # Dotenv file '.env' is optional. It is useful for development.
+    if dotenv.load_dotenv():
+        config["SETTINGS_DOTENV_FILEPATH"] = dotenv.find_dotenv()
+
     # Find and read the settings file, updating the defaults.
     try:
-        filepath = os.environ["ORDERPORTAL_SETTINGS"]
+        filepath = os.environ["ORDERPORTAL_SETTINGS_FILEPATH"]
     except KeyError:
         filepath = os.path.join(constants.SITE_DIR, "settings.yaml")
-    with open(filepath) as infile:
-        from_settings_file = yaml.safe_load(infile)
-    settings.update(from_settings_file)
-    settings["SETTINGS_FILE"] = filepath
+    try:
+        with open(filepath) as infile:
+            from_settings_file = yaml.safe_load(infile)
+    except OSError:
+        obsolete_keys = []
+    else:
+        settings.update(from_settings_file)
+        settings["SETTINGS_FILE"] = filepath
+        obsolete_keys = set(from_settings_file.keys()).difference(DEFAULT_SETTINGS)
+
+    # Modify the settings from environment variables; convert to correct type.
+    envvar_keys = []
+    for key, value in DEFAULT_SETTINGS.items():
+        try:
+            new = os.environ[key]
+        except KeyError:
+            pass
+        else:  # Do NOT catch any exception! Means bad setup.
+            if isinstance(value, int):
+                settings[key] = int(new)
+            elif isinstance(value, bool):
+                settings[key] = utils.to_bool(new)
+            else:
+                settings[key] = new
+            envvar_keys.append(key)
+            settings["SETTINGS_ENVVAR"] = True
 
     # Setup logging.
     logging.basicConfig(format=constants.LOGGING_FORMAT)
@@ -48,52 +109,32 @@ def load_settings_from_file():
     logger.info(f"logger debug: {settings['LOGGING_DEBUG']}")
     logger.info(f"tornado debug: {settings['TORNADO_DEBUG']}")
 
-    # Check some settings.
-    for key in [
-        "BASE_URL",
-        "DATABASE_SERVER",
-        "DATABASE_NAME",
-        "DATABASE_ACCOUNT",
-        "DATABASE_PASSWORD",
-        "COOKIE_SECRET",
-        "PASSWORD_SALT",
-    ]:
-        if not settings[key]:
-            raise ValueError(f"settings['{key}'] has invalid value.")
+    # Sanity checks.
+    if not settings["PASSWORD_SALT"]:
+        raise ValueError("setting PASSWORD_SALT has not been set.")
+    if not settings["COOKIE_SECRET"]:
+        raise ValueError("setting COOKIE_SECRET has not been set.")
     if len(settings["COOKIE_SECRET"]) < 10:
-        raise ValueError("settings['COOKIE_SECRET'] is too short.")
+        raise ValueError("setting COOKIE_SECRET is too short.")
 
-    # Check valid order identifier format; prefix all upper case characters
+    # Check valid order identifier format; prefix all upper case characters.
     if not settings["ORDER_IDENTIFIER_FORMAT"]:
         raise ValueError("Undefined ORDER_IDENTIFIER_FORMAT")
-    if not isinstance(settings["ORDER_IDENTIFIER_FIRST"], int):
-        raise ValueError("ORDER_IDENTIFIER_FIRST is not an integer")
     if not settings["ORDER_IDENTIFIER_FORMAT"][0].isalpha():
         raise ValueError(
-            "ORDER_IDENTIFIER_FORMAT prefix contain at least one alphabetical character"
+            "ORDER_IDENTIFIER_FORMAT prefix must contain at least one alphabetical character"
         )
     for c in settings["ORDER_IDENTIFIER_FORMAT"]:
-        if not c.isalpha():
+        if c.isdigit():
+            raise ValueError("ORDER_IDENTIFIER_FORMAT prefix may not contain digits")
+        elif not c.isalpha():
             break
-        if not c.isupper():
+        elif c != c.upper():
             raise ValueError(
                 "ORDER_IDENTIFIER_FORMAT prefix must be all upper-case characters"
             )
-
-    # Check for obsolete settings.
-    for key in sorted(from_settings_file):
-        if key not in DEFAULT_SETTINGS:
-            logger.warning(f"Obsolete entry '{key}' in settings file.")
-
-    # Read order messages YAML file.
-    filepath = settings.get("ORDER_MESSAGES_FILE")
-    if filepath:
-        filepath = os.path.join(constants.SITE_DIR, filepath)
-        logger.info(f"Order messages file: {filepath}")
-        with open(filepath) as infile:
-            settings["ORDER_MESSAGES"] = yaml.safe_load(infile) or {}
-    else:
-        settings["ORDER_MESSAGES"] = {}
+    if not isinstance(settings["ORDER_IDENTIFIER_FIRST"], int):
+        raise ValueError("ORDER_IDENTIFIER_FIRST is not an integer")
 
     # Normalize the BASE_URL and BASE_URL_PATH_PREFIX values.
     # BASE_URL must contain only the scheme and netloc parts, with a trailing '/'.
@@ -107,14 +148,40 @@ def load_settings_from_file():
     if settings["BASE_URL_PATH_PREFIX"]:
         settings["BASE_URL_PATH_PREFIX"] = settings["BASE_URL_PATH_PREFIX"].strip("/") or None
 
+    # Check for obsolete settings.
+    for key in sorted(obsolete_keys):
+        logger.warning(f"Obsolete entry '{key}' in settings file.")
+
 
 def load_settings_from_db(db):
-    "Load the configuration that are stored in the database into 'settings'."
+    "Load the configurations that are stored in the database into 'settings'."
     logger = logging.getLogger("orderportal")
     doc = db["order_statuses"]
     settings["ORDER_STATUSES"] = doc["statuses"]
     settings["ORDER_TRANSITIONS"] = doc["transitions"]
     logger.info("Loaded order statuses configuration from database into 'settings'.")
+
+    settings["ORDER_MESSAGES"] = dict([(status, dict(recipients=[], subject="", text=""))
+                                       for status in constants.ORDER_STATUSES])
+    for status in doc["statuses"]:
+        settings["ORDER_MESSAGES"][status["identifier"]] = status["message"]
+    logger.info("Loaded order messages configuration from database into 'settings'.")
+
+    # Site configuration variables and files.
+    doc = db["site_configuration"]
+    settings["SITE_NAME"] = doc.get("name") or "OrderPortal"
+    settings["SITE_HOST_NAME"] = doc.get("host_name")
+    settings["SITE_HOST_URL"] = doc.get("host_url")
+    for name in ("icon", "favicon", "image", "css", "host_icon"):
+        key = f"SITE_{name.upper()}"
+        if doc.get("_attachments", {}).get(name):
+            settings[key] = dict(
+                content_type=doc["_attachments"][name]["content_type"],
+                content=db.get_attachment(doc, name).read()
+            )
+        else:
+            settings[key] = None
+    logger.info("Loaded site configuration from database into 'settings'.")
 
     doc = db["order"]
     settings["ORDER_CREATE_USER"] = doc.get("create_user", True)
@@ -181,6 +248,7 @@ def load_settings_from_db(db):
     settings["SUBJECT_TERMS_LOOKUP"] = dict(
         [(s["code"], s["term"]) for s in settings["SUBJECT_TERMS"]]
     )
+
 
 def load_texts_from_db(db):
     "Load the texts from the database into settings."
