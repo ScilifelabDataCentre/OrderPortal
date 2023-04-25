@@ -171,7 +171,7 @@ def load_settings_from_file():
             if level <= 2:
                 if level > current_level:
                     for l in range(current_level, level):
-                        toc.append('<ul class="list-unstyled ml-3">')
+                        toc.append('<ul class="list-unstyled" style="padding-left: 1.5em;">')
                     current_level = level
                 elif level < current_level:
                     for l in range(level, current_level):

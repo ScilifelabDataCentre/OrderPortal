@@ -5,26 +5,13 @@
 {% block head_title %}Documentation{% end %}
 {% block body_title %}Documentation{% end %}
 
-{% block head_items %}
-<style>
-  thead.sticky th {top: 0; position: sticky; background: white; }
-</style>
-{% end %}
-
 {% block content %}
 <div class="row">
   <div class="col-md-9">
     {% raw settings["DOCUMENTATION"] %}
   </div>
-  <div class="col-md-2 col-md-offset-1">
+  <div class="sticky-top col-md-2 col-md-offset-1">
     {% raw settings["DOCUMENTATION_TOC"] %}
   </div>
-<!--
-  <div class="col-md-2 col-md-offset-1">
-    <small class="sticky-top">
-      {% raw settings["DOCUMENTATION_TOC"] %}
-    </small>
-  </div>
--->
 </div>
 {% end %}

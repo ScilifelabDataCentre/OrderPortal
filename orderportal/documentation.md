@@ -8,7 +8,7 @@ used as a system to gather reports from researchers and research
 units.
 
 The OrderPortal system was originally created to satisfy the needs of the
-[National Genomics Infrastructure (NGI) Sweden](https://ngisweden.scilifelab.se/),
+[National Genomics Infrastructure (NGI) Sweden](https://ngisweden.scilifelab.se/ "!"),
 which is a service facility for DNA sequencing and genotyping of
 samples provided by external researchers. The facility processes the
 samples according to the specifications in the order from the
@@ -37,7 +37,7 @@ needs.
 * The facility staff can review, accept or decline an order, depending
   on the configuration set up by system administrators.
 * Let the facility staff keep track of review and agreements.
-* Allow attaching various documents to an order.
+* Allow attaching files to an order.
 * Display project status reports.
 * Allow keeping track of Key Performance Indicators (KPIs), facilitating
   resource usage reports for the facility.
@@ -77,7 +77,7 @@ a user changes email address, a new account will have to be created.
 
 The system administrators can (and should) customisation the site
 logo, title, home page text blocks and the body of email messages sent
-by the system.  Pages for showing information and documents under
+by the system. Pages for showing information and documents are under
 control of the system administrators.
 
 
@@ -246,10 +246,11 @@ Here are some general guidelines:
   'rescue' an order which has been put in an incorrect status.
 
 
-## Attached files
+## Attach files
 
 Files such as agreements, specifications, images, etc, can be attached
-to an order.
+to an order. If the form has file input fields, these files will also be
+attached to the order.
 
 
 ## Order links
@@ -355,8 +356,27 @@ other field has been assigned a specific value. This is useful for
 orders where the relevant fields depend on some high-level choice,
 such a type of technology to use for a project.
 
+## Field types
 
-## Info pages
+The order form field types are:
+
+- **String**: One single line of text, such as a name or a title.
+- **Email**: One single email address.
+- **Int**: A number that is a whole integer.
+- **Float**: A number that may contain fractions.
+- **Boolean**: A selection between Yes and No.
+- **Url**: One single URL (link address).
+- **Select**: A choice of one among a set of text given values.
+- **Multiselect**: A choice among a set of text given values, allowing multiple selected values.
+- **Text**: A multiline text which may use
+  [Markdown formatting](https://www.markdownguide.org/basic-syntax/).
+- **Date**: One single date, using ISO format (YYY-MM-DD).
+- **Table**: A basic table allowing several columns.
+- **File**: An uploaded file which is attached to the order.
+- **Group*: A group of a set of other fields. Does not contain a value.
+
+
+# Info pages
 
 There is a very basic information page subsystem, intended to allow
 displaying information about the orders and/or the facility to the
@@ -366,15 +386,16 @@ feature can be disabled by the system administrators in the display
 configuration page.
 
 
-## Documents
+# Documents
 
 There is a simple feature to store documents (files), such as PDFs or
-XLSX files.  This can be used to provide the users with templates or
-information documents.  This feature can be disabled by the system
-administrators in the display configuration page.
+XLSX files for any user to access. This can be used to provide the
+users with templates or information documents. This feature can be
+disabled by the system administrators in the display configuration
+page.
 
 
-## Interface
+# Interfaces
 
 There are three main interfaces to the system, the web, the API
 (Application Programming Interface) and the CLI (Command-Line
@@ -384,154 +405,148 @@ The web interface behaves slightly differently depending on the role
 of the user account logged in.
 
 
-### User web interface
+## Web
 
-This is for ordinary users. It should provide the user with sufficient
-help and visual cues to allow filling in the form in a productive
-manner. Missing values and values outside of allowed ranges are
-highlighted to help the user prepare a valid order.
+The web interace is the standard interface for accessing and using OrderPortal.
 
+Depending on the role of the user account, the privileges in the web
+interface differ. In principle, the ordinary user can view and edit
+only her own orders. Staff can view most things, while admin can
+perform all view and edit operations that are available in the web
+interface.
 
-### Staff web interface
+## API
 
-This is for normal facility staff usage. Display of orders according
-to status and other parameters.
-
-
-### Administrator web interface
-
-For system administrators only, this interface enables editing orders,
-users and fields. This includes the ability to move orders along into
-different statuses.
-
-
-### The Application Programming Interface (API)
-
-The API allows other systems to interact with the order portal. It is
-based on RESTful principles using JSON and linked data to allow other
-systems to access and/or modify various data entities in the portal.
+The Application Programming Interface (API) allows other systems to
+interact with the order portal. It is based on RESTful principles
+using JSON and linked data to allow other systems to access and/or
+modify various data entities in the portal.
 
 The API is currently fairly limited.
 
+The web pages having a link
+![](/static/json.png) `JSON`
+which leads to the JSON format representation of the entity in the page.
 
-### The Command Line Interface (CLI).
+The account to be used for API interactions must have its API key
+set. That key provides authentication for programmatic access to the
+API. Set it by checking the box `Set new API key` in the **edit page**
+of your account. The user identified by the API key has the same
+privileges in the API as in the web interface.
 
-The CLI allows system various maintenance operations, such as backup,
-account creation and such. It is executed on the command line of the
-machine which hosts the OrderPortal instance. This means that only
-users with accounts of sufficient privilege on this machine can use
-it.
+The JSON for the entities may contain links to other entities or
+actions. The design is inspired by (but not identical to) the proposed
+standard Hypertext Application Language (HAL). See Mike Kelly's
+original proposal at http://stateless.co/hal_specification.html and
+the (defunct) IETF proposal at
+https://tools.ietf.org/html/draft-kelly-json-hal-08. The most
+important difference is that the key `links`, rather than `_links`, is
+used.
 
+There are a number of sample scripts showing various interactions with
+the API. Note that the example script uses the third-party
+module `requests` (see
+[here](http://docs.python-requests.org/en/master/ "!")) which is much
+nicer to work with than the standard Python `urllib` module.
 
-# Installation
+### API Get order data
 
-The current version has been developed using Python 3.10 or higher.
-It may work on Python 3.8 and 3.9, but this has not been tested.
+An example script that gets all data about an order in JSON format is
+provided here:
+[get_order.py](https://github.com/pekrau/OrderPortal/blob/master/api_scripts/get_order.py "!").
 
+The data obtained is the same as one gets by clicking the JSON link in
+the upper right corner of the order's web page.
 
-## Docker containers
-
-Docker containers for the releases can be retrieved from [ghcr.io/pekrau](https://github.com/pekrau/OrderPortal/pkgs/container/orderportal).
-
-
-## From source code
-
-This instruction is based on the old procedure used previously for the
-instances running on the SciLifeLab server. It will have to be adapted
-for your site.
-
-The Linux account `nginx` is used in the instructions below to host
-the instance files. Change according to the policy at your site.
-
-The name `xyz` is used below as a placeholder for the name of your instance.
-
-Instructions for updating the OrderPortal source code is given below
-under [Updates](#updates).
-
-
-### Source code setup
-
-Download the `tar.gz` file for latest release from
-[the Github repo](https://github.com/pekrau/OrderPortal/releases)
-into the directory where the installation will be hosted. Substitute
-the directory `/var/www/apps` with the corresponding on your machine:
-
-    $ cd /var/www/apps
-    $ sudo -u nginx mkdir xyz
-    $ cd xyz
-    $ ### Download OrderPortal-version.tar.gz to here.
-    $ sudo -u nginx tar xvf OrderPortal-version.tar.gz
-    $ sudo -u nginx mv OrderPortal-version OrderPortal
-
-Create the `site` subdirectory for your instance by copying the
-`site_template` directory.
-
-    $ cd OrderPortal
-    $ sudo -u nginx cp -r site_template site
-
-The OrderPortal server and the CLI (command-line interface) must be
-executed in a Python environment where all the required dependencies
-have been installed, as specified by the file `requirements.txt`.  It
-is recommended that a virtual environment is created for this. Refer
-to the Python documentation.
-
-Download and install the required third-party Python modules using the
-`requirements.txt` file as approprate for your Python environment.
-
-    $ sudo pip install -r requirements.txt
-
-### Settings file
-
-Set the correction protection for the file `site/settings.yaml` and
-edit it according to your setup. Some of the settings depend on
-actions described below, so you may have to go back to edit it again.
-
-    $ cd /var/www/apps/xyz/OrderPortal/site
-    $ sudo -u nginx chmod go-rw settings.yaml
-    $ sudo -u nginx emacs settings.yaml
-
-See the comments in the template `settings.yaml` file for editing the
-file for your site. In particular, the CouchDB variables must be set (see below).
-
-### CouchDB setup
-
-Install and set up a CouchDB instance, if you don't have one
-already. Follow the instructions for CouchDB, which are not included
-here.
-
-- Go to the CouchDB web interface, usually http://localhost:5984/_utils/
-  if on the local machine and login.
-- It is a good idea to create a new CouchDB CouchDB user account
-  (e.g. `orderportal_xyz`) for your OrderPortal instance. It must have
-  privileges to create and delete databases in CouchDB.
-- However, it is possible to simply use the admin user account that you
-  created when setting up the CouchDB instance.
-
-Set the correct values for the CouchDB variables in the `site/settings.yaml` file
-(see above). Otherwise the following operations will fail.
-
-Create the database in CouchDB using the command-line interface (CLI).
-
-    $ cd /var/www/apps/xyz/OrderPortal/orderportal
-    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py create-database
-
-Create the first OrderPortal system administrator account in the database using the CLI:
-
-    $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py admin
+One should note that the order can always be identified by its
+IUID. If the site has enabled identifiers (which typically look
+something like XYZ00102), then it is possible to use that identifier
+instead of the IUID for this particular case. For some cases, the IUID
+must be used in the URL. The IUID is the safest bet, so if you have it
+readily at hand, use it.
 
 
-### `Tornado` server
+### API Create order
 
-The `tornado` server should be executed as a system service. This depends
-on your operating system; refer to its documentation.
+An order can be created by POST of JSON data containing the IUID of
+the relevant form, and optionally a title. The returned data will
+contain the full representation of the newly created order, which will
+contain no data for the fields.
 
-It is recommended that you use a reverse proxy for the `tornado`
-server, e.g. `nginx` or `apache`. See the documentation for those
-systems. A sample configuration file from an installation using `nginx` is
-provided at [orderportal/site_template/orderportal_xyz.conf](orderportal/site_template/orderportal_xyz.conf).
+It is not possible to set any initial values of the fields using this
+call. You will have to set the field values using a separate edit (see
+[Edit an order](/documentation#edit-order]).
+
+For an example order create script, see
+[create_order.py](https://github.com/pekrau/OrderPortal/blob/master/api_scripts/create_order.py "!").
 
 
-### Backup
+### API Edit order
+
+An order can be edited by POST of JSON data containing the fields to
+change. In principle, the data to send should look like a subset of
+the full JSON representation of an order.
+
+Fields that are not included in the data are not touched. Only fields
+present in the form for the order can be set, and only when the
+current user is allowed to do so. Attempts to set other fields will be
+silently ignored.
+
+In addition to the fields, the title, tags and history of an order can
+also be set via the API.
+
+**NOTE**: setting history explicitly should be done with care, so as
+to avoid fake data in the history. The point of the history is to
+show when status changes happened without having to go through the
+entire log of the order.
+
+For an example order edit script, see
+[edit_order.py](https://github.com/pekrau/OrderPortal/blob/master/api_scripts/edit_order.py "!").
+
+
+### API Set order status
+
+The API can be used to set the status of an order. The allowed status
+transitions are the same as in the web interface, and depend on the
+current status of the order and the role of the account.
+
+The allowed transitions and their URLs are provided in the JSON data
+for the order in the form of a dictionary with the target states as
+key and as value another dictionary with the key ``href`` and the
+corresponding URL as value. One must use the HTTP method POST for
+these URLs, since they change the order.
+
+See the example script
+[submit_order.py](https://github.com/pekrau/OrderPortal/blob/master/api_scripts/submit_order.py "!")
+for the code used to submit an order. Similar code is used for other
+status transitions.
+
+
+### API Add order report
+
+A report for an order can be added by doing a PUT to the order
+report URI with the report content file as request body.
+
+The content type (MIME type) of the data is recorded with the
+report. If it is `text/html` or `text/plain`, the content will be
+display in-line in the user's browser. Otherwise the content will be
+downloaded as a file to the user's browser when the report button is
+clicked.
+
+For an example add report script, see
+[add_report.py](https://github.com/pekrau/OrderPortal/blob/master/api_scripts/add_report.py "!").
+
+
+## CLI
+
+The Command Line Interface (CLI) allows system various maintenance
+operations, such as backup, account creation and such. It is executed
+on the command line of the machine which hosts the OrderPortal
+instance. This means that only users with accounts of sufficient
+privilege on this machine can use it.
+
+
+# Backup
 
 Backups of the CouchDB database can easily be produced using the CLI:
 
@@ -542,13 +557,57 @@ options for setting the name of the file, or the directory in which it is writte
 See the `--help` option of the CLI.
 
 
-### Updates
+# Instructions
 
-To update the source code, simply download the latest release, unpack
-the `tar.gz` file, and move the `OrderPortal` directory tree to the
-correct location.  Ensure that you keep your `site` directory, and
-that it is placed in the same location as before.
+## Creating order form
 
-Since OrderPortal version 3.6.19, the CouchDB design documents (which
-defined the indexes) are automatically updated when the `tornado`
-server is restarted.
+A system administrator will have to prepare a form for the end-user to
+be able to prepare an order.
+
+Like so:
+
+- Go to the [forms list page](/forms "!").
+- Click the button "Create form".
+- Fill in the title and description. These can be edited later.
+- Click "Save".
+
+Now add fields. A "group" field is a container for other fields, and does
+not contain a value of its own. The other types of fields are fairly
+self-explanatory.
+
+- Click "Create field".
+- Choose group. If no groups have been created, only the top level is
+  available. This choice cannot be edited later.
+- The identifier must be like a common programming language identifier:
+  Begin with an alphabetical character, and then any number of alphanumerical
+  and underscore characters. No blanks. It must be unique within the form.
+  It cannot be edited later.
+- The label is what is shown for the user. If none, then the identifer will
+  be shown, somewhat prettified. Can be edited later.
+- The field can be made read-only for user, or invisible to the user. Can be
+  edited later.
+- The description is the help text visible to the user. Can be edited later.
+- Click "Save."
+- The field will be added below the others in its group. The placement in
+  the group can be edited later.
+- If you make a mistake (giving wrong identifier, placing in wrong group,
+  etc) you will probably have to delete the field and try again. Currently,
+  only the label, access, placement and description can be edited later.
+- Conditional visibility is specified when editing a field. Currently,
+  only a single value in another select field can be tested against.
+
+After having added some fields, it is possible to test what an order for it
+will look like: Click "Testing". This will allow only the system administrators
+to create and edit a test order for the form.
+
+Once done with testing, click "Pending" to allow editing of the form again.
+Any orders created while "Testing" will automatically be deleted.
+
+**Do not click "Enable"!** That will enable the form for users to create
+orders. This **cannot be undone!** So be sure that the form is OK before
+you do this.
+
+# Installation
+
+The current installation procedure is described in README for the
+[GitHub repo](https://github.com/pekrau/OrderPortal "!").
