@@ -8,11 +8,6 @@ from orderportal import saver
 from orderportal import utils
 
 
-class SafeDict(dict):
-    def __missing__(self, key):
-        return f"[unknown variable {key}]"
-
-
 class MessageSaver(saver.Saver):
     doctype = constants.MESSAGE
 
@@ -64,7 +59,7 @@ class MessageSaver(saver.Saver):
         site_url = settings["BASE_URL"]
         if settings["BASE_URL_PATH_PREFIX"]:
             site_url += settings["BASE_URL_PATH_PREFIX"]
-        params = SafeDict(
+        params = utils.SafeDict(
             host=settings.get("SITE_HOST_NAME") or "[not defined]",
             host_url=settings.get("SITE_HOST_URL") or "[not defined]",
             site=settings["SITE_NAME"],

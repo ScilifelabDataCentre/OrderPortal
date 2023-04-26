@@ -166,7 +166,7 @@ the order form ([see below](/documentation#order-form)) it was created from.
 An order belongs to one and only one user account.
 
 An order has one and only on status at any time. When the order is
-created, it is in status PREPARATION, and while it is in that state,
+created, it is in status `Preparation`, and while it is in that state,
 the user can edit it and save it. An order that is being prepared can
 be, but is usually not, inspected by the staff or system
 administrators.
@@ -180,43 +180,166 @@ order to complete it and then submit it.
 When all fields have been given valid values by the user, it becomes
 possible to submit it.
 
-An order in status SUBMITTED will be handled by the staff and system
+An order in status `Submitted` will be handled by the staff and system
 administrators.
 
 
 ## Order status
 
-This is a list of all possible order statuses:
+<table class="table">
+<caption>The list of all possible order statuses.</caption>
 
-| State       | Semantics                                                     |
-|-------------|---------------------------------------------------------------|
-| PREPARATION | The order has been created and is being edited by the user.   |
-| SUBMITTED   | The order has been submitted by the user for consideration.   |
-| REVIEW      | The order is under review.                                    |
-| QUEUED      | The order has been queued.                                    |
-| WAITING     | The order is waiting.                                         |
-| ACCEPTED    | The order has been checked and accepted.                      |
-| REJECTED    | The order has been rejected.                                  |
-| PROCESSING  | The order is being processed in the lab.                      |
-| ACTIVE      | The order is active.                                          |
-| ANALYSIS    | The order results are being analysed.                         |
-| ONHOLD      | The order is on hold.                                         |
-| HALTED      | The work on the order has been halted.                        |
-| ABORTED     | The work on the order has been permanently stopped.           |
-| TERMINATED  | The order has been terminated.                                |
-| CANCELLED   | The order has been cancelled.                                 |
-| FINISHED    | The work on the order has finished.                           |
-| COMPLETED   | The order has been completed.                                 |
-| CLOSED      | All work and other actions for the order have been performed. |
-| DELIVERED   | The order results have been delivered.                        |
-| INVOICED    | The order has been invoiced.                                  |
-| ARCHIVED    | The order has been archived.                                  |
-| UNDEFINED   | The order has an undefined or unknown status.                 |
+<thead>
+<tr>
+<th colspan="2">Status</th>
+<th>Semantics</th>
+</tr>
+</thead>
 
-Only the statuses PREPARATION and SUBMITTED are enabled by default. All other
-statuses will have to be enabled to become available for use.
+<tbody>
 
-Statuses can be enabled by the system administrators.  Once enabled, a
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/preparation.png"></td>
+<td><code>Preparation</code></td>
+<td>The order has been created and is being edited by the user.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/submitted.png"></td>
+<td><code>Submitted</code></td>
+<td>The order has been submitted by the user for consideration.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/review.png"></td>
+<td><code>Review</code></td>
+<td>The order is under review.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/queued.png"></td>
+<td><code>Queued</code></td>
+<td>The order has been queued.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/waiting.png"></td>
+<td><code>Waiting</code></td>
+<td>The order is waiting for something else to happen.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/accepted.png"></td>
+<td><code>Accepted</code></td>
+<td>The order has been checked and accepted.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/rejected.png"></td>
+<td><code>Rejected</code></td>
+<td>The order has been rejected.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/processing.png"></td>
+<td><code>Processing</code></td>
+<td>The order is being processed in the lab.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/active.png"></td>
+<td><code>Active</code></td>
+<td>The order is actively being worked on.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/analysis.png"></td>
+<td><code>Analysis</code></td>
+<td>The order results are being analysed.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/onhold.png"></td>
+<td><code>Onhold</code></td>
+<td>The order is on hold.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/halted.png"></td>
+<td><code>Halted</code></td>
+<td>The work on the order has been halted.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/aborted.png"></td>
+<td><code>Aborted</code></td>
+<td>The work on the order has been permanently stopped.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/terminated.png"></td>
+<td><code>Terminated</code></td>
+<td>The order has been terminated.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/cancelled.png"></td>
+<td><code>Cancelled</code></td>
+<td>The order has been cancelled.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/finished.png"></td>
+<td><code>Finished</code></td>
+<td>The work on the order has finished.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/completed.png"></td>
+<td><code>Completed</code></td>
+<td>The order has been completed.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/closed.png"></td>
+<td><code>Closed</code></td>
+<td>All work and other actions for the order have been performed.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/delivered.png"></td>
+<td><code>Delivered</code></td>
+<td>The order results have been delivered.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/invoiced.png"></td>
+<td><code>Invoiced</code></td>
+<td>The order has been invoiced.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/archived.png"></td>
+<td><code>Archived</code></td>
+<td>The order has been archived.</td>
+</tr>
+
+<tr>
+<td><img src="{BASE_URL_PATH_PREFIX}/static/undefined.png"></td>
+<td><code>Undefined</code></td>
+<td>The order has an undefined or unknown status.</td>
+</tr>
+
+</tbody>
+</table>
+
+Only the statuses `Preparation` and `Submitted` are enabled by
+default. All other statuses will have to be enabled to become
+available for use.
+
+All orders will be in status `Preparation` when created.
+
+Statuses can be enabled only by the system administrators. Once enabled, a
 status cannot be disabled. The reason for this is that already
 existing orders may be in a specific status, or have a specific status
 recorded in its history, and removing such a status would introduce
@@ -225,7 +348,7 @@ status can be edited by the system administrators.
 
 Transitions between the statuses can be edited by the system
 administrators. The only transition enabled by default is the one from
-PREPARATION to SUBMITTED.
+`Preparation` to `Submitted`.
 
 Typically, enabling statuses and transitions should be done as part of
 the configuration and testing phase before the instance is launched
@@ -475,7 +598,7 @@ contain no data for the fields.
 
 It is not possible to set any initial values of the fields using this
 call. You will have to set the field values using a separate edit (see
-[Edit an order](/documentation#edit-order]).
+[API Edit order](/documentation#api-edit-order).
 
 For an example order create script, see
 [create_order.py](https://github.com/pekrau/OrderPortal/blob/master/api_scripts/create_order.py "!").
@@ -603,11 +726,30 @@ to create and edit a test order for the form.
 Once done with testing, click "Pending" to allow editing of the form again.
 Any orders created while "Testing" will automatically be deleted.
 
-**Do not click "Enable"!** That will enable the form for users to create
-orders. This **cannot be undone!** So be sure that the form is OK before
-you do this.
+Clicking "Enable" will enable the form for users to create
+orders. This **cannot be undone!** So be sure that the form is OK
+before you do this.
+
 
 # Installation
 
 The current installation procedure is described in README for the
 [GitHub repo](https://github.com/pekrau/OrderPortal "!").
+
+
+# Software design
+
+The implementation of Anubis is based on the following design decisions:
+
+- The back-end is written in Python using [tornado](https://pypi.org/project/tornado/ "!").
+  - The back-end generates HTML for display using the tornado template system.
+  - The front-end uses [Bootstrap](https://getbootstrap.com/docs/3.4/ "!").
+- The back-end uses the No-SQL database [CouchDB](https://couchdb.apache.org/ "!").
+  - Each entity instance is stored in one document in the CouchDB database.
+  - The entities are in most cases identified internally by a IUID
+    (Instance-unique identifier) which is a UUID4 value.
+  - The entities contain pointers to each other using the IUIDs.
+  - The CouchDB indexes ("designs") are vital for the computational efficiency
+    of the system.
+- There is a command-line interface (CLI) tool for certain operations,
+  such as creating and loading dumps.

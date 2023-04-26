@@ -248,3 +248,9 @@ class HtmlRenderer(marko.html_renderer.HTMLRenderer):
             return element.children
         else:
             return "".join([self.get_text_only(el) for el in element.children])
+
+
+class SafeDict(dict):
+    "Return error message, rather than raise exception, when entry is missing."
+    def __missing__(self, key):
+        return f"[unknown variable {key}]"

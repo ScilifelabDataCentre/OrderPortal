@@ -155,8 +155,14 @@ def load_settings_from_file():
         logger.warning(f"Obsolete entry '{key}' in settings file.")
 
     # Read and preprocess the documentation file.
+    if settings["BASE_URL_PATH_PREFIX"]:
+        BASE_URL_PATH_PREFIX = "/" + settings["BASE_URL_PATH_PREFIX"]
+    else:
+        BASE_URL_PATH_PREFIX = ""
+    lines = []
     with open("documentation.md") as infile:
-        lines = infile.readlines()
+        for line in infile.readlines():
+            lines.append(line.format(BASE_URL_PATH_PREFIX=BASE_URL_PATH_PREFIX))
     toc = []
     current_level = 0
     for line in lines:
