@@ -3,8 +3,8 @@
 The OrderPortal system is a web-based portal that allows form-based
 submission of information from users to a facility. It was designed
 academic service facilities that handle discrete orders or project
-proposals, reports, etc, from its researcher users. It has also been
-used as a system to gather reports from researchers and research
+proposals, reports, etc, from its users (researchers). It has also
+been used as a system to gather reports from researchers and research
 units.
 
 The OrderPortal system was originally created to satisfy the needs of the
@@ -45,40 +45,40 @@ needs.
 
 ## Basic concepts
 
-The system is a portal for **orders** (requests, project proposals,
-etc) to a single facility from its users. A **user** is a researcher
-external to the service facility, and may or may not be the Principal
-Investigator (PI) for one or more projects.
+- Orders: The OrderPortal system is a portal for orders (requests, project proposals,
+  etc) to a single facility from its users.
 
-An order is created from a template which is called a **form** in the
-OrderPortal system. The system administrators must set up and publish
-the forms for a researcher to be able to create an order. Each form
-defines the fields for data to be input by the researcher.
+- User: A user is a researcher external to the service facility, and may or
+  may not be the Principal Investigator (PI) for one or more projects.
 
-The OrderPortal system is designed for only one facility, displaying
-up to about 8 different order forms. There is no hard limit to the
-number of simultaneously published forms, but the current design does
-not work well with more than about 8 forms.
+- Order: An order is created, filled in and submitted by a user. The facility
+  personnel (system administrators and/or staff) then handles the order,
+  applying whatever workflow is defined by them. The order is moved
+  along by changing its status.
 
-If an organization has different facilities requiring different sets
-of forms, then it is probably a good idea to set up different
-instances of the OrderPortal system, with separate back-end database
-instances.
+- Form: An order is created from a template which is called a **form**.  The
+  system administrators must set up and publish the forms for a
+  user to be able to create an order. Each form defines the fields
+  for data to be input by the user.
 
-The design of an order form is fairly general; there is nothing that
-is hardcoded for specific domains of science. The content of the order
-forms consists of a different fields for different types of input
-data, with optional constraints on the input data, and optional help
-text. The order forms are defined by the system administrators.
+  The design of an order form is fairly general; there is nothing that
+  is hardcoded for specific domains of science. The content of the order
+  forms consists of a different fields for different types of input
+  data, with optional constraints on the input data, and optional help
+  text. The order forms are defined by the system administrators.
 
-A **user account** is defined within each OrderPortal instance. The email
-address of the user is the user account identifier. This means that if
-a user changes email address, a new account will have to be created.
+- Report: A report is an HTML file or a document file (PDF, DOCX, etc) which
+  can be attached to an order by the system administrators or staff.
+  This can be used a means of delivering results to the user.
 
-The system administrators can (and should) customisation the site
-logo, title, home page text blocks and the body of email messages sent
-by the system. Pages for showing information and documents are under
-control of the system administrators.
+- User account: A user account is defined within each OrderPortal instance. The email
+  address of the user is the user account identifier. This means that if
+  a user changes email address, a new account will have to be created.
+
+- Customization: The system administrators can (and should) customization the site
+  logo, title, home page text blocks and the body of email messages sent
+  by the system. Pages for showing information and documents are under
+  control of the system administrators.
 
 
 # Facility
@@ -110,6 +110,16 @@ different facilities.
 
 Note that there is no entity called `facility` in the OrderPortal system.
 It is just a concept behind the design of the system.
+
+The OrderPortal system is designed for only one facility, displaying
+up to about 8 different order forms. There is no hard limit to the
+number of simultaneously published forms, but the current design does
+not work well with more than about 8 forms.
+
+If an organization has different facilities requiring different sets
+of forms, then it is probably a good idea to set up different
+instances of the OrderPortal system, with separate back-end database
+instances.
 
 
 # Users
@@ -161,7 +171,7 @@ for an individual order.
 # Order
 
 An order is essentially a form with values. Its fields are defined by
-the order form ([see below](/documentation#order-form)) it was created from.
+the order form ([see below](/documentation#form)) it was created from.
 
 An order belongs to one and only one user account.
 
@@ -337,14 +347,14 @@ Only the statuses `Preparation` and `Submitted` are enabled by
 default. All other statuses will have to be enabled to become
 available for use.
 
-All orders will be in status `Preparation` when created.
-
 Statuses can be enabled only by the system administrators. Once enabled, a
 status cannot be disabled. The reason for this is that already
 existing orders may be in a specific status, or have a specific status
 recorded in its history, and removing such a status would introduce
-inconsistencies in the database. The description of the semantic of a
+inconsistencies in the database. The description of the semantics of a
 status can be edited by the system administrators.
+
+All orders will be in status `Preparation` when created.
 
 Transitions between the statuses can be edited by the system
 administrators. The only transition enabled by default is the one from
@@ -396,7 +406,7 @@ what" is stored. The log trace is written by the system automatically
 and cannot be edited by any user.
 
 
-# Order form
+# Form
 
 The order form fields are fully configurable by the system
 administrators via the web interface. The field definitions are
@@ -425,7 +435,7 @@ becoming invalid. It was a design decision to stop this from
 happening by disallowing changing a form after it has been enabled.
 
 
-## Order form fields
+## Form fields
 
 The fields of an order form, and by extension the orders created from it,
 are of different types, for input of text, number or other kinds of values.
@@ -499,23 +509,37 @@ The order form field types are:
 - **Group*: A group of a set of other fields. Does not contain a value.
 
 
+# Report
+
+An order may have any number of reports attached to it by the system
+administrators or staff. If the report is an HTML file it will be
+shown in-line, otherwise it will be downloadable by the user.
+
+The report feature is intended as a means to deliver results in the
+form of written reports to the user. There is a very simple review
+system, which allows requesting other staff to review a report before
+publishing it.
+
 # Info pages
 
 There is a very basic information page subsystem, intended to allow
 displaying information about the orders and/or the facility to the
-user or the general public. It is not a full-fledged wiki.  The system
-administrators can edit these pages via the web interface. This
-feature can be disabled by the system administrators in the display
-configuration page.
+user or the general public. It is not a full-fledged wiki. The system
+administrators can edit these pages via the web interface.
+
+This feature can be disabled by the system administrators in the
+display configuration page.
 
 
 # Documents
 
 There is a simple feature to store documents (files), such as PDFs or
-XLSX files for any user to access. This can be used to provide the
-users with templates or information documents. This feature can be
-disabled by the system administrators in the display configuration
-page.
+XLSX files in a general system-wide manner for any user to
+access. This can be used to provide the users with templates or
+information documents.
+
+This feature can be disabled by the system administrators in the
+display configuration page.
 
 
 # Interfaces
