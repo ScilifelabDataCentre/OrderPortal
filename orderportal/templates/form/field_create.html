@@ -10,8 +10,7 @@
 {% end %} {# block action_content #}
 
 {% block main_content %}
-<form action="{{ reverse_url('field_create', form['_id']) }}"
-      method="POST" role="form">
+<form action="{{ reverse_url('field_create', form['_id']) }}" method="POST" role="form">
   {% module xsrf_form_html() %}
 
   <div class="form-group has-feedback">
@@ -335,7 +334,7 @@
       <div class="col-md-12 help-block">
         Description to display in the {{ terminology('order') }} to help
         the user fill in the field correctly, using
-        <a href="{{ constants.MARKDOWN_URL }}" target="_blank">Markdown</a>
+        <a href="{{ constants.MARKDOWN_INFO_URL }}" target="_blank">Markdown</a>
         notation for formatting.
       </div>
     </div>

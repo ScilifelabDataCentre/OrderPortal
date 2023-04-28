@@ -10,7 +10,7 @@ import sys
 import pycountry
 
 
-__version__ = "11.0.0"
+__version__ = "11.0.1"
 
 
 class Constants:
@@ -37,7 +37,7 @@ class Constants:
     REQUESTS_URL = "https://docs.python-requests.org/"
     XLSXWRITER_URL = "https://pypi.org/project/XlsxWriter/"
     MARKO_URL = "https://pypi.org/project/marko/"
-    MARKDOWN_NOTATION_INFO_URL = "https://www.markdownguide.org/cheat-sheet/"
+    MARKDOWN_INFO_URL = "https://www.markdownguide.org/cheat-sheet/"
     PYYAML_URL = "https://pypi.org/project/PyYAML/"
 
     BOOTSTRAP_VERSION = "3.4.1"
