@@ -51,7 +51,7 @@ Review report for {{ terminology('order') }} '{{ order['title'] }}'
                 >{% module NoneStr(report['reviewers'][current_user['email']]['review']) %}</textarea>
       <small>
         {% if settings['DISPLAY_TEXT_MARKDOWN_NOTATION_INFO'] %}
-        <a href="{{ constants.MARKDOWN_NOTATION_INFO_URL }}" target="_blank">
+        <a href="{{ constants.MARKDOWN_INFO_URL }}" target="_blank">
           Markdown</a> notation may optionally be used to format the text.
         {% end %}
       </small>
