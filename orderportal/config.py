@@ -5,7 +5,6 @@ import os
 import os.path
 import urllib.parse
 
-import dotenv
 import yaml
 
 from orderportal import constants
@@ -45,21 +44,15 @@ def load_settings_from_file():
     """Load the settings that are not stored in the database from file or
     environment variables.
     1) Initialize with the values in DEFAULT_SETTINGS.
-    2) Set environment variables from file '.env', if any, using 'dotenv.load_dotenv'.
-       This does not overwrite any already existing environment variables.
-    3) Try the filepath in environment variable ORDERPORTAL_SETTINGS_FILEPATH.
-    4) If none, try the file '../site/settings.yaml' relative to this directory.
-    5) Use any environment variables defined; settings file values are overwritten.
-    6) Read and preprocess the documentation file.
+    2) Try the filepath in environment variable ORDERPORTAL_SETTINGS_FILEPATH.
+    3) If none, try the file '../site/settings.yaml' relative to this directory.
+    4) Use any environment variables defined; settings file values are overwritten.
+    5) Read and preprocess the documentation file.
     Raise KeyError if a settings variable is missing.
     Raise ValueError if a settings variable value is invalid.
     """
     settings.clear()
     settings.update(DEFAULT_SETTINGS)
-
-    # Dotenv file '.env' is optional. It is useful for development.
-    if dotenv.load_dotenv():
-        config["SETTINGS_DOTENV_FILEPATH"] = dotenv.find_dotenv()
 
     # Find and read the settings file, updating the defaults.
     try:
