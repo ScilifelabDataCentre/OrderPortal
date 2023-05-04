@@ -24,17 +24,9 @@ import orderportal.search
 import orderportal.uimodules
 
 
-def main():
-    orderportal.config.load_settings_from_file()
-    db = orderportal.database.get_db()
-    orderportal.database.update_design_documents(db)
-    orderportal.admin.migrate_meta_documents(db)
-    orderportal.admin.migrate_text_documents(db)
-    orderportal.config.load_settings_from_db(db)
-    orderportal.config.load_texts_from_db(db)
-
+def get_handlers():
     url = tornado.web.url
-    handlers = [
+    return [
         url(r"/", orderportal.home.Home, name="home"),
         url(r"/status", orderportal.home.Status, name="status"),
         url(r"/contact", orderportal.home.Contact, name="contact"),
@@ -171,7 +163,7 @@ def main():
             orderportal.account.AccountEdit,
             name="account_edit",
         ),
-        url(r"/login", orderportal.account.Login, name="login"),
+        url(constants.LOGIN_URL, orderportal.account.Login, name="login"),
         url(r"/logout", orderportal.account.Logout, name="logout"),
         url(r"/reset", orderportal.account.Reset, name="reset"),
         url(r"/password", orderportal.account.Password, name="password"),
@@ -366,13 +358,23 @@ def main():
         url(r"/(.*)", orderportal.home.NoSuchEntity),
     ]
 
+    
+def main():
+    orderportal.config.load_settings_from_file()
+    db = orderportal.database.get_db()
+    orderportal.database.update_design_documents(db)
+    orderportal.admin.migrate_meta_documents(db)
+    orderportal.admin.migrate_text_documents(db)
+    orderportal.config.load_settings_from_db(db)
+    orderportal.config.load_texts_from_db(db)
+
     if settings["BASE_URL_PATH_PREFIX"]:
-        login_url = f"/{settings['BASE_URL_PATH_PREFIX']}/login"
+        login_url = f"/{settings['BASE_URL_PATH_PREFIX']}{constants.LOGIN_URL}"
     else:
-        login_url = "/login"
+        login_url = constants.LOGIN_URL
 
     application = tornado.web.Application(
-        handlers=handlers,
+        handlers=get_handlers(),
         debug=settings.get("TORNADO_DEBUG", False),
         autoreload=settings.get("TORNADO_DEBUG", False),
         cookie_secret=settings["COOKIE_SECRET"],
