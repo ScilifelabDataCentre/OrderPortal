@@ -24,8 +24,8 @@ DEFAULT_SETTINGS = dict(
     DATABASE_PASSWORD=None,
     COOKIE_SECRET=None,
     PASSWORD_SALT=None,
-    SETTINGS_FILE=None,  # This value is set on startup.
-    SETTINGS_ENVVAR=False,  # This value is set on startup.
+    SETTINGS_FILEPATH=None,  # This value is set on startup.
+    SETTINGS_ENVVAR=False,   # This value is set on startup.
     ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",  # Order identifier format; site-unique prefix.
     ORDER_IDENTIFIER_FIRST=1,  # The number to use for the first order.
     MAIL_SERVER=None,  # If not set, then no emails can be sent.
@@ -66,7 +66,7 @@ def load_settings_from_file():
         obsolete_keys = []
     else:
         settings.update(from_settings_file)
-        settings["SETTINGS_FILE"] = filepath
+        settings["SETTINGS_FILEPATH"] = filepath
         obsolete_keys = set(from_settings_file.keys()).difference(DEFAULT_SETTINGS)
 
     # Modify the settings from environment variables; convert to correct type.
@@ -95,8 +95,7 @@ def load_settings_from_file():
         logger.setLevel(logging.INFO)
     logger.info(f"OrderPortal version {constants.VERSION}")
     logger.info(f"ROOT_DIR: {constants.ROOT_DIR}")
-    logger.info(f"SITE_DIR: {constants.SITE_DIR}")
-    logger.info(f"settings: {settings['SETTINGS_FILE']}")
+    logger.info(f"settings: {settings['SETTINGS_FILEPATH']}")
     logger.info(f"logger debug: {settings['LOGGING_DEBUG']}")
     logger.info(f"tornado debug: {settings['TORNADO_DEBUG']}")
 

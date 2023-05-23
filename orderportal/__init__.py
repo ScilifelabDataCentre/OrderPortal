@@ -10,7 +10,7 @@ import sys
 import pycountry
 
 
-__version__ = "11.1.1"
+__version__ = "11.1.3"
 
 
 class Constants:
@@ -158,6 +158,8 @@ class Constants:
     STAFF = "staff"
     ADMIN = "admin"
     ACCOUNT_ROLES = (USER, STAFF, ADMIN)
+
+    LOGIN_URL = r"/login"
 
     # Form statuses; hard-wired!
     TESTING = "testing"
@@ -333,5 +335,5 @@ class Constants:
 constants = Constants()
 
 
-# Set by 'config.load_settings_from_file' and 'config.load_settings_from_db'.
+# Loaded by 'config.load_settings_from_file' and 'config.load_settings_from_db'.
 settings = {}

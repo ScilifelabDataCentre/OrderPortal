@@ -51,7 +51,9 @@ def initialize():
     """Initialize database; load design documents.
     No longer needed. Kept just for backwards compatibility.
     """
-    orderportal.database.update_design_documents(orderportal.database.get_db())
+    db = orderportal.database.get_db()
+    orderportal.config.load_settings_from_db(db)
+    orderportal.database.update_design_documents(db)
 
 
 @cli.command()
@@ -59,6 +61,7 @@ def initialize():
 def counts(verbose):
     "Output counts of database entities."
     db = orderportal.database.get_db()
+    orderportal.config.load_settings_from_db(db)
     orderportal.database.update_design_documents(db)
     click.echo(f"{orderportal.database.get_count(db, 'order', 'owner'):>5} orders")
     click.echo(f"{orderportal.database.get_count(db, 'form', 'all'):>5} forms")
@@ -82,6 +85,7 @@ def counts(verbose):
 def dump(dumpfile, dumpdir, progressbar):
     "Dump all data in the database to a '.tar.gz' dump file."
     db = orderportal.database.get_db()
+    orderportal.config.load_settings_from_db(db)
     if not dumpfile:
         dumpfile = "dump_{0}.tar.gz".format(time.strftime("%Y-%m-%d"))
         if dumpdir:
@@ -151,6 +155,7 @@ def create_admin(email, password):
     No email is sent to the email address by this command.
     """
     db = orderportal.database.get_db()
+    orderportal.config.load_settings_from_db(db)
     try:
         with orderportal.account.AccountSaver(db=db) as saver:
             saver.set_email(email)
@@ -181,6 +186,7 @@ def create_admin(email, password):
 def password(email, password):
     "Set the password for the given account."
     db = orderportal.database.get_db()
+    orderportal.config.load_settings_from_db(db)
     try:
         account = _get_account(db, email)
     except KeyError as error:
@@ -220,6 +226,7 @@ def _get_account(db, email):
 def role(email, role):
     "Set the role for the given account."
     db = orderportal.database.get_db()
+    orderportal.config.load_settings_from_db(db)
     try:
         account = _get_account(db, email)
     except KeyError as error:
@@ -239,9 +246,9 @@ def output(identifier):
     The identifier may be an account email, account API key, file name, info name,
     order identifier, or '_id' of the CouchDB document.
     """
-    doc = orderportal.database.lookup_document(
-        orderportal.database.get_db(), identifier
-    )
+    db = orderportal.database.get_db()
+    orderportal.config.load_settings_from_db(db)
+    doc = orderportal.database.lookup_document(db, identifier)
     if doc is None:
         raise click.ClickException("No such item in the database.")
     click.echo(json.dumps(doc, ensure_ascii=False, indent=2))

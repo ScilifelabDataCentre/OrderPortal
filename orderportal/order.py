@@ -14,6 +14,7 @@ from orderportal import constants
 from orderportal import settings
 from orderportal import saver
 from orderportal import utils
+from orderportal.admin import MetaSaver
 from orderportal.fields import Fields
 from orderportal.message import MessageSaver
 from orderportal.requesthandler import RequestHandler, ApiV1Mixin
@@ -51,7 +52,10 @@ class OrderSaver(saver.Saver):
         # Set the order identifier if its format defined.
         # Allow also for disabled, since admin may clone such orders.
         if form["status"] in (constants.ENABLED, constants.DISABLED):
-            counter = self.handler.get_next_counter(constants.ORDER)
+            doc = self.db["order"]
+            with MetaSaver(doc, self) as saver:
+                counter = doc["counter"]
+                saver["counter"] = doc["counter"] + 1
             self["identifier"] = settings["ORDER_IDENTIFIER_FORMAT"].format(counter)
 
     def autopopulate(self):
