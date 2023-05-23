@@ -54,9 +54,12 @@ class OrderSaver(saver.Saver):
         if form["status"] in (constants.ENABLED, constants.DISABLED):
             doc = self.db["order"]
             with MetaSaver(doc, self) as saver:
-                counter = doc["counter"]
-                saver["counter"] = doc["counter"] + 1
-            self["identifier"] = settings["ORDER_IDENTIFIER_FORMAT"].format(counter)
+                try:
+                    number = doc["counter"] + 1
+                except KeyError:
+                    number = settings["ORDER_IDENTIFIER_FIRST"]
+                saver["counter"] = number
+            self["identifier"] = settings["ORDER_IDENTIFIER_FORMAT"].format(number)
 
     def autopopulate(self):
         """Autopopulate fields if defined.
