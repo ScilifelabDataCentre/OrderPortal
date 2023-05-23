@@ -249,28 +249,6 @@ class RequestHandler(tornado.web.RequestHandler):
         admins = [row.doc for row in view]
         return [a for a in admins if a["status"] == constants.ENABLED]
 
-    def get_next_counter(self, doctype):
-        "Get the next counter number for the doctype."
-        from orderportal.admin import MetaSaver  # To avoid circular import.
-
-        while True:
-            try:
-                doc = self.db[doctype]  # Doc must be reloaded each iteration
-            except couchdb2.NotFoundError:
-                with MetaSaver(handler=self) as saver:
-                    saver.set_id(doctype)
-                doc = saver.doc
-            try:
-                number = doc["counter"] + 1
-            except KeyError:
-                if doctype == constants.ORDER:
-                    number = settings["ORDER_IDENTIFIER_FIRST"]
-                else:
-                    number = 1
-            doc["counter"] = number
-            self.db.put(doc)
-            return number
-
     def get_entity(self, iuid, doctype=None):
         """Get the entity by the IUID. Check the doctype, if given.
         Raise HTTP 404 if no such entity.

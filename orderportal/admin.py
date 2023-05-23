@@ -218,6 +218,12 @@ def migrate_meta_documents(db):
             saver["default_country_code"] = settings.get("DEFAULT_COUNTRY_CODE", "SE")
         logger.info("Saved account configuration to database.")
 
+    ### Create the starting "order" document, if none.
+    if "order" not in db:
+        with MetaSaver(db=db) as saver:
+            saver.set_id("order")
+            saver["counter"] = settings["ORDER_IDENTIFIER_FIRST"]
+
     ### As of version 9.1.0, many settings pertaining to order entities
     ### are stored on the database, not the settings file.
     ### Transfer the settings to the existing "order" document.
