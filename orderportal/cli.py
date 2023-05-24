@@ -34,21 +34,32 @@ def destroy_database():
 
 
 @cli.command()
-def create_database():
-    "Create the database instance within CouchDB. Load the design document."
+@click.option(
+    "-s",
+    "--silent",
+    is_flag=True,
+    default=False,
+    help="Do not complain if database already exists.",
+)
+def create_database(silent):
+    "Create the database instance within CouchDB. Update the design documents."
     server = orderportal.database.get_server()
-    if settings["DATABASE_NAME"] in server:
-        raise click.ClickException(
-            f"""Database '{settings["DATABASE_NAME"]}' already exists."""
-        )
-    server.create(settings["DATABASE_NAME"])
+    exists = settings["DATABASE_NAME"] in server
+    if exists:
+        if not silent:
+            raise click.ClickException(
+                f"""Database '{settings["DATABASE_NAME"]}' already exists."""
+            )
+    else:
+        server.create(settings["DATABASE_NAME"])
     orderportal.database.update_design_documents(orderportal.database.get_db())
-    click.echo(f"""Created database '{settings["DATABASE_NAME"]}'.""")
+    if not exists:
+        click.echo(f"""Created database '{settings["DATABASE_NAME"]}'.""")
 
 
 @cli.command()
 def initialize():
-    """Initialize database; load design documents.
+    """Initialize database. Update the design documents.
     No longer needed. Kept just for backwards compatibility.
     """
     db = orderportal.database.get_db()
