@@ -358,7 +358,7 @@ def get_handlers():
         url(r"/(.*)", orderportal.home.NoSuchEntity),
     ]
 
-    
+
 def main():
     orderportal.config.load_settings_from_file()
     db = orderportal.database.get_db()

@@ -252,5 +252,6 @@ class HtmlRenderer(marko.html_renderer.HTMLRenderer):
 
 class SafeDict(dict):
     "Return error message, rather than raise exception, when entry is missing."
+
     def __missing__(self, key):
         return f"[unknown variable {key}]"

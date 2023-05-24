@@ -25,7 +25,7 @@ DEFAULT_SETTINGS = dict(
     COOKIE_SECRET=None,
     PASSWORD_SALT=None,
     SETTINGS_FILEPATH=None,  # This value is set on startup.
-    SETTINGS_ENVVAR=False,   # This value is set on startup.
+    SETTINGS_ENVVAR=False,  # This value is set on startup.
     ORDER_IDENTIFIER_FORMAT="OP{0:=05d}",  # Order identifier format; site-unique prefix.
     ORDER_IDENTIFIER_FIRST=1,  # The number to use for the first order.
     MAIL_SERVER=None,  # If not set, then no emails can be sent.
@@ -169,7 +169,9 @@ def load_settings_from_file():
             if level <= 2:
                 if level > current_level:
                     for l in range(current_level, level):
-                        toc.append('<ul class="list-unstyled" style="padding-left: 1.5em;">')
+                        toc.append(
+                            '<ul class="list-unstyled" style="padding-left: 1.5em;">'
+                        )
                     current_level = level
                 elif level < current_level:
                     for l in range(level, current_level):

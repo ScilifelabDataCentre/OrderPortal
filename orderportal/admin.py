@@ -221,8 +221,7 @@ def migrate_meta_documents(db):
     ### Create the starting "order" document, if none.
     if "order" not in db:
         with MetaSaver(db=db) as saver:
-            saver.set_id("order")
-            saver["counter"] = settings["ORDER_IDENTIFIER_FIRST"]
+            saver.set_id("order")  # "counter" is set when the first order is created.
 
     ### As of version 9.1.0, many settings pertaining to order entities
     ### are stored on the database, not the settings file.
