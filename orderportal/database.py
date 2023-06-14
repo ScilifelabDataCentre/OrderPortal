@@ -100,7 +100,7 @@ def lookup_document(db, identifier):
     The identifier may be an account email, account API key, file name, info name,
     order identifier, or '_id' of the CouchDB document.
     """
-    if not identifier:  # If empty string, database info is returned.
+    if not identifier:  # If empty string, database info is returned. Don't do that.
         return None
     for designname, viewname in [
         ("account", "email"),
