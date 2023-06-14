@@ -1039,12 +1039,13 @@ class OrderCsv(OrderMixin, RequestHandler):
             # Special case for table field; spans more than one row
             if field["type"] == constants.TABLE:
                 table = values[4]  # Column for 'Value'
-                values[4] = len(table)  # Number of rows in table
-                values += [h.split(";")[0] for h in field_ref["table"]]
-                writer.writerow(values)
-                prefix = [""] * n_column_headers
-                for row in table:
-                    writer.writerow(prefix + row)
+                if table:  # Defensive; apparently, this can be None in some cases?
+                    values[4] = len(table)  # Number of rows in table
+                    values += [h.split(";")[0] for h in field_ref["table"]]
+                    writer.writerow(values)
+                    prefix = [""] * n_column_headers
+                    for row in table:
+                        writer.writerow(prefix + row)
 
             elif field["type"] == constants.MULTISELECT:
                 if isinstance(values[4], list):
