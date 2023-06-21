@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.11/css/dataTables.bootstrap.min.css">
-    {% block css_page %}
-    {% end %}
     <link rel="stylesheet" href="{{ static_url('modifications.css') }}">
     {% if settings['SITE_CSS'] %}
     <link rel="stylesheet" href="{{ reverse_url('site', 'css') }}">
