@@ -127,6 +127,14 @@
           <input type="checkbox" id="orders_filter_field_remove"
                  name="orders_filter_field_remove" value="{{ f['identifier'] }}">
           {{ f.get('label') or f['identifier'] }}
+          <button type="button" class="btn btn-default btn-sm"
+                  data-toggle="collapse" data-target="#_filter_{{ f['identifier'] }}">
+            <span class="glyphicon glyphicon-triangle-bottom"></span>
+            Specification
+          </button>
+          <div id="_filter_{{ f['identifier'] }}" class="collapse">
+            {% module Yaml(f) %}
+          </div>
         </label>
       </div>
       {% end %}

@@ -5,6 +5,7 @@ import logging
 
 import htmlgenerator as hg
 import tornado.web
+import yaml
 
 from orderportal import constants, settings
 from orderportal import utils
@@ -192,6 +193,13 @@ class Json(tornado.web.UIModule):
 
     def render(self, data):
         return f"<pre>{json.dumps(data, indent=2)}</pre>"
+
+
+class Yaml(tornado.web.UIModule):
+    "Display YAML."
+
+    def render(self, data):
+        return f"<pre>{yaml.dump(data)}</pre>"
 
 
 class Tags(tornado.web.UIModule):

@@ -1291,21 +1291,6 @@ class Database(RequestHandler):
         )
 
 
-class Document(RequestHandler):
-    "Download a document from the CouchDB database."
-
-    @tornado.web.authenticated
-    def get(self, id):
-        self.check_admin()
-        try:
-            doc = self.db[id]
-        except couchdb2.NotFoundError:
-            return self.see_other("admin_database")
-        self.set_header("Content-Type", constants.JSON_MIMETYPE)
-        self.set_header("Content-Disposition", f'attachment; filename="{id}.json"')
-        self.write(json.dumps(doc, ensure_ascii=False, indent=2))
-
-
 class Settings(RequestHandler):
     "Page displaying settings info."
 

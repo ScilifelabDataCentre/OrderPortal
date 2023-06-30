@@ -167,11 +167,57 @@ to her orders by creating a group to which the other users are
 invited. Access can also be granted by a user to other specific users
 for an individual order.
 
+### Forms
+
+Only system administrators are allowed to view, create, edit, delete, enable or
+disable forms.
+
+### Order
+
+#### Create
+
+Any logged-in user may create an order from an enabled form, unless the
+system has been configured to disallow ordinary users to do so.
+
+System administrators may create an order from a form that is in status **testing**.
+
+#### Edit or delete
+
+A user may edit or delete their own order while it has a status that
+allows editing for ordinary users. This is configurable.
+
+A staff member may edit or delete an order while it has a status that
+allows editing for staff. This is configurable.
+
+System administrators may always edit or delete an order.
+
+#### Change status
+
+Which users are allowed to change the status of an order depends on the configuration.
+Usually, a user is allowed to submit their own order and nothing more.
+
+Staff and system administrators are allowed to change status according to the current
+configuration.
+
+#### Clone
+
+Any user may clone their own order, as long as the order form is enabled.
+
+Staff and system administrators may clone any order. As a special
+case, system administrators are allowed to clone an order that is
+based on a disabled form.
+
+#### Change owner
+
+Any user is allowed to change the ownership of their order to another user.
+
+System administrators are allowed to change the ownership of any order.
 
 # Order
 
-An order is essentially a form with values. Its fields are defined by
-the order form ([see below](/documentation#form)) it was created from.
+An order is essentially a set of values for a given form. Its fields
+are defined by the order form ([see below](/documentation#form)) it
+was created from.
 
 An order belongs to one and only one user account.
 
@@ -714,15 +760,15 @@ be able to prepare an order.
 Like so:
 
 - Go to the [forms list page](/forms "!").
-- Click the button "Create form".
+- Click the button **Create form**.
 - Fill in the title and description. These can be edited later.
-- Click "Save".
+- Click **Save**.
 
-Now add fields. A "group" field is a container for other fields, and does
+Now add fields. A **group** field is a container for other fields, and does
 not contain a value of its own. The other types of fields are fairly
 self-explanatory.
 
-- Click "Create field".
+- Click **Create field**.
 - Choose group. If no groups have been created, only the top level is
   available. This choice cannot be edited later.
 - The identifier must be like a common programming language identifier:
@@ -734,7 +780,7 @@ self-explanatory.
 - The field can be made read-only for user, or invisible to the user. Can be
   edited later.
 - The description is the help text visible to the user. Can be edited later.
-- Click "Save."
+- Click **Save.**
 - The field will be added below the others in its group. The placement in
   the group can be edited later.
 - If you make a mistake (giving wrong identifier, placing in wrong group,
@@ -744,14 +790,14 @@ self-explanatory.
   only a single value in another select field can be tested against.
 
 After having added some fields, it is possible to test what an order for it
-will look like: Click "Testing". This will allow only the system administrators
+will look like: Click **Testing**. This will allow only the system administrators
 to create and edit a test order for the form.
 
-Once done with testing, click "Pending" to allow editing of the form again.
-Any orders created while "Testing" will automatically be deleted.
+Once done with testing, click **Pending** to allow editing of the form again.
+Any orders created while **Testing** will automatically be deleted.
 
-Clicking "Enable" will enable the form for users to create
-orders. This **cannot be undone!** So be sure that the form is OK
+Clicking **Enable** will enable the form for users to create
+orders. This **cannot be undone!** So ensure that the form is OK
 before you do this.
 
 

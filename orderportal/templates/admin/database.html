@@ -30,17 +30,12 @@
       </div>
     </form>
   </div>
-  {% if doc %}
-  <div class="col-md col-md-offset-1">
-    <a href="{{ reverse_url('admin_document', doc['_id']) }}"
-       class="btn btn-primary">
-      Download {{ doc['_id'] }}
-    </a>
-  </div>
-  {% end %}
 </div>
+{% if doc %}
+{% module Json(doc) %}
+{% end %}
 
-<h3>Document counts in the OrderPortal CouchDBdatabase</h3>
+<h3>Document counts in the OrderPortal CouchDB database</h3>
 {% module Json(counts) %}
 
 <h3>OrderPortal CouchDB database info</h3>
