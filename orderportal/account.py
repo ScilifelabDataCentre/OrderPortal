@@ -840,6 +840,8 @@ class AccountEdit(AccessMixin, RequestHandler):
                 saver["other_data"] = self.get_argument("other_data", None)
                 if utils.to_bool(self.get_argument("api_key", False)):
                     saver["api_key"] = utils.get_iuid()
+                saver["no_order_messages"] = utils.to_bool(
+                    self.get_argument("no_order_messages", False))
                 saver["update_info"] = False
                 saver.check_required()
         except ValueError as error:

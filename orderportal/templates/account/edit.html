@@ -483,6 +483,17 @@ administrator of the site can then change the ownership of your
   </div>
 
   <div class="form-group">
+    <label class="control-label col-md-2" for="no_order_messages">Order messages</label>
+    <div class="col-md-10">
+      <div  class="form-control">
+        <input type="checkbox" name="no_order_messages" id="no_order_messages"
+               value="true" {{ account.get('no_order_messages') and 'checked' or '' }}>
+        Do <strong>NOT</strong> send any emails for order status changes.
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
     <div class="col-md-offset-2 col-md-3">
       <button type="submit" class="btn btn-success btn-block">
         <span class="glyphicon glyphicon-floppy-disk"></span> Save
