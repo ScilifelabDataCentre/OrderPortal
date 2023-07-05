@@ -252,8 +252,8 @@ class RequestHandler(tornado.web.RequestHandler):
     def get_staff(self):
         "Get the list of enabled staff accounts."
         view = self.db.view("account", "role", key=constants.STAFF, include_docs=True)
-        admins = [row.doc for row in view]
-        return [a for a in admins if a["status"] == constants.ENABLED]
+        staff = [row.doc for row in view]
+        return [s for s in staff if s["status"] == constants.ENABLED]
 
     def get_entity(self, iuid, doctype=None):
         """Get the entity by the IUID. Check the doctype, if given.
