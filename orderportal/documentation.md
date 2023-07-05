@@ -2,27 +2,28 @@
 
 The OrderPortal system is a web-based portal that allows form-based
 submission of information from users to a facility. It was designed
-academic service facilities that handle discrete orders or project
+for academic service facilities that handle discrete orders or project
 proposals, reports, etc, from its users (researchers). It has also
 been used as a system to gather reports from researchers and research
 units.
 
+The services offered by the facility are described in the forms for
+orders. These forms are defined by the facility. Is is possible to
+create a new form when a service is upgraded or modified, and to
+disable an old form when the corresponding service is retired.
+
+The OrderPortal system is not hardcoded for any specific scientific
+area. Considerable effort has gone into making sure the design is as
+general as possible within the scope of the basic problem it is
+intended to solve.
+
+Since the system is general in character, it requires specific
+configuration settings to suite your particular needs.
+
 The OrderPortal system was originally created to satisfy the needs of the
 [National Genomics Infrastructure (NGI) Sweden](https://ngisweden.scilifelab.se/ "!"),
-which is a service facility for DNA sequencing and genotyping of
-samples provided by external researchers. The facility processes the
-samples according to the specifications in the order from the
-researcher.  The available services are described in the forms for
-orders that the facility defines.
-
-The OrderPortal system is not hardcoded for any specific area such as
-DNA sequencing. On the contrary, considerable effort has gone into
-making sure the design is as general as possible within the scope of
-the basic problem it is intended to solve.
-
-Since the system is general in character, the installation of it
-requires specific configuration settings to suite your particular
-needs.
+which is an infrastructure unit for DNA sequencing and genotyping of
+samples provided by external researchers.
 
 
 ## Features
@@ -32,15 +33,15 @@ needs.
 * Allows system administrators to create predefined forms with a
   specific set of input fields.
 * Allow the user to specify an order according to one of the predefined forms.
-* Allow input from the user of required project data, such as sample sheets.
+* Allow input from the user of required order data, such as sample sheets.
 * Allow the user to submit the order to the facility.
 * The facility staff can review, accept or decline an order, depending
   on the configuration set up by system administrators.
 * Let the facility staff keep track of review and agreements.
 * Allow attaching files to an order.
-* Display project status reports.
+* Display order status reports.
 * Allow keeping track of Key Performance Indicators (KPIs), facilitating
-  resource usage reports for the facility.
+  resource usage reporting for the facility.
 
 
 ## Basic concepts
@@ -49,7 +50,7 @@ needs.
   etc) to a single facility from its users.
 
 - User: A user is a researcher external to the service facility, and may or
-  may not be the Principal Investigator (PI) for one or more projects.
+  may not be the Principal Investigator (PI) for one or more orders.
 
 - Order: An order is created, filled in and submitted by a user. The facility
   personnel (system administrators and/or staff) then handles the order,
@@ -67,9 +68,10 @@ needs.
   data, with optional constraints on the input data, and optional help
   text. The order forms are defined by the system administrators.
 
-- Report: A report is an HTML file or a document file (PDF, DOCX, etc) which
-  can be attached to an order by the system administrators or staff.
-  This can be used a means of delivering results to the user.
+- Report: A report is an HTML file or a document file (TXT, PDF, DOCX,
+  etc) which can be attached to an order by the system administrators
+  or staff. This can be used a means of delivering results to the
+  user.
 
 - User account: A user account is defined within each OrderPortal instance. The email
   address of the user is the user account identifier. This means that if
@@ -92,7 +94,7 @@ and only one facility.
 There are three reasons for this design choice:
 
 1. Security between facilities. The existence and contents of a
-   particular project in one facility must not be visible to the
+   particular order in one facility must not be visible to the
    administrators or staff of another facility. This is a strict requirement
    for some facilities, and it is easier to implement if the database instance
    for each facility is separate from one another.
@@ -105,7 +107,7 @@ There are three reasons for this design choice:
    independent of the other.
 
 One drawback with this design choice is that it complicates the
-communication between, and linking of, different but related projects in
+communication between, and linking of, different but related orders in
 different facilities.
 
 Note that there is no entity called `facility` in the OrderPortal system.
@@ -134,15 +136,15 @@ There are three kinds (=roles) of users:
    "customer" of the facility.
 
 2. Staff: Facility staff, who may view all orders, but are not allowed
-   to change very much.
+   to change very much. If so configured by the system administrators,
+   they may move along orders from one status to another.
 
 3. Admin: System administrators who are allowed to view and edit all
    aspects of the OrderPortal system that can be modified via the web
    interface. This includes processing orders, modifying the order
-   fields, and handling user accounts. Often, the project coordinators
+   fields, and handling user accounts. Often, the order coordinators
    of the facility are designated as system administrators, since they
-   will be using the system to keep track of incoming orders
-   (projects).
+   will be using the system to keep track of incoming orders.
 
 User accounts can be set as disabled, for example if the person leaves
 her position, or as a means of blocking invalid use. An account can be
@@ -533,7 +535,7 @@ Adding a field in a new form requires deciding on the following parameters:
 A field may be conditional, meaning that it is displayed only of some
 other field has been assigned a specific value. This is useful for
 orders where the relevant fields depend on some high-level choice,
-such a type of technology to use for a project.
+such a type of technology to use for a order.
 
 ## Field types
 
@@ -558,8 +560,8 @@ The order form field types are:
 # Report
 
 An order may have any number of reports attached to it by the system
-administrators or staff. If the report is an HTML file it will be
-shown in-line, otherwise it will be downloadable by the user.
+administrators or staff. If the report is an HTML or TXT file it will
+be shown in-line, otherwise it will be downloadable by the user.
 
 The report feature is intended as a means to deliver results in the
 form of written reports to the user. There is a very simple review
@@ -803,7 +805,7 @@ before you do this.
 
 # Installation
 
-The current installation procedure is described in README for the
+The current installation procedure is described in the `README.md` for the
 [GitHub repo](https://github.com/pekrau/OrderPortal "!").
 
 
