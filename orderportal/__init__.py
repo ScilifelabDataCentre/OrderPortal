@@ -10,7 +10,7 @@ import sys
 import pycountry
 
 
-__version__ = "11.2.0"
+__version__ = "11.3.0"
 
 
 class Constants:
@@ -218,7 +218,7 @@ class Constants:
 
     # Recipients of order messages.
     OWNER = "owner"
-    ORDER_MESSAGE_RECIPIENTS = (ADMIN, OWNER, GROUP)
+    ORDER_MESSAGE_RECIPIENTS = (ADMIN, STAFF, OWNER, GROUP)
 
     # Delimiters to remove when searching in order titles.
     ORDERS_SEARCH_DELIMS_LINT = (":", ",", ";", "'", '"', "(", ")")

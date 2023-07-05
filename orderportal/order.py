@@ -492,8 +492,11 @@ class OrderSaver(saver.Saver):
             pass
         else:  # Meaningful only if the owner account actually still exists.
             email = owner["email"]
+            # Send to owner, if so set for this status change.
             if "owner" in message_template["recipients"]:
-                recipients.add(owner["email"])
+                if not owner.get("no_order_messages"):
+                    recipients.add(owner["email"])
+            # Send to members in owner's group, if so set for this status change.
             if constants.GROUP in message_template["recipients"]:
                 colleagues = dict()
                 for row in self.db.view(
@@ -510,11 +513,20 @@ class OrderSaver(saver.Saver):
                         except ValueError:
                             pass
                 for colleague in colleagues.values():
-                    recipients.add(colleague["email"])
+                    if not colleague.get("no_order_messages"):
+                        recipients.add(colleague["email"])
+        # Send to admins, if so set for this status change.
         if constants.ADMIN in message_template["recipients"]:
             for admin in self.handler.get_admins():
                 if admin["status"] == constants.ENABLED:
-                    recipients.add(admin["email"])
+                    if not admin.get("no_order_messages"):
+                        recipients.add(admin["email"])
+        # Send to staff, if so set for this status change.
+        if constants.STAFF in message_template["recipients"]:
+            for staff in self.handler.get_staff():
+                if staff["status"] == constants.ENABLED:
+                    if not staff.get("no_order_messages"):
+                        recipients.add(staff["email"])
         if not recipients:
             return
         try:

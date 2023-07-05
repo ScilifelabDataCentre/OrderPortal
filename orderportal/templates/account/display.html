@@ -312,6 +312,16 @@
     <td>{{ account.get('api_key') or '-' }}</td>
   </tr>
   <tr>
+    <th>Order messages</th>
+    <td>
+      {% if account.get('no_order_messages') %}
+      Do <strong>NOT</strong> send any emails for order status changes.
+      {% else %}
+      Do send emails for order status changes, if so set.
+      {% end %}
+    </td>
+  </tr>
+  <tr>
     <th>Other data</th>
     <td class="pre">{{ account.get('other_data') or '-' }}</td>
   </tr>
