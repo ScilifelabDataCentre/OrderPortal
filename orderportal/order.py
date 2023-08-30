@@ -77,11 +77,12 @@ class OrderSaver(saver.Saver):
         for source in ["department", "phone", "invoice_ref", "invoice_vat"]:
             target = autopopulate.get(source)
             if target and target in self["fields"]:
-                self["fields"][target] = account[source]
+                self["fields"][target] = account.get(source)
         # Postal address fields.
         for source in ["university", "department", "address", "zip", "city"]:
             target = autopopulate.get(f"address.{source}")
             if target and target in self["fields"]:
+                # Field 'address' is a dict, and exists always.
                 self["fields"][target] = account["address"].get(source)
         target = autopopulate.get("address.country")
         if target and target in self["fields"]:
