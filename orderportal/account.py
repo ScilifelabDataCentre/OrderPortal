@@ -117,15 +117,7 @@ class RecipientsMixin:
         if constants.ADMIN in text["recipients"]:
             result.extend([a["email"] for a in self.get_admins()])
         if constants.STAFF in text["recipients"]:
-            staff = [
-                row.doc
-                for row in self.db.view(
-                    "account", "role", key=constants.STAFF, include_docs=True
-                )
-            ]
-            result.extend(
-                [a["email"] for a in staff if a["status"] == constants.ENABLED]
-            )
+            result.extend([s["email"] for s in self.get_staff()])
         return result
 
 
