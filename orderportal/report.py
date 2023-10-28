@@ -416,9 +416,6 @@ class ReportApiV1(ReportApiV1Mixin, RequestHandler):
         self.write(self.get_report_json(report))
 
     def post(self, iuid):
-        if self.get_argument("_http_method", None) == "delete":
-            self.delete(iuid)
-            return
         try:
             self.check_staff()
         except ValueError as error:
