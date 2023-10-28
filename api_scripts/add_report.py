@@ -5,7 +5,7 @@ the name, status and (optionally) reviewers are set, the contents
 must be provided in the JSON indata, and must therefore be 
 base64-encoded in UTF-8.
 
-NOTE: You need to change several upper-case variables.
+NOTE: You need to review/change the upper-case variables.
 
 NOTE: The third-party 'requests' module is used.
 """

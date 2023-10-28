@@ -416,6 +416,9 @@ class ReportApiV1(ReportApiV1Mixin, RequestHandler):
         self.write(self.get_report_json(report))
 
     def post(self, iuid):
+        if self.get_argument("_http_method", None) == "delete":
+            self.delete(iuid)
+            return
         try:
             self.check_staff()
         except ValueError as error:
@@ -443,6 +446,19 @@ class ReportApiV1(ReportApiV1Mixin, RequestHandler):
         except ValueError as error:
             raise tornado.web.HTTPError(400, reason=str(error))
         self.write(self.get_report_json(report, self.get_order(report["order"])))
+
+    def delete(self, iuid):
+        try:
+            self.check_staff()
+        except ValueError as error:
+            raise tornado.web.HTTPError(403, reason=str(error))
+        try:
+            report = self.get_report(iuid)
+        except ValueError as error:
+            raise tornado.web.HTTPError(404, reason=str(error))
+        self.delete_logs(report["_id"])
+        self.db.delete(report)
+        self.set_status(204)    # Empty content.
 
 
 class ReportEdit(ReportMixin, RequestHandler):
