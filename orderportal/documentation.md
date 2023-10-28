@@ -719,8 +719,9 @@ status transitions.
 
 ### API Add order report
 
-A report for an order can be added by doing a PUT to the order
-report URI with the report content file as request body.
+A report for an order can be added by doing a POST to the order
+report URI with a request body containing the name of the report
+and the contents of the report file.
 
 The content type (MIME type) of the data is recorded with the
 report. If it is `text/html` or `text/plain`, the content will be
@@ -732,6 +733,31 @@ For an example add report script, see
 [add_report.py](https://github.com/pekrau/OrderPortal/blob/master/api_scripts/add_report.py "!").
 
 
+### API Edit order report
+
+A report for an order can be edited by doing a POST to the order
+report URI containing the report UUID, and a request body containing
+the name of the report and the contents of the report file.
+
+The content type (MIME type) of the data is recorded with the
+report. If it is `text/html` or `text/plain`, the content will be
+display in-line in the user's browser. Otherwise the content will be
+downloaded as a file to the user's browser when the report button is
+clicked.
+
+For an example edit report script, see
+[edit_report.py](https://github.com/pekrau/OrderPortal/blob/master/api_scripts/edit_report.py "!").
+
+
+### API Delete order report
+
+A report for an order can be deleted by doing a DELETE to the order
+report URI containing the report UUID. No request body should be used.
+
+For an example delete report script, see
+[delete_report.py](https://github.com/pekrau/OrderPortal/blob/master/api_scripts/delete_report.py "!").
+
+
 ## CLI
 
 The Command Line Interface (CLI) allows system various maintenance
@@ -739,6 +765,8 @@ operations, such as backup, account creation and such. It is executed
 on the command line of the machine which hosts the OrderPortal
 instance. This means that only users with accounts of sufficient
 privilege on this machine can use it.
+
+    $ python3 cli.py --help
 
 
 # Backup
@@ -813,7 +841,7 @@ The current installation procedure is described in the `README.md` for the
 
 The implementation of Anubis is based on the following design decisions:
 
-- The back-end is written in Python using [tornado](https://pypi.org/project/tornado/ "!").
+- The back-end is written in Python 3 using [tornado](https://pypi.org/project/tornado/ "!").
   - The back-end generates HTML for display using the tornado template system.
   - The front-end uses [Bootstrap](https://getbootstrap.com/docs/3.4/ "!").
 - The back-end uses the No-SQL database [CouchDB](https://couchdb.apache.org/ "!").

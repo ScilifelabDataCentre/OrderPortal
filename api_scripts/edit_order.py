@@ -1,6 +1,6 @@
 """API example script: Edit an order; fields, title.
 
-NOTE: You need to change several upper-case variables.
+NOTE: You need to review/change the upper-case variables.
 
 NOTE: The third-party 'requests' module is used.
 """

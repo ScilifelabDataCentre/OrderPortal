@@ -1,6 +1,6 @@
 """API example script: Get reports for an order.
 
-NOTE: You need to change several upper-case variables.
+NOTE: You need to review/change the upper-case variables.
 
 NOTE: The third-party 'requests' module is used.
 """
@@ -15,7 +15,7 @@ import requests
 BASE_URL = "http://localhost:8881"
 
 # The identifier for the order.
-ORDER_ID = "OP0032"
+ORDER_ID = "OP00013"
 
 API_KEY = os.environ["ORDERPORTAL_API_KEY"]
 

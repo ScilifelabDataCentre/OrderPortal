@@ -1,8 +1,8 @@
 """API example script: Edit the content and status of a report for an order.
 
-NOTE: The 'order' and 'owner' of the report cannot be edited.
+NOTE: You need to review/change the upper-case variables.
 
-NOTE: You need to change several upper-case variables.
+NOTE: The 'order' and 'owner' of the report cannot be edited.
 
 NOTE: The third-party 'requests' module is used.
 """
