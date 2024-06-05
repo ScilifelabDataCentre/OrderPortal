@@ -369,7 +369,7 @@ class AccountsCsv(Accounts):
                 account.get("invoice_ref") or "",
                 account.get("invoice_vat") or "",
                 iaddr.get("university") or "",
-                aiddr.get("department") or "",
+                iaddr.get("department") or "",
                 iaddr.get("address") or "",
                 iaddr.get("zip") or "",
                 iaddr.get("city") or "",
