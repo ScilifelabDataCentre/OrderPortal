@@ -1,0 +1,61 @@
+---
+version: "3.9"
+
+services:
+  couchdb:
+    container_name: couchdb
+    image: couchdb:3.3.2
+    environment:
+      COUCHDB_USER: ${COUCHDB_USER}
+      COUCHDB_PASSWORD: ${COUCHDB_PASSWORD}
+      COUCHDB_SECRET: ${COUCHDB_SECRET}
+    restart: on-failure
+    ports:
+      - 127.0.0.1:5984:5984
+    # Test to see if the database is accessible.
+    # Backend waits for this with 'condition: service_healthy'
+    healthcheck:
+      test: curl -f http://localhost:5984/_up
+      interval: 10s
+      timeout: 1s
+      retries: 3
+    # volumes:
+      # TODO
+
+  orderportal:
+    container_name: orderportal
+    image: orderportal-local:latest
+    # This user will be used by default in the container.
+    # When we want to run as root, change the following line
+    user: "root:root"
+    #user: "1001:1001"
+    build:
+      dockerfile: Docker/Dockerfile-prod
+      context: ./
+    working_dir: /code/orderportal
+    command: sh -c "python ./cli.py create-database --silent && python ./main.py"
+    environment:
+      - ORDERPORTAL_SETTINGS_FILEPATH=/code/orderportal/settings_template.yaml
+    depends_on:
+      couchdb:
+        condition: service_healthy
+    restart: on-failure
+    ports:
+      - 127.0.0.1:4000:4000
+      - 127.0.0.1:8880:8880
+    volumes:
+      # Main website files (so can edit locally)
+      - type: bind
+        source: ./orderportal
+        target: /code/orderportal
+
+      # settings file
+      - type: bind
+        source: ./settings_template.yaml
+        target: /code/orderportal/settings_template.yaml
+
+  mailcatcher:
+    container_name: dds_mailcatcher
+    image: sj26/mailcatcher:latest
+    ports:
+      - 127.0.0.1:1080:1080
