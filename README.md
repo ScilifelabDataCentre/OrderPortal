@@ -13,20 +13,92 @@ URL `/documentation` in a running OrderPortal instance, e.g. in
 the demo instance at
 [https://orderportal.scilifelab.se/](https://orderportal.scilifelab.se/)
 
+
 ## Installation
 
 The current version has been developed using Python 3.10 or higher.
 It may work on Python 3.8 and 3.9, but this has not been tested.
 
+### Settings file
+
+From version 11.0 of OrderPortal, it is possible to use only environment
+variables for the basic configuration of the system. All other configurations
+have been moved into the database, and can be modified using the web interface.
+
+However, it is still possible to use a YAML settings file for the basic configuration.
+On startup, the OrderPortal system looks for a YAML settings file first by the
+file path given by the environment variable ORDERPORTAL_SETTINGS_FILEPATH, and
+in second place by the file path `OrderPortal/site/settings.yaml`. The first of
+these files found, if any, will be used.
+
+If both an environment variable and an entry in a YAML settings file defines
+a configuration value, then the environment variable takes precedence.
+
+See the comments in the template file
+`OrderPortal/settings_template.yaml` file for editing the file for
+your site. In particular, the CouchDB variables must be set (see
+below).
+
 ### Docker containers
 
 Docker containers for the releases can be retrieved from
-[ghcr.io/pekrau](https://github.com/pekrau/OrderPortal/pkgs/container/orderportal).
+[ghcr.io/scilifelabdatacentre](ghcr.io/scilifelabdatacentre/orderportal).
+
+
+### Development Setup
+
+When developing, we recommend that you run the application locally using Docker.
+
+#### Start services
+
+```bash
+docker-compose up
+```
+
+This command will orchestrate the building and running of the application, the couchDB database and a local mail server called mailcatcher
+
+#### Check services
+
+The setup consists of the following services:
+
+1. **CouchDB**  
+   - A NoSQL database for storing data.  
+   - Accessible locally at `http://127.0.0.1:5984/_utils/index.html`.  
+   - Username and password are defined in the .env file
+
+2. **OrderPortal**  
+   - A Python-based web application with Tornado framework.  
+   - Accessible locally on:  
+     - Web interface: `http://127.0.0.1:8880`  
+   - Depends on CouchDB for database storage.  
+
+3. **MailCatcher**  
+   - A local SMTP server for catching test emails.  
+   - Accessible at `http://127.0.0.1:1080` for viewing emails.  
+
+#### Create first admin
+
+Enter the backend container and create the first admin user:
+
+```bash
+docker exec -it orderportal python cli.py create-admin test@test.se --password test_password
+```
+
+You need to input a Name and University for this user. Once done, go to the web interface at `http://127.0.0.1:8880` and log in.
+
+#### Developing
+
+Your local files in /orderportal directory are automatically synchronized with the container running the orderportal, so you can edit files using your favorite editor and then test them.
+Sometimes, for some changes you would need to restart the service anyway. If you encounter any issue re-running the containers, you can force a clean re-start with:
+
+```bash
+docker-compose down --rmi all -v --remove-orphans && docker-compose up
+```
 
 
 ### From source code
 
-This instruction is based on the old procedure used previously for the
+This instruction is based on the **old** procedure used previously for the
 instances running on the SciLifeLab server. It will have to be adapted
 for your site.
 
@@ -63,27 +135,7 @@ Download and install the required third-party Python modules using the
 
     $ sudo pip install -r requirements.txt
 
-### Settings file
-
-From version 11.0 of OrderPortal, it is possible to use only environment
-variables for the basic configuration of the system. All other configurations
-have been moved into the database, and can be modified using the web interface.
-
-However, it is still possible to use a YAML settings file for the basic configuration.
-On startup, the OrderPortal system looks for a YAML settings file first by the
-file path given by the environment variable ORDERPORTAL_SETTINGS_FILEPATH, and
-in second place by the file path `OrderPortal/site/settings.yaml`. The first of
-these files found, if any, will be used.
-
-If both an environment variable and an entry in a YAML settings file defines
-a configuration value, then the environment variable takes precedence.
-
-See the comments in the template file
-`OrderPortal/settings_template.yaml` file for editing the file for
-your site. In particular, the CouchDB variables must be set (see
-below).
-
-### CouchDB setup
+#### CouchDB setup
 
 Install and set up a CouchDB instance, if you don't have one
 already. Follow the instructions for CouchDB, which are not included
@@ -109,7 +161,7 @@ Create the first OrderPortal system administrator account in the database using 
 
     $ sudo -u nginx PYTHONPATH=/var/www/apps/xyz/OrderPortal python3 cli.py create-admin
 
-### `Tornado` server
+#### `Tornado` server
 
 The `tornado` server should be executed as a system service. This depends
 on your operating system; refer to its documentation.
@@ -118,7 +170,7 @@ It is recommended that you use a reverse proxy for the `tornado`
 server, e.g. `nginx` or `apache`. See the documentation for those
 systems.
 
-### Updates
+#### Updates
 
 To update the source code, simply download the latest release, unpack
 the `tar.gz` file, and move the `OrderPortal` directory tree to the

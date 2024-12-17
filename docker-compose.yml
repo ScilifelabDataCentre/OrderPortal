@@ -13,22 +13,23 @@ services:
     ports:
       - 127.0.0.1:5984:5984
     # Test to see if the database is accessible.
-    # Backend waits for this with 'condition: service_healthy'
+    # orderportal waits for this with 'condition: service_healthy'
     healthcheck:
       test: curl -f http://localhost:5984/_up
       interval: 10s
       timeout: 1s
       retries: 3
-    # volumes:
-      # TODO
+    volumes:
+      # settings file
+      - type: bind
+        source: ./docker/couchdb/local.ini
+        target: /opt/couchdb/etc/local.d/local.ini
 
   orderportal:
     container_name: orderportal
     image: orderportal-local:latest
-    # This user will be used by default in the container.
-    # When we want to run as root, change the following line
+    # TODO set up non root user to simulate prod enviroment (look dds_web for example)
     user: "root:root"
-    #user: "1001:1001"
     build:
       dockerfile: Docker/Dockerfile-prod
       context: ./
