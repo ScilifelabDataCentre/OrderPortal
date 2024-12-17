@@ -44,6 +44,9 @@ below).
 Docker containers for the releases can be retrieved from
 [ghcr.io/scilifelabdatacentre](ghcr.io/scilifelabdatacentre/orderportal).
 
+### Production instances
+
+For production instances, you would need to edit the previously mentioned settings file to setted up real passwords, an url and mail servers.
 
 ### Development Setup
 
