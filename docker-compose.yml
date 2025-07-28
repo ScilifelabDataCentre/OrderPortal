@@ -31,7 +31,7 @@ services:
     # TODO set up non root user to simulate prod enviroment (look dds_web for example)
     user: "root:root"
     build:
-      dockerfile: Docker/Dockerfile-prod
+      dockerfile: docker/Dockerfile-prod
       context: ./
     working_dir: /code/orderportal
     command: sh -c "python ./cli.py create-database --silent && python ./main.py"
