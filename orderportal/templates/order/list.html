@@ -88,9 +88,6 @@
           <th width="30%">Title</th>
           <th>Form</th>
           <th>Owner</th>
-          {% if settings['ORDERS_LIST_TAGS'] %}
-          <th width="5%">{{ terminology('Tags') }}</th>
-          {% end %}
           {% if settings['ORDERS_LIST_OWNER_UNIVERSITY'] %}
           <th>Owner university</th>
           {% end %}
@@ -99,6 +96,9 @@
           {% end %}
           {% if settings['ORDERS_LIST_OWNER_GENDER'] %}
           <th>Owner gender</th>
+          {% end %}
+          {% if settings['ORDERS_LIST_TAGS'] %}
+          <th width="5%">{{ terminology('Tags') }}</th>
           {% end %}
           {% for f in settings['ORDERS_LIST_FIELDS'] %}
           <th>{{ f.replace('_', ' ').capitalize() }}</th>
