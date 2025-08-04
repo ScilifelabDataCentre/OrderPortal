@@ -219,6 +219,9 @@ def get_handlers():
             r"/form/([0-9a-f]{32})/clone", orderportal.form.FormClone, name="form_clone"
         ),
         url(
+            r"/form/([0-9a-f]{32})/mailform", orderportal.form.FormEmailSender, name="form_mail"
+        ),
+        url(
             r"/form/([0-9a-f]{32})/pending",
             orderportal.form.FormPending,
             name="form_pending",

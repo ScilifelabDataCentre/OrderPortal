@@ -108,6 +108,17 @@
     <span class="glyphicon glyphicon-th"></span> Aggregate
   </a>
 </p>
+
+<p>
+  <form action="{{ reverse_url('form_mail', form['_id']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <button type="submit" class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-envelope"></span> Send Survey
+    </button>
+  </form>
+</p>
+
 {% end %} {# block action_content #}
 
 {% block main_content %}

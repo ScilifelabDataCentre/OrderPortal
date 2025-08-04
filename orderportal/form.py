@@ -9,6 +9,7 @@ from orderportal import saver
 from orderportal import utils
 from orderportal.fields import Fields
 from orderportal.requesthandler import RequestHandler, ApiV1Mixin
+from orderportal.message import MessageSaver
 
 
 class FormSaver(saver.Saver):
@@ -75,6 +76,21 @@ class FormMixin:
         except (TypeError, IndexError):
             return 0
 
+    def get_order_emails(self, form):
+        "Return a list of emails for orders for the form."
+        view = self.db.view(
+            "order",
+            "form",
+            startkey=[form["_id"]],
+            endkey=[form["_id"], constants.CEILING],
+            include_docs=True,
+        )
+        # set to avoid duplicates (if one user has filled multiple orders)
+        emails = set()
+        emails.update(v.doc["owner"] for v in view if "owner" in v.doc)
+
+        # return a list
+        return list(emails)
 
 class Forms(FormMixin, RequestHandler):
     "Forms list page."
@@ -432,6 +448,26 @@ class FormClone(FormMixin, RequestHandler):
             saver.clone_fields(form)
             saver["status"] = constants.PENDING
         self.see_other("form_edit", saver.doc["_id"])
+
+class FormEmailSender(FormMixin, RequestHandler):
+    "TODO."
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_admin()
+
+        # prepare email
+        subject = "Test email from OrderPortal"
+        text = "Survey link: https://example.com/survey"
+        recipients = self.get_order_emails(self.get_form(iuid))
+
+        # send email with survey link
+        with MessageSaver(handler=self) as saver:
+            saver.create({"subject": subject, "text": text})
+            saver.send(recipients=recipients)
+
+        # redirect to form page
+        self.redirect(self.absolute_reverse_url("form", iuid))
 
 
 class FormPending(FormMixin, RequestHandler):
