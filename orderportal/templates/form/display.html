@@ -178,6 +178,27 @@
         <th>IUID</th>
         <td>{{ form['_id'] }}</td>
       </tr>
+      <tr>
+        <th>Survey link</th>
+        <td>
+          {% if form.get('survey_link') %}
+            <a href="{{ form['survey_link'] }}" target="_blank">{{ form['survey_link'] }}</a>
+          {% else %}
+            <span style="color:red;">If you want to send a survey to users, edit the form to set up the link to it first</span>
+          {% end %}
+        </td>
+      </tr>
+      <tr>
+        <th>Survey sent</th>
+        <td>
+          {% if form.get('survey_sent') %}
+            <span style="color:green;">&#10004;</span>
+          {% else %}
+            <span style="color:red;">&#10008;</span>
+          
+          {% end %}
+        </td>
+      </tr>
     </table>
   </div>
 </div>

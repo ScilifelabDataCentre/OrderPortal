@@ -92,6 +92,7 @@ class FormMixin:
         # return a list
         return list(emails)
 
+
 class Forms(FormMixin, RequestHandler):
     "Forms list page."
 
@@ -229,6 +230,8 @@ class FormCreate(RequestHandler):
             saver["instruction"] = self.get_argument("instruction", None)
             saver["disclaimer"] = self.get_argument("disclaimer", None)
             saver["status"] = constants.PENDING
+            saver["survey_sent"] = False  # Default value
+            saver["survey_link"] = None  # Default value
             try:
                 infile = self.request.files["import"][0]
                 # This throws exceptions if not JSON
@@ -278,6 +281,7 @@ class FormEdit(FormMixin, RequestHandler):
             saver["description"] = self.get_argument("description", None)
             saver["instruction"] = self.get_argument("instruction", None)
             saver["disclaimer"] = self.get_argument("disclaimer", None)
+            saver["survey_link"] = self.get_argument("survey_link", None)
             try:
                 saver["ordinal"] = int(self.get_argument("ordinal", 0))
             except (ValueError, TypeError):
@@ -449,24 +453,61 @@ class FormClone(FormMixin, RequestHandler):
             saver["status"] = constants.PENDING
         self.see_other("form_edit", saver.doc["_id"])
 
+
 class FormEmailSender(FormMixin, RequestHandler):
-    "TODO."
+    """TODO.
+
+    Possibly to define the link when form is created.
+    Adapt the subject and text to be more explicatory.
+
+    """
 
     @tornado.web.authenticated
     def post(self, iuid):
         self.check_admin()
 
-        # prepare email
-        subject = "Test email from OrderPortal"
-        text = "Survey link: https://example.com/survey"
-        recipients = self.get_order_emails(self.get_form(iuid))
+        form = self.get_form(iuid)
+        # Check if form is enabled
+        if form["status"] != constants.ENABLED:
+            self.see_other("form", form["_id"], error="Form is not enabled.")
+            return
 
-        # send email with survey link
+        # Check if survey link is set
+        link = form.get("survey_link", None)
+        if not link:
+            self.see_other("form", form["_id"], error="No survey link set.")
+            return
+
+        # Get recipients
+        recipients = self.get_order_emails(form)
+        owner = form.get("owner", None)
+        recipients.append(owner)  # Add form owner to the list of recipients
+
+        # Prepare email content
+        site = settings.get("SITE_NAME") or "OrderPortal"
+        text = """The owners of {site} want to send you a survey.
+
+The survey is available at the following link:
+{link}.
+
+    
+Yours sincerely,
+The {site} administrators.
+        """.format(
+            site=site, link=link
+        )
+        subject = "Email from {site} - Survey".format(site=site)
+
+        # send email
         with MessageSaver(handler=self) as saver:
             saver.create({"subject": subject, "text": text})
             saver.send(recipients=recipients)
 
-        # redirect to form page
+        # set survey_sent to True
+        with FormSaver(doc=form, handler=self) as saver:
+            saver["survey_sent"] = True
+
+        # redirect back to form page
         self.redirect(self.absolute_reverse_url("form", iuid))
 
 
