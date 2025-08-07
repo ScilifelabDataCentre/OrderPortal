@@ -455,11 +455,9 @@ class FormClone(FormMixin, RequestHandler):
 
 
 class FormEmailSender(FormMixin, RequestHandler):
-    """TODO.
-
-    Possibly to define the link when form is created.
-    Adapt the subject and text to be more explicatory.
-
+    """
+    Send an email to all users who have made orders for the form.
+    The email will contain a link to a survey.
     """
 
     @tornado.web.authenticated
