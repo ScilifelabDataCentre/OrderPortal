@@ -99,6 +99,19 @@
   </div>
 
   <div class="form-group">
+    <label class="control-label col-md-2" for="survey_link">Link to Survey</label>
+    <div class="col-md-10">
+      <input type="text" name="survey_link" id="survey_link"
+             class="form-control" aria-describedby="survey_linkHelp"
+             value="{{ form.get('survey_link') or '' }}">
+      <span id="survey_linkHelp" class="help-block">
+        Optional. The link to the survey that will be sent to the user
+      </span>
+    </div>
+  </div>
+
+
+  <div class="form-group">
     <div class="col-md-offset-2 col-md-3">
       <button type="submit" class="btn btn-success btn-block">
         <span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
