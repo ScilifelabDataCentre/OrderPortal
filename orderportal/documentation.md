@@ -558,7 +558,7 @@ The order form field types are:
 
 ## Send email with survey
 
-Administrators have the option to send an email to all the users that have make an Order from a Form. The link needs to be setted up as there is none by default.
+Administrators have the option to send an email to all the users that have made an Order from a Form. The link needs to be set up, there is no default.
 
 A checkbox will let you know if such email has been already sent. However, the email can be sent more times if needed. The recipients will be all the users who make an order plus the owner (creator) of the form.
 
