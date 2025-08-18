@@ -483,7 +483,9 @@ class FormEmailSender(FormMixin, RequestHandler):
 
         # Prepare email content
         site = settings.get("SITE_NAME") or "OrderPortal"
-        text = """The owners of {site} want to send you a survey.
+        url = settings.get("BASE_URL") # can't be none
+        form_title = form.get("title") # can't be none
+        text = """The owners of {site} ({url}) would like to get feedback from you regarding {form_title}.
 
 The survey is available at the following link:
 {link}.
@@ -492,7 +494,7 @@ The survey is available at the following link:
 Yours sincerely,
 The {site} administrators.
         """.format(
-            site=site, link=link
+            site=site, url=url, form_title=form_title, link=link
         )
         subject = "Email from {site} - Survey".format(site=site)
 
