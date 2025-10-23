@@ -507,6 +507,8 @@ The {site} administrators.
         with FormSaver(doc=form, handler=self) as saver:
             saver["survey_sent"] = True
 
+        # Log that survey has been sent
+        utils.log(self.db, self, form, changed={ 'recipients': recipients })
         # redirect back to form page
         self.redirect(self.absolute_reverse_url("form", iuid))
 
