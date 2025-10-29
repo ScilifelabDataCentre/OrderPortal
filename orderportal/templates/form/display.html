@@ -108,6 +108,17 @@
     <span class="glyphicon glyphicon-th"></span> Aggregate
   </a>
 </p>
+
+<p>
+  <form action="{{ reverse_url('form_mail', form['_id']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <button type="submit" class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-envelope"></span> Send Survey
+    </button>
+  </form>
+</p>
+
 {% end %} {# block action_content #}
 
 {% block main_content %}
@@ -166,6 +177,26 @@
       <tr>
         <th>IUID</th>
         <td>{{ form['_id'] }}</td>
+      </tr>
+      <tr>
+        <th>Survey link</th>
+        <td>
+          {% if form.get('survey_link') %}
+            <a href="{{ form['survey_link'] }}" target="_blank">{{ form['survey_link'] }}</a>
+          {% else %}
+            <span style="color:red;">To send a survey to users, edit the form and create a link to the survey.</span>
+          {% end %}
+        </td>
+      </tr>
+      <tr>
+        <th>Survey sent</th>
+        <td>
+          {% if form.get('survey_sent') %}
+            <span style="color:green;">Sent &#10004;</span>
+          {% else %}
+            <span style="color:red;">Not sent</span>
+          {% end %}
+        </td>
       </tr>
     </table>
   </div>

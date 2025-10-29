@@ -556,6 +556,24 @@ The order form field types are:
 - **File**: An uploaded file which is attached to the order.
 - **Group*: A group of a set of other fields. Does not contain a value.
 
+## Send email with survey
+
+Administrators have the option to send an email to all the users that have made an Order from a Form. The link needs to be set up, there is no default.
+
+A checkbox will let you know if such email has been already sent. However, the email can be sent more times if needed. The recipients will be all the users who make an order plus the owner (creator) of the form.
+
+The email sent will look as follows:
+
+```markdown
+The owners of `site` want to send you a survey.
+
+The survey is available at the following link:
+`link`.
+
+Yours sincerely,
+The `site` administrators.
+
+```
 
 # Report
 

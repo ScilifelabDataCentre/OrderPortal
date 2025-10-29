@@ -9,6 +9,7 @@ from orderportal import saver
 from orderportal import utils
 from orderportal.fields import Fields
 from orderportal.requesthandler import RequestHandler, ApiV1Mixin
+from orderportal.message import MessageSaver
 
 
 class FormSaver(saver.Saver):
@@ -74,6 +75,22 @@ class FormMixin:
             return list(view)[0].value
         except (TypeError, IndexError):
             return 0
+
+    def get_order_emails(self, form):
+        "Return a list of emails for orders for the form."
+        view = self.db.view(
+            "order",
+            "form",
+            startkey=[form["_id"]],
+            endkey=[form["_id"], constants.CEILING],
+            include_docs=True,
+        )
+        # set to avoid duplicates (if one user has filled multiple orders)
+        emails = set()
+        emails.update(v.doc["owner"] for v in view if "owner" in v.doc)
+
+        # return a list
+        return list(emails)
 
 
 class Forms(FormMixin, RequestHandler):
@@ -213,6 +230,8 @@ class FormCreate(RequestHandler):
             saver["instruction"] = self.get_argument("instruction", None)
             saver["disclaimer"] = self.get_argument("disclaimer", None)
             saver["status"] = constants.PENDING
+            saver["survey_sent"] = False  # Default value
+            saver["survey_link"] = None  # Default value
             try:
                 infile = self.request.files["import"][0]
                 # This throws exceptions if not JSON
@@ -262,6 +281,7 @@ class FormEdit(FormMixin, RequestHandler):
             saver["description"] = self.get_argument("description", None)
             saver["instruction"] = self.get_argument("instruction", None)
             saver["disclaimer"] = self.get_argument("disclaimer", None)
+            saver["survey_link"] = self.get_argument("survey_link", None)
             try:
                 saver["ordinal"] = int(self.get_argument("ordinal", 0))
             except (ValueError, TypeError):
@@ -432,6 +452,65 @@ class FormClone(FormMixin, RequestHandler):
             saver.clone_fields(form)
             saver["status"] = constants.PENDING
         self.see_other("form_edit", saver.doc["_id"])
+
+
+class FormEmailSender(FormMixin, RequestHandler):
+    """
+    Send an email to all users who have made orders for the form.
+    The email will contain a link to a survey.
+    """
+
+    @tornado.web.authenticated
+    def post(self, iuid):
+        self.check_admin()
+
+        form = self.get_form(iuid)
+        # Check if form is enabled
+        if form["status"] != constants.ENABLED:
+            self.see_other("form", form["_id"], error="Form is not enabled.")
+            return
+
+        # Check if survey link is set
+        link = form.get("survey_link", None)
+        if not link:
+            self.see_other("form", form["_id"], error="No survey link set.")
+            return
+
+        # Get recipients
+        recipients = self.get_order_emails(form)
+        owner = form.get("owner", None)
+        recipients.append(owner)  # Add form owner to the list of recipients
+
+        # Prepare email content
+        site = settings.get("SITE_NAME") or "OrderPortal"
+        url = settings.get("BASE_URL") # can't be none
+        form_title = form.get("title") # can't be none
+        text = """The owners of {site} ({url}) would like to get feedback from you regarding {form_title}.
+
+The survey is available at the following link:
+{link}.
+
+    
+Yours sincerely,
+The {site} administrators.
+        """.format(
+            site=site, url=url, form_title=form_title, link=link
+        )
+        subject = "Email from {site} - Survey".format(site=site)
+
+        # send email
+        with MessageSaver(handler=self) as saver:
+            saver.create({"subject": subject, "text": text})
+            saver.send(recipients=recipients)
+
+        # set survey_sent to True
+        with FormSaver(doc=form, handler=self) as saver:
+            saver["survey_sent"] = True
+
+        # Log that survey has been sent
+        utils.log(self.db, self, form, changed={ 'recipients': recipients })
+        # redirect back to form page
+        self.redirect(self.absolute_reverse_url("form", iuid))
 
 
 class FormPending(FormMixin, RequestHandler):
