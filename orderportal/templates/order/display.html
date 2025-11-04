@@ -78,6 +78,15 @@
 <br>
 
 <p>
+  <form action="{{ reverse_url('form_mail', form['_id']) }}"
+        method="POST" role="form">
+    {% module xsrf_form_html() %}
+    <button type="submit" class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-envelope"></span> Send Survey
+    </button>
+  </form>
+</p>
+<p>
   {% if targets %}
   {% for target in targets %}
   <form action="{{ reverse_url('order_transition', order['_id'], target['identifier']) }}"
