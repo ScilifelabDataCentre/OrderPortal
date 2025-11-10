@@ -512,7 +512,7 @@ class FormEmailSender(FormMixin, RequestHandler):
 
 <p>The survey takes less than two minutes to complete, is entirely anonymous, and your input will directly help us serve our users better in the future.</p>
 
-<p><a href="{link}">Click here.</a> to fill in the survey.</p>
+<p><a href="{link}">Click here</a> to fill in the survey.</p>
 
 <p>We truly appreciate your time and support in helping us improve.</p>
 
