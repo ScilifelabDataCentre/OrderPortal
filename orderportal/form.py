@@ -516,6 +516,8 @@ class FormEmailSender(FormMixin, RequestHandler):
 
 <p>We truly appreciate your time and support in helping us improve.</p>
 
+<p><strong>Please disregard this email if you  have already responded to the survey.</strong></p>
+
 <p>Thank you,<br />
 The {site} Management Team.</p>
             """.format(site=site, link=link, project_name=project_name)
