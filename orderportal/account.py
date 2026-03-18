@@ -710,7 +710,7 @@ class AccountGroupsOrdersApiV1(AccountOrdersMixin, OrderApiV1Mixin, RequestHandl
             display=dict(href=URL("account_groups_orders", account["email"])),
         )
         data["orders"] = [
-            self.get_order_json(order) for oorder in self.get_group_orders(account)
+            self.get_order_json(order) for order in self.get_group_orders(account)
         ]
         self.write(data)
 
