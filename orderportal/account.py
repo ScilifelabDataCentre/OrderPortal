@@ -545,6 +545,10 @@ class AccountApiV1(AccessMixin, RequestHandler):
             display=dict(href=URL("account_orders", account["email"])),
             api=dict(href=URL("account_orders_api", account["email"])),
         )
+        data["iuid"] = account["_id"]
+        data["department"] = account.get("department")
+        data["subject"] = account.get("subject")
+        data["phone"] = account.get("phone")
         self.write(data)
 
 
