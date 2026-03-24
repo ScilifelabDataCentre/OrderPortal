@@ -482,26 +482,51 @@ class FormEmailSender(FormMixin, RequestHandler):
         recipients.append(owner)  # Add form owner to the list of recipients
 
         # Prepare email content
-        site = settings.get("SITE_NAME") or "OrderPortal"
-        url = settings.get("BASE_URL") # can't be none
-        form_title = form.get("title") # can't be none
-        text = """The owners of {site} ({url}) would like to get feedback from you regarding {form_title}.
+        site = settings.get("SITE_NAME") or "Order Portal"
 
-The survey is available at the following link:
-{link}.
+        for recipient in recipients:
+            # Find relevant order / project
+            try:
+                account = self.get_account(recipient)
+            except:
+                continue
+            view = self.db.view(
+                "order",
+                "owner",
+                reduce=False,
+                include_docs=True,
+                startkey=[account["email"]],
+                endkey=[account["email"], constants.CEILING],
+            )
+            orders = [r.doc for r in view]
+            if len(orders) == 0:
+                project_name = "on our site"
+            else:
+                orders_sorted = sorted(orders, key = lambda order: order['created']) # FIXME Do that in CouchDB!
+                order_title = orders_sorted[-1]['title']
+                project_name = f"in the project {order_title}"
 
-    
-Yours sincerely,
-The {site} administrators.
-        """.format(
-            site=site, url=url, form_title=form_title, link=link
-        )
-        subject = "Email from {site} - Survey".format(site=site)
+            email_text = """<p>Dear {site} user,</p>
 
-        # send email
-        with MessageSaver(handler=self) as saver:
-            saver.create({"subject": subject, "text": text})
-            saver.send(recipients=recipients)
+<p>Thank you for using our services and/or instruments {project_name}.  We continuously strive to improve and would greatly value your feedback on the support you received.</p>
+
+<p>The survey takes less than two minutes to complete, is entirely anonymous, and your input will directly help us serve our users better in the future.</p>
+
+<p><a href="{link}">Click here</a> to fill in the survey.</p>
+
+<p>We truly appreciate your time and support in helping us improve.</p>
+
+<p><strong>Please disregard this email if you  have already responded to the survey.</strong></p>
+
+<p>Thank you,<br />
+The {site} Management Team.</p>
+            """.format(site=site, link=link, project_name=project_name)
+            subject = f"{site} User Survey"
+
+            # send email
+            with MessageSaver(handler=self) as saver:
+                saver.create({"subject": subject, "text": email_text})
+                saver.send(recipients=recipient, content_type="html")
 
         # set survey_sent to True
         with FormSaver(doc=form, handler=self) as saver:

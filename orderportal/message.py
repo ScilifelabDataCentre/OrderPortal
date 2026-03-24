@@ -70,7 +70,7 @@ class MessageSaver(saver.Saver):
         self["subject"] = str(text_container["subject"]).format_map(params)
         self["text"] = str(text_container["text"]).format_map(params)
 
-    def send(self, recipients):
+    def send(self, recipients, content_type: str = "plain"):
         """Send the message to the given recipient email addresses.
         Raises ValueError if some other error.
         """
@@ -90,7 +90,7 @@ class MessageSaver(saver.Saver):
             if self["reply-to"]:
                 message["Reply-To"] = self["reply-to"]
             message["To"] = ", ".join(set(self["recipients"]))
-            message.set_content(self["text"])
+            message.add_alternative(self['text'], content_type)
             self.server.send_message(message)
             self["sent"] = utils.timestamp()
         except smtplib.SMTPException as error:
