@@ -10,7 +10,7 @@ import sys
 import pycountry
 
 
-__version__ = "11.5.2"
+__version__ = "11.6.0"
 
 
 class Constants:
