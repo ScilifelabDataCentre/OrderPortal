@@ -506,11 +506,11 @@ class AccountApiV1(AccessMixin, RequestHandler):
         try:
             account = self.get_account(email)
         except ValueError as error:
-            raise tornado.web.HTTPError(404, reason=error)
+            raise tornado.web.HTTPError(404, reason="No such account.")
         try:
             self.check_readable(account)
         except ValueError as error:
-            raise tornado.web.HTTPError(403, reason=error)
+            raise tornado.web.HTTPError(403, reason="No read permission.")
         data = utils.get_json(URL("account", email), "account")
         data["email"] = account["email"]
         name = last_name = account.get("last_name")
