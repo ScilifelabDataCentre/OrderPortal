@@ -11,6 +11,6 @@ python-dotenv==1.0.0
 PyYAML==6.0.1
 requests==2.31.0
 tornado==6.3.3
-tqdm==4.62.3
+tqdm==4.66.3
 urllib3==1.26.18
 XlsxWriter==3.0.2
