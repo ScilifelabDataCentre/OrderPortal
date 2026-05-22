@@ -506,11 +506,11 @@ class AccountApiV1(AccessMixin, RequestHandler):
         try:
             account = self.get_account(email)
         except ValueError as error:
-            raise tornado.web.HTTPError(404, reason=error)
+            raise tornado.web.HTTPError(404, reason="No such account.")
         try:
             self.check_readable(account)
         except ValueError as error:
-            raise tornado.web.HTTPError(403, reason=error)
+            raise tornado.web.HTTPError(403, reason="No read permission.")
         data = utils.get_json(URL("account", email), "account")
         data["email"] = account["email"]
         name = last_name = account.get("last_name")
@@ -545,6 +545,10 @@ class AccountApiV1(AccessMixin, RequestHandler):
             display=dict(href=URL("account_orders", account["email"])),
             api=dict(href=URL("account_orders_api", account["email"])),
         )
+        data["iuid"] = account["_id"]
+        data["department"] = account.get("department")
+        data["subject"] = account.get("subject")
+        data["phone"] = account.get("phone")
         self.write(data)
 
 
